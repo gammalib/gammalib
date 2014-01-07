@@ -52,6 +52,7 @@ void TestGModel::set(void)
     m_xml_model_point_plaw        = "data/model_point_plaw.xml";
     m_xml_model_point_plaw2       = "data/model_point_plaw2.xml";
     m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
+    m_xml_model_point_bplaw       = "data/model_point_bplaw.xml";
     m_xml_model_point_logparabola = "data/model_point_logparabola.xml";
     m_xml_model_point_nodes       = "data/model_point_nodes.xml";
     m_xml_model_point_filefct     = "data/model_point_filefct.xml";
@@ -83,6 +84,7 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
     append(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     append(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_bplaw), "Test GModelSpectralBrokenPlaw");
     append(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
     append(static_cast<pfunction>(&TestGModel::test_nodes), "Test GModelSpectralNodes");
     append(static_cast<pfunction>(&TestGModel::test_filefct), "Test GModelSpectralFunc");
@@ -1406,6 +1408,92 @@ void TestGModel::test_eplaw(void)
 
 
 /***********************************************************************//**
+ * @brief Test GModelSpectralBrokenPlaw class
+ ***************************************************************************/
+void TestGModel::test_bplaw(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralBrokenPlaw model;
+        test_assert(model.type() == "BrokenPowerLaw",
+                                    "Model type \"BrokenPowerLaw\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralBrokenPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"), -2.8);
+        test_value(model.prefactor(), 2.0);
+        test_value(model.index1(), -2.1);
+        test_value(model.breakenergy().MeV(), 100.0);
+        test_value(model.index2(), -2.8);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                     xml(m_xml_model_point_bplaw);
+        GXmlElement*             element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralBrokenPlaw model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "BrokenPowerLaw", "Expected \"BrokenPowerLaw\"");
+        test_value(model.prefactor(), 5.7e-16);
+        test_value(model.index1(), -2.48);
+        test_value(model.breakenergy().TeV(), 0.3);
+        test_value(model.index2(), -2.70);
+
+        // Test prefactor method
+        model.prefactor(2.3e-16);
+        test_value(model.prefactor(), 2.3e-16);
+
+        // Test index1 method
+        model.index1(-2.6);
+        test_value(model.index1(), -2.6);
+
+        // Test breakenergy method
+        model.breakenergy(GEnergy(0.5, "TeV"));
+        test_value(model.breakenergy().TeV(), 0.5);
+
+        // Test index2 method
+        model.index2(-3.6);
+        test_value(model.index2(), -3.6);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Index1", "BreakValue", "Index2"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test GModelSpectralLogParabola class
  ***************************************************************************/
 void TestGModel::test_logparabola(void)
@@ -1812,6 +1900,7 @@ void TestGModel::test_spectral_model(void)
     test_xml_model("GModelSpectralPlaw",        m_xml_model_point_plaw);
     test_xml_model("GModelSpectralPlaw2",       m_xml_model_point_plaw2);
     test_xml_model("GModelSpectralExpPaw",      m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralBrokenPlaw",  m_xml_model_point_bplaw);
     test_xml_model("GModelSpectralLogParabola", m_xml_model_point_logparabola);
     test_xml_model("GModelSpectralNodes",       m_xml_model_point_nodes);
     test_xml_model("GModelSpectralFunc",        m_xml_model_point_filefct);

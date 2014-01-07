@@ -136,13 +136,14 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialDiffuseMap.hpp \
                      GModelSpectral.hpp \
                      GModelSpectralRegistry.hpp \
+                     GModelSpectralBrokenPlaw.hpp \
+                     GModelSpectralConst.hpp \
                      GModelSpectralExpPlaw.hpp \
                      GModelSpectralFunc.hpp \
+                     GModelSpectralLogParabola.hpp \
                      GModelSpectralNodes.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlaw2.hpp \
-                     GModelSpectralLogParabola.hpp \
-                     GModelSpectralConst.hpp \
                      GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp

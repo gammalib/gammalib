@@ -27,13 +27,14 @@ sources = GModelPar.cpp \
           GModelSpatialDiffuseMap.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
+          GModelSpectralBrokenPlaw.cpp \
           GModelSpectralConst.cpp \
           GModelSpectralExpPlaw.cpp \
           GModelSpectralFunc.cpp \
+          GModelSpectralLogParabola.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
           GModelSpectralPlaw2.cpp \
-          GModelSpectralLogParabola.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \

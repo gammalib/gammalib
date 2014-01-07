@@ -41,7 +41,7 @@ def analyse_unbinned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_unbinned("data/p7v6/ft1.fits", "data/p7v6/ft2.fits", "data/p7v6/ltcube.fits")
-    lat.response("P6_v3_diff", "../caldb")
+    lat.response("P7REP_SOURCE_V15", "../caldb")
 
     # Setup ROI covered by data
     instDir = GLATInstDir()
@@ -83,7 +83,7 @@ def analyse_binned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_binned("data/p7v6/srcmap.fits", "data/p7v6/binned_expmap.fits", "data/p7v6/ltcube.fits")
-    lat.response("P6_v3_diff", "../caldb")
+    lat.response("P7REP_SOURCE_V15", "../caldb")
     lat.response().force_mean(True)
 
     # Append LAT observation to container
@@ -190,5 +190,5 @@ if __name__ == '__main__':
     print("**************************************")
 
     # Analyse data
-    # analyse_unbinned("data/p7v6/crab_model.xml")
-    analyse_binned("data/p7v6/crab_model.xml")
+    analyse_unbinned("data/p7v6/crab_model.xml")
+#     analyse_binned("data/p7v6/crab_model.xml")
