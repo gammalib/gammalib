@@ -465,13 +465,13 @@ bool GLATPsf::has_phi(void) const
  *
  * If no PSF has been allocated, false is returned.
  ***************************************************************************/
-bool GLATPsf::isfront(void) const
+bool GLATPsf::is_front(void) const
 {
     // Retrieve front section flag
-    bool isfront = (m_psf != NULL) ? m_psf->front() : false;
+    bool is_front = (m_psf != NULL) ? m_psf->front() : false;
     
     // Return front section flag
-    return isfront;
+    return is_front;
 }
 
 
@@ -482,13 +482,13 @@ bool GLATPsf::isfront(void) const
  *
  * If no PSF has been allocated, false is returned.
  ***************************************************************************/
-bool GLATPsf::isback(void) const
+bool GLATPsf::is_back(void) const
 {
     // Retrieve back section flag
-    bool isback = (m_psf != NULL) ? !(m_psf->front()) : false;
+    bool is_back = (m_psf != NULL) ? !(m_psf->front()) : false;
     
     // Return back section flag
-    return isback;
+    return is_back;
 }    
 
 
@@ -535,7 +535,7 @@ std::string GLATPsf::print(const GChatter& chatter) const
         else {
             result.append("\n"+gammalib::parformat("Version")+gammalib::str(version()));
             result.append("\n"+gammalib::parformat("Detector section"));
-            if (isfront()) {
+            if (is_front()) {
                 result.append("front");
             }
             else {

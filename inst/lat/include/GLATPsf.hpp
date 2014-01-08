@@ -81,8 +81,8 @@ public:
     double      costhetamin(void) const;
     void        costhetamin(const double& ctheta);
     bool        has_phi(void) const;
-    bool        isfront(void) const;
-    bool        isback(void) const;
+    bool        is_front(void) const;
+    bool        is_back(void) const;
     int         version(void) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
