@@ -661,7 +661,7 @@ void GTestSuites::write(GXml& xml) const
 
             // If a failure or error occured then append the message to the
             // XML element.
-            if (!testcase.passed()) {
+            if (!testcase.has_passed()) {
 
                 // Append XML element for the test case problem
                 GXmlElement* element_testcase_problem = element_testcase->append("error");

@@ -293,7 +293,7 @@ bool GTestSuite::run(void)
             catch (std::exception& e) {
 
                 // Signal that test did not succeed
-                test->passed(false);
+                test->has_passed(false);
 
                 // Set test message to exception message
                 test->message(e.what());
@@ -305,7 +305,7 @@ bool GTestSuite::run(void)
             catch (...)
             {
                 // For other exceptions
-                test->passed(false);
+                test->has_passed(false);
             }
 
             // Compute elapsed time
@@ -319,7 +319,7 @@ bool GTestSuite::run(void)
             test->duration(t_elapse);
 
             // Increment number of errors if the test did not pass
-            if (!test->passed()) {
+            if (!test->has_passed()) {
                 m_errors++;
             }
 
@@ -372,9 +372,9 @@ void GTestSuite::test_assert(const bool&        assert,
     GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST, format_name(name));
 
     // If assert is false then signal that the test is not passed and
-    // increement the number of failures in this test suite 
+    // increment the number of failures in this test suite
     if (!assert) {
-        testcase->passed(false);
+        testcase->has_passed(false);
         m_failures++;
     }
 
@@ -425,7 +425,7 @@ void GTestSuite::test_value(const int&         value,
     // If value is not the expected one then signal test as failed and
     // increment the number of failures
     if (value != expected) {
-        testcase->passed(false);
+        testcase->has_passed(false);
         m_failures++;
     }
 
@@ -488,7 +488,7 @@ void GTestSuite::test_value(const double&      value,
     // If value is not between in interval [expected-eps, expected+eps]
     // then signal test as failed and increment the number of failures
     if (value > expected + eps || value < expected - eps) {
-        testcase->passed(false);
+        testcase->has_passed(false);
         m_failures++;
     }
 
@@ -630,7 +630,7 @@ void GTestSuite::test_try_failure(const std::string& message,
     }
 
     // Signal that test is not ok
-    m_stack_try.back()->passed(false);
+    m_stack_try.back()->has_passed(false);
 
     // Increment the number of errors
     m_errors++;
