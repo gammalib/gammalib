@@ -51,7 +51,7 @@ public:
     // Methods
     void        clear(void);
     GClass*     clone(void) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

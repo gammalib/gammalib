@@ -158,14 +158,14 @@ GClass* GClass::clone(void) const
 /***********************************************************************//**
  * @brief Print class information
  ***************************************************************************/
-std::string GClass::print(void) const
+std::string GClass::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
     result.append("=== GClass ===");
-    result.append("\n"+parformat("Name")+m_name);
+    result.append("\n"+gammalib::parformat("Name")+m_name);
 
     // Return result
     return result;
@@ -219,42 +219,4 @@ void GClass::free_members(void)
   
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] c Class.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GClass& c)
-{
-     // Write class in output stream
-    os << c.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] c Class.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GClass& c)
-{
-    // Write class into logger
-    log << c.print();
-
-    // Return logger
-    return log;
 }
