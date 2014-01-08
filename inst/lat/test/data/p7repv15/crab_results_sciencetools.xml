@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="Crab" type="PointSource">
+    <spectrum type="PowerLaw2">
+      <parameter error="1.510702125" free="1" max="1000" min="1e-05" name="Integral" scale="1e-07" value="25.58700179" />
+      <parameter error="0.04594388483" free="1" max="-0.1" min="-5" name="Index" scale="1" value="-2.135443533" />
+      <parameter free="0" max="1000000" min="10" name="LowerLimit" scale="1" value="100" />
+      <parameter free="0" max="1000000" min="10" name="UpperLimit" scale="1" value="500000" />
+    </spectrum>
+    <spatialModel type="SkyDirFunction">
+      <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+      <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+    </spatialModel>
+  </source>
+  <source name="gll_iem_v05" type="DiffuseSource">
+    <spectrum type="PowerLaw">
+      <parameter error="0.144060828" free="1" max="100" min="1e-05" name="Prefactor" scale="1" value="0.7287081944" />
+      <parameter error="0.0716234477" free="1" max="1" min="-1" name="Index" scale="1" value="0.08682762462" />
+      <parameter free="0" max="2000" min="50" name="Scale" scale="1" value="100" />
+    </spectrum>
+    <spatialModel file="/lustre/fs8/group/hess/user/aschulz/lat_data/fssc_files/diffuse/p7rep/gll_iem_v05.fit" type="MapCubeFunction">
+      <parameter free="0" max="1000" min="0.001" name="Normalization" scale="1" value="1" />
+    </spatialModel>
+  </source>
+  <source name="iso_source_v05" type="DiffuseSource">
+    <spectrum file="/lustre/fs8/group/hess/user/aschulz/lat_data/fssc_files/diffuse/p7rep/iso_source_v05.txt" type="FileFunction">
+      <parameter error="0.6855552052" free="1" max="10" min="0" name="Normalization" scale="1" value="2.875818636" />
+    </spectrum>
+    <spatialModel type="ConstantValue">
+      <parameter free="0" max="10" min="0" name="Value" scale="1" value="1" />
+    </spatialModel>
+  </source>
+</source_library>

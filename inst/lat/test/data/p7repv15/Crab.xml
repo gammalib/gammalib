@@ -1,0 +1,32 @@
+<source_library title="source library">
+<source name="iso_source_v05" type="DiffuseSource">
+	<spectrum file="$(PACKAGE_SOURCE)/inst/lat/test/data/p7repv15/iso_source_v05.txt" type="FileFunction">
+		<parameter free="1" max="10" min="0" name="Normalization" scale="1" value="1.0" />
+	</spectrum>
+	<spatialModel type="ConstantValue">
+		<parameter free="0" max="10" min="0" name="Value" scale="1" value="1" />
+	</spatialModel>
+  </source>
+<source name="gll_iem_v05" type="DiffuseSource">
+	<spectrum type="PowerLaw">
+		<parameter free="1" max="100" min="1e-05" name="Prefactor" scale="1" value="1." />
+		<parameter free="1" max="1" min="-1" name="Index" scale="1" value="0." />
+		<parameter free="0" max="2000" min="50" name="Scale" scale="1" value="100" />
+	</spectrum>
+	<spatialModel type="MapCubeFunction" file="$(PACKAGE_SOURCE)/test/data/test_cube.fits">
+		<parameter free="0" max="1000" min="0.001" name="Normalization" scale="1" value="1" />
+	</spatialModel>
+  </source>
+  <source type="PointSource" name="Crab">
+    <spectrum type="PowerLaw2">
+      <parameter scale="1e-07" name="Integral" min="1e-05" max="1000.0" value="1.0" free="1"/>
+      <parameter scale="1.0" name="Index" min="-5.0" max="-0.1" value="-2.0" free="1"/>
+      <parameter scale="1.0" name="LowerLimit" min="10.0" max="1000000.0" value="100.0" free="0"/>
+      <parameter scale="1.0" name="UpperLimit" min="10.0" max="1000000.0" value="500000.0" free="0"/>
+    </spectrum>
+    <spatialModel type="SkyDirFunction">
+      <parameter scale="1" name="RA" min="-360" max="360" value="83.6331" free="0"/>
+      <parameter scale="1" name="DEC" min="-90" max="90" value="22.0145" free="0"/>
+    </spatialModel>
+  </source>
+</source_library>
