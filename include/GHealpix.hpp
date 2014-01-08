@@ -48,9 +48,9 @@ class GHealpix : public GSkyProjection {
 public:
     // Constructors and destructors
     GHealpix(void);
-    explicit GHealpix(const int&         nside,
-                      const std::string& ordering = "NESTED",
-                      const std::string& coordsys = "GAL");
+    GHealpix(const int&         nside,
+             const std::string& ordering = "NESTED",
+             const std::string& coordsys = "GAL");
     explicit GHealpix(const GFitsHDU& hdu);
     GHealpix(const GHealpix& wcs);
     virtual ~GHealpix(void);
