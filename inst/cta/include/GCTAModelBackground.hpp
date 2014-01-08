@@ -67,7 +67,7 @@ public:
     virtual void                 clear(void);
     virtual GCTAModelBackground* clone(void) const;
     virtual std::string          type(void) const;
-    virtual bool                 isconstant(void) const;
+    virtual bool                 is_constant(void) const;
     virtual double               eval(const GEvent& event,
                                       const GObservation& obs) const;
     virtual double               eval_gradients(const GEvent& event,
@@ -192,7 +192,7 @@ std::string GCTAModelBackground::type(void) const
  * model is a model that has a temporal component of type "Constant".
  ***************************************************************************/
 inline
-bool GCTAModelBackground::isconstant(void) const
+bool GCTAModelBackground::is_constant(void) const
 {
     return (m_temporal != NULL && m_temporal->type() == "Constant");
 }

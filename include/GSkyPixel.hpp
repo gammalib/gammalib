@@ -62,13 +62,13 @@
  *    int    index  = GSkyPixel(1);       // Retrieve integer index
  *    double dindex = GSkyPixel(1.0);     // Retrieve double precision index
  *
- * The dimensionality of a pixel is checked using the is1D() and is2D()
+ * The dimensionality of a pixel is checked using the is_1D() and is_2D()
  * methods. The size() method returns 1 for 1D pixels and 2 for 2D pixels.
  * If a pixel is not initialised, e.g.
  *
  *    GSkyPixel pixel;                    // Not initialised
  *
- * the is1D() and is2D() methods return false and the size() method returns
+ * the is_1D() and is_2D() methods return false and the size() method returns
  * 0.
  ***************************************************************************/
 class GSkyPixel : public GBase {
@@ -92,8 +92,8 @@ public:
     void          clear(void);
     GSkyPixel*    clone(void) const;
     int           size(void) const;
-    bool          is1D(void) const;
-    bool          is2D(void) const;
+    bool          is_1D(void) const;
+    bool          is_2D(void) const;
     void          index(const double& index);
     void          x(const double& x);
     void          y(const double& y);
@@ -137,7 +137,7 @@ int GSkyPixel::size(void) const
  * @return True if pixel is 1D.
  ***************************************************************************/
 inline
-bool GSkyPixel::is1D(void) const
+bool GSkyPixel::is_1D(void) const
 {
     return (m_size == 1);
 }
@@ -149,7 +149,7 @@ bool GSkyPixel::is1D(void) const
  * @return True if pixel is 2D.
  ***************************************************************************/
 inline
-bool GSkyPixel::is2D(void) const
+bool GSkyPixel::is_2D(void) const
 {
     return (m_size == 2);
 }

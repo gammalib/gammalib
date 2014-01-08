@@ -39,7 +39,7 @@
 /***********************************************************************//**
  * @class GApplication
  *
- * @brief GammaLib application interface defintion
+ * @brief GammaLib application interface definition
  *
  * This class provides the base class for ftools-like executables based on
  * GammaLib. The ftools-like executables will be implemented as derived
@@ -76,7 +76,7 @@ public:
     bool               logVerbose(void) const;
     bool               logDebug(void) const;
     bool               clobber(void) const;
-    bool               haspar(const std::string& name) const;
+    bool               has_par(const std::string& name) const;
     const std::string& par_filename(void) const;
     const std::string& log_filename(void) const;
     void               log_header(void);
@@ -162,7 +162,7 @@ const std::string& GApplication::version(void) const
  * @return True if an application parameter with the specified name exists.
  ***************************************************************************/
 inline
-bool GApplication::haspar(const std::string& name) const
+bool GApplication::has_par(const std::string& name) const
 {
     return (m_pars.contains(name));
 }

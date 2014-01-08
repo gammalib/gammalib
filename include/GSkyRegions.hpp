@@ -72,7 +72,7 @@ public:
     GSkyRegion*        at(const int& index);
     const GSkyRegion*  at(const int& index) const;
     int                size(void) const;
-    bool               isempty(void) const;
+    bool               is_empty(void) const;
     GSkyRegion*        set(const int& index, const GSkyRegion& region);
     GSkyRegion*        set(const std::string& name, const GSkyRegion& region);
     GSkyRegion*        append(const GSkyRegion& region);
@@ -83,7 +83,7 @@ public:
     void               reserve(const int& num);
     void               extend(const GSkyRegions& regions);
     bool               contains(const std::string& name) const;
-	bool               contains(const GSkyDir& dir) const;
+    bool               contains(const GSkyDir& dir) const;
     bool               overlaps(const GSkyRegion& reg) const;
     void               load(const std::string& filename);
     void               save(const std::string& filename) const;
@@ -153,7 +153,7 @@ int GSkyRegions::size(void) const
  * Signals if the region container does not contain any region.
  ***************************************************************************/
 inline
-bool GSkyRegions::isempty(void) const
+bool GSkyRegions::is_empty(void) const
 {
     return (m_regions.empty());
 }

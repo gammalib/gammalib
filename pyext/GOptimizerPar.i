@@ -73,20 +73,20 @@ public:
     void          scale(const double& scale);
 
     // Boundary methods
-    bool hasmin(void) const;
-    bool hasmax(void) const;
-    bool hasrange(void) const;
+    bool has_min(void) const;
+    bool has_max(void) const;
+    bool has_range(void) const;
     void remove_min(void);
     void remove_max(void);
     void remove_range(void);
 
     // Property methods
-    bool isfree(void) const;
-    bool isfixed(void) const;
-    bool hasgrad(void) const;
+    bool is_free(void) const;
+    bool is_fixed(void) const;
+    bool has_grad(void) const;
     void free(void);
     void fix(void);
-    void hasgrad(const bool& grad);
+    void has_grad(const bool& grad);
 
     // Other methods
     void               clear(void);

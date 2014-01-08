@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GException_app.cpp
- * @brief Application exception handler interface definiton
+ * @brief Application exception handler interface definition
  * @author Juergen Knoedlseder
  */
 

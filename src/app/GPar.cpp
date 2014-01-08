@@ -317,7 +317,7 @@ void GPar::string(const std::string& value)
 void GPar::filename(const std::string& value)
 {
     // Check if parameter is a filename parameter
-    if (!isfilename()) {
+    if (!is_filename()) {
         throw GException::par_error(G_FILENAME_SET, name(),
               "attempted to set "+par_type_string(m_type)+
               " parameter with filename.");
@@ -491,7 +491,7 @@ std::string GPar::string(void)
 std::string GPar::filename(void)
 {
     // Check if parameter is a filename parameter
-    if (!isfilename()) {
+    if (!is_filename()) {
         throw GException::par_error(G_FILENAME_GET, name(),
               "attempted reading "+par_type_string(m_type)+
               " parameter as a filename.");
@@ -633,7 +633,7 @@ double GPar::real(void)
  * A parameter is in mode learn when it has one of the following modes:
  * hl,ql,lh, or lq.
  ***************************************************************************/
-bool GPar::islearn(void) const
+bool GPar::is_learn(void) const
 {
     // Assign result
     bool result = (m_mode == "hl" || m_mode == "ql" || m_mode == "lh" || 
@@ -650,7 +650,7 @@ bool GPar::islearn(void) const
  * A parameter will be queried when it has one of the following modes:
  * q, ql, or lq.
  ***************************************************************************/
-bool GPar::isquery(void) const
+bool GPar::is_query(void) const
 {
     // Assign result
     bool result = (m_mode == "q" || m_mode == "ql" || m_mode == "lq");
@@ -666,7 +666,7 @@ bool GPar::isquery(void) const
  * A parameter is of type "filename" if it has one of the following types:
  * f, fr, fw, fe, or fn.
  ***************************************************************************/
-bool GPar::isfilename(void) const
+bool GPar::is_filename(void) const
 {
     // Assign result
     bool result = (m_type == "f"  || m_type == "fr" || m_type == "fw" ||
@@ -680,7 +680,7 @@ bool GPar::isfilename(void) const
 /***********************************************************************//**
  * @brief Signals if parameter is valid
  ***************************************************************************/
-bool GPar::isvalid(void)
+bool GPar::is_valid(void)
 {
     // Query parameter
     query();
@@ -693,7 +693,7 @@ bool GPar::isvalid(void)
 /***********************************************************************//**
  * @brief Signals if parameter is undefined
  ***************************************************************************/
-bool GPar::isundefined(void)
+bool GPar::is_undefined(void)
 {
     // Query parameter
     query();
@@ -706,7 +706,7 @@ bool GPar::isundefined(void)
 /***********************************************************************//**
  * @brief Signals if parameter is not a number
  ***************************************************************************/
-bool GPar::isnotanumber(void)
+bool GPar::is_notanumber(void)
 {
     // Query parameter
     query();
@@ -911,7 +911,7 @@ void GPar::check_value(const std::string& value) const
     else if (m_type == "s") {
         check_value_string(value);
     }
-    else if (isfilename()) {
+    else if (is_filename()) {
         check_value_filename(value);
     }
 
@@ -1115,7 +1115,7 @@ void GPar::set_value(const std::string& value)
 void GPar::query(void)
 {
     // Continue only if parameter has query mode
-    if (isquery()) {
+    if (is_query()) {
 
         // Dump prompt string
         std::string prompt = m_prompt;

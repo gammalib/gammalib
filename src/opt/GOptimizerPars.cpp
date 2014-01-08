@@ -315,7 +315,7 @@ int GOptimizerPars::nfree(void) const
     
     // Collect all free parameters
     for (int i = 0; i < size(); ++i) {
-        if (m_pars[i]->isfree()) {
+        if (m_pars[i]->is_free()) {
             nfree++;
         }
     }
@@ -612,7 +612,7 @@ void GOptimizerPars::remove(const std::string& name)
 void GOptimizerPars::extend(const GOptimizerPars& pars)
 {
     // Do nothing if parameter container is empty
-    if (!pars.isempty()) {
+    if (!pars.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to

@@ -195,7 +195,7 @@ std::string GTestCase::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Set string dependent on test result
-        if (m_passed) {
+        if (m_has_passed) {
             result.append(".");
         }
         else if (m_kind == ERROR_TEST) {
@@ -224,12 +224,12 @@ std::string GTestCase::print(const GChatter& chatter) const
 void GTestCase::init_members(void)
 {
     // Initialise members
-    m_name     = "Unnamed Error Test Case";
-    m_message  = "";
-    m_type     = "";
-    m_passed   = true;
-    m_kind     = ERROR_TEST;
-    m_duration = 0.0;
+    m_name       = "Unnamed Error Test Case";
+    m_message    = "";
+    m_type       = "";
+    m_has_passed = true;
+    m_kind       = ERROR_TEST;
+    m_duration   = 0.0;
 
     // Return
     return;
@@ -246,12 +246,12 @@ void GTestCase::init_members(void)
 void GTestCase::copy_members(const GTestCase& test)
 {
     // Copy members
-    m_name     = test.m_name;
-    m_message  = test.m_message;
-    m_type     = test.m_type;
-    m_passed   = test.m_passed;
-    m_kind     = test.m_kind;
-    m_duration = test.m_duration;
+    m_name       = test.m_name;
+    m_message    = test.m_message;
+    m_type       = test.m_type;
+    m_has_passed = test.m_has_passed;
+    m_kind       = test.m_kind;
+    m_duration   = test.m_duration;
 
     // Return
     return;

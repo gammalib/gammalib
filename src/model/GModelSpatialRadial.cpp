@@ -427,7 +427,7 @@ void GModelSpatialRadial::init_members(void)
     m_ra.fix();
     m_ra.scale(1.0);
     m_ra.gradient(0.0);
-    m_ra.hasgrad(false);
+    m_ra.has_grad(false);
 
     // Initialise Declination
     m_dec.clear();
@@ -436,7 +436,7 @@ void GModelSpatialRadial::init_members(void)
     m_dec.fix();
     m_dec.scale(1.0);
     m_dec.gradient(0.0);
-    m_dec.hasgrad(false);
+    m_dec.has_grad(false);
 
     // Set parameter pointer(s)
     m_pars.clear();

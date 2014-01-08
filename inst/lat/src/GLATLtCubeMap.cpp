@@ -246,7 +246,7 @@ double GLATLtCubeMap::operator()(const GSkyDir& dir, const GEnergy& energy,
     // zenith and azimuth. Note that the map index starts with m_num_ctheta
     // as the first m_num_ctheta maps correspond to an evaluation without
     // any phi-dependence.
-    if (hasphi() && aeff.hasphi()) {
+    if (has_phi() && aeff.has_phi()) {
         for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
             double p = phi(iphi);
             for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i) {
@@ -311,7 +311,7 @@ double GLATLtCubeMap::operator()(const GSkyDir& dir, const GEnergy& energy,
     // zenith and azimuth. Note that the map index starts with m_num_ctheta
     // as the first m_num_ctheta maps correspond to an evaluation without
     // any phi-dependence.
-    if (hasphi() && aeff.hasphi()) {
+    if (has_phi() && aeff.has_phi()) {
         for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
             double p = phi(iphi);
             for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i) {

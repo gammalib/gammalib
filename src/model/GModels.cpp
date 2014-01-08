@@ -443,7 +443,7 @@ GModel* GModels::insert(const int& index, const GModel& model)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (isempty()) {
+    if (is_empty()) {
         if (index > 0) {
             throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
         }
@@ -597,7 +597,7 @@ void GModels::remove(const std::string& name)
 void GModels::extend(const GModels& models)
 {
     // Do nothing if model container is empty
-    if (!models.isempty()) {
+    if (!models.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to

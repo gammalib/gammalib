@@ -46,7 +46,7 @@ public:
     virtual void                 clear(void);
     virtual GCOMModelDRBFitting* clone(void) const;
     virtual std::string          type(void) const;
-    virtual bool                 isconstant(void) const;
+    virtual bool                 is_constant(void) const;
     virtual double               eval(const GEvent& event,
                                       const GObservation& obs) const;
     virtual double               eval_gradients(const GEvent& event,

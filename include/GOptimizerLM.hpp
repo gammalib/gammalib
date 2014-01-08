@@ -83,7 +83,7 @@ public:
     int           max_boundary_hits(void) const { return m_max_hit; }     //!< @brief Return maximum number of boundary hits
     const double& lambda_start(void) const { return m_lambda_start; }     //!< @brief Return lambda start value
     const double& lambda_inc(void) const { return m_lambda_inc; }         //!< @brief Return lambda increment
-    const double& lambda_dec(void) const { return m_lambda_dec; }         //!< @brief Return lambda derement
+    const double& lambda_dec(void) const { return m_lambda_dec; }         //!< @brief Return lambda decrement
     const double& lambda(void) const { return m_lambda; }                 //!< @brief Return lambda value
     const double& eps(void) const { return m_eps; }                       //!< @brief Return convergence precision
 

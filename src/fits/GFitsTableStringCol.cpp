@@ -526,7 +526,7 @@ void GFitsTableStringCol::init_members(void)
 void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
 {
     // Fetch data if necessary
-    bool not_loaded = (!column.isloaded());
+    bool not_loaded = (!column.is_loaded());
     if (not_loaded) {
         column.fetch_data();
     }

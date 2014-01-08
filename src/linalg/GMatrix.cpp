@@ -908,7 +908,7 @@ GMatrix GMatrix::abs(void) const
  *
  * Returns the fill of the matrix. The fill of a matrix is defined as the
  * number non-zero elements devided by the number of total elements. By
- * definiton, the fill is comprised in the interval [0,..,1].
+ * definition, the fill is comprised in the interval [0,..,1].
  *
  * The fill of a matrix with zero elements will be set to 0.
  ***************************************************************************/

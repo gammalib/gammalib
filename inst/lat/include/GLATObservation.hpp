@@ -130,7 +130,7 @@ const GLATLtCube* GLATObservation::ltcube(void) const
 inline
 std::string GLATObservation::instrument(void) const
 {
-    // Return instument name
+    // Return instrument name
     return ("LAT");
 }
 

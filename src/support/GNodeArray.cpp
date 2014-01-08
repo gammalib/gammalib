@@ -350,7 +350,7 @@ void GNodeArray::insert(const int& index, const double& node)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (isempty()) {
+    if (is_empty()) {
         if (index > 0) {
             throw GException::out_of_range(G_INSERT, "Node index", index, size());
         }
@@ -413,7 +413,7 @@ void GNodeArray::remove(const int& index)
 void GNodeArray::extend(const GNodeArray& nodes)
 {
     // Do nothing if node array is empty
-    if (!nodes.isempty()) {
+    if (!nodes.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to

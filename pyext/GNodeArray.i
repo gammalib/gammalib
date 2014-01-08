@@ -49,7 +49,7 @@ public:
     GNodeArray*   clone(void) const;
     double&       at(const int& index);
     int           size(void) const;
-    bool          isempty(void) const;
+    bool          is_empty(void) const;
     void          append(const double& node);
     void          insert(const int& index, const double& node);
     void          remove(const int& index);

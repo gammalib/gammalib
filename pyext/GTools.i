@@ -72,7 +72,7 @@ namespace gammalib {
     std::string              fill(const std::string& s, int n);
     std::string              left(const std::string& s, int n, char c = ' ');
     std::string              right(const std::string& s, int n, char c = ' ');
-    std::string              center(const std::string& s, int n, char c = ' ');
+    std::string              centre(const std::string& s, int n, char c = ' ');
     std::string              parformat(const std::string& s, const int& indent = 0);
     double                   plaw_photon_flux(const double& emin,
                                               const double& emax,
@@ -83,6 +83,6 @@ namespace gammalib {
                                               const double& epivot,
                                               const double& gamma);
     bool                     file_exists(const std::string& filename);
-    bool                     isinfinite(const double& x);
-    bool                     isnotanumber(const double& x);
+    bool                     is_infinite(const double& x);
+    bool                     is_notanumber(const double& x);
 }

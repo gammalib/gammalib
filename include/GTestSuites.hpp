@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuites.hpp
- * @brief Test suite container class interface defintion
+ * @brief Test suite container class interface definition
  * @author Jean-Baptiste Cayrou
  */
 
@@ -67,7 +67,7 @@ public:
     GTestSuite*        at(const int& index);
     const GTestSuite*  at(const int& index) const;
     int                size(void) const;
-    bool               isempty(void) const;
+    bool               is_empty(void) const;
     GTestSuite*        set(const int& index, const GTestSuite& suite);
     GTestSuite*        append(const GTestSuite& suite);
     GTestSuite*        insert(const int& index, const GTestSuite& suite);
@@ -154,7 +154,7 @@ int GTestSuites::size(void) const
  * Signals if the container does not contain any test suite.
  ***************************************************************************/
 inline
-bool GTestSuites::isempty(void) const
+bool GTestSuites::is_empty(void) const
 {
     return (m_testsuites.empty());
 }

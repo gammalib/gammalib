@@ -61,8 +61,8 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GLATResponse* clone(void) const;
-    virtual bool          hasedisp(void) const;
-    virtual bool          hastdisp(void) const;
+    virtual bool          has_edisp(void) const;
+    virtual bool          has_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -105,8 +105,8 @@ private:
     // Private members
     std::string               m_caldb;      //!< Name of or path to the calibration database
     std::string               m_rspname;    //!< Name of the instrument response
-    bool                      m_hasfront;   //!< Front IRF loaded?
-    bool                      m_hasback;    //!< Back IRF loaded?
+    bool                      m_has_front;   //!< Front IRF loaded?
+    bool                      m_has_back;    //!< Back IRF loaded?
     bool                      m_force_mean; //!< Use mean PSF in any case
     std::vector<GLATAeff*>    m_aeff;       //!< Effective areas
     std::vector<GLATPsf*>     m_psf;        //!< Point spread functions
@@ -121,7 +121,7 @@ private:
  * @return True if response supports energy dispersion.
  ***************************************************************************/
 inline
-bool GLATResponse::hasedisp(void) const
+bool GLATResponse::has_edisp(void) const
 {
     return false;
 }
@@ -133,7 +133,7 @@ bool GLATResponse::hasedisp(void) const
  * @return True if response supports time dispersion.
  ***************************************************************************/
 inline
-bool GLATResponse::hastdisp(void) const
+bool GLATResponse::has_tdisp(void) const
 {
     return false;
 }

@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GException.hpp
- * @brief Exception handler interface definiton.
+ * @brief Exception handler interface definition.
  * @author Juergen Knoedlseder
  */
 

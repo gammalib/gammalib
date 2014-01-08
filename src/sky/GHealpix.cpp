@@ -140,7 +140,7 @@ GHealpix::GHealpix(const GFitsHDU& hdu) : GSkyProjection()
     // Initialise class members
     init_members();
 
-    // Read Healpix defintion from FITS table
+    // Read Healpix definition from FITS table
     read(hdu);
 
     // Return
@@ -251,7 +251,7 @@ GHealpix* GHealpix::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Read Healpix definiton from FITS header
+ * @brief Read Healpix definition from FITS header
  *
  * @param[in] hdu FITS HDU.
  *
@@ -280,10 +280,10 @@ void GHealpix::read(const GFitsHDU& hdu)
     // versions of LAT exposure cubes). If not found then search for standard
     // COORDSYS keyword.
     std::string coords;
-    if (hdu.hascard("HIER_CRD")) {
+    if (hdu.has_card("HIER_CRD")) {
         coords = hdu.string("HIER_CRD");
     }
-    else if (hdu.hascard("COORDSYS")) {
+    else if (hdu.has_card("COORDSYS")) {
         coords = hdu.string("COORDSYS");
     }
 
@@ -309,7 +309,7 @@ void GHealpix::read(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
- * @brief Write Healpix definiton into FITS HDU
+ * @brief Write Healpix definition into FITS HDU
  *
  * @param[in] hdu FITS HDU.
  *
@@ -350,7 +350,7 @@ void GHealpix::write(GFitsHDU& hdu) const
 GSkyDir GHealpix::pix2dir(const GSkyPixel& pixel) const
 {
     // Throw an exception if sky map pixel is not 1D
-    if (!pixel.is1D()) {
+    if (!pixel.is_1D()) {
         std::string msg = "Sky map pixel "+pixel.print()+" is not"
                           " 1-dimensional.\n"
                           "Only 1-dimensional pixels are supported by the"

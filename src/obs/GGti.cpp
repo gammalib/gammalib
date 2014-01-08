@@ -475,7 +475,7 @@ void GGti::reserve(const int& num)
 void GGti::extend(const GGti& gti)
 {
     // Do nothing if Good Time Intervals are empty
-    if (!gti.isempty()) {
+    if (!gti.is_empty()) {
 
         // Allocate new intervals
         int    num   = m_num+gti.size();

@@ -518,7 +518,7 @@ void GFitsTableBoolCol::init_members(void)
 void GFitsTableBoolCol::copy_members(const GFitsTableBoolCol& column)
 {
     // Fetch data if necessary
-    bool not_loaded = (!column.isloaded());
+    bool not_loaded = (!column.is_loaded());
     if (not_loaded) {
         column.fetch_data();
     }

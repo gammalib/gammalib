@@ -39,7 +39,7 @@
  *
  * This class implements a FITS table Bit column. Bits are stored internally
  * in an array of type char and is transferred to the file in junks of
- * 8 Bits (using the cfitsio type TBYTE).
+ * 8 Bits (using the CFITSIO type TBYTE).
  ***************************************************************************/
 class GFitsTableBitCol : public GFitsTableCol {
 
@@ -64,7 +64,7 @@ public:
     virtual int               integer(const int& row, const int& col = 0) const;
     virtual void              insert(const int& row, const int& nrows);
     virtual void              remove(const int& row, const int& nrows);
-    virtual bool              isloaded(void) const;
+    virtual bool              is_loaded(void) const;
     
     // Other methods
     unsigned char* data(void);
@@ -115,7 +115,7 @@ private:
  * @return True if column has been loaded, false otherwise
  ***************************************************************************/
 inline
-bool GFitsTableBitCol::isloaded(void) const
+bool GFitsTableBitCol::is_loaded(void) const
 {
     return (m_data != NULL);
 }

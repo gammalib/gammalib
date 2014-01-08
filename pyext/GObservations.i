@@ -47,7 +47,7 @@ public:
     void           clear(void);
     GObservations* clone(void) const;
     int            size(void) const;
-    bool           isempty(void) const;
+    bool           is_empty(void) const;
     GObservation*  set(const int& index, const GObservation& obs);
     GObservation*  append(const GObservation& obs);
     GObservation*  insert(const int& index, const GObservation& obs);

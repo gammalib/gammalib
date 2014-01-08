@@ -61,8 +61,8 @@ public:
     int          ncostheta(void) const;
     double       costhetamin(void) const;
     void         costhetamin(const double& ctheta);
-    bool         hasphi(void) const;
-    bool         hasefficiency(void) const;
+    bool         has_phi(void) const;
+    bool         has_efficiency(void) const;
     double       efficiency_factor1(const GEnergy& srcEng) const;
     double       efficiency_factor2(const GEnergy& srcEng) const;
 };

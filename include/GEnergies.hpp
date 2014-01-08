@@ -65,7 +65,7 @@ public:
     GEnergy&       at(const int& index);
     const GEnergy& at(const int& index) const;
     int            size(void) const;
-    bool           isempty(void) const;
+    bool           is_empty(void) const;
     GEnergy&       append(const GEnergy& energy);
     GEnergy&       insert(const int& index, const GEnergy& energy);
     void           remove(const int& index);
@@ -141,14 +141,14 @@ int GEnergies::size(void) const
  * Signals if the energy container does not contain any energy.
  ***************************************************************************/
 inline
-bool GEnergies::isempty(void) const
+bool GEnergies::is_empty(void) const
 {
     return (m_energies.empty());
 }
 
 
 /***********************************************************************//**
- * @brief Reserves space for energues in container
+ * @brief Reserves space for energies in container
  *
  * @param[in] num Number of energies.
  *

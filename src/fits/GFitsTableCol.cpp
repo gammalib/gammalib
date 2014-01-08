@@ -217,7 +217,7 @@ void GFitsTableCol::elements(const int& row, const int& elements)
     }
 
     // First handle the case of a variable-length column
-    if (isvariable()) {
+    if (is_variable()) {
 
         // Determine number of elements to add or to remove
         int difference = elements - (m_rowstart[row+1] - m_rowstart[row]);
@@ -354,11 +354,11 @@ std::string GFitsTableCol::tform_binary(void) const
     else {
         tform.append(gammalib::str(number()));
     }
-    if (isvariable()) {
+    if (is_variable()) {
         tform.append("P");
     }
     tform.append(typecode);
-    if (isvariable() && m_varlen > 0) {
+    if (is_variable() && m_varlen > 0) {
         tform.append("("+gammalib::str(m_varlen)+")");
     }
     
@@ -404,7 +404,7 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
 
         // Append loading information
-        if (isloaded()) {
+        if (is_loaded()) {
             result.append("[loaded]     ");
         }
         else {
@@ -429,7 +429,7 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
 
         // Append cfitsio information
-        if (isvariable()) {
+        if (is_variable()) {
             result.append(" repeat=" + gammalib::str(repeat()));
             result.append(" width="  + gammalib::str(width()));
             result.append(" number=" + gammalib::str(number()));
@@ -458,12 +458,12 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Fetch data if necessary
-        if (!isloaded()) fetch_data();
+        if (!is_loaded()) fetch_data();
 
         // Loop over all rows
         for (int row = 0; row < length(); ++row) {
             result.append("\n");
-            if (isvariable()) {
+            if (is_variable()) {
                 result.append("start=");
                 result.append(gammalib::str(m_rowstart[row]));
                 result.append(":");
@@ -472,7 +472,7 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
                 result.append(" "+string(row, inx));
             }
         }
-        if (isvariable()) {
+        if (is_variable()) {
             result.append("\nend=");
             result.append(gammalib::str(m_rowstart[length()]));
         }
@@ -515,7 +515,7 @@ void GFitsTableCol::save(void)
 void GFitsTableCol::load_column(void)
 {
     // Load variable-length or fixed-length column from FITS file
-    if (isvariable()) {
+    if (is_variable()) {
         load_column_variable();
     }
     else {
@@ -744,7 +744,7 @@ void GFitsTableCol::load_column_variable(void)
 void GFitsTableCol::save_column(void)
 {
     // Save variable-length or fixed-length column into FITS file
-    if (isvariable()) {
+    if (is_variable()) {
         save_column_variable();
     }
     else {
@@ -899,7 +899,7 @@ int GFitsTableCol::offset(const int& row, const int& inx) const
     #endif
 
     // Calculate pixel offset
-    int offset = (isvariable()) ? m_rowstart[row] + inx : row * m_number + inx;
+    int offset = (is_variable()) ? m_rowstart[row] + inx : row * m_number + inx;
 
     // Return offset
     return offset;

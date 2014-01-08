@@ -73,8 +73,8 @@ public:
     void               type( const std::string& type);
     const ErrorKind&   kind(void) const;
     void               kind(const ErrorKind& kind);
-    const bool&        passed(void) const;
-    void               passed(const bool& passed);
+    const bool&        has_passed(void) const;
+    void               has_passed(const bool& has_passed);
     const double&      duration(void) const;
     void               duration(const double& duration);
     std::string        print(const GChatter& chatter = NORMAL) const;
@@ -86,12 +86,12 @@ protected:
     void free_members(void);
         
     // Private members
-    std::string m_name;      //!< Test name
-    std::string m_message;   //!< Test message
-    std::string m_type;      //!< Test type
-    bool        m_passed;    //!< Boolean to check test success
-    ErrorKind   m_kind;      //!< Kind of test case (failure or error test)
-    double      m_duration;  //!< Test duration
+    std::string m_name;       //!< Test name
+    std::string m_message;    //!< Test message
+    std::string m_type;       //!< Test type
+    bool        m_has_passed; //!< Boolean to check test success
+    ErrorKind   m_kind;       //!< Kind of test case (failure or error test)
+    double      m_duration;   //!< Test duration
 };
 
 
@@ -209,21 +209,21 @@ void GTestCase::kind(const ErrorKind& kind)
  * This method returns true if the test has passed, false otherwise.
  ***************************************************************************/
 inline
-const bool& GTestCase::passed(void) const
+const bool& GTestCase::has_passed(void) const
 {
-    return m_passed;
+    return m_has_passed;
 }
 
 
 /***********************************************************************//**
  * @brief Set if test passed
  *
- * @param[in] passed Test passed (true or false)
+ * @param[in] has_passed Test passed (true or false)
  ***************************************************************************/
 inline
-void GTestCase::passed(const bool& passed)
+void GTestCase::has_passed(const bool& has_passed)
 {
-    m_passed = passed;
+    m_has_passed = has_passed;
     return;
 }
 

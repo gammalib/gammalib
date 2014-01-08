@@ -284,7 +284,7 @@ void GLATPsf::read(const GFits& fits)
     const GFitsTable& hdu_scale = *fits.table("PSF_SCALING_PARAMS");
 
     // Determine PSF version (default version is version 1)
-    int version = (hdu_rpsf.hascard("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
+    int version = (hdu_rpsf.has_card("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
 
     // Determine PSF type
     bool        front  = true;
@@ -451,7 +451,7 @@ void GLATPsf::costhetamin(const double& ctheta)
  *
  * @todo Implement phi dependence
  ***************************************************************************/
-bool GLATPsf::hasphi(void) const
+bool GLATPsf::has_phi(void) const
 {
     // Return
     return false;
@@ -465,13 +465,13 @@ bool GLATPsf::hasphi(void) const
  *
  * If no PSF has been allocated, false is returned.
  ***************************************************************************/
-bool GLATPsf::isfront(void) const
+bool GLATPsf::is_front(void) const
 {
     // Retrieve front section flag
-    bool isfront = (m_psf != NULL) ? m_psf->front() : false;
+    bool is_front = (m_psf != NULL) ? m_psf->front() : false;
     
     // Return front section flag
-    return isfront;
+    return is_front;
 }
 
 
@@ -482,13 +482,13 @@ bool GLATPsf::isfront(void) const
  *
  * If no PSF has been allocated, false is returned.
  ***************************************************************************/
-bool GLATPsf::isback(void) const
+bool GLATPsf::is_back(void) const
 {
     // Retrieve back section flag
-    bool isback = (m_psf != NULL) ? !(m_psf->front()) : false;
+    bool is_back = (m_psf != NULL) ? !(m_psf->front()) : false;
     
     // Return back section flag
-    return isback;
+    return is_back;
 }    
 
 
@@ -535,7 +535,7 @@ std::string GLATPsf::print(const GChatter& chatter) const
         else {
             result.append("\n"+gammalib::parformat("Version")+gammalib::str(version()));
             result.append("\n"+gammalib::parformat("Detector section"));
-            if (isfront()) {
+            if (is_front()) {
                 result.append("front");
             }
             else {

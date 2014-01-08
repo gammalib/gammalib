@@ -279,7 +279,7 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw2::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -374,12 +374,12 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
     double value = m_integral.value() * m_norm * m_power;
 
     // Integral flux gradient
-    if (m_integral.isfree()) {
+    if (m_integral.is_free()) {
          g_integral = value / m_integral.factor_value();
     }
 
     // Index gradient
-    if (m_index.isfree()) {
+    if (m_index.is_free()) {
         g_index = value * (m_g_norm + gammalib::ln10 * srcEng.log10MeV()) *
                   m_index.scale();
     }
@@ -390,7 +390,7 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw2::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -805,7 +805,7 @@ void GModelSpectralPlaw2::init_members(void)
     m_integral.range(0.0, 10.0); // range:   [0,10]
     m_integral.free();
     m_integral.gradient(0.0);
-    m_integral.hasgrad(true);
+    m_integral.has_grad(true);
 
     // Initialise powerlaw index
     m_index.clear();
@@ -815,7 +815,7 @@ void GModelSpectralPlaw2::init_members(void)
     m_index.range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
     m_index.gradient(0.0);
-    m_index.hasgrad(true);
+    m_index.has_grad(true);
 
     // Initialise lower limit
     m_emin.clear();
@@ -826,7 +826,7 @@ void GModelSpectralPlaw2::init_members(void)
     m_emin.range(0.001, 1.0e15); // range:   [0.001, 1e15]
     m_emin.fix();
     m_emin.gradient(0.0);
-    m_emin.hasgrad(false);
+    m_emin.has_grad(false);
 
     // Initialise upper limit
     m_emax.clear();
@@ -837,7 +837,7 @@ void GModelSpectralPlaw2::init_members(void)
     m_emin.range(0.001, 1.0e15); // range:   [0.001, 1e15]
     m_emax.fix();
     m_emax.gradient(0.0);
-    m_emax.hasgrad(false);
+    m_emax.has_grad(false);
 
     // Set parameter pointer(s)
     m_pars.clear();

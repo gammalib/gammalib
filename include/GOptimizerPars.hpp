@@ -70,7 +70,7 @@ public:
     GOptimizerPar*       at(const int& index);
     const GOptimizerPar* at(const int& index) const;
     int                  size(void) const;
-    bool                 isempty(void) const;
+    bool                 is_empty(void) const;
     int                  nfree(void) const;
     GOptimizerPar*       set(const int& index, const GOptimizerPar& par);
     GOptimizerPar*       set(const std::string& name, const GOptimizerPar& par);
@@ -151,7 +151,7 @@ int GOptimizerPars::size(void) const
  * Signals if the parameters container does not contain any parameter.
  ***************************************************************************/
 inline
-bool GOptimizerPars::isempty(void) const
+bool GOptimizerPars::is_empty(void) const
 {
     return (m_pars.empty());
 }

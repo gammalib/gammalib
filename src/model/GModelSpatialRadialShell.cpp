@@ -323,7 +323,7 @@ double GModelSpatialRadialShell::eval(const double&  theta,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(result) || gammalib::isinfinite(result)) {
+    if (gammalib::is_notanumber(result) || gammalib::is_infinite(result)) {
         std::cout << "*** ERROR: GModelSpatialRadialShell::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (result=" << result;
@@ -647,7 +647,7 @@ void GModelSpatialRadialShell::init_members(void)
     m_radius.free();
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
-    m_radius.hasgrad(false);  // Radial components never have gradients
+    m_radius.has_grad(false);  // Radial components never have gradients
 
     // Initialise Width
     m_width.clear();
@@ -658,7 +658,7 @@ void GModelSpatialRadialShell::init_members(void)
     m_width.free();
     m_width.scale(1.0);
     m_width.gradient(0.0);
-    m_width.hasgrad(false);  // Radial components never have gradients
+    m_width.has_grad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);
@@ -790,7 +790,7 @@ void GModelSpatialRadialShell::update() const
     
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(m_norm) || gammalib::isinfinite(m_norm)) {
+    if (gammalib::is_notanumber(m_norm) || gammalib::is_infinite(m_norm)) {
         std::cout << "*** ERROR: GModelSpatialRadialShell::update:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (m_norm=" << m_norm;

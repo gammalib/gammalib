@@ -246,7 +246,7 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralNodes::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -327,20 +327,20 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
     }
 
     // Gradient for left node
-    if (m_values[inx_left].isfree()) {
+    if (m_values[inx_left].is_free()) {
         double grad = value * wgt_left / m_values[inx_left].factor_value();
         m_values[inx_left].factor_gradient(grad);
     }
 
     // Gradient for right node
-    if (m_values[inx_right].isfree()) {
+    if (m_values[inx_right].is_free()) {
         double grad = value * wgt_right / m_values[inx_right].factor_value();
         m_values[inx_right].factor_gradient(grad);
     }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralNodes::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -693,12 +693,12 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         // Set energy attributes
         energy.name(energy_name);
         energy.unit("MeV");
-        energy.hasgrad(false);
+        energy.has_grad(false);
 
         // Set intensity attributes
         intensity.name(intensity_name);
         intensity.unit("ph/cm2/s/MeV");
-        intensity.hasgrad(true);
+        intensity.has_grad(true);
 
         // Push node parameters on list
         m_energies.push_back(energy);
@@ -846,13 +846,13 @@ void GModelSpectralNodes::append(const GEnergy& energy,
     e_par.name("Energy");
     e_par.value(energy.MeV());
     e_par.unit("MeV");
-    e_par.hasgrad(false);
+    e_par.has_grad(false);
 
     // Set intensity attributes
     i_par.name("Intensity");
     i_par.value(intensity);
     i_par.unit("ph/cm2/s/MeV");
-    i_par.hasgrad(true);
+    i_par.has_grad(true);
 
     // Append to nodes
     m_energies.push_back(e_par);
@@ -908,13 +908,13 @@ void GModelSpectralNodes::insert(const int&     index,
     e_par.name("Energy");
     e_par.value(energy.MeV());
     e_par.unit("MeV");
-    e_par.hasgrad(false);
+    e_par.has_grad(false);
 
     // Set intensity attributes
     i_par.name("Intensity");
     i_par.value(intensity);
     i_par.unit("ph/cm2/s/MeV");
-    i_par.hasgrad(true);
+    i_par.has_grad(true);
 
     // Insert node
     m_energies.insert(m_energies.begin()+index, e_par);
@@ -1305,12 +1305,12 @@ void GModelSpectralNodes::update_pars(void)
         // Set energy attributes
         m_energies[i].name(energy_name);
         m_energies[i].unit("MeV");
-        m_energies[i].hasgrad(false);
+        m_energies[i].has_grad(false);
 
         // Set intensity attributes
         m_values[i].name(intensity_name);
         m_values[i].unit("ph/cm2/s/MeV");
-        m_values[i].hasgrad(true);
+        m_values[i].has_grad(true);
 
         // Set pointer
         m_pars.push_back(&(m_energies[i]));

@@ -68,7 +68,7 @@ public:
     GPar&       at(const int& index);
     const GPar& at(const int& index) const;
     int         size(void) const;
-    bool        isempty(void) const;
+    bool        is_empty(void) const;
     GPar&       append(const GPar& par);
     void        append_standard(void);
     GPar&       insert(const int& index, const GPar& par);
@@ -158,7 +158,7 @@ int GPars::size(void) const
  * Signals if the parameter container does not contain any parameter.
  ***************************************************************************/
 inline
-bool GPars::isempty(void) const
+bool GPars::is_empty(void) const
 {
     return (m_pars.empty());
 }

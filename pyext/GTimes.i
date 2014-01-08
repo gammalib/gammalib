@@ -48,7 +48,7 @@ public:
     void    clear(void);
     GTimes* clone(void) const;
     int     size(void) const;
-    bool    isempty(void) const;
+    bool    is_empty(void) const;
     void    append(const GTime& time);
     void    insert(const int& index, const GTime& time);
     void    remove(const int& index);

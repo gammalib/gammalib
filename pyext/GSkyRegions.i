@@ -48,7 +48,7 @@ public:
     GSkyRegions*      clone(void) const;
     GSkyRegion*       at(const int& index);
     int               size(void) const;
-    bool              isempty(void) const;
+    bool              is_empty(void) const;
     GSkyRegion*       set(const int& index, const GSkyRegion& region);
     GSkyRegion*       set(const std::string& name, const GSkyRegion& region);
     GSkyRegion*       append(const GSkyRegion& region);

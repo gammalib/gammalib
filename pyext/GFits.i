@@ -160,7 +160,7 @@ public:
     GFitsTable*        table(const int& extno);
     GFitsTable*        table(const std::string& extname);
     int                size(void) const;
-    bool               isempty(void) const;
+    bool               is_empty(void) const;
     GFitsHDU*          set(const int& extno, const GFitsHDU& hdu);
     GFitsHDU*          set(const std::string& extname, const GFitsHDU& hdu);
     GFitsHDU*          append(const GFitsHDU& hdu);

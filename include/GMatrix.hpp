@@ -40,9 +40,9 @@ class GVector;
 /***********************************************************************//**
  * @class GMatrix
  *
- * @brief Generic matrix class defintion
+ * @brief Generic matrix class definition
  *
- * This class implements a generic matrix. The class is a non-spezialized
+ * This class implements a generic matrix. The class is a non-specialized
  * representation of a matrix, and all other matrix storage classes can be
  * converted into that class.
  *
@@ -59,7 +59,7 @@ class GVector;
  * where @p rows and @p columns specify the number of rows and columns of
  * the matrix. Storage conversion constructors exist that allow allocating
  * a generic matrix by copying from a sparse matrix of type GMatrixSparse
- * and a symmetrix matrix of type GMatrixSymmetric.
+ * and a symmetric matrix of type GMatrixSymmetric.
  *
  * To support using the GMatrix for coordinate transformations, methods
  * are available to compute matrices for the three Euler angles:

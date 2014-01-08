@@ -304,7 +304,7 @@ double GLATResponse::irf(const GEvent&       event,
 {
     // Get IRF value
     double rsp;
-    if (event.isatom()) {
+    if (event.is_atom()) {
         rsp = irf(static_cast<const GLATEventAtom&>(event), source, obs);
     }
     else {
@@ -539,16 +539,16 @@ void GLATResponse::load(const std::string& rspname)
     std::vector<std::string> array = gammalib::split(rspname, "::");
     if (array.size() == 1) {
         m_rspname  = array[0];
-        m_hasfront = true;
-        m_hasback  = true;
+        m_has_front = true;
+        m_has_back  = true;
     }
     else if (array.size() == 2) {
         m_rspname = array[0];
         if (gammalib::strip_whitespace(gammalib::tolower(array[1])) == "front") {
-            m_hasfront = true;
+            m_has_front = true;
         }
         else if (gammalib::strip_whitespace(gammalib::tolower(array[1])) == "back") {
-            m_hasback  = true;
+            m_has_back  = true;
         }
         else {
             throw GException::rsp_invalid_type(G_LOAD, array[1]);
@@ -562,7 +562,7 @@ void GLATResponse::load(const std::string& rspname)
     caldb += "/data/glast/lat/bcf/";
 
     // Load front IRF if requested
-    if (m_hasfront) {
+    if (m_has_front) {
         std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_front.fits";
         std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_front.fits";
         std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_front.fits";
@@ -575,7 +575,7 @@ void GLATResponse::load(const std::string& rspname)
     }
 
     // Load back IRF if requested
-    if (m_hasback) {
+    if (m_has_back) {
         std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_back.fits";
         std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_back.fits";
         std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_back.fits";
@@ -710,13 +710,13 @@ std::string GLATResponse::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Calibration database")+m_caldb);
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
         result.append("\n"+gammalib::parformat("Section(s)"));
-        if (m_hasfront && m_hasback) {
+        if (m_has_front && m_has_back) {
             result.append("front & back");
         }
-        else if (m_hasfront) {
+        else if (m_has_front) {
             result.append("front");
         }
-        else if (m_hasback) {
+        else if (m_has_back) {
             result.append("back");
         }
         else {
@@ -756,8 +756,8 @@ void GLATResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_hasfront   = false;
-    m_hasback    = false;
+    m_has_front   = false;
+    m_has_back    = false;
     m_force_mean = false;
     m_aeff.clear();
     m_psf.clear();
@@ -785,8 +785,8 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
     // Copy members
     m_caldb      = rsp.m_caldb;
     m_rspname    = rsp.m_rspname;
-    m_hasfront   = rsp.m_hasfront;
-    m_hasback    = rsp.m_hasback;
+    m_has_front   = rsp.m_has_front;
+    m_has_back    = rsp.m_has_back;
     m_force_mean = rsp.m_force_mean;
 
     // Clone Aeff

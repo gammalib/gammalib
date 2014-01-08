@@ -348,7 +348,7 @@ int GUrlString::write(const void* buffer, const int& nbyte)
  *
  * If no string exists, the method returns EOF.
  ***************************************************************************/
-int GUrlString::getchar(void) const
+int GUrlString::get_char(void) const
 {
     // Initialise character to EOF
     int character = EOF;
@@ -377,7 +377,7 @@ int GUrlString::getchar(void) const
  *
  * Writes a character to the string and advances the position indicator.
  ***************************************************************************/
-void GUrlString::putchar(const int& character)
+void GUrlString::put_char(const int& character)
 {
     // Append character to buffer
     m_buffer.push_back(character);

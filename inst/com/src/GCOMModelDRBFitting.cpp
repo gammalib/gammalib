@@ -299,7 +299,7 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+        if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
             std::cout << "*** ERROR: GCOMModelDRBFitting::eval";
             std::cout << "(index=" << index << "):";
             std::cout << " NaN/Inf encountered";
@@ -375,7 +375,7 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
             scale = m_values[0].value();
         
             // Compute partial derivative
-            double grad = (m_values[0].isfree()) ? value * m_values[0].scale() : 0.0;
+            double grad = (m_values[0].is_free()) ? value * m_values[0].scale() : 0.0;
 
             // Set gradient (circumvent const correctness)
             const_cast<GCOMModelDRBFitting*>(this)->m_values[0].factor_gradient(grad);
@@ -405,13 +405,13 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
                     m_values[inx_right].value() * wgt_right;
 
             // Gradient for left node
-            if (m_values[inx_left].isfree()) {
+            if (m_values[inx_left].is_free()) {
                 double grad = wgt_left * value * m_values[inx_left].scale();
                 const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_left].factor_gradient(grad);
             }
 
             // Gradient for right node
-            if (m_values[inx_right].isfree()) {
+            if (m_values[inx_right].is_free()) {
                 double grad = wgt_right * value * m_values[inx_right].scale();
                 const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_right].factor_gradient(grad);
             }
@@ -423,7 +423,7 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+        if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
             std::cout << "*** ERROR: GCOMModelDRBFitting::eval_gradients";
             std::cout << "(index=" << index << "):";
             std::cout << " NaN/Inf encountered";
@@ -579,12 +579,12 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
         // Set Phibar attributes
         phibar.name(phibar_name);
         phibar.unit("deg");
-        phibar.hasgrad(false);
+        phibar.has_grad(false);
 
         // Set normalization attributes
         normalization.name(normalization_name);
         normalization.unit("");
-        normalization.hasgrad(true);
+        normalization.has_grad(true);
 
         // Push node parameters on list
         m_phibars.push_back(phibar);
@@ -858,10 +858,10 @@ void GCOMModelDRBFitting::set_pointers(void)
     for (int i = 0; i < nodes; ++i) {
 
         // Signal that Phibar values have no gradients
-        m_phibars[i].hasgrad(false);
+        m_phibars[i].has_grad(false);
 
         // Signal that values have gradients
-        m_values[i].hasgrad(true);
+        m_values[i].has_grad(true);
 
         // Set pointer
         m_pars.push_back(&(m_phibars[i]));
@@ -904,7 +904,7 @@ void GCOMModelDRBFitting::set_cache(void) const
             double phibar = m_phibars[i].value();
             m_nodes.append(phibar);
             m_old_phibars.push_back(phibar);
-            if (m_phibars[i].isfree()) {
+            if (m_phibars[i].is_free()) {
                 m_fixed = false;
             }
         }

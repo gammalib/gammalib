@@ -679,7 +679,7 @@ void GMWLSpectrum::read_fits(const GFitsTable& table)
     }
 
     // Get telescope name
-    if (table.hascard("TELESCOP")) {
+    if (table.has_card("TELESCOP")) {
         m_telescope = table.string("TELESCOP");
     }
     else {
@@ -687,7 +687,7 @@ void GMWLSpectrum::read_fits(const GFitsTable& table)
     }
 
     // Get instrument name
-    if (table.hascard("INSTRUME")) {
+    if (table.has_card("INSTRUME")) {
         m_instrument = table.string("INSTRUME");
     }
     else {

@@ -207,7 +207,7 @@ GWcs& GWcs::operator=(const GWcs& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Read WCS definiton from FITS header.
+ * @brief Read WCS definition from FITS header.
  *
  * @param[in] hdu FITS HDU.
  *
@@ -298,7 +298,7 @@ void GWcs::read(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
- * @brief Write WCS definiton into FITS HDU header
+ * @brief Write WCS definition into FITS HDU header
  *
  * @param[in] hdu FITS HDU.
  *

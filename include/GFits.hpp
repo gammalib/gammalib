@@ -91,7 +91,7 @@ public:
     GFitsTable*        table(const std::string& extname);
     const GFitsTable*  table(const std::string& extname) const;
     int                size(void) const;
-    bool               isempty(void) const;
+    bool               is_empty(void) const;
     GFitsHDU*          set(const int& extno, const GFitsHDU& hdu);
     GFitsHDU*          set(const std::string& extname, const GFitsHDU& hdu);
     GFitsHDU*          append(const GFitsHDU& hdu);
@@ -230,7 +230,7 @@ int GFits::size(void) const
  * Signals if the FITS file does not contain any HDUs.
  ***************************************************************************/
 inline
-bool GFits::isempty(void) const
+bool GFits::is_empty(void) const
 {
     return (m_hdu.empty());
 }

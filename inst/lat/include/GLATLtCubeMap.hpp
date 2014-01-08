@@ -74,7 +74,7 @@ public:
     void           write(GFits& file) const;
     const int&     ncostheta(void) const;
     const int&     nphi(void) const;
-    bool           hasphi(void) const;
+    bool           has_phi(void) const;
     double         costheta(const int& index) const;
     double         phi(const int& index) const;
     const double&  costhetamin(void) const;
@@ -126,7 +126,7 @@ const int& GLATLtCubeMap::nphi(void) const
  * @return True if livetime cube map has phi dependence.
  ***************************************************************************/
 inline
-bool GLATLtCubeMap::hasphi(void) const
+bool GLATLtCubeMap::has_phi(void) const
 {
     return (m_num_phi != 0);
 }

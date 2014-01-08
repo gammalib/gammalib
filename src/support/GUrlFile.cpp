@@ -345,7 +345,7 @@ int GUrlFile::write(const void* buffer, const int& nbyte)
  *
  * If no file has been opened, the method returns EOF.
  ***************************************************************************/
-int GUrlFile::getchar(void) const
+int GUrlFile::get_char(void) const
 {
     // Initialise character to EOF
     int character = EOF;
@@ -372,7 +372,7 @@ int GUrlFile::getchar(void) const
  *
  * If no file has been opened, the method does nothing.
  ***************************************************************************/
-void GUrlFile::putchar(const int& character)
+void GUrlFile::put_char(const int& character)
 {
     // Continue only if file is opened
     if (m_fptr != NULL) {

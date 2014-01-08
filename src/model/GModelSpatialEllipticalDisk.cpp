@@ -309,7 +309,7 @@ double GModelSpatialEllipticalDisk::eval(const double&  theta,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+        if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
             std::cout << "*** ERROR: GModelSpatialEllipticalDisk::eval";
             std::cout << "(theta=" << theta << "): NaN/Inf encountered";
             std::cout << "(posangle=" << posangle << "): NaN/Inf encountered";
@@ -643,7 +643,7 @@ void GModelSpatialEllipticalDisk::init_members(void)
     m_semiminor.free();
     m_semiminor.scale(1.0);
     m_semiminor.gradient(0.0);
-    m_semiminor.hasgrad(false);  // Elliptical components never have gradients
+    m_semiminor.has_grad(false);  // Elliptical components never have gradients
 
     // Initialise semi-major axis
     m_semimajor.clear();
@@ -654,7 +654,7 @@ void GModelSpatialEllipticalDisk::init_members(void)
     m_semimajor.free();
     m_semimajor.scale(1.0);
     m_semimajor.gradient(0.0);
-    m_semimajor.hasgrad(false);  // Elliptical components never have gradients
+    m_semimajor.has_grad(false);  // Elliptical components never have gradients
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_semiminor);

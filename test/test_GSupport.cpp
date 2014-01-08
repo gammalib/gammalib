@@ -264,9 +264,9 @@ void TestGSupport::test_node_array(void)
     test_try("Container manipulation");
     try {
         GNodeArray array;
-        test_assert(array.isempty(), "Node array should be empty");
+        test_assert(array.is_empty(), "Node array should be empty");
         array.append(0.0);
-        test_assert(!array.isempty(), "Node array should not be empty");
+        test_assert(!array.is_empty(), "Node array should not be empty");
         test_value(array.size(), 1);
         array.append(1.0);
         array.append(2.0);
@@ -380,7 +380,7 @@ void TestGSupport::test_url_file(void)
     // Test file writing
     GUrlFile url("test_url.dat", "w");
     test_value(url.write("abcd", 4), 4);
-    url.putchar('e');
+    url.put_char('e');
     url.printf("fghi%s%d%3.1fxyz", "jklm", 41, 9.9);
     url.close();
 
@@ -394,12 +394,12 @@ void TestGSupport::test_url_file(void)
                 result+"\n");
     url.close();
 
-    // Test file reading using getchar() method
+    // Test file reading using get_char() method
     result.clear();
     url.open("test_url.dat", "r");
     int character = 0;
     do {
-        character = url.getchar();
+        character = url.get_char();
         if (character != EOF) {
             char c = (char)character;
             result.append(1, c);
@@ -455,7 +455,7 @@ void TestGSupport::test_url_string(void)
     // Test string writing
     GUrlString url;
     test_value(url.write("abcd", 4), 4);
-    url.putchar('e');
+    url.put_char('e');
     url.printf("fghi%s%d%3.1fxyz", "jklm", 41, 9.9);
 
     // Test string reading using read() method
@@ -467,12 +467,12 @@ void TestGSupport::test_url_string(void)
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
                 result+"\n");
 
-    // Test string reading using getchar() method
+    // Test string reading using get_char() method
     result.clear();
     url.rewind();
     int character = 0;
     do {
-        character = url.getchar();
+        character = url.get_char();
         if (character != EOF) {
             char c = (char)character;
             result.append(1, c);

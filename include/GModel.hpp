@@ -69,7 +69,7 @@ class GObservation;
  * handling does not actual depend on the value of this text string.
  *
  * The model @p instruments is a list of text strings that specifies the
- * instruments to which the model applies. The isvalid() method will check
+ * instruments to which the model applies. The is_valid() method will check
  * a given instrument name against that list to verify if the model applies
  * to an instrument. The instruments() method returns a comma separated
  * list of all instruments. Another instance of this method allows setting
@@ -78,7 +78,7 @@ class GObservation;
  *
  * The model @p ids is a list of text strings that specifies the observation
  * identifiers to which the model applies. This allows specifying of models
- * for a specific list of observations. The isvalid() method will check
+ * for a specific list of observations. The is_valid() method will check
  * a given observation identifier against that list to verify if the model
  * applies. The ids() method returns a comma separated list of all
  * observation identifiers. Another instance of this method allows setting
@@ -115,7 +115,7 @@ public:
     virtual void        clear(void) = 0;
     virtual GModel*     clone(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual bool        isconstant(void) const = 0;
+    virtual bool        is_constant(void) const = 0;
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const = 0;
     virtual double      eval_gradients(const GEvent& event,
@@ -130,7 +130,7 @@ public:
     int                 size(void) const;
     GModelPar&          at(const int& index);
     const GModelPar&    at(const int& index) const;
-    bool                haspar(const std::string& name) const;
+    bool                has_par(const std::string& name) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
     std::string         instruments(void) const;
@@ -139,7 +139,7 @@ public:
     void                scale(const GModelPar& par);
     std::string         ids(void) const;
     void                ids(const std::string& ids);
-    bool                isvalid(const std::string& instruments,
+    bool                is_valid(const std::string& instruments,
                                 const std::string& ids) const;
 
 protected:

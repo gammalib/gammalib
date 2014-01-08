@@ -74,7 +74,7 @@ public:
     int                    integer(const int& cardno) const;
     int                    integer(const std::string& keyname) const;
     int                    size(void) const;
-    bool                   isempty(void) const;
+    bool                   is_empty(void) const;
     GFitsHeaderCard&       append(const GFitsHeaderCard& card);
     GFitsHeaderCard&       insert(const int& cardno, const GFitsHeaderCard& card);
     GFitsHeaderCard&       insert(const std::string& keyname, const GFitsHeaderCard& card);
@@ -174,7 +174,7 @@ int GFitsHeader::size(void) const
  * Signals if there are no cards in the FITS header.
  ***************************************************************************/
 inline
-bool GFitsHeader::isempty(void) const
+bool GFitsHeader::is_empty(void) const
 {
     return (m_cards.empty());
 }

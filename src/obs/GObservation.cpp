@@ -297,7 +297,7 @@ double GObservation::model(const GModels& models, const GEvent& event,
 
             // Continue only if model applies to specific instrument and
             // observation identifier
-            if (mptr->isvalid(instrument(), id())) {
+            if (mptr->is_valid(instrument(), id())) {
 
                 // Compute value and add to model
                 model += mptr->eval_gradients(event, *this);
@@ -372,7 +372,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
             // Continue only if model applies to specific instrument and
             // observation identifier
-            if (mptr->isvalid(instrument(), id())) {
+            if (mptr->is_valid(instrument(), id())) {
 
                 // Determine Npred for model
                 npred += npred_temp(*mptr);
@@ -440,10 +440,10 @@ double GObservation::model_grad(const GModel& model,
     const GModelPar& par = model[ipar];
 
     // Compute gradient only if parameter is free
-    if (par.isfree()) {
+    if (par.is_free()) {
 
         // If model has a gradient then use it
-        if (par.hasgrad()) {
+        if (par.has_grad()) {
             grad = par.factor_gradient();
         }
 
@@ -467,7 +467,7 @@ double GObservation::model_grad(const GModel& model,
             #if !defined(G_GRAD_RIDDLER)
             const double step_size = 0.0002;
             double       dx        = step_size;
-            if (model[ipar].hasmin()) {
+            if (model[ipar].has_min()) {
                 double dx_min = x - par.factor_min();
                 if (dx_min == 0.0) {
                     dx = step_size * x;
@@ -480,7 +480,7 @@ double GObservation::model_grad(const GModel& model,
                     dx = dx_min;
                 }
             }
-            if (model[ipar].hasmax()) {
+            if (model[ipar].has_max()) {
                 double dx_max = par.factor_max() - x;
                 if (dx_max == 0.0) {
                     dx = step_size * x;
@@ -576,7 +576,7 @@ double GObservation::npred_grad(const GModel& model, const int& ipar) const
     double grad = 0.0;
 
     // Compute gradient only if parameter is free
-    if (model[ipar].isfree()) {
+    if (model[ipar].is_free()) {
 
         // Get non-const model pointer (circumvent const correctness)
         GModel* ptr = const_cast<GModel*>(&model);
@@ -595,7 +595,7 @@ double GObservation::npred_grad(const GModel& model, const int& ipar) const
         #if !defined(G_GRAD_RIDDLER)
         const double step_size = 0.0002;
         double       dx        = step_size;
-        if (model[ipar].hasmin()) {
+        if (model[ipar].has_min()) {
             double dx_min = x - model[ipar].factor_min();
             if (dx_min == 0.0) {
                 dx = step_size * x;
@@ -608,7 +608,7 @@ double GObservation::npred_grad(const GModel& model, const int& ipar) const
                 dx = dx_min;
             }
         }
-        if (model[ipar].hasmax()) {
+        if (model[ipar].has_max()) {
             double dx_max = model[ipar].factor_max() - x;
             if (dx_max == 0.0) {
                 dx = step_size * x;
@@ -821,7 +821,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
             values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
+            if (wrk_grad[i] != 0.0 && !gammalib::is_infinite(wrk_grad[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -968,7 +968,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
             values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
+            if (wrk_grad[i] != 0.0 && !gammalib::is_infinite(wrk_grad[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -1146,7 +1146,7 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
             values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
+            if (wrk_grad[i] != 0.0 && !gammalib::is_infinite(wrk_grad[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -1291,7 +1291,7 @@ double GObservation::npred_temp(const GModel& model) const
 
 
     // Case A: If the model is constant then integrate analytically
-    if (model.isconstant()) {
+    if (model.is_constant()) {
 
         // Evaluate model at first start time and multiply by ontime
         double ontime = events()->gti().ontime();
@@ -1414,7 +1414,7 @@ double GObservation::npred_spec(const GModel& model,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(result) || gammalib::isinfinite(result)) {
+    if (gammalib::is_notanumber(result) || gammalib::is_infinite(result)) {
         std::cout << "*** ERROR: GObservation::npred_spec:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (result=" << result;
@@ -1464,7 +1464,7 @@ double GObservation::npred_spec_kern::eval(const double& x)
 
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GObservation::npred_spec_kern::eval";
         std::cout << "(x=" << x << "): ";
         std::cout << " NaN/Inf encountered";

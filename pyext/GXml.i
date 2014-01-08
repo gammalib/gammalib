@@ -69,7 +69,7 @@ public:
     void               clear(void);
     GXml*              clone(void) const;
     int                size(void) const;
-    bool               isempty(void) const;
+    bool               is_empty(void) const;
     GXmlNode*          set(const int& index, const GXmlNode& node);
     GXmlNode*          append(const GXmlNode& node);
     GXmlElement*       append(const std::string& segment);

@@ -327,7 +327,7 @@ double GCTAResponse::irf(const GEvent&       event,
             irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
 
             // Multiply-in energy dispersion
-            if (hasedisp() && irf > 0) {
+            if (has_edisp() && irf > 0) {
 
                 // Get log10(E/TeV) of measured photon energy.
                 double obsLogEng = obsEng.log10TeV();
@@ -346,7 +346,7 @@ double GCTAResponse::irf(const GEvent&       event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
         std::cout << "*** ERROR: GCTAResponse::irf:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (irf=" << irf;
@@ -404,7 +404,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
         npred *= npsf(srcDir, srcLogEng, srcTime, pnt, roi);
 
         // Multiply-in energy dispersion
-        if (hasedisp() && npred > 0.0) {
+        if (has_edisp() && npred > 0.0) {
 
             // Get energy dispersion
             npred *= nedisp(srcDir, srcEng, srcTime, pnt, cta.events()->ebounds());
@@ -418,7 +418,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
         std::cout << "*** ERROR: GCTAResponse::npred:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -989,7 +989,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
             std::cout << "*** ERROR: GCTAResponse::irf_radial:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (irf=" << irf;
@@ -1157,7 +1157,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
             std::cout << "*** ERROR: GCTAResponse::irf_elliptical:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (irf=" << irf;
@@ -1328,7 +1328,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
+            if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
                 std::cout << "*** ERROR: GCTAResponse::irf_diffuse:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (irf=" << irf;
@@ -1512,7 +1512,7 @@ double GCTAResponse::npred_radial(const GSource& source,
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
         std::cout << "*** ERROR: GCTAResponse::npred_radial:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -1675,7 +1675,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
         std::cout << "*** ERROR: GCTAResponse::npred_elliptical:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -1853,7 +1853,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
             std::cout << "*** ERROR: GCTAResponse::npred_diffuse:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
@@ -2093,7 +2093,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+            if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
                 std::cout << "*** ERROR: GCTAResponse::npsf:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;

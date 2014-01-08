@@ -41,7 +41,7 @@ public:
 
     // Pure virtual methods
     virtual int  size(void) const = 0;
-    virtual bool isempty(void) const = 0;
+    virtual bool is_empty(void) const = 0;
     virtual void remove(const int& index) = 0;
     virtual void reserve(const int& num) = 0;
 };

@@ -514,7 +514,7 @@ void GFitsTableFloatCol::init_members(void)
 void GFitsTableFloatCol::copy_members(const GFitsTableFloatCol& column)
 {
     // Fetch data if necessary
-    bool not_loaded = (!column.isloaded());
+    bool not_loaded = (!column.is_loaded());
     if (not_loaded) {
         column.fetch_data();
     }

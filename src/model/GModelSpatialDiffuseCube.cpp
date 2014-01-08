@@ -343,7 +343,7 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
     double value = intensity * m_value.value();
 
 	// Compute partial derivatives of the parameter value
-	double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
+	double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
 
     // Make sure that value is not negative
     if (value < 0.0) {
@@ -937,7 +937,7 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_value.range(0.001, 1000.0);
     m_value.gradient(0.0);
     m_value.fix();
-    m_value.hasgrad(true);
+    m_value.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();

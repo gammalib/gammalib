@@ -40,7 +40,7 @@ class GVector;
 /***********************************************************************//**
  * @class GMatrixSymmetric
  *
- * @brief Symmetric matrix class interface defintion
+ * @brief Symmetric matrix class interface definition
  *
  * This class implements a symmetric matrix. The class stores only a triangle
  * physically, imposing thus strict matrix symmetry.

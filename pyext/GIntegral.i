@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GIntegral
  *
- * @brief Integration class Python interface defintion.
+ * @brief Integration class Python interface definition.
  *
  * This class allows to perform integration using various methods. The
  * integrand is implemented by a derived class of GIntegrand.

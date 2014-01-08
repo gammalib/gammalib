@@ -651,7 +651,7 @@ void GCTAEventCube::set_directions(void)
     // Throw an error if we have no sky pixels
     if (npix() < 1) {
         throw GCTAException::no_sky(G_SET_DIRECTIONS, "Every CTA event cube"
-                                   " needs a definiton of the sky pixels.");
+                                   " needs a definition of the sky pixels.");
     }
 
     // Clear old pixel directions and solid angle
@@ -697,7 +697,7 @@ void GCTAEventCube::set_energies(void)
     // Throw an error if we have no energy bins
     if (ebins() < 1) {
         throw GCTAException::no_ebds(G_SET_ENERGIES, "Every CTA event cube"
-                             " needs a definiton of the energy boundaries.");
+                             " needs a definition of the energy boundaries.");
     }
 
     // Clear old bin energies and energy widths

@@ -63,7 +63,7 @@ public:
     GModels*       clone(void) const;
     GModel*        at(const int& index);
     int            size(void) const;
-    bool           isempty(void) const;
+    bool           is_empty(void) const;
     GModel*        set(const int& index, const GModel& model);
     GModel*        set(const std::string& name, const GModel& model);
     GModel*        append(const GModel& model);

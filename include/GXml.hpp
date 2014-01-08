@@ -115,14 +115,14 @@
  * and to load and save the document from a URL. GXml derives from GContainer
  * as it behaves like a container class. It does, however, not contain an
  * explicit list, as the only data member of the class is a single instance
- * of GXmlDocument. GXmlDocument contains the hierachical list of all XML
+ * of GXmlDocument. GXmlDocument contains the hierarchical list of all XML
  * nodes.
  *
  * To manipulate the child nodes of GXmlDocument, the usual container class
  * methods are available. size() returns the number of child nodes that
  * exist in the XML document root (in the above example there would be two
  * child elements with name @p element). The child nodes are accessed using
- * the operator[]. The isempty() method checks whether the document root has
+ * the operator[]. The is_empty() method checks whether the document root has
  * no children.
  *
  * The set() method allows to set a specific child node, the append() method
@@ -191,7 +191,7 @@ public:
     void               clear(void);
     GXml*              clone(void) const;
     int                size(void) const { return m_root.size(); }
-    bool               isempty(void) const { return m_root.isempty(); }
+    bool               is_empty(void) const { return m_root.is_empty(); }
     GXmlNode*          set(const int& index, const GXmlNode& node);
     GXmlNode*          append(const GXmlNode& node);
     GXmlElement*       append(const std::string& segment);

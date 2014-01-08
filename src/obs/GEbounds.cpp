@@ -110,10 +110,10 @@ GEbounds::GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
 
     // Set intervals
     if (log) {
-        this->setlog(num, emin, emax);
+        this->set_log(num, emin, emax);
     }
     else {
-        this->setlin(num, emin, emax);
+        this->set_lin(num, emin, emax);
     }
 
     // Return
@@ -429,7 +429,7 @@ void GEbounds::reserve(const int& num)
 void GEbounds::extend(const GEbounds& ebds)
 {
     // Do nothing if energy boundaries are empty
-    if (!ebds.isempty()) {
+    if (!ebds.is_empty()) {
 
         // Allocate new intervals
         int      num = m_num+ebds.size();
@@ -482,7 +482,7 @@ void GEbounds::extend(const GEbounds& ebds)
  * Creates @p num linearly spaced energy boundaries running from @p emin to
  * @p emax.
  ***************************************************************************/
-void GEbounds::setlin(const int& num, const GEnergy& emin, const GEnergy& emax)
+void GEbounds::set_lin(const int& num, const GEnergy& emin, const GEnergy& emax)
 {
     // Initialise members
     clear();
@@ -517,7 +517,7 @@ void GEbounds::setlin(const int& num, const GEnergy& emin, const GEnergy& emax)
  * Creates @p num logarithmically spaced energy boundaries running from
  * @p emin to @p emax.
  ***************************************************************************/
-void GEbounds::setlog(const int& num, const GEnergy& emin, const GEnergy& emax)
+void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
 {
     // Initialise members
     clear();

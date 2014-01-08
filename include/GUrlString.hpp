@@ -58,8 +58,8 @@ public:
     virtual void        close(void);
     virtual int         read(void* buffer, const int& nbyte);
     virtual int         write(const void* buffer, const int& nbyte);
-    virtual int         getchar(void) const;
-    virtual void        putchar(const int& character);
+    virtual int         get_char(void) const;
+    virtual void        put_char(const int& character);
     virtual void        scanf(const char* format, ...);
     virtual void        printf(const char* format, ...);
     virtual std::string print(const GChatter& chatter = NORMAL) const;

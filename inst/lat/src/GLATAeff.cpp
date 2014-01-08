@@ -358,7 +358,7 @@ void GLATAeff::write(GFits& fits) const
  * The method returns true if both efficiency factor functors exist, false
  * otherwise.
  ***************************************************************************/
-bool GLATAeff::hasefficiency(void) const
+bool GLATAeff::has_efficiency(void) const
 {
     // Return
     return (m_eff_func1 != NULL && m_eff_func2 != NULL);
@@ -456,7 +456,7 @@ std::string GLATAeff::print(const GChatter& chatter) const
             result.append("unknown");
         }
         result.append("\n"+gammalib::parformat("Efficiency factors"));
-        if (hasefficiency()) {
+        if (has_efficiency()) {
             result.append("present");
         }
         else {

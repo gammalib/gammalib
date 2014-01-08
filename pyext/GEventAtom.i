@@ -71,8 +71,8 @@ public:
     virtual double          error(void) const;
 
     // Other methods
-    bool isatom(void) const;
-    bool isbin(void) const;
+    bool is_atom(void) const;
+    bool is_bin(void) const;
 };
 
 

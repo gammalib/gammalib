@@ -57,11 +57,11 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
     Set shell model.
     """
     # Set shell centre
-    center = GSkyDir()
-    center.radec_deg(ra, dec)
+    centre = GSkyDir()
+    centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelRadialShell(center, radius, width, False)
+    radial = GModelRadialShell(centre, radius, width, False)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)
@@ -81,11 +81,11 @@ def disk_model(ra=359.6, dec=-0.2, radius=0.4):
     Set disk model.
     """
     # Set disk centre
-    center = GSkyDir()
-    center.radec_deg(ra, dec)
+    centre = GSkyDir()
+    centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelRadialDisk(center, radius)
+    radial = GModelRadialDisk(centre, radius)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)
@@ -105,11 +105,11 @@ def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
     Set Gaussian model.
     """
     # Set Gaussian centre
-    center = GSkyDir()
-    center.radec_deg(ra, dec)
+    centre = GSkyDir()
+    centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelRadialGauss(center, sigma)
+    radial = GModelRadialGauss(centre, sigma)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)
@@ -147,7 +147,7 @@ def observation(ra=0.0, dec=0.0, binsz=0.05, npix=200, ebins=10):
     emax    = GEnergy()
     emin.TeV(0.1)
     emax.TeV(100.0)
-    ebounds.setlog(emin, emax, ebins)
+    ebounds.set_log(emin, emax, ebins)
     gti  = GGti()
     tmin = GTime(0.0)
     tmax = GTime(1800.0)

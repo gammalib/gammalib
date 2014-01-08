@@ -262,7 +262,7 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -331,11 +331,11 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
     double value = m_norm.value() * m_last_power;
 
     // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.isfree())
+    double g_norm  = (m_norm.is_free())
                      ? m_norm.scale() * m_last_power : 0.0;
-    double g_index = (m_index.isfree())
+    double g_index = (m_index.is_free())
                      ? value * m_index.scale() * m_last_log_e_norm : 0.0;
-    double g_pivot = (m_pivot.isfree())
+    double g_pivot = (m_pivot.is_free())
                      ? -value * m_last_index / m_pivot.factor_value() : 0.0;
 
     // Set gradients
@@ -345,7 +345,7 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -712,7 +712,7 @@ void GModelSpectralPlaw::init_members(void)
     m_norm.min(0.0);            // min:     0.0
     m_norm.free();
     m_norm.gradient(0.0);
-    m_norm.hasgrad(true);
+    m_norm.has_grad(true);
 
     // Initialise powerlaw index
     m_index.clear();
@@ -722,7 +722,7 @@ void GModelSpectralPlaw::init_members(void)
     m_index.range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
     m_index.gradient(0.0);
-    m_index.hasgrad(true);
+    m_index.has_grad(true);
 
     // Initialise pivot energy
     m_pivot.clear();
@@ -732,7 +732,7 @@ void GModelSpectralPlaw::init_members(void)
     m_pivot.value(100.0);       // default: 100
     m_pivot.fix();
     m_pivot.gradient(0.0);
-    m_pivot.hasgrad(true);
+    m_pivot.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();

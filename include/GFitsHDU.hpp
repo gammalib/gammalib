@@ -83,8 +83,8 @@ public:
     void                   extno(const int& extno);
     GFitsHeader&           header(void);
     const GFitsHeader&     header(void) const;
-    bool                   hascard(const int& cardno) const;
-    bool                   hascard(const std::string& keyname) const;
+    bool                   has_card(const int& cardno) const;
+    bool                   has_card(const std::string& keyname) const;
     GFitsHeaderCard&       card(const int& cardno);
     const GFitsHeaderCard& card(const int& cardno) const;
     GFitsHeaderCard&       card(const std::string& keyname);
@@ -222,7 +222,7 @@ const GFitsHeader& GFitsHDU::header(void) const
  * @return True if card with specified card number @p cardno exists in header.
  ***************************************************************************/
 inline
-bool GFitsHDU::hascard(const int& cardno) const
+bool GFitsHDU::has_card(const int& cardno) const
 {
     return m_header.contains(cardno);
 }
@@ -235,7 +235,7 @@ bool GFitsHDU::hascard(const int& cardno) const
  * @return True if card with specified @p keyname exists in header.
  ***************************************************************************/
 inline
-bool GFitsHDU::hascard(const std::string& keyname) const
+bool GFitsHDU::has_card(const std::string& keyname) const
 {
     return (m_header.contains(keyname));
 }

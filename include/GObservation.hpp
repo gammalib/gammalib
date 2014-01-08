@@ -47,7 +47,7 @@
  *
  * This class provides an abstract interface for an observation. The
  * observation collects information about the instrument, holds the measured
- * events, and provides information about the analysis definiton.
+ * events, and provides information about the analysis definition.
  * The method model() returns the probability for an event to be measured
  * with a given instrument direction, a given energy and at a given time,
  * given a source model and an instrument pointing direction.

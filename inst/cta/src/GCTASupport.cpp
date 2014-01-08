@@ -96,8 +96,8 @@ double gammalib::cta_roi_arclength(const double& rad,     const double& dist,
                 double cosang = (cosroi - cosdist*cosrad) / (sindist*sinrad);
                 arclength     = 2.0 * gammalib::acos(cosang);
                 #if G_CHECK_FOR_NAN
-                if (gammalib::isinfinite(arclength) ||
-                    gammalib::isnotanumber(arclength)) {
+                if (gammalib::is_infinite(arclength) ||
+                    gammalib::is_notanumber(arclength)) {
                     std::cout << "cta_roi_arclength: NaN occured";
                     std::cout << " rad=" << rad;
                     std::cout << " sinrad=" << sinrad;

@@ -373,7 +373,7 @@ void GOptimizerPar::factor_value(const double& value)
 {
     // If there is a minimum boundary and if value is below this boundary
     // then throw an exception
-    if (m_hasmin && value < m_factor_min) {
+    if (m_has_min && value < m_factor_min) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is smaller than the minimum boundary "+
                           gammalib::str(m_factor_min)+".";
@@ -382,7 +382,7 @@ void GOptimizerPar::factor_value(const double& value)
 
     // If there is a maximum boundary and if value is above this boundary
     // then throw an exception
-    if (m_hasmax && value > m_factor_max) {
+    if (m_has_max && value > m_factor_max) {
         std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is larger than the maximum boundary "+
                           gammalib::str(m_factor_max)+".";
@@ -423,7 +423,7 @@ void GOptimizerPar::factor_min(const double& min)
     m_factor_min = min;
     
     // Flag that minimum was set
-    m_hasmin = true;
+    m_has_min = true;
     
     // Return
     return;
@@ -456,7 +456,7 @@ void GOptimizerPar::factor_max(const double& max)
     m_factor_max = max;
     
     // Flag that maximum was set
-    m_hasmax = true;
+    m_has_max = true;
     
     // Return
     return;
@@ -522,31 +522,31 @@ void GOptimizerPar::scale(const double& scale)
     m_factor_value    *= rescale;
     m_factor_error    *= rescale;
     m_factor_gradient *= rescale;
-    if (m_hasmin) {
+    if (m_has_min) {
         m_factor_min *= rescale;
     }
-    if (m_hasmax) {
+    if (m_has_max) {
         m_factor_max *= rescale;
     }
 
     // Takes care of boundaries in case of sign change
     if (rescale < 0.0) {
-        if (m_hasmin && m_hasmax) {
+        if (m_has_min && m_has_max) {
             double swap  = m_factor_min;
             m_factor_min = m_factor_max;
             m_factor_max = swap;
         }
-        else if (m_hasmin) {
+        else if (m_has_min) {
             m_factor_max = m_factor_min;
-            m_hasmax     = true;
+            m_has_max     = true;
             m_factor_min = 0.0;
-            m_hasmin     = false;
+            m_has_min     = false;
         }
-        else if (m_hasmax) {
+        else if (m_has_max) {
             m_factor_min = m_factor_max;
-            m_hasmin     = true;
+            m_has_min     = true;
             m_factor_max = 0.0;
-            m_hasmax     = false;
+            m_has_max     = false;
         }
     }
     
@@ -586,31 +586,31 @@ void GOptimizerPar::autoscale(void)
         m_factor_value    *= invscale;
         m_factor_error    *= invscale;
         m_factor_gradient *= invscale;
-        if (m_hasmin) {
+        if (m_has_min) {
             m_factor_min *= invscale;
         }
-        if (m_hasmax) {
+        if (m_has_max) {
             m_factor_max *= invscale;
         }
 
         // Takes care of boundaries in case of sign change
         if (invscale < 0.0) {
-            if (m_hasmin && m_hasmax) {
+            if (m_has_min && m_has_max) {
                 double swap  = m_factor_min;
                 m_factor_min = m_factor_max;
                 m_factor_max = swap;
             }
-            else if (m_hasmin) {
+            else if (m_has_min) {
                 m_factor_max = m_factor_min;
-                m_hasmax     = true;
+                m_has_max     = true;
                 m_factor_min = 0.0;
-                m_hasmin     = false;
+                m_has_min     = false;
             }
-            else if (m_hasmax) {
+            else if (m_has_max) {
                 m_factor_min = m_factor_max;
-                m_hasmin     = true;
+                m_has_min     = true;
                 m_factor_max = 0.0;
-                m_hasmax     = false;
+                m_has_max     = false;
             }
         }
 
@@ -647,13 +647,13 @@ std::string GOptimizerPar::print(const GChatter& chatter) const
         }
 
         // Append parameter limites if they exist
-        if (m_hasmin && m_hasmax) {
+        if (m_has_min && m_has_max) {
             result.append(" ["+gammalib::str(min()) + ","+gammalib::str(max())+"]");
         }
-        else if (m_hasmin) {
+        else if (m_has_min) {
             result.append(" ["+gammalib::str(min()) + ",infty[");
         }
-        else if (m_hasmax) {
+        else if (m_has_max) {
             result.append(" ]-infty,"+gammalib::str(max())+"]");
         }
 
@@ -672,7 +672,7 @@ std::string GOptimizerPar::print(const GChatter& chatter) const
         result.append(",scale="+gammalib::str(m_scale));
 
         // Signal if parameter has analytic gradient
-        if (m_hasgrad) {
+        if (m_has_grad) {
             result.append(",gradient)");
         }
         else {
@@ -707,9 +707,9 @@ void GOptimizerPar::init_members(void)
     m_factor_max      = 0.0;
     m_scale           = 1.0;
     m_free            = true;
-    m_hasmin          = false;
-    m_hasmax          = false;
-    m_hasgrad         = false;
+    m_has_min          = false;
+    m_has_max          = false;
+    m_has_grad         = false;
   
     // Return
     return;
@@ -733,9 +733,9 @@ void GOptimizerPar::copy_members(const GOptimizerPar& par)
     m_factor_max      = par.m_factor_max;
     m_scale           = par.m_scale;
     m_free            = par.m_free;
-    m_hasmin          = par.m_hasmin;
-    m_hasmax          = par.m_hasmax;
-    m_hasgrad         = par.m_hasgrad;
+    m_has_min          = par.m_has_min;
+    m_has_max          = par.m_has_max;
+    m_has_grad         = par.m_has_grad;
 
     // Return
     return;

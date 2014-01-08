@@ -279,7 +279,7 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng,
     double value = m_norm.value();
 
     // Compute partial derivatives of the parameter values
-    double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
+    double g_norm = (m_norm.is_free()) ? m_norm.scale() : 0.0;
 
     // Set factor gradient (the parameter gradient is obtained by dividing
     // the factor gradient by the scale factor)
@@ -572,7 +572,7 @@ void GModelSpectralConst::init_members(void)
     m_norm.range(0.0, 1000.0); // range:   [0, 1000]
     m_norm.free();
     m_norm.gradient(0.0);
-    m_norm.hasgrad(true);
+    m_norm.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();

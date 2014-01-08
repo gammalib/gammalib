@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuites.i
- * @brief Test suite container class interface defintion
+ * @brief Test suite container class interface definition
  * @author Jean-Baptiste Cayrou
  */
 %{
@@ -49,7 +49,7 @@ class GTestSuites : public GContainer {
     GTestSuites*       clone(void) const;
     GTestSuite*        at(const int& index);
     int                size(void) const;
-    bool               isempty(void) const;
+    bool               is_empty(void) const;
     GTestSuite*        set(const int& index, const GTestSuite& suite);
     GTestSuite*        append(const GTestSuite& suite);
     GTestSuite*        insert(const int& index, const GTestSuite& suite);

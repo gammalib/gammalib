@@ -74,7 +74,7 @@ public:
     double&       at(const int& index);
     const double& at(const int& index) const;
     int           size(void) const;
-    bool          isempty(void) const;
+    bool          is_empty(void) const;
     void          append(const double& node);
     void          insert(const int& index, const double& node);
     void          remove(const int& index);
@@ -173,7 +173,7 @@ int GNodeArray::size(void) const
  * Signals if the node array does not contain any node.
  ***************************************************************************/
 inline
-bool GNodeArray::isempty(void) const
+bool GNodeArray::is_empty(void) const
 {
     return (m_node.empty());
 }

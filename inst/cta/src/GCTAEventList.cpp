@@ -848,7 +848,7 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU& hdu)
 
     // Get number of data selection keywords (default to 0 if keyword is
     // not found)
-    int ndskeys = (hdu.hascard("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
+    int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
 
     // Loop over all data selection keys
     for (int i = 1; i <= ndskeys; ++i) {
@@ -859,7 +859,7 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU& hdu)
         std::string value_key = "DSVAL"+gammalib::str(i);
 
         // Continue only if type_key is found and if this key is ENERGY
-        if (hdu.hascard(type_key) && hdu.string(type_key) == "ENERGY") {
+        if (hdu.has_card(type_key) && hdu.string(type_key) == "ENERGY") {
 
             // Extract energy boundaries
             std::string value                = hdu.string(value_key);
@@ -912,7 +912,7 @@ void GCTAEventList::read_ds_roi(const GFitsHDU& hdu)
 
     // Get number of data selection keywords (default to 0 if keyword is
     // not found)
-    int ndskeys = (hdu.hascard("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
+    int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
 
     // Loop over all data selection keys
     for (int i = 1; i <= ndskeys; ++i) {
@@ -923,7 +923,7 @@ void GCTAEventList::read_ds_roi(const GFitsHDU& hdu)
         std::string value_key = "DSVAL"+gammalib::str(i);
 
         // Continue only if type_key is found and if this key is POS(RA,DEC)
-        if (hdu.hascard(type_key) && hdu.string(type_key) == "POS(RA,DEC)") {
+        if (hdu.has_card(type_key) && hdu.string(type_key) == "POS(RA,DEC)") {
 
             // ...
             //std::string unit              = gammalib::toupper(hdu.string(unit_key));

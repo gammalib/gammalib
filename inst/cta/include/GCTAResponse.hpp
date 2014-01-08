@@ -72,8 +72,8 @@ public:
     // Implement pure virtual base class methods
     virtual void          clear(void);
     virtual GCTAResponse* clone(void) const;
-    virtual bool          hasedisp(void) const;
-    virtual bool          hastdisp(void) const;
+    virtual bool          has_edisp(void) const;
+    virtual bool          has_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -190,7 +190,7 @@ private:
  * @return False.
  ***************************************************************************/
 inline
-bool GCTAResponse::hasedisp(void) const
+bool GCTAResponse::has_edisp(void) const
 {
     return false;
 }
@@ -202,7 +202,7 @@ bool GCTAResponse::hasedisp(void) const
  * @return False.
  ***************************************************************************/
 inline
-bool GCTAResponse::hastdisp(void) const
+bool GCTAResponse::has_tdisp(void) const
 {
     return false;
 }
@@ -246,9 +246,9 @@ const double& GCTAResponse::eps(void) const
 
 
 /***********************************************************************//**
- * @brief Return Redestribution Matrix File name
+ * @brief Return Redistribution Matrix File name
  *
- * @return Redestribution Matrix File name.
+ * @return Redistribution Matrix File name.
  ***************************************************************************/
 inline
 const std::string& GCTAResponse::rmffile(void) const

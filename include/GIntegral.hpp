@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class GIntegral
  *
- * @brief GIntegral class interface defintion.
+ * @brief GIntegral class interface definition.
  *
  * This class allows to perform integration using various methods. The
  * integrand is implemented by a derived class of GIntegrand.

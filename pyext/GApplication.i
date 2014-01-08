@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GApplication.i
- * @brief GammaLib application base class Python interface defintion
+ * @brief GammaLib application base class Python interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -37,7 +37,7 @@
 /***********************************************************************//**
  * @class GApplication
  *
- * @brief GammaLib application Python interface defintion.
+ * @brief GammaLib application Python interface definition.
  ***************************************************************************/
 class GApplication : public GBase {
 public:
@@ -63,7 +63,7 @@ public:
     bool               logVerbose(void) const;
     bool               logDebug(void) const;
     bool               clobber(void) const;
-    bool               haspar(const std::string& name) const;
+    bool               has_par(const std::string& name) const;
     const std::string& par_filename(void) const;
     const std::string& log_filename(void) const;
     void               log_header(void);

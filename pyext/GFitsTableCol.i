@@ -69,7 +69,7 @@ public:
     virtual int             integer(const int& row, const int& inx = 0) const = 0;
     virtual void            insert(const int& row, const int& nrows) = 0;
     virtual void            remove(const int& row, const int& nrows) = 0;
-    virtual bool            isloaded(void) const = 0;
+    virtual bool            is_loaded(void) const = 0;
 
     // Other methods
     void                    name(const std::string& name);
@@ -92,8 +92,8 @@ public:
     int                     elements(const int& row) const;
     void                    length(const int& length);
     const int&              length(void) const;
-    void                    isvariable(const bool& variable);
-    const bool&             isvariable(void) const;
+    void                    is_variable(const bool& variable);
+    const bool&             is_variable(void) const;
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
     std::string             tform_binary(void) const;

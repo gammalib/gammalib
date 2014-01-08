@@ -59,7 +59,7 @@ public:
     void        clear(void);
     GTimes*     clone(void) const;
     int         size(void) const;
-    bool        isempty(void) const;
+    bool        is_empty(void) const;
     void        append(const GTime& time);
     void        insert(const int& index, const GTime& time);
     void        remove(const int& index);
@@ -96,7 +96,7 @@ int GTimes::size(void) const
  * @return True if there are no times.
  ***************************************************************************/
 inline
-bool GTimes::isempty(void) const
+bool GTimes::is_empty(void) const
 {
     return m_times.empty();
 }

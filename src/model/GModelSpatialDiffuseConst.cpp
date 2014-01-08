@@ -259,7 +259,7 @@ double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
     double value = m_value.value();
 
     // Compute partial derivatives of the parameter values
-    double g_norm = (m_value.isfree()) ? m_value.scale() : 0.0;
+    double g_norm = (m_value.is_free()) ? m_value.scale() : 0.0;
 
     // Set gradient (circumvent const correctness)
     const_cast<GModelSpatialDiffuseConst*>(this)->m_value.factor_gradient(g_norm);
@@ -453,7 +453,7 @@ void GModelSpatialDiffuseConst::init_members(void)
     m_value.scale(1.0);
     m_value.range(0.0, 10.0);
     m_value.gradient(0.0);
-    m_value.hasgrad(true);
+    m_value.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();

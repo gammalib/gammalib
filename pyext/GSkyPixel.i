@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GSkyPixel
  *
- * @brief GSkyPixel class interface defintion
+ * @brief GSkyPixel class interface definition
  ***************************************************************************/
 class GSkyPixel : public GBase {
 
@@ -51,8 +51,8 @@ public:
     void          clear(void);
     GSkyPixel*    clone(void) const;
     int           size(void) const;
-    bool          is1D(void) const;
-    bool          is2D(void) const;
+    bool          is_1D(void) const;
+    bool          is_2D(void) const;
     void          index(const double& index);
     void          x(const double& x);
     void          y(const double& y);

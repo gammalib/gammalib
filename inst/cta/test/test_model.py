@@ -53,11 +53,11 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
     Set shell model.
     """
     # Set shell centre
-    center = GSkyDir()
-    center.radec_deg(ra, dec)
+    centre = GSkyDir()
+    centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelSpatialRadialShell(center, radius, width, False)
+    radial = GModelSpatialRadialShell(centre, radius, width, False)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))
@@ -77,11 +77,11 @@ def disk_model(ra=359.6, dec=-0.2, radius=0.4):
     Set disk model.
     """
     # Set disk centre
-    center = GSkyDir()
-    center.radec_deg(ra, dec)
+    centre = GSkyDir()
+    centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelSpatialRadialDisk(center, radius)
+    radial = GModelSpatialRadialDisk(centre, radius)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))
@@ -101,11 +101,11 @@ def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
     Set Gaussian model.
     """
     # Set Gaussian centre
-    center = GSkyDir()
-    center.radec_deg(ra, dec)
+    centre = GSkyDir()
+    centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelSpatialRadialGauss(center, sigma)
+    radial = GModelSpatialRadialGauss(centre, sigma)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))

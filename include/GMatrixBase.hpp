@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class GMatrixBase
  *
- * @brief Abstract matrix base class interface defintion
+ * @brief Abstract matrix base class interface definition
  *
  * This class provides the abstract interface for all matrix classes. A
  * GammaLib matrix is a two dimensional array of double precision values

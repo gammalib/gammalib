@@ -24,15 +24,15 @@ from gammalib import *
 # Set the location / centre of the source model to
 # Right Ascension = 42.0 deg and Declination = 43 deg
 # ===================================================
-center = GSkyDir()
-center.radec_deg(42.0, 43.0)
+centre = GSkyDir()
+centre.radec_deg(42.0, 43.0)
 
 #
 # Create a point source with power law spectral shape
 # Normalization:   1.0e-7 ph/cm2/s/MeV @ 100 MeV
 # Spectral index: -2.1
 # ===================================================
-point_spatial  = GModelSpatialPointSource(center)
+point_spatial  = GModelSpatialPointSource(centre)
 point_spectrum = GModelSpectralPlaw(1.0e-7, -2.1, GEnergy(100.0, "MeV"))
 point = GModelSky(point_spatial, point_spectrum)
 point.name('My point source')
@@ -43,7 +43,7 @@ point.name('My point source')
 # Normalization:   4.2e-7 ph/cm2/s/MeV @ 100 MeV
 # Spectral index: -2.4
 # ===================================================
-gauss_spatial  = GModelSpatialRadialGauss(center, 3.0)
+gauss_spatial  = GModelSpatialRadialGauss(centre, 3.0)
 gauss_spectrum = GModelSpectralPlaw(4.2e-7, -2.4, GEnergy(100.0, "MeV"))
 gauss = GModelSky(gauss_spatial, gauss_spectrum)
 gauss.name('My Gaussian source')

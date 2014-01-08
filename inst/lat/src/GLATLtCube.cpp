@@ -173,7 +173,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
     /*
-    if (aeff.hasefficiency()) {
+    if (aeff.has_efficiency()) {
     
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);
@@ -225,7 +225,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
     /*
-    if (aeff.hasefficiency()) {
+    if (aeff.has_efficiency()) {
     
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);
@@ -271,7 +271,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
-    if (aeff.hasefficiency()) {
+    if (aeff.has_efficiency()) {
     
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);
@@ -324,7 +324,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
-    if (aeff.hasefficiency()) {
+    if (aeff.has_efficiency()) {
     
         // Compute correction factors
         double f1 = aeff.efficiency_factor1(energy);

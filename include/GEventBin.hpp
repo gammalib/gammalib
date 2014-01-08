@@ -88,8 +88,8 @@ public:
     virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
-    bool isatom(void) const;
-    bool isbin(void) const;
+    bool is_atom(void) const;
+    bool is_bin(void) const;
 
 protected:
     // Protected methods
@@ -105,7 +105,7 @@ protected:
  * @return False.
  ***************************************************************************/
 inline
-bool GEventBin::isatom(void) const
+bool GEventBin::is_atom(void) const
 {
     return (false);
 }
@@ -117,7 +117,7 @@ bool GEventBin::isatom(void) const
  * @return True.
  ***************************************************************************/
 inline
-bool GEventBin::isbin(void) const
+bool GEventBin::is_bin(void) const
 {
     return (true);
 }

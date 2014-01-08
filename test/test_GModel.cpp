@@ -140,9 +140,9 @@ void TestGModel::test_model_par(void)
         test_value(par.gradient(), 0.0);
         test_value(par.min(), 0.0);
         test_value(par.max(), 0.0);
-        test_assert(!par.hasmin(), "Parameter shall have no minimum.");
-        test_assert(!par.hasmax(), "Parameter shall have no maximum.");
-        test_assert(!par.hasrange(), "Parameter shall have no range.");
+        test_assert(!par.has_min(), "Parameter shall have no minimum.");
+        test_assert(!par.has_max(), "Parameter shall have no maximum.");
+        test_assert(!par.has_range(), "Parameter shall have no range.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -180,7 +180,7 @@ void TestGModel::test_model_par(void)
         test_value(par.scale(), 2.0);
         test_assert(par.name() == "Test parameter", "Parameter name");
         test_assert(par.unit() == "MeV", "Parameter unit");
-        test_assert(par.isfree(), "Parameter freezing");
+        test_assert(par.is_free(), "Parameter freezing");
         test_assert(par.print() == 
                     "  Test parameter ...........: 94.02 +/- 4.006 MeV"
                     " (free,scale=2)", "Parameter printing");
@@ -189,7 +189,7 @@ void TestGModel::test_model_par(void)
         test_value(par2.factor_value(), 3.14);
         test_value(par2.scale(), 3.0);
         test_assert(par2.name() == "Another test parameter", "Parameter name");
-        test_assert(par2.isfree(), "Parameter freezing");
+        test_assert(par2.is_free(), "Parameter freezing");
         test_assert(par2.print() == 
                     "  Another test parameter ...: 9.42 +/- 0  (free,scale=3)",
                     "Parameter printing");
@@ -203,17 +203,17 @@ void TestGModel::test_model_par(void)
     test_try("Test boundary handling (1/4)");
     try {
         GModelPar par("Test boundary", 1.0);
-        test_assert(!par.hasmin(), "Parameter shall have no minimum.");
-        test_assert(!par.hasmax(), "Parameter shall have no maximum.");
-        test_assert(!par.hasrange(), "Parameter shall have no range.");
+        test_assert(!par.has_min(), "Parameter shall have no minimum.");
+        test_assert(!par.has_max(), "Parameter shall have no maximum.");
+        test_assert(!par.has_range(), "Parameter shall have no range.");
         par.min(0.5);
-        test_assert(par.hasmin(), "Parameter shall have minimum.");
-        test_assert(!par.hasmax(), "Parameter shall have no maximum.");
-        test_assert(!par.hasrange(), "Parameter shall have no range.");
+        test_assert(par.has_min(), "Parameter shall have minimum.");
+        test_assert(!par.has_max(), "Parameter shall have no maximum.");
+        test_assert(!par.has_range(), "Parameter shall have no range.");
         par.max(2.0);
-        test_assert(par.hasmin(), "Parameter shall have minimum.");
-        test_assert(par.hasmax(), "Parameter shall have maximum.");
-        test_assert(par.hasrange(), "Parameter shall have range.");
+        test_assert(par.has_min(), "Parameter shall have minimum.");
+        test_assert(par.has_max(), "Parameter shall have maximum.");
+        test_assert(par.has_range(), "Parameter shall have range.");
         par.value(5.0);
         test_try_failure("Setting a parameter outside boundaries shall"
                          " generate an exception.");
@@ -1919,7 +1919,7 @@ void TestGModel::test_models(void)
     test_try("Test void constructor");
     try {
         GModels models;
-        test_assert(models.isempty(), "Model container not empty.");
+        test_assert(models.is_empty(), "Model container not empty.");
         test_value(models.size(), 0);
         test_try_success();
     }
@@ -1961,7 +1961,7 @@ void TestGModel::test_models(void)
                     "Model \"1FGL J0005.7+3815\" not found.");
         test_assert(!models.contains("2FGL J0005.7+3815"), 
                     "Model \"2FGL J0005.7+3815\" found but not expected.");
-        test_assert(!models.isempty(), "Model container is empty.");
+        test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 1);
         
         // Append model with same name
@@ -2016,27 +2016,27 @@ void TestGModel::test_models(void)
         models.set(0, *model);
 
         // Make sure that we have now 3 models in container
-        test_assert(!models.isempty(), "Model container is empty.");
+        test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 3);
 
         // Remove "Set model"
         models.remove(0);
-        test_assert(!models.isempty(), "Model container is empty.");
+        test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 2);
 
         // Remove "1FGL J0005.7+3815"
         models.remove(0);
-        test_assert(!models.isempty(), "Model container is empty.");
+        test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 1);
 
         // Remove "Appended model"
         models.remove("Appended model");
-        test_assert(models.isempty(), "Model container is not empty.");
+        test_assert(models.is_empty(), "Model container is not empty.");
         test_value(models.size(), 0);
 
         // Reload model
         models.load(m_xml_file);
-        test_assert(!models.isempty(), "Model container is empty.");
+        test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 1);
         
         // Append identical container
@@ -2056,7 +2056,7 @@ void TestGModel::test_models(void)
         GModels other_models = models;
         other_models[0]->name("New name");
         models.extend(other_models);
-        test_assert(!models.isempty(), "Model container is empty.");
+        test_assert(!models.is_empty(), "Model container is empty.");
         test_value(models.size(), 2);
 
         // Free model

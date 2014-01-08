@@ -67,7 +67,7 @@ public:
     virtual int             integer(const int& row, const int& inx = 0) const = 0;
     virtual void            insert(const int& row, const int& nrows) = 0;
     virtual void            remove(const int& row, const int& nrows) = 0;
-    virtual bool            isloaded(void) const = 0;
+    virtual bool            is_loaded(void) const = 0;
 
     // Other methods
     void                    name(const std::string& name);
@@ -90,8 +90,8 @@ public:
     int                     elements(const int& row) const;
     void                    length(const int& length);
     const int&              length(void) const;
-    void                    isvariable(const bool& variable);
-    const bool&             isvariable(void) const;
+    void                    is_variable(const bool& variable);
+    const bool&             is_variable(void) const;
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
     std::string             tform_binary(void) const;
@@ -132,7 +132,7 @@ protected:
                                   //!< This parameter is used to signal if a
                                   //!< table column corresponds to a FITS file
                                   //!< column. If it is set to 0 there is no
-                                  //!< correspondance.
+                                  //!< correspondence.
     int              m_type;      //!< Column type
     int              m_repeat;    //!< Repeat value of column
     int              m_width;     //!< Width of single column element
@@ -140,7 +140,7 @@ protected:
                                   //!< m_number = m_repeat / m_width
     int              m_length;    //!< Length of column (number of rows)
     bool             m_variable;  //!< Signals if column is variable length
-    int              m_varlen;    //!< Maximum number of elements in variable-lgth
+    int              m_varlen;    //!< Maximum number of elements in variable-length
     std::vector<int> m_rowstart;  //!< Start index of each row
     mutable int      m_size;      //!< Size of allocated data area (0 if not loaded)
     int              m_anynul;    //!< Number of NULLs encountered
@@ -437,7 +437,7 @@ const int& GFitsTableCol::length(void) const
  * @param[in] variable Variable-length flag.
  ***************************************************************************/
 inline
-void GFitsTableCol::isvariable(const bool& variable)
+void GFitsTableCol::is_variable(const bool& variable)
 {
     // Set variable-length flag
     m_variable = variable;
@@ -453,7 +453,7 @@ void GFitsTableCol::isvariable(const bool& variable)
  * @return True if column is a variable length column
  ***************************************************************************/
 inline
-const bool& GFitsTableCol::isvariable(void) const
+const bool& GFitsTableCol::is_variable(void) const
 {
     // Return variable-length flag
     return m_variable;

@@ -66,7 +66,7 @@ public:
     void           clear(void);
     GEbounds*      clone(void) const;
     int            size(void) const;
-    bool           isempty(void) const;
+    bool           is_empty(void) const;
     void           append(const GEnergy& emin, const GEnergy& emax);
     void           insert(const GEnergy& emin, const GEnergy& emax);
     void           merge(void);
@@ -74,8 +74,8 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GEbounds& ebds);
-    void           setlin(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void           setlog(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void           set_lin(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void           set_log(const int& num, const GEnergy& emin, const GEnergy& emax);
     void           load(const std::string& filename,
                         const std::string& extname = "EBOUNDS");
     void           save(const std::string& filename,
@@ -130,7 +130,7 @@ int GEbounds::size(void) const
  * @return True if there are no energy boundaries.
  ***************************************************************************/
 inline
-bool GEbounds::isempty(void) const
+bool GEbounds::is_empty(void) const
 {
     return (m_num == 0);
 }

@@ -73,7 +73,7 @@ public:
     int           ncostheta(void) const;
     const double& costhetamin(void) const;
     void          costhetamin(const double& ctheta);
-    bool          hasphi(void) const;
+    bool          has_phi(void) const;
     const bool&   front(void) const;
     void          front(const bool& front);
     const double& scale_par1(void) const;
@@ -164,7 +164,7 @@ void GLATPsfBase::costhetamin(const double& ctheta)
  * @return True if point spread function has Phi dependence.
  ***************************************************************************/
 inline
-bool GLATPsfBase::hasphi(void) const
+bool GLATPsfBase::has_phi(void) const
 {
     return false;
 }
