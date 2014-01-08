@@ -26,7 +26,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
+import gammalib
 
 
 # =========================================== #
@@ -36,14 +36,15 @@ def create_models():
     """
     """
     # Create model container
-    models = GModels()
+    models = gammalib.GModels()
     
     # Create a power law model for the Crab
-    crabdir = GSkyDir()
+    crabdir = gammalib.GSkyDir()
     crabdir.radec_deg(83.6331, 22.0145)
-    spatial  = GModelSpatialPointSource(crabdir)
-    spectral = GModelSpectralPlaw(5.7e-16, -2.48, GEnergy(100.0, "MeV"))
-    model    = GModelSky(spatial, spectral)
+    spatial  = gammalib.GModelSpatialPointSource(crabdir)
+    energy   = gammalib.GEnergy(100.0, "MeV")
+    spectral = gammalib.GModelSpectralPlaw(5.7e-16, -2.48, energy)
+    model    = gammalib.GModelSky(spatial, spectral)
     models.append(model)
     
     # Return models
