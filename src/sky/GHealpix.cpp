@@ -372,7 +372,7 @@ GSkyDir GHealpix::pix2dir(const GSkyPixel& pixel) const
         break;
     }
 
-    // Store coordinate system dependent result
+    // Store coordinate system-dependent result
     GSkyDir result;
     switch (m_coordsys) {
     case 0:
@@ -399,8 +399,8 @@ GSkyDir GHealpix::pix2dir(const GSkyPixel& pixel) const
 GSkyPixel GHealpix::dir2pix(const GSkyDir& dir) const
 {
     // Compute coordinate system dependent (z,phi)
-    double z;
-    double phi;
+    double z = 0;
+    double phi = 0;
     switch (m_coordsys) {
     case 0:
         z   = cos(gammalib::pihalf - dir.dec());

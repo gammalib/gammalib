@@ -84,7 +84,7 @@ protected:
     virtual bool compare(const GSkyProjection& proj) const = 0;
 
     // Protected members
-    int m_coordsys;   //!< 0=celestial, 1=galactic, 2=ecl, 3=hel, 4=sgl
+    int m_coordsys;   //!< 0=EQU, 1=GAL
 };
 
 #endif /* GSKYPROJECTION_HPP */

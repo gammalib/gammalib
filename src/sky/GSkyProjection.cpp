@@ -143,9 +143,6 @@ GSkyProjection& GSkyProjection::operator= (const GSkyProjection& proj)
  * Returns one of 
  * 'EQU' (equatorial),
  * 'GAL' (galactic),
- * 'ECL' (ecliptic),
- * 'HEL' (helioecliptic), and
- * 'SGL' (supergalactic).
  ***************************************************************************/
 std::string GSkyProjection::coordsys(void) const
 {
@@ -157,15 +154,6 @@ std::string GSkyProjection::coordsys(void) const
         break;
     case 1:
         s_coordsys = "GAL";
-        break;
-    case 2:
-        s_coordsys = "ECL";
-        break;
-    case 3:
-        s_coordsys = "HEL";
-        break;
-    case 4:
-        s_coordsys = "SGL";
         break;
     default:
         s_coordsys = "UNKNOWN";
@@ -189,9 +177,6 @@ std::string GSkyProjection::coordsys(void) const
  * following codes:
  * 'EQU', 'CEL', 'C': celestial,
  * 'GAL', 'G': galactic,
- * 'ECL', 'E': ecliptic,
- * 'HEL', 'H': helioecliptic, and
- * 'SGL', 'S': helioecliptic.
  ***************************************************************************/
 void GSkyProjection::coordsys(const std::string& coordsys)
 {
@@ -204,15 +189,6 @@ void GSkyProjection::coordsys(const std::string& coordsys)
     }
     else if (ucoordsys == "GAL" || ucoordsys == "G") {
         m_coordsys = 1;
-    }
-    else if (ucoordsys == "ECL" || ucoordsys == "E") {
-        m_coordsys = 2;
-    }
-    else if (ucoordsys == "HEL" || ucoordsys == "H") {
-        m_coordsys = 3;
-    }
-    else if (ucoordsys == "SGL" || ucoordsys == "S") {
-        m_coordsys = 4;
     }
     else {
         throw GException::wcs_bad_coords(G_COORDSYS_SET, coordsys);
@@ -235,7 +211,7 @@ void GSkyProjection::coordsys(const std::string& coordsys)
 void GSkyProjection::init_members(void)
 {
     // Initialise members
-    m_coordsys = 0;
+    m_coordsys = 0; // 0 means EQU
 
     // Return
     return;
