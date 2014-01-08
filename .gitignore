@@ -40,7 +40,10 @@ m4/lt~obsolete.m4
 *.xml~
 *.ac~
 *.am~
+*.plist
+clang_output_*
 .gitignore~
+sloccount.sc
 Makefile
 stamp-h1
 Makefile.in
