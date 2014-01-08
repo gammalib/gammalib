@@ -1,0 +1,8 @@
+<observation_list title="observation list">  
+ <observation name="Crab" id="00002" instrument="LAT">
+    <parameter name="CountsMap" file="srcmap_Crab_ct_CEL_0.1dpb_AIT_100-10000MeV_P7REP_SOURCE_V15.fits"/>
+    <parameter name="ExposureMap" file="expcube_239557446.6_240162199.6_100-10000_P7REP_SOURCE_V15.fits"/>
+    <parameter name="LiveTimeCube" file="ltcube_239557446.6_240162199.6_scaled.fits"/>
+    <parameter name="IRF" value="P7REP_SOURCE_V15"/>
+  </observation>
+</observation_list>

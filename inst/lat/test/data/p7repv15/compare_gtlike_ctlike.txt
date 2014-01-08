@@ -1,0 +1,495 @@
+LAT example analysis of Crab region
+First analysis with Scince tools 09-32-05, then analysis of the same files with gtlike and ctlike: 
+
+ra = 83.6331
+dec = 22.0145
+
+rad = 7.5
+10x10 deg, 0.1 degperbin 
+zmax = 100
+emin = 100 MeV
+emax = 10000 MeV
+
+
+tmin = 239557446.6 MET in s
+tmax= 240162199.6 MET in s 
+nebins=20
+
+
+
+
+gtlike results: 
+
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="Crab" type="PointSource">
+    <spectrum type="PowerLaw2">
+      <parameter error="1.510702125" free="1" max="1000" min="1e-05" name="Integral" scale="1e-07" value="25.58700179" />
+      <parameter error="0.04594388483" free="1" max="-0.1" min="-5" name="Index" scale="1" value="-2.135443533" />
+      <parameter free="0" max="1000000" min="10" name="LowerLimit" scale="1" value="100" />
+      <parameter free="0" max="1000000" min="10" name="UpperLimit" scale="1" value="500000" />
+    </spectrum>
+    <spatialModel type="SkyDirFunction">
+      <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+      <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+    </spatialModel>
+  </source>
+  <source name="gll_iem_v05" type="DiffuseSource">
+    <spectrum type="PowerLaw">
+      <parameter error="0.144060828" free="1" max="100" min="1e-05" name="Prefactor" scale="1" value="0.7287081944" />
+      <parameter error="0.0716234477" free="1" max="1" min="-1" name="Index" scale="1" value="0.08682762462" />
+      <parameter free="0" max="2000" min="50" name="Scale" scale="1" value="100" />
+    </spectrum>
+    <spatialModel file="/lustre/fs8/group/hess/user/aschulz/lat_data/fssc_files/diffuse/p7rep/gll_iem_v05.fit" type="MapCubeFunction">
+      <parameter free="0" max="1000" min="0.001" name="Normalization" scale="1" value="1" />
+    </spatialModel>
+  </source>
+  <source name="iso_source_v05" type="DiffuseSource">
+    <spectrum file="/lustre/fs8/group/hess/user/aschulz/lat_data/fssc_files/diffuse/p7rep/iso_source_v05.txt" type="FileFunction">
+      <parameter error="0.6855552052" free="1" max="10" min="0" name="Normalization" scale="1" value="2.875818636" />
+    </spectrum>
+    <spatialModel type="ConstantValue">
+      <parameter free="0" max="10" min="0" name="Value" scale="1" value="1" />
+    </spatialModel>
+  </source>
+</source_library>
+
+
+
+
+ctlike: 
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<source_library title="source library">
+  <source name="iso_source_v05" type="DiffuseSource">
+    <spectrum type="FileFunction" file="/Users/schulz/software/gammalib/inst/lat/test/data/p7repv15/iso_source_v05.txt">
+      <parameter name="Normalization" value="3.48618" error="0.694252" scale="1" min="0" max="10" free="1" />
+    </spectrum>
+    <spatialModel type="ConstantValue">
+      <parameter name="Value" value="1" scale="1" min="0" max="10" free="0" />
+    </spatialModel>
+  </source>
+  <source name="gll_iem_v05" type="DiffuseSource">
+    <spectrum type="PowerLaw">
+      <parameter name="Prefactor" value="0.774972" error="0.156895" scale="1" min="1e-05" max="100" free="1" />
+      <parameter name="Index" value="0.0695083" error="0.0745843" scale="1" min="-1" max="1" free="1" />
+      <parameter name="Scale" value="100" scale="1" min="50" max="2000" free="0" />
+    </spectrum>
+    <spatialModel type="MapCubeFunction" file="/Users/schulz/software/gammalib/inst/lat/test/data/p7repv15/gll_iem_v05.fit">
+      <parameter name="Normalization" value="1" scale="1" min="0.001" max="1000" free="0" />
+    </spatialModel>
+  </source>
+  <source name="Crab" type="PointSource">
+    <spectrum type="PowerLaw2">
+      <parameter name="Integral" value="19.9229" error="1.19129" scale="1e-07" min="1e-05" max="1000" free="1" />
+      <parameter name="Index" value="-2.05072" error="0.0491567" scale="1" min="-5" max="-0.1" free="1" />
+      <parameter name="LowerLimit" value="100" scale="1" min="10" max="1e+06" free="0" />
+      <parameter name="UpperLimit" value="500000" scale="1" min="10" max="1e+06" free="0" />
+    </spectrum>
+    <spatialModel type="SkyDirFunction">
+      <parameter name="RA" value="83.6331" scale="1" min="-360" max="360" free="0" />
+      <parameter name="DEC" value="22.0145" scale="1" min="-90" max="90" free="0" />
+    </spatialModel>
+  </source>
+</source_library>
+
+
+
+
+
+
+
+
+logfiles:
+
+------------------  running:  pybinlike ------------------
+Parameters:
+   irfs  =  P7REP_SOURCE_V15
+   expcube  =  ltcube_239557446.6_240162199.6_scaled.fits
+   srcmdl  =  Crab.xml
+   cmap  =  srcmap_Crab_ct_CEL_0.1dpb_AIT_100-10000MeV_P7REP_SOURCE_V15.fits
+   bexpmap  =  expcube_239557446.6_240162199.6_100-10000_P7REP_SOURCE_V15.fits
+   optimizer  =  Minuit
+   specfile  =  binned_specfile_py_Crab_ct.fits
+   sfile  =  binned_fitted_py_Crab_ct.xml
+   results  =  binned_results_py_Crab_ct.dat
+   scratchdir  =  none
+{'irfs': 'P7REP_SOURCE_V15', 'expcube': 'ltcube_239557446.6_240162199.6_scaled.fits', 'optimizer': 'Minuit', 'srcmdl': 'Crab.xml', 'sfile': 'binned_fitted_py_Crab_ct.xml', 'results': 'binned_results_py_Crab_ct.dat', 'bexpmap': 'expcube_239557446.6_240162199.6_100-10000_P7REP_SOURCE_V15.fits', 'scratchdir': 'none', 'cmap': 'srcmap_Crab_ct_CEL_0.1dpb_AIT_100-10000MeV_P7REP_SOURCE_V15.fits', 'specfile': 'binned_specfile_py_Crab_ct.fits'}
+{'irfs': 'P7REP_SOURCE_V15', 'expcube': 'ltcube_239557446.6_240162199.6_scaled.fits', 'optimizer': 'Minuit', 'srcmdl': 'Crab.xml', 'sfile': 'binned_fitted_py_Crab_ct.xml', 'results': 'binned_results_py_Crab_ct.dat', 'bexpmap': 'expcube_239557446.6_240162199.6_100-10000_P7REP_SOURCE_V15.fits', 'scratchdir': 'none', 'cmap': 'srcmap_Crab_ct_CEL_0.1dpb_AIT_100-10000MeV_P7REP_SOURCE_V15.fits', 'specfile': 'binned_specfile_py_Crab_ct.fits'}
+
+Parameters:
+   irfs  =  P7REP_SOURCE_V15
+   expcube  =  ltcube_239557446.6_240162199.6_scaled.fits
+   optimizer  =  Minuit
+   srcmdl  =  Crab.xml
+   sfile  =  binned_fitted_py_Crab_ct.xml
+   results  =  binned_results_py_Crab_ct.dat
+   bexpmap  =  expcube_239557446.6_240162199.6_100-10000_P7REP_SOURCE_V15.fits
+   scratchdir  =  none
+   cmap  =  srcmap_Crab_ct_CEL_0.1dpb_AIT_100-10000MeV_P7REP_SOURCE_V15.fits
+   specfile  =  binned_specfile_py_Crab_ct.fits
+
+   Setting up binned likelihood
+   Initial model parameters
+
+Source maps: srcmap_Crab_ct_CEL_0.1dpb_AIT_100-10000MeV_P7REP_SOURCE_V15.fits
+Exposure cube: ltcube_239557446.6_240162199.6_scaled.fits
+Exposure map: expcube_239557446.6_240162199.6_100-10000_P7REP_SOURCE_V15.fits
+IRFs: P7REP_SOURCE_V15
+Source model file: Crab.xml
+Optimizer: Minuit
+Tolerance = 0.001
+Tolerance type = 1
+Crab
+   Spectrum: PowerLaw2
+0       Integral:  1.000e+00  0.000e+00  1.000e-05  1.000e+03 ( 1.000e-07)
+1          Index: -2.000e+00  0.000e+00 -5.000e+00 -1.000e-01 ( 1.000e+00)
+2     LowerLimit:  1.000e+02  0.000e+00  1.000e+01  1.000e+06 ( 1.000e+00) fixed
+3     UpperLimit:  5.000e+05  0.000e+00  1.000e+01  1.000e+06 ( 1.000e+00) fixed
+
+gll_iem_v05
+   Spectrum: PowerLaw
+4      Prefactor:  1.000e+00  0.000e+00  1.000e-05  1.000e+02 ( 1.000e+00)
+5          Index:  0.000e+00  0.000e+00 -1.000e+00  1.000e+00 ( 1.000e+00)
+6          Scale:  1.000e+02  0.000e+00  5.000e+01  2.000e+03 ( 1.000e+00) fixed
+
+iso_source_v05
+   Spectrum: FileFunction
+7     Normalization:  1.000e+00  0.000e+00  0.000e+00  1.000e+01 ( 1.000e+00)
+
+   Performing likelihood fit
+
+ **********
+ **    1 **SET PRINT    2.000
+ **********
+ **********
+ **    2 **SET NOWARN
+ **********
+
+ PARAMETER DEFINITIONS:
+    NO.   NAME         VALUE      STEP SIZE      LIMITS
+     1 'Integral  '    1.0000       1.0000         .10000E-04   1000.0
+     2 'Index     '   -2.0000       1.0000        -5.0000      -.10000
+     3 'Prefactor '    1.0000       1.0000         .10000E-04   100.00
+     4 'Index     '     .0000       1.0000        -1.0000       1.0000
+     5 'Normalizat'    1.0000       1.0000          .0000       10.000
+ **********
+ **    3 **SET ERR    .5000
+ **********
+ **********
+ **    4 **SET GRAD    1.000
+ **********
+ **********
+ **    5 **MINIMIZE    800.0       2.000
+ **********
+
+ FIRST CALL TO USER FUNCTION AT NEW START POINT, WITH IFLAG=4.
+ START MIGRAD MINIMIZATION.  STRATEGY 1.  CONVERGENCE WHEN EDM .LT.  .20E-02
+
+ FCN=   11570.88     FROM MIGRAD    STATUS=INITIATE       1 CALLS        2 TOTAL
+                     EDM= unknown      STRATEGY= 1      NO ERROR MATRIX
+
+  EXT PARAMETER               CURRENT GUESS       STEP         FIRST
+  NO.   NAME        VALUE          ERROR          SIZE      DERIVATIVE
+   1  Integral     1.00000        1.0000        .43760E-01   -5385.8
+   2  Index        -2.0000        1.0000        .43485       -428.26
+   3  Prefactor    1.00000        1.0000        .14092       -6446.5
+   4  Index          .0000        1.0000        1.5688       -733.82
+   5  Normalizat   1.00000        1.0000        .46267       -348.37
+                               ERR DEF=  .500
+ NO ERROR MATRIX
+
+ FCN=   11498.56     FROM MIGRAD    STATUS=PROGRESS       8 CALLS        9 TOTAL
+                     EDM=   .24E+07    STRATEGY= 1      NO ERROR MATRIX
+
+  EXT PARAMETER               CURRENT GUESS       STEP         FIRST
+  NO.   NAME        VALUE          ERROR          SIZE      DERIVATIVE
+   1  Integral      1.0532        1.0000        .16626E-02   -3483.6
+   2  Index        -1.9689        1.0000        .13055E-01   -293.04
+   3  Prefactor     1.2158        1.0000        .20638E-01    1980.5
+   4  Index         .28706        1.0000        .29116        961.06
+   5  Normalizat    1.0364        1.0000        .12022E-01   -107.65
+                               ERR DEF=  .500
+
+ FCN=   10808.51     FROM MIGRAD    STATUS=PROGRESS      44 CALLS       45 TOTAL
+                     EDM=   .44E-04  STRATEGY=1  ERROR MATRIX UNCERTAINTY= 11.8%
+
+  EXT PARAMETER                APPROXIMATE        STEP         FIRST
+  NO.   NAME        VALUE          ERROR          SIZE      DERIVATIVE
+   1  Integral      25.587        1.4987       -.40989E-03   -.74472
+   2  Index        -2.1354        .46094E-01    .66442E-03   -.13219
+   3  Prefactor     .72871        .12597       -.25291E-02   -1.8487
+   4  Index         .86828E-01    .62329E-01    .10321E-01   -.28497
+   5  Normalizat    2.8758        .62827        .17529E-01   -.11416
+                               ERR DEF=  .500
+
+ MIGRAD MINIMIZATION HAS CONVERGED.
+
+ MIGRAD WILL VERIFY CONVERGENCE AND ERROR MATRIX.
+   START COVARIANCE MATRIX CALCULATION.
+ EIGENVALUES OF SECOND-DERIVATIVE MATRIX:
+         -.6215E-01   .2198E+00   .7051E+00   .1404E+01   .2733E+01
+
+ FCN=   10808.51     FROM MIGRAD    STATUS=CONVERGED     93 CALLS       94 TOTAL
+                     EDM=   .13E-03    STRATEGY= 1      ERR MATRIX NOT POS-DEF
+
+  EXT PARAMETER                APPROXIMATE        STEP         FIRST
+  NO.   NAME        VALUE          ERROR          SIZE      DERIVATIVE
+   1  Integral      25.587        1.7100        .15489E-01   -.74473
+   2  Index        -2.1354        .50728E-01    .43485E-01   -.13214
+   3  Prefactor     .72871        .45763        .85444E-02   -1.8487
+   4  Index         .86828E-01    .25580        .51124E-01   -.28492
+   5  Normalizat    2.8758        1.2558        .13663       -.11415
+                               ERR DEF=  .500
+
+ EXTERNAL ERROR MATRIX.    NDIM= 100    NPAR=  5    ERR DEF=  .500
+   .292E+01 -.620E-01 -.430E+00  .246E+00  .898E+00
+  -.620E-01  .257E-02  .113E-01 -.658E-02 -.242E-01
+  -.430E+00  .113E-01  .210E+00 -.118E+00 -.561E+00
+   .246E+00 -.658E-02 -.118E+00  .669E-01  .312E+00
+   .898E+00 -.242E-01 -.561E+00  .312E+00  .162E+01
+ ERR MATRIX NOT POS-DEF
+
+ PARAMETER  CORRELATION COEFFICIENTS
+       NO.  GLOBAL     1     2     3     4     5
+        1   .79750  1.000 -.715 -.549  .556  .413
+        2   .73270  -.715 1.000  .487 -.501 -.375
+        3   .99776  -.549  .487 1.000 -.995 -.963
+        4   .99652   .556 -.501 -.995 1.000  .946
+        5   .97863   .413 -.375 -.963  .946 1.000
+ ERR MATRIX NOT POS-DEF
+Final values:
+  Integral   = 25.587
+  Index      = -2.13544
+  Prefactor  = 0.728708
+  Index      = 0.0868276
+  Normalizat = 2.87582
+ **********
+ **    6 **HESSE
+ **********
+   START COVARIANCE MATRIX CALCULATION.
+ EIGENVALUES OF SECOND-DERIVATIVE MATRIX:
+          .2895E-01   .2394E+00   .6905E+00   .1336E+01   .2705E+01
+ COVARIANCE MATRIX CALCULATED SUCCESSFULLY
+
+ FCN=   10808.51     FROM HESSE     STATUS=OK            31 CALLS      125 TOTAL
+                     EDM=   .68E-04    STRATEGY= 1      ERROR MATRIX ACCURATE
+
+  EXT PARAMETER                                INTERNAL      INTERNAL
+  NO.   NAME        VALUE          ERROR       STEP SIZE       VALUE
+   1  Integral      25.587        1.5107        .68454E-04   -1.2495
+   2  Index        -2.1354        .45941E-01    .14981E-03    .17002
+   3  Prefactor     .72871        .14405        .37751E-04   -1.3999
+   4  Index         .86828E-01    .71562E-01    .22668E-03    .86937E-01
+   5  Normalizat    2.8758        .68294        .60570E-03   -.43878
+                               ERR DEF=  .500
+
+ EXTERNAL ERROR MATRIX.    NDIM= 100    NPAR=  5    ERR DEF=  .500
+   .228E+01 -.426E-01  .644E-02  .399E-02 -.344E+00
+  -.426E-01  .211E-02 -.447E-03 -.911E-04  .922E-02
+   .644E-02 -.447E-03  .208E-01 -.958E-02 -.824E-01
+   .399E-02 -.911E-04 -.958E-02  .513E-02  .329E-01
+  -.344E+00  .922E-02 -.824E-01  .329E-01  .470E+00
+
+ PARAMETER  CORRELATION COEFFICIENTS
+       NO.  GLOBAL     1     2     3     4     5
+        1   .70952  1.000 -.613  .030  .037 -.332
+        2   .63226  -.613 1.000 -.068 -.028  .293
+        3   .97562   .030 -.068 1.000 -.929 -.834
+        4   .95052   .037 -.028 -.929 1.000  .669
+        5   .91975  -.332  .293 -.834  .669 1.000
+Minuit fit quality: 3   estimated distance: 6.76066e-05
+Minuit parameter uncertainties:
+  1  1.5107
+  2  0.0459439
+  3  0.144061
+  4  0.0716234
+  5  0.685555
+Generating SourceMap for Crab....................!
+
+ EXTERNAL ERROR MATRIX.    NDIM=   5    NPAR=  5    ERR DEF=  .500
+   .228E+01 -.426E-01  .644E-02  .399E-02 -.344E+00
+  -.426E-01  .211E-02 -.447E-03 -.911E-04  .922E-02
+   .644E-02 -.447E-03  .208E-01 -.958E-02 -.824E-01
+   .399E-02 -.911E-04 -.958E-02  .513E-02  .329E-01
+  -.344E+00  .922E-02 -.824E-01  .329E-01  .470E+00
+   Fitted model parameters
+
+Crab
+   Spectrum: PowerLaw2
+0       Integral:  2.559e+01  1.511e+00  1.000e-05  1.000e+03 ( 1.000e-07)
+1          Index: -2.135e+00  4.594e-02 -5.000e+00 -1.000e-01 ( 1.000e+00)
+2     LowerLimit:  1.000e+02  0.000e+00  1.000e+01  1.000e+06 ( 1.000e+00) fixed
+3     UpperLimit:  5.000e+05  0.000e+00  1.000e+01  1.000e+06 ( 1.000e+00) fixed
+
+gll_iem_v05
+   Spectrum: PowerLaw
+4      Prefactor:  7.287e-01  1.441e-01  1.000e-05  1.000e+02 ( 1.000e+00)
+5          Index:  8.683e-02  7.162e-02 -1.000e+00  1.000e+00 ( 1.000e+00)
+6          Scale:  1.000e+02  0.000e+00  5.000e+01  2.000e+03 ( 1.000e+00) fixed
+
+iso_source_v05
+   Spectrum: FileFunction
+7     Normalization:  2.876e+00  6.856e-01  0.000e+00  1.000e+01 ( 1.000e+00)
+
+{'Crab': {'DEC': [22.0145],
+          'Energy flux 1000': [0.0008451339118765881, 0.00012748598777983171],
+          'Flux 1000': [1.8710656060226001e-07, 1.5607151735282336e-08],
+          'Index': [-2.1354435334969293, 0.04594388482845476],
+          'Integral': [25.587001794287488, 1.5107021246857777],
+          'LowerLimit': [100.0],
+          'Npred': 883.6820271808168,
+          'RA': [83.63309999999998],
+          'TS value': 1432.7716170280473,
+          'UpperLimit': [500000.0]},
+ 'gll_iem_v05': {'Energy flux 1000': [0.13014639519669133,
+                                      0.016019766902211626],
+                 'Flux 1000': [4.553183162897382e-05, 3.6174781586347625e-06],
+                 'Index': [0.08682762462159843, 0.07162344769818912],
+                 'Npred': 916.193626511584,
+                 'Prefactor': [0.7287081943702254, 0.1440608280265844],
+                 'Scale': [100.0],
+                 'TS value': 636.2220754477894},
+ 'iso_source_v05': {'Energy flux 1000': [0.09452113626537338,
+                                         0.022532509845750396],
+                    'Flux 1000': [1.7700945209265112e-05,
+                                  4.217913754868659e-06],
+                    'Normalization': [2.875818635678156, 0.6855552052125737],
+                    'Npred': 424.77274035060253,
+                    'TS value': 53.92443256788101},
+ 'logLike': 10808.505288286657}
+
+Writing used config file to:  ./usedconf/used_Crab_select_mktime_cmap_ccube_ltcube_scaleltcube_expcube2_srcmap_pybinlike.conf
+
+----------------------------------------------
+Total elapsed time was: 0.0427083333333 hours
+
+
+
+
+
+
+2014-01-07T15:30:35: ********************************************************************************
+2014-01-07T15:30:35: *                                    ctlike                                    *
+2014-01-07T15:30:35: * ---------------------------------------------------------------------------- *
+2014-01-07T15:30:35: * Version: 00-05-00                                                            *
+2014-01-07T15:30:35: ********************************************************************************
+2014-01-07T15:35:17: +============+
+2014-01-07T15:35:17: | Parameters |
+2014-01-07T15:35:17: +============+
+2014-01-07T15:35:17:  infile ....................: observation_fermi.xml
+2014-01-07T15:35:17:  stat ......................: POISSON
+2014-01-07T15:35:17:  refit .....................: no
+2014-01-07T15:35:17:  caldb .....................: ${GAMMALIB}/share/caldb/cta
+2014-01-07T15:35:17:  irf .......................: kb_A_50h_v3
+2014-01-07T15:35:17:  srcmdl ....................: Crab_pathadjusted.xml
+2014-01-07T15:35:17:  outmdl ....................: crab_results_ctools.xml
+2014-01-07T15:35:17:  chatter ...................: 2
+2014-01-07T15:35:17:  clobber ...................: yes
+2014-01-07T15:35:17:  debug .....................: no
+2014-01-07T15:35:17:  mode ......................: ql
+2014-01-07T15:35:17: 
+2014-01-07T15:35:17: +=============+
+2014-01-07T15:35:17: | Observation |
+2014-01-07T15:35:17: +=============+
+2014-01-07T15:35:17: === GObservations ===
+2014-01-07T15:35:17:  Number of observations ....: 1
+2014-01-07T15:35:17:  Number of predicted events : 0
+2014-01-07T15:35:17: === GLATObservation ===
+2014-01-07T15:35:17:  Name ......................: Crab
+2014-01-07T15:35:17:  Identifier ................: 00002
+2014-01-07T15:35:17:  Instrument ................: LAT
+2014-01-07T15:35:17:  Statistics ................: Poisson
+2014-01-07T15:35:17:  Ontime ....................: 0
+2014-01-07T15:35:17:  Livetime ..................: 0
+2014-01-07T15:35:17: === GLATResponse ===
+2014-01-07T15:35:17:  Calibration database ......: /Users/schulz/software/gammalib/inst/lat/caldb/
+2014-01-07T15:35:17:  Response name .............: P7REPSOURCE_V15
+2014-01-07T15:35:17:  Section(s) ................: front & back
+2014-01-07T15:35:17: === GLATLtCube ===
+2014-01-07T15:35:17: 
+2014-01-07T15:35:17: +=================================+
+2014-01-07T15:35:17: | Maximum likelihood optimisation |
+2014-01-07T15:35:17: +=================================+
+2014-01-07T15:35:20:  Initial iteration: func=11537.5, Lambda=0.001
+2014-01-07T15:35:22:  Iteration 1: func=11259.1, Lambda=0.0001, delta=278.423, max(grad)=0 [-1]
+2014-01-07T15:35:24:  Iteration 2: func=11070.8, Lambda=1e-05, delta=188.277, max(grad)=0 [-1]
+2014-01-07T15:35:26:  Iteration 3: func=10915.6, Lambda=1e-06, delta=155.181, max(grad)=0 [-1]
+2014-01-07T15:35:28:  Iteration 4: func=10838.8, Lambda=1e-07, delta=76.8212, max(grad)=0 [-1]
+2014-01-07T15:35:30:  Iteration 5: func=10824.7, Lambda=1e-08, delta=14.1277, max(grad)=0 [-1]
+2014-01-07T15:35:32:  Iteration 6: func=10824.3, Lambda=1e-09, delta=0.369295, max(grad)=0.326075 [11]
+2014-01-07T15:35:33:  Iteration 7: func=10824.3, Lambda=1e-10, delta=0.00068754, max(grad)=0.000177934 [5]
+2014-01-07T15:35:35:  Iteration 8: func=10824.3, Lambda=1e-11, delta=6.65009e-06, max(grad)=0.00969042 [11]
+2014-01-07T15:35:37:  Iteration 9: func=10824.3, Lambda=1e-12, delta=9.97497e-08, max(grad)=0.00010425 [5]
+2014-01-07T15:35:39: 
+2014-01-07T15:35:39: +=========================================+
+2014-01-07T15:35:39: | Maximum likelihood optimization results |
+2014-01-07T15:35:39: +=========================================+
+2014-01-07T15:35:39: === GOptimizerLM ===
+2014-01-07T15:35:39:  Optimized function value ..: 10824.3
+2014-01-07T15:35:39:  Absolute precision ........: 1e-06
+2014-01-07T15:35:39:  Optimization status .......: converged
+2014-01-07T15:35:39:  Number of parameters ......: 15
+2014-01-07T15:35:39:  Number of free parameters .: 5
+2014-01-07T15:35:39:  Number of iterations ......: 9
+2014-01-07T15:35:39:  Lambda ....................: 1e-12
+2014-01-07T15:35:39:  Maximum log likelihood ....: -10824.3
+2014-01-07T15:35:39:  Observed events  (Nobs) ...: 2225
+2014-01-07T15:35:39:  Predicted events (Npred) ..: 2225 (Nobs - Npred = 2.88554e-07)
+2014-01-07T15:35:39: === GModels ===
+2014-01-07T15:35:39:  Number of models ..........: 3
+2014-01-07T15:35:39:  Number of parameters ......: 15
+2014-01-07T15:35:39: === GModelSky ===
+2014-01-07T15:35:39:  Name ......................: iso_source_v05
+2014-01-07T15:35:39:  Instruments ...............: all
+2014-01-07T15:35:39:  Instrument scale factors ..: unity
+2014-01-07T15:35:39:  Observation identifiers ...: all
+2014-01-07T15:35:39:  Model type ................: DiffuseSource
+2014-01-07T15:35:39:  Model components ..........: "ConstantValue" * "FileFunction" * "Constant"
+2014-01-07T15:35:39:  Number of parameters ......: 3
+2014-01-07T15:35:39:  Number of spatial par's ...: 1
+2014-01-07T15:35:39:   Value ....................: 1 [0,10]  (fixed,scale=1,gradient)
+2014-01-07T15:35:39:  Number of spectral par's ..: 1
+2014-01-07T15:35:39:   Normalization ............: 3.48618 +/- 0.694252 [0,10]  (free,scale=1,gradient)
+2014-01-07T15:35:39:  Number of temporal par's ..: 1
+2014-01-07T15:35:39:   Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+2014-01-07T15:35:39: === GModelSky ===
+2014-01-07T15:35:39:  Name ......................: gll_iem_v05
+2014-01-07T15:35:39:  Instruments ...............: all
+2014-01-07T15:35:39:  Instrument scale factors ..: unity
+2014-01-07T15:35:39:  Observation identifiers ...: all
+2014-01-07T15:35:39:  Model type ................: DiffuseSource
+2014-01-07T15:35:39:  Model components ..........: "MapCubeFunction" * "PowerLaw" * "Constant"
+2014-01-07T15:35:39:  Number of parameters ......: 5
+2014-01-07T15:35:39:  Number of spatial par's ...: 1
+2014-01-07T15:35:39:   Normalization ............: 1 [0.001,1000]  (fixed,scale=1,gradient)
+2014-01-07T15:35:39:  Number of spectral par's ..: 3
+2014-01-07T15:35:39:   Prefactor ................: 0.774972 +/- 0.156895 [1e-05,100] ph/cm2/s/MeV (free,scale=1,gradient)
+2014-01-07T15:35:39:   Index ....................: 0.0695083 +/- 0.0745843 [-1,1]  (free,scale=1,gradient)
+2014-01-07T15:35:39:   PivotEnergy ..............: 100 [50,2000] MeV (fixed,scale=1,gradient)
+2014-01-07T15:35:39:  Number of temporal par's ..: 1
+2014-01-07T15:35:39:   Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+2014-01-07T15:35:39: === GModelSky ===
+2014-01-07T15:35:39:  Name ......................: Crab
+2014-01-07T15:35:39:  Instruments ...............: all
+2014-01-07T15:35:39:  Instrument scale factors ..: unity
+2014-01-07T15:35:39:  Observation identifiers ...: all
+2014-01-07T15:35:39:  Model type ................: PointSource
+2014-01-07T15:35:39:  Model components ..........: "SkyDirFunction" * "PowerLaw2" * "Constant"
+2014-01-07T15:35:39:  Number of parameters ......: 7
+2014-01-07T15:35:39:  Number of spatial par's ...: 2
+2014-01-07T15:35:39:   RA .......................: 83.6331 [-360,360] deg (fixed,scale=1)
+2014-01-07T15:35:39:   DEC ......................: 22.0145 [-90,90] deg (fixed,scale=1)
+2014-01-07T15:35:39:  Number of spectral par's ..: 4
+2014-01-07T15:35:39:   Integral .................: 1.99229e-06 +/- 1.19129e-07 [1e-12,0.0001] ph/cm2/s (free,scale=1e-07,gradient)
+2014-01-07T15:35:39:   Index ....................: -2.05072 +/- 0.0491567 [-5,-0.1]  (free,scale=1,gradient)
+2014-01-07T15:35:39:   LowerLimit ...............: 100 [10,1e+06] MeV (fixed,scale=1)
+2014-01-07T15:35:39:   UpperLimit ...............: 500000 [10,1e+06] MeV (fixed,scale=1)
+2014-01-07T15:35:39:  Number of temporal par's ..: 1
+2014-01-07T15:35:39:   Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+2014-01-07T15:35:39: 
+2014-01-07T15:35:39: +==============+
+2014-01-07T15:35:39: | Save results |
+2014-01-07T15:35:39: +==============+
+2014-01-07T15:35:39: 
+2014-01-07T15:35:39: Application "ctlike" terminated after 304 wall clock seconds, consuming 276.453 seconds of CPU time.
