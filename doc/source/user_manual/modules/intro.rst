@@ -37,5 +37,3 @@ dotted boundary.
    :width: 100%
 
    UML usage
-
-

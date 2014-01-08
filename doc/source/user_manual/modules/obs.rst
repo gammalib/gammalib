@@ -16,7 +16,6 @@ module and their relations.
 
    Observation module
 
-
 The central C++ class of the obs module is the abstract base class
 ``GObservation`` which defines the instrument-independent interface for a
 gamma-ray observation. A gamma-ray observation is defined for a single
@@ -86,7 +85,9 @@ Describing observations using XML
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Observations can be described in GammaLib using an ASCII file in XML
-format. The general format of this file is::
+format. The general format of this file is:
+
+.. code-block:: xml
 
     <observation_list title="observation library">
         <observation name="..." id="..." instrument="...">
@@ -106,7 +107,9 @@ observation identifiers must be unique.
 
 The specific format of the XML file for a given instrument is defined by the
 relevant instrument specific ``GObservation`` class. For example, a CTA
-observation implemented by the ``GCTAObservation`` class is described by::
+observation implemented by the ``GCTAObservation`` class is described by:
+
+.. code-block:: xml
 
     <observation name="..." id="..." instrument="...">
         <parameter name="EventList"           file="..."/>
@@ -115,7 +118,9 @@ observation implemented by the ``GCTAObservation`` class is described by::
         <parameter name="EnergyDispersion"    file="..."/>
     </observation>
 
-for an unbinned observation and by::
+for an unbinned observation and by:
+
+.. code-block:: xml
 
     <observation name="..." id="..." instrument="...">
         <parameter name="CountsMap"           file="..."/>
@@ -130,27 +135,37 @@ The other tags specify the components of the instrumental response function.
 Similar definitions exist for the other instruments.
 
 The observations are loaded from the XML file descriptor using the load
-constructor::
+constructor:
+
+.. code-block:: cpp
 
     GObservations obs("my_observations.xml");
 
-Alternatively, the ``GObservations::load`` method can be used::
+Alternatively, the ``GObservations::load`` method can be used:
+
+.. code-block:: cpp
 
     GObservations obs;
     obs.load("my_observations.xml");
 
 The ``GObservations::read`` method enables loading the observation from an 
-already opened XML file::
+already opened XML file:
+ 
+.. code-block:: cpp
  
     GXml xml("my_observations.xml");
     GObservations obs;
     obs.read(xml);
 
-Observations are saved into an XML file descriptor using::
+Observations are saved into an XML file descriptor using:
+
+.. code-block:: cpp
 
     obs.save("my_observations.xml");
 
-or::
+or:
+
+.. code-block:: cpp
 
     GXml xml("my_observations.xml");
     obs.write(xml);

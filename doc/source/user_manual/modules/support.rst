@@ -47,16 +47,19 @@ Exception handling
 
 GammaLib uses C++ exceptions to handle any kind of errors or unexpected
 values that are encountered. Here an example of how an exception is thrown 
-in the ``GModels::at`` method::
+in the ``GModels::at`` method:
 
-    1  #define G_AT "GModels::at(int&)"
-    2  GModel* GModels::at(const int& index)
-    3  {
-    4      if (index < 0 || index >= size()) {
-    5          throw GException::out_of_range(G_AT, "Model index", index, size());
-    6      }
-    7      return m_models[index];
-    8  }
+.. code-block:: cpp
+   :linenos:
+
+    #define G_AT "GModels::at(int&)"
+    GModel* GModels::at(const int& index)
+    {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_AT, "Model index", index, size());
+        }
+        return m_models[index];
+    }
 
 Line 1 defines the name of the method that is always passed to the 
 exception handle to track the origin of the exception. The definition 
@@ -112,16 +115,19 @@ Linear interpolation is implemented in GammaLib through the ``GNodeArray``
 class. This class contains a collection of nodes :math:`x_i` that may be
 used to describe a functional relation :math:`y_i=f(x_i)`. The following 
 code illustrates how the ``GNodeArray`` class is used
-(see ``example/cpp/interpolate`` for the source code)::
+(see ``examples/cpp/interpolate/interpolate.cpp`` for the source code):
 
-    1  double x_i[] = {1.0, 4.0, 6.0};
-    2  double y_i[] = {8.0, 7.0, 2.0};
-    3  GNodeArray nodes(3, x_i);
-    4  for (double x = 0; x < 10.0; x += 0.5) {
-    5      nodes.set_value(x);
-    6      double y = y_i[nodes.inx_left()]  * nodes.wgt_left() + y_i[nodes.inx_right()] * nodes.wgt_right();
-    7      std::cout << "x=" << x << " : y=" << y << std::endl;
-    8  }
+.. code-block:: cpp
+   :linenos:
+
+    double x_i[] = {1.0, 4.0, 6.0};
+    double y_i[] = {8.0, 7.0, 2.0};
+    GNodeArray nodes(3, x_i);
+    for (double x = 0; x < 10.0; x += 0.5) {
+        nodes.set_value(x);
+        double y = y_i[nodes.inx_left()]  * nodes.wgt_left() + y_i[nodes.inx_right()] * nodes.wgt_right();
+        std::cout << "x=" << x << " : y=" << y << std::endl;
+    }
 
 In line 1, the nodes :math:`x_i` at which the function values :math:`y_i`
 are given are declared, the actual function values :math:`y_i` are

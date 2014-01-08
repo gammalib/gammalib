@@ -35,41 +35,46 @@ Creating a XML file
 ~~~~~~~~~~~~~~~~~~~
 
 The following example illustrates the creation of a XML file
-(see ``examples/createxml.cpp`` for the source code; the line numbers are
-for reference and are not part of the source code)::
+(see ``examples/cpp/createxml/createxml.cpp`` for the source code; the line numbers are
+for reference and are not part of the source code):
 
-    1  GXml xml;
-    2  GXmlComment comment("Now 2 nodes with spatial and spectral info");
-    3  GXmlElement spatial("spatial type=\"Position\"");
-    4  GXmlElement spectral("spectrum type=\"PowerLaw\"");
-    5  GXmlElement text("text");
-    6  GXmlPI      pi("<?process now?>");
-    7  spatial.append(GXmlElement("parameter ra=\"83.0\""));
-    8  spatial.append(GXmlElement("parameter dec=\"22.0\""));
-    9  spectral.append(GXmlElement("parameter prefactor=\"1e-7\""));
-   10  spectral.append(GXmlElement("parameter index=\"-2.1\""));
-   11  text.append(GXmlText("Finish with text"));
-   12  xml.append(comment);
-   13  xml.append(spatial);
-   14  xml.append(spectral);
-   15  xml.append(text);
-   16  xml.append(pi);
-   17  xml.save("my_xml_file.xml");
+.. code-block:: cpp
+   :linenos:
 
-Below the content of the XML file that will be created by this code::
+   GXml xml;
+   GXmlComment comment("Now 2 nodes with spatial and spectral info");
+   GXmlElement spatial("spatial type=\"Position\"");
+   GXmlElement spectral("spectrum type=\"PowerLaw\"");
+   GXmlElement text("text");
+   GXmlPI      pi("<?process now?>");
+   spatial.append(GXmlElement("parameter ra=\"83.0\""));
+   spatial.append(GXmlElement("parameter dec=\"22.0\""));
+   spectral.append(GXmlElement("parameter prefactor=\"1e-7\""));
+   spectral.append(GXmlElement("parameter index=\"-2.1\""));
+   text.append(GXmlText("Finish with text"));
+   xml.append(comment);
+   xml.append(spatial);
+   xml.append(spectral);
+   xml.append(text);
+   xml.append(pi);
+   xml.save("my_xml_file.xml");
 
-  <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-  <!--Now 2 nodes with spatial and spectral info-->
-  <spatial type="Position">
+Below the content of the XML file that will be created by this code:
+
+.. code-block:: xml
+
+   <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+   <!--Now 2 nodes with spatial and spectral info-->
+   <spatial type="Position">
     <parameter ra="83.0" />
     <parameter dec="22.0" />
-  </spatial>
-  <spectrum type="PowerLaw">
+   </spatial>
+   <spectrum type="PowerLaw">
     <parameter prefactor="1e-7" />
     <parameter index="-2.1" />
-  </spectrum>
-  <text>Finish with text</text>
-  <?process now?>
+   </spectrum>
+   <text>Finish with text</text>
+   <?process now?>
 
 In line 1 a XML object if allocated. In lines 2-6, one comment node, three
 element nodes and one processing instruction node are created. For the
@@ -90,7 +95,9 @@ before the nodes were appended to the document root. The reason behind
 this approach is that the ``append`` method creates deep copies of the
 nodes provided in the argument, hence manipulation of the node once 
 appended requires to retrieve the pointers to the deep copies in the XML
-document. The following example illustrates how this can be done::
+document. The following example illustrates how this can be done:
+
+.. code-block:: cpp
 
     xml.append(GXmlElement("source type=\"PointSource\""));
     xml.element("spatial", 0)->append(GXmlElement("parameter ra=\"83.0\""));
@@ -102,7 +109,9 @@ we have a pointer to the nodes, elements can be appended to the XML
 document using the ``append`` method.
 
 Alternatively, one can also retrieve the node pointer when the node is 
-appended to the XML document::
+appended to the XML document:
+
+.. code-block:: cpp
 
     GXmlNode* node = xml.append(GXmlElement("source type=\"PointSource\""));
     node->append(GXmlElement("parameter ra=\"83.0\""));
@@ -111,4 +120,3 @@ appended to the XML document::
 The ``append`` method returns in fact the pointer to the deep copy of the
 element that has been appended. This pointer can then be used to manipulate
 directly the nodes in the XML document.
-

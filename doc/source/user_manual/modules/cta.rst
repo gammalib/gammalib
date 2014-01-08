@@ -89,7 +89,9 @@ Describing CTA observations using XML
 
 CTA observations can be described in GammaLib using an ASCII file in XML
 format (see :ref:`sec_obsxml`). The CTA specific section of this file has
-the format::
+the format:
+
+.. code-block:: xml
 
     <observation name="..." id="..." instrument="...">
         <parameter name="EventList"           file="..."/>
@@ -98,7 +100,9 @@ the format::
         <parameter name="EnergyDispersion"    file="..."/>
     </observation>
 
-for an unbinned observation and::
+for an unbinned observation and:
+
+.. code-block:: xml
 
     <observation name="..." id="..." instrument="...">
         <parameter name="CountsMap"           file="..."/>
@@ -146,7 +150,9 @@ base class and provides a description of the background count rate as
 function of reconstructued sky direction, measured energy and event trigger
 time.
 
-The XML description of the background model has the following format::
+The XML description of the background model has the following format:
+
+.. code-block:: xml
 
     <source name="CTABackgroundModel" type="CTABackground" instrument="CTA">
         <spatialModel type="...">
@@ -167,7 +173,9 @@ in time.
 The ``<spatialModel>`` may be any of the spatial model components available
 in GammaLib. In particular, a diffuse map cube can be used to provide an
 energy dependent template of the background count rate over the field of
-view::
+view:
+
+.. code-block:: xml
 
     <source name="CTABackgroundModel" type="CTABackground" instrument="CTA">
         <spatialModel type="MapCubeFunction" file="my_background_template.fits">
@@ -190,7 +198,9 @@ omitted, MeV is assumed as unit).
 The ``ConstantValue`` spectrum corresponds to a single scaling factor for
 the background model, which in the above example is fitted in the maximum 
 likelihood analysis. Any spectral model available in GammaLib can be used 
-as the spectral component, such as for example a power law::
+as the spectral component, such as for example a power law:
+
+.. code-block:: xml
 
     <source name="CTABackgroundModel" type="CTABackground" instrument="CTA">
         <spatialModel type="MapCubeFunction" file="my_background_template.fits">
@@ -234,7 +244,9 @@ Effective area
 
 The :math:`A_{\rm eff}(d, p, E, t)` term is described by the abstract
 ``GCTAAeff`` base class. The effective area is determined using
-the::
+the:
+ 
+.. code-block:: cpp
  
     double GCTAAeff::operator()(const double& logE, 
                                 const double& theta = 0.0, 
@@ -410,9 +422,3 @@ a vector column, that describes the axes of the  multi-dimensional response
 cube and the response information. Note that this class may in the future
 be promoted to the GammaLib core, as a similar class has been implemented
 in the *Fermi*/LAT interface. 
-
-
-
-
-
-

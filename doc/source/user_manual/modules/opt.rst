@@ -40,7 +40,7 @@ Example: Optimizing a function
 This example illustrates how the minimum of a quadratic function of 
 the form :math:`f(x)=ax^2+bx+c` can be determined using the optimizer.
 
-The source code is in ``examples/cpp/optimize.cpp``.
+The source code is in ``examples/cpp/optimize/optimize.cpp``.
 
 First, the function to be optimized has to be implemented as a class derived from
 ``GOptimizerFunction``:

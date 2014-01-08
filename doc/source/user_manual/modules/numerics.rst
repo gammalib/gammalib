@@ -72,27 +72,30 @@ Integration and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following code illustrates how integrations and derivatives are
-computed within GammaLib (see ``examples/numerics.cpp`` for the
-source code)::
+computed within GammaLib (see ``examples/cpp/numerics/numerics.cpp`` for the
+source code):
 
-    1  class function : public GFunction {
-    2  public:
-    3      function(const double& sigma) : m_a(1.0/(sigma*std::sqrt(gammalib::twopi))), m_sigma(sigma) {}
-    4      double eval(const double& x) { return m_a*std::exp(-0.5*x*x/(m_sigma*m_sigma)); }
-    5  protected:
-    6      double m_a;
-    7      double m_sigma;
-    8  };
-    9  int main(void) {
-   10      function fct(3.0);
-   11      GIntegral integral(&fct);
-   12      integral.eps(1.0e-8);
-   13      double result = integral.romb(-15.0, +15.0);
-   14      std::cout << "Integral:       " << result << std::endl;
-   15      GDerivative derivative(&fct);
-   16      std::cout << "Derivative(0):  " << derivative.value(0.0) << std::endl;
-   17  return 0;
-   18  }
+.. code-block:: cpp
+   :linenos:
+
+    class function : public GFunction {
+    public:
+        function(const double& sigma) : m_a(1.0/(sigma*std::sqrt(gammalib::twopi))), m_sigma(sigma) {}
+        double eval(const double& x) { return m_a*std::exp(-0.5*x*x/(m_sigma*m_sigma)); }
+    protected:
+        double m_a;
+        double m_sigma;
+    };
+    int main(void) {
+        function fct(3.0);
+        GIntegral integral(&fct);
+        integral.eps(1.0e-8);
+        double result = integral.romb(-15.0, +15.0);
+        std::cout << "Integral:       " << result << std::endl;
+        GDerivative derivative(&fct);
+        std::cout << "Derivative(0):  " << derivative.value(0.0) << std::endl;
+    return 0;
+    }
 
 The function that should be integrated or differentiated is defined in
 lines 1-8 as a class that derives from the abstract ``GFunction`` base
