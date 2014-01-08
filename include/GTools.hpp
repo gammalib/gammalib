@@ -88,9 +88,9 @@ namespace gammalib {
                                               const double& epivot,
                                               const double& gamma);
     bool                     file_exists(const std::string& filename);
-    bool                     isinfinite(const double& x);
-    bool                     isnotanumber(const double& x);
-    bool 					 contains(const std::string& str,
+    bool                     is_infinite(const double& x);
+    bool                     is_notanumber(const double& x);
+    bool                     contains(const std::string& str,
                                       const std::string& substring);
     void                     warning(const std::string& origin,
                                      const std::string& message);
@@ -107,7 +107,7 @@ namespace gammalib {
  * This function has been copied from gnulib.
  ***************************************************************************/
 inline
-bool gammalib::isinfinite(const double& x)
+bool gammalib::is_infinite(const double& x)
 {
   return (x < -DBL_MAX || x > DBL_MAX);
 }
@@ -124,7 +124,7 @@ bool gammalib::isinfinite(const double& x)
  * This function is a very simple kluge. It may not work on all systems.
  ***************************************************************************/
 inline
-bool gammalib::isnotanumber(const double& x)
+bool gammalib::is_notanumber(const double& x)
 {
   return (x != x);
 }

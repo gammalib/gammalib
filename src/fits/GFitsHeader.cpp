@@ -465,7 +465,7 @@ GFitsHeaderCard& GFitsHeader::insert(const int&             cardno,
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (isempty()) {
+    if (is_empty()) {
         if (cardno > 0) {
             throw GException::out_of_range(G_INSERT1, "Header card number",
                                            cardno, size());
@@ -586,7 +586,7 @@ void GFitsHeader::remove(const std::string& keyname)
 void GFitsHeader::extend(const GFitsHeader& header)
 {
     // Do nothing if header is empty
-    if (!header.isempty()) {
+    if (!header.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to

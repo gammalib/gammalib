@@ -258,7 +258,7 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpatialRadialGauss::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -538,7 +538,7 @@ void GModelSpatialRadialGauss::init_members(void)
     m_sigma.free();
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
-    m_sigma.hasgrad(false);  // Radial components never have gradients
+    m_sigma.has_grad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_sigma);

@@ -63,7 +63,7 @@ public:
     GCTAOnOffObservation*       at(const int& index);
     const GCTAOnOffObservation* at(const int& index) const;
     int                         size(void) const;
-    bool                        isempty(void) const;
+    bool                        is_empty(void) const;
     GCTAOnOffObservation*       set(const int& index, const GCTAOnOffObservation& obs);
     GCTAOnOffObservation*       append(const GCTAOnOffObservation& obs);
     GCTAOnOffObservation*       insert(const int& index, const GCTAOnOffObservation& obs);
@@ -157,7 +157,7 @@ int GCTAOnOffObservations::size(void) const
  * Signals if the observation container does not contain any observation.
  ***************************************************************************/
 inline
-bool GCTAOnOffObservations::isempty(void) const
+bool GCTAOnOffObservations::is_empty(void) const
 {
     return (m_obs.empty());
 }

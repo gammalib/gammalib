@@ -396,7 +396,7 @@ GPar& GPars::insert(const int& index, const GPar& par)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (isempty()) {
+    if (is_empty()) {
         if (index > 0) {
             throw GException::out_of_range(G_INSERT1, "Parameter index", index, size());
         }
@@ -563,7 +563,7 @@ void GPars::remove(const std::string& name)
 void GPars::extend(const GPars& pars)
 {
     // Do nothing if parameter container is empty
-    if (!pars.isempty()) {
+    if (!pars.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to
@@ -1325,7 +1325,7 @@ void GPars::update(void)
     for (int i = 0; i < m_pars.size(); ++i) {
 
         // Update only if requested and allowed
-        if (m_pars[i].m_update && m_pars[i].islearn()) {
+        if (m_pars[i].m_update && m_pars[i].is_learn()) {
             m_parfile[m_line[i]] = m_parfile[m_line[i]].substr(0, m_vstart[i]) +
                                    m_pars[i].m_value +
                                    m_parfile[m_line[i]].substr(m_vstop[i]);

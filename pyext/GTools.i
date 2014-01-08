@@ -83,6 +83,6 @@ namespace gammalib {
                                               const double& epivot,
                                               const double& gamma);
     bool                     file_exists(const std::string& filename);
-    bool                     isinfinite(const double& x);
-    bool                     isnotanumber(const double& x);
+    bool                     is_infinite(const double& x);
+    bool                     is_notanumber(const double& x);
 }

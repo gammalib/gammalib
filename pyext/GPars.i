@@ -52,7 +52,7 @@ public:
     GPar&       at(const int& index);
     const GPar& at(const int& index) const;
     int         size(void) const;
-    bool        isempty(void) const;
+    bool        is_empty(void) const;
     GPar&       append(const GPar& par);
     void        append_standard(void);
     GPar&       insert(const int& index, const GPar& par);

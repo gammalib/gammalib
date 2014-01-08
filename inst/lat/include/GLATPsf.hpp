@@ -80,7 +80,7 @@ public:
     int         ncostheta(void) const;
     double      costhetamin(void) const;
     void        costhetamin(const double& ctheta);
-    bool        hasphi(void) const;
+    bool        has_phi(void) const;
     bool        isfront(void) const;
     bool        isback(void) const;
     int         version(void) const;

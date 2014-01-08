@@ -268,7 +268,7 @@ GEnergy& GEnergies::insert(const int& index, const GEnergy& energy)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (isempty()) {
+    if (is_empty()) {
         if (index > 0) {
             throw GException::out_of_range(G_INSERT, index, 0, size()-1);
         }
@@ -325,7 +325,7 @@ void GEnergies::remove(const int& index)
 void GEnergies::extend(const GEnergies& energies)
 {
     // Do nothing if energy container is empty
-    if (!energies.isempty()) {
+    if (!energies.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to
@@ -430,7 +430,7 @@ void GEnergies::read(const GFitsTable& table)
         // Get the unit of the energies. If no TUNIT1 header keyword is
         // found then use MeV
         std::string unit = "MeV";
-        if (table.hascard("TUNIT1")) {
+        if (table.has_card("TUNIT1")) {
             unit = table.string("TUNIT1");
         }
 

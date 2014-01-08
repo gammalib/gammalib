@@ -47,8 +47,8 @@ public:
     virtual GUrl* clone(void) const = 0;
     virtual void  open(const std::string& url, const std::string& mode) = 0;
     virtual void  close(void) = 0;
-    virtual int   getchar(void) const = 0;
-    virtual void  putchar(const int& character) = 0;
+    virtual int   get_char(void) const = 0;
+    virtual void  put_char(const int& character) = 0;
 };
 
 

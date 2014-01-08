@@ -77,8 +77,8 @@ public:
     int           ncostheta(void) const;
     const double& costhetamin(void) const;
     void          costhetamin(const double& ctheta);
-    bool          hasphi(void) const;
-    bool          hasefficiency(void) const;
+    bool          has_phi(void) const;
+    bool          has_efficiency(void) const;
     double        efficiency_factor1(const GEnergy& srcEng) const;
     double        efficiency_factor2(const GEnergy& srcEng) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
@@ -171,7 +171,7 @@ void GLATAeff::costhetamin(const double& ctheta)
  * @return True if effective area has Phi dependence.
  ***************************************************************************/
 inline
-bool GLATAeff::hasphi(void) const
+bool GLATAeff::has_phi(void) const
 {
     return false;
 }

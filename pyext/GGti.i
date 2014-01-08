@@ -47,7 +47,7 @@ public:
     void                  clear(void);
     GGti*                 clone(void) const;
     int                   size(void) const;
-    bool                  isempty(void) const;
+    bool                  is_empty(void) const;
     void                  append(const GTime& tstart, const GTime& tstop);
     void                  insert(const GTime& tstart, const GTime& tstop);
     void                  merge(void);

@@ -514,7 +514,7 @@ void GFitsTableByteCol::init_members(void)
 void GFitsTableByteCol::copy_members(const GFitsTableByteCol& column)
 {
     // Fetch data if necessary
-    bool not_loaded = (!column.isloaded());
+    bool not_loaded = (!column.is_loaded());
     if (not_loaded) {
         column.fetch_data();
     }

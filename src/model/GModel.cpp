@@ -281,7 +281,7 @@ const GModelPar& GModel::at(const int& index) const
  * Searches all parameter names for a match with the specified @p name. If
  * the specified name has been found, true is returned.
  ***************************************************************************/
-bool GModel::haspar(const std::string& name) const
+bool GModel::has_par(const std::string& name) const
 {
     // Default found flag to false
     bool found = false;
@@ -494,7 +494,7 @@ void GModel::ids(const std::string& ids)
  * possible instruments. If the list of applicable observation identifiers
  * is empty, the model applies to all identifiers.
  ***************************************************************************/
-bool GModel::isvalid(const std::string& instrument,
+bool GModel::is_valid(const std::string& instrument,
                      const std::string& id) const
 {
     // Initialise validity

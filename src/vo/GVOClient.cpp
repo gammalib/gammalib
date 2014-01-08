@@ -213,7 +213,7 @@ void GVOClient::disconnect(void)
  *
  * Checks if all mandatory Hub tokens are non-empty.
  ***************************************************************************/
-bool GVOClient::hashub(void) const
+bool GVOClient::has_hub(void) const
 {
     // Return Hub information status
     return (!m_secret.empty() && !m_hub_url.empty() && !m_version.empty());
@@ -227,7 +227,7 @@ bool GVOClient::hashub(void) const
  *
  * Checks if a client is connected to Hub.
  ***************************************************************************/
-bool GVOClient::isconnected(void) const
+bool GVOClient::is_connected(void) const
 {
     // Return
     return false;
@@ -286,7 +286,7 @@ std::string GVOClient::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Name")+m_name);
 
         // Append Hub information
-        if (hashub()) {
+        if (has_hub()) {
             result.append("\n"+gammalib::parformat("Hub key")+m_secret);
             result.append("\n"+gammalib::parformat("Hub URL")+m_hub_url);
             result.append("\n"+gammalib::parformat("Hub host (port)"));
@@ -487,7 +487,7 @@ bool GVOClient::find_hub(void)
             }
 
             // Check for existence of mandatory tokens
-            found = hashub();
+            found = has_hub();
 
         } // endif: SAMP lockfile opened
 
@@ -514,7 +514,7 @@ bool GVOClient::find_hub(void)
  *
  * Connects to Hub by creating a socket and connecting to this socket. The
  * method expects that a Hub has already been found. If no Hub has been found
- * (i.e. hashub() returns false), the method does nothing.
+ * (i.e. has_hub() returns false), the method does nothing.
  *
  * The method extracts the hostname and the port from the Hub endpoint URL.
  * If Hub connection fails, any created socket is closed.

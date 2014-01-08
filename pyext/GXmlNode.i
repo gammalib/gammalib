@@ -85,7 +85,7 @@ public:
     virtual void               clear(void) = 0;
     virtual GXmlNode*          clone(void) const = 0;
     virtual int                size(void) const;
-    virtual bool               isempty(void) const;
+    virtual bool               is_empty(void) const;
     virtual GXmlNode*          set(const int& index, const GXmlNode& node);
     virtual GXmlNode*          append(const GXmlNode& node);
     virtual GXmlElement*       append(const std::string& segment);

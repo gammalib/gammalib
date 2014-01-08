@@ -208,7 +208,7 @@ GSkyPixel& GSkyPixel::operator=(const GSkyPixel& pixel)
 GSkyPixel::operator int() const
 {
     // Throw an exception if pixel is not 1D
-    if (!is1D()) {
+    if (!is_1D()) {
         std::string msg = "Sky map pixel is not 1-dimensional.\n"
                           "Conversion from GSkyPixel to int is only allowed"
                           " for 1-dimensional sky map pixels.";
@@ -233,7 +233,7 @@ GSkyPixel::operator int() const
 GSkyPixel::operator double() const
 {
     // Throw an exception if pixel is not 1D
-    if (!is1D()) {
+    if (!is_1D()) {
         std::string msg = "Sky map pixel is not 1-dimensional.\n"
                           "Conversion from GSkyPixel to double is only allowed"
                           " for 1-dimensional sky map pixels.";
@@ -298,10 +298,10 @@ std::string GSkyPixel::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append pixel
-        if (is1D()) {
+        if (is_1D()) {
             result.append(gammalib::str(x()));
         }
-        else if (is2D()) {
+        else if (is_2D()) {
             result.append("(");
             result.append(gammalib::str(x()));
             result.append(",");

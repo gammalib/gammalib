@@ -216,8 +216,8 @@ Function                       Description
 ``gammalib::plaw_photon_flux`` Compute photon flux under a power law.
 ``gammalib::plaw_energy_flux`` Compute energy flux under a power law.
 ``gammalib::file_exists``      Check whether a file exists.
-``gammalib::isinfinite``       Check whether a double precision value is infinite.
-``gammalib::isnotanumber``     Check whether a double precision value is not a number.
+``gammalib::is_infinite``      Check whether a double precision value is infinite.
+``gammalib::is_notanumber``    Check whether a double precision value is not a number.
 ``gammalib::contains``         Check whether a string contains a sub-string.
 ``gammalib::warning``          Dump warning in console.
 ============================== ===========

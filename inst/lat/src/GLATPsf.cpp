@@ -284,7 +284,7 @@ void GLATPsf::read(const GFits& fits)
     const GFitsTable& hdu_scale = *fits.table("PSF_SCALING_PARAMS");
 
     // Determine PSF version (default version is version 1)
-    int version = (hdu_rpsf.hascard("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
+    int version = (hdu_rpsf.has_card("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
 
     // Determine PSF type
     bool        front  = true;
@@ -451,7 +451,7 @@ void GLATPsf::costhetamin(const double& ctheta)
  *
  * @todo Implement phi dependence
  ***************************************************************************/
-bool GLATPsf::hasphi(void) const
+bool GLATPsf::has_phi(void) const
 {
     // Return
     return false;

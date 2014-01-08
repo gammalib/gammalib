@@ -675,12 +675,12 @@ int GSkymap::pix2inx(const GSkyPixel& pixel) const
     int index = 0;
 
     // Handle 1D sky map pixel
-    if (pixel.is1D()) {
+    if (pixel.is_1D()) {
         index = int(pixel);
     }
 
     // Handle 2D sky map pixel
-    else if (pixel.is2D()) {
+    else if (pixel.is_2D()) {
 
         // Get x and y indices by rounding the (x,y) values
         int ix = int(pixel.x()+0.5);
@@ -891,14 +891,14 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
     bool inmap = false;
 
     // Test 1D pixels
-    if (pixel.is1D()) {
+    if (pixel.is_1D()) {
         if (pixel.index()+0.5 >= 0.0 && pixel.index()-0.5 < m_num_pixels) {
             inmap = true;
         }
     }
 
     // Test 2D pixels
-    else if (pixel.is2D()) {
+    else if (pixel.is_2D()) {
 
         // If pixel is in range then set containment flag to true
         if ((pixel.x()+0.5 >= 0.0 && pixel.x()-0.5 < m_num_x) &&
@@ -949,7 +949,7 @@ void GSkymap::load(const std::string& filename)
         const GFitsHDU& hdu = *fits.at(extno);
         
         // If PIXTYPE keyword equals "HEALPIX" then load map
-        if (hdu.hascard("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+        if (hdu.has_card("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
             read_healpix(static_cast<const GFitsTable&>(hdu));
             loaded = true;
             break;
@@ -1045,7 +1045,7 @@ void GSkymap::read(const GFitsHDU& hdu)
     bool loaded = false;
 
     // If PIXTYPE keyword equals "HEALPIX" then load map
-    if (hdu.hascard("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+    if (hdu.has_card("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
         read_healpix(static_cast<const GFitsTable&>(hdu));
         loaded = true;
     }

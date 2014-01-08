@@ -54,7 +54,7 @@
  * value of a parameter.
  *
  * The minimum and maximum values are optional, and existence of these
- * attributes is tested using the hasmin() and hasmax() methods,
+ * attributes is tested using the has_min() and has_max() methods,
  * respectively. The minimum value, maximum value are removed using the
  * remove_min() and remove_max() methods. Simultaneous removal of minimum
  * and maximum values is done using the remove_range() method.
@@ -65,8 +65,8 @@
  *      analytically (true) or numerically (false)
  *
  * The parameter property @p free is set using the free() and fix()
- * methods and it is retrieved using the isfree() and isfixed() methods.
- * The attribute @p grad is set and retrieved using the has hasgrad()
+ * methods and it is retrieved using the is_free() and is_fixed() methods.
+ * The attribute @p grad is set and retrieved using the has has_grad()
  * methods.
  *
  * Each model parameter is factorized into a @p factor and a @p scale

@@ -229,7 +229,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
         // have to figure out how ... (the diagonal loading was not so
         // successful as it faked early convergence)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (pars[ipar]->isfree()) {
+            if (pars[ipar]->is_free()) {
                 if ((*fct.curvature())(ipar,ipar) == 0.0) {
                     if (m_logger != NULL) {
                         *m_logger << "  Parameter \"" << pars[ipar]->name();
@@ -283,7 +283,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             double grad_max  = 0.0;
             int    grad_imax = -1;
             for (int ipar = 0; ipar < m_npars; ++ipar) {
-                if (pars[ipar]->isfree()) {
+                if (pars[ipar]->is_free()) {
                     double grad = pars[ipar]->factor_gradient();
                     if (grad > grad_max) {
                         grad_max  = grad;
@@ -668,7 +668,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
 
             // Consider only free parameters
-            if (pars[ipar]->isfree()) {
+            if (pars[ipar]->is_free()) {
 
                 // Get actual parameter value and limits
                 double p     = pars[ipar]->factor_value();
@@ -686,7 +686,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
                 #endif
 
                 // Constrain parameter to within the valid range
-                if (pars[ipar]->hasmin() && p < p_min) {
+                if (pars[ipar]->has_min() && p < p_min) {
                     if (m_hit_minimum[ipar] >= m_max_hit) {
                         if (m_logger != NULL) {
                             *m_logger << "  Parameter \"" << pars[ipar]->name();
@@ -708,7 +708,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
                     m_hit_minimum[ipar]++;
                     p = p_min;
                 }
-                else if (pars[ipar]->hasmax() && p > p_max) {
+                else if (pars[ipar]->has_max() && p > p_max) {
                     if (m_hit_maximum[ipar] >= m_max_hit) {
                         if (m_logger != NULL) {
                             *m_logger << "  Parameter \"" << pars[ipar]->name();
@@ -754,7 +754,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         // have to figure out how ... (the diagonal loading was not so
         // successful as it faked early convergence)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (pars[ipar]->isfree()) {
+            if (pars[ipar]->is_free()) {
                 if ((*fct.curvature())(ipar,ipar) == 0.0) {
                     if (m_logger != NULL) {
                         *m_logger << "  Parameter \"" << pars[ipar]->name();
@@ -978,7 +978,7 @@ double GOptimizerLM::step_size(const GVector& grad, const GOptimizerPars& pars)
             double delta = grad[ipar];
 
             // Check if a parameter minimum requires a reduced step size
-            if (pars[ipar]->hasmin()) {
+            if (pars[ipar]->has_min()) {
                 double step_min = (delta < 0.0) ? (p_min - p)/delta : 1.0;
                 if (step_min > 0.0) {
                     if (step_min < step) {
@@ -1000,7 +1000,7 @@ double GOptimizerLM::step_size(const GVector& grad, const GOptimizerPars& pars)
             }
 
             // Check if a parameter maximum requires a reduced step size
-            if (pars[ipar]->hasmax()) {
+            if (pars[ipar]->has_max()) {
                 double step_max = (delta > 0.0) ? (p_max - p)/delta : 1.0;
                 if (step_max > 0.0) {
                     if (step_max < step) {

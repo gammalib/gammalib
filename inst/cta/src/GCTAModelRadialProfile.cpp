@@ -245,7 +245,7 @@ double GCTAModelRadialProfile::eval(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialProfile::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -423,7 +423,7 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Width\" parameter is required to be positive.");
             }
-            if (!m_width.hasmin() || m_width.min() <= 0.0) {
+            if (!m_width.has_min() || m_width.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Width\" parameter requires positive minimum boundary.");
             }
@@ -437,7 +437,7 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Core\" parameter is required to be positive.");
             }
-            if (!m_core.hasmin() || m_core.min() <= 0.0) {
+            if (!m_core.has_min() || m_core.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Core\" parameter requires positive minimum boundary.");
             }
@@ -451,7 +451,7 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Core\" parameter is required to be positive.");
             }
-            if (!m_tail.hasmin() || m_tail.min() <= 0.0) {
+            if (!m_tail.has_min() || m_tail.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Core\" parameter requires positive minimum boundary.");
             }
@@ -601,7 +601,7 @@ void GCTAModelRadialProfile::init_members(void)
     m_width.min(0.1);            // min:     0.1 deg
     m_width.free();
     m_width.gradient(0.0);
-    m_width.hasgrad(false);
+    m_width.has_grad(false);
 
     // Initialise core parameter
     m_core.clear();
@@ -611,7 +611,7 @@ void GCTAModelRadialProfile::init_members(void)
     m_core.min(1.0);             // min:     1.0 (could even be larger)
     m_core.free();
     m_core.gradient(0.0);
-    m_core.hasgrad(false);
+    m_core.has_grad(false);
 
     // Initialise tail parameter
     m_tail.clear();
@@ -621,7 +621,7 @@ void GCTAModelRadialProfile::init_members(void)
     m_tail.min(1.0);             // min:     1.0
     m_tail.fix();
     m_tail.gradient(0.0);
-    m_tail.hasgrad(false);
+    m_tail.has_grad(false);
 
     // Set parameter pointer(s)
     m_pars.clear();

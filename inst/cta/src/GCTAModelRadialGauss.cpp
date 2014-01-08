@@ -237,7 +237,7 @@ double GCTAModelRadialGauss::eval(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -289,7 +289,7 @@ double GCTAModelRadialGauss::eval_gradients(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialGauss::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -442,7 +442,7 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Sigma\" parameter is required to be positive.");
             }
-            if (!m_sigma.hasmin() || m_sigma.min() <= 0.0) {
+            if (!m_sigma.has_min() || m_sigma.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Sigma\" parameter requires positive minimum boundary.");
             }
@@ -580,7 +580,7 @@ void GCTAModelRadialGauss::init_members(void)
     m_sigma.free();
     m_sigma.scale(1.0);
     m_sigma.gradient(0.0);
-    m_sigma.hasgrad(true);
+    m_sigma.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();

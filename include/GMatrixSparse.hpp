@@ -48,7 +48,7 @@ class GSparseNumeric;
 /***********************************************************************//**
  * @class GMatrixSparse
  *
- * @brief Sparse matrix class interface defintion
+ * @brief Sparse matrix class interface definition
  *
  * This class implements a sparse matrix. The class only stores non-zero
  * elements, which can considerably reduce the memory requirements for large
@@ -123,7 +123,7 @@ class GSparseNumeric;
  * the matrix and @p elements is the size of the memory that should be
  * pre-allocated for matrix storage (optional). Storage conversion
  * constructors exist that allow allocating a sparse matrix by copying from
- * a general matrix of type GMatrix and a symmetrix matrix of type
+ * a general matrix of type GMatrix and a symmetric matrix of type
  * GMatrixSymmetric.
  *
  * Because the location of a specific matrix element is not necessarily known
@@ -167,7 +167,7 @@ class GSparseNumeric;
  * 512 is used. If @p entries is set to 0 (the default value), the number of
  * matrix columns is taken as default @p entries value. Note that a too large
  * number of elements will produce some overhead due to fill stack
- * management, hence @p entries should not exceeed a value of the order of
+ * management, hence @p entries should not exceed a value of the order of
  * 10-100.
  *
  * The stack_flush() method flushes the stack, which is mandatory before any

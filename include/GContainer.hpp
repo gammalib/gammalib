@@ -44,7 +44,7 @@
  *     clone      - Clones container (inherited from GBase)
  *     print      - Print container content (inherited from GBase)
  *     size       - Returns number of objects is container
- *     isempty    - Checks if container is empty
+ *     is_empty    - Checks if container is empty
  *     remove     - Removes an object from the container
  *     reserve    - Reserves space in the container
  ***************************************************************************/
@@ -64,7 +64,7 @@ public:
     /// @brief Checks if container is empty
     ///
     /// @return True if no objects are in container, false otherwise.
-    virtual bool isempty(void) const = 0;
+    virtual bool is_empty(void) const = 0;
     
     /// @brief Remove object from container
     ///

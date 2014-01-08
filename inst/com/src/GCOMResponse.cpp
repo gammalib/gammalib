@@ -320,7 +320,7 @@ double GCOMResponse::irf(const GEvent&       event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
         std::cout << "*** ERROR: GCOMResponse::irf:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (irf=" << irf;
@@ -354,7 +354,7 @@ double GCOMResponse::npred(const GPhoton&      photon,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
         std::cout << "*** ERROR: GCOMResponse::npred:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (";

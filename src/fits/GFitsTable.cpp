@@ -860,7 +860,7 @@ void GFitsTable::data_open(void* vptr)
         m_columns[i]->repeat(repeat);
         m_columns[i]->width(width);
         m_columns[i]->length(m_rows);
-        m_columns[i]->isvariable(typecode < 0);
+        m_columns[i]->is_variable(typecode < 0);
         m_columns[i]->connect(FPTR(m_fitsfile));
 
         // Extract column vector size

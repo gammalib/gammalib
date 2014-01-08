@@ -55,7 +55,7 @@
  * value of a parameter.
  *
  * The minimum and maximum values are optional, and existence of these
- * attributes is tested using the hasmin() and hasmax() methods,
+ * attributes is tested using the has_min() and has_max() methods,
  * respectively. The minimum value, maximum value are removed using the
  * remove_min() and remove_max() methods. Simultaneous removal of minimum
  * and maximum values is done using the remove_range() method.
@@ -66,8 +66,8 @@
  *      analytically (true) or numerically (false)
  *
  * The parameter property @p free is set using the free() and fix()
- * methods and it is retrieved using the isfree() and isfixed() methods.
- * The attribute @p grad is set and retrieved using the has hasgrad()
+ * methods and it is retrieved using the is_free() and is_fixed() methods.
+ * The attribute @p grad is set and retrieved using the has has_grad()
  * methods.
  *
  * Each function parameter is factorized into a @p factor and a @p scale
@@ -128,20 +128,20 @@ public:
     void          scale(const double& scale);
 
     // Boundary methods
-    bool hasmin(void) const;
-    bool hasmax(void) const;
-    bool hasrange(void) const;
+    bool has_min(void) const;
+    bool has_max(void) const;
+    bool has_range(void) const;
     void remove_min(void);
     void remove_max(void);
     void remove_range(void);
 
     // Property methods
-    bool isfree(void) const;
-    bool isfixed(void) const;
-    bool hasgrad(void) const;
+    bool is_free(void) const;
+    bool is_fixed(void) const;
+    bool has_grad(void) const;
     void free(void);
     void fix(void);
-    void hasgrad(const bool& grad);
+    void has_grad(const bool& grad);
 
     // Other methods
     void               clear(void);
@@ -169,9 +169,9 @@ protected:
     double      m_factor_max;      //!< Parameter maximum factor
     double      m_scale;           //!< Parameter scaling (true = factor * scale)
     bool        m_free;            //!< Parameter is free
-    bool        m_hasmin;          //!< Parameter has minimum boundary
-    bool        m_hasmax;          //!< Parameter has maximum boundary
-    bool        m_hasgrad;         //!< Parameter has analytic gradient
+    bool        m_has_min;          //!< Parameter has minimum boundary
+    bool        m_has_max;          //!< Parameter has maximum boundary
+    bool        m_has_grad;         //!< Parameter has analytic gradient
 };
 
 
@@ -372,9 +372,9 @@ void GOptimizerPar::factor_gradient(const double& gradient)
  * Signals if the parameter has a minimum boundary.
  ***************************************************************************/
 inline
-bool GOptimizerPar::hasmin(void) const
+bool GOptimizerPar::has_min(void) const
 {
-    return m_hasmin;
+    return m_has_min;
 }
 
 
@@ -386,9 +386,9 @@ bool GOptimizerPar::hasmin(void) const
  * Signals if the parameter has a maximum boundary.
  ***************************************************************************/
 inline
-bool GOptimizerPar::hasmax(void) const
+bool GOptimizerPar::has_max(void) const
 {
-    return m_hasmax;
+    return m_has_max;
 }
 
 
@@ -401,9 +401,9 @@ bool GOptimizerPar::hasmax(void) const
  * Signals if the parameter has a minimum and a maximum boundary.
  ***************************************************************************/
 inline
-bool GOptimizerPar::hasrange(void) const
+bool GOptimizerPar::has_range(void) const
 {
-    return (m_hasmin && m_hasmax);
+    return (m_has_min && m_has_max);
 }
 
 
@@ -415,7 +415,7 @@ bool GOptimizerPar::hasrange(void) const
 inline
 void GOptimizerPar::remove_min(void)
 {
-    m_hasmin = false;
+    m_has_min = false;
     return;
 }
 
@@ -428,7 +428,7 @@ void GOptimizerPar::remove_min(void)
 inline
 void GOptimizerPar::remove_max(void)
 {
-    m_hasmax = false;
+    m_has_max = false;
     return;
 }
 
@@ -441,8 +441,8 @@ void GOptimizerPar::remove_max(void)
 inline
 void GOptimizerPar::remove_range(void)
 {
-    m_hasmin = false;
-    m_hasmax = false;
+    m_has_min = false;
+    m_has_max = false;
     return;
 }
 
@@ -456,7 +456,7 @@ void GOptimizerPar::remove_range(void)
  * parameter optimization process.
  ***************************************************************************/
 inline
-bool GOptimizerPar::isfree(void) const
+bool GOptimizerPar::is_free(void) const
 {
     return m_free;
 }
@@ -471,7 +471,7 @@ bool GOptimizerPar::isfree(void) const
  * parameter optimization process.
  ***************************************************************************/
 inline
-bool GOptimizerPar::isfixed(void) const
+bool GOptimizerPar::is_fixed(void) const
 {
     return (!m_free);
 }
@@ -488,9 +488,9 @@ bool GOptimizerPar::isfixed(void) const
  * which gradients need to be computed numerically.
  ***************************************************************************/
 inline
-bool GOptimizerPar::hasgrad(void) const
+bool GOptimizerPar::has_grad(void) const
 {
-    return m_hasgrad;
+    return m_has_grad;
 }
 
 
@@ -533,9 +533,9 @@ void GOptimizerPar::fix(void)
  * numerically.
  ***************************************************************************/
 inline
-void GOptimizerPar::hasgrad(const bool& grad)
+void GOptimizerPar::has_grad(const bool& grad)
 {
-    m_hasgrad = grad;
+    m_has_grad = grad;
     return;
 }
 

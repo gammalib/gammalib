@@ -162,39 +162,39 @@ void TestGApplication::test_GPar(void)
     // Test integer parameter exceptions
     GPar par;
     par = GPar("name", "i", "a", "INDEF", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check integer parameter INDEF.",
+    test_assert(par.is_undefined(), "Check integer parameter INDEF.",
                 par.value()+" found instead of undefined value.");
     par = GPar("name", "i", "a", "NONE", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check integer parameter NONE.",
+    test_assert(par.is_undefined(), "Check integer parameter NONE.",
                 par.value()+" found instead of undefined value.");
     par = GPar("name", "i", "a", "UNDEF", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check integer parameter UNDEF.",
+    test_assert(par.is_undefined(), "Check integer parameter UNDEF.",
                 par.value()+" found instead of undefined value.");
     par = GPar("name", "i", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check integer parameter UNDEFINED.",
+    test_assert(par.is_undefined(), "Check integer parameter UNDEFINED.",
                 par.value()+" found instead of undefined value.");
 
     // Test floating point parameter exceptions
     par = GPar("name", "r", "a", "INDEF", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check floating point parameter INDEF.",
+    test_assert(par.is_undefined(), "Check floating point parameter INDEF.",
                 par.value()+" found instead of undefined value.");
     par = GPar("name", "r", "a", "NONE", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check floating point parameter NONE.",
+    test_assert(par.is_undefined(), "Check floating point parameter NONE.",
                 par.value()+" found instead of undefined value.");
     par = GPar("name", "r", "a", "UNDEF", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check floating point parameter UNDEF.",
+    test_assert(par.is_undefined(), "Check floating point parameter UNDEF.",
                 par.value()+" found instead of undefined value.");
     par = GPar("name", "r", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
-    test_assert(par.isundefined(), "Check floating point parameter UNDEFINED.",
+    test_assert(par.is_undefined(), "Check floating point parameter UNDEFINED.",
                 par.value()+" found instead of undefined value.");
     par = GPar("name", "r", "a", "INF", "0.0", "2.0", "Parameter name");
-    test_assert(par.isnotanumber(), "Check floating point parameter INF.",
+    test_assert(par.is_notanumber(), "Check floating point parameter INF.",
                 par.value()+" found instead of infinite value.");
     par = GPar("name", "r", "a", "INFINITY", "0.0", "2.0", "Parameter name");
-    test_assert(par.isnotanumber(), "Check floating point parameter INFINITY.",
+    test_assert(par.is_notanumber(), "Check floating point parameter INFINITY.",
                 par.value()+" found instead of infinite value.");
     par = GPar("name", "r", "a", "NAN", "0.0", "2.0", "Parameter name");
-    test_assert(par.isnotanumber(), "Check floating point parameter NAN.",
+    test_assert(par.is_notanumber(), "Check floating point parameter NAN.",
                 par.value()+" found instead of not a number.");
 
     // Return

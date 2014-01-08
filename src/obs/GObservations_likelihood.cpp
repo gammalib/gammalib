@@ -319,7 +319,7 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
     // Copy over the parameter gradients for all parameters that are
     // free (so that we can access the gradients from outside)
     for (int ipar = 0; ipar < pars.size(); ++ipar) {
-        if (pars[ipar]->isfree()) {
+        if (pars[ipar]->is_free()) {
             GOptimizerPar* par = const_cast<GOptimizerPar*>(pars[ipar]);
             par->factor_gradient((*m_gradient)[ipar]);
         }

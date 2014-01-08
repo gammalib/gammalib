@@ -45,8 +45,8 @@ public:
     // Implement pure virtual base class methods
     virtual void          clear(void);
     virtual GCOMResponse* clone(void) const;
-    virtual bool          hasedisp(void) const;
-    virtual bool          hastdisp(void) const;
+    virtual bool          has_edisp(void) const;
+    virtual bool          has_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;

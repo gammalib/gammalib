@@ -555,7 +555,7 @@ void GLATEventList::read_events(const GFitsTable& table)
                 std::sprintf(keyword, "DIFRSP%d", k);
 
                 // Get DIFRSP label
-                if (table.hascard(std::string(keyword))) {
+                if (table.has_card(std::string(keyword))) {
                     m_difrsp_label.push_back(table.string(std::string(keyword)));
                 }
                 else {
@@ -616,7 +616,7 @@ void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
 
             // Get DSTYPnn
             std::sprintf(keyword, "DSTYP%d", i+1);
-            if (hdu.hascard(std::string(keyword))) {
+            if (hdu.has_card(std::string(keyword))) {
                 m_ds_type.push_back(hdu.string(std::string(keyword)));
             }
             else {
@@ -625,7 +625,7 @@ void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
 
             // Get DSUNInn
             std::sprintf(keyword, "DSUNI%d", i+1);
-            if (hdu.hascard(std::string(keyword))) {
+            if (hdu.has_card(std::string(keyword))) {
                 m_ds_unit.push_back(hdu.string(std::string(keyword)));
             }
             else {
@@ -634,7 +634,7 @@ void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
 
             // Get DSVALnn
             std::sprintf(keyword, "DSVAL%d", i+1);
-            if (hdu.hascard(std::string(keyword))) {
+            if (hdu.has_card(std::string(keyword))) {
                 m_ds_value.push_back(hdu.string(std::string(keyword)));
             }
             else {
@@ -643,7 +643,7 @@ void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
 
             // Get DSREFnn
             std::sprintf(keyword, "DSREF%d", i+1);
-            if (hdu.hascard(std::string(keyword))) {
+            if (hdu.has_card(std::string(keyword))) {
                 m_ds_reference.push_back(hdu.string(std::string(keyword)));
             }
             else {

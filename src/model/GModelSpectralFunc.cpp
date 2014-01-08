@@ -257,7 +257,7 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralFunc::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -310,14 +310,14 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng,
     double value  = m_norm.value() * func;
 
     // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.isfree())  ? m_norm.scale() * func : 0.0;
+    double g_norm  = (m_norm.is_free())  ? m_norm.scale() * func : 0.0;
 
     // Set gradients
     m_norm.factor_gradient(g_norm);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralFunc::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -754,7 +754,7 @@ void GModelSpectralFunc::init_members(void)
     m_norm.range(0.0,1000.0);
     m_norm.free();
     m_norm.gradient(0.0);
-    m_norm.hasgrad(true);
+    m_norm.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();

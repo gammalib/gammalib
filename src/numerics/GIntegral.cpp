@@ -224,7 +224,7 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (isnotanumber(s[m_iter]) || isinfinite(s[m_iter])) {
+            if (is_notanumber(s[m_iter]) || is_infinite(s[m_iter])) {
                 std::cout << "*** ERROR: GIntegral::romb";
                 std::cout << "(a=" << a << ", b=" << b << ", k=" << k << "):";
                 std::cout << " NaN/Inf encountered";

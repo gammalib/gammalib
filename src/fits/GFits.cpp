@@ -912,7 +912,7 @@ void GFits::remove(const std::string& extname)
 void GFits::extend(const GFits& fits)
 {
     // Do nothing if FITS file is empty
-    if (!fits.isempty()) {
+    if (!fits.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to

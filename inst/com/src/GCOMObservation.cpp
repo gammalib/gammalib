@@ -841,8 +841,8 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Read observation information
-        m_obs_id = (hdu->hascard("OBS_ID")) ? hdu->real("OBS_ID") : 0;
-        m_name   = (hdu->hascard("OBJECT")) ? hdu->string("OBJECT") : "unknown";
+        m_obs_id = (hdu->has_card("OBS_ID")) ? hdu->real("OBS_ID") : 0;
+        m_name   = (hdu->has_card("OBJECT")) ? hdu->string("OBJECT") : "unknown";
 
         // Compute ontime
         double tstart = hdu->real("TSTART");

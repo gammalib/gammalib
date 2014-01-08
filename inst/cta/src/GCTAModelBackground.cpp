@@ -570,7 +570,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 
 	        // Debug: Check for NaN
 	        #if defined(G_NAN_CHECK)
-	        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+	        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
 	            std::cout << "*** ERROR: GCTAModelBackground::npred:";
 	            std::cout << " NaN/Inf encountered";
 	            std::cout << " (npred=" << npred;
@@ -1255,7 +1255,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(const double& theta)
 
 			// Debug: Check for NaN
 			#if defined(G_NAN_CHECK)
-			if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+			if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
 				std::cout << "*** ERROR: GCTAModelBackground::npred_roi_kern_theta::eval";
 				std::cout << "(theta=" << theta << "):";
 				std::cout << " NaN/Inf encountered";
@@ -1314,7 +1314,7 @@ double GCTAModelBackground::npred_roi_kern_phi::eval(const double& phi)
 
 	// Debug: Check for NaN
 	#if defined(G_NAN_CHECK)
-	if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+	if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
 		std::cout << "*** ERROR: GCTAModelBackground::npred_roi_kern_phi::eval";
 		std::cout << "(phi=" << phi << "):";
 		std::cout << " NaN/Inf encountered";

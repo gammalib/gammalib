@@ -59,7 +59,7 @@ public:
     int          ncostheta(void) const;
     //double       costhetamin(void) const;
     //void         costhetamin(const double& ctheta);
-    bool         hasphi(void) const;
+    bool         has_phi(void) const;
 };
 
 

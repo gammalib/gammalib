@@ -67,8 +67,8 @@ public:
     const int&         extno(void) const;
     void               extno(const int& extno);
     GFitsHeader&       header(void);
-    bool               hascard(const int& cardno) const;
-    bool               hascard(const std::string& keyname) const;
+    bool               has_card(const int& cardno) const;
+    bool               has_card(const std::string& keyname) const;
     GFitsHeaderCard&   card(const int& cardno);
     GFitsHeaderCard&   card(const std::string& keyname);
     void               card(const GFitsHeaderCard& card);

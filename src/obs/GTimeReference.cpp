@@ -260,21 +260,21 @@ GTimeReference* GTimeReference::clone(void) const
 void GTimeReference::read(const GFitsHDU& hdu)
 {
     // Get reference MJD
-    double mjdref  = (hdu.hascard("MJDREF"))  ? hdu.real("MJDREF") : 0.0;
-    int    mjdrefi = (hdu.hascard("MJDREFI")) ? hdu.integer("MJDREFI") : 0;
-    double mjdreff = (hdu.hascard("MJDREFF")) ? hdu.real("MJDREFF") : 0.0;
+    double mjdref  = (hdu.has_card("MJDREF"))  ? hdu.real("MJDREF") : 0.0;
+    int    mjdrefi = (hdu.has_card("MJDREFI")) ? hdu.integer("MJDREFI") : 0;
+    double mjdreff = (hdu.has_card("MJDREFF")) ? hdu.real("MJDREFF") : 0.0;
 
     // Get remaining keywords. To accept a large variety of FITS headers,
     // all keywords are optionally.
-    std::string timeunit = (hdu.hascard("TIMEUNIT")) ? hdu.string("TIMEUNIT") : "s";
-    std::string timesys  = (hdu.hascard("TIMESYS"))  ? hdu.string("TIMESYS")  : "TT";
-    std::string timeref  = (hdu.hascard("TIMEREF"))  ? hdu.string("TIMEREF")  : "LOCAL";
+    std::string timeunit = (hdu.has_card("TIMEUNIT")) ? hdu.string("TIMEUNIT") : "s";
+    std::string timesys  = (hdu.has_card("TIMESYS"))  ? hdu.string("TIMESYS")  : "TT";
+    std::string timeref  = (hdu.has_card("TIMEREF"))  ? hdu.string("TIMEREF")  : "LOCAL";
 
     // Set time reference
-    if (hdu.hascard("MJDREF")) {
+    if (hdu.has_card("MJDREF")) {
         set(mjdref, timeunit, timesys, timeref);
     }
-    else if (hdu.hascard("MJDREFI") && hdu.hascard("MJDREFF")) {
+    else if (hdu.has_card("MJDREFI") && hdu.has_card("MJDREFF")) {
         set(mjdrefi, mjdreff, timeunit, timesys, timeref);
     }
     else {
@@ -310,7 +310,7 @@ void GTimeReference::read(const GFitsHDU& hdu)
 void GTimeReference::write(GFitsHDU& hdu) const
 {
    // Case A: use floating point reference MJD
-   if (hdu.hascard("MJDREF")) {
+   if (hdu.has_card("MJDREF")) {
        hdu.card("MJDREF",   mjdref(),   "[days] Time reference MJD");
        hdu.card("TIMEUNIT", timeunit(), "Time unit");
        hdu.card("TIMESYS",  timesys(),  "Time system");

@@ -269,7 +269,7 @@ double GModelSpectralBrokenPlaw::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralBrokenPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -339,16 +339,16 @@ double GModelSpectralBrokenPlaw::eval_gradients(const GEnergy& srcEng,
     double value = m_norm.value() * m_last_power;
 
     // Compute normalisation gradient
-    double g_norm  = (m_norm.isfree())
+    double g_norm  = (m_norm.is_free())
                      ? m_norm.scale() * m_last_power : 0.0;
     m_norm.factor_gradient(g_norm);
 
     // Compute index and break value gradients
     if (srcEng.MeV() < m_breakenergy.value()) {
-        double g_index = (m_index1.isfree()) 
+        double g_index = (m_index1.is_free()) 
                          ? value * m_index1.scale() * m_last_log_e_norm
                          : 0.0;
-        double g_break = (m_breakenergy.isfree())
+        double g_break = (m_breakenergy.is_free())
                          ? -value * m_last_index1 / m_breakenergy.factor_value()
                          : 0.0;
         m_index1.factor_gradient(g_index);
@@ -356,10 +356,10 @@ double GModelSpectralBrokenPlaw::eval_gradients(const GEnergy& srcEng,
         m_breakenergy.factor_gradient(g_break);
     }
     else {
-        double g_index = (m_index2.isfree()) 
+        double g_index = (m_index2.is_free()) 
                          ? value * m_index2.scale() * m_last_log_e_norm
                          : 0.0;
-        double g_break = (m_breakenergy.isfree())
+        double g_break = (m_breakenergy.is_free())
                          ? -value * m_last_index2 / m_breakenergy.factor_value()
                          : 0.0;
         m_index1.factor_gradient(0.0);
@@ -369,7 +369,7 @@ double GModelSpectralBrokenPlaw::eval_gradients(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpectralBrokenPlaw::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -801,7 +801,7 @@ void GModelSpectralBrokenPlaw::init_members(void)
     m_norm.min(0.0);            // min:     0.0
     m_norm.free();
     m_norm.gradient(0.0);
-    m_norm.hasgrad(true);
+    m_norm.has_grad(true);
 
     // Initialise powerlaw index1
     m_index1.clear();
@@ -811,7 +811,7 @@ void GModelSpectralBrokenPlaw::init_members(void)
     m_index1.range(-10.0,+10.0); // range:   [-10,+10]
     m_index1.free();
     m_index1.gradient(0.0);
-    m_index1.hasgrad(true);
+    m_index1.has_grad(true);
 
     // Initialise powerlaw index2
     m_index2.clear();
@@ -821,7 +821,7 @@ void GModelSpectralBrokenPlaw::init_members(void)
     m_index2.range(-10.0,+10.0); // range:   [-10,+10]
     m_index2.free();
     m_index2.gradient(0.0);
-    m_index2.hasgrad(true);
+    m_index2.has_grad(true);
 
     // Initialise break energy
     m_breakenergy.clear();
@@ -831,7 +831,7 @@ void GModelSpectralBrokenPlaw::init_members(void)
     m_breakenergy.value(100.0);  // default: 100
     m_breakenergy.fix();
     m_breakenergy.gradient(0.0);
-    m_breakenergy.hasgrad(true);
+    m_breakenergy.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();

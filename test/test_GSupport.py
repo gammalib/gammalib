@@ -99,7 +99,7 @@ class Test(GPythonTestSuite):
         # Test file writing
         url = GUrlFile("test_url.dat", "w")
         self.test_value(url.write("abcd", 4), 4)
-        url.putchar(ord("e"))
+        url.put_char(ord("e"))
         url.close()
 
         # Test file reading
@@ -122,7 +122,7 @@ class Test(GPythonTestSuite):
         # Test writing
         url = GUrlString()
         self.test_value(url.write("abcd", 4), 4)
-        url.putchar(ord("e"))
+        url.put_char(ord("e"))
 
         # Test reading
         url.rewind()

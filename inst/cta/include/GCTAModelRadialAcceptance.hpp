@@ -67,7 +67,7 @@ public:
     virtual void                       clear(void);
     virtual GCTAModelRadialAcceptance* clone(void) const;
     virtual std::string                type(void) const;
-    virtual bool                       isconstant(void) const;
+    virtual bool                       is_constant(void) const;
     virtual double                     eval(const GEvent& event,
                                             const GObservation& obs) const;
     virtual double                     eval_gradients(const GEvent& event,
@@ -146,7 +146,7 @@ std::string GCTAModelRadialAcceptance::type(void) const
  * is a model that has a temporal component of type "Constant".
  ***************************************************************************/
 inline
-bool GCTAModelRadialAcceptance::isconstant(void) const
+bool GCTAModelRadialAcceptance::is_constant(void) const
 {
     return (m_temporal != NULL && m_temporal->type() == "Constant");
 }

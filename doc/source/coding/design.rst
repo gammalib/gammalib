@@ -373,13 +373,7 @@ will remain open. Typically, these methods take a ``GFits*`` or a
 ``GFitsHDU*`` pointer as argument.
 
 Methods that perform checks should return a bool type and should start
-with the prefix ``is`` or ``has``. Examples are:
-
-.. code-block:: cpp
-
-    islong()
-    isin()
-    hasedisp()
+with the prefix ``is_`` or ``has_``, e.g. ``is_empty()`` or ``has_min()``.
 
 Method const declarations
 ^^^^^^^^^^^^^^^^^^^^^^^^^

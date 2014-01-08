@@ -514,7 +514,7 @@ void GFitsTableLongLongCol::init_members(void)
 void GFitsTableLongLongCol::copy_members(const GFitsTableLongLongCol& column)
 {
     // Fetch data if necessary
-    bool not_loaded = (!column.isloaded());
+    bool not_loaded = (!column.is_loaded());
     if (not_loaded) {
         column.fetch_data();
     }

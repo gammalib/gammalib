@@ -48,8 +48,8 @@ public:
     virtual GUrlFile* clone(void) const;
     virtual void      open(const std::string& url, const std::string& mode);
     virtual void      close(void);
-    virtual int       getchar(void) const;
-    virtual void      putchar(const int& character);
+    virtual int       get_char(void) const;
+    virtual void      put_char(const int& character);
 };
 
 

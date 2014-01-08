@@ -59,7 +59,7 @@ public:
     void           clear(void);
     GPhotons*      clone(void) const;
     int            size(void) const;
-    bool           isempty(void) const;
+    bool           is_empty(void) const;
     void           append(const GPhoton& photon);
     void           insert(const int& index, const GPhoton& photon);
     void           remove(const int& index);
@@ -96,7 +96,7 @@ int GPhotons::size(void) const
  * @return True if there are no photons.
  ***************************************************************************/
 inline
-bool GPhotons::isempty(void) const
+bool GPhotons::is_empty(void) const
 {
     return m_photons.empty();
 }

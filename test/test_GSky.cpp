@@ -280,8 +280,8 @@ void TestGSky::test_GSkyPixel(void)
     test_try("Test 1D constructor (int version)");
     try {
         GSkyPixel pixel(41);
-        test_assert(pixel.is1D(), "Pixel is not 1D");
-        test_assert(!pixel.is2D(), "Pixel is 2D but it should be 1D");
+        test_assert(pixel.is_1D(), "Pixel is not 1D");
+        test_assert(!pixel.is_2D(), "Pixel is 2D but it should be 1D");
         test_value(pixel.size(), 1);
         test_value(pixel.index(), 41.0);
         test_try_success();
@@ -294,8 +294,8 @@ void TestGSky::test_GSkyPixel(void)
     test_try("Test 1D constructor (double version)");
     try {
         GSkyPixel pixel(41.001);
-        test_assert(pixel.is1D(), "Pixel is not 1D");
-        test_assert(!pixel.is2D(), "Pixel is 2D but it should be 1D");
+        test_assert(pixel.is_1D(), "Pixel is not 1D");
+        test_assert(!pixel.is_2D(), "Pixel is 2D but it should be 1D");
         test_value(pixel.size(), 1);
         test_value(pixel.index(), 41.001);
         test_try_success();
@@ -308,8 +308,8 @@ void TestGSky::test_GSkyPixel(void)
     test_try("Test 2D constructor (int version)");
     try {
         GSkyPixel pixel(41,14);
-        test_assert(!pixel.is1D(), "Pixel is 1D but it should be 2D");
-        test_assert(pixel.is2D(), "Pixel is not 2D");
+        test_assert(!pixel.is_1D(), "Pixel is 1D but it should be 2D");
+        test_assert(pixel.is_2D(), "Pixel is not 2D");
         test_value(pixel.size(), 2);
         test_value(pixel.x(), 41.0);
         test_value(pixel.y(), 14.0);
@@ -323,8 +323,8 @@ void TestGSky::test_GSkyPixel(void)
     test_try("Test 2D constructor (double version)");
     try {
         GSkyPixel pixel(41.001,14.003);
-        test_assert(!pixel.is1D(), "Pixel is 1D but it should be 2D");
-        test_assert(pixel.is2D(), "Pixel is not 2D");
+        test_assert(!pixel.is_1D(), "Pixel is 1D but it should be 2D");
+        test_assert(pixel.is_2D(), "Pixel is not 2D");
         test_value(pixel.size(), 2);
         test_value(pixel.x(), 41.001);
         test_value(pixel.y(), 14.003);

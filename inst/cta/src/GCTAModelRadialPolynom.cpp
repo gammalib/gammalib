@@ -101,7 +101,7 @@ GCTAModelRadialPolynom::GCTAModelRadialPolynom(const std::vector<double>& coeffs
         par.free();
         par.scale(1.0);
         par.gradient(0.0);
-        par.hasgrad(true);
+        par.has_grad(true);
 
         // Push coefficient on list
         m_coeffs.push_back(par);
@@ -272,7 +272,7 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialPolynom::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -350,7 +350,7 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialPolynom::eval_gradients";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -811,7 +811,7 @@ void GCTAModelRadialPolynom::update_pars(void)
     for (int i = 0; i < ncoeffs; ++i) {
 
         // Signal that we have gradients
-        m_coeffs[i].hasgrad(true);
+        m_coeffs[i].has_grad(true);
 
         // Set pointer
         m_pars.push_back(&(m_coeffs[i]));

@@ -47,7 +47,7 @@ public:
     GOptimizerPars* clone(void) const;
     GOptimizerPar*  at(const int& index);
     int             size(void) const;
-    bool            isempty(void) const;
+    bool            is_empty(void) const;
     int             nfree(void) const;
     GOptimizerPar*  set(const int& index, const GOptimizerPar& par);
     GOptimizerPar*  set(const std::string& name, const GOptimizerPar& par);

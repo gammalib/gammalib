@@ -46,7 +46,7 @@ public:
     void      clear(void);
     GPhotons* clone(void) const;
     int       size(void) const;
-    bool      isempty(void) const;
+    bool      is_empty(void) const;
     void      append(const GPhoton& photon);
     void      insert(const int& index, const GPhoton& photon);
     void      remove(const int& index);

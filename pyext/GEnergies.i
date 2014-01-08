@@ -51,7 +51,7 @@ public:
     GEnergies* clone(void) const;
     GEnergy&   at(const int& index);
     int        size(void) const;
-    bool       isempty(void) const;
+    bool       is_empty(void) const;
     GEnergy&   append(const GEnergy& energy);
     GEnergy&   insert(const int& index, const GEnergy& energy);
     void       remove(const int& index);

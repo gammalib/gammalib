@@ -39,7 +39,7 @@
  * either a physical event occuring in the instrument (called an event
  * atom) or a collection of events with similar properties (called an
  * event bin). While event atoms are used for unbinned analysis, event bins
- * are used for binned analysis. The methods isatom() and isbin() inform
+ * are used for binned analysis. The methods is_atom() and is_bin() inform
  * whether an event is an atom or a bin.
  *
  * Each event has 3 attributes: energy, instrument direction and time.
@@ -80,8 +80,8 @@ public:
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const = 0;
     virtual double          error(void) const = 0;
-    virtual bool            isatom(void) const = 0;
-    virtual bool            isbin(void) const = 0;
+    virtual bool            is_atom(void) const = 0;
+    virtual bool            is_bin(void) const = 0;
 };
 
 

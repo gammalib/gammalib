@@ -107,7 +107,7 @@ public:
     GObservation*       at(const int& index);
     const GObservation* at(const int& index) const;
     int                 size(void) const;
-    bool                isempty(void) const;
+    bool                is_empty(void) const;
     GObservation*       set(const int& index, const GObservation& obs);
     GObservation*       append(const GObservation& obs);
     GObservation*       insert(const int& index, const GObservation& obs);
@@ -232,7 +232,7 @@ int GObservations::size(void) const
  * Signals if the observation container does not contain any observation.
  ***************************************************************************/
 inline
-bool GObservations::isempty(void) const
+bool GObservations::is_empty(void) const
 {
     return (m_obs.empty());
 }

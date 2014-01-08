@@ -257,7 +257,7 @@ void GModelPar::read(const GXmlElement& xml)
     arg = xml.attribute("min");
     if (arg != "") {
         m_factor_min = gammalib::todouble(arg);
-        m_hasmin     = true;
+        m_has_min     = true;
     }
     else {
         remove_min();
@@ -267,7 +267,7 @@ void GModelPar::read(const GXmlElement& xml)
     arg = xml.attribute("max");
     if (arg != "") {
         m_factor_max = gammalib::todouble(arg);
-        m_hasmax     = true;
+        m_has_max     = true;
     }
     else {
         remove_max();
@@ -284,7 +284,7 @@ void GModelPar::read(const GXmlElement& xml)
 
     // If there is a minimum and maximum, make sure that the maximum is
     // not smaller than the minimum
-    if (m_hasmin && m_hasmax) {
+    if (m_has_min && m_has_max) {
         if (m_factor_min > m_factor_max) {
             std::string msg = "The model parameter \""+m_name+
                               "\" in the XML document has a minimum boundary "+
@@ -296,7 +296,7 @@ void GModelPar::read(const GXmlElement& xml)
     }
 
     // If there is a minimum, make sure that the value is not below it
-    if (m_hasmin && m_factor_value < m_factor_min) {
+    if (m_has_min && m_factor_value < m_factor_min) {
         std::string msg = "The model parameter \""+m_name+
                           "\" in the XML document has a value "+
                             gammalib::str(m_factor_value)+
@@ -306,7 +306,7 @@ void GModelPar::read(const GXmlElement& xml)
     }
 
     // If there is a maximum, make sure that the value is not above it
-    if (m_hasmax && m_factor_value > m_factor_max) {
+    if (m_has_max && m_factor_value > m_factor_max) {
         std::string msg = "The model parameter \""+m_name+
                           "\" in the XML document has a value "+
                             gammalib::str(m_factor_value)+
@@ -343,7 +343,7 @@ void GModelPar::write(GXmlElement& xml) const
     xml.attribute("value", gammalib::str(m_factor_value));
 
     // Set error (only if parameter is free)
-    if (isfree()) {
+    if (is_free()) {
         xml.attribute("error", gammalib::str(m_factor_error));
     }
 
@@ -351,17 +351,17 @@ void GModelPar::write(GXmlElement& xml) const
     xml.attribute("scale", gammalib::str(m_scale));
 
     // Set minimum
-    if (hasmin()) {
+    if (has_min()) {
         xml.attribute("min", gammalib::str(m_factor_min));
     }
 
     // Set maximum
-    if (hasmax()) {
+    if (has_max()) {
         xml.attribute("max", gammalib::str(m_factor_max));
     }
 
     // Set free/fix flag
-    if (isfree()) {
+    if (is_free()) {
         xml.attribute("free", "1");
     }
     else {

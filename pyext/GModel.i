@@ -48,7 +48,7 @@ public:
     virtual void        clear(void) = 0;
     virtual GModel*     clone(void) const = 0;
     virtual std::string type(void) const = 0;
-    virtual bool        isconstant(void) const = 0;
+    virtual bool        is_constant(void) const = 0;
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const = 0;
     virtual double      eval_gradients(const GEvent& event,
@@ -61,7 +61,7 @@ public:
     // Implemented methods
     int                 size(void) const;
     GModelPar&          at(const int& index);
-    bool                haspar(const std::string& name) const;
+    bool                has_par(const std::string& name) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
     std::string         instruments(void) const;
@@ -70,7 +70,7 @@ public:
     void                scale(const GModelPar& par);
     std::string         ids(void) const;
     void                ids(const std::string& ids);
-    bool                isvalid(const std::string& instruments,
+    bool                is_valid(const std::string& instruments,
                                 const std::string& ids) const;
 };
 

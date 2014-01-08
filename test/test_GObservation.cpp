@@ -98,28 +98,28 @@ void TestGObservation::test_ebounds(void)
     // Manipulate energy boudaries starting from an empty object
     GEbounds ebds;
     test_value(ebds.size(), 0, "GEbounds should have zero size.");
-    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_assert(ebds.is_empty(), "GEbounds should be empty.");
     test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
     test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
 
     // Add empty interval
     ebds.append(GEnergy(1.0, "MeV"), GEnergy(1.0, "MeV"));
     test_value(ebds.size(), 0, "GEbounds should have zero size.");
-    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_assert(ebds.is_empty(), "GEbounds should be empty.");
     test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
     test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
 
     // Add one interval
     ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
     test_value(ebds.size(), 1, "GEbounds should have 1 element.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 10.0, 1.0e-10, "Maximum energy should be 10.");
 
     // Remove interval
     ebds.remove(0);
     test_value(ebds.size(), 0, "GEbounds should have zero size.");
-    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_assert(ebds.is_empty(), "GEbounds should be empty.");
     test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
     test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
 
@@ -127,14 +127,14 @@ void TestGObservation::test_ebounds(void)
     ebds.append(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     ebds.append(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
     // Clear object
     ebds.clear();
     test_value(ebds.size(), 0, "GEbounds should have zero size.");
-    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_assert(ebds.is_empty(), "GEbounds should be empty.");
     test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
     test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
 
@@ -143,7 +143,7 @@ void TestGObservation::test_ebounds(void)
     ebds.append(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
     ebds.append(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
@@ -152,7 +152,7 @@ void TestGObservation::test_ebounds(void)
     ebds.insert(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     ebds.insert(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
@@ -161,7 +161,7 @@ void TestGObservation::test_ebounds(void)
     ebds.insert(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
     ebds.insert(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
@@ -170,7 +170,7 @@ void TestGObservation::test_ebounds(void)
     ebds.merge(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     ebds.merge(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
     test_value(ebds.size(), 1, "GEbounds should have 1 element.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
@@ -179,15 +179,15 @@ void TestGObservation::test_ebounds(void)
     ebds.merge(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
     ebds.merge(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     test_value(ebds.size(), 1, "GEbounds should have 1 element.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
     // Check linear boundaries
     ebds.clear();
-    ebds.setlin(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"));
+    ebds.set_lin(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"));
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
     test_value(ebds.emin(1).MeV(), 2.0, 1.0e-10, "Bin 1 minimum energy should be 2.");
     test_value(ebds.emax(0).MeV(), 2.0, 1.0e-10, "Bin 0 maximum energy should be 2.");
@@ -197,9 +197,9 @@ void TestGObservation::test_ebounds(void)
 
     // Check logarithmic boundaries
     ebds.clear();
-    ebds.setlog(2, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.set_log(2, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
     test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Bin 1 minimum energy should be 10.");
     test_value(ebds.emax(0).MeV(), 10.0, 1.0e-10, "Bin 0 maximum energy should be 10.");
@@ -211,7 +211,7 @@ void TestGObservation::test_ebounds(void)
     GEbounds ext(1, GEnergy(100.0, "MeV"), GEnergy(1000.0, "MeV"));
     ebds.extend(ext);
     test_value(ebds.size(), 3, "GEbounds should have 3 elements.");
-    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
     test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Bin 1 minimum energy should be 10.");
     test_value(ebds.emin(2).MeV(), 100.0, 1.0e-10, "Bin 2 minimum energy should be 100.");
@@ -244,28 +244,28 @@ void TestGObservation::test_gti(void)
     // Manipulate GTIs starting from an empty object
     GGti gti;
     test_value(gti.size(), 0, "GGti should have zero size.");
-    test_assert(gti.isempty(), "GGti should be empty.");
+    test_assert(gti.is_empty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
     test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
 
     // Add empty interval
     gti.append(GTime(1.0), GTime(1.0));
     test_value(gti.size(), 0, "GGti should have zero size.");
-    test_assert(gti.isempty(), "GGti should be empty.");
+    test_assert(gti.is_empty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
     test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
 
     // Add one interval
     gti.append(GTime(1.0), GTime(10.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 10.0, 1.0e-10, "Stop time should be 10.");
 
     // Remove interval
     gti.remove(0);
     test_value(gti.size(), 0, "GGti should have zero size.");
-    test_assert(gti.isempty(), "GGti should be empty.");
+    test_assert(gti.is_empty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
     test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
 
@@ -273,14 +273,14 @@ void TestGObservation::test_gti(void)
     gti.append(GTime(1.0), GTime(100.0));
     gti.append(GTime(10.0), GTime(1000.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
     // Clear object
     gti.clear();
     test_value(gti.size(), 0, "GGti should have zero size.");
-    test_assert(gti.isempty(), "GGti should be empty.");
+    test_assert(gti.is_empty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
     test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
 
@@ -289,7 +289,7 @@ void TestGObservation::test_gti(void)
     gti.append(GTime(10.0), GTime(1000.0));
     gti.append(GTime(1.0), GTime(100.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
@@ -298,7 +298,7 @@ void TestGObservation::test_gti(void)
     gti.insert(GTime(1.0), GTime(100.0));
     gti.insert(GTime(10.0), GTime(1000.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
@@ -307,7 +307,7 @@ void TestGObservation::test_gti(void)
     gti.insert(GTime(10.0), GTime(1000.0));
     gti.insert(GTime(1.0), GTime(100.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
@@ -316,7 +316,7 @@ void TestGObservation::test_gti(void)
     gti.merge(GTime(1.0), GTime(100.0));
     gti.merge(GTime(10.0), GTime(1000.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
@@ -325,7 +325,7 @@ void TestGObservation::test_gti(void)
     gti.merge(GTime(10.0), GTime(1000.0));
     gti.merge(GTime(1.0), GTime(100.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
@@ -337,7 +337,7 @@ void TestGObservation::test_gti(void)
     ext.append(GTime(100.0), GTime(1000.0));
     gti.extend(ext);
     test_value(gti.size(), 3, "GGti should have 3 intervals.");
-    test_assert(!gti.isempty(), "GGti should not be empty.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart(0).secs(), 1.0, 1.0e-10, "Bin 0 start time should be 1.");
     test_value(gti.tstart(1).secs(), 10.0, 1.0e-10, "Bin 1 start time should be 10.");
     test_value(gti.tstart(2).secs(), 100.0, 1.0e-10, "Bin 2 start time should be 100.");
@@ -563,39 +563,39 @@ void TestGObservation::test_times(void)
     // Manipulate GTimes starting from an empty object
     GTimes times;
     test_value(times.size(), 0, "GTimes should have zero size.");
-    test_assert(times.isempty(), "GTimes should be empty.");
+    test_assert(times.is_empty(), "GTimes should be empty.");
 
     // Add a time
     times.append(GTime());
     test_value(times.size(), 1, "GTimes should have 1 time.");
-    test_assert(!times.isempty(), "GTimes should not be empty.");
+    test_assert(!times.is_empty(), "GTimes should not be empty.");
 
     // Remove time
     times.remove(0);
     test_value(times.size(), 0, "GTimes should have zero size.");
-    test_assert(times.isempty(), "GTimes should be empty.");
+    test_assert(times.is_empty(), "GTimes should be empty.");
 
     // Append two times
     times.append(GTime());
     times.append(GTime());
     test_value(times.size(), 2, "GTimes should have 2 times.");
-    test_assert(!times.isempty(), "GTimes should not be empty.");
+    test_assert(!times.is_empty(), "GTimes should not be empty.");
 
     // Clear object
     times.clear();
     test_value(times.size(), 0, "GTimes should have zero size.");
-    test_assert(times.isempty(), "GTimes should be empty.");
+    test_assert(times.is_empty(), "GTimes should be empty.");
 
     // Insert two times
     times.insert(0, GTime());
     times.insert(0, GTime());
     test_value(times.size(), 2, "GTimes should have 2 times.");
-    test_assert(!times.isempty(), "GTimes should not be empty.");
+    test_assert(!times.is_empty(), "GTimes should not be empty.");
 
     // Extend times
     times.extend(times);
     test_value(times.size(), 4, "GTimes should have 4 times.");
-    test_assert(!times.isempty(), "GTimes should not be empty.");
+    test_assert(!times.is_empty(), "GTimes should not be empty.");
 
     // Return
     return;
@@ -620,39 +620,39 @@ void TestGObservation::test_energies(void)
     // Manipulate GEnergies starting from an empty object
     GEnergies energies;
     test_value(energies.size(), 0, "GEnergies should have zero size.");
-    test_assert(energies.isempty(), "GEnergies should be empty.");
+    test_assert(energies.is_empty(), "GEnergies should be empty.");
 
     // Add an energy
     energies.append(GEnergy());
     test_value(energies.size(), 1, "GEnergies should have 1 energy.");
-    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+    test_assert(!energies.is_empty(), "GEnergies should not be empty.");
 
     // Remove energy
     energies.remove(0);
     test_value(energies.size(), 0, "GEnergies should have zero size.");
-    test_assert(energies.isempty(), "GEnergies should be empty.");
+    test_assert(energies.is_empty(), "GEnergies should be empty.");
 
     // Append two energies
     energies.append(GEnergy());
     energies.append(GEnergy());
     test_value(energies.size(), 2, "GEnergies should have 2 energies.");
-    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+    test_assert(!energies.is_empty(), "GEnergies should not be empty.");
 
     // Clear object
     energies.clear();
     test_value(energies.size(), 0, "GEnergies should have zero size.");
-    test_assert(energies.isempty(), "GEnergies should be empty.");
+    test_assert(energies.is_empty(), "GEnergies should be empty.");
 
     // Insert two energies
     energies.insert(0, GEnergy());
     energies.insert(0, GEnergy());
     test_value(energies.size(), 2, "GEnergies should have 2 energies.");
-    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+    test_assert(!energies.is_empty(), "GEnergies should not be empty.");
 
     // Extend energies
     energies.extend(energies);
     test_value(energies.size(), 4, "GEnergies should have 4 energies.");
-    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+    test_assert(!energies.is_empty(), "GEnergies should not be empty.");
 
     // Create 4 energies
     energies.clear();
@@ -714,39 +714,39 @@ void TestGObservation::test_photons(void)
     // Manipulate GPhotons starting from an empty object
     GPhotons photons;
     test_value(photons.size(), 0, "GPhotons should have zero size.");
-    test_assert(photons.isempty(), "GPhotons should be empty.");
+    test_assert(photons.is_empty(), "GPhotons should be empty.");
 
     // Add one photon
     photons.append(GPhoton());
     test_value(photons.size(), 1, "GPhotons should have 1 photon.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
+    test_assert(!photons.is_empty(), "GPhotons should not be empty.");
 
     // Remove photon
     photons.remove(0);
     test_value(photons.size(), 0, "GPhotons should have zero size.");
-    test_assert(photons.isempty(), "GPhotons should be empty.");
+    test_assert(photons.is_empty(), "GPhotons should be empty.");
 
     // Append two photons
     photons.append(GPhoton());
     photons.append(GPhoton());
     test_value(photons.size(), 2, "GPhotons should have 2 photons.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
+    test_assert(!photons.is_empty(), "GPhotons should not be empty.");
 
     // Clear object
     photons.clear();
     test_value(photons.size(), 0, "GPhotons should have zero size.");
-    test_assert(photons.isempty(), "GPhotons should be empty.");
+    test_assert(photons.is_empty(), "GPhotons should be empty.");
 
     // Insert two photons
     photons.insert(0, GPhoton());
     photons.insert(0, GPhoton());
     test_value(photons.size(), 2, "GPhotons should have 2 photons.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
+    test_assert(!photons.is_empty(), "GPhotons should not be empty.");
 
     // Extend photons
     photons.extend(photons);
     test_value(photons.size(), 4, "GPhotons should have 4 photons.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
+    test_assert(!photons.is_empty(), "GPhotons should not be empty.");
 
     // Return
     return;

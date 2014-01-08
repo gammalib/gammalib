@@ -51,12 +51,12 @@ class GObservation;
  *
  * The GModels class provides methods to manage and to access the models
  * in the container. The number of models in the container is retrieved
- * using the size() method. The isempty() method can be used to check
+ * using the size() method. The is_empty() method can be used to check
  * whether the container is empty or whether it contains models:
  *
  *     GModels models;                 // Allocate container
  *     int n = models.size();          // Number of models in container
- *     if (models.isempty())           // Check for emptiness
+ *     if (models.is_empty())           // Check for emptiness
  *         std::cout << "Empty container";
  *
  * Access operators exist for accessing of models by index or by name:
@@ -164,7 +164,7 @@ public:
     GModel*        at(const int& index);
     const GModel*  at(const int& index) const;
     int            size(void) const;
-    bool           isempty(void) const;
+    bool           is_empty(void) const;
     GModel*        set(const int& index, const GModel& model);
     GModel*        set(const std::string& name, const GModel& model);
     GModel*        append(const GModel& model);
@@ -247,7 +247,7 @@ int GModels::size(void) const
  * Signals if the model container does not contain any model.
  ***************************************************************************/
 inline
-bool GModels::isempty(void) const
+bool GModels::is_empty(void) const
 {
     return (m_models.empty());
 }

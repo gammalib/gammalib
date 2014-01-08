@@ -666,7 +666,7 @@ void GXml::parse(const GUrl& url)
     GXmlNode*   current = &m_root;
 
     // Main parsing loop
-    while ((c = url.getchar()) != EOF) {
+    while ((c = url.get_char()) != EOF) {
 
         // Convert special characters into line feeds
         if (c == '\x85' || c == L'\x2028') {
@@ -863,7 +863,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
                 throw GException::xml_syntax_error(G_PROCESS, segment,
                       "unexpected declaration markup encountered");
             }
-            if (!m_root.isempty()) {
+            if (!m_root.is_empty()) {
                 throw GException::xml_syntax_error(G_PROCESS, segment,
                       "declaration markup only allowed in first line");
             }

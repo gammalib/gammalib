@@ -57,8 +57,8 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GMWLResponse* clone(void) const;
-    virtual bool          hasedisp(void) const;
-    virtual bool          hastdisp(void) const;
+    virtual bool          has_edisp(void) const;
+    virtual bool          has_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -80,7 +80,7 @@ protected:
  * @return True if response supports energy dispersion.
  ***************************************************************************/
 inline
-bool GMWLResponse::hasedisp(void) const
+bool GMWLResponse::has_edisp(void) const
 {
     return false;
 }
@@ -92,7 +92,7 @@ bool GMWLResponse::hasedisp(void) const
  * @return True if response supports time dispersion.
  ***************************************************************************/
 inline
-bool GMWLResponse::hastdisp(void) const
+bool GMWLResponse::has_tdisp(void) const
 {
     return false;
 }

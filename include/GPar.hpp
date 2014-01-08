@@ -79,12 +79,12 @@ public:
     const std::string& min(void) const;
     const std::string& max(void) const;
     const std::string& prompt(void) const;
-    bool               islearn(void) const;
-    bool               isquery(void) const;
-    bool               isfilename(void) const;
-    bool               isvalid(void);
-    bool               isundefined(void);
-    bool               isnotanumber(void);
+    bool               is_learn(void) const;
+    bool               is_query(void) const;
+    bool               is_filename(void) const;
+    bool               is_valid(void);
+    bool               is_undefined(void);
+    bool               is_notanumber(void);
     std::string        print(const GChatter& chatter = NORMAL) const;
   
 protected:

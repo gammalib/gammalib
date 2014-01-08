@@ -572,7 +572,7 @@ void TestGFits::test_file_manipulation(void)
     try {
         // Allocate empty FITS file
         GFits fits;
-        test_assert(fits.isempty(), "FITS file should be empty");
+        test_assert(fits.is_empty(), "FITS file should be empty");
         test_value(fits.size(), 0);
 
         // Create an image and a table to play with
@@ -582,7 +582,7 @@ void TestGFits::test_file_manipulation(void)
         // Append two images
         fits.append(image);
         fits.append(image);
-        test_assert(!fits.isempty(), "FITS file should not be empty");
+        test_assert(!fits.is_empty(), "FITS file should not be empty");
         test_value(fits.size(), 2);
         for (int i = 0; i < fits.size(); ++i) {
             test_value(fits.at(i)->extno(), i);
@@ -628,7 +628,7 @@ void TestGFits::test_file_manipulation(void)
     try {
         // Create FITS file
         GFits fits("test_container.fits", true);
-        test_assert(fits.isempty(), "FITS file should be empty");
+        test_assert(fits.is_empty(), "FITS file should be empty");
         test_value(fits.size(), 0);
 
         // Create an image and a table to play with
@@ -641,7 +641,7 @@ void TestGFits::test_file_manipulation(void)
         fits.save(true);
         fits.close();
         fits.open("test_container.fits");
-        test_assert(!fits.isempty(), "FITS file should not be empty");
+        test_assert(!fits.is_empty(), "FITS file should not be empty");
         test_value(fits.size(), 2);
         for (int i = 0; i < fits.size(); ++i) {
             test_value(fits.at(i)->extno(), i);

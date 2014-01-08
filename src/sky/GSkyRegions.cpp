@@ -440,7 +440,7 @@ GSkyRegion* GSkyRegions::insert(const int& index, const GSkyRegion& region)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (isempty()) {
+    if (is_empty()) {
         if (index > 0) {
             throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
         }
@@ -594,7 +594,7 @@ void GSkyRegions::remove(const std::string& name)
 void GSkyRegions::extend(const GSkyRegions& regions)
 {
     // Do nothing if region container is empty
-    if (!regions.isempty()) {
+    if (!regions.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to

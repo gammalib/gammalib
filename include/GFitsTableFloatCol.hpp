@@ -62,7 +62,7 @@ public:
     virtual int                 integer(const int& row, const int& col = 0) const;
     virtual void                insert(const int& row, const int& nrows);
     virtual void                remove(const int& row, const int& nrows);
-    virtual bool                isloaded(void) const;
+    virtual bool                is_loaded(void) const;
     
     // Other methods
     float* data(void);
@@ -98,7 +98,7 @@ private:
  * @return True if column has been loaded, false otherwise
  ***************************************************************************/
 inline
-bool GFitsTableFloatCol::isloaded(void) const
+bool GFitsTableFloatCol::is_loaded(void) const
 {
     return (m_data != NULL);
 }

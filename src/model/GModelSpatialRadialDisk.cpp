@@ -265,7 +265,7 @@ double GModelSpatialRadialDisk::eval(const double&  theta,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSpatialRadialDisk::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -538,7 +538,7 @@ void GModelSpatialRadialDisk::init_members(void)
     m_radius.free();
     m_radius.scale(1.0);
     m_radius.gradient(0.0);
-    m_radius.hasgrad(false);  // Radial components never have gradients
+    m_radius.has_grad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)
     m_pars.push_back(&m_radius);

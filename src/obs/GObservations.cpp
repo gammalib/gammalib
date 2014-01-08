@@ -343,7 +343,7 @@ GObservation* GObservations::insert(const int& index, const GObservation& obs)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (isempty()) {
+    if (is_empty()) {
         if (index > 0) {
             throw GException::out_of_range(G_INSERT, index, 0, size()-1);
         }
@@ -425,7 +425,7 @@ void GObservations::remove(const int& index)
 void GObservations::extend(const GObservations& obs)
 {
     // Do nothing if observation container is empty
-    if (!obs.isempty()) {
+    if (!obs.is_empty()) {
 
         // Get size. Note that we extract the size first to avoid an
         // endless loop that arises when a container is appended to

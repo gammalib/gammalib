@@ -71,7 +71,7 @@ public:
     int          ncostheta(void) const;
     //double       costhetamin(void) const { return m_min_ctheta; }
     //void         costhetamin(const double& ctheta);
-    bool         hasphi(void) const { return false; }
+    bool         has_phi(void) const { return false; }
     std::string  print(const GChatter& chatter = NORMAL) const;
 
 private:

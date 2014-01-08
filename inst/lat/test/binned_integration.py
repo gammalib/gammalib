@@ -45,7 +45,7 @@ def set_ebds(ebins=20):
     emin.MeV(100.0)
     emax.MeV(20000.0)
     ebds = GEbounds()
-    ebds.setlog(emin, emax, ebins)
+    ebds.set_log(emin, emax, ebins)
 
     # Return energy boundaries
     return ebds

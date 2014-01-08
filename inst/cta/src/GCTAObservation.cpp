@@ -895,17 +895,17 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     // Read mandatory attributes
     double ra_pnt  = hdu.real("RA_PNT");
     double dec_pnt = hdu.real("DEC_PNT");
-    m_ontime   = (hdu.hascard("ONTIME"))   ? hdu.real("ONTIME") : 0.0;
-    m_livetime = (hdu.hascard("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
+    m_ontime   = (hdu.has_card("ONTIME"))   ? hdu.real("ONTIME") : 0.0;
+    m_livetime = (hdu.has_card("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
 
     // Read optional attributes
-    m_name     = (hdu.hascard("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
-    m_deadc    = (hdu.hascard("DEADC"))    ? hdu.real("DEADC") : 0.0;
-    m_ra_obj   = (hdu.hascard("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
-    m_dec_obj  = (hdu.hascard("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
-    m_obs_id   = (hdu.hascard("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
-    //double alt = (hdu.hascard("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
-    //double az  = (hdu.hascard("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
+    m_name     = (hdu.has_card("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
+    m_deadc    = (hdu.has_card("DEADC"))    ? hdu.real("DEADC") : 0.0;
+    m_ra_obj   = (hdu.has_card("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
+    m_dec_obj  = (hdu.has_card("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
+    m_obs_id   = (hdu.has_card("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
+    //double alt = (hdu.has_card("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
+    //double az  = (hdu.has_card("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
 
     // Kluge: compute DEADC from livetime and ontime instead of using the
     // keyword value as the original event lists had this values badly

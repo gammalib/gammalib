@@ -293,7 +293,7 @@ double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
     double intensity = m_map(photon.dir());
 
     // Compute partial derivatives of the parameter values
-    double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
+    double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
 
     // Set gradient to 0 (circumvent const correctness)
     const_cast<GModelSpatialDiffuseMap*>(this)->m_value.factor_gradient(g_value);
@@ -556,7 +556,7 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_value.range(0.001, 1000.0);
     m_value.gradient(0.0);
     m_value.fix();
-    m_value.hasgrad(true);
+    m_value.has_grad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -642,8 +642,8 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         for (int i = 0; i < npix; ++i) {
             double flux = m_map(i) * m_map.solidangle(i);
             if (flux < 0.0 ||
-                gammalib::isnotanumber(flux) ||
-                gammalib::isinfinite(flux)) {
+                gammalib::is_notanumber(flux) ||
+                gammalib::is_infinite(flux)) {
                 m_map(i) = 0.0;
                 flux     = 0.0;
             }

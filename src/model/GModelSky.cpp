@@ -589,7 +589,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
             std::cout << "*** ERROR: GModelSky::npred:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
@@ -1303,7 +1303,7 @@ double GModelSky::integrate_time(const GEvent& event,
     const GResponse& rsp = obs.response();
 
     // Determine if time integration is needed
-    bool integrate = rsp.hastdisp();
+    bool integrate = rsp.has_tdisp();
 
     // Case A: Integraion
     if (integrate) {
@@ -1317,7 +1317,7 @@ double GModelSky::integrate_time(const GEvent& event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSky::integrate_time:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -1372,7 +1372,7 @@ double GModelSky::integrate_energy(const GEvent& event,
     const GResponse& rsp = obs.response();
 
     // Determine if energy integration is needed
-    bool integrate = rsp.hasedisp();
+    bool integrate = rsp.has_edisp();
 
     // Case A: Integraion
     if (integrate) {
@@ -1386,7 +1386,7 @@ double GModelSky::integrate_energy(const GEvent& event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: GModelSky::integrate_energy:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -1466,7 +1466,7 @@ double GModelSky::integrate_dir(const GEvent&       event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+            if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
                 std::cout << "*** ERROR: GModelSky::integrate_dir:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;
@@ -1511,7 +1511,7 @@ double GModelSky::integrate_dir(const GEvent&       event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
+            if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
                 std::cout << "*** ERROR: GModelSky::integrate_dir:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;

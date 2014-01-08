@@ -321,7 +321,7 @@ void GXmlElement::write(GUrl& url, const int& indent) const
     }
 
     // If there are no children then write an empty tag
-    if (isempty()) {
+    if (is_empty()) {
         url.printf(" />\n");
     }
 

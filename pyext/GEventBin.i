@@ -74,8 +74,8 @@ public:
     virtual void            counts(const double& counts) = 0;
 
     // Other methods
-    bool isatom(void) const;
-    bool isbin(void) const;
+    bool is_atom(void) const;
+    bool is_bin(void) const;
 };
 
 

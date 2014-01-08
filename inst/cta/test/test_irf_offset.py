@@ -147,7 +147,7 @@ def observation(ra=0.0, dec=0.0, binsz=0.05, npix=200, ebins=10):
     emax    = GEnergy()
     emin.TeV(0.1)
     emax.TeV(100.0)
-    ebounds.setlog(emin, emax, ebins)
+    ebounds.set_log(emin, emax, ebins)
     gti  = GGti()
     tmin = GTime(0.0)
     tmax = GTime(1800.0)
