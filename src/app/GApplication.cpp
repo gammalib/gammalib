@@ -425,7 +425,7 @@ void GApplication::log_header(void)
 
     // Dump header
     log << gammalib::fill("*", header_width) << std::endl;
-    log << "*" << gammalib::center(m_name, header_width-2) << "*" << std::endl;
+    log << "*" << gammalib::centre(m_name, header_width-2) << "*" << std::endl;
     log << "* " << gammalib::fill("-", header_width-4) << " *" << std::endl;
     log << "* Version: " << gammalib::left(m_version, header_width-12) << "*" << std::endl;
     log << gammalib::fill("*", header_width) << std::endl;

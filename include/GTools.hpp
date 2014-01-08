@@ -76,7 +76,7 @@ namespace gammalib {
                                   const char& c = ' ');
     std::string              right(const std::string& s, const int& n,
                                    const char& c = ' ');
-    std::string              center(const std::string& s, const int& n,
+    std::string              centre(const std::string& s, const int& n,
                                     const char& c = ' ');
     std::string              parformat(const std::string& s, const int& indent = 0);
     double                   plaw_photon_flux(const double& emin,

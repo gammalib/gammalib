@@ -471,7 +471,7 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
 		const GSkyRegionCircle* regcirc =
               dynamic_cast<const GSkyRegionCircle*>(&reg);
 
-		// Calculate angular distance between the centers
+		// Calculate angular distance between the centres
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
 
 		// Check if the region is contained in this
@@ -512,7 +512,7 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 		const GSkyRegionCircle* regcirc =
               dynamic_cast<const GSkyRegionCircle*>(&reg);
 
-		// Calculate angular distance between the centers
+		// Calculate angular distance between the centres
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
 
 		// Check if the distance is smaller than the sum of both radii

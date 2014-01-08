@@ -21,7 +21,7 @@ Glossary
 
 -  **HEASARC** (`<http://heasarc.gsfc.nasa.gov/>`_)
 
-   High Energy Astrophysics Science Archive Research Center.
+   High Energy Astrophysics Science Archive Research Centre.
 
 -  **Python** (`<http://www.python.org/>`_)
 

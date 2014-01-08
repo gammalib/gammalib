@@ -362,7 +362,7 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     GEnergy  emax(100.0, "TeV");
     GEbounds ebounds(nebins, emin, emax);
 
-    // Setup event cube centered on Cen A
+    // Setup event cube centreed on Cen A
     GCTAEventCube cube(map, ebounds, gti);
 
     // Setup dummy CTA observation
@@ -515,7 +515,7 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
     const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
     const GModelSpatialRadialGauss* spat = dynamic_cast<const GModelSpatialRadialGauss*>(bck->spatial());
 
-    // Get Integration center for ROI position
+    // Get Integration centre for ROI position
     double src_ra  = spat->ra();
     double src_dec = spat->dec();
     double sigma   = spat->sigma();

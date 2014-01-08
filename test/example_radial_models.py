@@ -37,7 +37,7 @@ def test_radial_model(name, model, clobber=True):
     time   = GTime()
     for inx in range(image.npix()):
         dir        = image.inx2dir(inx)
-        theta      = center.dist(dir)
+        theta      = centre.dist(dir)
         image[inx] = model.eval(theta, energy, time)
 
     # Write it to file
@@ -62,10 +62,10 @@ if __name__ == '__main__':
     Test radial model integration.
     """
     # Set model location / centre
-    center = GSkyDir()
-    center.radec_deg(0.3, 0.1)
+    centre = GSkyDir()
+    centre.radec_deg(0.3, 0.1)
 
     # Test models
-    test_radial_model(name='gauss', model=GModelSpatialRadialGauss(center, 0.3))
-    test_radial_model(name='disk',  model=GModelSpatialRadialDisk(center, 0.8))
-    test_radial_model(name='shell', model=GModelSpatialRadialShell(center, 0.5, 0.1))
+    test_radial_model(name='gauss', model=GModelSpatialRadialGauss(centre, 0.3))
+    test_radial_model(name='disk',  model=GModelSpatialRadialDisk(centre, 0.8))
+    test_radial_model(name='shell', model=GModelSpatialRadialShell(centre, 0.5, 0.1))

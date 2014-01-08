@@ -1196,7 +1196,7 @@ GModelTemporal* GCTAModelBackground::xml_temporal(const GXmlElement& temporal) c
 /***********************************************************************//**
  * @brief Kernel for zenith angle Npred integration of background model
  *
- * @param[in] theta Offset angle from ROI center (radians).
+ * @param[in] theta Offset angle from ROI centre (radians).
  *
  * Computes
  *

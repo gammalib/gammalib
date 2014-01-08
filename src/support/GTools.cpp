@@ -660,16 +660,16 @@ std::string gammalib::right(const std::string& s, const int& n, const char& c)
 
 
 /***********************************************************************//**
- * @brief Center string to achieve a length of n characters
+ * @brief Centre string to achieve a length of n characters
  *
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
  * @param[in] c Left fill character.
  *
- * Center string by adding whitespace to the left and the right to achieve a
+ * Centre string by adding whitespace to the left and the right to achieve a
  * length of n characters.
  ***************************************************************************/
-std::string gammalib::center(const std::string& s, const int& n, const char& c)
+std::string gammalib::centre(const std::string& s, const int& n, const char& c)
 {
     // Compute number of characters to fill left and right
     int n_right = (n-s.length()) / 2;

@@ -930,7 +930,7 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 
     // Test contain dirs
 	test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
-    test_assert(refregion.contains(centre), "test if center in circle");
+    test_assert(refregion.contains(centre), "test if centre in circle");
 	test_assert(!refregion.contains(refdir_outside_refregion), "test2 for containment");
 
 	// Test contain regions

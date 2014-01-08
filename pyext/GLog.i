@@ -111,7 +111,7 @@ public:
     void right(const std::string& arg, const int& n) {
         (*self) << gammalib::right(arg, n);
     }
-    void center(const std::string& arg, const int& n) {
-        (*self) << gammalib::center(arg, n);
+    void centre(const std::string& arg, const int& n) {
+        (*self) << gammalib::centre(arg, n);
     }
 }
