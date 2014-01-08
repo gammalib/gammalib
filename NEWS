@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-7 January 2014
+8 January 2014
 
 
 1. Introduction
@@ -16,6 +16,11 @@ changes made since the last release of GammaLib.
 This section summarizes all modifications of public class interfaces
 that will lead to compatibility issues with respect to the last
 GammaLib release.
+
+General
+  All methods start with is..., has..., etc. have been renamed
+  to is_..., has_..., etc. For example, isempty() now becomes
+  is_empty().
 
 GApplications
   The par_filename() and log_filename() methods return a const
