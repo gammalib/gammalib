@@ -50,7 +50,7 @@ public:
     GHealpix(void);
     explicit GHealpix(const int&         nside,
                       const std::string& ordering = "NESTED",
-                      const std::string& coordsys = "EQU");
+                      const std::string& coordsys = "GAL");
     explicit GHealpix(const GFitsHDU& hdu);
     GHealpix(const GHealpix& wcs);
     virtual ~GHealpix(void);
