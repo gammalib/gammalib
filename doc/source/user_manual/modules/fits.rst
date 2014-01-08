@@ -46,29 +46,32 @@ Creating a FITS file
 ~~~~~~~~~~~~~~~~~~~~
 
 The following example illustrates the creation of a FITS file comprising
-one image and one table (see ``examples/createfits.cpp`` for the
+one image and one table (see ``examples/cpp/createfits/createfits.cpp`` for the
 source code; the line numbers are for reference and are not part of
-the source code)::
+the source code):
 
-    1  GFits fits;
-    2  GFitsImageDouble image(20,10);
-    3  for (int x = 0; x < 20; ++x) {
-    4      for (int y = 0; y < 10; ++y) {
-    5         image(x,y) = x+100.0*y;
-    6      }
-    7  }
-    8  fits.append(image);
-    9  GFitsBinTable       table;
-   10  GFitsTableDoubleCol column("ENERGY", 10, 3);
-   11  for (int row = 0; row < 10; ++row) {
-   12      for (int index = 0; index < 3; ++index) {
-   13          column(row, index) = row*100.0+index;
-   14      }
-   15  }
-   16  table.append(column);
-   17  fits.append(table);
-   18  fits.saveto("my_fits_file.fits", true);
-   19  fits.close();
+.. code-block:: cpp
+   :linenos:
+
+   GFits fits;
+   GFitsImageDouble image(20,10);
+   for (int x = 0; x < 20; ++x) {
+       for (int y = 0; y < 10; ++y) {
+          image(x,y) = x+100.0*y;
+       }
+   }
+   fits.append(image);
+   GFitsBinTable       table;
+   GFitsTableDoubleCol column("ENERGY", 10, 3);
+   for (int row = 0; row < 10; ++row) {
+       for (int index = 0; index < 3; ++index) {
+           column(row, index) = row*100.0+index;
+       }
+   }
+   table.append(column);
+   fits.append(table);
+   fits.saveto("my_fits_file.fits", true);
+   fits.close();
 
 In line 1, a FITS object is allocated in memory.
 An image is created in line 2, comprising 20 pixels in the x-direction
@@ -109,7 +112,9 @@ yet exist. By default, this argument is set to ``false``, and an exception
 is raised when creating the ``GFits`` object. If a file exists already,
 line 1 will in fact open the file, and lines 2-17 will add an image and
 a table *in addition* to the image and table that exists already in the
-file. Line 1 is in fact identical to::
+file. Line 1 is in fact identical to:
+
+.. code-block:: cpp
 
     GFits fits;
     fits.open("my_fits_file.fits", true);
@@ -139,7 +144,9 @@ and the column to the binary table. These methods will append a *copy*
 of the object to the FITS object, hence after appending, any manipulations
 on the original object will not be reflected in the FITS object. If an
 object should be manipulated after it has been appended, a pointer to
-the object has to be retrieved from the FITS object using::
+the object has to be retrieved from the FITS object using:
+
+.. code-block:: cpp
 
     GFitsImage*    image  = fits.image(0);
     GFitsTable*    table  = fits.table(1);

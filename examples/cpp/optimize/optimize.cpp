@@ -31,21 +31,21 @@
 /***********************************************************************//**
  * @brief Parabola function
  *
- * This code illustrates the definition of a Gaussian function.
+ * This code illustrates the definition of a parabola function.
  ***************************************************************************/
-class function : public GOptimizerFunction {
+class parabola : public GOptimizerFunction {
 public:
-    function(void) : m_value(0), m_gradient(1), m_covar(1,1) {}
+    parabola(void) : m_value(0), m_gradient(1), m_curvature(1,1) {}
     void           eval(const GOptimizerPars& pars);
     double         value(void) { return m_value; }
     GVector*       gradient(void) { return &m_gradient; }
-    GMatrixSparse* covar(void) { return &m_covar; }
+    GMatrixSparse* curvature(void) { return &m_curvature; }
 protected:
-    double        m_value;    //!< Function value
-    GVector       m_gradient; //!< Function gradient vector
-    GMatrixSparse m_covar;    //!< Covariance matrix
+    double        m_value;     //!< Function value
+    GVector       m_gradient;  //!< Function gradient vector
+    GMatrixSparse m_curvature; //!< Curvature matrix
 };
-void function::eval(const GOptimizerPars& pars)
+void parabola::eval(const GOptimizerPars& pars)
 {
     const double a =  2.0;
     const double b = -4.0;
@@ -53,7 +53,7 @@ void function::eval(const GOptimizerPars& pars)
     double x       = pars[0]->value();
     m_value        = a*x*x + b*x + c;
     m_gradient[0]  = 2.0*a*x + b;
-    m_covar(0,0)   = m_gradient[0] * m_gradient[0];
+    m_curvature(0,0)   = m_gradient[0] * m_gradient[0];
 };
 
 
@@ -73,7 +73,7 @@ int main(void) {
     GOptimizerLM opt;
 
     // Allocate function
-    function fct;
+    parabola fct;
 
     // Allocate parameters and set initial value
     GOptimizerPars pars(1);

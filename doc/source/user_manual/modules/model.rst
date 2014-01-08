@@ -74,11 +74,13 @@ where the parameters in the XML definition have the following mappings:
 
 * :math:`N_0` = ``Normalization``
 
-The XML format for specifying a constant is::
+The XML format for specifying a constant is:
 
-  <spectrum type="ConstantValue">
+.. code-block:: xml
+
+   <spectrum type="ConstantValue">
     <parameter name="Normalization" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
-  </spectrum>
+   </spectrum>
 
 
 Power law
@@ -95,13 +97,15 @@ where the parameters in the XML definition have the following mappings:
 * :math:`\gamma` = ``Index``
 * :math:`E_0` = ``Scale``
 
-The XML format for specifying a power law is::
+The XML format for specifying a power law is:
 
-  <spectrum type="PowerLaw">
+.. code-block:: xml
+
+   <spectrum type="PowerLaw">
     <parameter name="Prefactor" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
     <parameter name="Index"     scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
     <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
-  </spectrum>
+   </spectrum>
 
 An alternative power law function is defined by the ``GModelSpectralPlaw2``
 class that uses the integral flux as parameter rather than the Prefactor:
@@ -117,14 +121,16 @@ where the parameters in the XML definition have the following mappings:
 * :math:`E_{\rm min}` = ``LowerLimit``
 * :math:`E_{\rm max}` = ``UpperLimit``
 
-The XML format for specifying a power law defined by the integral flux is::
+The XML format for specifying a power law defined by the integral flux is:
 
-  <spectrum type="PowerLaw2">
+.. code-block:: xml
+
+   <spectrum type="PowerLaw2">
     <parameter scale="1e-07" name="Integral"   min="1e-07" max="1000.0"    value="1.0" free="1"/>
     <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
     <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
-  </spectrum>
+   </spectrum>
 
 **NOTE:** The UpperLimit and LowerLimit parameters are always treated as fixed and,
 as should be apparent from this definition, the flux given by the Integral parameter 
@@ -149,14 +155,16 @@ where the parameters in the XML definition have the following mappings:
 * :math:`E_0` = ``Scale``
 * :math:`E_{\rm cut}` = ``Cutoff``
 
-The XML format for specifying an exponentially cut-off power law is::
+The XML format for specifying an exponentially cut-off power law is:
 
-  <spectrum type="ExpCutoff">
+.. code-block:: xml
+
+   <spectrum type="ExpCutoff">
     <parameter name="Prefactor" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
     <parameter name="Index"     scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
     <parameter name="Cutoff"    scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="1"/>
     <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
-  </spectrum>
+   </spectrum>
 
 
 Broken power law
@@ -180,14 +188,16 @@ where the parameters in the XML definition have the following mappings:
 * :math:`\gamma_2` = ``Index2``
 * :math:`E_b` = ``BreakValue``
 
-The XML format for specifying a broken power law is::
+The XML format for specifying a broken power law is:
 
-  <spectrum type="BrokenPowerLaw">
+.. code-block:: xml
+
+   <spectrum type="BrokenPowerLaw">
     <parameter name="Prefactor"  scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
     <parameter name="Index1"     scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
     <parameter name="BreakValue" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
     <parameter name="Index2"     scale="-1"    value="2.70" min="0.01"  max="1000.0" free="1"/>
-  </spectrum>
+   </spectrum>
 
 Node function
 ^^^^^^^^^^^^^
@@ -196,9 +206,11 @@ The generalisation of the broken power law is the node function, which is
 defined by a set of energy and intensity values, the so called nodes, 
 which are connected by power laws.
 
-The XML format for specifying a node function is::
+The XML format for specifying a node function is:
 
-  <spectrum type="NodeFunction">
+.. code-block:: xml
+
+   <spectrum type="NodeFunction">
     <node>
       <parameter scale="1.0"   name="Energy"    min="0.1"   max="1.0e20" value="1.0"  free="0"/>
       <parameter scale="1e-07" name="Intensity" min="1e-07" max="1000.0" value="1.0"  free="1"/>
@@ -207,7 +219,7 @@ The XML format for specifying a node function is::
       <parameter scale="1.0"   name="Energy"    min="0.1"   max="1.0e20" value="10.0" free="0"/>
       <parameter scale="1e-07" name="Intensity" min="1e-07" max="1000.0" value="0.1"  free="1"/>
     </node>
-  </spectrum>
+   </spectrum>
 
 (in this example there are two nodes; the number of nodes in a node 
 function is arbitrary).
@@ -229,24 +241,27 @@ where the parameters in the XML definition have the following mappings:
 * :math:`E_0` = ``Scale``
 
 
-The XML format for specifying a log parabola spectrum is::
+The XML format for specifying a log parabola spectrum is:
 
-  <spectrum type="LogParabola">
+.. code-block:: xml
+
+   <spectrum type="LogParabola">
     <parameter name="Prefactor" scale="1e-17" value="5.878"   min="1e-07" max="1000.0" free="1"/>
     <parameter name="Index"     scale="-1"    value="2.32473" min="0.0"   max="+5.0"   free="1"/>
     <parameter name="Curvature" scale="-1"    value="0.074"   min="-5.0"  max="+5.0"   free="1"/>
     <parameter name="Scale"     scale="1e6"   value="1.0"     min="0.01"  max="1000.0" free="0"/>
-  </spectrum>
+   </spectrum>
 
-An alternative XML format is supported for compatibility with the 
-Fermi/LAT XML format::
+An alternative XML format is supported for compatibility with the Fermi/LAT XML format:
 
-  <spectrum type="LogParabola">
+.. code-block:: xml
+
+   <spectrum type="LogParabola">
     <parameter name="Prefactor" scale="1e-17" value="5.878"   min="1e-07" max="1000.0" free="1"/>
     <parameter name="alpha"     scale="1"     value="2.32473" min="0.0"   max="+5.0"   free="1"/>
     <parameter name="beta"      scale="1"     value="0.074"   min="-5.0"  max="+5.0"   free="1"/>
     <parameter name="Scale"     scale="1e6"   value="1.0"     min="0.01"  max="1000.0" free="0"/>
-  </spectrum>
+   </spectrum>
 
 where
 
@@ -272,14 +287,15 @@ where the parameters in the XML definition have the following mappings:
 
 * :math:`N_0` = ``Normalization``
 
-The XML format for specifying a file function is::
+The XML format for specifying a file function is:
 
-  <spectrum type="FileFunction" file="data/filefunction.txt">
+.. code-block:: xml
+
+   <spectrum type="FileFunction" file="data/filefunction.txt">
     <parameter scale="1.0" name="Normalization" min="0.0" max="1000.0" value="1.0" free="1"/>
-  </spectrum>
+   </spectrum>
 
 If the file is given as relative path, the path is relative to the working 
 directory of the executable. Alternatively, an absolute path may be 
 specified. Any environment variable present in the path name will be 
 expanded.
-

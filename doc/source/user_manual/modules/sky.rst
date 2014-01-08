@@ -24,7 +24,6 @@ are implemented by the ``GWcsAIT``, ``GWcsAZP``, ``GWcsCAR``,
 all specific World Coordinate System classes are collected in
 the ``GWcsRegistry`` registry class.
 
-
 Sky coordinates are implemented by the ``GSkyDir`` class that
 specifies celestial coordinates in either equatorial (Right Ascension
 and Declination) or galactic (longitude and latitude) coordinates.
@@ -36,7 +35,6 @@ Sky regions are represented by the abstract ``GSkyRegion`` base class.
 So far, only a simple circular sky region is implemented by the
 ``GSkyRegionCircle`` class. Sky regions are collected in the 
 ``GSkyRegions`` container class.
-
 
 :ref:`fig_uml_sky` present an overview over the C++ classes of the sky
 module and their relations.

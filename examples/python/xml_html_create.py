@@ -25,7 +25,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
+import gammalib
 
 
 # ==================== #
@@ -47,7 +47,7 @@ def create_html():
     that is placed in the top-right corner of the page.
     """
     # Allocate XML document
-    xml = GXml()
+    xml = gammalib.GXml()
     
     # Creates HTML base
     html = xml.append('html')
@@ -57,7 +57,7 @@ def create_html():
     meta   = header.append('meta content="text/html; charset=ISO-8859-1" '
                            'http-equiv="content-type"')
     title  = header.append('title')
-    text   = title.append(GXmlText('GammaLib'))
+    text   = title.append(gammalib.GXmlText('GammaLib'))
     
     # Writes body
     body   = html.append('body')
@@ -66,10 +66,10 @@ def create_html():
     big    = image.append('big')
     bigger = big.append('big')
     span   = bigger.append('span style="font-family: Arial; font-weight: bold;"')
-    text   = span.append(GXmlText('Gammalib'))
-    text   = image.append(GXmlText('<br>'))
+    text   = span.append(gammalib.GXmlText('Gammalib'))
+    text   = image.append(gammalib.GXmlText('<br>'))
     span   = image.append('span style="font-family: Arial;"')
-    text   = span.append(GXmlText('A versatile toolbox for the scientific analysis '
+    text   = span.append(gammalib.GXmlText('A versatile toolbox for the scientific analysis '
                           'of astronomical gamma-ray data'))
     
     # Return XML document
@@ -84,7 +84,7 @@ def show_xml(xml):
     Show XML document on the screen.
     """
     # Allocate string URL
-    url = GUrlString()
+    url = gammalib.GUrlString()
     
     # Write XML document in URL
     xml.write(url)

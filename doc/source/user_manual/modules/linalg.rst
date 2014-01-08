@@ -45,11 +45,14 @@ Three matrix storage classes are implemented:
   stores only non-zero matrix elements in a column-wise organisation.
 
 Storage class conversion constructors exist for all three classes
-to transform one storage class into another::
+to transform one storage class into another:
 
-    1  GMatrix          plain(10,10);
-    2  GMatrixSymmetric symmetric(plain);
-    3  GMatrixSparse    sparse(symmetric);
+.. code-block:: cpp
+   :linenos:
+
+    GMatrix          plain(10,10);
+    GMatrixSymmetric symmetric(plain);
+    GMatrixSparse    sparse(symmetric);
 
 In the above example, a plain matrix is instantiated in line 1, the
 plain matrix is converted into a symmetric matrix in line 2, and the
@@ -66,15 +69,18 @@ that are located after that element in memory.
 
 To reduce the memory management overhead in the filling of a sparse 
 matrix, methods have been implemented that allow to fill a
-matrix column wise::
+matrix column wise:
 
-    1  GMatrixSparse sparse(10,5);
-    2  GVector       column(10);
-    3  column[0] = 1.0;
-    4  column[1] = 2.0;
-    5  column[5] = 8.0;
-    6  sparse.column(0, column);
-    7  sparse.add_to_column(0, column);
+.. code-block:: cpp
+   :linenos:
+
+    GMatrixSparse sparse(10,5);
+    GVector       column(10);
+    column[0] = 1.0;
+    column[1] = 2.0;
+    column[5] = 8.0;
+    sparse.column(0, column);
+    sparse.add_to_column(0, column);
 
 Line 1 allocates a sparse matrix with 10 rows and 5 columns, line 2
 instantiates a vector with 10 elements. In lines 3-5, 3 elements of
@@ -90,7 +96,9 @@ fill of a sparse matrix, a "fill-stack" has been implemented. The
 to be set or added to the matrix. The columns will be stored in this
 "fill-stack" in the order they are provided, and only once the 
 "fill-stack" is full, or upon request, the "fill-stack" will be flushed
-into memory. The "fill-stack" is used as follows::
+into memory. The "fill-stack" is used as follows:
+
+.. code-block:: cpp
 
     sparse.stack_init(size, entries);
     ...

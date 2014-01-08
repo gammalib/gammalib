@@ -26,7 +26,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
+import gammalib
 
 
 # =================== #
@@ -51,7 +51,7 @@ def create_xml():
       (GXmlComment)
     """
     # Allocate XML document
-    xml = GXml()
+    xml = gammalib.GXml()
     
     # Append first child element to XML document root. The first child
     # element contains a single child which is an empty-element tag.
@@ -64,21 +64,21 @@ def create_xml():
     level1 = xml.append('element')
     level2 = level1.append('list')
     level3 = level2.append('string')
-    level4 = level3.append(GXmlText("This is a text"))
+    level4 = level3.append(gammalib.GXmlText("This is a text"))
     level3 = level2.append('integer')
-    level4 = level3.append(GXmlText("17"))
+    level4 = level3.append(gammalib.GXmlText("17"))
 
     # Append third child element to XML document root. The third child
     # element contains a single Processing Instruction.
     level1 = xml.append('processing-instruction')
-    level2 = level1.append(GXmlPI('<?xml-stylesheet type="text/xsl"?>'))
+    level2 = level1.append(gammalib.GXmlPI('<?xml-stylesheet type="text/xsl"?>'))
 
     # Append forth child element to XML document root. The forth child
     # element contains two comments. The first comment is a single-line
     # comment while the second comment runs over multiple lines.
     level1 = xml.append('comment')
-    level2 = level1.append(GXmlComment('This is a comment'))
-    level2 = level1.append(GXmlComment('This is a\ntwo line comment'))
+    level2 = level1.append(gammalib.GXmlComment('This is a comment'))
+    level2 = level1.append(gammalib.GXmlComment('This is a\ntwo line comment'))
 
     # Return XML document
     return xml
@@ -101,7 +101,7 @@ def manipulate_xml(xml):
     # Insert now at the location where we just removed the processing
     # instruction a new child element named 'replacement'. This new
     # child element will have four levels of child nodes.
-    level0 = xml.insert(2, GXmlElement('replacement'))
+    level0 = xml.insert(2, gammalib.GXmlElement('replacement'))
     level1 = level0.append('level1')
     level2 = level1.append('level2')
     level3 = level2.append('level3')
@@ -110,7 +110,7 @@ def manipulate_xml(xml):
     # Set now a text node at the place of the level4 child node (the
     # level4 child node was sitting in the first slot of the level3
     # node, hence we have to set the text using the index 0)
-    level4 = level3.set(0, GXmlText('This text replaces the level 4 child node'))
+    level4 = level3.set(0, gammalib.GXmlText('This text replaces the level 4 child node'))
 
     # We extend the level2 child node by adding four further child nodes
     # containg a text node, one comment and one processing instruction.
@@ -124,17 +124,17 @@ def manipulate_xml(xml):
     # will contain a text node. We furthermore append one comment and one
     # processing instruction. Once this is setup we call the extend() method
     # to extend the level2 child node.
-    ext      = GXmlElement('level2 extension="yes"')
+    ext      = gammalib.GXmlElement('level2 extension="yes"')
     element1 = ext.append('level3')
     element2 = ext.append('level3')
     element3 = ext.append('level3')
     element4 = ext.append('level3')
-    comment  = ext.append(GXmlComment('This is a comment'))
-    pi       = ext.append(GXmlPI('<?xml-stylesheet type="text/xsl"?>'))
-    element1.append(GXmlText('This is the first element'))
-    element2.append(GXmlText('This is the second element'))
-    element3.append(GXmlText('This is the third element'))
-    element4.append(GXmlText('This is the forth element'))
+    comment  = ext.append(gammalib.GXmlComment('This is a comment'))
+    pi       = ext.append(gammalib.GXmlPI('<?xml-stylesheet type="text/xsl"?>'))
+    element1.append(gammalib.GXmlText('This is the first element'))
+    element2.append(gammalib.GXmlText('This is the second element'))
+    element3.append(gammalib.GXmlText('This is the third element'))
+    element4.append(gammalib.GXmlText('This is the forth element'))
     level2.extend(ext)
 
     # Now we replace the text of the last element in the level2 childs.
@@ -215,7 +215,7 @@ def show_xml(xml):
     Show XML document on the screen.
     """
     # Allocate string URL
-    url = GUrlString()
+    url = gammalib.GUrlString()
     
     # Write XML document in URL
     xml.write(url)
