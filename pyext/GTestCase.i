@@ -59,8 +59,8 @@ public:
     void               type( const std::string& type);
     const ErrorKind&   kind(void) const;
     void               kind(const ErrorKind& kind);
-    const bool&        passed(void) const;
-    void               passed(const bool& passed);
+    const bool&        has_passed(void) const;
+    void               has_passed(const bool& has_passed);
     const double&      duration(void) const;
     void               duration(const double& duration);
 };
