@@ -693,7 +693,7 @@ void GCOMEventCube::set_scatter_directions(void)
     // Throw an error if we have no sky pixels
     if (npix() < 1) {
         throw GCOMException::no_sky(G_SET_SCATTER_DIRECTIONS,
-              "Every COMPTEL event cube needs a definiton of sky pixels.");
+              "Every COMPTEL event cube needs a definition of sky pixels.");
     }
 
     // Clear vectors
@@ -760,7 +760,7 @@ void GCOMEventCube::set_energies(void)
     // Throw an error if GTI is empty
     if (m_ebounds.size() < 1) {
         throw GCOMException::no_ebds(G_SET_ENERGIES, "Every COMPTEL event"
-                  " cube needs a definiton of the energy boundaries.");
+                  " cube needs a definition of the energy boundaries.");
     }
 
     // Compute the logarithmic mean energy

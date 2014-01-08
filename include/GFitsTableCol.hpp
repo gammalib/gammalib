@@ -132,7 +132,7 @@ protected:
                                   //!< This parameter is used to signal if a
                                   //!< table column corresponds to a FITS file
                                   //!< column. If it is set to 0 there is no
-                                  //!< correspondance.
+                                  //!< correspondence.
     int              m_type;      //!< Column type
     int              m_repeat;    //!< Repeat value of column
     int              m_width;     //!< Width of single column element
@@ -140,7 +140,7 @@ protected:
                                   //!< m_number = m_repeat / m_width
     int              m_length;    //!< Length of column (number of rows)
     bool             m_variable;  //!< Signals if column is variable length
-    int              m_varlen;    //!< Maximum number of elements in variable-lgth
+    int              m_varlen;    //!< Maximum number of elements in variable-length
     std::vector<int> m_rowstart;  //!< Start index of each row
     mutable int      m_size;      //!< Size of allocated data area (0 if not loaded)
     int              m_anynul;    //!< Number of NULLs encountered

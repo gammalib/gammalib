@@ -38,7 +38,7 @@
 /***********************************************************************//**
  * @class GLog
  *
- * @brief Information logger interface defintion.
+ * @brief Information logger interface definition.
  *
  * This class implements an interface for logging of text messages to the
  * standard output and/or error streams and into an ASCII log file. It

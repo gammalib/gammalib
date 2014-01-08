@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuites.hpp
- * @brief Test suite container class interface defintion
+ * @brief Test suite container class interface definition
  * @author Jean-Baptiste Cayrou
  */
 

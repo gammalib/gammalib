@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GTestCase
  *
- * @brief Test case Python interface defintion
+ * @brief Test case Python interface definition
  ***************************************************************************/
 class GTestCase : public GBase {
 public:

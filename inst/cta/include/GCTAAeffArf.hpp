@@ -45,7 +45,7 @@ class GCTAResponse;
  * @brief CTA ARF effective area class
  *
  * This class implements the CTA effective area response that is defined by
- * an auxilliary response function (ARF) file.
+ * an auxiliary response function (ARF) file.
  ***************************************************************************/
 class GCTAAeffArf : public GCTAAeff {
 
@@ -159,7 +159,7 @@ const double& GCTAAeffArf::sigma(void) const
  *
  * Sets the theta cut angle which defines the energy independent cut that
  * has been assumed in deriving the ARF values. If @p thetacut os 0 (which
- * is the default avlue), not thetacut will be applied.
+ * is the default value), not thetacut will be applied.
  ***************************************************************************/
 inline
 void GCTAAeffArf::thetacut(const double& thetacut)

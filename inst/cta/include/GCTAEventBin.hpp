@@ -38,7 +38,7 @@
 /***********************************************************************//**
  * @class GCTAEventBin
  *
- * @brief GCTAEventBin class interface defintion
+ * @brief GCTAEventBin class interface definition
  *
  * This class implements a CTA event bin. The event bin is a collection of
  * pointers that points to the relevant information in memory. The class

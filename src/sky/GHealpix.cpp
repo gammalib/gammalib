@@ -140,7 +140,7 @@ GHealpix::GHealpix(const GFitsHDU& hdu) : GSkyProjection()
     // Initialise class members
     init_members();
 
-    // Read Healpix defintion from FITS table
+    // Read Healpix definition from FITS table
     read(hdu);
 
     // Return
@@ -251,7 +251,7 @@ GHealpix* GHealpix::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Read Healpix definiton from FITS header
+ * @brief Read Healpix definition from FITS header
  *
  * @param[in] hdu FITS HDU.
  *
@@ -309,7 +309,7 @@ void GHealpix::read(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
- * @brief Write Healpix definiton into FITS HDU
+ * @brief Write Healpix definition into FITS HDU
  *
  * @param[in] hdu FITS HDU.
  *

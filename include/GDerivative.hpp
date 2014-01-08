@@ -221,7 +221,7 @@ const bool& GDerivative::silent(void) const
  *
  * @param[in] function Function.
  *
- * Sets the function for which the derivate should be determined.
+ * Sets the function for which the derivative should be determined.
  ***************************************************************************/
 inline
 void GDerivative::function(GFunction* function)

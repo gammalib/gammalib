@@ -121,7 +121,7 @@ bool gammalib::is_infinite(const double& x)
  *
  * Signals if the argument @p x is not a number.
  *
- * This function is a very simple kluge. It may not work on all systems.
+ * This function is a very simple kludge. It may not work on all systems.
  ***************************************************************************/
 inline
 bool gammalib::is_notanumber(const double& x)

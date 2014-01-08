@@ -40,7 +40,7 @@
  * @brief Vector class
  *
  * This class implement a double precision floating point vector class that
- * is intended to be used for numerical computation (it is not ment to
+ * is intended to be used for numerical computation (it is not meant to
  * replace the std::vector template class).
  ***************************************************************************/
 class GVector : public GBase {

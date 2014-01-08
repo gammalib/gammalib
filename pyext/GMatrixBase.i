@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GMatrixBase
  *
- * @brief Abstract matrix base class interface defintion
+ * @brief Abstract matrix base class interface definition
  ***************************************************************************/
 class GMatrixBase : public GBase {
 public:

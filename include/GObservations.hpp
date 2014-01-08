@@ -80,7 +80,7 @@
  *
  * Based on the list of models, the optimize() method will optimize all
  * model parameters that are marked as free in the list of models. The
- * npred() method returns the total number of events that are prediced
+ * npred() method returns the total number of events that are predicted
  * by all models after optimization.
  *
  * GObservations also provides an optimizer class that is derived from

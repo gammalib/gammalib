@@ -1266,7 +1266,7 @@ void GPars::parse(void)
         if (contains(fields[0])) {
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     gammalib::strip_chars(line,"\n"),
-                          "redefiniton of parameter name \""+fields[0]+"\"");
+                          "redefinition of parameter name \""+fields[0]+"\"");
         }
 
         // Add parameter

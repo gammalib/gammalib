@@ -40,7 +40,7 @@
  *
  * @brief Abstract interface for the event atom class.
  *
- * An event atom is a single event occuring in an instrument. Event atoms
+ * An event atom is a single event occurring in an instrument. Event atoms
  * are used for unbinned analysis.
  *
  * Each event has 3 attributes: energy, instrument direction and time.

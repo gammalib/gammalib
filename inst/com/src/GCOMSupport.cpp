@@ -59,7 +59,7 @@ void com_wcs_mer2car(GSkymap& map)
     // Apply kluge only if the skymap is in Mercator's projection
     if (wcs != NULL && wcs->code() == "MER") {
 
-        // Extract original WCS definiton
+        // Extract original WCS definition
         double crval1 = wcs->crval(0);
         double crval2 = wcs->crval(1);
         double crpix1 = wcs->crpix(0);

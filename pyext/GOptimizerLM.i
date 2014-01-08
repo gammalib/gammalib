@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GOptimizerLM
  *
- * @brief GOptimizerLM class SWIG interface defintion.
+ * @brief GOptimizerLM class SWIG interface definition.
  ***************************************************************************/
 class GOptimizerLM : public GOptimizer {
 public:

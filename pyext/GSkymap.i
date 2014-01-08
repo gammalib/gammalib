@@ -103,7 +103,7 @@ static int skymap_tuple(PyObject *input, int *ptr) {
 /***********************************************************************//**
  * @class GSkymap
  *
- * @brief GSkymap class interface defintion
+ * @brief GSkymap class interface definition
  ***************************************************************************/
 class GSkymap : public GBase {
 

@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GLog
  *
- * @brief Information logger interface defintion.
+ * @brief Information logger interface definition.
  ***************************************************************************/
 class GLog {
 public:

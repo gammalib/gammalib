@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GSkyPixel
  *
- * @brief GSkyPixel class interface defintion
+ * @brief GSkyPixel class interface definition
  ***************************************************************************/
 class GSkyPixel : public GBase {
 

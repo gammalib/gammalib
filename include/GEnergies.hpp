@@ -148,7 +148,7 @@ bool GEnergies::is_empty(void) const
 
 
 /***********************************************************************//**
- * @brief Reserves space for energues in container
+ * @brief Reserves space for energies in container
  *
  * @param[in] num Number of energies.
  *

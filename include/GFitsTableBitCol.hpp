@@ -39,7 +39,7 @@
  *
  * This class implements a FITS table Bit column. Bits are stored internally
  * in an array of type char and is transferred to the file in junks of
- * 8 Bits (using the cfitsio type TBYTE).
+ * 8 Bits (using the CFITSIO type TBYTE).
  ***************************************************************************/
 class GFitsTableBitCol : public GFitsTableCol {
 

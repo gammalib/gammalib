@@ -246,9 +246,9 @@ const double& GCTAResponse::eps(void) const
 
 
 /***********************************************************************//**
- * @brief Return Redestribution Matrix File name
+ * @brief Return Redistribution Matrix File name
  *
- * @return Redestribution Matrix File name.
+ * @return Redistribution Matrix File name.
  ***************************************************************************/
 inline
 const std::string& GCTAResponse::rmffile(void) const

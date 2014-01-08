@@ -142,7 +142,7 @@ public:
 /***********************************************************************//**
  * @class GTestSuite
  *
- * @brief Abstract test suite Python interface defintion
+ * @brief Abstract test suite Python interface definition
  ***************************************************************************/
 class GTestSuite : public GBase {
 public:        
@@ -222,7 +222,7 @@ public:
 /***********************************************************************//**
  * @class GTestSuite
  *
- * @brief Test suite Python interface defintion
+ * @brief Test suite Python interface definition
  ***************************************************************************/
 class GPythonTestSuite : public GTestSuite {
 public:        

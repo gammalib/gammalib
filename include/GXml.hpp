@@ -115,7 +115,7 @@
  * and to load and save the document from a URL. GXml derives from GContainer
  * as it behaves like a container class. It does, however, not contain an
  * explicit list, as the only data member of the class is a single instance
- * of GXmlDocument. GXmlDocument contains the hierachical list of all XML
+ * of GXmlDocument. GXmlDocument contains the hierarchical list of all XML
  * nodes.
  *
  * To manipulate the child nodes of GXmlDocument, the usual container class

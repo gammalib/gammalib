@@ -157,7 +157,7 @@ const int& GFitsImage::naxis(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of nul values envountered during loading
+ * @brief Return number of nul values encountered during loading
  ***************************************************************************/
 inline
 const int& GFitsImage::anynul(void) const

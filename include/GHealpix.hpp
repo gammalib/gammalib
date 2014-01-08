@@ -37,7 +37,7 @@
 /***********************************************************************//**
  * @class GHealpix
  *
- * @brief HealPix projection class interface defintion
+ * @brief HealPix projection class interface definition
  *
  * The HealPix projection class has been implemented by adapting code from
  * the HealPix library (version 2.1). For more information about HEALPix, see

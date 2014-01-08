@@ -35,7 +35,7 @@
 /***********************************************************************//**
  * @class GClass
  *
- * @brief [brief descriptor] interface defintion
+ * @brief [brief descriptor] interface definition
  ***************************************************************************/
 class GClass : public GBase {
 

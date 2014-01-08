@@ -39,7 +39,7 @@
 /***********************************************************************//**
  * @class GApplication
  *
- * @brief GammaLib application interface defintion
+ * @brief GammaLib application interface definition
  *
  * This class provides the base class for ftools-like executables based on
  * GammaLib. The ftools-like executables will be implemented as derived

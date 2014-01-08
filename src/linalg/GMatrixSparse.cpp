@@ -1511,7 +1511,7 @@ GMatrixSparse GMatrixSparse::abs(void) const
  * @brief Returns fill of matrix
  *
  * The fill of a matrix is defined as the number non-zero elements devided
- * by the number of total elements. By definiton, the fill is comprised
+ * by the number of total elements. By definition, the fill is comprised
  * in the interval [0,..,1]. The fill of an undefined matrix is defined to
  * be 0.
  ***************************************************************************/
