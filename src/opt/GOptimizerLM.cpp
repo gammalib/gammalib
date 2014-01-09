@@ -303,7 +303,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             if (m_logger != NULL) {
                 *m_logger << "Iteration " << m_iter << ": ";
                 *m_logger << "func=" << m_value << ", ";
-                *m_logger << "Lambda=" << m_lambda << ", ";
+                *m_logger << "Lambda=" << lambda_old << ", ";
                 *m_logger << "delta=" << delta;
                 *m_logger << ", " << "max(grad)=" << grad_max;
                 *m_logger << " [" << grad_imax << "]";
@@ -788,15 +788,16 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
             }
         }
 
-        // If the function has decreased then accept the new solution and decrease
-        // lambda ...
+        // If the function has decreased then accept the new solution
+        // and decrease lambda ...
         double delta = save_value - m_value;
         if (delta > 0.0) {
             m_lambda *= m_lambda_dec;
         }
 
-        // ... if function is identical then accept new solution. If the parameters 
-        // have changed then increase lambda, otherwise decrease lambda
+        // ... if function is identical then accept new solution. If the
+        // parameters have changed then increase lambda, otherwise decrease
+        // lambda
         else if (delta == 0.0) {
             if (par_change) {
                 m_lambda *= m_lambda_inc;
@@ -806,15 +807,16 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
             }
         }
 
-        // ... if function worsened slightly then accept new solution and increase
-        // lambda
-        else if (delta > 1.0e-6) {
+        // ... if function worsened slightly then accept new solution and
+        // increase lambda
+        else if (delta > -1.0e-6) {
             m_lambda *= m_lambda_inc;
         }
 
-        // ... otherwise,  if the statistics did not improve then use old parameters
-        // and increase lamdba. Restore also the best statistics value that was
-        // reached so far, the gradient vector and the curve matrix.
+        // ... otherwise,  if the statistics did not improve then use old
+        // parameters and increase lamdba. Restore also the best statistics
+        // value that was reached so far, the gradient vector and the curve
+        // matrix.
         else {
             m_lambda *= m_lambda_inc;
             m_value    = save_value;
