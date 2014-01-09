@@ -49,7 +49,7 @@ public:
     void                      test_constructor(void);
     void                      test_stream_logger(void);
     void                      test_C_logger(void);
-    void                      test_GPar(void);
+    void                      test_GApplicationPar(void);
 };
 
 #endif /* TEST_GAPPLICATION_HPP */

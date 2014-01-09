@@ -33,7 +33,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GLog.hpp"
-#include "GPars.hpp"
+#include "GApplicationPars.hpp"
 
 
 /***********************************************************************//**
@@ -59,8 +59,8 @@ public:
 
     // Operators
     GApplication& operator=(const GApplication& app);
-    GPar&         operator[](const std::string& name);
-    const GPar&   operator[](const std::string& name) const;
+    GApplicationPar&         operator[](const std::string& name);
+    const GApplicationPar&   operator[](const std::string& name) const;
 
     // Methods
     void               clear(void);
@@ -103,7 +103,7 @@ protected:
     std::vector<std::string> m_args;       //!< Command line arguments
     std::time_t              m_tstart;     //!< Calendar start time of execution
     std::clock_t             m_cstart;     //!< Clock start time of execution
-    GPars                    m_pars;       //!< Application parameters
+    GApplicationPars                    m_pars;       //!< Application parameters
 };
 
 
@@ -113,7 +113,7 @@ protected:
  * @param[in] name Parameter name.
  ***************************************************************************/
 inline
-GPar& GApplication::operator[](const std::string& name)
+GApplicationPar& GApplication::operator[](const std::string& name)
 {
     return (m_pars[name]);
 }
@@ -125,7 +125,7 @@ GPar& GApplication::operator[](const std::string& name)
  * @param[in] name Parameter name.
  ***************************************************************************/
 inline
-const GPar& GApplication::operator[](const std::string& name) const
+const GApplicationPar& GApplication::operator[](const std::string& name) const
 {
     return (m_pars[name]);
 }

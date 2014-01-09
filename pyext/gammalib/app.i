@@ -49,5 +49,5 @@
 /* __ Application module _________________________________________________ */
 %include "GApplication.i"
 %include "GLog.i"
-%include "GPars.i"
-%include "GPar.i"
+%include "GApplicationPars.i"
+%include "GApplicationPar.i"

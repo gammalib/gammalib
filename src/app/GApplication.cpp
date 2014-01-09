@@ -317,7 +317,7 @@ void GApplication::logFileOpen(const bool& clobber)
 bool GApplication::logTerse(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
+    int chatter = const_cast<GApplicationPar*>(&m_pars["chatter"])->integer();
 
     // Return terse logging condition
     return (chatter > 0);
@@ -335,7 +335,7 @@ bool GApplication::logTerse(void) const
 bool GApplication::logNormal(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
+    int chatter = const_cast<GApplicationPar*>(&m_pars["chatter"])->integer();
 
     // Return normal logging condition
     return (chatter > 1);
@@ -353,7 +353,7 @@ bool GApplication::logNormal(void) const
 bool GApplication::logExplicit(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
+    int chatter = const_cast<GApplicationPar*>(&m_pars["chatter"])->integer();
 
     // Return explicit logging condition
     return (chatter > 2);
@@ -370,7 +370,7 @@ bool GApplication::logExplicit(void) const
 bool GApplication::logVerbose(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
+    int chatter = const_cast<GApplicationPar*>(&m_pars["chatter"])->integer();
 
     // Return verbose logging condition
     return (chatter > 3);
@@ -387,7 +387,7 @@ bool GApplication::logVerbose(void) const
 bool GApplication::logDebug(void) const
 {
     // Get debug condition (circumvent const correctness)
-    bool debug = const_cast<GPar*>(&m_pars["debug"])->boolean();
+    bool debug = const_cast<GApplicationPar*>(&m_pars["debug"])->boolean();
 
     // Return debug condition
     return (debug);
@@ -404,7 +404,7 @@ bool GApplication::logDebug(void) const
 bool GApplication::clobber(void) const
 {
     // Get clobber condition (circumvent const correctness)
-    bool clobber = const_cast<GPar*>(&m_pars["clobber"])->boolean();
+    bool clobber = const_cast<GApplicationPar*>(&m_pars["clobber"])->boolean();
 
     // Return clobber condition
     return (clobber);

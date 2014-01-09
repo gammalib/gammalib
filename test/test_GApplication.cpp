@@ -45,7 +45,7 @@ void TestGApplication::set(void)
     append(static_cast<pfunction>(&TestGApplication::test_constructor), "Test GLog constructor");
     append(static_cast<pfunction>(&TestGApplication::test_stream_logger), "Test stream logger");
     append(static_cast<pfunction>(&TestGApplication::test_C_logger), "Test C logger");
-    append(static_cast<pfunction>(&TestGApplication::test_GPar), "Test GPar class");
+    append(static_cast<pfunction>(&TestGApplication::test_GApplicationPar), "Test GApplicationPar class");
 
     // Return
     return;
@@ -124,14 +124,14 @@ void TestGApplication::test_C_logger(void)
 
 
 /***********************************************************************//**
- * @brief Test GPar class
+ * @brief Test GApplicationPar class
  **************************************************************************/
-void TestGApplication::test_GPar(void)
+void TestGApplication::test_GApplicationPar(void)
 {
     // Test void constructor
     test_try("Void constructor");
     try {
-        GPar par;
+        GApplicationPar par;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -141,8 +141,8 @@ void TestGApplication::test_GPar(void)
     // Test copy constructor
     test_try("Copy constructor");
     try {
-        GPar par;
-        GPar par2(par);
+        GApplicationPar par;
+        GApplicationPar par2(par);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -152,7 +152,7 @@ void TestGApplication::test_GPar(void)
     // Test parameter constructor
     test_try("Parameter constructor");
     try {
-        GPar par("name", "r", "a", "1.0", "0.0", "2.0", "Parameter name");
+        GApplicationPar par("name", "r", "a", "1.0", "0.0", "2.0", "Parameter name");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -160,40 +160,40 @@ void TestGApplication::test_GPar(void)
     }
 
     // Test integer parameter exceptions
-    GPar par;
-    par = GPar("name", "i", "a", "INDEF", "0.0", "2.0", "Parameter name");
+    GApplicationPar par;
+    par = GApplicationPar("name", "i", "a", "INDEF", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter INDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GPar("name", "i", "a", "NONE", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "i", "a", "NONE", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter NONE.",
                 par.value()+" found instead of undefined value.");
-    par = GPar("name", "i", "a", "UNDEF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "i", "a", "UNDEF", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter UNDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GPar("name", "i", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "i", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter UNDEFINED.",
                 par.value()+" found instead of undefined value.");
 
     // Test floating point parameter exceptions
-    par = GPar("name", "r", "a", "INDEF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "INDEF", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter INDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GPar("name", "r", "a", "NONE", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "NONE", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter NONE.",
                 par.value()+" found instead of undefined value.");
-    par = GPar("name", "r", "a", "UNDEF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "UNDEF", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter UNDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GPar("name", "r", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter UNDEFINED.",
                 par.value()+" found instead of undefined value.");
-    par = GPar("name", "r", "a", "INF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "INF", "0.0", "2.0", "Parameter name");
     test_assert(par.is_notanumber(), "Check floating point parameter INF.",
                 par.value()+" found instead of infinite value.");
-    par = GPar("name", "r", "a", "INFINITY", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "INFINITY", "0.0", "2.0", "Parameter name");
     test_assert(par.is_notanumber(), "Check floating point parameter INFINITY.",
                 par.value()+" found instead of infinite value.");
-    par = GPar("name", "r", "a", "NAN", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "NAN", "0.0", "2.0", "Parameter name");
     test_assert(par.is_notanumber(), "Check floating point parameter NAN.",
                 par.value()+" found instead of not a number.");
 

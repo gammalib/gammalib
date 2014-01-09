@@ -115,8 +115,8 @@
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
 #include "GLog.hpp"
-#include "GPars.hpp"
-#include "GPar.hpp"
+#include "GApplicationPars.hpp"
+#include "GApplicationPar.hpp"
 
 /* __ Optimizer module ___________________________________________________ */
 #include "GOptimizer.hpp"

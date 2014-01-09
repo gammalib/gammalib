@@ -55,7 +55,7 @@ class Test(GPythonTestSuite):
 
         # Append tests
         self.append(self.test_log, "Test GLog")
-        self.append(self.test_pars, "Test GPars")
+        self.append(self.test_pars, "Test GApplicationPars")
 
         # Return
         return
@@ -154,15 +154,15 @@ class Test(GPythonTestSuite):
         # Return
         return
 
-    # Test GPars
+    # Test GApplicationPars
     def test_pars(self):
         """
-        Test GPars.
+        Test GApplicationPars.
         """
-        # Test GPars constructor with bad filename.
-        self.test_try("Test GPars constructor with bad filename")
+        # Test GApplicationPars constructor with bad filename.
+        self.test_try("Test GApplicationPars constructor with bad filename")
         try:
-            pars = GPars("testme.par")
+            pars = GApplicationPars("testme.par")
             self.test_try_failure("Exception not thrown.")
         except:
             self.test_try_success()

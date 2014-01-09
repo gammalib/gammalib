@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GPars.i - Application parameter container                *
+ *                GApplicationPars.i - Application parameter container                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,48 +19,48 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPars.i
+ * @file GApplicationPars.i
  * @brief Application parameter container class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GPars.hpp"
+#include "GApplicationPars.hpp"
 #include "GException.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GPars
+ * @class GApplicationPars
  *
  * @brief Application parameter container class
  ***************************************************************************/
-class GPars : public GBase {
+class GApplicationPars : public GBase {
 
 public:
     // Constructors and destructors
-    GPars(void);
-    explicit GPars(const std::string& filename);
-    explicit GPars(const std::string& filename,
+    GApplicationPars(void);
+    explicit GApplicationPars(const std::string& filename);
+    explicit GApplicationPars(const std::string& filename,
                    const std::vector<std::string>& args);
-    GPars(const GPars& pars);
-    virtual ~GPars(void);
+    GApplicationPars(const GApplicationPars& pars);
+    virtual ~GApplicationPars(void);
  
     // Methods
     void        clear(void);
-    GPars*      clone(void) const;
-    GPar&       at(const int& index);
-    const GPar& at(const int& index) const;
+    GApplicationPars*      clone(void) const;
+    GApplicationPar&       at(const int& index);
+    const GApplicationPar& at(const int& index) const;
     int         size(void) const;
     bool        is_empty(void) const;
-    GPar&       append(const GPar& par);
+    GApplicationPar&       append(const GApplicationPar& par);
     void        append_standard(void);
-    GPar&       insert(const int& index, const GPar& par);
-    GPar&       insert(const std::string& name, const GPar& par);
+    GApplicationPar&       insert(const int& index, const GApplicationPar& par);
+    GApplicationPar&       insert(const std::string& name, const GApplicationPar& par);
     void        remove(const int& index);
     void        remove(const std::string& name);
     void        reserve(const int& num);
-    void        extend(const GPars& pars);
+    void        extend(const GApplicationPars& pars);
     bool        contains(const std::string& name) const;
     void        load(const std::string& filename);
     void        load(const std::string& filename,
@@ -70,10 +70,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GPars class extension
+ * @brief GApplicationPars class extension
  ***************************************************************************/
-%extend GPars {
-    GPar& __getitem__(const int& index) {
+%extend GApplicationPars {
+    GApplicationPar& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
@@ -81,10 +81,10 @@ public:
             throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
-    GPar& __getitem__(const std::string& name) {
+    GApplicationPar& __getitem__(const std::string& name) {
         return (*self)[name];
     }
-    void __setitem__(const int& index, const GPar& par) {
+    void __setitem__(const int& index, const GApplicationPar& par) {
         if (index>=0 && index < self->size()) {
             (*self)[index] = par;
             return;
@@ -93,11 +93,11 @@ public:
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
     }
-    void __setitem__(const std::string& name, const GPar& par) {
+    void __setitem__(const std::string& name, const GApplicationPar& par) {
         (*self)[name] = par;
         return;
     }
-    GPars copy() {
+    GApplicationPars copy() {
         return (*self);
     }
 }

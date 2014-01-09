@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GPar.hpp - Application parameter class                *
+ *                   GApplicationPar.hpp - Application parameter class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPar.hpp
+ * @file GApplicationPar.hpp
  * @brief Application parameter class definition
  * @author Juergen Knoedlseder
  */
@@ -33,32 +33,32 @@
 
 
 /***********************************************************************//**
- * @class GPar
+ * @class GApplicationPar
  *
  * @brief Application parameter class
  ***************************************************************************/
-class GPar : public GBase {
+class GApplicationPar : public GBase {
 
     // Friend classes
-    friend class GPars;
+    friend class GApplicationPars;
     friend class GApplication;
 
 public:
     // Constructors and destructors
-    GPar(void);
-    explicit GPar(const std::string& name, const std::string& type,
+    GApplicationPar(void);
+    explicit GApplicationPar(const std::string& name, const std::string& type,
                   const std::string& mode, const std::string& value,
                   const std::string& min, const std::string& max, 
                   const std::string& prompt);
-    GPar(const GPar& par);
-    virtual ~GPar(void);
+    GApplicationPar(const GApplicationPar& par);
+    virtual ~GApplicationPar(void);
  
     // Operators
-    GPar& operator=(const GPar& par);
+    GApplicationPar& operator=(const GApplicationPar& par);
 
     // Methods
     void               clear(void);
-    GPar*              clone(void) const;
+    GApplicationPar*              clone(void) const;
     void               type(const std::string& type);
     void               mode(const std::string& mode);
     void               value(const std::string& value);
@@ -99,7 +99,7 @@ protected:
 
     // Protected methods
     void        init_members(void);
-    void        copy_members(const GPar& par);
+    void        copy_members(const GApplicationPar& par);
     void        free_members(void);
     void        check_type(const std::string& type) const;
     void        check_mode(const std::string& mode) const;
@@ -134,7 +134,7 @@ protected:
  * @return Parameter name
  ***************************************************************************/
 inline
-const std::string& GPar::name(void) const
+const std::string& GApplicationPar::name(void) const
 {
     return m_name;
 }
@@ -146,7 +146,7 @@ const std::string& GPar::name(void) const
  * @return Parameter type
  ***************************************************************************/
 inline
-const std::string& GPar::type(void) const
+const std::string& GApplicationPar::type(void) const
 {
     return m_type;
 }
@@ -158,7 +158,7 @@ const std::string& GPar::type(void) const
  * @return Parameter mode
  ***************************************************************************/
 inline
-const std::string& GPar::mode(void) const
+const std::string& GApplicationPar::mode(void) const
 {
     return m_mode;
 }
@@ -170,7 +170,7 @@ const std::string& GPar::mode(void) const
  * @return Parameter minimum
  ***************************************************************************/
 inline
-const std::string& GPar::min(void) const
+const std::string& GApplicationPar::min(void) const
 {
     return m_min;
 }
@@ -182,7 +182,7 @@ const std::string& GPar::min(void) const
  * @return Parameter maximum
  ***************************************************************************/
 inline
-const std::string& GPar::max(void) const
+const std::string& GApplicationPar::max(void) const
 {
     return m_max;
 }
@@ -194,7 +194,7 @@ const std::string& GPar::max(void) const
  * @return Parameter prompt
  ***************************************************************************/
 inline
-const std::string& GPar::prompt(void) const
+const std::string& GApplicationPar::prompt(void) const
 {
     return m_prompt;
 }

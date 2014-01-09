@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GPars.hpp - Application parameters                    *
+ *                   GApplicationPars.hpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPars.hpp
+ * @file GApplicationPars.hpp
  * @brief Application parameter container class definition
  * @author Juergen Knoedlseder
  */
@@ -31,52 +31,52 @@
 #include <vector>
 #include <string>
 #include "GContainer.hpp"
-#include "GPar.hpp"
+#include "GApplicationPar.hpp"
 
 
 /***********************************************************************//**
- * @class GPars
+ * @class GApplicationPars
  *
  * @brief Application parameter container class
  *
  * This class holds a collection of application parameters.
  ***************************************************************************/
-class GPars : public GContainer {
+class GApplicationPars : public GContainer {
 
     // Friend classes
     friend class GApplication;
 
 public:
     // Constructors and destructors
-    GPars(void);
-    explicit GPars(const std::string& filename);
-    explicit GPars(const std::string& filename,
+    GApplicationPars(void);
+    explicit GApplicationPars(const std::string& filename);
+    explicit GApplicationPars(const std::string& filename,
                    const std::vector<std::string>& args);
-    GPars(const GPars& pars);
-    virtual ~GPars(void);
+    GApplicationPars(const GApplicationPars& pars);
+    virtual ~GApplicationPars(void);
  
     // Operators
-    GPars&      operator=(const GPars& pars);
-    GPar&       operator[](const int& index);
-    const GPar& operator[](const int& index) const;
-    GPar&       operator[](const std::string& name);
-    const GPar& operator[](const std::string& name) const;
+    GApplicationPars&      operator=(const GApplicationPars& pars);
+    GApplicationPar&       operator[](const int& index);
+    const GApplicationPar& operator[](const int& index) const;
+    GApplicationPar&       operator[](const std::string& name);
+    const GApplicationPar& operator[](const std::string& name) const;
 
     // Methods
     void        clear(void);
-    GPars*      clone(void) const;
-    GPar&       at(const int& index);
-    const GPar& at(const int& index) const;
+    GApplicationPars*      clone(void) const;
+    GApplicationPar&       at(const int& index);
+    const GApplicationPar& at(const int& index) const;
     int         size(void) const;
     bool        is_empty(void) const;
-    GPar&       append(const GPar& par);
+    GApplicationPar&       append(const GApplicationPar& par);
     void        append_standard(void);
-    GPar&       insert(const int& index, const GPar& par);
-    GPar&       insert(const std::string& name, const GPar& par);
+    GApplicationPar&       insert(const int& index, const GApplicationPar& par);
+    GApplicationPar&       insert(const std::string& name, const GApplicationPar& par);
     void        remove(const int& index);
     void        remove(const std::string& name);
     void        reserve(const int& num);
-    void        extend(const GPars& pars);
+    void        extend(const GApplicationPars& pars);
     bool        contains(const std::string& name) const;
     void        load(const std::string& filename);
     void        load(const std::string& filename,
@@ -87,7 +87,7 @@ public:
 protected:
     // Protected methods
     void        init_members(void);
-    void        copy_members(const GPars& pars);
+    void        copy_members(const GApplicationPars& pars);
     void        free_members(void);
     std::string inpath(const std::string& filename) const;
     std::string outpath(const std::string& filename) const;
@@ -96,11 +96,11 @@ protected:
     void        parse(void);
     void        update(void);
     int         get_index(const std::string& name) const;
-    std::string parline(GPar& par, size_t* start, size_t* stop) const;
+    std::string parline(GApplicationPar& par, size_t* start, size_t* stop) const;
 
     // Protected data members
     std::vector<std::string> m_parfile;   //!< Parameter file lines
-    std::vector<GPar>        m_pars;      //!< Parameters
+    std::vector<GApplicationPar>        m_pars;      //!< Parameters
     std::vector<int>         m_line;      //!< Line number of parameter
     std::vector<size_t>      m_vstart;    //!< Column of value start
     std::vector<size_t>      m_vstop;     //!< Column of value stop
@@ -116,7 +116,7 @@ protected:
  * Returns a reference to the parameter with the specified @p index.
  ***************************************************************************/
 inline
-GPar& GPars::operator[](const int& index)
+GApplicationPar& GApplicationPars::operator[](const int& index)
 {
     return (m_pars[index]);
 }
@@ -130,7 +130,7 @@ GPar& GPars::operator[](const int& index)
  * Returns a reference to the parameter with the specified @p index.
  ***************************************************************************/
 inline
-const GPar& GPars::operator[](const int& index) const
+const GApplicationPar& GApplicationPars::operator[](const int& index) const
 {
     return (m_pars[index]);
 }
@@ -144,7 +144,7 @@ const GPar& GPars::operator[](const int& index) const
  * Returns the number of parameters in the parameter container.
  ***************************************************************************/
 inline
-int GPars::size(void) const
+int GApplicationPars::size(void) const
 {
     return (m_pars.size());
 }
@@ -158,7 +158,7 @@ int GPars::size(void) const
  * Signals if the parameter container does not contain any parameter.
  ***************************************************************************/
 inline
-bool GPars::is_empty(void) const
+bool GApplicationPars::is_empty(void) const
 {
     return (m_pars.empty());
 }
@@ -172,7 +172,7 @@ bool GPars::is_empty(void) const
  * Reserves space for @p num parameters in the container.
  ***************************************************************************/
 inline
-void GPars::reserve(const int& num)
+void GApplicationPars::reserve(const int& num)
 {
     m_pars.reserve(num);
     return;

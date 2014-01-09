@@ -79,10 +79,10 @@ public:
  * @brief GApplication class extension
  ***************************************************************************/
 %extend GApplication {
-    GPar& __getitem__(const std::string& name) {
+    GApplicationPar& __getitem__(const std::string& name) {
         return (*self)[name];
     }
-    void __setitem__(const std::string& name, const GPar& val) {
+    void __setitem__(const std::string& name, const GApplicationPar& val) {
         (*self)[name] = val;
         return;
     }

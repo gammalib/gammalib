@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GPars.cpp - Application parameters                    *
+ *                   GApplicationPars.cpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPars.cpp
+ * @file GApplicationPars.cpp
  * @brief Application parameter container class implementation
  * @author Juergen Knoedlseder
  */
@@ -34,28 +34,28 @@
 #include <sys/stat.h>      // mkdir() function
 #include <cstdlib>         // std::getenv() function
 #include <cstdio>          // std::fopen(), etc. functions
-#include "GPars.hpp"
+#include "GApplicationPars.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                            "GPars::operator[](std::string&)"
-#define G_AT                                          "GPar& GPars::at(int&)"
-#define G_APPEND                                       "GPars::append(GPar&)"
-#define G_INSERT1                          "GPar& GPars::insert(int&, GPar&)"
-#define G_INSERT2                  "GPar& GPars::insert(std::string&, GPar&)"
-#define G_REMOVE1                                       "GPars::remove(int&)"
-#define G_REMOVE2                               "GPars::remove(std::string&)"
-#define G_EXTEND                                      "GPars::extend(GPars&)"
+#define G_ACCESS                            "GApplicationPars::operator[](std::string&)"
+#define G_AT                                          "GApplicationPar& GApplicationPars::at(int&)"
+#define G_APPEND                                       "GApplicationPars::append(GApplicationPar&)"
+#define G_INSERT1                          "GApplicationPar& GApplicationPars::insert(int&, GApplicationPar&)"
+#define G_INSERT2                  "GApplicationPar& GApplicationPars::insert(std::string&, GApplicationPar&)"
+#define G_REMOVE1                                       "GApplicationPars::remove(int&)"
+#define G_REMOVE2                               "GApplicationPars::remove(std::string&)"
+#define G_EXTEND                                      "GApplicationPars::extend(GApplicationPars&)"
 
 
-#define G_LOAD1                                   "GPars::load(std::string&)"
-#define G_LOAD2        "GPars::load(std::string&, std::vector<std::string>&)"
-#define G_SAVE                                    "GPars::save(std::string&)"
-#define G_OUTPATH                              "GPars::outpath(std::string&)"
-#define G_READ                                    "GPars::read(std::string&)"
-#define G_WRITE                                  "GPars::write(std::string&)"
-#define G_PARSE                                              "GPars::parse()"
+#define G_LOAD1                                   "GApplicationPars::load(std::string&)"
+#define G_LOAD2        "GApplicationPars::load(std::string&, std::vector<std::string>&)"
+#define G_SAVE                                    "GApplicationPars::save(std::string&)"
+#define G_OUTPATH                              "GApplicationPars::outpath(std::string&)"
+#define G_READ                                    "GApplicationPars::read(std::string&)"
+#define G_WRITE                                  "GApplicationPars::write(std::string&)"
+#define G_PARSE                                              "GApplicationPars::parse()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -75,7 +75,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GPars::GPars(void)
+GApplicationPars::GApplicationPars(void)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -90,7 +90,7 @@ GPars::GPars(void)
  *
  * @param[in] filename Parameter filename. 
  ***************************************************************************/
-GPars::GPars(const std::string& filename)
+GApplicationPars::GApplicationPars(const std::string& filename)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -108,7 +108,7 @@ GPars::GPars(const std::string& filename)
  * @param[in] filename Parameter filename. 
  * @param[in] args Command line arguments. 
  ***************************************************************************/
-GPars::GPars(const std::string& filename, const std::vector<std::string>& args)
+GApplicationPars::GApplicationPars(const std::string& filename, const std::vector<std::string>& args)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -126,7 +126,7 @@ GPars::GPars(const std::string& filename, const std::vector<std::string>& args)
  *
  * @param[in] pars Parameter container.
  ***************************************************************************/
-GPars::GPars(const GPars& pars)
+GApplicationPars::GApplicationPars(const GApplicationPars& pars)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -142,7 +142,7 @@ GPars::GPars(const GPars& pars)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GPars::~GPars(void)
+GApplicationPars::~GApplicationPars(void)
 {
     // Free members
     free_members();
@@ -164,7 +164,7 @@ GPars::~GPars(void)
  * @param[in] pars Parameter container.
  * @return Parameter container.
  ***************************************************************************/
-GPars& GPars::operator=(const GPars& pars)
+GApplicationPars& GApplicationPars::operator=(const GApplicationPars& pars)
 {
     // Execute only if object is not identical
     if (this != &pars) {
@@ -194,7 +194,7 @@ GPars& GPars::operator=(const GPars& pars)
  * @exception GException::invalid_argument
  *            Parameter with specified name not found in container.
  ***************************************************************************/
-GPar& GPars::operator[](const std::string& name)
+GApplicationPar& GApplicationPars::operator[](const std::string& name)
 {
     // Get parameter index
     int index = get_index(name);
@@ -221,7 +221,7 @@ GPar& GPars::operator[](const std::string& name)
  * @exception GException::invalid_argument
  *            Parameter with specified name not found in container.
  ***************************************************************************/
-const GPar& GPars::operator[](const std::string& name) const
+const GApplicationPar& GApplicationPars::operator[](const std::string& name) const
 {
     // Get parameter index
     int index = get_index(name);
@@ -248,7 +248,7 @@ const GPar& GPars::operator[](const std::string& name) const
 /***********************************************************************//**
  * @brief Clear parameter container
  ***************************************************************************/
-void GPars::clear(void)
+void GApplicationPars::clear(void)
 {
     // Free members
     free_members();
@@ -266,9 +266,9 @@ void GPars::clear(void)
  *
  * @return Pointer to deep copy of parameter container.
  ***************************************************************************/
-GPars* GPars::clone(void) const
+GApplicationPars* GApplicationPars::clone(void) const
 {
-    return (new GPars(*this));
+    return (new GApplicationPars(*this));
 }
 
 
@@ -280,7 +280,7 @@ GPars* GPars::clone(void) const
  * @exception GException::out_of_range
  *            Parameter index is out of range.
  ***************************************************************************/
-GPar& GPars::at(const int& index)
+GApplicationPar& GApplicationPars::at(const int& index)
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -302,7 +302,7 @@ GPar& GPars::at(const int& index)
  * @exception GException::out_of_range
  *            Parameter index is out of range.
  ***************************************************************************/
-const GPar& GPars::at(const int& index) const
+const GApplicationPar& GApplicationPars::at(const int& index) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -328,7 +328,7 @@ const GPar& GPars::at(const int& index) const
  * This method appends one parameter to the parameter container. The
  * parameter provided to the method can be deleted after calling this method.
  ***************************************************************************/
-GPar& GPars::append(const GPar& par)
+GApplicationPar& GApplicationPars::append(const GApplicationPar& par)
 {
     // Check if a parameter with specified name does not yet exist
     int inx = get_index(par.name());
@@ -345,7 +345,7 @@ GPar& GPars::append(const GPar& par)
     m_pars.push_back(par);
 
     // Get reference of appended parameter
-    GPar& parameter = m_pars[m_pars.size()-1];
+    GApplicationPar& parameter = m_pars[m_pars.size()-1];
     
     // Build parameter file line
     size_t      start = 0;
@@ -369,13 +369,13 @@ GPar& GPars::append(const GPar& par)
  * This method appends the standard parameters to the parameter container.
  * Standard parameters are: "chatter", "clobber", "debug" and "mode".
  ***************************************************************************/
-void GPars::append_standard(void)
+void GApplicationPars::append_standard(void)
 {
     // Append standard parameters
-    append(GPar("chatter","i","h","2","0","4","Chattiness of output"));
-	append(GPar("clobber","b","h","yes","","","Overwrite existing output files with new output files?"));
-	append(GPar("debug","b","h","no","","","Debugging mode activated"));
-	append(GPar("mode","s","h","ql","","","Mode of automatic parameters"));
+    append(GApplicationPar("chatter","i","h","2","0","4","Chattiness of output"));
+	append(GApplicationPar("clobber","b","h","yes","","","Overwrite existing output files with new output files?"));
+	append(GApplicationPar("debug","b","h","no","","","Debugging mode activated"));
+	append(GApplicationPar("mode","s","h","ql","","","Mode of automatic parameters"));
 
     // Return
     return;
@@ -392,7 +392,7 @@ void GPars::append_standard(void)
  * Inserts a parameter into the container before the parameter with the
  * specified @p index.
  ***************************************************************************/
-GPar& GPars::insert(const int& index, const GPar& par)
+GApplicationPar& GApplicationPars::insert(const int& index, const GApplicationPar& par)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -424,7 +424,7 @@ GPar& GPars::insert(const int& index, const GPar& par)
     m_pars.insert(m_pars.begin()+index, par);
 
     // Get reference of appended parameter
-    GPar& parameter = m_pars[m_pars.size()-1];
+    GApplicationPar& parameter = m_pars[m_pars.size()-1];
 
     // Build parameter file line
     size_t      start = 0;
@@ -466,7 +466,7 @@ GPar& GPars::insert(const int& index, const GPar& par)
  * Inserts a parameter into the container before the parameter with the
  * specified @p name.
  ***************************************************************************/
-GPar& GPars::insert(const std::string& name, const GPar& par)
+GApplicationPar& GApplicationPars::insert(const std::string& name, const GApplicationPar& par)
 {
     // Get parameter index
     int index = get_index(name);
@@ -494,7 +494,7 @@ GPar& GPars::insert(const std::string& name, const GPar& par)
  *
  * Remove parameter with specified @p index from container.
  ***************************************************************************/
-void GPars::remove(const int& index)
+void GApplicationPars::remove(const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -532,7 +532,7 @@ void GPars::remove(const int& index)
  *
  * Remove parameter with specified @p name from container.
  ***************************************************************************/
-void GPars::remove(const std::string& name)
+void GApplicationPars::remove(const std::string& name)
 {
     // Get parameter index
     int index = get_index(name);
@@ -560,7 +560,7 @@ void GPars::remove(const std::string& name)
  *
  * Append parameter container to the container.
  ***************************************************************************/
-void GPars::extend(const GPars& pars)
+void GApplicationPars::extend(const GApplicationPars& pars)
 {
     // Do nothing if parameter container is empty
     if (!pars.is_empty()) {
@@ -610,7 +610,7 @@ void GPars::extend(const GPars& pars)
  * Determines whether a parameter with the specified name exists already in
  * the parameter container.
  ***************************************************************************/
-bool GPars::contains(const std::string& name) const
+bool GApplicationPars::contains(const std::string& name) const
 {
     // Get parameter index
     int inx = get_index(name);
@@ -630,7 +630,7 @@ bool GPars::contains(const std::string& name) const
  *
  * Loads all parameters from parameter file.
  ***************************************************************************/
-void GPars::load(const std::string& filename)
+void GApplicationPars::load(const std::string& filename)
 {
     // Reset parameters
     m_parfile.clear();
@@ -666,7 +666,7 @@ void GPars::load(const std::string& filename)
  * Loads all parameters from parameter file. Parameters are overwritten by
  * the values specified in the command line arguments.
  ***************************************************************************/
-void GPars::load(const std::string& filename,
+void GApplicationPars::load(const std::string& filename,
                  const std::vector<std::string>& args)
 {
     // Reset parameters
@@ -740,7 +740,7 @@ void GPars::load(const std::string& filename,
  * @exception GException::par_file_not_found
  *            No valid directory to write the parameter file has been found.
  ***************************************************************************/
-void GPars::save(const std::string& filename)
+void GApplicationPars::save(const std::string& filename)
 {
     // Get path to parameter file for output
     std::string path = outpath(filename);
@@ -765,7 +765,7 @@ void GPars::save(const std::string& filename)
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing parameter information.
  ***************************************************************************/
-std::string GPars::print(const GChatter& chatter) const
+std::string GApplicationPars::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -774,7 +774,7 @@ std::string GPars::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GPars ===");
+        result.append("=== GApplicationPars ===");
 
         // Append parameters
         for (int i = 0; i < size(); ++i) {
@@ -797,7 +797,7 @@ std::string GPars::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GPars::init_members(void)
+void GApplicationPars::init_members(void)
 {
     // Initialise members
     m_parfile.clear();
@@ -817,7 +817,7 @@ void GPars::init_members(void)
  *
  * @param[in] pars Object from which members which should be copied.
  ***************************************************************************/
-void GPars::copy_members(const GPars& pars)
+void GApplicationPars::copy_members(const GApplicationPars& pars)
 {
     // Copy attributes
     m_parfile = pars.m_parfile;
@@ -835,7 +835,7 @@ void GPars::copy_members(const GPars& pars)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GPars::free_members(void)
+void GApplicationPars::free_members(void)
 {
     // Return
     return;
@@ -856,7 +856,7 @@ void GPars::free_members(void)
  * pfiles directory, in ${GAMMALIB}/syspfiles and in ${prefix}/syspfiles,
  * where ${prefix} is the path to the GammaLib installation.
  ***************************************************************************/
-std::string GPars::inpath(const std::string& filename) const
+std::string GApplicationPars::inpath(const std::string& filename) const
 {
     // Allocate result path
     std::string path;
@@ -946,7 +946,7 @@ std::string GPars::inpath(const std::string& filename) const
  * home directory. If pfiles directory does not exist then create it.
  * If directory exists but is not writable then make it writable.
  ***************************************************************************/
-std::string GPars::outpath(const std::string& filename) const
+std::string GApplicationPars::outpath(const std::string& filename) const
 {
    // Allocate result path
     std::string path;
@@ -1025,7 +1025,7 @@ std::string GPars::outpath(const std::string& filename) const
  * character. The file will be locked to avoid simultaneous access by another
  * process.
  ***************************************************************************/
-void GPars::read(const std::string& filename)
+void GApplicationPars::read(const std::string& filename)
 {
     // Allocate line buffer
     const int n = 1000; 
@@ -1100,7 +1100,7 @@ void GPars::read(const std::string& filename)
  * Writes all lines of the parameter file. The file will be locked to avoid
  * simultaneous access by another process.
  ***************************************************************************/
-void GPars::write(const std::string& filename) const
+void GApplicationPars::write(const std::string& filename) const
 {
     // Trying to get file lock. We have to do this after opening the file
     // using the fopen function, as the file may not exist, hence it needs
@@ -1191,7 +1191,7 @@ void GPars::write(const std::string& filename) const
  * exists. Without the presence of the mode parameter the effective mode
  * will be 'h'.
  ***************************************************************************/
-void GPars::parse(void)
+void GApplicationPars::parse(void)
 {
     // Preset effective mode to 'hidden'
     m_mode = "h";
@@ -1271,7 +1271,7 @@ void GPars::parse(void)
 
         // Add parameter
         try {
-            m_pars.push_back(GPar(fields[0], fields[1], fields[2],
+            m_pars.push_back(GApplicationPar(fields[0], fields[1], fields[2],
                                   fields[3], fields[4], fields[5],
                                   fields[6]));
             m_line.push_back(i);
@@ -1319,7 +1319,7 @@ void GPars::parse(void)
  * whitespace).
  * Updating is only done of the parameter mode is 'learn'.
  ***************************************************************************/
-void GPars::update(void)
+void GApplicationPars::update(void)
 {
     // Loop over all parameters
     for (int i = 0; i < m_pars.size(); ++i) {
@@ -1348,7 +1348,7 @@ void GPars::update(void)
  * Returns parameter index based on the specified @p name. If no parameter
  * with the specified @p name is found the method returns -1.
  ***************************************************************************/
-int GPars::get_index(const std::string& name) const
+int GApplicationPars::get_index(const std::string& name) const
 {
     // Initialise index
     int index = -1;
@@ -1377,7 +1377,7 @@ int GPars::get_index(const std::string& name) const
  * Constructs the parameter file line for a specific parameter and returns
  * the line as a string. The line is terminated by a \n character.
  ***************************************************************************/
-std::string GPars::parline(GPar& par, size_t* start, size_t* stop) const
+std::string GApplicationPars::parline(GApplicationPar& par, size_t* start, size_t* stop) const
 {
     // Declate line
     std::string line;

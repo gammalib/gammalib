@@ -1,5 +1,5 @@
 /***************************************************************************
- *                    GPar.cpp - Application parameter                     *
+ *                    GApplicationPar.cpp - Application parameter                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPar.cpp
+ * @file GApplicationPar.cpp
  * @brief Application parameter class implementation
  * @author Juergen Knoedlseder
  */
@@ -33,24 +33,24 @@
 #include <readline/readline.h>
 #endif
 #include <climits>            //!< Needed for declaration of LONG_MAX
-#include "GPar.hpp"
+#include "GApplicationPar.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_STRING_SET                             "GPar::string(std::string&)"
-#define G_FILENAME_SET                         "GPar::filename(std::string&)"
-#define G_BOOLEAN_SET                                  "GPar::boolean(bool&)"
-#define G_INTEGER_SET                                   "GPar::integer(int&)"
-#define G_REAL_SET                                      "GPar::real(double&)"
-#define G_STRING_GET                                         "GPar::string()"
-#define G_FILENAME_GET                                     "GPar::filename()"
-#define G_BOOLEAN_GET                                       "GPar::boolean()"
-#define G_INTEGER_GET                                       "GPar::integer()"
-#define G_REAL_GET                                             "GPar::real()"
-#define G_CHECK_TYPE                          "GPar::check_type(std::string)"
-#define G_CHECK_MODE                          "GPar::check_mode(std::string)"
-#define G_CHECK_VALUE_BOOL              "GPar::check_value_bool(std::string)"
+#define G_STRING_SET                             "GApplicationPar::string(std::string&)"
+#define G_FILENAME_SET                         "GApplicationPar::filename(std::string&)"
+#define G_BOOLEAN_SET                                  "GApplicationPar::boolean(bool&)"
+#define G_INTEGER_SET                                   "GApplicationPar::integer(int&)"
+#define G_REAL_SET                                      "GApplicationPar::real(double&)"
+#define G_STRING_GET                                         "GApplicationPar::string()"
+#define G_FILENAME_GET                                     "GApplicationPar::filename()"
+#define G_BOOLEAN_GET                                       "GApplicationPar::boolean()"
+#define G_INTEGER_GET                                       "GApplicationPar::integer()"
+#define G_REAL_GET                                             "GApplicationPar::real()"
+#define G_CHECK_TYPE                          "GApplicationPar::check_type(std::string)"
+#define G_CHECK_MODE                          "GApplicationPar::check_mode(std::string)"
+#define G_CHECK_VALUE_BOOL              "GApplicationPar::check_value_bool(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -68,7 +68,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GPar::GPar(void)
+GApplicationPar::GApplicationPar(void)
 {
     // Initialise members
     init_members();
@@ -91,7 +91,7 @@ GPar::GPar(void)
  *
  * Constructs a parameter from parameter attributes.
  ***************************************************************************/
-GPar::GPar(const std::string& name, const std::string& type,
+GApplicationPar::GApplicationPar(const std::string& name, const std::string& type,
            const std::string& mode, const std::string& value,
            const std::string& min, const std::string& max, 
            const std::string& prompt)
@@ -118,7 +118,7 @@ GPar::GPar(const std::string& name, const std::string& type,
  *
  * @param[in] par Parameter.
  ***************************************************************************/
-GPar::GPar(const GPar& par)
+GApplicationPar::GApplicationPar(const GApplicationPar& par)
 {
     // Initialise members
     init_members();
@@ -134,7 +134,7 @@ GPar::GPar(const GPar& par)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GPar::~GPar(void)
+GApplicationPar::~GApplicationPar(void)
 {
     // Free members
     free_members();
@@ -156,7 +156,7 @@ GPar::~GPar(void)
  * @param[in] par Parameter.
  * @return Parameter.
  ***************************************************************************/
-GPar& GPar::operator=(const GPar& par)
+GApplicationPar& GApplicationPar::operator=(const GApplicationPar& par)
 {
     // Execute only if object is not identical
     if (this != &par) {
@@ -186,7 +186,7 @@ GPar& GPar::operator=(const GPar& par)
 /***********************************************************************//**
  * @brief Clear parameter
  ***************************************************************************/
-void GPar::clear(void)
+void GApplicationPar::clear(void)
 {
     // Free members
     free_members();
@@ -204,9 +204,9 @@ void GPar::clear(void)
  *
  * @return Pointer to deep copy of parameter.
  ***************************************************************************/
-GPar* GPar::clone(void) const
+GApplicationPar* GApplicationPar::clone(void) const
 {
-    return (new GPar(*this));
+    return (new GApplicationPar(*this));
 }
 
 
@@ -217,7 +217,7 @@ GPar* GPar::clone(void) const
  *
  * Valid parameter types are: b,i,r,s,f,fr,fw,fe,fn.
  ***************************************************************************/
-void GPar::type(const std::string& type)
+void GApplicationPar::type(const std::string& type)
 {
     // Verify that type is valid
     check_type(type);
@@ -237,7 +237,7 @@ void GPar::type(const std::string& type)
  *
  * Valid parameter modes are: a,h,l,q,hl,ql,lh,lq.
  ***************************************************************************/
-void GPar::mode(const std::string& mode)
+void GApplicationPar::mode(const std::string& mode)
 {
     // Verify that mode is valid
     check_mode(mode);
@@ -259,7 +259,7 @@ void GPar::mode(const std::string& mode)
  * It is a parser method that verifies that the given parameter value is
  * compatible with the parameter type.
  ***************************************************************************/
-void GPar::value(const std::string& value)
+void GApplicationPar::value(const std::string& value)
 {
     // Verify that value is valid
     check_value(value);
@@ -283,7 +283,7 @@ void GPar::value(const std::string& value)
  * This method sets a string parameter. The method only applies to parameters
  * of type "s". Other parameter types will produce an exception.
  ***************************************************************************/
-void GPar::string(const std::string& value)
+void GApplicationPar::string(const std::string& value)
 {
     // Check if parameter is a string parameter
     if (m_type != "s") {
@@ -314,7 +314,7 @@ void GPar::string(const std::string& value)
  * This method sets a filename parameter. The method only applies to filename
  * parameters. Other parameter types will produce an exception.
  ***************************************************************************/
-void GPar::filename(const std::string& value)
+void GApplicationPar::filename(const std::string& value)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
@@ -345,7 +345,7 @@ void GPar::filename(const std::string& value)
  * This method sets a boolean parameter. The method only applies to parameters
  * of type "b". Other parameter types will produce an exception.
  ***************************************************************************/
-void GPar::boolean(const bool& value)
+void GApplicationPar::boolean(const bool& value)
 {
     // Check if parameter is boolean
     if (m_type != "b") {
@@ -376,7 +376,7 @@ void GPar::boolean(const bool& value)
  * This method sets an integer parameter. The method only applies to
  * parameters of type "i". Other parameter types will produce an exception.
  ***************************************************************************/
-void GPar::integer(const int& value)
+void GApplicationPar::integer(const int& value)
 {
     // Check if parameter is integer
     if (m_type != "i") {
@@ -407,7 +407,7 @@ void GPar::integer(const int& value)
  * This method sets a real parameter. The method only applies to parameters
  * of type "r". Other parameter types will produce an exception.
  ***************************************************************************/
-void GPar::real(const double& value)
+void GApplicationPar::real(const double& value)
 {
     // Check if parameter is boolean
     if (m_type != "r") {
@@ -433,7 +433,7 @@ void GPar::real(const double& value)
  * This method queries any parameter and returns it as a string. No parameter
  * type checking is performed.
  ***************************************************************************/
-std::string GPar::value(void)
+std::string GApplicationPar::value(void)
 {
     // Query parameter
     query();
@@ -453,7 +453,7 @@ std::string GPar::value(void)
  * applies to parameters of type "s". Other parameter types will produce an
  * exception.
  ***************************************************************************/
-std::string GPar::string(void)
+std::string GApplicationPar::string(void)
 {
     // Check if parameter is a string parameter
     if (m_type != "s") {
@@ -488,7 +488,7 @@ std::string GPar::string(void)
  * exception. Any environment variables that are encountered within the
  * filename are expanded automatically.
  ***************************************************************************/
-std::string GPar::filename(void)
+std::string GApplicationPar::filename(void)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
@@ -522,7 +522,7 @@ std::string GPar::filename(void)
  * applies to parameters of type "b". Other parameter types will produce an
  * exception.
  ***************************************************************************/
-bool GPar::boolean(void)
+bool GApplicationPar::boolean(void)
 {
     // Check if parameter is boolean
     if (m_type != "b") {
@@ -563,7 +563,7 @@ bool GPar::boolean(void)
  * applies to parameters of type "i". Other parameter types will produce an
  * exception.
  ***************************************************************************/
-int GPar::integer(void)
+int GApplicationPar::integer(void)
 {
     // Check if parameter is integer
     if (m_type != "i") {
@@ -600,7 +600,7 @@ int GPar::integer(void)
  * applies to parameters of type "r". Other parameter types will produce an
  * exception.
  ***************************************************************************/
-double GPar::real(void)
+double GApplicationPar::real(void)
 {
     // Check if parameter is integer
     if (m_type != "r") {
@@ -633,7 +633,7 @@ double GPar::real(void)
  * A parameter is in mode learn when it has one of the following modes:
  * hl,ql,lh, or lq.
  ***************************************************************************/
-bool GPar::is_learn(void) const
+bool GApplicationPar::is_learn(void) const
 {
     // Assign result
     bool result = (m_mode == "hl" || m_mode == "ql" || m_mode == "lh" || 
@@ -650,7 +650,7 @@ bool GPar::is_learn(void) const
  * A parameter will be queried when it has one of the following modes:
  * q, ql, or lq.
  ***************************************************************************/
-bool GPar::is_query(void) const
+bool GApplicationPar::is_query(void) const
 {
     // Assign result
     bool result = (m_mode == "q" || m_mode == "ql" || m_mode == "lq");
@@ -666,7 +666,7 @@ bool GPar::is_query(void) const
  * A parameter is of type "filename" if it has one of the following types:
  * f, fr, fw, fe, or fn.
  ***************************************************************************/
-bool GPar::is_filename(void) const
+bool GApplicationPar::is_filename(void) const
 {
     // Assign result
     bool result = (m_type == "f"  || m_type == "fr" || m_type == "fw" ||
@@ -680,7 +680,7 @@ bool GPar::is_filename(void) const
 /***********************************************************************//**
  * @brief Signals if parameter is valid
  ***************************************************************************/
-bool GPar::is_valid(void)
+bool GApplicationPar::is_valid(void)
 {
     // Query parameter
     query();
@@ -693,7 +693,7 @@ bool GPar::is_valid(void)
 /***********************************************************************//**
  * @brief Signals if parameter is undefined
  ***************************************************************************/
-bool GPar::is_undefined(void)
+bool GApplicationPar::is_undefined(void)
 {
     // Query parameter
     query();
@@ -706,7 +706,7 @@ bool GPar::is_undefined(void)
 /***********************************************************************//**
  * @brief Signals if parameter is not a number
  ***************************************************************************/
-bool GPar::is_notanumber(void)
+bool GApplicationPar::is_notanumber(void)
 {
     // Query parameter
     query();
@@ -726,7 +726,7 @@ bool GPar::is_notanumber(void)
  *       options occur if there is only a minimum but not a maximum
  *       parameter. Check IRAF documentation.
  ***************************************************************************/
-std::string GPar::print(const GChatter& chatter) const
+std::string GApplicationPar::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -786,7 +786,7 @@ std::string GPar::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GPar::init_members(void)
+void GApplicationPar::init_members(void)
 {
     // Initialise members
     m_update = false;
@@ -809,7 +809,7 @@ void GPar::init_members(void)
  *
  * @param[in] par Parameter.
  ***************************************************************************/
-void GPar::copy_members(const GPar& par)
+void GApplicationPar::copy_members(const GApplicationPar& par)
 {
     // Copy attributes
     m_update = par.m_update;
@@ -830,7 +830,7 @@ void GPar::copy_members(const GPar& par)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GPar::free_members(void)
+void GApplicationPar::free_members(void)
 {
     // Return
     return;
@@ -849,7 +849,7 @@ void GPar::free_members(void)
  * The fr,fw,fe,fn types test for read access, write access, file existence,
  * and file absence, respectively.
  ***************************************************************************/
-void GPar::check_type(const std::string& type) const
+void GApplicationPar::check_type(const std::string& type) const
 {
     // Check if type is valid
     if (type != "b"  && type != "i"  && type != "r"  && type != "s" &&
@@ -874,7 +874,7 @@ void GPar::check_type(const std::string& type) const
  *
  * The parameter mode has to be one of a,h,l,q,hl,ql,lh,lq.
  ***************************************************************************/
-void GPar::check_mode(const std::string& mode) const
+void GApplicationPar::check_mode(const std::string& mode) const
 {
     // Check of mode is valid
     if (mode != "a"  && mode != "h"  && mode != "q" && mode != "hl" &&
@@ -896,7 +896,7 @@ void GPar::check_mode(const std::string& mode) const
  * Requires that m_type, m_min and m_max are set. The method does not verify
  * if m_type is valid.
  ***************************************************************************/
-void GPar::check_value(const std::string& value) const
+void GApplicationPar::check_value(const std::string& value) const
 {
     // Make type dependent check
     if (m_type == "b") {
@@ -931,7 +931,7 @@ void GPar::check_value(const std::string& value) const
  * The Boolean value string has to be one of y,yes,true,t or n,no,false,f
  * (case insensitive).
  ***************************************************************************/
-void GPar::check_value_bool(const std::string& value) const
+void GApplicationPar::check_value_bool(const std::string& value) const
 {
     // Turn value to lower case for testing
     std::string lvalue = gammalib::tolower(value);
@@ -958,7 +958,7 @@ void GPar::check_value_bool(const std::string& value) const
  *
  * @todo Implement method.
  ***************************************************************************/
-void GPar::check_value_int(const std::string& value) const
+void GApplicationPar::check_value_int(const std::string& value) const
 {
     // Convert value to integer
     //int ivalue = toint(value);
@@ -978,7 +978,7 @@ void GPar::check_value_int(const std::string& value) const
  *
  * @todo Implement method.
  ***************************************************************************/
-void GPar::check_value_real(const std::string& value) const
+void GApplicationPar::check_value_real(const std::string& value) const
 {
 
     // Return
@@ -996,7 +996,7 @@ void GPar::check_value_real(const std::string& value) const
  *
  * @todo Implement method.
  ***************************************************************************/
-void GPar::check_value_string(const std::string& value) const
+void GApplicationPar::check_value_string(const std::string& value) const
 {
 
     // Return
@@ -1015,7 +1015,7 @@ void GPar::check_value_string(const std::string& value) const
  * @todo Implement method.
  * @todo NONE is equivalent to an empty string.
  ***************************************************************************/
-void GPar::check_value_filename(const std::string& value) const
+void GApplicationPar::check_value_filename(const std::string& value) const
 {
 
     // Return
@@ -1040,7 +1040,7 @@ void GPar::check_value_filename(const std::string& value) const
  *
  * @todo Implement parameter verification (min, max, options)
  ***************************************************************************/
-void GPar::set_value(const std::string& value)
+void GApplicationPar::set_value(const std::string& value)
 {
     // Set integer value. Catch the special values that signal that a
     // parameter is undefined. Any infinity or nan is set to the maximum
@@ -1112,7 +1112,7 @@ void GPar::set_value(const std::string& value)
  * This method queries the parameter from the stardard input if it is needed
  * to be input by the user.
  ***************************************************************************/
-void GPar::query(void)
+void GApplicationPar::query(void)
 {
     // Continue only if parameter has query mode
     if (is_query()) {
@@ -1167,7 +1167,7 @@ void GPar::query(void)
 /***********************************************************************//**
  * @brief Don't query parameter
  ***************************************************************************/
-void GPar::stop_query(void)
+void GApplicationPar::stop_query(void)
 {
     // Don't query parameter again
     if (m_mode == "q")  m_mode = "h";
@@ -1188,7 +1188,7 @@ void GPar::stop_query(void)
  * Valid parameter types are: b,i,r,s,f,fr,fw,fe,fn. If the parameter type
  * is not valid, the method returns "unknown".
  ***************************************************************************/
-std::string GPar::par_type_string(const std::string& type) const
+std::string GApplicationPar::par_type_string(const std::string& type) const
 {
     // Initialize empty type string
     std::string type_string = "";
@@ -1224,7 +1224,7 @@ std::string GPar::par_type_string(const std::string& type) const
  *
  * @return Returns the parameter status in human readable form.
  ***************************************************************************/
-std::string GPar::par_status_string(void) const
+std::string GApplicationPar::par_status_string(void) const
 {
     // Allocate status string
     std::string status;
