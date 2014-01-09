@@ -1486,8 +1486,11 @@ void GModelSpectralNodes::update_eval_cache(void) const
  ***************************************************************************/
 void GModelSpectralNodes::update_flux_cache(void) const
 {
+    // Determine number of nodes
+    int nodes = m_energies.size(); // cast to int as size() returns unsigned
+
     // Loop over all nodes-1
-    for (int i = 0; i < m_energies.size()-1; ++i) {
+    for (int i = 0; i < nodes-1; ++i) {
     
         // Get energies and function values
         double emin = m_lin_energies[i];
