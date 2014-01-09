@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GApplicationPar.hpp - Application parameter class                *
+ *             GApplicationPar.hpp - Application parameter class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -46,10 +46,10 @@ class GApplicationPar : public GBase {
 public:
     // Constructors and destructors
     GApplicationPar(void);
-    explicit GApplicationPar(const std::string& name, const std::string& type,
-                  const std::string& mode, const std::string& value,
-                  const std::string& min, const std::string& max, 
-                  const std::string& prompt);
+    GApplicationPar(const std::string& name, const std::string& type,
+                    const std::string& mode, const std::string& value,
+                    const std::string& min, const std::string& max, 
+                    const std::string& prompt);
     GApplicationPar(const GApplicationPar& par);
     virtual ~GApplicationPar(void);
  
@@ -58,7 +58,7 @@ public:
 
     // Methods
     void               clear(void);
-    GApplicationPar*              clone(void) const;
+    GApplicationPar*   clone(void) const;
     void               type(const std::string& type);
     void               mode(const std::string& mode);
     void               value(const std::string& value);

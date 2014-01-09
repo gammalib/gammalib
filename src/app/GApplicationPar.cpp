@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GApplicationPar.cpp - Application parameter                     *
+ *               GApplicationPar.cpp - Application parameter               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,19 +38,19 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_STRING_SET                             "GApplicationPar::string(std::string&)"
-#define G_FILENAME_SET                         "GApplicationPar::filename(std::string&)"
-#define G_BOOLEAN_SET                                  "GApplicationPar::boolean(bool&)"
-#define G_INTEGER_SET                                   "GApplicationPar::integer(int&)"
-#define G_REAL_SET                                      "GApplicationPar::real(double&)"
-#define G_STRING_GET                                         "GApplicationPar::string()"
-#define G_FILENAME_GET                                     "GApplicationPar::filename()"
-#define G_BOOLEAN_GET                                       "GApplicationPar::boolean()"
-#define G_INTEGER_GET                                       "GApplicationPar::integer()"
-#define G_REAL_GET                                             "GApplicationPar::real()"
-#define G_CHECK_TYPE                          "GApplicationPar::check_type(std::string)"
-#define G_CHECK_MODE                          "GApplicationPar::check_mode(std::string)"
-#define G_CHECK_VALUE_BOOL              "GApplicationPar::check_value_bool(std::string)"
+#define G_STRING_SET                  "GApplicationPar::string(std::string&)"
+#define G_FILENAME_SET              "GApplicationPar::filename(std::string&)"
+#define G_BOOLEAN_SET                       "GApplicationPar::boolean(bool&)"
+#define G_INTEGER_SET                        "GApplicationPar::integer(int&)"
+#define G_REAL_SET                           "GApplicationPar::real(double&)"
+#define G_STRING_GET                              "GApplicationPar::string()"
+#define G_FILENAME_GET                          "GApplicationPar::filename()"
+#define G_BOOLEAN_GET                            "GApplicationPar::boolean()"
+#define G_INTEGER_GET                            "GApplicationPar::integer()"
+#define G_REAL_GET                                  "GApplicationPar::real()"
+#define G_CHECK_TYPE               "GApplicationPar::check_type(std::string)"
+#define G_CHECK_MODE               "GApplicationPar::check_mode(std::string)"
+#define G_CHECK_VALUE_BOOL   "GApplicationPar::check_value_bool(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -91,10 +91,13 @@ GApplicationPar::GApplicationPar(void)
  *
  * Constructs a parameter from parameter attributes.
  ***************************************************************************/
-GApplicationPar::GApplicationPar(const std::string& name, const std::string& type,
-           const std::string& mode, const std::string& value,
-           const std::string& min, const std::string& max, 
-           const std::string& prompt)
+GApplicationPar::GApplicationPar(const std::string& name,
+                                 const std::string& type,
+                                 const std::string& mode,
+                                 const std::string& value,
+                                 const std::string& min,
+                                 const std::string& max, 
+                                 const std::string& prompt)
 {
     // Initialise members
     init_members();

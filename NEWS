@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-8 January 2014
+9 January 2014
 
 
 1. Introduction
@@ -22,6 +22,16 @@ General
   to is_..., has_..., etc. For example, isempty() now becomes
   is_empty().
 
+GApplicationPar
+  The GPar class has been renamed to GApplicationPar.
+
+GApplicationPars
+  The GPars class has been renamed to GApplicationPars. The class
+  now derives from GContainer and implements the usual at(), size(), 
+  is_empty(), append(), insert(), remove(), reserve() and extent() 
+  methods. The haspar() method has been renamed to contains() for 
+  consistency.
+
 GApplications
   The par_filename() and log_filename() methods return a const
   reference string as the filenames are stored explicitly by the
@@ -33,7 +43,8 @@ GBase
   chattiness is set to NORMAL.
 
 GEbounds
-  The number argument in the setlin() and setlon() methods has been moved
+  The setlin() and setlog() methods have been renamed to set_lin() and
+  set_log(). The number arguments in these methods has been moved
   from the last position to the first position in the argument list.
   The emin(), emax(), emean() and elogmean() methods now take a const
   integer reference as argument instead of an integer value. The read()
@@ -51,7 +62,7 @@ GEventCube
 
 GFits
   The GFits class now derives from GContainer and implements all generic
-  container class methods (at(), size(), isempty(), set(), append(),
+  container class methods (at(), size(), is_empty(), set(), append(),
   insert(), remove(), reserve(), extend()). The hashdu() method has
   been renamed to contains() for compliance with other container classes.
   The hdu() methods have been renamed to at(), also for compliance.
@@ -68,7 +79,7 @@ GFitsHDU
 
 GFitsHeader
   The GFitsHeader class now derives from GContainer and implements all
-  generic container class methods (at(), size(), isempty(), append(),
+  generic container class methods (at(), size(), is_empty(), append(),
   insert(), remove(), reserve(), extend()). The hascard() methods have
   been renamed to contains() for compliance with other container classes.
   The card() methods have been renamed to at(), also for compliance.
@@ -193,12 +204,6 @@ GOptimizer & GOptimizerLM
   The optimization operators have been removed and replaced by the
   optimize method.
 
-GPars
-  The GPars class now derives from GContainer and implements the
-  usual at(), size(), isempty(), append(), insert(), remove(),
-  reserve() and extent() methods. The haspar() method has been
-  renamed to contains() for consistency.
-
 GPhoton
   Add mcid argument to Photon constructor (defaults to -1).
 
@@ -217,15 +222,16 @@ GSkyPixel
   The class now supports 1D and 2D pixels. Type conversion methods
   have been added that allow assigning integer and double precision
   values from and to GSkyPixel for 1D pixels. A size() method has
-  been added that returns the pixel dimension. Also the is1D() and
-  is2D() methods can be used to determine whether a pixel is 1D
+  been added that returns the pixel dimension. Also the is_1D() and
+  is_2D() methods can be used to determine whether a pixel is 1D
   or 2D. index() methods have been added to set and get 1D pixel
   values. A xy() method has been added to set x and y simultaneously
   for 2D pixels. 1D and 2D pixel constructors exist now for
   integer and double precision values.
 
 GTestCase
-  The name(), message(), type(), kind(), passed() and
+  The passed() method has been renamed to has_passed().
+  The name(), message(), type(), kind(), has_passed() and
   duration() methods now all return a const reference.
 
 GTestSuite
@@ -238,7 +244,7 @@ GTestSuite
 
 GTestSuites
   The GTestSuites class now derives from GContainer and implements
-  the usual container class methods (at(), size(), isempty(),
+  the usual container class methods (at(), size(), is_empty(),
   set(), append(), insert(), remove(), reserve() and extend()).
   The operator[] now returns pointers to GTestSuite. The name()
   and timestamp() methods now return const references.

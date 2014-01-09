@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GApplicationPars.hpp - Application parameters                    *
+ *               GApplicationPars.hpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,8 +50,8 @@ public:
     // Constructors and destructors
     GApplicationPars(void);
     explicit GApplicationPars(const std::string& filename);
-    explicit GApplicationPars(const std::string& filename,
-                   const std::vector<std::string>& args);
+    GApplicationPars(const std::string& filename,
+                     const std::vector<std::string>& args);
     GApplicationPars(const GApplicationPars& pars);
     virtual ~GApplicationPars(void);
  
@@ -63,26 +63,27 @@ public:
     const GApplicationPar& operator[](const std::string& name) const;
 
     // Methods
-    void        clear(void);
+    void                   clear(void);
     GApplicationPars*      clone(void) const;
     GApplicationPar&       at(const int& index);
     const GApplicationPar& at(const int& index) const;
-    int         size(void) const;
-    bool        is_empty(void) const;
+    int                    size(void) const;
+    bool                   is_empty(void) const;
     GApplicationPar&       append(const GApplicationPar& par);
-    void        append_standard(void);
+    void                   append_standard(void);
     GApplicationPar&       insert(const int& index, const GApplicationPar& par);
-    GApplicationPar&       insert(const std::string& name, const GApplicationPar& par);
-    void        remove(const int& index);
-    void        remove(const std::string& name);
-    void        reserve(const int& num);
-    void        extend(const GApplicationPars& pars);
-    bool        contains(const std::string& name) const;
-    void        load(const std::string& filename);
-    void        load(const std::string& filename,
-                     const std::vector<std::string>& args);
-    void        save(const std::string& filename);
-    std::string print(const GChatter& chatter = NORMAL) const;
+    GApplicationPar&       insert(const std::string& name,
+                                  const GApplicationPar& par);
+    void                   remove(const int& index);
+    void                   remove(const std::string& name);
+    void                   reserve(const int& num);
+    void                   extend(const GApplicationPars& pars);
+    bool                   contains(const std::string& name) const;
+    void                   load(const std::string& filename);
+    void                   load(const std::string& filename,
+                                const std::vector<std::string>& args);
+    void                   save(const std::string& filename);
+    std::string            print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods
@@ -99,12 +100,12 @@ protected:
     std::string parline(GApplicationPar& par, size_t* start, size_t* stop) const;
 
     // Protected data members
-    std::vector<std::string> m_parfile;   //!< Parameter file lines
-    std::vector<GApplicationPar>        m_pars;      //!< Parameters
-    std::vector<int>         m_line;      //!< Line number of parameter
-    std::vector<size_t>      m_vstart;    //!< Column of value start
-    std::vector<size_t>      m_vstop;     //!< Column of value stop
-    std::string              m_mode;      //!< Effective mode
+    std::vector<std::string>     m_parfile;   //!< Parameter file lines
+    std::vector<GApplicationPar> m_pars;      //!< Parameters
+    std::vector<int>             m_line;      //!< Line number of parameter
+    std::vector<size_t>          m_vstart;    //!< Column of value start
+    std::vector<size_t>          m_vstop;     //!< Column of value stop
+    std::string                  m_mode;      //!< Effective mode
 };
 
 

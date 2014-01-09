@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GApplicationPars.cpp - Application parameters                    *
+ *               GApplicationPars.cpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,23 +39,24 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                            "GApplicationPars::operator[](std::string&)"
-#define G_AT                                          "GApplicationPar& GApplicationPars::at(int&)"
-#define G_APPEND                                       "GApplicationPars::append(GApplicationPar&)"
-#define G_INSERT1                          "GApplicationPar& GApplicationPars::insert(int&, GApplicationPar&)"
-#define G_INSERT2                  "GApplicationPar& GApplicationPars::insert(std::string&, GApplicationPar&)"
-#define G_REMOVE1                                       "GApplicationPars::remove(int&)"
-#define G_REMOVE2                               "GApplicationPars::remove(std::string&)"
-#define G_EXTEND                                      "GApplicationPars::extend(GApplicationPars&)"
-
-
-#define G_LOAD1                                   "GApplicationPars::load(std::string&)"
-#define G_LOAD2        "GApplicationPars::load(std::string&, std::vector<std::string>&)"
-#define G_SAVE                                    "GApplicationPars::save(std::string&)"
-#define G_OUTPATH                              "GApplicationPars::outpath(std::string&)"
-#define G_READ                                    "GApplicationPars::read(std::string&)"
-#define G_WRITE                                  "GApplicationPars::write(std::string&)"
-#define G_PARSE                                              "GApplicationPars::parse()"
+#define G_ACCESS                 "GApplicationPars::operator[](std::string&)"
+#define G_AT                    "GApplicationPar& GApplicationPars::at(int&)"
+#define G_APPEND                 "GApplicationPars::append(GApplicationPar&)"
+#define G_INSERT1          "GApplicationPar& GApplicationPars::insert(int&, "\
+                                                          "GApplicationPar&)"
+#define G_INSERT2  "GApplicationPar& GApplicationPars::insert(std::string&, "\
+                                                          "GApplicationPar&)"
+#define G_REMOVE1                            "GApplicationPars::remove(int&)"
+#define G_REMOVE2                    "GApplicationPars::remove(std::string&)"
+#define G_EXTEND                "GApplicationPars::extend(GApplicationPars&)"
+#define G_LOAD1                        "GApplicationPars::load(std::string&)"
+#define G_LOAD2                       "GApplicationPars::load(std::string&, "\
+                                                 "std::vector<std::string>&)"
+#define G_SAVE                         "GApplicationPars::save(std::string&)"
+#define G_OUTPATH                   "GApplicationPars::outpath(std::string&)"
+#define G_READ                         "GApplicationPars::read(std::string&)"
+#define G_WRITE                       "GApplicationPars::write(std::string&)"
+#define G_PARSE                                   "GApplicationPars::parse()"
 
 /* __ Macros _____________________________________________________________ */
 
