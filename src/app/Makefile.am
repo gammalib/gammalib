@@ -8,8 +8,8 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = GApplication.cpp \
           GLog.cpp \
-          GPars.cpp \
-          GPar.cpp \
+          GApplicationPars.cpp \
+          GApplicationPar.cpp \
           GException_app.cpp
 
 # Build libtool library

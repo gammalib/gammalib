@@ -66,8 +66,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GRmf.hpp \
                      GApplication.hpp \
                      GLog.hpp \
-                     GPars.hpp \
-                     GPar.hpp \
+                     GApplicationPars.hpp \
+                     GApplicationPar.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPar.hpp \
