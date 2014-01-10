@@ -6,7 +6,7 @@
 # - matplotlib
 # - numpy
 #
-# Copyright (C) 2012 Jurgen Knodlseder
+# Copyright (C) 2012-2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,13 +41,13 @@ def analyse_unbinned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_unbinned("data/p7v6/ft1.fits", "data/p7v6/ft2.fits", "data/p7v6/ltcube.fits")
-    lat.response("P7REP_SOURCE_V15", "../caldb")
+    lat.response("P7SOURCE_V6", "../caldb")
 
     # Setup ROI covered by data
-    instDir = GLATInstDir()
-    roi = GLATRoi()
+    instDir = GSkyDir()
+    roi     = GLATRoi()
     instDir.radec_deg(83.6331, 22.0145)
-    roi.centre(instDir)
+    roi.centre(GLATInstDir(instDir))
     roi.radius(7.5)
     lat.roi(roi)
 
@@ -83,7 +83,7 @@ def analyse_binned(xmlname):
     # Load LAT observation
     lat = GLATObservation()
     lat.load_binned("data/p7v6/srcmap.fits", "data/p7v6/binned_expmap.fits", "data/p7v6/ltcube.fits")
-    lat.response("P7REP_SOURCE_V15", "../caldb")
+    lat.response("P7SOURCE_V6", "../caldb")
     lat.response().force_mean(True)
 
     # Append LAT observation to container
@@ -190,5 +190,5 @@ if __name__ == '__main__':
     print("**************************************")
 
     # Analyse data
-    analyse_unbinned("data/p7v6/crab_model.xml")
-#     analyse_binned("data/p7v6/crab_model.xml")
+#    analyse_unbinned("data/p7v6/crab_model.xml")
+    analyse_binned("data/p7v6/crab_model.xml")
