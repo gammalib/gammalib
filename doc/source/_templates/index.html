@@ -16,16 +16,32 @@ body %}
 	abstract data analysis framework that enables simultaneous
 	multi-mission analysis. {%endtrans%}</p>
 
+<p>{%trans%} GammaLib does not rely on any third-party software, except 
+of HEASARC's cfitsio library that is used to implement the FITS interface.
+Large parts of the code treat gamma-ray observations in an abstract
+representation, and do neither depend on the characteristics of the
+employed instrument, nor on the particular formats in which data and
+instrument response functions are delivered. Instrument specific
+aspects are implemented as isolated and well defined modules that
+interact with the rest of the library through a common interface. This
+philosophy also enables the joint analysis of data from different
+instruments, providing a framework that allows for consistent
+broad-band spectral fitting or imaging. So far, GammaLib supports
+analysis of COMPTEL, Fermi/LAT, and Cherenkov telescope data 
+(CTA, H.E.S.S., MAGIC, VERITAS). {%endtrans%}</p>
+
+<p>{%trans%} GammaLib is free software distributed under the
+<a href="http://www.gnu.org/licenses/gpl.html">GNU GPL license version 3</a> {%endtrans%}</p>
+
 <h2 style="margin-bottom: 0">{%trans%}Documentation{%endtrans%}</h2>
 
 <ul>
-<li><a class="smalllink" href="{{ pathto("home") }}">{%trans%}What is GammaLib?{%endtrans%}</a></li>   
 <li><a class="smalllink" href="{{ pathto("installation") }}">{%trans%}Installation{%endtrans%}</a></li> 
 <li><a class="smalllink" href="{{ pathto("quickstart") }}">{%trans%}Quickstart{%endtrans%}</a></li> 
 <li><a class="smalllink" href="{{ pathto("user_manual/index") }}">{%trans%}User Manual{%endtrans%}</a></li> 
 <li><a class="smalllink" href="{{ pathto("develop") }}">{%trans%}Developing GammaLib{%endtrans%}</a></li> 
 <li><a class="smalllink" href="{{ pathto("coding/index") }}">{%trans%}Coding conventions{%endtrans%}</a></li> 
-<li><a class="smalllink" href="doxygen/index.html">{%trans%}Code documentation{%endtrans%}</a></li> 
+<li><a class="smalllink" href="doxygen/index.html">{%trans%}Code documentation (Doxygen){%endtrans%}</a></li> 
 </ul>
 
 <h2 style="margin-bottom: 0">{%trans%}Links{%endtrans%}</h2>

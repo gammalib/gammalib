@@ -9,7 +9,6 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
-   home
    installation
    quickstart
    user_manual/index
