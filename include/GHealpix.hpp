@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GHealpix.hpp - Healpix projection class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,7 +50,7 @@ public:
     GHealpix(void);
     GHealpix(const int&         nside,
              const std::string& ordering = "NESTED",
-             const std::string& coordsys = "GAL");
+             const std::string& coordsys = "EQU");
     explicit GHealpix(const GFitsHDU& hdu);
     GHealpix(const GHealpix& wcs);
     virtual ~GHealpix(void);
