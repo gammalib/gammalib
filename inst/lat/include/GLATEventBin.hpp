@@ -73,7 +73,7 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const double&        omega(void) const;
+    const double&        solidangle(void) const;
     const GEnergy&       ewidth(void) const;
     const double&        ontime(void) const;
     const int&           index(void) const;
@@ -96,7 +96,7 @@ protected:
     GLATInstDir*   m_dir;         //!< Pointer to bin direction
     GTime*         m_time;        //!< Pointer to bin time
     double*        m_counts;      //!< Pointer to number of counts
-    double*        m_omega;       //!< Pointer to solid angle of pixel (sr)
+    double*        m_solidangle;  //!< Pointer to solid angle of pixel (sr)
     GEnergy*       m_ewidth;      //!< Pointer to energy width of bin
     double*        m_ontime;      //!< Pointer to ontime of bin (seconds)
 };

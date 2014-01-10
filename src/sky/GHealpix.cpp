@@ -122,7 +122,7 @@ GHealpix::GHealpix(const int&         nside,
     m_num_pixels = 12 * m_npface;
     m_fact2      = 4.0 / m_num_pixels;
     m_fact1      = 2 * m_nside * m_fact2;
-    m_omega      = gammalib::fourpi / m_num_pixels;
+    m_solidangle = gammalib::fourpi / m_num_pixels;
     m_order      = nside2order(m_nside);
 
     // Return
@@ -300,7 +300,7 @@ void GHealpix::read(const GFitsHDU& hdu)
     m_num_pixels = 12 * m_npface;
     m_fact2      = 4.0 / m_num_pixels;
     m_fact1      = 2 * m_nside * m_fact2;
-    m_omega      = gammalib::fourpi / m_num_pixels;
+    m_solidangle = gammalib::fourpi / m_num_pixels;
     m_order      = nside2order(m_nside);
 
     // Return
@@ -516,7 +516,7 @@ std::string GHealpix::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Order"));
         result.append(gammalib::str(m_order));
         result.append("\n"+gammalib::parformat("Solid angle per pixel"));
-        result.append(gammalib::str(m_omega)+" sr");
+        result.append(gammalib::str(m_solidangle)+" sr");
         result.append("\n"+gammalib::parformat("Ordering")+ordering());
 
     } // endif: chatter was not silent
@@ -547,7 +547,7 @@ void GHealpix::init_members(void)
     m_num_pixels  = 0;
     m_fact1       = 0.0;
     m_fact2       = 0.0;
-    m_omega       = 0.0;
+    m_solidangle  = 0.0;
 
     // Construct conversion arrays
     for (int m = 0; m < 0x100; ++m) {
@@ -580,7 +580,7 @@ void GHealpix::copy_members(const GHealpix& proj)
     m_num_pixels = proj.m_num_pixels;
     m_fact1      = proj.m_fact1;
     m_fact2      = proj.m_fact2;
-    m_omega      = proj.m_omega;
+    m_solidangle = proj.m_solidangle;
 
     // Return
     return;

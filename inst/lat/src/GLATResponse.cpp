@@ -410,7 +410,7 @@ double GLATResponse::irf(const GLATEventBin& event,
 
         // Divide by solid angle and ontime since source maps are given in units of
         // counts/pixel/MeV.
-        rsp /= (event.omega() * event.ontime());
+        rsp /= (event.solidangle() * event.ontime());
 
     } // endelse: diffuse response was present
 

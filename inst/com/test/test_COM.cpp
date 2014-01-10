@@ -362,8 +362,8 @@ void TestGCOMObservation::test_event_bin(void)
         std::string text = bin.print();
         test_assert(text == "1", "Test print() method.");
 
-        // omega method
-        test_value(bin.omega(), 0.0, 1.0e-10, "Test omega() method.");
+        // solidangle method
+        test_value(bin.solidangle(), 0.0, 1.0e-10, "Test solidangle() method.");
 
         // ewidth method
         GEnergy ewidth = bin.ewidth();

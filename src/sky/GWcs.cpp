@@ -452,10 +452,10 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
     double h = dir5.dist(dir6);
 
     // Compute solid angle
-    double omega = 0.5*(h*(a+b));
+    double solidangle = 0.5*(h*(a+b));
 
     // Return solid angle
-    return omega;
+    return solidangle;
 }
 
 

@@ -624,7 +624,7 @@ void GCOMEventCube::init_members(void)
     m_energy.clear();
     m_ewidth.clear();
     m_dirs.clear();
-    m_omega.clear();
+    m_solidangle.clear();
     m_phi.clear();
     m_dphi.clear();
 
@@ -648,16 +648,16 @@ void GCOMEventCube::init_members(void)
 void GCOMEventCube::copy_members(const GCOMEventCube& cube)
 {
     // Copy members
-    m_dir    = cube.m_dir;
-    m_map    = cube.m_map;
-    m_time   = cube.m_time;
-    m_ontime = cube.m_ontime;
-    m_energy = cube.m_energy;
-    m_ewidth = cube.m_ewidth;
-    m_dirs   = cube.m_dirs;
-    m_omega  = cube.m_omega;
-    m_phi    = cube.m_phi;
-    m_dphi   = cube.m_dphi;
+    m_dir        = cube.m_dir;
+    m_map        = cube.m_map;
+    m_time       = cube.m_time;
+    m_ontime     = cube.m_ontime;
+    m_energy     = cube.m_energy;
+    m_ewidth     = cube.m_ewidth;
+    m_dirs       = cube.m_dirs;
+    m_solidangle = cube.m_solidangle;
+    m_phi        = cube.m_phi;
+    m_dphi       = cube.m_dphi;
 
     // Prepare event bin
     init_bin();
@@ -698,18 +698,18 @@ void GCOMEventCube::set_scatter_directions(void)
 
     // Clear vectors
     m_dirs.clear();
-    m_omega.clear();
+    m_solidangle.clear();
 
     // Reserve space for pixel directions and solid angles
     m_dirs.reserve(npix());
-    m_omega.reserve(npix());
+    m_solidangle.reserve(npix());
 
     // Set pixel directions and solid angles
     for (int iy = 0; iy < npsi(); ++iy) {
         for (int ix = 0; ix < nchi(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
             m_dirs.push_back(m_map.pix2dir(pixel));
-            m_omega.push_back(m_map.solidangle(pixel));
+            m_solidangle.push_back(m_map.solidangle(pixel));
         }
     }
 
@@ -808,7 +808,7 @@ void GCOMEventCube::set_times(void)
  * @brief Initialise event bin
  *
  * This method initialises the event bin. The event bin is cleared and all
- * fixed pointers are set. Only the m_counts and the m_omega member of the
+ * fixed pointers are set. Only the m_counts and the m_solidangle member of the
  * event bin will be set to NULL, but these will be set by the set_bin method
  * which is called before any event bin access.
  ***************************************************************************/
@@ -816,13 +816,13 @@ void GCOMEventCube::init_bin(void)
 {
     // Prepare event bin
     m_bin.free_members();
-    m_bin.m_counts = NULL;      //!< Will be set by set_bin method
-    m_bin.m_dir    = &m_dir;    //!< Content will be set by set_bin method
-    m_bin.m_omega  = NULL;      //!< Will be set by set_bin method
-    m_bin.m_time   = &m_time;   //!< Fixed content
-    m_bin.m_ontime = &m_ontime; //!< Fixed content
-    m_bin.m_energy = &m_energy; //!< Fixed content
-    m_bin.m_ewidth = &m_ewidth; //!< Fixed content
+    m_bin.m_counts     = NULL;      //!< Will be set by set_bin method
+    m_bin.m_dir        = &m_dir;    //!< Content will be set by set_bin method
+    m_bin.m_solidangle = NULL;      //!< Will be set by set_bin method
+    m_bin.m_time       = &m_time;   //!< Fixed content
+    m_bin.m_ontime     = &m_ontime; //!< Fixed content
+    m_bin.m_energy     = &m_energy; //!< Fixed content
+    m_bin.m_ewidth     = &m_ewidth; //!< Fixed content
 
     // Return
     return;
@@ -855,7 +855,7 @@ void GCOMEventCube::set_bin(const int& index)
     #endif
 
     // Check for the existence of sky directions and solid angles
-    if (m_dirs.size() != npix() || m_omega.size() != npix()) {
+    if (m_dirs.size() != npix() || m_solidangle.size() != npix()) {
         throw GCOMException::no_dirs(G_SET_BIN);
     }
 
@@ -872,7 +872,7 @@ void GCOMEventCube::set_bin(const int& index)
     
     // Set pointers
     m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
-    m_bin.m_omega  = &(m_omega[ipix]);
+    m_bin.m_solidangle  = &(m_solidangle[ipix]);
 
     // Return
     return;
