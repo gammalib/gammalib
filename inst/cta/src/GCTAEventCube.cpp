@@ -490,16 +490,20 @@ std::string GCTAEventCube::print(const GChatter& chatter) const
         }
     
         // Append energy intervals
-        if (ebounds().size() > 0) {
-            result.append("\n"+ebounds().print(gammalib::reduce(chatter)));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Energy intervals") +
-                          "not defined");
+        if (gammalib::reduce(chatter) > SILENT) {
+            if (ebounds().size() > 0) {
+                result.append("\n"+ebounds().print(gammalib::reduce(chatter)));
+            }
+            else {
+                result.append("\n"+gammalib::parformat("Energy intervals") +
+                              "not defined");
+            }
         }
 
         // Append skymap definition
-        result.append("\n"+m_map.print(gammalib::reduce(chatter)));    
+        if (gammalib::reduce(chatter) > SILENT) {
+            result.append("\n"+m_map.print(gammalib::reduce(chatter)));    
+        }
 
     } // endif: chatter was not silent
 

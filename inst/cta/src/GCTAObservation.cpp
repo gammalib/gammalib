@@ -654,13 +654,17 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(m_deadc));
 
         // Append pointing
-        result.append("\n"+pointing().print(gammalib::reduce(chatter)));
+        if (gammalib::reduce(chatter) > SILENT) {
+            result.append("\n"+pointing().print(gammalib::reduce(chatter)));
+        }
 
         // Append response
-        result.append("\n"+response().print(gammalib::reduce(chatter)));
+        if (gammalib::reduce(chatter) > SILENT) {
+            result.append("\n"+response().print(gammalib::reduce(chatter)));
+        }
 
         // Append events
-        if (m_events != NULL) {
+        if (m_events != NULL && gammalib::reduce(chatter) > SILENT) {
             result.append("\n"+m_events->print(gammalib::reduce(chatter)));
         }
 

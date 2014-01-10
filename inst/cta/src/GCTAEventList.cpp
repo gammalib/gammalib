@@ -449,21 +449,25 @@ std::string GCTAEventList::print(const GChatter& chatter) const
         }
 
         // Append energy intervals
-        if (ebounds().size() > 0) {
-            result.append("\n"+ebounds().print(gammalib::reduce(chatter)));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Energy intervals") +
-                          "not defined");
+        if (gammalib::reduce(chatter) > SILENT) {
+            if (ebounds().size() > 0) {
+                result.append("\n"+ebounds().print(gammalib::reduce(chatter)));
+            }
+            else {
+                result.append("\n"+gammalib::parformat("Energy intervals") +
+                              "not defined");
+            }
         }
 
         // Append ROI
-        if (roi().radius() > 0) {
-            result.append("\n"+roi().print(gammalib::reduce(chatter)));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Region of interest") +
-                          "not defined");
+        if (gammalib::reduce(chatter) > SILENT) {
+            if (roi().radius() > 0) {
+                result.append("\n"+roi().print(gammalib::reduce(chatter)));
+            }
+            else {
+                result.append("\n"+gammalib::parformat("Region of interest") +
+                              "not defined");
+            }
         }
 
         // EXPLICIT: Append IRF cache

@@ -231,7 +231,7 @@ std::string GCTAPointing::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Pointing direction"));
-        result.append(this->dir().print(gammalib::reduce(chatter)));
+        result.append(this->dir().print());
 
     } // endif: chatter was not silent
 
