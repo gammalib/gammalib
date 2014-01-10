@@ -622,7 +622,7 @@ void GLATEventCube::init_members(void)
     m_srcmap_names.clear();
     m_enodes.clear();
     m_dirs.clear();
-    m_omega.clear();
+    m_solidangle.clear();
     m_energies.clear(); 
     m_ewidth.clear(); 
     m_ontime = 0.0;
@@ -646,7 +646,7 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
     m_ontime       = cube.m_ontime;
     m_enodes       = cube.m_enodes;
     m_dirs         = cube.m_dirs;
-    m_omega        = cube.m_omega;
+    m_solidangle   = cube.m_solidangle;
     m_energies     = cube.m_energies;
     m_ewidth       = cube.m_ewidth;
 
@@ -813,18 +813,18 @@ void GLATEventCube::set_directions(void)
 
     // Clear old pixel directions and solid angle
     m_dirs.clear();
-    m_omega.clear();
+    m_solidangle.clear();
 
     // Reserve space for pixel directions and solid angles
     m_dirs.reserve(npix());
-    m_omega.reserve(npix());
+    m_solidangle.reserve(npix());
 
     // Set pixel directions and solid angles
     for (int iy = 0; iy < ny(); ++iy) {
         for (int ix = 0; ix < nx(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
             m_dirs.push_back(GLATInstDir(m_map.pix2dir(pixel)));
-            m_omega.push_back(m_map.solidangle(pixel));
+            m_solidangle.push_back(m_map.solidangle(pixel));
         }
     }
 
@@ -939,7 +939,7 @@ void GLATEventCube::set_bin(const int& index)
     }
 
     // Check for the existence of sky directions and solid angles
-    if (m_dirs.size() != npix() || m_omega.size() != npix()) {
+    if (m_dirs.size() != npix() || m_solidangle.size() != npix()) {
         throw GLATException::no_dirs(G_SET_BIN);
     }
 
@@ -949,14 +949,14 @@ void GLATEventCube::set_bin(const int& index)
     m_bin.m_ieng  = index / npix();
 
     // Set pointers
-    m_bin.m_cube   = this;
-    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
-    m_bin.m_energy = &(m_energies[m_bin.m_ieng]);
-    m_bin.m_time   = &m_time;
-    m_bin.m_dir    = &(m_dirs[m_bin.m_ipix]);
-    m_bin.m_omega  = &(m_omega[m_bin.m_ipix]);
-    m_bin.m_ewidth = &(m_ewidth[m_bin.m_ieng]);
-    m_bin.m_ontime = &m_ontime;
+    m_bin.m_cube       = this;
+    m_bin.m_counts     = const_cast<double*>(&(m_map.pixels()[index]));
+    m_bin.m_energy     = &(m_energies[m_bin.m_ieng]);
+    m_bin.m_time       = &m_time;
+    m_bin.m_dir        = &(m_dirs[m_bin.m_ipix]);
+    m_bin.m_solidangle = &(m_solidangle[m_bin.m_ipix]);
+    m_bin.m_ewidth     = &(m_ewidth[m_bin.m_ieng]);
+    m_bin.m_ontime     = &m_ontime;
 
     // Return
     return;

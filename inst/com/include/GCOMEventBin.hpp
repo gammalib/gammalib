@@ -74,7 +74,7 @@ public:
 
     // Other methods
     const int&     index(void) const { return m_index; }
-    const double&  omega(void) const { return *m_omega; }
+    const double&  solidangle(void) const { return *m_solidangle; }
     const GEnergy& ewidth(void) const { return *m_ewidth; }
     const double&  ontime(void) const { return *m_ontime; }
 
@@ -89,7 +89,7 @@ protected:
     int          m_index;       //!< Dataspace index
     double*      m_counts;      //!< Pointer to number of counts
     GCOMInstDir* m_dir;         //!< Pointer to bin direction
-    double*      m_omega;       //!< Pointer to solid angle of pixel (sr)
+    double*      m_solidangle;  //!< Pointer to solid angle of pixel (sr)
     GTime*       m_time;        //!< Pointer to bin time
     double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
     GEnergy*     m_energy;      //!< Pointer to bin energy

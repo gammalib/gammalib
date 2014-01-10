@@ -109,7 +109,7 @@ protected:
     GEnergy              m_energy;     //!< Event cube mean energy
     GEnergy              m_ewidth;     //!< Event cube energy bin width
     std::vector<GSkyDir> m_dirs;       //!< Array of event scatter directions
-    std::vector<double>  m_omega;      //!< Array of solid angles (sr)
+    std::vector<double>  m_solidangle; //!< Array of solid angles (sr)
     std::vector<double>  m_phi;        //!< Array of event scatter angles
     std::vector<double>  m_dphi;       //!< Array of event scatter angles widths
 };

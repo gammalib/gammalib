@@ -103,7 +103,7 @@ protected:
     GCTAEventBin             m_bin;        //!< Actual event bin
     GTime                    m_time;       //!< Event cube mean time
     std::vector<GCTAInstDir> m_dirs;       //!< Array of event directions
-    std::vector<double>      m_omega;      //!< Array of solid angles (sr)
+    std::vector<double>      m_solidangle; //!< Array of solid angles (sr)
     std::vector<GEnergy>     m_energies;   //!< Array of log mean energies
     std::vector<GEnergy>     m_ewidth;     //!< Array of energy bin widths
     double                   m_ontime;     //!< Event cube ontime (sec)

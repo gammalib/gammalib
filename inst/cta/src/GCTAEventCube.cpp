@@ -528,7 +528,7 @@ void GCTAEventCube::init_members(void)
     m_bin.clear();
     m_time.clear();
     m_dirs.clear();
-    m_omega.clear();
+    m_solidangle.clear();
     m_energies.clear();
     m_ewidth.clear();
     m_ontime = 0.0;
@@ -546,14 +546,14 @@ void GCTAEventCube::init_members(void)
 void GCTAEventCube::copy_members(const GCTAEventCube& cube)
 {
     // Copy members
-    m_map      = cube.m_map;
-    m_bin      = cube.m_bin;
-    m_time     = cube.m_time;
-    m_dirs     = cube.m_dirs;
-    m_omega    = cube.m_omega;
-    m_energies = cube.m_energies;
-    m_ewidth   = cube.m_ewidth;
-    m_ontime   = cube.m_ontime;
+    m_map        = cube.m_map;
+    m_bin        = cube.m_bin;
+    m_time       = cube.m_time;
+    m_dirs       = cube.m_dirs;
+    m_solidangle = cube.m_solidangle;
+    m_energies   = cube.m_energies;
+    m_ewidth     = cube.m_ewidth;
+    m_ontime     = cube.m_ontime;
 
     // Return
     return;
@@ -660,11 +660,11 @@ void GCTAEventCube::set_directions(void)
 
     // Clear old pixel directions and solid angle
     m_dirs.clear();
-    m_omega.clear();
+    m_solidangle.clear();
 
     // Reserve space for pixel directions and solid angles
     m_dirs.reserve(npix());
-    m_omega.reserve(npix());
+    m_solidangle.reserve(npix());
 
     // Set pixel directions and solid angles
     for (int iy = 0; iy < ny(); ++iy) {
@@ -672,11 +672,11 @@ void GCTAEventCube::set_directions(void)
             try {
                 GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
                 m_dirs.push_back(GCTAInstDir(m_map.pix2dir(pixel)));
-                m_omega.push_back(m_map.solidangle(pixel));
+                m_solidangle.push_back(m_map.solidangle(pixel));
             }
             catch (GException::wcs_invalid_x_y& e) {
                 m_dirs.push_back(GCTAInstDir());
-                m_omega.push_back(0.0);
+                m_solidangle.push_back(0.0);
             }
         }
     }
@@ -789,7 +789,7 @@ void GCTAEventCube::set_bin(const int& index)
     }
 
     // Check for the existence of sky directions and solid angles
-    if (m_dirs.size() != npix() || m_omega.size() != npix()) {
+    if (m_dirs.size() != npix() || m_solidangle.size() != npix()) {
         throw GCTAException::no_dirs(G_SET_BIN);
     }
 
@@ -798,13 +798,13 @@ void GCTAEventCube::set_bin(const int& index)
     int ieng = index / npix();
 
     // Set pointers
-    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
-    m_bin.m_energy = &(m_energies[ieng]);
-    m_bin.m_time   = &m_time;
-    m_bin.m_dir    = &(m_dirs[ipix]);
-    m_bin.m_omega  = &(m_omega[ipix]);
-    m_bin.m_ewidth = &(m_ewidth[ieng]);
-    m_bin.m_ontime = &m_ontime;
+    m_bin.m_counts     = const_cast<double*>(&(m_map.pixels()[index]));
+    m_bin.m_energy     = &(m_energies[ieng]);
+    m_bin.m_time       = &m_time;
+    m_bin.m_dir        = &(m_dirs[ipix]);
+    m_bin.m_solidangle = &(m_solidangle[ipix]);
+    m_bin.m_ewidth     = &(m_ewidth[ieng]);
+    m_bin.m_ontime     = &m_ontime;
 
     // Return
     return;

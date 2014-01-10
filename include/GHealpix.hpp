@@ -101,7 +101,7 @@ private:
     int      m_num_pixels;   //!< Number of pixels
     double   m_fact1;        //!<
     double   m_fact2;        //!<
-    double   m_omega;        //!< Solid angle of pixel
+    double   m_solidangle;   //!< Solid angle of pixel
 };
 
 
@@ -181,7 +181,7 @@ const int& GHealpix::nside(void) const
 inline
 double GHealpix::solidangle(const GSkyPixel& pixel) const
 {
-    return m_omega;
+    return m_solidangle;
 }
 
 #endif /* GHEALPIX_HPP */

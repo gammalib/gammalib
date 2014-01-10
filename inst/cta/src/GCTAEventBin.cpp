@@ -348,13 +348,13 @@ double GCTAEventBin::error(void) const
 const double& GCTAEventBin::solidangle(void) const
 {
     // Throw an exception if solid angle pointer is not valid
-    if (m_omega == NULL) {
+    if (m_solidangle == NULL) {
         throw GCTAException::no_member(G_SOLIDANGLE,
                                        "Invalid solid angle pointer.");
     }
 
     // Return solid angle
-    return *m_omega;
+    return *m_solidangle;
 }
 
 
@@ -440,13 +440,13 @@ std::string GCTAEventBin::print(const GChatter& chatter) const
 void GCTAEventBin::init_members(void)
 {
     // Initialise members
-    m_energy = NULL;
-    m_dir    = NULL;
-    m_time   = NULL;
-    m_counts = NULL;
-    m_omega  = NULL;
-    m_ewidth = NULL;
-    m_ontime = NULL;
+    m_energy     = NULL;
+    m_dir        = NULL;
+    m_time       = NULL;
+    m_counts     = NULL;
+    m_solidangle = NULL;
+    m_ewidth     = NULL;
+    m_ontime     = NULL;
 
     // Return
     return;
@@ -461,13 +461,13 @@ void GCTAEventBin::init_members(void)
 void GCTAEventBin::copy_members(const GCTAEventBin& bin)
 {
     // Copy members
-    m_energy = bin.m_energy;
-    m_dir    = bin.m_dir;
-    m_time   = bin.m_time;
-    m_counts = bin.m_counts;
-    m_omega  = bin.m_omega;
-    m_ewidth = bin.m_ewidth;
-    m_ontime = bin.m_ontime;
+    m_energy     = bin.m_energy;
+    m_dir        = bin.m_dir;
+    m_time       = bin.m_time;
+    m_counts     = bin.m_counts;
+    m_solidangle = bin.m_solidangle;
+    m_ewidth     = bin.m_ewidth;
+    m_ontime     = bin.m_ontime;
 
     // Return
     return;

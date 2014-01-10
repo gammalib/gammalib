@@ -40,7 +40,7 @@
 #define G_TIME                                         "GLATEventBin::time()"
 #define G_COUNTS_GET                                 "GLATEventBin::counts()"
 #define G_COUNTS_SET                          "GLATEventBin::counts(double&)"
-#define G_OMEGA                                       "GLATEventBin::omega()"
+#define G_SOLIDANGLE                             "GLATEventBin::solidangle()"
 #define G_EWIDTH                                     "GLATEventBin::ewidth()"
 #define G_ONTIME                                     "GLATEventBin::ontime()"
 
@@ -189,7 +189,7 @@ GLATEventBin* GLATEventBin::clone(void) const
 double GLATEventBin::size(void) const
 {
     // Compute bin size
-    double size = omega() * ewidth().MeV() * ontime();
+    double size = solidangle() * ewidth().MeV() * ontime();
 
     // Return bin size
     return size;
@@ -347,16 +347,16 @@ double GLATEventBin::error(void) const
  *
  * Returns reference to the solid angle of the event bin.
  ***************************************************************************/
-const double& GLATEventBin::omega(void) const
+const double& GLATEventBin::solidangle(void) const
 {
     // Throw an exception if solid angle pointer is not valid
-    if (m_omega == NULL) {
-        throw GLATException::no_member(G_OMEGA,
+    if (m_solidangle == NULL) {
+        throw GLATException::no_member(G_SOLIDANGLE,
                                        "Invalid solid angle pointer.");
     }
 
     // Return solid angle
-    return *m_omega;
+    return *m_solidangle;
 }
 
 
@@ -442,17 +442,17 @@ std::string GLATEventBin::print(const GChatter& chatter) const
 void GLATEventBin::init_members(void)
 {
     // Initialise members
-    m_cube   = NULL;
-    m_index  = -1;
-    m_ipix   = -1;
-    m_ieng   = -1;
-    m_energy = NULL;
-    m_dir    = NULL;
-    m_time   = NULL;
-    m_counts = NULL;
-    m_omega  = NULL;
-    m_ewidth = NULL;
-    m_ontime = NULL;
+    m_cube       = NULL;
+    m_index      = -1;
+    m_ipix       = -1;
+    m_ieng       = -1;
+    m_energy     = NULL;
+    m_dir        = NULL;
+    m_time       = NULL;
+    m_counts     = NULL;
+    m_solidangle = NULL;
+    m_ewidth     = NULL;
+    m_ontime     = NULL;
 
     // Return
     return;
@@ -467,17 +467,17 @@ void GLATEventBin::init_members(void)
 void GLATEventBin::copy_members(const GLATEventBin& bin)
 {
     // Copy members
-    m_cube   = bin.m_cube;
-    m_index  = bin.m_index;
-    m_ipix   = bin.m_ipix;
-    m_ieng   = bin.m_ieng;
-    m_energy = bin.m_energy;
-    m_dir    = bin.m_dir;
-    m_time   = bin.m_time;
-    m_counts = bin.m_counts;
-    m_omega  = bin.m_omega;
-    m_ewidth = bin.m_ewidth;
-    m_ontime = bin.m_ontime;
+    m_cube       = bin.m_cube;
+    m_index      = bin.m_index;
+    m_ipix       = bin.m_ipix;
+    m_ieng       = bin.m_ieng;
+    m_energy     = bin.m_energy;
+    m_dir        = bin.m_dir;
+    m_time       = bin.m_time;
+    m_counts     = bin.m_counts;
+    m_solidangle = bin.m_solidangle;
+    m_ewidth     = bin.m_ewidth;
+    m_ontime     = bin.m_ontime;
 
     // Return
     return;

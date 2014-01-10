@@ -54,7 +54,7 @@ public:
 
     // Other methods
     const int&     index(void) const;
-    const double&  omega(void) const;
+    const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
 };
