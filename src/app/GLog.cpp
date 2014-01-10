@@ -537,6 +537,7 @@ void GLog::init_members(void)
     m_stdout     = false;
     m_stderr     = false;
     m_use_date   = false;
+    m_linestart  = true;
     m_file       = NULL;
     m_filename.clear();
     m_name.clear();
@@ -561,6 +562,7 @@ void GLog::copy_members(const GLog& log)
     m_stdout     = log.m_stdout;
     m_stderr     = log.m_stderr;
     m_use_date   = log.m_use_date;
+    m_linestart  = log.m_linestart;
     m_file       = log.m_file;
     m_filename   = log.m_filename;
     m_name       = log.m_name;
@@ -616,23 +618,17 @@ void GLog::flush(const bool& force)
             std::string line;
             std::size_t pos = m_buffer.find_first_of("\n", 0);
             if (pos == std::string::npos) {
-                line    = m_buffer;
+                line        = m_buffer;
+                m_linestart = false;
                 m_buffer.clear();
             }
             else {
-                line     = m_buffer.substr(0, pos) + "\n";
-                m_buffer = m_buffer.substr(pos+1, m_buffer.size()-pos);
+                line        = m_buffer.substr(0, pos) + "\n";
+                m_buffer    = m_buffer.substr(pos+1, m_buffer.size()-pos);
+                m_linestart = true;
             }
 
-            // Put line into requested streams
-            /*
-            if (m_stdout) {
-                std::cout << line;
-            }
-            if (m_stderr) {
-                std::cerr << line;
-            }
-            */
+            // Put line into file
             if (m_file != NULL) {
                 std::fprintf(m_file, "%s", line.c_str());
             }
@@ -780,12 +776,15 @@ std::string GLog::prefix(void) const
  ***************************************************************************/
 void GLog::append(std::string arg)
 {
-    // If the buffer is empty or if the last charater is a \n, prepend a
-    // prefix at the beginning of the string to be inserted.
-    if (m_buffer.size() == 0 || m_buffer[m_buffer.size()-1] == '\n') {
+    // If the buffer is empty and at the beginning of a line or if the last
+    // charater is a \n, prepend a prefix at the beginning of the string to
+    // be inserted.
+    if (m_buffer.size() == 0 && m_linestart ||
+        m_buffer[m_buffer.size()-1] == '\n') {
 
         // Prepend prefix
         arg.insert(0, prefix());
+
     }
 
     // Search the first CR (\n)

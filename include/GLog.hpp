@@ -123,6 +123,7 @@ protected:
     bool        m_stdout;     //!< Dump in standard output
     bool        m_stderr;     //!< Dump in standard error
     bool        m_use_date;   //!< Dump date in prefix
+    bool        m_linestart;  //!< Signals that buffer is at line start
     FILE*       m_file;       //!< Log file pointer
     std::string m_filename;   //!< Log file name
     std::string m_name;       //!< Name for prefix
