@@ -12,5 +12,4 @@ Documentation
    installation
    quickstart
    user_manual/index
-   develop
    coding/index
