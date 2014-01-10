@@ -114,6 +114,7 @@ protected:
     std::vector<bool> m_par_remove;      //!< Bookkeeping of parameter removal
     double            m_lambda;          //!< Actual lambda
     double            m_value;           //!< Actual function value
+    double            m_delta;           //!< Function improvement
     int               m_status;          //!< Fit status
     int               m_iter;            //!< Iteration
     GLog*             m_logger;          //!< Pointer to optional logger

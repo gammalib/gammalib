@@ -252,9 +252,8 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // Optionally write initial iteration into logger
         if (m_logger != NULL) {
-            *m_logger << "Initial iteration: ";
-            *m_logger << "func=" << m_value << ", ";
-            *m_logger << "Lambda=" << m_lambda << std::endl;
+            (*m_logger)("*Iteration %3d: logL=-%.3f, Lambda=%.1e",
+                        0, m_value, m_lambda);   
         }
         #if defined(G_DEBUG_OPT)
         std::cout << "Initial iteration: func=" << m_value << ", Lambda="
@@ -277,7 +276,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             iteration(fct, pars);
 
             // Compute function improvement (>0 means decrease)
-            double delta = value_old - m_value;
+            //double delta = value_old - m_value;
 
             // Determine maximum (scaled) gradient
             double grad_max  = 0.0;
@@ -285,7 +284,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             for (int ipar = 0; ipar < m_npars; ++ipar) {
                 if (pars[ipar]->is_free()) {
                     double grad = pars[ipar]->factor_gradient();
-                    if (grad > grad_max) {
+                    if (std::abs(grad) > std::abs(grad_max)) {
                         grad_max  = grad;
                         grad_imax = ipar;
                     }
@@ -301,21 +300,30 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
             // Optionally write iteration results into logger
             if (m_logger != NULL) {
-                *m_logger << "Iteration " << m_iter << ": ";
-                *m_logger << "func=" << m_value << ", ";
-                *m_logger << "Lambda=" << lambda_old << ", ";
-                *m_logger << "delta=" << delta;
-                *m_logger << ", " << "max(grad)=" << grad_max;
-                *m_logger << " [" << grad_imax << "]";
+                std::string stalled = "";
+                std::string status  = "";
                 if (m_lambda > lambda_old) {
-                    *m_logger << " (stalled)";
+                    status  = " ";
+                    stalled = " (stalled)";
                 }
-                *m_logger << std::endl;
+                else {
+                    status = "*";
+                }
+                std::string parname = "";
+                if (grad_imax != -1) {
+                    parname = " [" + pars[grad_imax]->name() + ":" +
+                              gammalib::str(grad_imax) + "]";
+                }
+                (*m_logger)("%sIteration %3d: logL=-%.3f, Lambda=%.1e,"
+                            " delta=%.3f, max(|grad|)=%f%s%s",
+                            status.c_str(), m_iter, m_value, lambda_old,
+                            m_delta, grad_max,
+                            parname.c_str(), stalled.c_str());   
             }
             #if defined(G_DEBUG_OPT)
             std::cout << "Iteration " << m_iter << ": func=" 
-                      << m_value << ", Lambda=" << m_lambda
-                      << ", delta=" << delta << std::endl;
+                      << m_value << ", Lambda=" << lambda_old
+                      << ", delta=" << m_delta << std::endl;
             #endif
             #if defined(G_DEBUG_SHOW_GRAD_COVAR)
             if (m_logger != NULL) {
@@ -339,7 +347,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             // free them now and continue. We do this only once, i.e.
             // the next time a parameter is frozen and convergence is
             // reached we really stop.
-            if ((m_lambda <= lambda_old) && (delta < m_eps)) {
+            if ((m_lambda <= lambda_old) && (m_delta < m_eps)) {
 
                 // Check for frozen parameters, and if some exist, free
                 // them and start over
@@ -395,7 +403,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             // lambda to detect turn arounds in the lambda tendency; however
             // we always keep the best function value)
             lambda_old = m_lambda;
-            if (delta > 0.0) {
+            if (m_delta > 0.0) {
                 value_old = m_value;
             }
 
@@ -516,7 +524,6 @@ void GOptimizerLM::init_members(void)
     m_max_stall    = 10;
     m_max_hit      = 3; //!< Maximum successive boundary hits before freeze
     m_step_adjust  = true;
-    //m_diag_load    = 1.0e-100;
 
     // Initialise bookkeeping arrays
     m_hit_boundary.clear();
@@ -528,6 +535,7 @@ void GOptimizerLM::init_members(void)
     // Initialise optimizer values
     m_lambda = m_lambda_start;
     m_value  = 0.0;
+    m_delta  = 0.0;
     m_status = 0;
     m_iter   = 0;
 
@@ -554,7 +562,6 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_max_iter     = opt.m_max_iter;
     m_max_stall    = opt.m_max_stall;
     m_step_adjust  = opt.m_step_adjust;
-    //m_diag_load    = opt.m_diag_load;
     m_hit_boundary = opt.m_hit_boundary;
     m_hit_minimum  = opt.m_hit_minimum;
     m_hit_maximum  = opt.m_hit_maximum;
@@ -562,6 +569,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_par_remove   = opt.m_par_remove;
     m_lambda       = opt.m_lambda;
     m_value        = opt.m_value;
+    m_delta        = opt.m_delta;
     m_status       = opt.m_status;
     m_iter         = opt.m_iter;
     m_logger       = opt.m_logger;
@@ -595,9 +603,14 @@ void GOptimizerLM::free_members(void)
  ***************************************************************************/
 void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 {
+    // Debug option: dump header
+    #if defined(G_DEBUG_ITER)
+    std::cout << "GOptimizerLM::iteration: enter" << std::endl;
+    #endif
+
     // Single loop for common exit point
     do {
-
+        
         // Initialise iteration parameters
         GVector*       grad      = fct.gradient();
         GMatrixSparse* curvature = fct.curvature();
@@ -621,12 +634,12 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         
         // Debug option: dump gradient and curvature matrix
         #if defined(G_DEBUG_ITER)
-        std::cout << "Grad.: ";
+        std::cout << "Gradient : ";
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             std::cout << (*grad)[ipar] << " ";
         }
         std::cout << std::endl;
-        std::cout << "Curve: ";
+        std::cout << "Curvature: ";
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             for (int jpar = 0; jpar < m_npars; ++jpar) {
                 std::cout << (*curvature)(ipar,jpar) << " ";
@@ -790,15 +803,15 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // If the function has decreased then accept the new solution
         // and decrease lambda ...
-        double delta = save_value - m_value;
-        if (delta > 0.0) {
+        m_delta = save_value - m_value;
+        if (m_delta > 0.0) {
             m_lambda *= m_lambda_dec;
         }
 
         // ... if function is identical then accept new solution. If the
         // parameters have changed then increase lambda, otherwise decrease
         // lambda
-        else if (delta == 0.0) {
+        else if (m_delta == 0.0) {
             if (par_change) {
                 m_lambda *= m_lambda_inc;
             }
@@ -809,16 +822,16 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // ... if function worsened slightly then accept new solution and
         // increase lambda
-        else if (delta > -1.0e-6) {
+        else if (m_delta > -1.0e-6) {
             m_lambda *= m_lambda_inc;
         }
 
-        // ... otherwise,  if the statistics did not improve then use old
+        // ... otherwise, if the statistics did not improve then use old
         // parameters and increase lamdba. Restore also the best statistics
         // value that was reached so far, the gradient vector and the curve
         // matrix.
         else {
-            m_lambda *= m_lambda_inc;
+            m_lambda  *= m_lambda_inc;
             m_value    = save_value;
             *grad      = save_grad;
             *curvature = save_curvature;
@@ -828,6 +841,11 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         }
 
     } while (0); // endwhile: main loop
+
+    // Debug option: dump trailer
+    #if defined(G_DEBUG_ITER)
+    std::cout << "GOptimizerLM::iteration: exit" << std::endl;
+    #endif
 
     // Return
     return;
