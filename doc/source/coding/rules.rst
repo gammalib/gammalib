@@ -229,7 +229,7 @@ Code semantics
 Language features
 ^^^^^^^^^^^^^^^^^
 
-You can find lots of information on how to write Python code that work with
+You can find lots of information on how to write Python code that works with
 Python 2 and 3 on the web, e.g.
 `here <http://docs.python.org/dev/howto/pyporting.html#use-same-source>`__
 and `here <http://python3porting.com/noconv.html>`__.

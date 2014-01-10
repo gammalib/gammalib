@@ -7,7 +7,8 @@ Code configuration
 ------------------
 
 The code configuration is controlled via the ``config.h`` header file that
-is created during the configuration step of the GammaLib build. To make configuration
+is created during the configuration step of the GammaLib build. To make 
+configuration
 options available the following code has to be added to the source code
 file:
 
@@ -27,8 +28,8 @@ performed when accessing array elements, assuring that no elements
 outside the valid range are accessed. Range checking, however, is time
 consuming, in particular if many elements are accessed subsequently.
 GammaLib therefore allows to disable range checks. This can be done by
-specifying ``./configure –disable-range-check`` when configuring GammaLib
-for compilation. The ``–disable-range-check`` option undefines
+specifying ``./configure --disable-range-check`` when configuring GammaLib
+for compilation. The ``--disable-range-check`` option undefines
 G_RANGE_CHECK, and optional range checking is thus achieved by adding
 for example
 
@@ -339,30 +340,31 @@ in GammaLib, together with their typical usage. The last column specifies where
 these methods are used. Note that **the ``clear()``, ``clone()``, and ``print()``
 methods should be implemented for all classes**.
 
-=========== ============================================= ==============
-Method      Usage                                         Implementation
-=========== ============================================= ==============
-``clear``   Set object to initial empty state             all classes
-``clone``   Provides a deep copy of the class             all classes
-``print``   Print object into string                      all classes (see :ref:`sec_output`)
-``append``  Append element to list of elements            container classes (see :ref:`sec_containers`)
-``extend``  Append container elements to list of elements container classes (see :ref:`sec_containers`)
-``insert``  Insert element to list of elements            container classes (see :ref:`sec_containers`)
-``remove``  Remove element from list of elements          container classes (see :ref:`sec_containers`)
-``reserve`` Reserve memory for a number of elements       container classes (see :ref:`sec_containers`)
-``load``    Load data from file (open, read, close)       if applicable
-``save``    Save data into file (open, write, close)      if applicable
-``open``    Open file                                     if applicable
-``read``    Read data from open file                      if applicable
-``write``   Write data into open file                     if applicable
-``close``   Close file                                    if applicable
-``name``    Name of object                                if applicable
-``type``    Type of object                                if applicable
-``size``    Size of object                                if applicable
-``real``    Returns double precision value                if applicable
-``integer`` Returns ``int`` value                         if applicable
-``string``  Returns ``std::string`` value                 if applicable
-=========== ============================================= ==============
+============ ============================================= ==============
+Method       Usage                                         Implementation
+============ ============================================= ==============
+``clear``    Set object to initial empty state             all classes
+``clone``    Provides a deep copy of the class             all classes
+``print``    Print object into string                      all classes (see :ref:`sec_output`)
+``is_empty`` Checks for emptiness of object                :ref:`sec_containers`
+``append``   Append element to list of elements            :ref:`sec_containers`
+``extend``   Append container elements to list of elements :ref:`sec_containers`
+``insert``   Insert element to list of elements            :ref:`sec_containers`
+``remove``   Remove element from list of elements          :ref:`sec_containers`
+``reserve``  Reserve memory for a number of elements       :ref:`sec_containers`
+``load``     Load data from file (open, read, close)       if applicable
+``save``     Save data into file (open, write, close)      if applicable
+``open``     Open file                                     if applicable
+``read``     Read data from open file                      if applicable
+``write``    Write data into open file                     if applicable
+``close``    Close file                                    if applicable
+``name``     Name of object                                if applicable
+``type``     Type of object                                if applicable
+``size``     Size of object                                if applicable
+``real``     Returns double precision value                if applicable
+``integer``  Returns ``int`` value                         if applicable
+``string``   Returns ``std::string`` value                 if applicable
+============ ============================================= ==============
 
 Note the difference between ``load()`` and ``read()`` and between ``save()`` and
 ``write()``. The ``load()`` and ``save()`` methods should take as arguments a file
@@ -463,8 +465,8 @@ definition of ``GObservation``:
 
     class GObservation {
     public:
-        void                  events(const GEvents* events);
-        void                  statistics(const std::string& statistics);
+        void events(const GEvents* events);
+        void statistics(const std::string& statistics);
     protected:
         std::string m_statistics;   //!< Optimizer statistics (default=poisson)
         GEvents*    m_events;       //!< Pointer to event container
@@ -494,9 +496,9 @@ Here an example based on the definition of ``GObservation``:
 
     class GObservation {
     public:
-        virtual double        ontime(void) const = 0;
-        const GEvents*        events(void) const;
-        const std::string&    statistics(void) const { return m_statistics; }
+        virtual double     ontime(void) const = 0;
+        const GEvents*     events(void) const;
+        const std::string& statistics(void) const { return m_statistics; }
     protected:
         std::string m_statistics;   //!< Optimizer statistics (default=poisson)
         GEvents*    m_events;       //!< Pointer to event container
@@ -535,6 +537,7 @@ Method                                    Usage
 ``operator[](const int&)``                Element access operator
 ``const operator[](const int&) const``    Element access operator (const version)
 ``void clear()``                          Delete all objects in container
+``bool is_empty()``                       Checks whether container is empty
 ``int size()``                            Return number of elements in container
 ``void append(const e&)``                 Append an element to the container
 ``void insert(const int&, const e&)``     Insert an element into the container
@@ -559,6 +562,7 @@ Method                                    Usage
 ``const e* operator[](const int&) const`` Element access operator (const version)
 ``void set(const int&, const e&)``        Set an element of the container
 ``void clear()``                          Delete all objects in container
+``bool is_empty()``                       Checks whether container is empty
 ``int size()``                            Return number of elements in container
 ``void append(const e&)``                 Append an element to the container
 ``void insert(const int&, const e&)``     Insert an element into the container
@@ -652,3 +656,7 @@ Extension       Method         Usage
 ``__setitem__`` ``operator[]`` Element access (set)
 ``__len__``     ``size``       Container size
 =============== ============== =====
+
+While ``__str__`` and ``__len__`` are implemented in the ``GContainer``
+base class, ``__getitem__`` and ``__setitem__`` need to be implemented
+as class extensions in the SWIG file (see :ref:`sec_python`).

@@ -1,6 +1,6 @@
-===================================
-Coding and Design Conventions (CDC)
-===================================
+=============================
+Coding and Design Conventions
+=============================
 
 .. toctree::
    :maxdepth: 2

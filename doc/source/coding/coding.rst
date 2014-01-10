@@ -108,12 +108,12 @@ of a header file.
         virtual ~GClass(void);
      
         // Operators
-        GClass& operator= (const GClass& c);
+        GClass& operator=(const GClass& c);
 
         // Methods
         void        clear(void);
         GClass*     clone(void) const;
-        std::string print(void) const;
+        std::string print(const GChatter& chatter = NORMAL) const;
       
     protected:
         // Protected methods
@@ -193,7 +193,7 @@ Here an illustration of the expected structure, based on the
         virtual ~GObservation(void);
 
         // Operators
-        virtual GObservation& operator= (const GObservation& obs);
+        virtual GObservation& operator=(const GObservation& obs);
 
         // Pure virtual methods
         virtual void          clear(void) = 0;
@@ -267,7 +267,7 @@ example of the start of a source code file.
     /* __ Method name definitions ____________________________________________ */
     #define G_CLEAR                                             "GClass::clear()"
     #define G_CLONE                                       "GClass::clone() const"
-    #define G_PRINT                                       "GClass::print() const"
+    #define G_PRINT                              "GClass::print(GChatter&) const"
 
     /* __ Compile options ____________________________________________________ */
     #define G_USE_MY_OPTION
@@ -342,7 +342,6 @@ the header file, with a few exceptions. Here an example:
     %{
     /* Put headers and other declarations here that are needed for compilation */
     #include "GClass.hpp"
-    #include "GTools.hpp"
     %}
 
     /***********************************************************************//**
@@ -393,4 +392,34 @@ that will exist in the Python interface.
 
 In case that an access operator needs to be implemented, the
 ``__getitem__()`` and ``__setitem__()`` methods need to be added to the
-class extensions.
+class extensions. Here an example:
+
+.. code-block:: cpp
+
+  /***********************************************************************//**
+   * @brief GObservations class extension
+   ***************************************************************************/
+  %extend GObservations {
+      GObservation* __getitem__(const int& index) {
+          if (index >= 0 && index < self->size()) {
+              return (*self)[index];
+          }
+          else {
+              throw GException::out_of_range("__getitem__(int)", index, self->size());
+          }
+      }
+      void __setitem__(const int& index, const GObservation& val) {
+          if (index >= 0 && index < self->size()) {
+              self->set(index, val);
+              return;
+          }
+          else {
+              throw GException::out_of_range("__setitem__(int)", index, self->size());
+          }
+      }
+  };
+
+Note that the access operators perform explicit range checking because the
+``[]`` operators used do not any range checking. In addition, in this was
+the Python operator names ``__getitem__()`` and ``__setitem__()`` can be
+specified in the exception.
