@@ -346,7 +346,7 @@ double GRan::poisson(const double& lambda)
  *
  * Returns exponential deviates from the probability distribution
  * \f[p(x) = \frac{1}{2\pi} x \exp( -\frac{1}{2} x^2 )\f]
- * This method can be used to simulate the radom radial offset of a measured
+ * This method can be used to simulate the random radial offset of a measured
  * source position from the true source position, assuming an azimuthally
  * symmetric 2D Gaussian probability distribution.
  ***************************************************************************/
