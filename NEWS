@@ -343,6 +343,10 @@ GLATEventBin
 GLATEventCube
   enodes() method is now declared const.
 
+GCOMEventBin
+GLATEventBin
+  Renamed omega() to solidangle().
+
 GCOMResponse
   Renamed read_iaq() method to read(). The read() method now takes
   a const reference as argument.
