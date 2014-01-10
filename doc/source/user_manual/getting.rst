@@ -144,8 +144,7 @@ https://sourceforge.net/projects/gammalib/. The code can be downloaded
 from this site by clicking on the download button. Alternatively, the
 code can be downloaded and unpacked from the UNIX prompt using::
 
-    $ wget --no-check-certificate https://downloads.sourceforge.net/project/gammalib/
-    gammalib/gammalib-00-08-00.tar.gz
+    $ wget --no-check-certificate https://downloads.sourceforge.net/project/gammalib/gammalib/gammalib-00-08-00.tar.gz
     $ tar xfz gammalib-00-08-00.tar.gz
 
 The GammaLib source code can also be cloned using git. This method is
@@ -539,4 +538,43 @@ or by sending an e-mail to the mailing list.
 Known problems
 --------------
 
-Solaris (TBW)
+* Python support
+   GammaLib comes with Python wrappers so that all classes can be directly
+   used from Python. To compile-in Python support, GammaLib needs the
+   Python.h header file, which on many distributions is not installed by
+   default. To make Python.h available, install the Python developer
+   package in your distribution using the package manager. Otherwise you
+   will not be able to use GammaLib from Python.
+
+* Mac OS X
+   The Python development package is not installed as default on Mac OS X,
+   and consequently, the Python.h header file is missing that is needed to
+   compile in the Python bindings. The configure script recognises this
+   fact and adjust the build procedure accordingly, but you will not be
+   able to use GammaLib from Python. So better install the Python
+   development package before installing GammaLib (see above).
+
+* Solaris
+   Although GammaLib builds on Solaris using the Sun compiler, there are
+   problems with global symbols in shared libraries and exception catching,
+   which prevents the FITS interface to work correctly. GammaLib has
+   however been built and tested successfully using the GNU compiler, and
+   this is the only build method that is currently supported. Problems have
+   also been encountered when compiling cfitsio versions more recent than
+   3.250. The problems have been reported to the cfitsio developer team,
+   and are likely to be solved in the future. For the time being, it is
+   recommended to use cfitsio version 3.250 on Solaris.
+
+* OpenSolaris
+   On OpenSolaris, the same problems concerning the SunStudio compiler
+   occur as for Solaris, and also here, the GNU compiler is the recommended
+   tool to build GammaLib. Also here, cfitsio version 3.250 is the
+   recommended library as more recent version feature relocation
+   problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
+   2009.06. Make sure to create the symbolic links ::
+
+      $ ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
+      $ ln -s /usr/bin/g++4.3.2 /usr/bin/g++
+
+   which are not there by default to avoid excess warnings during
+   compilation.
