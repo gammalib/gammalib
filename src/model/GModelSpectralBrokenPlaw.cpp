@@ -597,12 +597,12 @@ GEnergy GModelSpectralBrokenPlaw::mc(const GEnergy& emin,
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
  *
- *    <spectrum type="BrokenPowerLaw">
- *      <parameter name="Prefactor" scale=".." value=".." max=".." min=".." free=".."/>
- *      <parameter name="Index1" scale=".." value=".." max=".." min=".." free=".."/>
- *      <parameter name="BreakValue" scale=".." value=".." max=".." min=".." free=".."/>
- *      <parameter name="Index2" scale=".." value=".." max=".." min=".." free=".."/>
- *    </spectrum>
+ *     <spectrum type="BrokenPowerLaw">
+ *       <parameter name="Prefactor" scale=".." value=".." max=".." min=".." free=".."/>
+ *       <parameter name="Index1" scale=".." value=".." max=".." min=".." free=".."/>
+ *       <parameter name="BreakValue" scale=".." value=".." max=".." min=".." free=".."/>
+ *       <parameter name="Index2" scale=".." value=".." max=".." min=".." free=".."/>
+ *     </spectrum>
  *
  * @todo Add parameter validity check
  ***************************************************************************/
@@ -672,12 +672,14 @@ void GModelSpectralBrokenPlaw::read(const GXmlElement& xml)
  *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
- * *    <spectrum type="BrokenPowerLaw">
- *      <parameter name="Prefactor" scale=".." value=".." max=".." min=".." free=".."/>
- *      <parameter name="Index1" scale=".." value=".." max=".." min=".." free=".."/>
- *      <parameter name="BreakValue" scale=".." value=".." max=".." min=".." free=".."/>
- *      <parameter name="Index2" scale=".." value=".." max=".." min=".." free=".."/>
- *    </spectrum>
+ *
+ *     <spectrum type="BrokenPowerLaw">
+ *       <parameter name="Prefactor" scale=".." value=".." max=".." min=".." free=".."/>
+ *       <parameter name="Index1" scale=".." value=".." max=".." min=".." free=".."/>
+ *       <parameter name="BreakValue" scale=".." value=".." max=".." min=".." free=".."/>
+ *       <parameter name="Index2" scale=".." value=".." max=".." min=".." free=".."/>
+ *     </spectrum>
+ *
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::write(GXmlElement& xml) const
 {
