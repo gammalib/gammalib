@@ -42,9 +42,9 @@
 /***********************************************************************//**
  * @class GModelSpectralLogParabola
  *
- * @brief LogParabola spectrall model class
+ * @brief LogParabola spectral model class
  *
- * This class implements a low parabola spectrum. The spectrum is defined by
+ * This class implements a log parabola spectrum. The spectrum is defined by
  *
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
