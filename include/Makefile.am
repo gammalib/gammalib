@@ -140,6 +140,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralConst.hpp \
                      GModelSpectralExpPlaw.hpp \
                      GModelSpectralFunc.hpp \
+                     GModelSpectralGauss.hpp \
                      GModelSpectralLogParabola.hpp \
                      GModelSpectralNodes.hpp \
                      GModelSpectralPlaw.hpp \

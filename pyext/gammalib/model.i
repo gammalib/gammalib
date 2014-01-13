@@ -77,6 +77,7 @@
 %include "GModelSpectralConst.i"
 %include "GModelSpectralExpPlaw.i"
 %include "GModelSpectralFunc.i"
+%include "GModelSpectralGauss.i"
 %include "GModelSpectralLogParabola.i"
 %include "GModelSpectralNodes.i"
 %include "GModelSpectralPlaw.i"

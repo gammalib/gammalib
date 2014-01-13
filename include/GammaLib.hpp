@@ -203,6 +203,7 @@
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralExpPlaw.hpp"
 #include "GModelSpectralFunc.hpp"
+#include "GModelSpectralGauss.hpp"
 #include "GModelSpectralLogParabola.hpp"
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralPlaw.hpp"
