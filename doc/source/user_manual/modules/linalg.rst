@@ -21,7 +21,7 @@ the linear algebra module and their relations.
 .. _fig_uml_linalg:
 
 .. figure:: uml_linalg.png
-   :width: 100%
+   :width: 70%
 
    Linear algebra module
 

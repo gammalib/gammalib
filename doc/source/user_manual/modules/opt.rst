@@ -23,7 +23,7 @@ the optimizer module and their relations.
 .. _fig_uml_opt:
 
 .. figure:: uml_opt.png
-   :width: 100%
+   :width: 60%
 
    Optimizer module
 
