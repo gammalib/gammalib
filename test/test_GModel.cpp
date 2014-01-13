@@ -49,6 +49,7 @@ void TestGModel::set(void)
     m_cube_file                   = "data/test_cube.fits";
     m_xml_file                    = "data/crab.xml";
     m_xml_model_point_const       = "data/model_point_const.xml";
+    m_xml_model_point_gauss       = "data/model_point_gauss.xml";
     m_xml_model_point_plaw        = "data/model_point_plaw.xml";
     m_xml_model_point_plaw2       = "data/model_point_plaw2.xml";
     m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
@@ -81,6 +82,7 @@ void TestGModel::set(void)
 
     // Append spectral model tests
     append(static_cast<pfunction>(&TestGModel::test_const), "Test GModelSpectralConst");
+    append(static_cast<pfunction>(&TestGModel::test_gauss), "Test GModelSpectralGauss");
     append(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
     append(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     append(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
@@ -1131,6 +1133,86 @@ void TestGModel::test_const(void)
         // Test operator access
         const char* strarray[] = {"Value"};
         for (int i = 0; i < 1; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralGauss class
+ ***************************************************************************/
+void TestGModel::test_gauss(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralGauss model;
+        test_assert(model.type() == "Gaussian",
+                                    "Model type \"Gaussian\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralGauss model(1.0, GEnergy(42.0, "MeV"), GEnergy(0.5, "MeV"));
+        test_value(model.prefactor(), 1.0);
+        test_value(model.mean().MeV(), 42.0);
+        test_value(model.sigma().MeV(), 0.5);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                  xml(m_xml_model_point_gauss);
+        GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralGauss model(*element);
+        test_value(model.size(), 3);
+        test_assert(model.type() == "Gaussian", "Expected \"Gaussian\"");
+        test_value(model.prefactor(), 5.7e-16);
+        test_value(model.mean().MeV(), 2.48e6);
+        test_value(model.sigma().MeV(), 1e6);
+
+        // Test prefactor method
+        model.prefactor(2.3e-16);
+        test_value(model.prefactor(), 2.3e-16);
+
+        // Test mean method
+        model.mean(GEnergy(96.0, "MeV"));
+        test_value(model.mean().MeV(), 96.0);
+
+        // Test sigma method
+        model.sigma(GEnergy(0.5e7, "keV"));
+        test_value(model.sigma().keV(), 0.5e7);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Mean", "Sigma"};
+        for (int i = 0; i < 3; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value
             model[keyname].value(2.1);

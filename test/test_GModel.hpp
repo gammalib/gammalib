@@ -58,6 +58,7 @@ public:
     void                test_elliptical_disk(void);
     void                test_spatial_model(void);
     void                test_const(void);
+    void                test_gauss(void);
     void                test_plaw(void);
     void                test_plaw2(void);
     void                test_eplaw(void);
@@ -79,6 +80,7 @@ private:
     std::string m_cube_file;
     std::string m_xml_file;
     std::string m_xml_model_point_const;
+    std::string m_xml_model_point_gauss;
     std::string m_xml_model_point_plaw;
     std::string m_xml_model_point_plaw2;
     std::string m_xml_model_point_eplaw;
