@@ -11,10 +11,10 @@ using GammaLib. A ftool application provides a parameter interface
 following the IRAF standard that is widely used in high-energy
 astrophysics. The application is represented by the abstract
 ``GApplication`` base class. It contains a parameter container
-implemented by the ``GPars`` class that contains application
-parameter implemented by the ``GPar`` class. In addition, an application
-contains a logger, implemented by the ``GLog`` class, which allows
-message passing to the console and/or a dedicated log file.
+implemented by the ``GApplicationPars`` class that contains application
+parameter implemented by the ``GApplicationPar`` class. In addition, an
+application contains a logger, implemented by the ``GLog`` class, which 
+allows message passing to the console and/or a dedicated log file.
 
 
 :ref:`fig_uml_app` present an overview over the C++ classes of the 
@@ -23,6 +23,6 @@ application module and their relations.
 .. _fig_uml_app:
 
 .. figure:: uml_app.png
-   :width: 100%
+   :width: 50%
 
    Application module
