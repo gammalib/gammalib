@@ -37,6 +37,7 @@ namespace gammalib {
     const double pihalf       =  1.570796326794896619231321691639751442099;
     const double inv_pihalf   =  0.6366197723675813430755350534900574;
     const double inv_sqrt4pi  =  0.2820947917738781434740397257803862929220;
+    const double inv_sqrt2pi  =  0.3989422804014327028632180827116826549172;
     const double pi2          = pi*pi;
     const double deg2rad      =  0.0174532925199432954743717;
     const double rad2deg      = 57.295779513082322864647722;
@@ -67,5 +68,6 @@ namespace gammalib {
 
     // Other functions
     double gammln(const double& arg);
+    double erfcc(const double& arg);
     double modulo(const double& v1, const double& v2);
 }

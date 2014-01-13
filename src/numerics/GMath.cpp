@@ -374,6 +374,31 @@ double gammalib::gammln(const double& arg) {
 
 
 /***********************************************************************//**
+ * @brief Computes complementary error function
+ *
+ * @param[in] arg Argument.
+ * @return Complementary error function.
+ *
+ * Reference: http://en.wikipedia.org/wiki/Complementary_error_function
+ ***************************************************************************/
+double gammalib::erfcc(const double& arg) {
+   /* (C) Copr. 1986-92 Numerical Recipes Software 0@.1Y.. */
+  // Copied from Gaussian.cxx in the Fermi ScienceTools software
+   double t, z, ans;
+
+   z = std::abs(arg);
+   t = 1.0/(1.0+0.5*z);
+   ans = t*std::exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
+         t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
+         t*(-0.82215223+t*0.17087277)))))))));
+   double result = arg >= 0.0 ? ans : 2.0-ans;
+
+   // Return result
+   return result;
+}
+
+
+/***********************************************************************//**
  * @brief Returns the remainder of the division \a v1/v2.
  *
  * @param[in] v1 Argument 1.
