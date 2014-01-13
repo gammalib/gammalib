@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralGauss.cpp - Spectral Gaussian model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -108,7 +108,7 @@ GModelSpectralGauss::GModelSpectralGauss(const GXmlElement& xml) :
 GModelSpectralGauss::GModelSpectralGauss(const double&  prefactor,
                                          const GEnergy& mean,
                                          const GEnergy& sigma) :
-                           GModelSpectral()
+                     GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -240,21 +240,22 @@ GModelSpectralGauss* GModelSpectralGauss::clone(void) const
  * Evaluates
  *
  * \f[
- * \frac{dN}{dE}=\frac{\norm}{\sqrt{2\pi}\sigma}\exp(\frac{(E-\bar{E})^2}{2\sigma^2})
+ * \frac{dN}{dE} = \frac{\norm}{\sqrt{2\pi}\sigma}
+ *                 \exp(\frac{(E-\bar{E})^2}{2\sigma^2})
  * \f]
  ***************************************************************************/
 double GModelSpectralGauss::eval(const GEnergy& srcEng,
                                  const GTime&   srcTime) const
 {
     double energy = srcEng.MeV();
-    double norm = m_norm.value();
-    double mean = m_mean.value();
-    double sigma = m_sigma.value();
+    double norm   = m_norm.value();
+    double mean   = m_mean.value();
+    double sigma  = m_sigma.value();
 
     // Compute function value
     double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
-    double term2 = (energy - mean) * (energy - mean) / (2 * sigma * sigma);
-    double value = term1 * std::exp(- term2);
+    double term2 = (energy - mean) * (energy - mean) / (2.0 * sigma * sigma);
+    double value = term1 * std::exp(-term2);
 
     // Return
     return value;
@@ -297,28 +298,27 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
  ***************************************************************************/
-
 double GModelSpectralGauss::flux(const GEnergy& emin,
-                                 const GEnergy& emax) const{
-
-    double energy_min = emin.MeV();
-    double energy_max = emax.MeV();
-
-
-	double norm = m_norm.value();
-    double mean = m_mean.value();
-    double sigma = m_sigma.value();
-
-	double zmin = (energy_min - mean)/sqrt(2.)/sigma;
-	double zmax = (energy_max - mean)/sqrt(2.)/sigma;
-
+                                 const GEnergy& emax) const
+{
+    // Initialise flux
     double flux = 0.0;
     
     // Compute only if integration range is valid
     if (emin < emax) {
 
+        // Precomputations
+        double energy_min = emin.MeV();
+        double energy_max = emax.MeV();
+        double norm       = m_norm.value();
+        double mean       = m_mean.value();
+        double sigma      = m_sigma.value();
+        double denom      = 1.0 / (gammalib::sqrt_two*sigma);
+        double zmin       = (energy_min - mean) * denom;
+        double zmax       = (energy_max - mean) * denom;
+
         // Compute flux for a constant model
-        flux = norm*(gammalib::erfcc(zmin) - gammalib::erfcc(zmax))/2.;
+        flux = norm*(gammalib::erfcc(zmin) - gammalib::erfcc(zmax))/2.0;
     
     } // endif: integration range was valid
 
@@ -413,21 +413,24 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
 
     // Get uniform value between 0 and 1
     double u = ran.uniform();
-    float x1, x2, w;
 
+    // Do ...
     do {
+        double x1;
+        double w;
     	do{
-    		x1 = 2.0 * u - 1.0;
-    		x2 = 2.0 * u - 1.0;
-    		w = x1 * x1 + x2 * x2;
+    		x1        = 2.0 * u - 1.0;
+    		double x2 = 2.0 * u - 1.0;
+    		w         = x1 * x1 + x2 * x2;
     	} while (w >= 1.0);
 
-        w = sqrt( (-2.0 * log( w ) ) / w );
+        // Do ...
+        w = std::sqrt( (-2.0 * std::log( w ) ) / w );
 
+        // Compute ...
     	double val = x1 * w;
 
     	// Map into [emin,emax] range
-
     	energy = (xmax - xmin) * val + xmin;
 
     } while ((xmin <= energy) && (energy < xmax));
@@ -459,50 +462,51 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralGauss::read(const GXmlElement& xml)
 {
-  const int n_pars = 3;
+    // Set number of parameters
+    const int n_pars = 3;
 
-  // Verify that XML element has exactly 3 parameters
-  if (xml.elements() != n_pars || xml.elements("parameter") != n_pars) {
-      throw GException::model_invalid_parnum(G_READ, xml,
-            "Gaussian model requires exactly 3 parameters.");
-  }
+    // Verify that XML element has exactly 3 parameters
+    if (xml.elements() != n_pars || xml.elements("parameter") != n_pars) {
+        throw GException::model_invalid_parnum(G_READ, xml,
+              "Gaussian model requires exactly 3 parameters.");
+    }
 
-  // Extract model parameters
-  int npar[] = {0, 0, 0};
-  for (int i = 0; i < n_pars; ++i) {
+    // Extract model parameters
+    int npar[] = {0, 0, 0};
+    for (int i = 0; i < n_pars; ++i) {
 
-      // Get parameter element
-      const GXmlElement* par = xml.element("parameter", i);
+        // Get parameter element
+        const GXmlElement* par = xml.element("parameter", i);
 
-      // Handle prefactor
-      if (par->attribute("name") == "Prefactor") {
-          m_norm.read(*par);
-          npar[0]++;
-      }
+        // Handle prefactor
+        if (par->attribute("name") == "Prefactor") {
+            m_norm.read(*par);
+            npar[0]++;
+        }
 
-      // Handle mean
-      else if (par->attribute("name") == "Mean") {
-          m_mean.read(*par);
-          npar[1]++;
-      }
+        // Handle mean
+        else if (par->attribute("name") == "Mean") {
+            m_mean.read(*par);
+            npar[1]++;
+        }
 
-      // Handle sigma
-      else if (par->attribute("name") == "Sigma") {
-          m_sigma.read(*par);
-          npar[2]++;
-      }
+        // Handle sigma
+        else if (par->attribute("name") == "Sigma") {
+            m_sigma.read(*par);
+            npar[2]++;
+        }
 
-  } // endfor: looped over all parameters
+    } // endfor: looped over all parameters
 
-  // Verify that all parameters were found
-  if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
-      throw GException::model_invalid_parnames(G_READ, xml,
-            "Require \"Prefactor\", \"Mean\", and \"Sigma\""
-            " parameters.");
-  }
+    // Verify that all parameters were found
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
+        throw GException::model_invalid_parnames(G_READ, xml,
+              "Require \"Prefactor\", \"Mean\", and \"Sigma\""
+              " parameters.");
+    }
 
-  // Return
-  return;
+    // Return
+    return;
 }
 
 
@@ -687,8 +691,8 @@ void GModelSpectralGauss::init_members(void)
 void GModelSpectralGauss::copy_members(const GModelSpectralGauss& model)
 {
     // Copy members
-    m_norm = model.m_norm;
-    m_mean = model.m_mean;
+    m_norm  = model.m_norm;
+    m_mean  = model.m_mean;
     m_sigma = model.m_sigma;
 
     // Set parameter pointer(s)
@@ -720,7 +724,7 @@ double GModelSpectralGauss::eflux_kernel::eval(const double& energy)
 {
     // Evaluate function value
     double term1 = (m_norm / m_sigma) * gammalib::inv_sqrt2pi;
-    double term2 = (energy - m_mean) * (energy - m_mean) / (2 * m_sigma * m_sigma);
+    double term2 = (energy - m_mean) * (energy - m_mean) / (2.0 * m_sigma * m_sigma);
     double value = term1 * std::exp(- term2);
 
     // Return value

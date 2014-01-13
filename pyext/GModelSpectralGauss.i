@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralGauss.i - Spectral gaussian model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,9 +41,9 @@ public:
     // Constructors and destructors
     GModelSpectralGauss(void);
     explicit GModelSpectralGauss(const GXmlElement& xml);
-    explicit GModelSpectralGauss(const double&  prefactor,
-                                 const GEnergy& mean,
-                                 const GEnergy& sigma);
+    GModelSpectralGauss(const double&  prefactor,
+                        const GEnergy& mean,
+                        const GEnergy& sigma);
     GModelSpectralGauss(const GModelSpectralGauss& model);
     virtual ~GModelSpectralGauss(void);
 
@@ -58,12 +58,11 @@ public:
     virtual double               flux(const GEnergy& emin,
                                       const GEnergy& emax) const;
     virtual double               eflux(const GEnergy& emin,
-    									
                                        const GEnergy& emax) const;
-    virtual GEnergy                mc(const GEnergy& emin,
-                                      const GEnergy& emax,
-                                      const GTime&   time,
-                                      GRan&          ran) const;
+    virtual GEnergy              mc(const GEnergy& emin,
+                                    const GEnergy& emax,
+                                    const GTime&   time,
+                                    GRan&          ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
 

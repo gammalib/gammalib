@@ -1,14 +1,14 @@
 <?xml version="1.0" standalone="no"?>
 <source_library title="source library">
-	<source name="Crab" type="PointSource">
+    <source name="Crab" type="PointSource">
         <spectrum type="Gaussian">
-           <parameter name="Prefactor" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
-           <parameter name="Mean"      scale="1e6"   value="2.48" min="0.0"   max="+5.0"   free="1"/>
-           <parameter name="Sigma"     scale="1e6"   value="1.0"  min="0.0001"  max="1000.0" free="1"/>
+            <parameter name="Prefactor" scale="1e-16" value="5.7"  min="1e-07"   max="1000.0" free="1"/>
+            <parameter name="Mean"      scale="1e6"   value="2.48" min="0.0"     max="+5.0"   free="1"/>
+            <parameter name="Sigma"     scale="1e6"   value="1.0"  min="0.0001"  max="1000.0" free="1"/>
         </spectrum>
-		<spatialModel type="SkyDirFunction">
-			<parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
-			<parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
-		</spatialModel>
-	</source>
+        <spatialModel type="SkyDirFunction">
+            <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+            <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+        </spatialModel>
+    </source>
 </source_library>

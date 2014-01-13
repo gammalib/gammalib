@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralGauss.hpp - Spectral Gaussian model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,9 +60,9 @@ public:
     // Constructors and destructors
     GModelSpectralGauss(void);
     explicit GModelSpectralGauss(const GXmlElement& xml);
-    explicit GModelSpectralGauss(const double&  prefactor,
-                                 const GEnergy& mean,
-                                 const GEnergy& sigma);
+    GModelSpectralGauss(const double&  prefactor,
+                        const GEnergy& mean,
+                        const GEnergy& sigma);
     GModelSpectralGauss(const GModelSpectralGauss& model);
     virtual ~GModelSpectralGauss(void);
 
@@ -217,6 +217,5 @@ void GModelSpectralGauss::sigma(const GEnergy& sigma)
     m_sigma.value(sigma.MeV());
     return;
 }
-
 
 #endif /* GMODELSPECTRALGAUSS_HPP */
