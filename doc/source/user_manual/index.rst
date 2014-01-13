@@ -10,7 +10,7 @@ User Manual
    quickstart
    modules/index
    internals
-   using
+   manual/index
    glossary
 
 
