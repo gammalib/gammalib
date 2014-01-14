@@ -127,7 +127,6 @@ protected:
     GModelPar m_mean;  //!< Gaussian mean energy
     GModelPar m_sigma; //!< Gaussian energy width
 
-    // Cached members used for pre-computations
     mutable double  m_last_norm;   //!< Last Normalization value
     mutable double  m_last_mean;    //!< Last Mean value
     mutable double  m_last_sigma;    //!< Last Sigma value
@@ -189,7 +188,7 @@ GEnergy GModelSpectralGauss::mean(void) const
 /***********************************************************************//**
  * @brief Set mean energy
  *
- * @param[in] mean Mean energy.
+ * @param[in] Mean energy.
  ***************************************************************************/
 inline
 void GModelSpectralGauss::mean(const GEnergy& mean)
@@ -215,7 +214,7 @@ GEnergy GModelSpectralGauss::sigma(void) const
 /***********************************************************************//**
  * @brief Set energy width
  *
- * @param[in] sigma Energy width
+ * @param[in] Energy width
  ***************************************************************************/
 inline
 void GModelSpectralGauss::sigma(const GEnergy& sigma)
@@ -223,5 +222,6 @@ void GModelSpectralGauss::sigma(const GEnergy& sigma)
     m_sigma.value(sigma.MeV());
     return;
 }
+
 
 #endif /* GMODELSPECTRALGAUSS_HPP */

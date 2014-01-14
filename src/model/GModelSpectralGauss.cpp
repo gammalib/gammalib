@@ -240,12 +240,7 @@ GModelSpectralGauss* GModelSpectralGauss::clone(void) const
  * Evaluates
  *
  * \f[
-<<<<<<< HEAD
- * \frac{dN}{dE} = \frac{\norm}{\sqrt{2\pi}\sigma}
- *                 \exp(\frac{(E-\bar{E})^2}{2\sigma^2})
-=======
  * \frac{dN}{dE}=\frac{\norm}{\sqrt{2\pi}\sigma}\exp(\frac{-(E-\bar{E})^2}{2\sigma^2})
->>>>>>> Implements eval_gradients in GModelSpectralGauss - not yet checked
  * \f]
  ***************************************************************************/
 double GModelSpectralGauss::eval(const GEnergy& srcEng,
@@ -276,11 +271,7 @@ double GModelSpectralGauss::eval(const GEnergy& srcEng,
  * This method simply calls the eval() method as no analytical gradients will
  * be computed. See the eval() method for details.
  *
-<<<<<<< HEAD
  * TODO: update docstring.
-=======
- * TODO: Implement this
->>>>>>> efa5ea566f0bf64aca32f7e22a66761cbccf2f80
  ***************************************************************************/
 double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
                                            const GTime&   srcTime)
@@ -293,7 +284,6 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
 	// Update the evaluation cache
 	    update_eval_cache(srcEng);
 
-<<<<<<< HEAD
 	    // Compute function terms
 	    double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
 	    double term2 = (1 / sigma) * gammalib::inv_sqrt2pi;
@@ -313,24 +303,6 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
 	    double g_sigma = - term5 * std::exp(- term3) * (1 - (2 * term3));
 
 		// Set gradients
-=======
-	    // Compute function value
-	    double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
-	    double term2 = (energy - mean) * (energy - mean) / (2 * sigma * sigma);
-	    double value = term1 * std::exp(- term2);
-
-	    // Compute partial derivatives with respect to the parameter factor
-	    // values. The partial derivatives with respect to the parameter
-	    // values are obtained by division by the scale factor.
-	    double g_norm  = (m_norm.is_free())
-	                     ? m_norm.scale() * m_last_power : 0.0;
-	    double g_mean = (m_index.is_free())
-	                     ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
-	    double g_sigma  = (m_ecut.is_free())
-	                     ? value * m_last_e_cut / m_ecut.factor_value() : 0.0;
-
-	    // Set gradients
->>>>>>> efa5ea566f0bf64aca32f7e22a66761cbccf2f80
 	    m_norm.factor_gradient(g_norm);
 	    m_mean.factor_gradient(g_mean);
 	    m_sigma.factor_gradient(g_sigma);
@@ -338,24 +310,14 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
 	    // Compile option: Check for NaN/Inf
 	    #if defined(G_NAN_CHECK)
 	    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-<<<<<<< HEAD
 	        std::cout << "*** ERROR: GModelSpectralGauss::eval_gradients";
-=======
-	        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval_gradients";
->>>>>>> efa5ea566f0bf64aca32f7e22a66761cbccf2f80
 	        std::cout << "(srcEng=" << srcEng;
 	        std::cout << ", srcTime=" << srcTime << "):";
 	        std::cout << " NaN/Inf encountered";
 	        std::cout << " (value=" << value;
-<<<<<<< HEAD
 	        std::cout << ", norm=" << m_last_norm;
 	        std::cout << ", mean=" << m_last_mean;
 	        std::cout << ", Sigma=" << m_last_sigma;
-=======
-	        std::cout << ", e_norm=" << m_last_e_norm;
-	        std::cout << ", e_cut=" << m_last_e_cut;
-	        std::cout << ", power=" << m_last_power;
->>>>>>> efa5ea566f0bf64aca32f7e22a66761cbccf2f80
 	        std::cout << ")" << std::endl;
 	    }
 	    #endif
@@ -385,6 +347,7 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
  ***************************************************************************/
+
 double GModelSpectralGauss::flux(const GEnergy& emin,
                                  const GEnergy& emax) const
 {
@@ -525,7 +488,6 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
     return GEnergy(energy, "MeV");
 }
 
-
 /***********************************************************************//**
  * @brief Read model from XML element
  *
@@ -594,7 +556,6 @@ void GModelSpectralGauss::read(const GXmlElement& xml)
     // Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Write model into XML element
@@ -834,16 +795,11 @@ double GModelSpectralGauss::eflux_kernel::eval(const double& energy)
  *
  * Updates the precomputation cache for eval() and eval_gradients() methods.
  *
-<<<<<<< HEAD
-=======
- * TODO integrate this to correct form
->>>>>>> efa5ea566f0bf64aca32f7e22a66761cbccf2f80
  ***************************************************************************/
 void GModelSpectralGauss::update_eval_cache(const GEnergy& energy) const
 {
     // Get parameter values (takes 3 multiplications which are difficult
     // to avoid)
-<<<<<<< HEAD
     double norm = m_norm.value();
     double mean  = m_mean.value();
     double sigma = m_sigma.value();
@@ -864,31 +820,6 @@ void GModelSpectralGauss::update_eval_cache(const GEnergy& energy) const
         m_last_norm = eng / m_last_norm;
         m_last_mean  = eng / m_last_mean;
         m_last_sigma  = eng/ m_last_sigma;
-=======
-    double index = m_index.value();
-    double ecut  = m_ecut.value();
-    double pivot = m_pivot.value();
-
-    // If the energy or one of the parameters index, cut-off or pivot
-    // energy has changed then recompute the cache
-    if ((m_last_energy != energy) ||
-        (m_last_index  != index)  ||
-        (m_last_ecut   != ecut)   ||
-        (m_last_pivot  != pivot)) {
-
-        // Store actual energy and parameter values
-        m_last_energy = energy;
-        m_last_index  = index;
-        m_last_ecut   = ecut;
-        m_last_pivot  = pivot;
-
-        // Compute and store value
-        double eng    = energy.MeV();
-        m_last_e_norm = eng / m_last_pivot;
-        m_last_e_cut  = eng / m_last_ecut;
-        m_last_power  = std::pow(m_last_e_norm, m_last_index) *
-                        std::exp(-m_last_e_cut);
->>>>>>> efa5ea566f0bf64aca32f7e22a66761cbccf2f80
 
     } // endif: recomputation was required
 
