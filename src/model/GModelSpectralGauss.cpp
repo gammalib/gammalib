@@ -240,8 +240,12 @@ GModelSpectralGauss* GModelSpectralGauss::clone(void) const
  * Evaluates
  *
  * \f[
+<<<<<<< HEAD
  * \frac{dN}{dE} = \frac{\norm}{\sqrt{2\pi}\sigma}
  *                 \exp(\frac{(E-\bar{E})^2}{2\sigma^2})
+=======
+ * \frac{dN}{dE}=\frac{\norm}{\sqrt{2\pi}\sigma}\exp(\frac{-(E-\bar{E})^2}{2\sigma^2})
+>>>>>>> Implements eval_gradients in GModelSpectralGauss - not yet checked
  * \f]
  ***************************************************************************/
 double GModelSpectralGauss::eval(const GEnergy& srcEng,
@@ -272,7 +276,7 @@ double GModelSpectralGauss::eval(const GEnergy& srcEng,
  * This method simply calls the eval() method as no analytical gradients will
  * be computed. See the eval() method for details.
  *
- * TODO: Implement this
+ * TODO: update docstring.
  ***************************************************************************/
 double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
                                            const GTime&   srcTime)
@@ -285,22 +289,25 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
 	// Update the evaluation cache
 	    update_eval_cache(srcEng);
 
-	    // Compute function value
+	    // Compute function terms
 	    double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
-	    double term2 = (energy - mean) * (energy - mean) / (2 * sigma * sigma);
-	    double value = term1 * std::exp(- term2);
+	    double term2 = (1 / sigma) * gammalib::inv_sqrt2pi;
+	    double term3 = (energy - mean) * (energy - mean) / (2 * sigma * sigma);
+	    double term4 = (energy - mean) / (sigma * sigma);
+	    double term5 = (norm / (sigma * sigma)) * gammalib::inv_sqrt2pi;
+
+	    // Compute function value
+	    double value = term1 * std::exp(- term3);
+
 
 	    // Compute partial derivatives with respect to the parameter factor
-	    // values. The partial derivatives with respect to the parameter
-	    // values are obtained by division by the scale factor.
-	    double g_norm  = (m_norm.is_free())
-	                     ? m_norm.scale() * m_last_power : 0.0;
-	    double g_mean = (m_index.is_free())
-	                     ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
-	    double g_sigma  = (m_ecut.is_free())
-	                     ? value * m_last_e_cut / m_ecut.factor_value() : 0.0;
+	    // values (partial differentials were determined analytically).
 
-	    // Set gradients
+	    double g_norm  = term2 * std::exp(- term3);
+	    double g_mean  = term1 * term4 * std::exp(- term3);
+	    double g_sigma = - term5 * std::exp(- term3) * (1 - (2 * term3));
+
+		// Set gradients
 	    m_norm.factor_gradient(g_norm);
 	    m_mean.factor_gradient(g_mean);
 	    m_sigma.factor_gradient(g_sigma);
@@ -308,14 +315,14 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
 	    // Compile option: Check for NaN/Inf
 	    #if defined(G_NAN_CHECK)
 	    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-	        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval_gradients";
+	        std::cout << "*** ERROR: GModelSpectralGauss::eval_gradients";
 	        std::cout << "(srcEng=" << srcEng;
 	        std::cout << ", srcTime=" << srcTime << "):";
 	        std::cout << " NaN/Inf encountered";
 	        std::cout << " (value=" << value;
-	        std::cout << ", e_norm=" << m_last_e_norm;
-	        std::cout << ", e_cut=" << m_last_e_cut;
-	        std::cout << ", power=" << m_last_power;
+	        std::cout << ", norm=" << m_last_norm;
+	        std::cout << ", mean=" << m_last_mean;
+	        std::cout << ", Sigma=" << m_last_sigma;
 	        std::cout << ")" << std::endl;
 	    }
 	    #endif
@@ -719,6 +726,11 @@ void GModelSpectralGauss::init_members(void)
     m_sigma.gradient(0.0);
     m_sigma.has_grad(false);
 
+    // Initialise eval cache
+    m_last_norm = 0.0;
+    m_last_mean  = 0.0;
+    m_last_sigma  = 0.0;
+
     // Set parameter pointer(s)
     m_pars.clear();
     m_pars.push_back(&m_norm);
@@ -747,6 +759,11 @@ void GModelSpectralGauss::copy_members(const GModelSpectralGauss& model)
     m_pars.push_back(&m_norm);
     m_pars.push_back(&m_mean);
     m_pars.push_back(&m_sigma);
+
+    // Copy eval cache
+    m_last_norm = model.m_last_norm;
+    m_last_mean = model.m_last_mean;
+    m_last_sigma = model.m_last_sigma;
 
     // Return
     return;
@@ -785,35 +802,31 @@ double GModelSpectralGauss::eflux_kernel::eval(const double& energy)
  *
  * Updates the precomputation cache for eval() and eval_gradients() methods.
  *
- * TODO integrate this to correct form
  ***************************************************************************/
 void GModelSpectralGauss::update_eval_cache(const GEnergy& energy) const
 {
     // Get parameter values (takes 3 multiplications which are difficult
     // to avoid)
-    double index = m_index.value();
-    double ecut  = m_ecut.value();
-    double pivot = m_pivot.value();
+    double norm = m_norm.value();
+    double mean  = m_mean.value();
+    double sigma = m_sigma.value();
 
-    // If the energy or one of the parameters index, cut-off or pivot
+    // If the energy or one of the parameters norm, mean or sigma
     // energy has changed then recompute the cache
-    if ((m_last_energy != energy) ||
-        (m_last_index  != index)  ||
-        (m_last_ecut   != ecut)   ||
-        (m_last_pivot  != pivot)) {
+    if ((m_last_norm != norm) ||
+        (m_last_mean  != mean)  ||
+        (m_last_sigma   != sigma)) {
 
         // Store actual energy and parameter values
-        m_last_energy = energy;
-        m_last_index  = index;
-        m_last_ecut   = ecut;
-        m_last_pivot  = pivot;
+        m_last_norm = norm;
+        m_last_mean  = mean;
+        m_last_sigma   = sigma;
 
         // Compute and store value
         double eng    = energy.MeV();
-        m_last_e_norm = eng / m_last_pivot;
-        m_last_e_cut  = eng / m_last_ecut;
-        m_last_power  = std::pow(m_last_e_norm, m_last_index) *
-                        std::exp(-m_last_e_cut);
+        m_last_norm = eng / m_last_norm;
+        m_last_mean  = eng / m_last_mean;
+        m_last_sigma  = eng/ m_last_sigma;
 
     } // endif: recomputation was required
 
