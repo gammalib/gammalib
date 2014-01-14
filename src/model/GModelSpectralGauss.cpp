@@ -466,15 +466,14 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
     }
 
     // Get uniform value between 0 and 1
-    double u = ran.uniform();
 
     // Do ...
     do {
         double x1;
         double w;
     	do{
-    		x1        = 2.0 * u - 1.0;
-    		double x2 = 2.0 * u - 1.0;
+    		x1        = 2.0 * ran.uniform() - 1.0;
+    		double x2 = 2.0 * ran.uniform() - 1.0;
     		w         = x1 * x1 + x2 * x2;
     	} while (w >= 1.0);
 
@@ -485,7 +484,7 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
     	double val = x1 * w;
 
     	// Map into [emin,emax] range
-    	energy = (xmax - xmin) * val + xmin;
+    	energy = m_sigma.value() * val + m_mean.value();
 
     } while ((xmin <= energy) && (energy < xmax));
 
