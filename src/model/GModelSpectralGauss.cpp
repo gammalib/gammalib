@@ -270,12 +270,59 @@ double GModelSpectralGauss::eval(const GEnergy& srcEng,
  *
  * This method simply calls the eval() method as no analytical gradients will
  * be computed. See the eval() method for details.
+ *
+ * TODO: Implement this
  ***************************************************************************/
 double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
                                            const GTime&   srcTime)
 {
-    // Return
-    return eval(srcEng, srcTime);
+    	double energy = srcEng.MeV();
+    	double norm = m_norm.value();
+    	double mean = m_mean.value();
+    	double sigma = m_sigma.value();
+
+	// Update the evaluation cache
+	    update_eval_cache(srcEng);
+
+	    // Compute function value
+	    double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
+	    double term2 = (energy - mean) * (energy - mean) / (2 * sigma * sigma);
+	    double value = term1 * std::exp(- term2);
+
+	    // Compute partial derivatives with respect to the parameter factor
+	    // values. The partial derivatives with respect to the parameter
+	    // values are obtained by division by the scale factor.
+	    double g_norm  = (m_norm.is_free())
+	                     ? m_norm.scale() * m_last_power : 0.0;
+	    double g_mean = (m_index.is_free())
+	                     ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
+	    double g_sigma  = (m_ecut.is_free())
+	                     ? value * m_last_e_cut / m_ecut.factor_value() : 0.0;
+
+	    // Set gradients
+	    m_norm.factor_gradient(g_norm);
+	    m_mean.factor_gradient(g_mean);
+	    m_sigma.factor_gradient(g_sigma);
+
+	    // Compile option: Check for NaN/Inf
+	    #if defined(G_NAN_CHECK)
+	    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+	        std::cout << "*** ERROR: GModelSpectralExpPlaw::eval_gradients";
+	        std::cout << "(srcEng=" << srcEng;
+	        std::cout << ", srcTime=" << srcTime << "):";
+	        std::cout << " NaN/Inf encountered";
+	        std::cout << " (value=" << value;
+	        std::cout << ", e_norm=" << m_last_e_norm;
+	        std::cout << ", e_cut=" << m_last_e_cut;
+	        std::cout << ", power=" << m_last_power;
+	        std::cout << ")" << std::endl;
+	    }
+	    #endif
+
+	    // Return
+	    return value;
+	}
+
 }
 
 
@@ -726,3 +773,48 @@ double GModelSpectralGauss::eflux_kernel::eval(const double& energy)
     // Return value
     return value;
 }
+
+/***********************************************************************//**
+ * @brief Update eval precomputation cache
+ *
+ * @param[in] energy Energy.
+ *
+ * Updates the precomputation cache for eval() and eval_gradients() methods.
+ *
+ * TODO integrate this to correct form
+ ***************************************************************************/
+void GModelSpectralGauss::update_eval_cache(const GEnergy& energy) const
+{
+    // Get parameter values (takes 3 multiplications which are difficult
+    // to avoid)
+    double index = m_index.value();
+    double ecut  = m_ecut.value();
+    double pivot = m_pivot.value();
+
+    // If the energy or one of the parameters index, cut-off or pivot
+    // energy has changed then recompute the cache
+    if ((m_last_energy != energy) ||
+        (m_last_index  != index)  ||
+        (m_last_ecut   != ecut)   ||
+        (m_last_pivot  != pivot)) {
+
+        // Store actual energy and parameter values
+        m_last_energy = energy;
+        m_last_index  = index;
+        m_last_ecut   = ecut;
+        m_last_pivot  = pivot;
+
+        // Compute and store value
+        double eng    = energy.MeV();
+        m_last_e_norm = eng / m_last_pivot;
+        m_last_e_cut  = eng / m_last_ecut;
+        m_last_power  = std::pow(m_last_e_norm, m_last_index) *
+                        std::exp(-m_last_e_cut);
+
+    } // endif: recomputation was required
+
+    // Return
+    return;
+}
+
+
