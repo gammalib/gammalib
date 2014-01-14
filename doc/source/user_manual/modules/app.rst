@@ -16,6 +16,7 @@ parameter implemented by the ``GApplicationPar`` class. In addition, an
 application contains a logger, implemented by the ``GLog`` class, which 
 allows message passing to the console and/or a dedicated log file.
 
+This is a link from the Sphinx to the Doxygen API documentation: :doxy:`GApplication`.
 
 :ref:`fig_uml_app` present an overview over the C++ classes of the 
 application module and their relations.
