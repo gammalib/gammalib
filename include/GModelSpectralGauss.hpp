@@ -96,7 +96,7 @@ public:
     void    mean(const GEnergy& mean);
     GEnergy sigma(void) const;
     void    sigma(const GEnergy& sigma);
-
+    void 	update_eval_cache(const GEnergy& energy) const;
 
 
 protected:
@@ -104,6 +104,7 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralGauss& model);
     void free_members(void);
+    void update_eval_cache(const GEnergy& energy) const;
 
     // Energy flux integration kernel
     class eflux_kernel : public GFunction {
@@ -125,6 +126,10 @@ protected:
     GModelPar m_norm;  //!< Normalization factor
     GModelPar m_mean;  //!< Gaussian mean energy
     GModelPar m_sigma; //!< Gaussian energy width
+
+    mutable double  m_last_norm;   //!< Last Normalization value
+    mutable double  m_last_mean;    //!< Last Mean value
+    mutable double  m_last_sigma;    //!< Last Sigma value
 };
 
 
@@ -217,5 +222,6 @@ void GModelSpectralGauss::sigma(const GEnergy& sigma)
     m_sigma.value(sigma.MeV());
     return;
 }
+
 
 #endif /* GMODELSPECTRALGAUSS_HPP */

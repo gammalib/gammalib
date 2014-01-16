@@ -240,8 +240,7 @@ GModelSpectralGauss* GModelSpectralGauss::clone(void) const
  * Evaluates
  *
  * \f[
- * \frac{dN}{dE} = \frac{\norm}{\sqrt{2\pi}\sigma}
- *                 \exp(\frac{(E-\bar{E})^2}{2\sigma^2})
+ * \frac{dN}{dE}=\frac{\norm}{\sqrt{2\pi}\sigma}\exp(\frac{-(E-\bar{E})^2}{2\sigma^2})
  * \f]
  ***************************************************************************/
 double GModelSpectralGauss::eval(const GEnergy& srcEng,
@@ -271,12 +270,62 @@ double GModelSpectralGauss::eval(const GEnergy& srcEng,
  *
  * This method simply calls the eval() method as no analytical gradients will
  * be computed. See the eval() method for details.
+ *
+ * TODO: update docstring.
  ***************************************************************************/
 double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
                                            const GTime&   srcTime)
 {
-    // Return
-    return eval(srcEng, srcTime);
+    	double energy = srcEng.MeV();
+    	double norm = m_norm.value();
+    	double mean = m_mean.value();
+    	double sigma = m_sigma.value();
+
+	// Update the evaluation cache
+	    update_eval_cache(srcEng);
+
+	    // Compute function terms
+	    double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
+	    double term2 = (1 / sigma) * gammalib::inv_sqrt2pi;
+	    double term3 = (energy - mean) * (energy - mean) / (2 * sigma * sigma);
+	    double term4 = (energy - mean) / (sigma * sigma);
+	    double term5 = (norm / (sigma * sigma)) * gammalib::inv_sqrt2pi;
+
+	    // Compute function value
+	    double value = term1 * std::exp(- term3);
+
+
+	    // Compute partial derivatives with respect to the parameter factor
+	    // values (partial differentials were determined analytically).
+
+	    double g_norm  = term2 * std::exp(- term3);
+	    double g_mean  = term1 * term4 * std::exp(- term3);
+	    double g_sigma = - term5 * std::exp(- term3) * (1 - (2 * term3));
+
+		// Set gradients
+	    m_norm.factor_gradient(g_norm);
+	    m_mean.factor_gradient(g_mean);
+	    m_sigma.factor_gradient(g_sigma);
+
+	    // Compile option: Check for NaN/Inf
+	    #if defined(G_NAN_CHECK)
+	    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+	        std::cout << "*** ERROR: GModelSpectralGauss::eval_gradients";
+	        std::cout << "(srcEng=" << srcEng;
+	        std::cout << ", srcTime=" << srcTime << "):";
+	        std::cout << " NaN/Inf encountered";
+	        std::cout << " (value=" << value;
+	        std::cout << ", norm=" << m_last_norm;
+	        std::cout << ", mean=" << m_last_mean;
+	        std::cout << ", Sigma=" << m_last_sigma;
+	        std::cout << ")" << std::endl;
+	    }
+	    #endif
+
+	    // Return
+	    return value;
+	}
+
 }
 
 
@@ -298,6 +347,7 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
  ***************************************************************************/
+
 double GModelSpectralGauss::flux(const GEnergy& emin,
                                  const GEnergy& emax) const
 {
@@ -412,15 +462,14 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
     }
 
     // Get uniform value between 0 and 1
-    double u = ran.uniform();
 
     // Do ...
     do {
         double x1;
         double w;
     	do{
-    		x1        = 2.0 * u - 1.0;
-    		double x2 = 2.0 * u - 1.0;
+    		x1        = 2.0 * ran.uniform() - 1.0;
+    		double x2 = 2.0 * ran.uniform() - 1.0;
     		w         = x1 * x1 + x2 * x2;
     	} while (w >= 1.0);
 
@@ -431,14 +480,13 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
     	double val = x1 * w;
 
     	// Map into [emin,emax] range
-    	energy = (xmax - xmin) * val + xmin;
+    	energy = m_sigma.value() * val + m_mean.value();
 
     } while ((xmin <= energy) && (energy < xmax));
 
     // Return energy
     return GEnergy(energy, "MeV");
 }
-
 
 /***********************************************************************//**
  * @brief Read model from XML element
@@ -508,7 +556,6 @@ void GModelSpectralGauss::read(const GXmlElement& xml)
     // Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Write model into XML element
@@ -672,6 +719,11 @@ void GModelSpectralGauss::init_members(void)
     m_sigma.gradient(0.0);
     m_sigma.has_grad(false);
 
+    // Initialise eval cache
+    m_last_norm = 0.0;
+    m_last_mean  = 0.0;
+    m_last_sigma  = 0.0;
+
     // Set parameter pointer(s)
     m_pars.clear();
     m_pars.push_back(&m_norm);
@@ -700,6 +752,11 @@ void GModelSpectralGauss::copy_members(const GModelSpectralGauss& model)
     m_pars.push_back(&m_norm);
     m_pars.push_back(&m_mean);
     m_pars.push_back(&m_sigma);
+
+    // Copy eval cache
+    m_last_norm = model.m_last_norm;
+    m_last_mean = model.m_last_mean;
+    m_last_sigma = model.m_last_sigma;
 
     // Return
     return;
@@ -730,3 +787,44 @@ double GModelSpectralGauss::eflux_kernel::eval(const double& energy)
     // Return value
     return value;
 }
+
+/***********************************************************************//**
+ * @brief Update eval precomputation cache
+ *
+ * @param[in] energy Energy.
+ *
+ * Updates the precomputation cache for eval() and eval_gradients() methods.
+ *
+ ***************************************************************************/
+void GModelSpectralGauss::update_eval_cache(const GEnergy& energy) const
+{
+    // Get parameter values (takes 3 multiplications which are difficult
+    // to avoid)
+    double norm = m_norm.value();
+    double mean  = m_mean.value();
+    double sigma = m_sigma.value();
+
+    // If the energy or one of the parameters norm, mean or sigma
+    // energy has changed then recompute the cache
+    if ((m_last_norm != norm) ||
+        (m_last_mean  != mean)  ||
+        (m_last_sigma   != sigma)) {
+
+        // Store actual energy and parameter values
+        m_last_norm = norm;
+        m_last_mean  = mean;
+        m_last_sigma   = sigma;
+
+        // Compute and store value
+        double eng    = energy.MeV();
+        m_last_norm = eng / m_last_norm;
+        m_last_mean  = eng / m_last_mean;
+        m_last_sigma  = eng/ m_last_sigma;
+
+    } // endif: recomputation was required
+
+    // Return
+    return;
+}
+
+
