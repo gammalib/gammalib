@@ -220,6 +220,8 @@ implemented in GammaLib:
 All matrix classes derive from the abstract ``GMatrixBase`` class.
 
 
+.. _sec_matrix_storage:
+
 Matrix storage classes
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -317,9 +319,10 @@ course an equal number of rows and columns. And an empty matrix is not
 allowed. All matrix elements are initialised to 0 by the matrix
 allocation.
 
-You can access matrix elements by the ``()`` operator, with the first 
+You can access matrix elements using the ``()`` operator, with the first 
 argument specifying the row and the second argument the column to be 
-accessed:
+accessed (row and column indices run from 0 to the number of elements
+minus one):
 
 .. code-block:: cpp
 
@@ -336,8 +339,6 @@ accessed:
        }
      }
 
-Row and column indices run from 0 to the number of elements minus one.
-
 You can dump the content of a matrix to the console using
 
 .. code-block:: cpp
@@ -349,80 +350,78 @@ Matrix arithmetics
 ^^^^^^^^^^^^^^^^^^
 
 The following description of matrix arithmetics applies to all storage
-classes (see section [sec:matrix:storage]). The following matrix
-operators have been implemented in
+classes (see :ref:`sec_matrix_storage`). The following matrix
+operators have been implemented:
 
 .. code-block:: cpp
 
-     C = A + B;                             // Matrix Matrix addition
-     C = A - B;                             // Matrix Matrix subtraction
-     C = A * B;                             // Matrix Matrix multiplication
-     C = A * v;                             // Matrix Vector multiplication
-     C = A * s;                             // Matrix Scalar multiplication
-     C = s * A;                             // Scalar Matrix multiplication
-     C = A / s;                             // Matrix Scalar division
-     C = -A;                                // Negation
-     A += B;                                // Matrix inplace addition
-     A -= B;                                // Matrix inplace subtraction
-     A *= B;                                // Matrix inplace multiplications
-     A *= s;                                // Matrix inplace scalar multiplication
-     A /= s;                                // Matrix inplace scalar division
+     GMatrix A;
+     GMatrix B;
+     GMatrix C;
+     ...
+     C  = A + B;        // Matrix Matrix addition
+     C  = A - B;        // Matrix Matrix subtraction
+     C  = A * B;        // Matrix Matrix multiplication
+     C  = A * v;        // Matrix Vector multiplication
+     C  = A * s;        // Matrix Scalar multiplication
+     C  = s * A;        // Scalar Matrix multiplication
+     C  = A / s;        // Matrix Scalar division
+     C  = -A;           // Negation
+     A += B;            // Matrix inplace addition
+     A -= B;            // Matrix inplace subtraction
+     A *= B;            // Matrix inplace multiplications
+     A *= s;            // Matrix inplace scalar multiplication
+     A /= s;            // Matrix inplace scalar division
 
 The comparison operators
 
 .. code-block:: cpp
 
-     int equal   = (A == B);                // True if all elements equal
-     int unequal = (A != B);                // True if at least one elements unequal
+     int equal   = (A == B);    // True if all elements equal
+     int unequal = (A != B);    // True if at least one elements unequal
 
 allow to compare all elements of a matrix. If all elements are
-identical, the ``==`` operator returns ``true``, otherwise ``false``. If at least
-one element differs, the ``!=`` operator returns true, is all elements are
-identical it returns false.
+identical, the ``==`` operator returns ``true``, otherwise ``false``.
+If at least one element differs, the ``!=`` operator returns true, 
+if all elements are identical it returns false.
 
-Matrix methods and functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A number of methods has been implemented to manipulate matrixes. The
-method
+General matrix methods and functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: cpp
+A number of methods have been implemented to manipulate matrixes. The 
+methods described in this section are available for all storage classes.
 
-     A.clear();                             // Set all elements to 0
-
-sets all elements to 0. The methods
+The methods
 
 .. code-block:: cpp
 
-     int rows = A.rows();                   // Returns number of rows in matrix
-     int cols = A.cols();                   // Returns number of columns in matrix
+     int rows = A.rows();      // Returns number of rows in matrix
+     int cols = A.columns();   // Returns number of columns in matrix
+     int rows = A.size();      // Returns number of elements in matrix
 
 provide access to the matrix dimensions, the methods
 
 .. code-block:: cpp
 
-     double sum = A.sum();                  // Sum of all elements in matrix
-     double min = A.min();                  // Returns minimum element of matrix
-     double max = A.max();                  // Returns maximum element of matrix
+     double sum  = A.sum();    // Sum of all elements in matrix
+     double min  = A.min();    // Returns minimum element of matrix
+     double max  = A.max();    // Returns maximum element of matrix
+     double fill = A.fill();   // Returns fraction of non-zero elements
 
 inform about some matrix properties. The methods
 
 .. code-block:: cpp
 
-     GVector v_row    = A.extract_row(row); // Puts row in vector
-     GVector v_column = A.extract_col(col); // Puts column in vector
+     GVector row_vector    = A.row(row);    // Extract matrix row into vector
+     GVector column_vector = A.col(column); // Extract matrix column into vector
 
-extract entire rows and columns from a matrix. Extraction of lower or
-upper triangle parts of a matrix into another is performed using
+extract entire rows and columns from a matrix into a vector. Conversely, 
+you may set entire rows or columns of a matrix using the methods
 
-.. code-block:: cpp
+     A.row(row, row_vector);                // Add vector to column
+     A.column(column, column_vector);       // Puts vector in column
 
-     B = A.extract_lower_triangle();        // B holds lower triangle
-     B = A.extract_upper_triangle();        // B holds upper triangle
-
-``B`` is of the same storage class as ``A``, except for the case that ``A`` is a
-``GSymMatrix`` object. In this case, ``B`` will be a full matrix of type
-``GMatrix``.
 
 The methods
 
@@ -459,6 +458,43 @@ The absolute value of a matrix is provided by
 .. code-block:: cpp
 
      B = fabs(A);                           // B = |A|
+
+
+Specific matrix methods and functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some methods do only exist for specific matrix storage classes. Although
+these methods could in principle apply to all matrix classes, they have
+for practical reasons not yet been implemented for all storage classes.
+This may change in future versions of GammaLib.
+
+
+GMatrix methods
+~~~~~~~~~~~~~~~
+
+
+GMatrixSymmetric methods
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+GMatrixSparse methods
+~~~~~~~~~~~~~~~~~~~~~
+
+Other methods
+~~~~~~~~~~~~~
+
+You can extract the lower or upper triangle of a matrix into another
+matrix using
+
+.. code-block:: cpp
+
+     GMatrix B = A.extract_lower_triangle();   // B holds lower triangle
+     GMatrix B = A.extract_upper_triangle();   // B holds upper triangle
+
+This method is implemented for storage classes ``GMatrix`` and
+``GMatrixSymmetric``.
+
+
 
 Matrix factorisations
 ^^^^^^^^^^^^^^^^^^^^^
