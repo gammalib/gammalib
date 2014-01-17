@@ -75,6 +75,20 @@ if [ -d $prefix/syspfiles/. ]; then
     syspfiles="$prefix/syspfiles$syspfiles"
   fi
 
+  # updates any existing PFILES if syspfiles are newer
+  for filename in $HOME/pfiles/*.par
+  do
+    parfile=`basename $filename`
+    sys_parfile=$prefix/syspfiles/$parfile
+    if [ -e $sys_parfile ]
+    then
+      if test $sys_parfile -nt $filename
+      then
+        cp -f $sys_parfile $filename
+      fi
+    fi
+  done
+
   # Set PFILES and PFCLOBBER environment variable
   PFILES="$locpfiles;$syspfiles"
   PFCLOBBER=1
