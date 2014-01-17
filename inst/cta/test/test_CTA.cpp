@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -335,7 +335,8 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
 {
     // Set reference value
     //double ref = 13803.800313356;
-    const double ref = 13803.5186374;
+    //const double ref = 13803.5186374;
+    const double ref = 13796.8200974; // After GWcs::solidangle improvement
 
     // Set parameters
     double src_ra  = 201.3651;
@@ -412,7 +413,8 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
 {
     // Set reference value
     //double ref = 11212.26274; // npred_spec precision of 1e-6
-    const double ref = 11212.437464; // npred_spec precision of 1e-5
+    //const double ref = 11212.437464; // npred_spec precision of 1e-5
+    const double ref = 11206.8536502; // After GWcs::solidangle improvement
 
     // Set parameters
     double src_ra  = 201.3651;
@@ -766,10 +768,10 @@ void TestGCTAOptimize::test_binned_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.616410411e-16, 1.904730785e-17,
-                            -2.481781246, -0.02580905077,
+                            -2.47925, -0.02580905077,
                             300000, 0,
                             1, 0,
-                            2.933677595, 0.06639644824,
+                            2.93353, 0.06639644824,
                             6.550723074e-05, 1.945714239e-06,
                             -1.833781187, -0.0160819,
                             1000000, 0,
