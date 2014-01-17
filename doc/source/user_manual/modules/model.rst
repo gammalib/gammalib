@@ -198,6 +198,31 @@ The XML format for specifying a broken power law is:
     <parameter name="BreakValue" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
     <parameter name="Index2"     scale="-1"    value="2.70" min="0.01"  max="1000.0" free="1"/>
    </spectrum>
+   
+Gaussian
+^^^^^^^^
+
+The ``GModelSpectralGauss`` class implements the gaussian function
+
+.. math::
+    \frac{dN}{dE} = \frac{N_0}{\sqrt{2\pi}\sigma}\exp(\frac{-(E-E_bar)^2}{2 \sigma^2})
+
+where the parameters in the XML definition have the following mappings:
+
+* :math:`N_0` = ``Prefactor``
+* :math:`E_bar` = ``Mean Energy``
+* :math:`sigma` = ``Energy Standard Deviation``
+
+The XML format for specifying a power law is:
+
+.. code-block:: xml
+
+   <spectrum type="Gaussian">
+    <parameter name="Normalization" scale="1e-10" value="1.0"  min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Mean"          scale="1e6"   value="5.0"  min="0.01"  max="100.0"  free="1"/>
+    <parameter name="Sigma"         scale="1e6"   value="1.0"  min="0.01"  max="100.0"  free="1"/>
+   </spectrum>
+
 
 Node function
 ^^^^^^^^^^^^^
