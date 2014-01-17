@@ -435,6 +435,7 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
     GSkyDir dir3 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5));
     GSkyDir dir4 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5));
 
+    /*
     GVector vec1 = dir1.celvector();
     GVector vec2 = dir2.celvector();
     GVector vec3 = dir3.celvector();
@@ -444,9 +445,44 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
     double angle2 = std::acos(cross(vec3, (cross(vec2, vec3))) * cross(vec3, (cross(vec4, vec3))));
     double angle3 = std::acos(cross(vec4, (cross(vec3, vec4))) * cross(vec4, (cross(vec1, vec4))));
     double angle4 = std::acos(cross(vec1, (cross(vec4, vec1))) * cross(vec1, (cross(vec2, vec1))));
+    */
 
+    //
+    double a;
+    double b;
+    double c;
+
+    // Angle 1
+    a = dir1.dist(dir3);
+    b = dir4.dist(dir3);
+    c = dir4.dist(dir1);
+    double angle1 = std::acos((std::cos(a) - std::cos(b)*std::cos(c))/(std::sin(b)*std::sin(c)));
+
+    // Angle 2
+    a = dir4.dist(dir2);
+    b = dir2.dist(dir3);
+    c = dir3.dist(dir4);
+    double angle2 = std::acos((std::cos(a) - std::cos(b)*std::cos(c))/(std::sin(b)*std::sin(c)));
+
+    // Angle 3
+    a = dir1.dist(dir3);
+    b = dir1.dist(dir2);
+    c = dir2.dist(dir3);
+    double angle3 = std::acos((std::cos(a) - std::cos(b)*std::cos(c))/(std::sin(b)*std::sin(c)));
+
+    // Angle 4
+    a = dir4.dist(dir2);
+    b = dir4.dist(dir1);
+    c = dir1.dist(dir2);
+    double angle4 = std::acos((std::cos(a) - std::cos(b)*std::cos(c))/(std::sin(b)*std::sin(c)));
+
+    std::cout << angle1 << " ";
+    std::cout << angle2 << " ";
+    std::cout << angle3 << " ";
+    std::cout << angle4 << " " << std::endl;
+    
     // http://mathworld.wolfram.com/SphericalPolygon.html
-    double solidangle = (angle1 + angle2 + angle3 + angle4) - (2 * gammalib::pi);
+    double solidangle = (angle1 + angle2 + angle3 + angle4) - (2.0 * gammalib::pi);
 
     // Return solid angle
     return solidangle;
