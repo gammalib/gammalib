@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-13 January 2014
+17 January 2014
 
 
 1. Introduction
@@ -496,7 +496,9 @@ GOptimizerPar are the XML read() and write() methods.
 A broken power law spectral model has been implemented by the
 GModelSpectralBrokenPlaw class.
 
-A Gauss spectral model has been implemented by the GModelSpectralGauss class.
+A Gaussian spectral model has been implemented by the GModelSpectralGauss
+class.
+
 
 9. Numerics module
 ------------------

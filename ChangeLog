@@ -1,4 +1,4 @@
-2014-01-09  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
         ========================
@@ -22,7 +22,8 @@
         Reorganise GOptimizerPars class and add GOptimizerPar class
         Put likelihood computation in GObservation class
         Add broken power law spectral model
-        Renamed the following classes:
+        Add Gaussian spectral model
+        Rename the following classes:
         - GWcs => GSkyProjection
         - GWcslib => GWcs
         - GWcsHPX => GHealpix
