@@ -440,14 +440,13 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
     GVector vec3 = dir3.celvector();
     GVector vec4 = dir4.celvector();
 
-    double angle1 = std::acos(cross(vec2, (cross(vec1, vec2))) * cross(vec2, (cross(vec3, vec2))));
-    double angle2 = std::acos(cross(vec3, (cross(vec2, vec3))) * cross(vec3, (cross(vec4, vec3))));
-    double angle3 = std::acos(cross(vec4, (cross(vec3, vec4))) * cross(vec4, (cross(vec1, vec4))));
-    double angle4 = std::acos(cross(vec1, (cross(vec4, vec1))) * cross(vec1, (cross(vec2, vec1))));
+    double angle1 = gammalib::acos(cross(vec2, (cross(vec1, vec2))) * cross(vec2, (cross(vec3, vec2))));
+    double angle2 = gammalib::acos(cross(vec3, (cross(vec2, vec3))) * cross(vec3, (cross(vec4, vec3))));
+    double angle3 = gammalib::acos(cross(vec4, (cross(vec3, vec4))) * cross(vec4, (cross(vec1, vec4))));
+    double angle4 = gammalib::acos(cross(vec1, (cross(vec4, vec1))) * cross(vec1, (cross(vec2, vec1))));
 
     // http://mathworld.wolfram.com/SphericalPolygon.html
-    double solidangle = (angle1 + angle2 + angle3 + angle4) - (2 * gammalib::pi);
-
+    double solidangle = ((gammalib::pi * (1.0/180.0)) * (gammalib::pi * (1.0/180.0))) + (angle1 + angle2 + angle3 + angle4) - (2.0 * gammalib::pi);
     // Return solid angle
     return solidangle;
 }
