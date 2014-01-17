@@ -436,18 +436,27 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
     GSkyDir dir3 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5));
     GSkyDir dir4 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5));
 
+    // Get vectors to pixel corners
     GVector vec1 = dir1.celvector();
     GVector vec2 = dir2.celvector();
     GVector vec3 = dir3.celvector();
     GVector vec4 = dir4.celvector();
 
-    double angle1 = gammalib::acos(cross(vec2, (cross(vec1, vec2))) * cross(vec2, (cross(vec3, vec2))));
-    double angle2 = gammalib::acos(cross(vec3, (cross(vec2, vec3))) * cross(vec3, (cross(vec4, vec3))));
-    double angle3 = gammalib::acos(cross(vec4, (cross(vec3, vec4))) * cross(vec4, (cross(vec1, vec4))));
-    double angle4 = gammalib::acos(cross(vec1, (cross(vec4, vec1))) * cross(vec1, (cross(vec2, vec1))));
+    // Compute inner angles of pixel corners
+    double angle1 = gammalib::acos(cross(vec2, (cross(vec1, vec2))) * 
+                                   cross(vec2, (cross(vec3, vec2))));
+    double angle2 = gammalib::acos(cross(vec3, (cross(vec2, vec3))) *
+                                   cross(vec3, (cross(vec4, vec3))));
+    double angle3 = gammalib::acos(cross(vec4, (cross(vec3, vec4))) *
+                                   cross(vec4, (cross(vec1, vec4))));
+    double angle4 = gammalib::acos(cross(vec1, (cross(vec4, vec1))) *
+                                   cross(vec1, (cross(vec2, vec1))));
 
-    // http://mathworld.wolfram.com/SphericalPolygon.html
-    double solidangle = ((gammalib::pi * (1.0/180.0)) * (gammalib::pi * (1.0/180.0))) + (angle1 + angle2 + angle3 + angle4) - (2.0 * gammalib::pi);
+    // Use Girard equation for excess area to determine solid angle
+    double solidangle = gammalib::deg2rad * gammalib::deg2rad +
+                        (angle1 + angle2 + angle3 + angle4) -
+                        gammalib::twopi;
+
     // Return solid angle
     return solidangle;
 }
