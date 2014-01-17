@@ -101,11 +101,11 @@ GModelSpectralGauss::GModelSpectralGauss(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] prefactor Power law pre factor (in ph/cm2/s/MeV).
+ * @param[in] norm Total flux under Gaussian (in ph/cm2/s).
  * @param[in] mean Mean energy.
  * @param[in] sigma Energy width.
  ***************************************************************************/
-GModelSpectralGauss::GModelSpectralGauss(const double&  prefactor,
+GModelSpectralGauss::GModelSpectralGauss(const double&  norm,
                                          const GEnergy& mean,
                                          const GEnergy& sigma) :
                      GModelSpectral()
@@ -114,7 +114,7 @@ GModelSpectralGauss::GModelSpectralGauss(const double&  prefactor,
     init_members();
 
     // Set parameters
-    m_norm.value(prefactor);
+    m_norm.value(norm);
     m_mean.value(mean.MeV());
     m_sigma.value(sigma.MeV());
 
@@ -240,21 +240,41 @@ GModelSpectralGauss* GModelSpectralGauss::clone(void) const
  * Evaluates
  *
  * \f[
- * \frac{dN}{dE}=\frac{\norm}{\sqrt{2\pi}\sigma}\exp(\frac{-(E-\bar{E})^2}{2\sigma^2})
+ * S_{\rm E}(E | t) = \frac{m\_norm}{\sqrt{2\pi}m\_sigma}
+ *                    \exp(\frac{-(E-m\_mean)^2}{2 m\_sigma^2})
  * \f]
+ *
+ * where
+ * - \f${\tt m\_norm}\f$ is the normalization,
+ * - \f${\tt m\_mean}\f$ is the mean energy, and
+ * - \f${\tt m\_sigma}\f$ is the energy width.
  ***************************************************************************/
 double GModelSpectralGauss::eval(const GEnergy& srcEng,
                                  const GTime&   srcTime) const
 {
+    // Get parameter values
     double energy = srcEng.MeV();
     double norm   = m_norm.value();
     double mean   = m_mean.value();
     double sigma  = m_sigma.value();
 
     // Compute function value
+    double delta = energy - mean;
     double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
-    double term2 = (energy - mean) * (energy - mean) / (2.0 * sigma * sigma);
+    double term2 = delta * delta / (2.0 * sigma * sigma);
     double value = term1 * std::exp(-term2);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: GModelSpectralGauss::eval";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
     // Return
     return value;
@@ -268,64 +288,89 @@ double GModelSpectralGauss::eval(const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * This method simply calls the eval() method as no analytical gradients will
- * be computed. See the eval() method for details.
+ * Evaluates
  *
- * TODO: update docstring.
+ * \f[
+ * S_{\rm E}(E | t) = \frac{m\_norm}{\sqrt{2\pi}m\_sigma}
+ *                    \exp(\frac{-(E-m\_mean)^2}{2 m\_sigma^2})
+ * \f]
+ *
+ * where
+ * - \f${\tt m\_norm}\f$ is the normalization,
+ * - \f${\tt m\_mean}\f$ is the mean energy, and
+ * - \f${\tt m\_sigma}\f$ is the energy width.
+ *
+ * The method also evaluates the partial derivatives of the model with
+ * respect to the parameters using
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_mean}} =
+ *      S_{\rm E}(E | t) \frac{E-m\_mean}{m\_sigma^2}
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_sigma}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_sigma}}
+ *      \left( \frac{(E-m\_mean)^2}{m\_sigma^2} - 1 \right)
+ * \f]
+ *
  ***************************************************************************/
 double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
                                            const GTime&   srcTime)
 {
-    	double energy = srcEng.MeV();
-    	double norm = m_norm.value();
-    	double mean = m_mean.value();
-    	double sigma = m_sigma.value();
+    // Get parameter values
+    double energy = srcEng.MeV();
+    double norm   = m_norm.value();
+    double mean   = m_mean.value();
+    double sigma  = m_sigma.value();
 
-	// Update the evaluation cache
-	    update_eval_cache(srcEng);
+    // Compute function terms
+    double delta  = energy - mean;
+    double sigma2 = sigma * sigma;
+    double term2  = (1.0 / sigma) * gammalib::inv_sqrt2pi;
+    double term1  = norm * term2;
+    double term3  = delta * delta / (2.0 * sigma2);
+    double term4  = delta / sigma2;
+    double term5  = (norm / sigma2) * gammalib::inv_sqrt2pi;
+    double eterm3 = std::exp(-term3);
 
-	    // Compute function terms
-	    double term1 = (norm / sigma) * gammalib::inv_sqrt2pi;
-	    double term2 = (1 / sigma) * gammalib::inv_sqrt2pi;
-	    double term3 = (energy - mean) * (energy - mean) / (2 * sigma * sigma);
-	    double term4 = (energy - mean) / (sigma * sigma);
-	    double term5 = (norm / (sigma * sigma)) * gammalib::inv_sqrt2pi;
+    // Compute function value
+    double value = term1 * eterm3;
 
-	    // Compute function value
-	    double value = term1 * std::exp(- term3);
+    // Compute partial derivatives with respect to the parameter factor
+    // values (partial differentials were determined analytically).
+    double g_norm  = (m_norm.is_free())
+                     ? term2 * eterm3 * m_norm.scale() : 0.0;
+    double g_mean  = (m_mean.is_free())
+                     ? value * term4 * m_mean.scale() : 0.0;
+    double g_sigma = (m_sigma.is_free())
+                     ? -term5 * eterm3 * (1.0 - (2.0 * term3)) * m_sigma.scale()
+                     : 0.0;
 
+    // Set gradients
+    m_norm.factor_gradient(g_norm);
+    m_mean.factor_gradient(g_mean);
+    m_sigma.factor_gradient(g_sigma);
 
-	    // Compute partial derivatives with respect to the parameter factor
-	    // values (partial differentials were determined analytically).
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: GModelSpectralGauss::eval_gradients";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
 
-	    double g_norm  = term2 * std::exp(- term3);
-	    double g_mean  = term1 * term4 * std::exp(- term3);
-	    double g_sigma = - term5 * std::exp(- term3) * (1 - (2 * term3));
-
-		// Set gradients
-	    m_norm.factor_gradient(g_norm);
-	    m_mean.factor_gradient(g_mean);
-	    m_sigma.factor_gradient(g_sigma);
-
-	    // Compile option: Check for NaN/Inf
-	    #if defined(G_NAN_CHECK)
-	    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-	        std::cout << "*** ERROR: GModelSpectralGauss::eval_gradients";
-	        std::cout << "(srcEng=" << srcEng;
-	        std::cout << ", srcTime=" << srcTime << "):";
-	        std::cout << " NaN/Inf encountered";
-	        std::cout << " (value=" << value;
-	        std::cout << ", norm=" << m_last_norm;
-	        std::cout << ", mean=" << m_last_mean;
-	        std::cout << ", Sigma=" << m_last_sigma;
-	        std::cout << ")" << std::endl;
-	    }
-	    #endif
-
-	    // Return
-	    return value;
-	}
-
+    // Return
+    return value;
 }
 
 
@@ -347,7 +392,6 @@ double GModelSpectralGauss::eval_gradients(const GEnergy& srcEng,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
  ***************************************************************************/
-
 double GModelSpectralGauss::flux(const GEnergy& emin,
                                  const GEnergy& emax) const
 {
@@ -451,9 +495,12 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
                                 const GTime&   time,
                                 GRan&          ran) const
 {
+    // Get energy boundaries in MeV
 	double xmax = emax.MeV();
 	double xmin = emin.MeV();
-	double energy;
+
+    // Initialize return energy
+	double energy = 0.0;
 
     // Throw an exception if energy range is invalid
     if (xmin >= xmax) {
@@ -461,32 +508,29 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
               "Minimum energy < maximum energy required.");
     }
 
-    // Get uniform value between 0 and 1
-
-    // Do ...
+    // Sample until we find a value within the requested energy range
     do {
         double x1;
         double w;
-    	do{
+    	do {
     		x1        = 2.0 * ran.uniform() - 1.0;
     		double x2 = 2.0 * ran.uniform() - 1.0;
     		w         = x1 * x1 + x2 * x2;
     	} while (w >= 1.0);
 
-        // Do ...
-        w = std::sqrt( (-2.0 * std::log( w ) ) / w );
+        // Compute random value
+    	double val = x1 * std::sqrt((-2.0 * std::log(w)) / w);
 
-        // Compute ...
-    	double val = x1 * w;
-
-    	// Map into [emin,emax] range
+    	// Scale to specified width and shift by mean value
     	energy = m_sigma.value() * val + m_mean.value();
 
-    } while ((xmin <= energy) && (energy < xmax));
+    } while (energy < xmin || energy > xmax);
+
 
     // Return energy
     return GEnergy(energy, "MeV");
 }
+
 
 /***********************************************************************//**
  * @brief Read model from XML element
@@ -502,9 +546,9 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
  * The format of the XML elements is:
  *
  *     <spectrum type="Gaussian">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Mean"      scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Sigma"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Normalization" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Mean"          scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Sigma"         scale=".." value=".." min=".." max=".." free=".."/>
  *     </spectrum>
  *
  ***************************************************************************/
@@ -526,8 +570,8 @@ void GModelSpectralGauss::read(const GXmlElement& xml)
         // Get parameter element
         const GXmlElement* par = xml.element("parameter", i);
 
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
+        // Handle normalization
+        if (par->attribute("name") == "Normalization") {
             m_norm.read(*par);
             npar[0]++;
         }
@@ -549,13 +593,14 @@ void GModelSpectralGauss::read(const GXmlElement& xml)
     // Verify that all parameters were found
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Mean\", and \"Sigma\""
+              "Require \"Normalization\", \"Mean\", and \"Sigma\""
               " parameters.");
     }
 
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Write model into XML element
@@ -573,9 +618,9 @@ void GModelSpectralGauss::read(const GXmlElement& xml)
  * element is
  *
  *     <spectrum type="Gaussian">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Mean"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Sigma"    scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Normalization" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Mean"          scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Sigma"         scale=".." value=".." min=".." max=".." free=".."/>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralGauss::write(GXmlElement& xml) const
@@ -593,7 +638,7 @@ void GModelSpectralGauss::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 3 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
+        xml.append(GXmlElement("parameter name=\"Normalization\""));
         xml.append(GXmlElement("parameter name=\"Mean\""));
         xml.append(GXmlElement("parameter name=\"Sigma\""));
     }
@@ -611,8 +656,8 @@ void GModelSpectralGauss::write(GXmlElement& xml) const
         // Get parameter element
         GXmlElement* par = xml.element("parameter", i);
 
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
+        // Handle normalization
+        if (par->attribute("name") == "Normalization") {
             npar[0]++;
             m_norm.write(*par);
         }
@@ -635,7 +680,7 @@ void GModelSpectralGauss::write(GXmlElement& xml) const
     // Check of all required parameters are present
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 ) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Mean\" and \"Sigma\""
+              "Require \"Normalization\", \"Mean\" and \"Sigma\""
               " parameters.");
     }
 
@@ -688,8 +733,8 @@ void GModelSpectralGauss::init_members(void)
 {
     // Initialise normalisation
     m_norm.clear();
-    m_norm.name("Prefactor");
-    m_norm.unit("ph/cm2/s/MeV");
+    m_norm.name("Normalization");
+    m_norm.unit("ph/cm2/s");
     m_norm.scale(1.0);
     m_norm.value(1.0);          // default: 1.0
     m_norm.min(0.0);            // min:     0.0
@@ -718,11 +763,6 @@ void GModelSpectralGauss::init_members(void)
     m_sigma.free();
     m_sigma.gradient(0.0);
     m_sigma.has_grad(false);
-
-    // Initialise eval cache
-    m_last_norm = 0.0;
-    m_last_mean  = 0.0;
-    m_last_sigma  = 0.0;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -753,11 +793,6 @@ void GModelSpectralGauss::copy_members(const GModelSpectralGauss& model)
     m_pars.push_back(&m_mean);
     m_pars.push_back(&m_sigma);
 
-    // Copy eval cache
-    m_last_norm = model.m_last_norm;
-    m_last_mean = model.m_last_mean;
-    m_last_sigma = model.m_last_sigma;
-
     // Return
     return;
 }
@@ -780,51 +815,11 @@ void GModelSpectralGauss::free_members(void)
 double GModelSpectralGauss::eflux_kernel::eval(const double& energy)
 {
     // Evaluate function value
+    double delta = energy - m_mean;
     double term1 = (m_norm / m_sigma) * gammalib::inv_sqrt2pi;
-    double term2 = (energy - m_mean) * (energy - m_mean) / (2.0 * m_sigma * m_sigma);
+    double term2 = delta * delta / (2.0 * m_sigma * m_sigma);
     double value = term1 * std::exp(- term2);
 
     // Return value
     return value;
 }
-
-/***********************************************************************//**
- * @brief Update eval precomputation cache
- *
- * @param[in] energy Energy.
- *
- * Updates the precomputation cache for eval() and eval_gradients() methods.
- *
- ***************************************************************************/
-void GModelSpectralGauss::update_eval_cache(const GEnergy& energy) const
-{
-    // Get parameter values (takes 3 multiplications which are difficult
-    // to avoid)
-    double norm = m_norm.value();
-    double mean  = m_mean.value();
-    double sigma = m_sigma.value();
-
-    // If the energy or one of the parameters norm, mean or sigma
-    // energy has changed then recompute the cache
-    if ((m_last_norm != norm) ||
-        (m_last_mean  != mean)  ||
-        (m_last_sigma   != sigma)) {
-
-        // Store actual energy and parameter values
-        m_last_norm = norm;
-        m_last_mean  = mean;
-        m_last_sigma   = sigma;
-
-        // Compute and store value
-        double eng    = energy.MeV();
-        m_last_norm = eng / m_last_norm;
-        m_last_mean  = eng / m_last_mean;
-        m_last_sigma  = eng/ m_last_sigma;
-
-    } // endif: recomputation was required
-
-    // Return
-    return;
-}
-
-

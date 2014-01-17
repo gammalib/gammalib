@@ -1176,7 +1176,7 @@ void TestGModel::test_gauss(void)
     test_try("Test value constructor");
     try {
         GModelSpectralGauss model(1.0, GEnergy(42.0, "MeV"), GEnergy(0.5, "MeV"));
-        test_value(model.prefactor(), 1.0);
+        test_value(model.norm(), 1.0);
         test_value(model.mean().MeV(), 42.0);
         test_value(model.sigma().MeV(), 0.5);
         test_try_success();
@@ -1189,29 +1189,29 @@ void TestGModel::test_gauss(void)
     test_try("Test XML constructor, value and gradients");
     try {
         // Test XML constructor
-        GXml                  xml(m_xml_model_point_gauss);
-        GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
+        GXml                xml(m_xml_model_point_gauss);
+        GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
         GModelSpectralGauss model(*element);
         test_value(model.size(), 3);
         test_assert(model.type() == "Gaussian", "Expected \"Gaussian\"");
-        test_value(model.prefactor(), 5.7e-16);
-        test_value(model.mean().MeV(), 2.48e6);
-        test_value(model.sigma().MeV(), 1e6);
+        test_value(model.norm(), 1.0e-10);
+        test_value(model.mean().MeV(), 5.0e6);
+        test_value(model.sigma().MeV(), 1.0e6);
 
-        // Test prefactor method
-        model.prefactor(2.3e-16);
-        test_value(model.prefactor(), 2.3e-16);
+        // Test norm method
+        model.norm(2.3e-10);
+        test_value(model.norm(), 2.3e-10);
 
         // Test mean method
-        model.mean(GEnergy(96.0, "MeV"));
-        test_value(model.mean().MeV(), 96.0);
+        model.mean(GEnergy(1.5678, "TeV"));
+        test_value(model.mean().TeV(), 1.5678);
 
         // Test sigma method
-        model.sigma(GEnergy(0.5e7, "keV"));
-        test_value(model.sigma().keV(), 0.5e7);
+        model.sigma(GEnergy(0.1234, "TeV"));
+        test_value(model.sigma().TeV(), 0.1234);
 
         // Test operator access
-        const char* strarray[] = {"Prefactor", "Mean", "Sigma"};
+        const char* strarray[] = {"Normalization", "Mean", "Sigma"};
         for (int i = 0; i < 3; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value

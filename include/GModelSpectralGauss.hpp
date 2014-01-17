@@ -45,12 +45,12 @@
  *
  * \f[
  *    S_{\rm E}(E | t) =
- *    \frac{\tt m\_norm}{\sqrt{2 \pi} \sigma^2} \exp
+ *    \frac{\tt m\_norm}{\sqrt{2 \pi} m\_sigma^2} \exp
  *    \left(\frac{-(E - m\_mean)^2}{2 m_\sigma^2} \right)
  * \f]
  *
  * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_norm}\f$ is the normalization,
  * - \f${\tt m\_mean}\f$ is the mean energy,
  * - \f${\tt m\_sigma}\f$ is the energy width.
  ***************************************************************************/
@@ -60,7 +60,7 @@ public:
     // Constructors and destructors
     GModelSpectralGauss(void);
     explicit GModelSpectralGauss(const GXmlElement& xml);
-    GModelSpectralGauss(const double&  prefactor,
+    GModelSpectralGauss(const double&  norm,
                         const GEnergy& mean,
                         const GEnergy& sigma);
     GModelSpectralGauss(const GModelSpectralGauss& model);
@@ -90,14 +90,12 @@ public:
     virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double  prefactor(void) const;
-    void    prefactor(const double& prefactor);
+    double  norm(void) const;
+    void    norm(const double& norm);
     GEnergy mean(void) const;
     void    mean(const GEnergy& mean);
     GEnergy sigma(void) const;
     void    sigma(const GEnergy& sigma);
-    void 	update_eval_cache(const GEnergy& energy) const;
-
 
 protected:
     // Protected methods
@@ -126,10 +124,6 @@ protected:
     GModelPar m_norm;  //!< Normalization factor
     GModelPar m_mean;  //!< Gaussian mean energy
     GModelPar m_sigma; //!< Gaussian energy width
-
-    mutable double  m_last_norm;   //!< Last Normalization value
-    mutable double  m_last_mean;    //!< Last Mean value
-    mutable double  m_last_sigma;    //!< Last Sigma value
 };
 
 
@@ -148,26 +142,26 @@ std::string GModelSpectralGauss::type(void) const
 
 
 /***********************************************************************//**
- * @brief Return pre factor
+ * @brief Return normalization
  *
- * @return Pre factor (ph/cm2/s/MeV).
+ * @return Normalization (ph/cm2/s).
  ***************************************************************************/
 inline
-double GModelSpectralGauss::prefactor(void) const
+double GModelSpectralGauss::norm(void) const
 {
     return (m_norm.value());
 }
 
 
 /***********************************************************************//**
- * @brief Set pre factor
+ * @brief Set normalization
  *
- * @param[in] prefactor Pre factor (ph/cm2/s/MeV).
+ * @param[in] norm Normalization (ph/cm2/s).
  ***************************************************************************/
 inline
-void GModelSpectralGauss::prefactor(const double& prefactor)
+void GModelSpectralGauss::norm(const double& norm)
 {
-    m_norm.value(prefactor);
+    m_norm.value(norm);
     return;
 }
 
@@ -222,6 +216,5 @@ void GModelSpectralGauss::sigma(const GEnergy& sigma)
     m_sigma.value(sigma.MeV());
     return;
 }
-
 
 #endif /* GMODELSPECTRALGAUSS_HPP */

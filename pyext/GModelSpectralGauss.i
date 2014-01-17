@@ -41,7 +41,7 @@ public:
     // Constructors and destructors
     GModelSpectralGauss(void);
     explicit GModelSpectralGauss(const GXmlElement& xml);
-    GModelSpectralGauss(const double&  prefactor,
+    GModelSpectralGauss(const double&  norm,
                         const GEnergy& mean,
                         const GEnergy& sigma);
     GModelSpectralGauss(const GModelSpectralGauss& model);
@@ -67,8 +67,8 @@ public:
     virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
-    double  prefactor(void) const;
-    void    prefactor(const double& prefactor);
+    double  norm(void) const;
+    void    norm(const double& norm);
     GEnergy mean(void) const;
     void    mean(const GEnergy& mean);
     GEnergy sigma(void) const;
