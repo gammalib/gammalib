@@ -24,6 +24,7 @@
         Add broken power law spectral model
         Add Gaussian spectral model
         Update parameter files if necessary
+        Implement exact sky map pixel solid angle computation
         Rename the following classes:
         - GWcs => GSkyProjection
         - GWcslib => GWcs

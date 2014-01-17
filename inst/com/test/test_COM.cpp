@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -580,7 +580,7 @@ void TestGCOMOptimize::test_binned_optimizer(void)
                             47, 0,
                             29.9617, 0.377506,
                             49, 0,
-                            27.9993, 0.372603};
+                            27.9992, 0.372603};
     test_try("Perform LM optimization");
     try {
         GOptimizerLM opt;
