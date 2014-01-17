@@ -425,7 +425,8 @@ void GWcs::write(GFitsHDU& hdu) const
  *
  * @param[in] pixel Pixel index (x,y)
  *
-TODO:: UPDATE THIS DOCSTRING (+link to wikipedia)
+ * Estimates solid angles of pixels using the Girard equation for excess
+ * area - see: http://mathworld.wolfram.com/SphericalPolygon.html
  ***************************************************************************/
 double GWcs::solidangle(const GSkyPixel& pixel) const
 {
