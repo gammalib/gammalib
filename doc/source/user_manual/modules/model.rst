@@ -89,11 +89,11 @@ Power law
 The ``GModelSpectralPlaw`` class implements the power law function
 
 .. math::
-    \frac{dN}{dE} = N_0 \left( \frac{E}{E_0} \right)^{\gamma}
+    \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma}
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N_0` = ``Prefactor``
+* :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
 * :math:`E_0` = ``Scale``
 
@@ -145,12 +145,12 @@ Exponentially cut-off power law
 The ``GModelSpectralExpPlaw`` class implements the exponentially cut-off power law function
 
 .. math::
-    \frac{dN}{dE} = N_0 \left( \frac{E}{E_0} \right)^{\gamma}
+    \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma}
                     \exp \left( \frac{-E}{\tt E_{\rm cut}} \right)
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N_0` = ``Prefactor``
+* :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
 * :math:`E_0` = ``Scale``
 * :math:`E_{\rm cut}` = ``Cutoff``
@@ -174,7 +174,7 @@ The ``GModelSpectralBrokenPlaw`` class implements the broken power law function
 
 .. math::
 
-    \frac{dN}{dE} = N_0 \times \left \{
+    \frac{dN}{dE} = k_0 \times \left \{
     \begin{eqnarray}
       \left( \frac{E}{E_b} \right)^{\gamma_1} & {\rm if\,\,} E < E_b \\
       \left( \frac{E}{E_b} \right)^{\gamma_2} & {\rm otherwise}
@@ -183,7 +183,7 @@ The ``GModelSpectralBrokenPlaw`` class implements the broken power law function
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N_0` = ``Prefactor``
+* :math:`k_0` = ``Prefactor``
 * :math:`\gamma_1` = ``Index1``
 * :math:`\gamma_2` = ``Index2``
 * :math:`E_b` = ``BreakValue``
@@ -198,22 +198,24 @@ The XML format for specifying a broken power law is:
     <parameter name="BreakValue" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
     <parameter name="Index2"     scale="-1"    value="2.70" min="0.01"  max="1000.0" free="1"/>
    </spectrum>
-   
+
+
 Gaussian
 ^^^^^^^^
 
 The ``GModelSpectralGauss`` class implements the gaussian function
 
 .. math::
-    \frac{dN}{dE} = \frac{N_0}{\sqrt{2\pi}\sigma}\exp(\frac{-(E-E_bar)^2}{2 \sigma^2})
+    \frac{dN}{dE} = \frac{N_0}{\sqrt{2\pi}\sigma}
+                    \exp \left( \frac{-(E-\bar{E})^2}{2 \sigma^2} \right)
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N_0` = ``Prefactor``
-* :math:`E_bar` = ``Mean Energy``
-* :math:`sigma` = ``Energy Standard Deviation``
+* :math:`N_0` = ``Normalization``
+* :math:`\bar{E}` = ``Mean``
+* :math:`\sigma` = ``Sigma``
 
-The XML format for specifying a power law is:
+The XML format for specifying a Gaussian is:
 
 .. code-block:: xml
 
@@ -256,11 +258,11 @@ Log parabola
 The ``GModelSpectralLogParabola`` class implements the log parabola function
 
 .. math::
-    \frac{dN}{dE} = N_0 \left( \frac{E}{E_0} \right)^{\gamma+\eta \ln(E/E_0)}
+    \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma+\eta \ln(E/E_0)}
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N_0` = ``Prefactor``
+* :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
 * :math:`\eta` = ``Curvature``
 * :math:`E_0` = ``Scale``
