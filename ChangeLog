@@ -23,6 +23,7 @@
         Put likelihood computation in GObservation class
         Add broken power law spectral model
         Add Gaussian spectral model
+        Update parameter files if necessary
         Rename the following classes:
         - GWcs => GSkyProjection
         - GWcslib => GWcs

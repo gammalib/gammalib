@@ -375,6 +375,11 @@ installed. This allows providing absolute paths for unit testing, a need
 for the special valgrind rule in case that Sonar is used for quality
 checking.
 
+The configuration script now updates any parameter files in the users
+pfiles directory that is older than the system parameter files. This
+corrects for problems that arose when parameter files in the pfiles
+directory did not include all parameters necessary for the latest version.
+
 
 4. Application module
 ---------------------
