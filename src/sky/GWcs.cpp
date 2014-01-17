@@ -425,34 +425,28 @@ void GWcs::write(GFitsHDU& hdu) const
  *
  * @param[in] pixel Pixel index (x,y)
  *
- * Estimate solid angles of pixel by computing the coordinates in the 4 pixel
- * corners. The surface is computed using a cartesian approximation:
- *           a
- *     1-----5-----2                 a+b
- *    /      | h    \    where A = h ---
- *   4-------6-------3                2
- *           b
- * This is a brute force technique that works sufficiently well for non-
- * rotated sky maps. Something more intelligent should be implemented in
- * the future.
+TODO:: UPDATE THIS DOCSTRING (+link to wikipedia)
  ***************************************************************************/
 double GWcs::solidangle(const GSkyPixel& pixel) const
 {
-    // Get the sky directions of the 6 points
+    // Get the sky directions of the 4 points
     GSkyDir dir1 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5));
     GSkyDir dir2 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()-0.5));
     GSkyDir dir3 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5));
     GSkyDir dir4 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5));
-    GSkyDir dir5 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5));
-    GSkyDir dir6 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5));
 
-    // Compute distances between sky directions
-    double a = dir1.dist(dir2);
-    double b = dir3.dist(dir4);
-    double h = dir5.dist(dir6);
+    GVector vec1 = dir1.celvector();
+    GVector vec2 = dir2.celvector();
+    GVector vec3 = dir3.celvector();
+    GVector vec4 = dir4.celvector();
 
-    // Compute solid angle
-    double solidangle = 0.5*(h*(a+b));
+    double angle1 = std::acos(cross(vec2, (cross(vec1, vec2))) * cross(vec2, (cross(vec3, vec2))));
+    double angle2 = std::acos(cross(vec3, (cross(vec2, vec3))) * cross(vec3, (cross(vec4, vec3))));
+    double angle3 = std::acos(cross(vec4, (cross(vec3, vec4))) * cross(vec4, (cross(vec1, vec4))));
+    double angle4 = std::acos(cross(vec1, (cross(vec4, vec1))) * cross(vec1, (cross(vec2, vec1))));
+
+    // http://mathworld.wolfram.com/SphericalPolygon.html
+    double solidangle = (angle1 + angle2 + angle3 + angle4) - (2 * gammalib::pi);
 
     // Return solid angle
     return solidangle;
