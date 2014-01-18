@@ -564,45 +564,31 @@ double GWcs::solidangle(const GSkyPixel& pixel) const
     double a12 = dir1.dist(dir2);
     double a14 = dir1.dist(dir4);
     double a23 = dir2.dist(dir3);
+    double a24 = dir2.dist(dir4);
     double a34 = dir3.dist(dir4);
 
     // Special case: a12 or a14 is zero, then pixel is a triangle composed
     // of [2,3,4]
     if (a12 <= 0.0 || a14 <= 0.0) {
-
-        // Compute diagonals
-        double a24 = dir2.dist(dir4);
-
-        // Triangle [2,3,4]
         double s   = 0.5 * (a23 + a34 + a24);
-        solidangle = std::atan(std::sqrt(std::tan(0.5*s) *
-                                         std::tan(0.5*(s-a23)) *
-                                         std::tan(0.5*(s-a34)) *
-                                         std::tan(0.5*(s-a24))));
-
+        solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                               std::tan(0.5*(s-a23)) *
+                                               std::tan(0.5*(s-a34)) *
+                                               std::tan(0.5*(s-a24))));
     }
 
     // Special case: a23 or a 34 is zero, then pixel is a triangle composed
     // of [1,2,4]
     else if (a23 <= 0.0 || a34 <= 0.0) {
-
-        // Compute diagonals
-        double a24 = dir2.dist(dir4);
-
-        // Triangle [1,2,4]
         double s   = 0.5 * (a12 + a24 + a14);
-        solidangle = std::atan(std::sqrt(std::tan(0.5*s) *
-                                         std::tan(0.5*(s-a12)) *
-                                         std::tan(0.5*(s-a24)) *
-                                         std::tan(0.5*(s-a14))));
-
+        solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                               std::tan(0.5*(s-a12)) *
+                                               std::tan(0.5*(s-a24)) *
+                                               std::tan(0.5*(s-a14))));
     }
 
     // Otherwise we have a polygon
     else {
-
-        // Compute diagonal
-        double a24 = dir2.dist(dir4);
 
         // Triangle 1 [1,2,4]
         double s1      = 0.5 * (a12 + a24 + a14);
