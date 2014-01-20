@@ -37,6 +37,11 @@
 #include "GCTAEventAtom.hpp"
 #include "GCTAObservation.hpp"
 #include "GSkyRegions.hpp"
+#include "GModelSpatial.hpp"
+#include "GModelSpectral.hpp"
+#include "GModelTemporal.hpp"
+#include "GModelSky.hpp"
+#include "GCTAModelBackground.hpp"
 
 
 /***********************************************************************//**
@@ -83,16 +88,15 @@ public:
     std::string           print(const GChatter& chatter = NORMAL) const;
     double                model_on(const GOptimizerPars&     pars,
 										  int                 ibin,
-									      GVector&            mod_grad);
+									      GVector*            mod_grad);
 	double                model_off(const GOptimizerPars&     pars,
 										  int                 ibin,
-									      GVector&            mod_grad);
+									      GVector*            mod_grad);
 	void                  poisson_onoff(const GOptimizerPars& pars,
 											  GMatrixSparse&        covar,
 											  GVector&              gradient,
 											  double&               value,
-											  double&               npred,
-										      GVector&              wrk_grad);
+											  double&               npred);
 
 protected:
     // Protected methods
@@ -273,7 +277,7 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
 * @return alpha parameter.
 ***************************************************************************/
 inline
-const GRmf& GCTAOnOffObservation::alpha(void) const
+const double GCTAOnOffObservation::alpha(void) const
 {
     return m_alpha;
 }
@@ -285,7 +289,7 @@ const GRmf& GCTAOnOffObservation::alpha(void) const
 * @return ON exposure time
 ***************************************************************************/
 inline
-const GRmf& GCTAOnOffObservation::ontime(void) const
+const double GCTAOnOffObservation::ontime(void) const
 {
     return m_ontime;
 }
@@ -297,7 +301,7 @@ const GRmf& GCTAOnOffObservation::ontime(void) const
 * @return OFF exposure time.
 ***************************************************************************/
 inline
-const GRmf& GCTAOnOffObservation::offtime(void) const
+const double GCTAOnOffObservation::offtime(void) const
 {
     return m_offtime;
 }
