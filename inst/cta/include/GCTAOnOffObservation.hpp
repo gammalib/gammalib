@@ -72,12 +72,27 @@ public:
     const GPha&           off_spec(void) const;
     const GArf&           arf(void) const;
     const GRmf&           rmf(void) const;
+	const double          alpha(void) const;
+	const double          ontime(void) const;
+	const double          offtime(void) const;
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
                                            const GEbounds& etrue);
     void                  read(const GXmlElement& xml);
     void                  write(GXmlElement& xml) const;
     std::string           print(const GChatter& chatter = NORMAL) const;
+    double                model_on(const GOptimizerPars&     pars,
+										  int                 ibin,
+									      GVector&            mod_grad);
+	double                model_off(const GOptimizerPars&     pars,
+										  int                 ibin,
+									      GVector&            mod_grad);
+	void                  poisson_onoff(const GOptimizerPars& pars,
+											  GMatrixSparse&        covar,
+											  GVector&              gradient,
+											  double&               value,
+											  double&               npred,
+										      GVector&              wrk_grad);
 
 protected:
     // Protected methods
@@ -88,15 +103,18 @@ protected:
     void compute_rmf(const GCTAObservation& obs, const GEbounds& etrue);
 
     // Protected data members
-    std::string m_name;         //!< Name
-    std::string m_instrument;   //!< Instrument name
-    std::string m_id;           //!< Observation identifier
-    GPha 		m_on_spec;
-    GPha 		m_off_spec;
-    GArf        m_arf;
-    GRmf        m_rmf;
-    GSkyRegions m_on_regions;
-    GSkyRegions m_off_regions;
+    std::string                       m_name;        //!< Name
+    std::string                       m_instrument;  //!< Instrument name
+    std::string                       m_id;          //!< Observation identifier
+    GPha 		                      m_on_spec;     //!< ON counts spectrum
+    GPha 		                      m_off_spec;    //!< OFF counts spectrum 
+    GArf                              m_arf;         //!< Effective area vector
+    GRmf                              m_rmf;         //!< Energy dispersion matrix
+    GSkyRegions                       m_on_regions;  //!< Container of ON region
+    GSkyRegions                       m_off_regions; //!< Container of OFF regions
+	double                            m_alpha;       //!< Ratio of ON/OFF exposure
+	double                            m_ontime;      //!< ON exposure time
+	double                            m_offtime;     //!< OFF exposure time
 };
 
 
@@ -247,5 +265,42 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
 {
     return m_rmf;
 }
+
+
+/***********************************************************************//**
+* @brief Return alpha parameter
+*
+* @return alpha parameter.
+***************************************************************************/
+inline
+const GRmf& GCTAOnOffObservation::alpha(void) const
+{
+    return m_alpha;
+}
+
+
+/***********************************************************************//**
+* @brief Return ON exposure time
+*
+* @return ON exposure time
+***************************************************************************/
+inline
+const GRmf& GCTAOnOffObservation::ontime(void) const
+{
+    return m_ontime;
+}
+
+
+/***********************************************************************//**
+* @brief Return OFF exposure time
+*
+* @return OFF exposure time.
+***************************************************************************/
+inline
+const GRmf& GCTAOnOffObservation::offtime(void) const
+{
+    return m_offtime;
+}
+
 
 #endif /* GCTAONOFFOBSERVATION_HPP */

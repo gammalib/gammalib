@@ -38,6 +38,11 @@
 #define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
 #define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&,"\
                                                                 " GEbounds&)"
+#define G_POISSON_ONOFF  "GCTAOnOffObservation::poisson_onoff(GOptimizerPars&,"\
+															 "GMatrixSparse&,"\
+															 "GVector&,"\
+															 "double&,"\
+															 "double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -471,7 +476,13 @@ void GCTAOnOffObservation::fill(const GCTAObservation& obs)
 		}
         
 	} // endfor: looped over all events
-
+	
+	// Set exposure times and compute alpha parameter 
+	// (default just based on numbers of regions, eventually should include ratio of effective areas)
+	m_ontime=obs.livetime();
+	m_offtime=obs.livetime()*m_off_regions.size();
+	m_alpha=m_ontime/m_offtime;
+	
 	// Return
 	return;
 }
@@ -635,6 +646,485 @@ std::string GCTAOnOffObservation::print(const GChatter& chatter) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************
+ * @brief Evaluate model for sky contribution and fill model gradients
+ *
+ * @param[in] pars Model parameters.
+ * @param[in,out] ibin Energy bin number.
+ * @param[in,out] mod_grad Model gradient array.
+ *
+ * Computes the number of expected gamma events in an ON region for a
+ * given energy bin, and returns it. Also computes the gradients of the
+ * sky model spectral components. The method assumes that 
+ * parameters are stored in the order spatial-spectral-temporal.
+ *
+ ***********************************************************************/
+double GCTAOnOffObservation::model_on(const GOptimizerPars&     pars,
+										    int                 ibin,
+										    GVector&            mod_grad)
+{
+	// Get number of parameters
+	int npars = pars.npars();
+	
+	// Initialize variables (vector has 0.0 values)
+	double ngam=0.0;
+	int ipar=0;
+	if (mod_grad != NULL) delete mod_grad;
+	mod_grad = new GVector(npars);
+	
+	// If bin number is in range
+	if (ibin < m_on_spec.size())  {
+	
+	    // Create pointer to model array
+	    GOptimizerPars* parptr=&pars;
+	    models=dynamic_cast<const GModels*>(parptr);
+	
+	    // Check that parameter array if of type GModels
+	    if (models != NULL) {
+		
+		    // Create time object (empty, just needed in some calls)
+			GTime time;
+			
+			// Get energy bin bounds
+		    const GEnergy emin=m_on_spec.ebounds().emin(ibin);
+		    const GEnergy emax=m_on_spec.ebounds().emax(ibin);
+		    const GEnergy emean=m_on_spec.ebounds().elogmean(ibin);
+				
+		    // Loop over models 
+		    for (int j = 0; j < models->size(); ++j) {
+			
+			    // Pointers to model components
+			    GModel* skyptr=NULL;
+			    GModelSpatial*  spaskyptr=NULL;
+				GModelSpectral* speskyptr=NULL;
+				GModelTemporal* temskyptr=NULL;
+			
+			    // Get model pointer. Continue only if pointer is valid
+			    const GModel* mptr = *models[j];
+			    if (mptr != NULL) {
+				
+				    // Continue only if model applies to specific instrument and observation identifier
+				    if (mptr->isvalid(m_this->instrument(), m_this->id())) {
+					
+					    // If this model component is a sky component
+					    if (dynamic_cast<const GModelSky*>(mptr) != NULL) {
+						
+						
+						    // Increase parameter counter for spatial parameter
+							spaskyptr=mptr->spatial();
+							if (spaskyptr != NULL)  {
+								i_par += spaskyptr->size();
+							}
+						
+						    // Spectral component (the useful one)
+						    speskyptr=mptr->spectral();
+						    
+							// Number of gamma events in model
+						    // (Get flux over energy bin in ph/cm2/s and multiply by effective area and time)
+						    if (speskyptr != NULL)  {
+							    ngam += speskyptr->flux(emin,emax)*m_arf[ibin]*m_ontime;
+						    }
+							
+							// Gradients
+							// Evaluate model at current energy (also fills gradients)
+							double v=spskyptr->eval_gradients(emean,time);
+							// Loop over spectral model parameters
+							for (int k = 0; k < speskyptr->size(); ++k)  {  
+								GModelPar* sppar=speskyptr[k];
+								if (sppar->isfree())  {
+									mod_grad[i_par]=sppar->gradient();
+									i_par++;
+								}
+								
+							} // Looped over parameters of the spectral component of the current model
+							
+							// Increase parameter counter for temporal parameter
+							temskyptr=mptr->temporal();
+							if (temskyptr != NULL)  {
+								i_par += temskyptr->size();
+							}
+						
+					    // ... else model is not of sky type, increase parameter counter and move on
+					    } else {
+						    i_par += mptr->size();
+						    continue;
+					    }
+															
+				    // ... else model does not apply to this obs, increase parameter counter
+				    } else {
+					    i_par += mptr->size();
+				    }
+				
+			    } // Pointer to model component is not NULL
+			
+	        } // Looped over model components		
+		
+	    } // Model container is not empty	
+		
+	} // Bin number is in the range
+	
+	// Exit
+	return ngam;
+
+}
+
+
+/***********************************************************************
+ * @brief Evaluate model for bgd contribution and fill model gradients
+ *
+ * @param[in] pars Model parameters.
+ * @param[in,out] ibin Energy bin number.
+ * @param[in,out] mod_grad Model gradient array.
+ *
+ * Computes the number of expected background events in an OFF region for a
+ * given energy bin, and returns it. Also computes the gradients of the
+ * background model spectral components.  The method assumes that 
+ * parameters are stored in the order spatial-spectral-temporal.
+ *
+ ***********************************************************************/
+double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
+									        int                 ibin,
+									        GVector&            mod_grad)
+{
+	// Get number of parameters
+	int npars = pars.npars();
+	
+	// Initialize variables (vector has 0.0 values)
+	double nbgd=0.0;
+	int ipar=0;
+	if (mod_grad != NULL) delete mod_grad;
+	mod_grad = new GVector(npars);
+	
+	// If bin number is in range
+	if (ibin < m_off_spec.size())  {
+		
+	    // Create pointer to model array
+	    GOptimizerPars* parptr=&pars;
+	    models=dynamic_cast<const GModels*>(parptr);
+		
+	    // Check that parameter array if of type GModels
+	    if (models != NULL) {
+			
+		    // Create time object (empty, just needed in some calls)
+			GTime time;
+			
+			// Get energy bin bounds
+		    const GEnergy emin=m_on_spec.ebounds().emin(ibin);
+		    const GEnergy emax=m_on_spec.ebounds().emax(ibin);
+		    const GEnergy emean=m_on_spec.ebounds().elogmean(ibin);
+			
+		    // Loop over models 
+		    for (int j = 0; j < models->size(); ++j) {
+				
+			    // Pointers to model components
+			    GModel* bgdptr=NULL;
+			    GModelSpatial*  spabgdptr=NULL;
+				GModelSpectral* spebgdptr=NULL;
+				GModelTemporal* tembgdptr=NULL;
+				
+			    // Get model pointer. Continue only if pointer is valid
+			    const GModel* mptr = *models[j];
+			    if (mptr != NULL) {
+					
+				    // Continue only if model applies to specific instrument and observation identifier
+				    if (mptr->isvalid(m_this->instrument(), m_this->id())) {
+						
+					    // If this model component is a sky component
+					    if (dynamic_cast<const GModelSky*>(mptr) != NULL) {
+							
+							
+						    // Increase parameter counter for spatial parameter
+							spabgdptr=mptr->spatial();
+							if (spabgdptr != NULL)  {
+								i_par += spabgdptr->size();
+							}
+							
+						    // Spectral component (the useful one)
+						    spebgdptr=mptr->spectral();
+						    
+							// Number of gamma events in model
+						    // (Get flux over energy bin in ph/cm2/s and multiply by effective area and time)
+						    if (spebgdptr != NULL)  {
+							    nbgd += spebgdptr->flux(emin,emax)*m_offtime;
+						    }
+							
+							// Gradients
+							// Evaluate model at current energy (also fills gradients)
+							double v=spbgdptr->eval_gradients(emean,time);
+							// Loop over spectral model parameters
+							for (int k = 0; k < spebgdptr->size(); ++k)  {  
+								GModelPar* sppar=spebgdptr[k];
+								if (sppar->isfree())  {
+									mod_grad[i_par]=sppar->gradient();
+									i_par++;
+								}
+								
+							} // Looped over parameters of the spectral component of the current model
+							
+							// Increase parameter counter for temporal parameter
+							tembgdptr=mptr->temporal();
+							if (tembgdptr != NULL)  {
+								i_par += tembgdptr->size();
+							}
+							
+							// ... else model is not of sky type, increase parameter counter and move on
+					    } else {
+						    i_par += mptr->size();
+						    continue;
+					    }
+						
+						// ... else model does not apply to this obs, increase parameter counter
+				    } else {
+					    i_par += mptr->size();
+				    }
+					
+			    } // Pointer to model component is not NULL
+				
+	        } // Looped over model components		
+			
+	    } // Model container is not empty	
+		
+	} // Bin number is in the range
+	
+	// Exit
+	return nbgd;
+	
+}
+
+
+/***********************************************************************
+ * @brief Evaluate log-likelihood function for ON-OFF analysis
+ *
+ * @param[in] obs Observation.
+ * @param[in] pars Optimizer parameters.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] value Likelihood value.
+ * @param[in,out] npred Number of predicted events.
+ * @param[in,out] wrk_grad Gradient working array.
+ *
+ * This method computes the log(likelihood) for one observation in the 
+ * case of an ON-OFF analysis. The method loops over energy bins to 
+ * update the function value and its first and second derivatives.
+ * The number of ON and OFF counts Non et Noff are taken from the class 
+ * members. The number of expected gamma and background events are computed 
+ * from the spectral models of the relevant components in the model 
+ * container (spatial and temporal models ignored so far). This is done
+ * in methods model_on() and model_off().
+ *
+ * The covariance matrix includes only terms containing first derivatives.
+ *
+ ***********************************************************************/
+void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
+											   GMatrixSparse&      covar,
+											   GVector&            gradient,
+											   double&             value,
+											   double&             npred)
+{
+    // Timing measurement
+    #if G_EVAL_TIMING
+    clock_t t_start = clock();
+    #endif
+	
+    // Initialise statistics
+    #if G_OPT_DEBUG
+	int    n_bins        = m_on_spec.size();
+    int    n_used        = 0;
+    int    n_small_model = 0;
+    int    n_zero_data   = 0;
+    double sum_data      = 0.0;
+    double sum_model     = 0.0;
+    double init_value    = value;
+	double init_npred    = npred;
+    #endif
+	
+	// Get number of parameters
+	int npars = pars.npars();
+	
+	// Create model gradients array (one for sky parameters, one for background parameters)
+	sky_grad = new GVector(npars);
+	bgd_grad = new GVector(npars);
+	// Working arrays
+	double* values = new double[npars];
+	int*    inx    = new int[npars];
+	
+	// Create time object (empty, just needed in some calls)
+	GTime time;
+	
+	// Create pointer to model array
+	GOptimizerPars* parptr=&pars;
+	models=dynamic_cast<const GModels*>(parptr);
+	
+	// Check that parameter array if of type GModels
+	if (models != NULL) {
+		
+		// Loop over all energy bins
+	  for (int i = 0; i < m_on_spec.size(); ++i) {
+				
+	    // Get energy bin bounds
+		const GEnergy emin=m_on_spec.ebounds().emin(i);
+		const GEnergy emax=m_on_spec.ebounds().emax(i);
+		const GEnergy emean=m_on_spec.ebounds().elogmean(i);
+		  
+		// Number of ON and OFF counts
+		double non=m_on_spec[i];
+		double noff=m_off_spec[i];
+		double ngam=0.0;
+		double nbgd=0.0;
+		double nonpred=0.0;
+			
+		// Get number of gamma and background events (and corresponding spectral model gradients)
+		ngam=model_on(pars,i,sky_grad)
+		nbgd=model_off(pars,i,bgd_grad)
+		  
+		// Skip bin if model is too small (avoids -Inf or NaN gradients)
+		nonpred= ngam+m_alpha*nbgd;
+		if (nbgd <= m_minmod) || (nonpred <= m_minmod) {
+		  #if G_OPT_DEBUG
+		  n_small_model++;
+		  #endif
+		  continue;
+		}
+		  
+		// Now we have all predicted gamma and background events for current energy bin
+		// Update the log(likelihood) and predicted number of events
+		value += -non*log(nonpred)+nonpred-noff*log(nbgd)+nbgd
+		npred += nonpred;
+		  
+		// Update statistics
+		#if G_OPT_DEBUG
+		n_used++;
+		sum_data  += non;
+		sum_model += nonpred;
+		#endif
+		
+	    // Create index array of non-zero derivatives and initialise working array
+		// (just needed in call to update hessian matrix)
+		int ndev = 0;
+		for (int j = 0; j < npars; ++j) {
+		     if ((sky_grad[j] != 0.0  && !gammalib::isinfinite(sky_grad[j])) || 
+				 (bgd_grad[j] != 0.0  && !gammalib::isinfinite(bgd_grad[j])))  {
+				  inx[ndev] = j;
+				  ndev++;
+			 }
+		}
+		  
+		// Fill derivatives
+		double fa=non/nonpred;
+		double fb=fa/nonpred;
+		double fc=m_alpha*fb
+		double fd=fc*m_alpha+noff/nbgd/nbgd;
+		double sky_factor=1.0-fa;
+		double bgd_factor=1.0+m_alpha-m_alpha*fa-noff/nbgd;
+		// Loop over all parameters
+		for (int j = 0; j < npars; ++j) {
+			
+			// If spectral model for sky component is non-zero and non-infinite
+			if (sky_grad[j] != 0.0  && !gammalib::isinfinite(sky_grad[j])) {
+				
+				// Gradient
+				gradient[j] += sky_factor*sky_grad[j];
+				
+				// Hessian (from first-order derivatives only)
+				for (int k = 0; k < npars; ++k) {
+				
+					// If spectral model for sky component is non-zero and non-infinite
+					if (sky_grad[k] != 0.0  && !gammalib::isinfinite(sky_grad[k])) {	
+					    values[k]=sky_grad[j]*sky_grad[k]*fb;
+					
+					// If spectral model for sky component is non-zero and non-infinite
+					} else if (bgd_grad[k] != 0.0  && !gammalib::isinfinite(bgd_grad[k])) {
+						values[k]=sky_grad[j]*bgd_grad[k]*fc;
+						
+					// ...else neither sky nor background
+					} else {
+					    values[k]=0.0;
+					}
+					
+					// Update matrix
+					covar.add_to_column(j, values, inx, ndev);
+					
+				}
+			
+			// If spectral model for sky component is non-zero and non-infinite
+			} else if (bgd_grad[j] != 0.0  && !gammalib::isinfinite(bgd_grad[j])) {
+				
+				// Gradient
+				gradient[j] += bgd_factor*bgd_grad[j];
+				
+				// Hessian (from first-order derivatives only)
+				for (int k = 0; k < npars; ++k) {
+					
+					// If spectral model for sky component is non-zero and non-infinite
+					if (sky_grad[k] != 0.0  && !gammalib::isinfinite(sky_grad[k])) {	
+					    values[k]=bgd_grad[j]*sky_grad[k]*fc;
+						
+						// If spectral model for sky component is non-zero and non-infinite
+					} else if (bgd_grad[k] != 0.0  && !gammalib::isinfinite(bgd_grad[k])) {
+						values[k]=bgd_grad[j]*bgd_grad[k]*fd;
+						
+						// ...else neither sky nor background
+					} else {
+					    values[k]=0.0;
+					}
+					
+					// Update matrix
+					covar.add_to_column(j, values, inx, ndev);
+					
+				}
+			
+			} 
+						
+		} // Looped over all parameters for derivatives computation
+			
+	  } // Looped over energy bins
+		
+	// ... else parameter array is not of type GModel so raise exception	
+	} else {
+		std::string msg ="Expected a model container for the computation of the "
+						 "likelihood in observation "+*this.name()+
+		                 " (ID "+*this.id()+").\n";
+		throw GException::bad_type(G_POISSON_ONOFF,msg);
+	}
+	
+    // Free working array
+    if (values != NULL) delete [] values;
+	if (inx    != NULL) delete [] inx;
+	
+    // Dump statistics
+    #if G_OPT_DEBUG
+    std::cout << "Number of bins: " << n_bins << std::endl;
+    std::cout << "Number of bins used for computation: " << n_used << std::endl;
+    std::cout << "Number of bins excluded due to small model: " << n_small_model << std::endl;
+    std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
+    std::cout << "Sum of data (ON): " << sum_data << std::endl;
+    std::cout << "Sum of model (ON): " << sum_model << std::endl;
+    std::cout << "Initial statistics: " << init_value << std::endl;
+    std::cout << "Delta statistics: " << value-init_value << std::endl;
+    #endif
+	
+    // Optionally dump gradient and covariance matrix
+    #if G_EVAL_DEBUG
+    std::cout << gradient << std::endl;
+    std::cout << covar << std::endl;
+    #endif
+	
+    // Timing measurement
+    #if G_EVAL_TIMING
+    #ifdef _OPENMP
+    double t_elapse = omp_get_wtime()-t_start;
+    #else
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
+    std::cout << "GCTAOnOffObservation::optimizer::poisson_onoff: CPU usage = "
+	          << t_elapse << " sec" << std::endl;
+    #endif
+	
+    // Return
+    return;
 }
 
 

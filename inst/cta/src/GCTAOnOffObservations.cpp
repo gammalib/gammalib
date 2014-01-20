@@ -735,6 +735,27 @@ std::string GCTAOnOffObservations::print(const GChatter& chatter) const
 }
 
 
+/***********************************************************************//**
+ * @brief Optimize model parameters using optimizer
+ *
+ * @param[in] opt Optimizer.
+ *
+ * Optimizes the free parameters of the models by using the optimizer
+ * that has been provided by the @p opt argument.
+ ***************************************************************************/
+void GCTAOnOffObservations::optimize(GOptimizer& opt)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+	
+	// Optimize model parameters
+    opt.optimize(m_fct, pars);
+	
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -749,6 +770,7 @@ void GCTAOnOffObservations::init_members(void)
     // Initialise members
     m_obs.clear();
     m_models.clear();
+	m_fct.set(this);  //!< Makes sure that optimizer points to this instance
 
     // Return
     return;
@@ -765,7 +787,9 @@ void GCTAOnOffObservations::init_members(void)
  ***************************************************************************/
 void GCTAOnOffObservations::copy_members(const GCTAOnOffObservations& obs)
 {
-    // Copy attributes
+    // Copy attributes. WARNING: The member m_fct SHALL not be copied to not
+    // corrupt its m_this pointer which should always point to the proper
+    // observation. See note in init_members().
     m_models = obs.m_models;
 
     // Copy observations

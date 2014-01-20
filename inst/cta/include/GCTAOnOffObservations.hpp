@@ -40,8 +40,15 @@
  *
  * @brief ON/OFF Observation container class
  *
- * This class in a container of GCTAOnOffObservation objects. Still some
- * work to do and things to be clarified...
+ * This class in a container of GCTAOnOffObservation objects.
+ * Similar to a GObservations object, it holds a model container but for the
+ * moment only the spectral part of it will be used. If no spectral model is
+ * provided, the optimization cannot be performed
+ *
+ * The method optimize() performs the optimization of the spectral model
+ * parameters applicable to all observations, together with the level of
+ * background in each observation (which are nuisance parameters).
+ * 
  ***************************************************************************/
 class GCTAOnOffObservations : public GContainer {
 
@@ -79,19 +86,49 @@ public:
 	void                        models(const GModels& models);
     void                        models(const std::string& filename);
     const GModels&              models(void) const;	
-    std::string                 print(const GChatter& chatter = NORMAL) const;	
-    
-	/*
-	// To do
-	Implement fit functions for both cases summed over runs or not ? 
-	Implement significance or have it at ctool level ?
-	Implement flux points computation and fit of a spectral function ?	
-	// Do we want that ? If yes, need to retrieve inline functions from GObservations...
-	double              npred(void) const;	
-	// Left aside at the moment
-	void                          optimize(GOptimizer& opt);
-	 */
-    
+    std::string                 print(const GChatter& chatter = NORMAL) const;
+    void                        optimize(GOptimizer& opt);
+	double                      npred(void) const;
+	
+	// Likelihood function
+    class likelihood : public GOptimizerFunction {
+    public:
+        // Constructors and destructors
+        likelihood(void);
+        likelihood(GCTAOnOffObservation* obs);
+        likelihood(const likelihood& fct);
+        ~likelihood(void);
+		
+        // Operators
+        likelihood& operator=(const likelihood& fct);
+		
+        // Implemented pure virtual base class methods
+        double         value(void);
+        double         npred(void) const;
+        GVector*       gradient(void);
+        GMatrixSparse* curvature(void);
+		
+        // Other methods
+        void set(GCTAOnOffObservations* obs);
+        void eval(const GOptimizerPars& pars);
+		
+    protected:
+        // Protected methods
+        void           init_members(void);
+        void           copy_members(const likelihood& fct);
+        void           free_members(void);
+		
+        // Protected data members
+        double                 m_value;       //!< Function value
+        double                 m_npred;       //!< Total number of predicted events
+        GVector*               m_gradient;    //!< Pointer to gradient vector
+        GMatrixSparse*         m_curvature;   //!< Pointer to curvature matrix
+        GCTAOnOffObservations* m_this;        //!< Pointer to GCTAOnOffObservations object
+    };
+	
+    // Optimizer function access method
+    const GCTAOnOffObservations::likelihood& function(void) const;
+	
 protected:
     // Protected methods
     void init_members(void);
@@ -101,8 +138,9 @@ protected:
                    const std::string& id) const;
 
     // Protected members
-    std::vector<GCTAOnOffObservation*> m_obs;    //!< List of observations
-    GModels                            m_models; //!< List of models
+    std::vector<GCTAOnOffObservation*>  m_obs;    //!< List of observations
+    GModels                             m_models; //!< List of models
+	GCTAOnOffObservations::likelihood   m_fct;    //!< Optimizer function
 };
 
 
@@ -205,5 +243,109 @@ const GModels& GCTAOnOffObservations::models(void) const
 {
     return m_models;
 }
+
+/***********************************************************************//**
+* @brief Return total number of predicted events after model fitting
+*
+* @return Total number of predicted events after model fitting.
+*
+* Returns the total number of events that is predicted by the models after
+* they have been fitted to the data. This number if computed following a
+* call of the optimize() method. If this method has never been called, the
+* npred() method returns 0.
+***************************************************************************/
+inline
+double GCTAOnOffObservations::npred(void) const
+{
+    return (m_fct.npred());
+}
+
+
+/***********************************************************************//**
+* @brief Return likelihood function
+*
+* @return Reference to likelihood function.
+*
+* Returns a reference to the likelihood function.
+***************************************************************************/
+inline
+const GCTAOnOffObservations::likelihood& GCTAOnOffObservations::function(void) const
+{
+    return m_fct;
+}
+
+
+/***********************************************************************//**
+* @brief Return likelihood function value
+*
+* @return Likelihood function value.
+*
+* Returns the actual function value of the likelihood function.
+***************************************************************************/
+inline
+double GCTAOnOffObservations::likelihood::value(void)
+{
+    return m_value;
+}
+
+
+/***********************************************************************//**
+* @brief Return total number of predicted events
+*
+* @return Total number of predicted events.
+*
+* Returns the total number of events that is predicted by the models after
+* they have been fitted to the data.
+***************************************************************************/
+inline
+double GCTAOnOffObservations::likelihood::npred(void) const
+{
+    return m_npred;
+}
+
+
+/***********************************************************************//**
+* @brief Return pointer to gradient vector
+*
+* @return Pointer to gradient vector.
+*
+* Returns a pointer to the parameter gradient vector.
+***************************************************************************/
+inline
+GVector* GCTAOnOffObservations::likelihood::gradient(void)
+{
+    return m_gradient;
+}
+
+
+/***********************************************************************//**
+* @brief Return pointer to curvature matrix
+*
+* @return Pointer to curvature matrix.
+*
+* Returns a pointer to the parameter curvature matrix.
+***************************************************************************/
+inline
+GMatrixSparse* GCTAOnOffObservations::likelihood::curvature(void)
+{
+    return m_curvature;
+}
+
+
+/***********************************************************************//**
+* @brief Set observation container
+*
+* @param[in] obs Pointer to observation container.
+*
+* Sets the pointer to the observation container for which the optimizer
+* class should be used.
+***************************************************************************/
+inline
+void GCTAOnOffObservations::likelihood::set(GCTAOnOffObservations* obs)
+{
+    m_this = obs;
+    return;
+}
+
 
 #endif /* GCTAONOFFOBSERVATIONS_HPP */

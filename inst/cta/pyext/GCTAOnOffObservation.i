@@ -81,11 +81,27 @@ public:
     const GPha&           off_spec(void) const;
     const GArf&           arf(void) const;
     const GRmf&           rmf(void) const;
+	const double          alpha(void) const;
+	const double          ontime(void) const;
+	const double          offtime(void) const;
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
                                            const GEbounds& etrue);
     void                  read(const GXmlElement& xml);
     void                  write(GXmlElement& xml) const;
+    std::string           print(const GChatter& chatter = NORMAL) const;
+    double                model_on(const GOptimizerPars&     pars,
+								   int                 ibin,
+								   GVector&            mod_grad);
+	double                model_off(const GOptimizerPars&     pars,
+									int                 ibin,
+									GVector&            mod_grad);
+	void                  poisson_onoff(const GOptimizerPars& pars,
+										GMatrixSparse&        covar,
+										GVector&              gradient,
+										double&               value,
+										double&               npred,
+										GVector&              wrk_grad);
 };
 
 

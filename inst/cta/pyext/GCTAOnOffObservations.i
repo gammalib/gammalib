@@ -43,27 +43,61 @@ public:
     virtual ~GCTAOnOffObservations(void);
 
     // Methods
-    void                   clear(void);
-    GCTAOnOffObservations* clone(void) const;
-    GCTAOnOffObservation*  at(const int& index);
-    int                    size(void) const;
-    bool                   is_empty(void) const;
-    GCTAOnOffObservation*  set(const int& index, const GCTAOnOffObservation& obs);
-    GCTAOnOffObservation*  append(const GCTAOnOffObservation& obs);
-    GCTAOnOffObservation*  insert(const int& index, const GCTAOnOffObservation& obs);
-    void                   remove(const int& index);
-    void                   reserve(const int& num);
-    void                   extend(const GCTAOnOffObservations& obs);
-    bool                   contains(const std::string& instrument,
-                                    const std::string& id) const;
-	void                   load(const std::string& filename);
-    void                   save(const std::string& filename) const;
-    void                   read(const GXml& xml);
-    void                   write(GXml& xml) const;
-	void                   models(const GModels& models);
-    void                   models(const std::string& filename);
-    const GModels&         models(void) const;	
+    void                        clear(void);
+    GCTAOnOffObservations*      clone(void) const;
+    GCTAOnOffObservation*       at(const int& index);
+    const GCTAOnOffObservation* at(const int& index) const;
+    int                         size(void) const;
+    bool                        is_empty(void) const;
+    GCTAOnOffObservation*       set(const int& index, const GCTAOnOffObservation& obs);
+    GCTAOnOffObservation*       append(const GCTAOnOffObservation& obs);
+    GCTAOnOffObservation*       insert(const int& index, const GCTAOnOffObservation& obs);
+    void                        remove(const int& index);
+    void                        reserve(const int& num);
+    void                        extend(const GCTAOnOffObservations& obs);
+    bool                        contains(const std::string& instrument,
+                                         const std::string& id) const;
+	void                        load(const std::string& filename);
+    void                        save(const std::string& filename) const;
+    void                        read(const GXml& xml);
+    void                        write(GXml& xml) const;
+	void                        models(const GModels& models);
+    void                        models(const std::string& filename);
+    const GModels&              models(void) const;	
+    std::string                 print(const GChatter& chatter = NORMAL) const;
+    void                        optimize(GOptimizer& opt);
+	double                      npred(void) const;
+	
+	// Optimizer function access method
+    const GCTAOnOffObservations::likelihood& function(void) const;
+	
 };
+
+// Likelihood function
+class likelihood : public GOptimizerFunction {
+public:
+    // Constructors and destructors
+    likelihood(void);
+    likelihood(GCTAOnOffObservations* obs);
+    likelihood(const likelihood& fct);
+    ~likelihood(void);
+	
+    // Implemented pure virtual base class methods
+    double         value(void);
+    double         npred(void) const;
+    GVector*       gradient(void);
+    GMatrixSparse* curvature(void);
+	
+    // Other methods
+    void set(GCTAOnOffObservations* obs);
+    void eval(const GOptimizerPars& pars);
+};
+%nestedworkaround GCTAOnOffObservations::likelihood;
+%{
+	// SWIG thinks that likelihood is a global class, so we need to trick the C++
+	// compiler into understanding this so called global type.
+	typedef GCTAOnOffObservations::likelihood likelihood;
+	%}
 
 
 /***********************************************************************//**
@@ -86,9 +120,6 @@ public:
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
-    }
-    int __len__() {
-        return (self->size());
     }
     GCTAOnOffObservations copy() {
         return (*self);
