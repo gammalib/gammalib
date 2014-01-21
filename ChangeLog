@@ -1,3 +1,12 @@
+2014-01-21  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+        
+        * Bug fix Version 0.7.1 released
+        ================================
+        
+        Added missing hyphens in pfiles synchronisation section (#1091)
+        GCTAModelBackground writes out run ids in XML file (#1092)
+
+
 2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
