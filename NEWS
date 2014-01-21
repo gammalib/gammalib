@@ -23,6 +23,9 @@ the user and system parameter files. This led to an error message on the
 console, but did not impact the proper configuration. Hyphens have now
 been added as needed.
 
+The configuration test script testconf.sh has been added to allow testing
+configuration script during continous integration.
+
 
 4. Application module
 ---------------------
