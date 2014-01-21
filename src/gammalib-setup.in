@@ -171,7 +171,8 @@ fi
 # Set MANPATH
 # ===========
 if [ "x$MANPATH" = x ]; then
-  MANPATH="$man_dir:$(manpath)"
+  manpath=${manpath:-}
+  MANPATH="$man_dir:${manpath}"
 else
   MANPATH=`echo ":$MANPATH:" | \
     sed "s%:$man_dir:%:%g" | sed "s%::*$%%"`

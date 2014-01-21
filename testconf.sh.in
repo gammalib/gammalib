@@ -1,0 +1,62 @@
+#!/bin/sh
+# =====================================================================
+# Test GammaLib configuration script (used for continuous integration;
+# assumes that GammaLib has been installed)
+#
+# Copyright (C) 2014 Juergen Knoedlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# =====================================================================
+#
+# Exit on any error
+# =================
+set -e
+
+#
+# Set fixed parameters
+# ====================
+test_dir="home"
+
+#
+# Set parameters
+# ==============
+prefix="@prefix@"
+
+#
+# Save current working directory
+# ==============================
+base=$PWD
+
+#
+# Create test directory
+# =====================
+@MKDIR_P@ "$test_dir"
+cd "$test_dir"
+
+#
+# Configure GammaLib
+# ==================
+export GAMMALIB="$prefix"
+. $GAMMALIB/bin/gammalib-init.sh > config.log 2>&1
+output=`cat config.log`
+if [ "x$output" != x ]; then
+  echo "*** Configuration script was not silent ***"
+  echo "$output"
+  exit 1
+fi
+
+#
+# Signal completion
+# =================
+echo "Configuration test successful."
