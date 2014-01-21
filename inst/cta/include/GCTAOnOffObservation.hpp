@@ -92,12 +92,12 @@ public:
 	double                model_off(const GOptimizerPars&     pars,
 										  int                 ibin,
 									      GVector*            mod_grad);
-	void                  poisson_onoff(const GOptimizerPars& pars,
-											  GMatrixSparse&        covar,
-											  GVector&              gradient,
-											  double&               value,
-											  double&               npred);
-
+	double                likelihood_poisson_onoff(const GOptimizerPars& pars,
+											             GMatrixSparse*  covar,
+											             GVector*        gradient,
+											             double&         value,
+											             double&         npred);
+	
 protected:
     // Protected methods
     void init_members(void);

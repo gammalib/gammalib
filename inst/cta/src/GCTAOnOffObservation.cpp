@@ -905,7 +905,7 @@ double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
  *
  * @param[in] obs Observation.
  * @param[in] pars Optimizer parameters.
- * @param[in,out] covar Covariance matrix.
+ * @param[in,out] curvature Curvature matrix.
  * @param[in,out] gradient Gradient.
  * @param[in,out] value Likelihood value.
  * @param[in,out] npred Number of predicted events.
@@ -919,14 +919,14 @@ double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
  * container (spatial and temporal models ignored so far). This is done
  * in methods model_on() and model_off().
  *
- * The covariance matrix includes only terms containing first derivatives.
+ * The curvature matrix includes only terms containing first derivatives.
  *
  ***********************************************************************/
-void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
-											   GMatrixSparse&      covar,
-											   GVector&            gradient,
-											   double&             value,
-											   double&             npred)
+double GCTAOnOffObservation::likelihood_poisson_onoff(const GOptimizerPars&     pars,
+											                GMatrixSparse*      curvature,
+											                GVector*            gradient,
+											                double&             value,
+											                double&             npred)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -1030,7 +1030,7 @@ void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
 			if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
 				
 				// Gradient
-				gradient[j] += sky_factor*sky_grad[j];
+				(*gradient)[j] += sky_factor*sky_grad[j];
 				
 				// Hessian (from first-order derivatives only)
 				for (int k = 0; k < npars; ++k) {
@@ -1049,7 +1049,7 @@ void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
 					}
 					
 					// Update matrix
-					covar.add_to_column(j, values, inx, ndev);
+					curvature->add_to_column(j, values, inx, ndev);
 					
 				}
 			
@@ -1057,7 +1057,7 @@ void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
 			} else if (bgd_grad[j] != 0.0  && !gammalib::is_infinite(bgd_grad[j])) {
 				
 				// Gradient
-				gradient[j] += bgd_factor*bgd_grad[j];
+				(*gradient)[j] += bgd_factor*bgd_grad[j];
 				
 				// Hessian (from first-order derivatives only)
 				for (int k = 0; k < npars; ++k) {
@@ -1076,7 +1076,7 @@ void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
 					}
 					
 					// Update matrix
-					covar.add_to_column(j, values, inx, ndev);
+					curvature->add_to_column(j, values, inx, ndev);
 					
 				}
 			
@@ -1110,10 +1110,10 @@ void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
     std::cout << "Delta statistics: " << value-init_value << std::endl;
     #endif
 	
-    // Optionally dump gradient and covariance matrix
+    // Optionally dump gradient and curvature matrix
     #if G_EVAL_DEBUG
-    std::cout << gradient << std::endl;
-    std::cout << covar << std::endl;
+    std::cout << *gradient << std::endl;
+    std::cout << *curvature << std::endl;
     #endif
 	
     // Timing measurement
@@ -1128,7 +1128,7 @@ void GCTAOnOffObservation::poisson_onoff(const GOptimizerPars&     pars,
     #endif
 	
     // Return
-    return;
+    return value;
 }
 
 

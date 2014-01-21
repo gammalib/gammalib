@@ -92,16 +92,15 @@ public:
     std::string           print(const GChatter& chatter = NORMAL) const;
     double                model_on(const GOptimizerPars&     pars,
 								   int                 ibin,
-								   GVector&            mod_grad);
+								   GVector*            mod_grad);
 	double                model_off(const GOptimizerPars&     pars,
 									int                 ibin,
-									GVector&            mod_grad);
-	void                  poisson_onoff(const GOptimizerPars& pars,
-										GMatrixSparse&        covar,
-										GVector&              gradient,
-										double&               value,
-										double&               npred,
-										GVector&              wrk_grad);
+									GVector*            mod_grad);
+	void                  likelihood_poisson_onoff(const GOptimizerPars& pars,
+												   GMatrixSparse*  covar,
+												   GVector*        gradient,
+												   double&         value,
+												   double&         npred);
 };
 
 

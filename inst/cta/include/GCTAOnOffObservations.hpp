@@ -32,6 +32,8 @@
 #include <vector>
 #include "GContainer.hpp"
 #include "GCTAOnOffObservation.hpp"
+#include "GOptimizer.hpp"
+#include "GOptimizerFunction.hpp"
 #include "GModels.hpp"
 
 
@@ -95,7 +97,7 @@ public:
     public:
         // Constructors and destructors
         likelihood(void);
-        likelihood(GCTAOnOffObservation* obs);
+        likelihood(GCTAOnOffObservations* obs);
         likelihood(const likelihood& fct);
         ~likelihood(void);
 		
