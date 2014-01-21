@@ -80,11 +80,10 @@ if [ -d $prefix/syspfiles/. ]; then
   do
     parfile=`basename $filename`
     sys_parfile=$prefix/syspfiles/$parfile
-    if [ -e $sys_parfile ]
-    then
-      if test $sys_parfile -nt $filename
+    if [ -e "$sys_parfile" ]; then
+      if test "$sys_parfile" -nt "$filename"
       then
-        cp -f $sys_parfile $filename
+        cp -f "$sys_parfile" "$filename"
       fi
     fi
   done
