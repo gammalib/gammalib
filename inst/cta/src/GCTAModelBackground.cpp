@@ -846,6 +846,7 @@ void GCTAModelBackground::write(GXmlElement& xml) const
     // Set model type, name and optionally instruments
     src->attribute("name", name());
     src->attribute("type", type());
+    src->attribute("ids",ids());
     if (instruments().length() > 0) {
         src->attribute("instrument", instruments());
     }
