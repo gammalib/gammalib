@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.cpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -714,6 +714,7 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
         if (radial()   != NULL) src->append(GXmlElement("radialModel"));
+        //if (temporal() != NULL) src->append(GXmlElement("temporalModel"));
     }
 
     // Set model type, name and optionally instruments
@@ -721,6 +722,10 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
     src->attribute("type", type());
     if (instruments().length() > 0) {
         src->attribute("instrument", instruments());
+    }
+    std::string identifiers = ids();
+    if (identifiers.length() > 0) {
+        src->attribute("id", identifiers);
     }
 
     // Write spectral model
@@ -736,12 +741,14 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
     }
 
     // Write temporal model
+    /*
     if (temporal()) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
             GXmlElement* temp = src->element("lightcurve", 0);
             temporal()->write(*temp);
         }
     }
+    */
 
     // Return
     return;

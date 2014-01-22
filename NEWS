@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-21 January 2014
+22 January 2014
 
 
 1. Introduction
@@ -49,7 +49,8 @@ None
 
 8. Model module
 ---------------
-None
+The GModelSky class now writes the id attribute to the XML file in case
+that identifiers are specified.
 
 
 9. Numerics module
@@ -109,7 +110,10 @@ None
 
 20. CTA interface
 -----------------
-None
+The GCTAModelBackground and GCTAModelRadialAcceptance classes now write
+the id attribute to the XML file in case that identifiers are specified.
+Furthermore, GCTAModelRadialAcceptance no longer write the temporal
+model component.
 
 
 21. COMPTEL interface
