@@ -1,3 +1,13 @@
+2014-01-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+        
+        * Bug fix Version 0.8.1 released
+        ================================
+        
+        Added missing hyphens in pfiles synchronisation section (#1091)
+        Add configuration test script (#1091)
+        GModelSky, GCTAModelBackground and GCTAModelRadialAcceptance write
+            id attribute into XML file (#1092)
+
 2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released

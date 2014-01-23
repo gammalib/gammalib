@@ -70,6 +70,7 @@ test-driver
 src/gammalib-setup
 src/template/test_GClass
 doc/Doxyfile.bak
+testconf.sh
 
 test/test_url.dat
 test/*.xml

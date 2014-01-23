@@ -27,4 +27,3 @@ Glossary
 
    Dynamic programming language that is used in a wide variety of
    application domains.
-

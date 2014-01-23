@@ -33,6 +33,7 @@ AC_INIT([gammalib], [0.8.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects])
+#AM_INIT_AUTOMAKE([gnu no-dependencies subdir-objects])
 AC_CONFIG_HEADER([config.h])
 
 
@@ -1277,7 +1278,10 @@ AC_CONFIG_FILES([Makefile
                  test/Makefile
                  pyext/Makefile
                  pyext/setup.py
-                 gammalib.pc])
+                 gammalib.pc
+                 testconf.sh],
+                [if test -f testconf.sh; then chmod +x testconf.sh; fi])
+
 if test "x$with_inst" = "xyes"; then
   AC_CONFIG_FILES([inst/Makefile])
 fi

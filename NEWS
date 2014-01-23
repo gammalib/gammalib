@@ -1,8 +1,8 @@
-vNew Features and Important Changes in GammaLib 00-08-00
+New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-18 January 2014
+22 January 2014
 
 
 1. Introduction
@@ -13,605 +13,84 @@ changes made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-This section summarizes all modifications of public class interfaces
-that will lead to compatibility issues with respect to the last
-GammaLib release.
-
-General
-  All methods start with is..., has..., etc. have been renamed
-  to is_..., has_..., etc. For example, isempty() now becomes
-  is_empty().
-
-GApplicationPar
-  The GPar class has been renamed to GApplicationPar.
-
-GApplicationPars
-  The GPars class has been renamed to GApplicationPars. The class
-  now derives from GContainer and implements the usual at(), size(), 
-  is_empty(), append(), insert(), remove(), reserve() and extent() 
-  methods. The haspar() method has been renamed to contains() for 
-  consistency.
-
-GApplications
-  The par_filename() and log_filename() methods return a const
-  reference string as the filenames are stored explicitly by the
-  class.
-
-GBase
-  The print() method now takes an optional argument of type GChatter
-  that controls the chattiness of the object printing. The default
-  chattiness is set to NORMAL.
-
-GEbounds
-  The setlin() and setlog() methods have been renamed to set_lin() and
-  set_log(). The number arguments in these methods has been moved
-  from the last position to the first position in the argument list.
-  The emin(), emax(), emean() and elogmean() methods now take a const
-  integer reference as argument instead of an integer value. The read()
-  and write() methods now use FITS references instead of pointers. The
-  clobber argument in the save() method is passed as const reference.
-
-GEvents
-GEventList
-  The clobber argument of the save() method is now passed as const
-  reference.
-
-GEventCube
-  The clobber argument of the save() method and the axis argument of the
-  naxis() method are now passed as const references.
-
-GFits
-  The GFits class now derives from GContainer and implements all generic
-  container class methods (at(), size(), is_empty(), set(), append(),
-  insert(), remove(), reserve(), extend()). The hashdu() method has
-  been renamed to contains() for compliance with other container classes.
-  The hdu() methods have been renamed to at(), also for compliance.
-  Boolean arguments are now passed as const references, and members are
-  returned as const references. HDU access operators[] have been
-  implemented to access FITS extensions without range checking.
-
-GFitsAsciiTable
-GFitsBinTable
-  The table constructors now take a const reference as argument.
-
-GFitsHDU
-  The card() methods now return a reference instead of a pointer.
-
-GFitsHeader
-  The GFitsHeader class now derives from GContainer and implements all
-  generic container class methods (at(), size(), is_empty(), append(),
-  insert(), remove(), reserve(), extend()). The hascard() methods have
-  been renamed to contains() for compliance with other container classes.
-  The card() methods have been renamed to at(), also for compliance.
-  The card access operators and methods now return the cards by
-  reference. Card access operators[] have been implemented to access
-  header cards without range checking.
-
-GFitsImage
-  All constructors and methods now take const references as arguments.
-  The size(), bitpix(), naxis() and anynul() methods return const
-  references, nulval() returns a const pointer.
-
-GFitsImageByte
-GFitsImageDouble
-GFitsImageFloat
-GFitsImageLong
-GFitsImageLongLong
-GFitsImageSByte
-GFitsImageShort
-GFitsImageULong
-GFitsImageUShort
-  All constructors now take const references as arguments.
-
-GFitsTable
-  The column table operator[] now returns a pointer instead of a
-  reference. Set set() method has been added for column setting.
-  The append_column() and insert_column() methods have been  
-  renamed to append() and insert(). The hascolumn() method has
-  been renamed to contains().
-
-GFunction
-  The eval() method now takes a const reference to a double precisio
-  value as argument.
-
-GGti
-  The read() and write() methods now use references instead of
-  pointers. The clobber argument in the save() method is passed
-  as const reference.
-
-GMatrixBase
-GMatrix
-GMatrixSparse (formerly GSparseMatrix)
-GMatrixSymmetric (formerly GSymMatrix)
-  Renamed cols() method to columns(), renamed insert_row() and
-  extract_row() to row(), renamed insert_col() and extract_col()
-  to column(), renamed add_col() to add_to_column(), reorder
-  arguments of GMatrixSparse::column() and GMatrixSparse::add_to_column()
-  methods.
-  The transpose(), inverse() and abs() inplace transformation methods have
-  been replaced by methods that return a matrix. The transpose(),
-  inverse(), abs(), and negate() friend functions have been removed.
-
-GModelPar
-  The "real_" prefix has been stripped from the methods operating on
-  true attributes, and the methods operating on unscaled attributes
-  have been prefixed with "factor_". Some missing methods have been
-  added. The name() and unit() methods now returns a const reference.
-
-GModelSky
-  The value() and gradient() methods now take an object of type GPhoton
-  as argument.
-
-GModelSpatial
-GModelSpatialPointSource
-GModelSpatialRadial
-GModelSpatialRadialDisk
-GModelSpatialRadialGauss
-GModelSpatialRadialShell
-GModelSpatialDiffuse
-GModelSpatialDiffuseConst
-GModelSpatialDiffuseCube
-GModelSpatialDiffuseMap
-GModelSpatialElliptical
-GModelSpatialEllipticalDisk
-  The eval() and eval_gradients() methods now take an object of type
-  GPhoton as argument. The eval_gradients() method is no longer declared
-  as const. The mc() method now also takes a GEnergy and a GTime
-  object as arguments.
-
-GModelSpectral
-GModelSpectralConst
-GModelSpectralExpPlaw
-GModelSpectralFunc
-GModelSpectralPlaw
-GModelSpectralPlaw2
-GModelSpectralNodes
-GModelSpectralLogParabola
-  The eval() and eval_gradients() methods now take a GEnergy and a GTime
-  object as arguments. The eval_gradients() method is no longer declared
-  as const. The mc() method now also takes also a GTime object as argument.
-
-GModelTemporal
-GModelTemporalConst
-  The eval_gradients() method is no longer declared as const.
-
-GModels
-  The set() method has been added for model setting.
-
-GNodeArray
-  The node array class now derives from GContainer, and all usual container
-  methods have been implemented.
-
-GObservation
-  The events() set method now takes a const reference instead of a const
-  pointer as argument. The response() method now returns a const
-  reference.
-
-GObservations
-  The observation is now passed as const reference in the append()
-  method (was non-const before). The observation iterator has been
-  removed from the class. The reference returned by the models() method
-  is now declared const. The operator[] now return a pointer instead
-  of a reference and the set() method has been added for observation
-  setting.
-
-GOptimizerFunction
-  The value method now returns a value instead of a pointer. The
-  covar() method has been renamed to curvature() as this is not
-  the covariance but the curvature matrix.
-
-GOptimizer & GOptimizerLM
-  The optimization operators have been removed and replaced by the
-  optimize method.
-
-GPhoton
-  Add mcid argument to Photon constructor (defaults to -1).
-
-GPointing
-  Remove the class as no abstract pointing interface is needed
-  so far.
-
-GSkymap
-  Rename xy2dir() to pix2dir(), dir2xy() to dir2pix(), xy2pix() to
-  pix2inx() and pix2xy() to inx2pix(). The nmaps argument in the
-  sky map constructor is now passed by reference. The isinmap()
-  method has been renamed to contains(). The read() and write()
-  methods now take a reference instead of a pointer.
-
-GSkyPixel
-  The class now supports 1D and 2D pixels. Type conversion methods
-  have been added that allow assigning integer and double precision
-  values from and to GSkyPixel for 1D pixels. A size() method has
-  been added that returns the pixel dimension. Also the is_1D() and
-  is_2D() methods can be used to determine whether a pixel is 1D
-  or 2D. index() methods have been added to set and get 1D pixel
-  values. A xy() method has been added to set x and y simultaneously
-  for 2D pixels. 1D and 2D pixel constructors exist now for
-  integer and double precision values.
-
-GTestCase
-  The passed() method has been renamed to has_passed().
-  The name(), message(), type(), kind(), has_passed() and
-  duration() methods now all return a const reference.
-
-GTestSuite
-  The GTestSuite class now derives from GBase. This implies that
-  the clone() method needs to be implemented for derived classes.
-  The test_assert() method now takes a const reference for the
-  boolean argument. The name(), errors(), failures(), and
-  timestamp() methods return const references. The obsolete
-  add_test() method has been removed.
-
-GTestSuites
-  The GTestSuites class now derives from GContainer and implements
-  the usual container class methods (at(), size(), is_empty(),
-  set(), append(), insert(), remove(), reserve() and extend()).
-  The operator[] now returns pointers to GTestSuite. The name()
-  and timestamp() methods now return const references.
-
-GTime
-  The secs() method now returns a const reference.
-
-GTimeReference
-  The load constructor and the read() and write() methods take
-  a const reference instead of a pointer.
-
-GWcs => GSkyProjection
-  The GWcs class has been renamed to GSkyProjection as it is more
-  general than the World Coordinate Systems. A size() method has
-  been added that returns the dimension of the projection (1D or
-  2D). The integer index methods have been removed as GSkyPixel
-  now supports 1D and 2D pixels. The read() and write() methods
-  now take a reference instead of a pointer. The omega() method
-  has been renamed to solidangle().
-
-GWcslib => GWcs
-  The GWcslib class has been renamed to GWcs. The class now conforms
-  to the GSkyProjection base class interface. The read() and write()
-  methods now take a reference instead of a pointer. The omega()
-  method has been renamed to solidangle().
-
-GWcsHPX => GHealpix
-  The GWcsHPX class has been renamed to GHealpix as the Healpix
-  projection is not a World Coordinate System. GHealpix is no
-  longer registered in GWcsRegistry. The read() and write()
-  methods now take a reference instead of a pointer. The
-  omega() method has been renamed to solidangle().
-
-GWcsRegistry
-  Now holds objects of renamed type GWcs (see GHealpix).
-
-GCTAAeff2D
-  The read() method now takes a reference instead of a pointer.
-
-GCTAAeffArf
-  Rename read_arf() to read(). read() now takes a reference as
-  argument instead of a pointer.
-
-GCTAObservation
-  caldb argument to response() method now passed as const reference.
-
-GLATAeff
-  read() method now take a const reference instead of a pointer.
-  The clobber argument for the save() method is now a const
-  reference.
-
-GLATEdisp
-GLATPsf
-GLATLtCube
-  The clobber argument for the save() method is now a const
-  reference.
-
-GLATPsfBase
-  read() and read_scale() now take const reference instead of
-  pointers as arguments. costhetamin(), front(), scale_par1(),
-  scale_par2() and scale_index() now return const references.
-
-GLATPsfV1
-GLATPsfV3
-  read() now takes a const reference instead of a pointer as
-  argument.
-
-GLATLtCubeMap
-  read() and write() methods now take a const reference instead of a
-  pointer. ncostheta(), nphi() and costhetamin() now return const
-  references.
-
-GLATMeanPsf
-  offset(), energy(), dir(), name() and thetamax() now return const
-  references.
-
-GLATResponse
-  caldb(), rspname() and force_mean() now return const references.
-
-GLATResponseTable
-  read() and write() methods now take a const reference instead of a
-  pointer. nenergies() and ncostheta() return const references.
-
-GCOMPointing
-GLATPointing
-  Remove class (is now obsolete as no GPointing base class exists
-  anymore).
-
-GLATObservation
-  ltcube() method now returns a const pointer and response() method
-  takes a const reference as caldb argument.
-
-GLATEventBin
-  cube() now returns a const pointer.
-
-GLATEventCube
-  enodes() method is now declared const.
-
-GCOMEventBin
-GLATEventBin
-  Renamed omega() to solidangle().
-
-GCOMResponse
-  Renamed read_iaq() method to read(). The read() method now takes
-  a const reference as argument.
-
-GMWLDatum
-  energy_err(), flux(), and flux_err() methods now return const
-  references.
-
-GMWLObservation
-  filename(), extno() and extname() methods now return const
-  references.
-
-GMWLSpectrum
-  telescope() and instrument() methods now return const references.
-
-All GammaLib constants, defined in GTools.hpp, and functions are now
-put in the gammalib namespace to avoid name clashes. Mathematical
-constants and functions have been moved to a new model named GMath.
+None
 
 
 3. Configuration
 -----------------
-Added the environment variable PACKAGE_SOURCE that is also available in
-config.h and that points to the source directory from which GammaLib is
-installed. This allows providing absolute paths for unit testing, a need
-for the special valgrind rule in case that Sonar is used for quality
-checking.
+Some hyphens were missing in the configuration script when synchronising
+the user and system parameter files. This led to an error message on the
+console, but did not impact the proper configuration. Hyphens have now
+been added as needed.
 
-The configuration script now updates any parameter files in the users
-pfiles directory that is older than the system parameter files. This
-corrects for problems that arose when parameter files in the pfiles
-directory did not include all parameters necessary for the latest version.
+The configuration test script testconf.sh has been added to allow testing
+configuration script during continous integration.
 
 
 4. Application module
 ---------------------
-The GApplication class now stores explicitly the log and parameter file
-names. The log filename can be changed by specifying the "logfile"
-parameter of file type in the parameter file. If not specified, the
-application name suffixed with ".log" will be used as log filename.
+None
 
 
 5. Base module
 --------------
-The GContainer interface class has been added to provide a common base
-class for all container classes. The following classes are now derived
-from GContainer:
-- GCTAOnOffObservations
-- GEbounds
-- GEnergies
-- GGti
-- GFits
-- GFitsHeader
-- GObservations
-- GOptimizerPars (and hence GModels)
-- GPars
-- GPhotons
-- GSkyRegions
-- GTimes
-- GTestSuites
-- GXml
-- GXmlNode
-
-Appropriate methods have been implemented in these classes to handle
-containers. They are not detailed here.
-
-Add smart pointer template class GRegistryPointer to the GRegistry header
-file that avoids memory leaks on exit of GammaLib.
+None
 
 
 6. FITS I/O Interface
 ---------------------
-Variable-length columns are now supported by the FITS table classes.
-
-The GFits class is now organised as a container class, and HDU
-manipulations including setting, appending, inserting, removing
-or extending FITS extensions are now fully supported.
+None
 
 
 7. Linear algebra module
 ------------------------
-The matrix classes have be renamed as follows:
-GMatrixBase
- |
- +-- GMatrix - generic matrix handling
- +-- GMatrixSparse - sparse matrix handling
- +-- GMatrixSymmetric - symmetric matrix handling
-
-The access operator does not provide argument checking anymore, at()
-methods have been added for matrix element access including argument
-checking.
-
-A value assignment operator has been added to assign a specific value
-to all matrix arguments.
+None
 
 
 8. Model module
 ---------------
-The sky models have been reorganized.
-
-GSkyModel is now the general class for a sky model. It is no longer
-abstract. The classes GModelPointSource, GModelExtendedSource and
-GModelDiffuseSource have been removed, as the source type is fully
-determined from the spatial model component.
-
-All spatial model components have now been categorized into 3 classes:
-
-* GModelSpatialPointSource - point source
-* GModelSpatialRadial - extended radial models
-* GModelSpatialElliptical - extended elliptical models
-* GModelSpatialDiffuse - diffuse models
-
-While GModelSpatialPointSource is a normal class, the other 2 classes
-are abstract and serve as the base classes for the various model
-implementations. The following implementations exist:
-
-GModelSpatialRadial
- |
- +- GModelSpatialRadialDisk - axisymmetric disk
- +- GModelSpatialRadialGauss - axisymmetric Gaussian
- +- GModelSpatialRadialShell - axisymmetric shell
-
-GModelSpatialElliptical
- |
- +- GModelSpatialEllipticalDisk - elliptical disk
-
-GModelSpatialDiffuse
- |
- +- GModelSpatialDiffuseConst - isotropic map
- +- GModelSpatialDiffuseCube - map cube
- +- GModelSpatialDiffuseMap - spatial map
-
-The GModelSpatialDiffuseCube class now reads an optional ENERGIES
-extension so that the energy values for maps in the cube are
-available.
-
-Model registries now use static functions instead of static members
-for registry information handling. This circumvents the ill defined
-initialization problem of static variables and allow using of the
-GRegistryPointer smart pointer, removing memory leaks on exit of
-GammaLib.
-
-The GModels class no longer derives from GOptimizerPars, but now is
-a full-blown container deriving from GContainer. The pars() method
-has been added that returns an optimizer parameter container that
-holds all model parameters in a plain array.
-
-The GModelPar class now derives from GOptimizerPar. For the moment,
-the only methods that GModelPar implements with respect to
-GOptimizerPar are the XML read() and write() methods.
-
-A broken power law spectral model has been implemented by the
-GModelSpectralBrokenPlaw class.
-
-A Gaussian spectral model has been implemented by the GModelSpectralGauss
-class.
+The GModelSky class now writes the id attribute to the XML file in case
+that identifiers are specified.
 
 
 9. Numerics module
 ------------------
-The GNumerics file was renamed to GMath, and mathematical functions
-from GTools and GWcslib have been moved into this file.
+None
 
 
 10. Observation module
 ----------------------
-Add energy constructor to GEnergy that allows one-line construction of
-an object by specifying an energy value and unit. Possible unit strings
-are erg(s), keV, MeV, GeV, and TeV (case insensitive).
-
-Observation registries now use static functions instead of static members
-for registry information handling. This circumvents the ill defined
-initialization problem of static variables and allow using of the
-GRegistryPointer smart pointer, removing memory leaks on exit of
-GammaLib.
-
-An energies container class GEnergies has been added to hold GEnergy
-objects.
-
-The likelihood computation is now performed in the GObservation class.
-This allows for an observation dependent definition of the likelihood
-function. For this purpose, the virtual likelihood() method has been
-added to GObservation.
+None
 
 
 11. Optimization module
 -----------------------
-Introduce the GOptimizerPar class to represent a general parameter of
-the optimizer function. The class was essentially copied from GModelPar.
-GModelPar now derives from this class.
-
-The GOptimizerPars is now a full blown container class that holds
-GOptimizerPar objects.
+None
 
 
 12. Sky module
 --------------
-Add a sin() and cos() pre computation cache to speed up repeated
-distance computations using dist() or dist_deg(). Coordinate access
-methods are now declared inline to provide also faster data access.
-
-Classes have been added to support handling of sky regions. The
-GSkyRegion class is the abstract base class of all sky regions. The
-GSkyRegionCircle class implements a circle on the sky. The DS9 region
-format is used for loading and saving region information into a file.
-Regions a gathered in a regions container, which is implement by the
-GSkyRegions class.
-
-The WCS registry now use static functions instead of static members
-for registry information handling. This circumvents the ill defined
-initialization problem of static variables and allow using of the
-GRegistryPointer smart pointer, removing memory leaks on exit of
-GammaLib.
-
-The GSkyPixel class now supports 1D and 2D pixelisations, allowing
-a more generic usage of the class. Integer and double precision
-values can be assigned from and to GSkyPixel for 1D pixelisations.
-
-The GWcsAIT class has been added for Aitoff projections.
-
-The solid angle of sky map pixels are now computed using the spherical
-excess. This provides accurate solid angles even in case that the
-pixels are highly distorted, for example at the poles of the Aitoff
-projections.
+None
 
 
 13. Support module
 ------------------
-The abstract GUrl base class has been implemented that provides an
-interface for transparent handling of Unified Resource Locators.
-Using this interface, files can be equally handles as strings, or
-http addresses.
-
-The following URL types have been implemented so far:
-* GUrlFile: handles flat files.
-* GUrlString: handles writing into a string
-
-The code of the support module has been reviewed, and some minor
-adjustments have been made that very likely do not affect any
-existing code.
+None
 
 
 14. XML module
 --------------
-The XML module classes now make use of the GUrl abstract interface
-to allow for generic URL input / output of the XML document. Before,
-only flat file I/O has been supported. Now, I/O can go through any
-media for which a URL class has been implemented.
+None
 
 
 15. VO module
 -------------
-This new module has been added to support compliance with the Virtual
-Observatory (VO) protocols.
-
-The GVOClient class implements a VO compliant client that can communicate
-with a SAMP Hub. The method supports SAMP discovery and registering and
-unregistering.
+None
 
 
 16. Xspec module
 ----------------
-A module has been added to provide an interface to the Xspec analysis
-package. Three classes have been implemented that support the Xspec
-file formats: GPha, GArf and GRmf.
+None
 
 
 17. Test module
@@ -631,23 +110,10 @@ None
 
 20. CTA interface
 -----------------
-The computations for diffuse map templates have been optimized by
-introducing a pre computation cache for IRF and Npred values. This
-considerably reduces the computing time for diffuse spatial maps.
-
-Support for on/off analysis has been added. The GCTAOnOffObservation
-class gathers all information that is required for an on/off analysis
-for a given run. The GCTAOnOffObservations container allows to analyse
-several runs in one shot.
-
-The radial model registry now use static functions instead of static
-members for registry information handling. This circumvents the ill
-defined initialization problem of static variables and allow using of
-the GRegistryPointer smart pointer, removing memory leaks on exit of
-GammaLib.
-
-A King profile PSF has been added that fits much better for fitting
-of the HESS PSF.
+The GCTAModelBackground and GCTAModelRadialAcceptance classes now write
+the id attribute to the XML file in case that identifiers are specified.
+Furthermore, GCTAModelRadialAcceptance no longer write the temporal
+model component.
 
 
 21. COMPTEL interface

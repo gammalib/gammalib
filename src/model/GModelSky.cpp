@@ -738,6 +738,10 @@ void GModelSky::write(GXmlElement& xml) const
     if (instruments.length() > 0) {
         src->attribute("instrument", instruments);
     }
+    std::string identifiers = ids();
+    if (identifiers.length() > 0) {
+        src->attribute("id", identifiers);
+    }
 
     // Write spectral model
     if (spectral() != NULL) {

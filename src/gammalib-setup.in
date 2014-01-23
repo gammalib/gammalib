@@ -80,11 +80,10 @@ if [ -d $prefix/syspfiles/. ]; then
   do
     parfile=`basename $filename`
     sys_parfile=$prefix/syspfiles/$parfile
-    if [ -e $sys_parfile ]
-    then
-      if test $sys_parfile -nt $filename
+    if [ -e "$sys_parfile" ]; then
+      if test "$sys_parfile" -nt "$filename"
       then
-        cp -f $sys_parfile $filename
+        cp -f "$sys_parfile" "$filename"
       fi
     fi
   done
@@ -172,7 +171,8 @@ fi
 # Set MANPATH
 # ===========
 if [ "x$MANPATH" = x ]; then
-  MANPATH="$man_dir:$(manpath)"
+  manpath=${manpath:-}
+  MANPATH="$man_dir:${manpath}"
 else
   MANPATH=`echo ":$MANPATH:" | \
     sed "s%:$man_dir:%:%g" | sed "s%::*$%%"`

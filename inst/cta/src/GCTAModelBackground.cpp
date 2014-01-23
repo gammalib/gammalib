@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelBackground.cpp - Generic CTA background model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -848,6 +848,10 @@ void GCTAModelBackground::write(GXmlElement& xml) const
     src->attribute("type", type());
     if (instruments().length() > 0) {
         src->attribute("instrument", instruments());
+    }
+    std::string identifiers = ids();
+    if (identifiers.length() > 0) {
+        src->attribute("id", identifiers);
     }
 
     // Write spectral model
