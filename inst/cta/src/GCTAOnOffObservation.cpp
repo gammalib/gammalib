@@ -38,11 +38,12 @@
 #define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
 #define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&,"\
                                                                 " GEbounds&)"
-#define G_POISSON_ONOFF  "GCTAOnOffObservation::likelihood_poisson_onoff(GOptimizerPars&,"\
-															 "GMatrixSparse&,"\
-															 "GVector&,"\
-															 "double&,"\
-															 "double&)"
+#define G_POISSON_ONOFF  "GCTAOnOffObservation::likelihood_poisson_onoff(GModels&,"\
+															            "GOptimizerPars&,"\
+															            "GMatrixSparse&,"\
+															            "GVector&,"\
+																		"double&,"\
+															            "double&)"
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
 const double minerr = 1.0e-100;                //!< Minimum statistical error
@@ -943,9 +944,9 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 	// Get number of parameters
 	int npars = pars.size();
 	
-	// Create model gradients array (one for sky parameters, one for background parameters)
-	GVector sky_grad(npars);
-	GVector bgd_grad(npars);
+	// Create model gradients array pointers (one for sky parameters, one for background parameters)
+	GVector* sky_grad=NULL;
+	GVector* bgd_grad=NULL;
 	// Working arrays
 	double* values = new double[npars];
 	int*    inx    = new int[npars];
@@ -972,8 +973,8 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		double nonpred=0.0;
 			
 		// Get number of gamma and background events (and corresponding spectral model gradients)
-		ngam=model_on(models,pars,i,&sky_grad);
-		nbgd=model_off(models,pars,i,&bgd_grad);
+		ngam=model_on(models,pars,i,sky_grad);
+		nbgd=model_off(models,pars,i,bgd_grad);
 		  
 		// Skip bin if model is too small (avoids -Inf or NaN gradients)
 		nonpred= ngam+m_alpha*nbgd;
@@ -1000,8 +1001,8 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		// (just needed in call to update hessian matrix)
 		int ndev = 0;
 		for (int j = 0; j < npars; ++j) {
-		     if ((sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) || 
-				 (bgd_grad[j] != 0.0  && !gammalib::is_infinite(bgd_grad[j])))  {
+		     if (((*sky_grad)[j] != 0.0  && !gammalib::is_infinite((*sky_grad)[j])) || 
+				 ((*bgd_grad)[j] != 0.0  && !gammalib::is_infinite((*bgd_grad)[j])))  {
 				  inx[ndev] = j;
 				  ndev++;
 			 }
@@ -1018,21 +1019,21 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		for (int j = 0; j < npars; ++j) {
 			
 			// If spectral model for sky component is non-zero and non-infinite
-			if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
+			if ((*sky_grad)[j] != 0.0  && !gammalib::is_infinite((*sky_grad)[j])) {
 				
 				// Gradient
-				(*gradient)[j] += sky_factor*sky_grad[j];
+				(*gradient)[j] += sky_factor*(*sky_grad)[j];
 				
 				// Hessian (from first-order derivatives only)
 				for (int k = 0; k < npars; ++k) {
 				
 					// If spectral model for sky component is non-zero and non-infinite
-					if (sky_grad[k] != 0.0  && !gammalib::is_infinite(sky_grad[k])) {	
-					    values[k]=sky_grad[j]*sky_grad[k]*fb;
+					if ((*sky_grad)[k] != 0.0  && !gammalib::is_infinite((*sky_grad)[k])) {	
+					    values[k]=(*sky_grad)[j]*(*sky_grad)[k]*fb;
 					
 					// If spectral model for sky component is non-zero and non-infinite
-					} else if (bgd_grad[k] != 0.0  && !gammalib::is_infinite(bgd_grad[k])) {
-						values[k]=sky_grad[j]*bgd_grad[k]*fc;
+					} else if ((*bgd_grad)[k] != 0.0  && !gammalib::is_infinite((*bgd_grad)[k])) {
+						values[k]=(*sky_grad)[j]*(*bgd_grad)[k]*fc;
 						
 					// ...else neither sky nor background
 					} else {
@@ -1045,21 +1046,21 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 				}
 			
 			// If spectral model for sky component is non-zero and non-infinite
-			} else if (bgd_grad[j] != 0.0  && !gammalib::is_infinite(bgd_grad[j])) {
+			} else if ((*bgd_grad)[j] != 0.0  && !gammalib::is_infinite((*bgd_grad)[j])) {
 				
 				// Gradient
-				(*gradient)[j] += bgd_factor*bgd_grad[j];
+				(*gradient)[j] += bgd_factor*(*bgd_grad)[j];
 				
 				// Hessian (from first-order derivatives only)
 				for (int k = 0; k < npars; ++k) {
 					
 					// If spectral model for sky component is non-zero and non-infinite
-					if (sky_grad[k] != 0.0  && !gammalib::is_infinite(sky_grad[k])) {	
-					    values[k]=bgd_grad[j]*sky_grad[k]*fc;
+					if ((*sky_grad)[k] != 0.0  && !gammalib::is_infinite((*sky_grad)[k])) {	
+					    values[k]=(*bgd_grad)[j]*(*sky_grad)[k]*fc;
 						
 						// If spectral model for sky component is non-zero and non-infinite
-					} else if (bgd_grad[k] != 0.0  && !gammalib::is_infinite(bgd_grad[k])) {
-						values[k]=bgd_grad[j]*bgd_grad[k]*fd;
+					} else if ((*bgd_grad)[k] != 0.0  && !gammalib::is_infinite((*bgd_grad)[k])) {
+						values[k]=(*bgd_grad)[j]*(*bgd_grad)[k]*fd;
 						
 						// ...else neither sky nor background
 					} else {
@@ -1082,7 +1083,7 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		std::string msg ="No model parameter for the computation of the "
 						 "likelihood in observation "+this->name()+
 		                 " (ID "+this->id()+").\n";
-		throw GException::bad_type(G_POISSON_ONOFF,msg);
+		throw GException::invalid_value(G_POISSON_ONOFF,msg);
 	}
 	
     // Free working array
