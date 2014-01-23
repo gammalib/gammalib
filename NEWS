@@ -29,7 +29,9 @@ configuration script during continous integration.
 
 4. Application module
 ---------------------
-None
+The GChatter typedef has been added to the Python interface, and a specific
+GLog::chatter() method has been added that takes integers as arguments to
+allow chatter level adjustments from within Python.
 
 
 5. Base module

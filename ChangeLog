@@ -7,6 +7,7 @@
         Add configuration test script (#1091)
         GModelSky, GCTAModelBackground and GCTAModelRadialAcceptance write
             id attribute into XML file (#1092)
+        Add GChatter typedef to Python interface
 
 2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
