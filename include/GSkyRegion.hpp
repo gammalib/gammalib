@@ -48,6 +48,7 @@ class GSkyDir;
  * 
  * Accessible information elements are:
  * - Type of the region (circle, rectangle,...)
+ * - Name of the region (must be different for different regions in container)
  * - Solid angle subtended by the region
  * 
  * The object can be initialised from a string in the DS9 region file format,
@@ -78,6 +79,7 @@ public:
     // Implemented methods
     const std::string& type(void) const;
     const std::string& name(void) const;
+	void               name(const std::string& name);
     const double&      solidangle(void) const;
 
 protected:
@@ -91,6 +93,20 @@ protected:
     std::string m_name;    //!< Name of the region
     double      m_solid;   //!< Solid angle subtended by the region (sr)
 };
+
+/***********************************************************************//**
+* @brief Set region name
+*
+* @param[in] name region name.
+*
+* Set name of the region.
+***************************************************************************/
+inline
+void GSkyRegion::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
 
 
 /***********************************************************************//**
