@@ -114,4 +114,7 @@ public:
     void centre(const std::string& arg, const int& n) {
         (*self) << gammalib::centre(arg, n);
     }
+    void chatter(const int& chatter) {
+        self->chatter(GChatter(chatter));
+    }
 }

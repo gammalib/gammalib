@@ -140,3 +140,13 @@ static int var_tuple_to_index(PyObject *input, int *ptr) {
         }
     }
 }
+
+/* __ Enumerations _______________________________________________________ */
+typedef enum {
+    SILENT = 0,
+    TERSE = 1,
+    NORMAL = 2,
+    EXPLICIT = 3,
+    VERBOSE = 4
+} GChatter;
+
