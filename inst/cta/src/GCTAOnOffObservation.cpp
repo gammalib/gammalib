@@ -38,7 +38,7 @@
 #define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
 #define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&,"\
                                                                 " GEbounds&)"
-#define G_POISSON_ONOFF  "GCTAOnOffObservation::poisson_onoff(GOptimizerPars&,"\
+#define G_POISSON_ONOFF  "GCTAOnOffObservation::likelihood_poisson_onoff(GOptimizerPars&,"\
 															 "GMatrixSparse&,"\
 															 "GVector&,"\
 															 "double&,"\
@@ -665,7 +665,8 @@ std::string GCTAOnOffObservation::print(const GChatter& chatter) const
  * parameters are stored in the order spatial-spectral-temporal.
  *
  ***********************************************************************/
-double GCTAOnOffObservation::model_on(const GOptimizerPars&     pars,
+double GCTAOnOffObservation::model_on(const GModels&            models,
+									  const GOptimizerPars&     pars,
 										    int                 ibin,
 										    GVector*            mod_grad)
 {
@@ -680,13 +681,9 @@ double GCTAOnOffObservation::model_on(const GOptimizerPars&     pars,
 	
 	// If bin number is in range
 	if (ibin < m_on_spec.size())  {
-	
-	    // Create pointer to model array
-	    const GOptimizerPars* parptr=&pars;
-	    const GModels* models=dynamic_cast<const GModels*>(parptr);
-	
-	    // Check that parameter array if of type GModels
-	    if (models != NULL) {
+		
+	    // Check that there are parameters
+	    if (npars > 0) {
 		
 		    // Create time object (empty, just needed in some calls)
 			GTime time;
@@ -697,7 +694,7 @@ double GCTAOnOffObservation::model_on(const GOptimizerPars&     pars,
 		    const GEnergy emean=m_on_spec.ebounds().elogmean(ibin);
 				
 		    // Loop over models 
-		    for (int j = 0; j < models->size(); ++j) {
+		    for (int j = 0; j < models.size(); ++j) {
 			
 			    // Pointers to model components
 			    GModelSpatial*  spaskyptr=NULL;
@@ -705,7 +702,7 @@ double GCTAOnOffObservation::model_on(const GOptimizerPars&     pars,
 				GModelTemporal* temskyptr=NULL;
 			
 			    // Get model pointer. Continue only if pointer is valid
-			    const GModel* mptr = (*models)[j];
+			    const GModel* mptr = models[j];
 			    if (mptr != NULL) {
 				
 				    // Continue only if model applies to specific instrument and observation identifier
@@ -789,9 +786,10 @@ double GCTAOnOffObservation::model_on(const GOptimizerPars&     pars,
  * parameters are stored in the order spatial-spectral-temporal.
  *
  ***********************************************************************/
-double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
-									        int                 ibin,
-									        GVector*            mod_grad)
+double GCTAOnOffObservation::model_off(const GModels&            models,
+									   const GOptimizerPars&     pars,
+									         int                 ibin,
+									         GVector*            mod_grad)
 {
 	// Get number of parameters
 	int npars = pars.size();
@@ -804,13 +802,9 @@ double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
 	
 	// If bin number is in range
 	if (ibin < m_off_spec.size())  {
-		
-	    // Create pointer to model array
-	    const GOptimizerPars* parptr=&pars;
-	    const GModels* models=dynamic_cast<const GModels*>(parptr);
-		
-	    // Check that parameter array if of type GModels
-	    if (models != NULL) {
+				
+	    // Check that there are parameters
+	    if (npars > 0) {
 			
 		    // Create time object (empty, just needed in some calls)
 			GTime time;
@@ -821,7 +815,7 @@ double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
 		    const GEnergy emean=m_on_spec.ebounds().elogmean(ibin);
 			
 		    // Loop over models 
-		    for (int j = 0; j < models->size(); ++j) {
+		    for (int j = 0; j < models.size(); ++j) {
 				
 			    // Pointers to model components
 			    GModelSpatial*  spabgdptr=NULL;
@@ -829,7 +823,7 @@ double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
 				GModelTemporal* tembgdptr=NULL;
 				
 			    // Get model pointer. Continue only if pointer is valid
-			    const GModel* mptr = (*models)[j];
+			    const GModel* mptr = models[j];
 			    if (mptr != NULL) {
 					
 				    // Continue only if model applies to specific instrument and observation identifier
@@ -922,7 +916,8 @@ double GCTAOnOffObservation::model_off(const GOptimizerPars&     pars,
  * The curvature matrix includes only terms containing first derivatives.
  *
  ***********************************************************************/
-double GCTAOnOffObservation::likelihood_poisson_onoff(const GOptimizerPars&     pars,
+double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            models,
+													  const GOptimizerPars&     pars,
 											                GMatrixSparse*      curvature,
 											                GVector*            gradient,
 											                double&             value,
@@ -957,13 +952,9 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GOptimizerPars&     
 	
 	// Create time object (empty, just needed in some calls)
 	GTime time;
-	
-	// Create pointer to model array
-	const GOptimizerPars* parptr=&pars;
-	const GModels* models=dynamic_cast<const GModels*>(parptr);
-	
-	// Check that parameter array if of type GModels
-	if (models != NULL) {
+		
+	// Check that there is at least one parameter
+	if (npars > 0) {
 		
 		// Loop over all energy bins
 	  for (int i = 0; i < m_on_spec.size(); ++i) {
@@ -981,8 +972,8 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GOptimizerPars&     
 		double nonpred=0.0;
 			
 		// Get number of gamma and background events (and corresponding spectral model gradients)
-		ngam=model_on(pars,i,&sky_grad);
-		nbgd=model_off(pars,i,&bgd_grad);
+		ngam=model_on(models,pars,i,&sky_grad);
+		nbgd=model_off(models,pars,i,&bgd_grad);
 		  
 		// Skip bin if model is too small (avoids -Inf or NaN gradients)
 		nonpred= ngam+m_alpha*nbgd;
@@ -1088,7 +1079,7 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GOptimizerPars&     
 		
 	// ... else parameter array is not of type GModel so raise exception	
 	} else {
-		std::string msg ="Expected a model container for the computation of the "
+		std::string msg ="No model parameter for the computation of the "
 						 "likelihood in observation "+this->name()+
 		                 " (ID "+this->id()+").\n";
 		throw GException::bad_type(G_POISSON_ONOFF,msg);

@@ -206,11 +206,12 @@ void GCTAOnOffObservations::likelihood::eval(const GOptimizerPars& pars)
 		for (int i = 0; i < m_this->size(); ++i) {
 			
 			// Compute likelihood
-			v += m_this->m_obs[i]->likelihood_poisson_onoff(pars,
-											           m_curvature,
-											           m_gradient,
-											           m_value,
-											           m_npred);
+			v += m_this->m_obs[i]->likelihood_poisson_onoff(m_this->models(),
+															pars,
+											                m_curvature,
+															m_gradient,
+															m_value,
+											                m_npred);
 			
 		} // endfor: looped over observations	
 

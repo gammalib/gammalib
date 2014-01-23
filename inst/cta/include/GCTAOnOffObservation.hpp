@@ -86,14 +86,17 @@ public:
     void                  read(const GXmlElement& xml);
     void                  write(GXmlElement& xml) const;
     std::string           print(const GChatter& chatter = NORMAL) const;
-    double                model_on(const GOptimizerPars&     pars,
+    double                model_on(const GModels&             models,
+								   const GOptimizerPars&      pars,
 										  int                 ibin,
 									      GVector*            mod_grad);
-	double                model_off(const GOptimizerPars&     pars,
+	double                model_off(const GModels&            models,
+									const GOptimizerPars&     pars,
 										  int                 ibin,
 									      GVector*            mod_grad);
-	double                likelihood_poisson_onoff(const GOptimizerPars& pars,
-											             GMatrixSparse*  covar,
+	double                likelihood_poisson_onoff(const GModels&        models,
+												   const GOptimizerPars& pars,
+											             GMatrixSparse*  curvature,
 											             GVector*        gradient,
 											             double&         value,
 											             double&         npred);
