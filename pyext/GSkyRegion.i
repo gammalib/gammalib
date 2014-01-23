@@ -54,6 +54,7 @@ public:
     // Implemented methods
     const std::string& type(void) const;
     const std::string& name(void) const;
+	void               name(const std::string& name);
     const double&      solidangle(void) const;
 };
 
