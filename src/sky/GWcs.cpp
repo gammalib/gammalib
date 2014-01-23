@@ -56,6 +56,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 //#define G_LIN_MATINV_FORCE_PC                             // Force PC usage
+#define G_SOLIDANGLE_OPTION 2                // 1=sin/cos, 2=tan, 3=vectors
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DIR2XY_DEBUG                                      // Debug dir2xy
@@ -425,34 +426,213 @@ void GWcs::write(GFitsHDU& hdu) const
  *
  * @param[in] pixel Pixel index (x,y)
  *
- * Estimate solid angles of pixel by computing the coordinates in the 4 pixel
- * corners. The surface is computed using a cartesian approximation:
- *           a
- *     1-----5-----2                 a+b
- *    /      | h    \    where A = h ---
- *   4-------6-------3                2
- *           b
- * This is a brute force technique that works sufficiently well for non-
- * rotated sky maps. Something more intelligent should be implemented in
- * the future.
+ * Estimates solid angles of pixels using the Girard equation for excess
+ * area - see: http://mathworld.wolfram.com/SphericalPolygon.html
+ *
+ *
+ * Below, the definiton of the pixel cornes and sides are shown as used
+ * within the code.
+ *
+ *             a12
+ *         1---------2
+ *         |\       /|
+ *         | \a13  / |
+ *         |  \   /  |
+ *         |   \ /   |
+ *      a14|    X    |a23
+ *         |   / \   |
+ *         |  /   \  |
+ *         | /a24  \ |
+ *         |/       \|
+ *         4---------3
+ *             a34
+ *
  ***************************************************************************/
 double GWcs::solidangle(const GSkyPixel& pixel) const
 {
-    // Get the sky directions of the 6 points
+    // Get the sky directions of the 4 points
     GSkyDir dir1 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5));
     GSkyDir dir2 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()-0.5));
     GSkyDir dir3 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5));
     GSkyDir dir4 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5));
-    GSkyDir dir5 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5));
-    GSkyDir dir6 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5));
 
-    // Compute distances between sky directions
-    double a = dir1.dist(dir2);
-    double b = dir3.dist(dir4);
-    double h = dir5.dist(dir6);
+    // Compile option 1: Use triginometric function
+    #if G_SOLIDANGLE_OPTION == 1
 
-    // Compute solid angle
-    double solidangle = 0.5*(h*(a+b));
+    // Initialise solid angle
+    double solidangle = 0.0;
+
+    // Compute angular distances between pixel corners
+    double a12 = dir1.dist(dir2);
+    double a14 = dir1.dist(dir4);
+    double a23 = dir2.dist(dir3);
+    double a34 = dir3.dist(dir4);
+
+    // Special case: a12 or a14 is zero, then pixel is a triangle composed
+    // of [2,3,4]
+    if (a12 <= 0.0 || a14 <= 0.0) {
+
+        // Compute diagonals
+        double a24 = dir2.dist(dir4);
+
+        // Compute sines
+        double sin_a23 = std::sin(a23);
+        double sin_a24 = std::sin(a24);
+        double sin_a34 = std::sin(a34);
+
+        // Compute cosines
+        double cos_a23 = std::cos(a23);
+        double cos_a24 = std::cos(a24);
+        double cos_a34 = std::cos(a34);
+
+        // Compute angles
+        double angle2 = gammalib::acos((cos_a34-cos_a24*cos_a23)/(sin_a24*sin_a23));
+        double angle3 = gammalib::acos((cos_a24-cos_a34*cos_a23)/(sin_a34*sin_a23));
+        double angle4 = gammalib::acos((cos_a23-cos_a24*cos_a34)/(sin_a24*sin_a34));
+
+        // Compute excess area to determine solid angle
+        solidangle = (angle2 + angle3 + angle4) - gammalib::pi;
+
+    }
+
+    // Special case: a23 or a 34 is zero, then pixel is a triangle composed
+    // of [1,2,4]
+    else if (a23 <= 0.0 || a34 <= 0.0) {
+
+        // Compute diagonals
+        double a24 = dir2.dist(dir4);
+
+        // Compute sines
+        double sin_a12 = std::sin(a12);
+        double sin_a14 = std::sin(a14);
+        double sin_a24 = std::sin(a24);
+
+        // Compute cosines
+        double cos_a12 = std::cos(a12);
+        double cos_a14 = std::cos(a14);
+        double cos_a24 = std::cos(a24);
+
+        // Compute angles
+        double angle1 = gammalib::acos((cos_a24-cos_a12*cos_a14)/(sin_a12*sin_a14));
+        double angle2 = gammalib::acos((cos_a14-cos_a12*cos_a24)/(sin_a12*sin_a24));
+        double angle4 = gammalib::acos((cos_a12-cos_a14*cos_a24)/(sin_a14*sin_a24));
+
+        // Compute excess area to determine solid angle
+        solidangle = (angle1 + angle2 + angle4) - gammalib::pi;
+
+    }
+
+    // Otherwise we have a polygon
+    else {
+
+        // Compute diagonals
+        double a13 = dir1.dist(dir3);
+        double a24 = dir2.dist(dir4);
+
+        // Compute sines
+        double sin_a12 = std::sin(a12);
+        double sin_a14 = std::sin(a14);
+        double sin_a23 = std::sin(a23);
+        double sin_a34 = std::sin(a34);
+
+        // Compute cosines
+        double cos_a12 = std::cos(a12);
+        double cos_a13 = std::cos(a13);
+        double cos_a14 = std::cos(a14);
+        double cos_a23 = std::cos(a23);
+        double cos_a24 = std::cos(a24);
+        double cos_a34 = std::cos(a34);
+
+        // Compute angles
+        double angle1 = std::acos((cos_a13-cos_a34*cos_a14)/(sin_a34*sin_a14));
+        double angle2 = std::acos((cos_a24-cos_a23*cos_a34)/(sin_a23*sin_a34));
+        double angle3 = std::acos((cos_a13-cos_a12*cos_a23)/(sin_a12*sin_a23));
+        double angle4 = std::acos((cos_a24-cos_a14*cos_a12)/(sin_a14*sin_a12));
+
+        // Use Girard equation for excess area to determine solid angle
+        solidangle = (angle1 + angle2 + angle3 + angle4) - gammalib::twopi;
+
+    } // endif: we had a polynom
+
+    // Compile option 2: Use Huilier's theorem
+    #elif G_SOLIDANGLE_OPTION == 2
+
+    // Initialise solid angle
+    double solidangle = 0.0;
+
+    // Compute angular distances between pixel corners
+    double a12 = dir1.dist(dir2);
+    double a14 = dir1.dist(dir4);
+    double a23 = dir2.dist(dir3);
+    double a24 = dir2.dist(dir4);
+    double a34 = dir3.dist(dir4);
+
+    // Special case: a12 or a14 is zero, then pixel is a triangle composed
+    // of [2,3,4]
+    if (a12 <= 0.0 || a14 <= 0.0) {
+        double s   = 0.5 * (a23 + a34 + a24);
+        solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                               std::tan(0.5*(s-a23)) *
+                                               std::tan(0.5*(s-a34)) *
+                                               std::tan(0.5*(s-a24))));
+    }
+
+    // Special case: a23 or a 34 is zero, then pixel is a triangle composed
+    // of [1,2,4]
+    else if (a23 <= 0.0 || a34 <= 0.0) {
+        double s   = 0.5 * (a12 + a24 + a14);
+        solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                               std::tan(0.5*(s-a12)) *
+                                               std::tan(0.5*(s-a24)) *
+                                               std::tan(0.5*(s-a14))));
+    }
+
+    // Otherwise we have a polygon
+    else {
+
+        // Triangle 1 [1,2,4]
+        double s1      = 0.5 * (a12 + a24 + a14);
+        double excess1 = std::atan(std::sqrt(std::tan(0.5*s1) *
+                                             std::tan(0.5*(s1-a12)) *
+                                             std::tan(0.5*(s1-a24)) *
+                                             std::tan(0.5*(s1-a14))));
+
+        // Triangle 2 [2,3,4]
+        double s2      = 0.5 * (a23 + a34 + a24);
+        double excess2 = std::atan(std::sqrt(std::tan(0.5*s2) *
+                                             std::tan(0.5*(s2-a23)) *
+                                             std::tan(0.5*(s2-a34)) *
+                                             std::tan(0.5*(s2-a24))));
+
+        // Determine solid angle
+        solidangle = 4.0 * (excess1 + excess2);
+
+    } // endif: we had a polynom
+
+    // Compile option 3: Use vectors
+    #else
+
+    // Get vectors to pixel corners
+    GVector vec1 = dir1.celvector();
+    GVector vec2 = dir2.celvector();
+    GVector vec3 = dir3.celvector();
+    GVector vec4 = dir4.celvector();
+
+    // Compute inner angles of pixel corners
+    double angle1 = gammalib::acos(cross(vec2, (cross(vec1, vec2))) * 
+                                   cross(vec2, (cross(vec3, vec2))));
+    double angle2 = gammalib::acos(cross(vec3, (cross(vec2, vec3))) *
+                                   cross(vec3, (cross(vec4, vec3))));
+    double angle3 = gammalib::acos(cross(vec4, (cross(vec3, vec4))) *
+                                   cross(vec4, (cross(vec1, vec4))));
+    double angle4 = gammalib::acos(cross(vec1, (cross(vec4, vec1))) *
+                                   cross(vec1, (cross(vec2, vec1))));
+
+    // Use Girard equation for excess area to determine solid angle
+    double solidangle = gammalib::deg2rad * gammalib::deg2rad +
+                        (angle1 + angle2 + angle3 + angle4) -
+                        gammalib::twopi;
+    #endif
 
     // Return solid angle
     return solidangle;

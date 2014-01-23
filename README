@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 00-08-00 (January 31st, 2013)
+Version: 00-08-00 (18 January 2014)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -92,7 +92,7 @@ The file INSTALL details more about using configure. Also try
      % ./configure --help.
 
 The `make check' command will run an extensive unit test to verify that
-GammaLib was correctly built. Make sure that all tests were successful. 
+GammaLib was correctly built.  Make sure that all tests were successful. 
 
 
 Macintosh OS X Installation
@@ -145,14 +145,14 @@ will generate a universal build which contains 32-bit and 64-bit code.
 
 BSD Installation
 ================
-GammaLib has been tested on FreeBSD successfully. Follow the Linux
+GammaLib has been tested on FreeBSD successfully.  Follow the Linux
 installation instructions above.
 
 
 Solaris Installation
 ====================
 GammaLib compiles on Solaris and openSolaris using the GNU compiler
-collection. Follow the Linux installation instructions above.
+collection.  Follow the Linux installation instructions above.
 GammaLib also compiles using the Sun Studio compiler, but due to
 some unexpected handling of global variables, it is not fully
 working (see "Known problems" below).
@@ -175,11 +175,25 @@ extensive unit test by typing:
 If everything works successfully you should see
 
     ===================
-    All 18 tests passed
+    All 20 tests passed
     ===================
 
-at the end of the test. If no Python support was compiled in, the
-number of tests performed will be reduced by one.
+or
+
+============================================================================
+Testsuite summary for gammalib 0.8.0
+============================================================================
+# TOTAL: 20
+# PASS:  20
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+
+at the end of the test (depending on your automake version).  If no Python
+support was compiled in, the number of tests performed will be reduced by one.
 
 
 Setting up your environment
@@ -227,43 +241,50 @@ Documentation
 =============
 The doc directory (usually at /usr/local/gamma/share/doc/gammalib)
 contains the most recent set of updated documentation for this release.
-A detailed documentation can be created using Doxygen by typing:
+A detailed documentation can be created by typing:
 
-    % make doxygen
+    % make doc
 
-before installing the library. Doxygen can be obtained from
-http://www.stack.nl/~dimitri/doxygen/
+before installing the library. Two types of documentation exist: 
+* code documentation
+* user documentation
 
-This is a development release and the documentation is largely, but 
-not entirely up to date. We are working on it. Please be patient or
-volunteer to help.
+Code documentation is created using Doxygen.  You need Doxygen on your
+system to generate the code documentation.  This includes man pages.
+Doxygen can be obtained from http://www.stack.nl/~dimitri/doxygen/.
+
+User documentation is created using Sphinx.  You need Sphinx on your
+system to generate the user documentation.  Sphinx can be obtained
+from http://sphinx-doc.org/install.html.
 
 
 Bug reports
 ===========
 To report or search for bugs, please use the GammaLib Bug Tracker at
-https://sourceforge.net/tracker/?group_id=282143&atid=1196795.
+https://cta-redmine.irap.omp.eu/projects/gammalib.  Before using the
+tracker, please read 
+https://cta-redmine.irap.omp.eu/projects/gammalib/wiki/Submission_guidelines
 
 
 Known problems
 ==============
 Python support
   GammaLib comes with Python wrappers so that all classes can be
-  directly used from Python. To compile-in Python support, GammaLib
+  directly used from Python.  To compile-in Python support, GammaLib
   needs the Python.h header file, which on many distributions is not
   installed by default.
   To make Python.h available, install the Python developer package
-  in your distribution. Otherwise you will not be able to use GammaLib
+  in your distribution.  Otherwise you will not be able to use GammaLib
   from Python.
 
 Readline support
   Many distributions do not have the readline header files and symbolic
-  link to the shared library set up by default. The same is true for the
-  ncurses library that is needed by readline. To properly compile-in
+  link to the shared library set up by default.  The same is true for the
+  ncurses library that is needed by readline.  To properly compile-in
   readline support in GammaLib, make sure that the redline header files
-  exist and that the symbolic links are set. In many distributions,
+  exist and that the symbolic links are set.  In many distributions,
   the shared redline and ncurses are located in /lib, while the symbolic
-  links are in /usr/lib. Make sure that you have symbolic links with
+  links are in /usr/lib.  Make sure that you have symbolic links with
   names
 
      libreadline.so
@@ -279,23 +300,23 @@ Readline support
 Solaris
   Although GammaLib builds on Solaris using the Sun compiler, there are
   problems with global symbols in the shared library that prevent the
-  model registry to work correctly. Furthermore, GammaLib is not able
+  model registry to work correctly.  Furthermore, GammaLib is not able
   to catch its own exceptions, which prevents the FITS interface to work
   correctly.
   GammaLib has however been built and tested successfully using the GNU
   compiler, and this is the only build method that is currently supported.
   Problems have also been encountered when compiling cfitsio versions
-  more recent than 3.250. The problems have been reported to the cfitsio
-  developer team, and are likely to be solved in the future. For the
+  more recent than 3.250.  The problems have been reported to the cfitsio
+  developer team, and are likely to be solved in the future.  For the
   time being, it is recommended to use cfitsio version 3.250 on Solaris.
 
 OpenSolaris
   On OpenSolaris, the same problems concerning the SunStudio compiler
   occur as for Solaris, and also here, the GNU compiler is the recommended
-  tool to build GammaLib. Also here, cfitsio version 3.250 is the
+  tool to build GammaLib.  Also here, cfitsio version 3.250 is the
   recommended library as more recent version feature relocation
   problems. GammaLib has been tested using gcc 4.3.2 on 
-  OpenSolaris 2009.06. Make sure to create the symbolic links
+  OpenSolaris 2009.06.  Make sure to create the symbolic links
 
      ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
      ln -s /usr/bin/g++4.3.2 /usr/bin/g++
@@ -303,12 +324,12 @@ OpenSolaris
   which are not there by default to avoid excess warnings during
   compilation. 
   For OpenSolaris 2009.06, no readline package is available, hence 
-  readline support is not readily available. Readline support can however
+  readline support is not readily available.  Readline support can however
   be enabled by directly installing the GNU ncurses and readline packages
-  from source (http://ftp.gnu.org/gnu). This has been done successfully
-  on OpenSolaris 2009.06 for ncurses-5.9 and readline-6.2. Make sure
+  from source (http://ftp.gnu.org/gnu).  This has been done successfully
+  on OpenSolaris 2009.06 for ncurses-5.9 and readline-6.2.  Make sure
   to specify the `--with-shared' option when configuring ncurses, so
-  that the shared library will be built and installed. Otherwise,
+  that the shared library will be built and installed.  Otherwise,
   relocation errors may occur during compilation of GammaLib.
 
 

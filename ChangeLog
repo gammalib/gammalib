@@ -1,4 +1,4 @@
-2014-01-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
         ========================
@@ -23,6 +23,8 @@
         Put likelihood computation in GObservation class
         Add broken power law spectral model
         Add Gaussian spectral model
+        Update parameter files if necessary
+        Implement exact sky map pixel solid angle computation
         Rename the following classes:
         - GWcs => GSkyProjection
         - GWcslib => GWcs

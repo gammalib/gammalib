@@ -182,7 +182,7 @@ GEnergy GModelSpectralGauss::mean(void) const
 /***********************************************************************//**
  * @brief Set mean energy
  *
- * @param[in] Mean energy.
+ * @param[in] mean Mean energy.
  ***************************************************************************/
 inline
 void GModelSpectralGauss::mean(const GEnergy& mean)
@@ -208,7 +208,7 @@ GEnergy GModelSpectralGauss::sigma(void) const
 /***********************************************************************//**
  * @brief Set energy width
  *
- * @param[in] Energy width
+ * @param[in] sigma Energy width.
  ***************************************************************************/
 inline
 void GModelSpectralGauss::sigma(const GEnergy& sigma)

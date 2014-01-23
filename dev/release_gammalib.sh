@@ -65,20 +65,6 @@ fi
 echo "Create LaTeX documentation"
 cd $sourcedir/doc
 #
-cd um/latex
-latex gammalib_um.tex
-dvips gammalib_um.dvi -o gammalib_um.ps
-ps2pdf gammalib_um.ps
-cd ../..
-mv um/latex/gammalib_um.pdf .
-#
-cd dev/coding
-latex gammalib_coding.tex
-dvips gammalib_coding.dvi -o gammalib_coding.ps
-ps2pdf gammalib_coding.ps
-cd ../..
-mv dev/coding/gammalib_coding.pdf .
-#
 cd dev/inst
 latex gammalib_inst.tex
 dvips gammalib_inst.dvi -o gammalib_inst.ps

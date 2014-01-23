@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-08-00
+vNew Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-17 January 2014
+18 January 2014
 
 
 1. Introduction
@@ -375,6 +375,11 @@ installed. This allows providing absolute paths for unit testing, a need
 for the special valgrind rule in case that Sonar is used for quality
 checking.
 
+The configuration script now updates any parameter files in the users
+pfiles directory that is older than the system parameter files. This
+corrects for problems that arose when parameter files in the pfiles
+directory did not include all parameters necessary for the latest version.
+
 
 4. Application module
 ---------------------
@@ -560,7 +565,12 @@ The GSkyPixel class now supports 1D and 2D pixelisations, allowing
 a more generic usage of the class. Integer and double precision
 values can be assigned from and to GSkyPixel for 1D pixelisations.
 
-The GWcsAIT class has been added for Aitoff-Hammer projections.
+The GWcsAIT class has been added for Aitoff projections.
+
+The solid angle of sky map pixels are now computed using the spherical
+excess. This provides accurate solid angles even in case that the
+pixels are highly distorted, for example at the poles of the Aitoff
+projections.
 
 
 13. Support module

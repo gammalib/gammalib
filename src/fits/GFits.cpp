@@ -1213,19 +1213,32 @@ void GFits::saveto(const std::string& filename, const bool& clobber)
     // Expand environment variables
     std::string fname = gammalib::expand_env(filename);
 
+    // Create gzipped file name version
+    std::string gzfname = fname + ".gz";
+
     // Debug header
     #if defined(G_DEBUG)
     std::cout << "GFits::saveto(\"" << fname << "\", " << clobber << ")"
               << " (size=" << size() << ") -->" << std::endl;
     #endif
 
-    // If overwriting has been specified then remove any existing file ...
+    // If overwriting has been specified then remove any existing file. We
+    // consider here also the possibility that the file is gzipped, but
+    // the file name does not contain the .gz extension.
     if (clobber) {
-        std::remove(fname.c_str());
+        if (gammalib::file_exists(fname)) {
+            std::remove(fname.c_str());
+        }
+        else {
+            if (gammalib::file_exists(gzfname)) {
+                std::remove(gzfname.c_str());
+            }
+        }
     }
 
-    // ... otherwise, if file exists then throw an exception
-    else if (gammalib::file_exists(fname)) {
+    // Otherwise, if file exists then throw an exception
+    else if (gammalib::file_exists(fname) ||
+             gammalib::file_exists(gzfname)) {
         throw GException::fits_file_exist(G_SAVETO, fname);
     }
 
@@ -1393,7 +1406,7 @@ void GFits::free_members(void)
     // If FITS file has been opened then close it now
     if (m_fitsfile != NULL) {
 
-        // If file has been created but not yet save then delete the file
+        // If file has been created but not yet saved then delete the file
         // now. We do not worry about the status in this case.
         if (m_created) {
             int status = 0;
