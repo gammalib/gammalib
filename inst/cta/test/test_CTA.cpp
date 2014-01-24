@@ -807,7 +807,7 @@ void TestGCTAOptimize::test_binned_optimizer(void)
  ***************************************************************************/
 int main(void)
 {
-    // Allocate test suit container
+    // Allocate test suite container
     GTestSuites testsuites("CTA instrument specific class testing");
 
     // Check if data directory exists
@@ -821,12 +821,11 @@ int main(void)
     bool success = true;
 
     // Create test suites and append them to the container
-    TestGCTAResponse    rsp;
-    TestGCTAObservation obs;
+    TestGCTAResponse        rsp;
+    TestGCTAObservation     obs;
     TestGCTAModelBackground bck;
-    TestGCTAOptimize    opt;
+    TestGCTAOptimize        opt;
     testsuites.append(rsp);
-
     if (has_data) {
     	testsuites.append(bck);
         testsuites.append(obs);
