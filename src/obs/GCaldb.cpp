@@ -464,7 +464,7 @@ std::string GCaldb::rootdir(void) const
 
     // ... otherwise, if CALDB was set then check whether the directory
     // exists
-    if (ptr2 != NULL) {
+    else if (ptr2 != NULL) {
         if (access(ptr2, F_OK) == 0) {
             rootdir = std::string(ptr2);
         }
