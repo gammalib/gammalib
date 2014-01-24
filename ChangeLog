@@ -1,4 +1,4 @@
-2014-01-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
         
         * Bug fix Version 0.8.1 released
         ================================
@@ -8,6 +8,7 @@
         GModelSky, GCTAModelBackground and GCTAModelRadialAcceptance write
             id attribute into XML file (#1092)
         Add GChatter typedef to Python interface
+        GAMMALIB_CALDB takes precedence over CALDB environment var (#1094)
 
 2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-22 January 2014
+24 January 2014
 
 
 1. Introduction
@@ -62,7 +62,9 @@ None
 
 10. Observation module
 ----------------------
-None
+The GAMMALIB_CALDB environment variable takes precedence over the CALDB
+environment variable. This was the initial intention, but the code did the
+opposite.
 
 
 11. Optimization module
