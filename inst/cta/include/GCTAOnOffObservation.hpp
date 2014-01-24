@@ -42,7 +42,7 @@
 #include "GModelTemporal.hpp"
 #include "GModelSky.hpp"
 #include "GCTAModelBackground.hpp"
-
+#include "GCTAModelRadialAcceptance.hpp"
 
 /***********************************************************************//**
  * @class GCTAOnOffObservation

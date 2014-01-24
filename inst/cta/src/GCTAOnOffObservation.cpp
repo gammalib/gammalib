@@ -677,8 +677,8 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 	// Initialize variables (vector has 0.0 values)
 	double ngam=0.0;
 	int i_par=0;
-	if (mod_grad != NULL) delete mod_grad;
-	mod_grad = new GVector(npars);
+	//if (mod_grad != NULL) delete mod_grad;
+	//mod_grad = new GVector(npars);
 	
 	// If bin number is in range
 	if (ibin < m_on_spec.size())  {
@@ -711,8 +711,11 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 					
 					    // If this model component is a sky component
 					    if (dynamic_cast<const GModelSky*>(mptr) != NULL) {
-													
-						    // Set pointer to sky
+																				
+							// For debug (to be removed later)
+							std::cout << "Obs " << m_name << " model " << j << " is of sky type" << std::endl;
+							
+							// Set pointer to sky
 							const GModelSky* skyptr=dynamic_cast<const GModelSky*>(mptr);
 							
 							// Increase parameter counter for spatial parameter
@@ -736,7 +739,7 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 							// Loop over spectral model parameters
 							for (int k = 0; k < speskyptr->size(); ++k)  {  
 								const GModelPar sppar=(*speskyptr)[k];
-								if (sppar.is_free())  {
+								if ((sppar.is_free()) && (i_par < npars))  {
 									mod_grad[i_par]=sppar.gradient();
 									i_par++;
 								}
@@ -798,8 +801,8 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 	// Initialize variables (vector has 0.0 values)
 	double nbgd=0.0;
 	int i_par=0;
-	if (mod_grad != NULL) delete mod_grad;
-	mod_grad = new GVector(npars);
+	//if (mod_grad != NULL) delete mod_grad;
+	//mod_grad = new GVector(npars);
 	
 	// If bin number is in range
 	if (ibin < m_off_spec.size())  {
@@ -819,7 +822,8 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 		    for (int j = 0; j < models.size(); ++j) {
 				
 			    // Pointers to model components
-			    GModelSpatial*  spabgdptr=NULL;
+			    GCTAModelRadial*  radbgdptr=NULL;
+				GModelSpatial*  spabgdptr=NULL;
 				GModelSpectral* spebgdptr=NULL;
 				GModelTemporal* tembgdptr=NULL;
 				
@@ -857,7 +861,7 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 							// Loop over spectral model parameters
 							for (int k = 0; k < spebgdptr->size(); ++k)  {  
 								const GModelPar sppar=(*spebgdptr)[k];
-								if (sppar.is_free())  {
+								if ((sppar.is_free()) && (i_par < npars))  {
 									mod_grad[i_par]=sppar.gradient();
 									i_par++;
 								}
@@ -870,7 +874,50 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 								i_par += tembgdptr->size();
 							}
 							
-							// ... else model is not of sky type, increase parameter counter and move on
+						// if this model component is a background component
+						} else if (dynamic_cast<const GCTAModelRadialAcceptance*>(mptr) != NULL) {
+															
+							    // For debug (to be removed later)
+							    std::cout << "Obs " << m_name << " model " << j << " is of background type" << std::endl;
+							
+							    // Set pointer to background
+								const GCTAModelRadialAcceptance* bgdptr=dynamic_cast<const GCTAModelRadialAcceptance*>(mptr);
+								
+								// Increase parameter counter for spatial parameter
+								radbgdptr=bgdptr->radial();
+								if (radbgdptr != NULL)  {
+									i_par += radbgdptr->size();
+								}
+								
+								// Spectral component (the useful one)
+								spebgdptr=bgdptr->spectral();
+								
+								// Number of gamma events in model
+								// (Get flux over energy bin in ph/cm2/s and multiply by effective area and time)
+								if (spebgdptr != NULL)  {
+									nbgd += spebgdptr->flux(emin,emax)*m_offtime;
+								}
+								
+								// Gradients
+								// Evaluate model at current energy (also fills gradients)
+								double v=spebgdptr->eval_gradients(emean,time);
+								// Loop over spectral model parameters
+								for (int k = 0; k < spebgdptr->size(); ++k)  {  
+									const GModelPar sppar=(*spebgdptr)[k];
+									if ((sppar.is_free()) && (i_par < npars))  {
+										mod_grad[i_par]=sppar.gradient();
+										i_par++;
+									}
+									
+								} // Looped over parameters of the spectral component of the current model
+								
+								// Increase parameter counter for temporal parameter
+								tembgdptr=bgdptr->temporal();
+								if (tembgdptr != NULL)  {
+									i_par += tembgdptr->size();
+								}
+								
+						// ... else model is not of background type, increase parameter counter and move on
 					    } else {
 						    i_par += mptr->size();
 						    continue;
@@ -945,8 +992,10 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 	int npars = pars.size();
 	
 	// Create model gradients array pointers (one for sky parameters, one for background parameters)
-	GVector* sky_grad=NULL;
-	GVector* bgd_grad=NULL;
+	GVector* sky_grad= NULL;
+	GVector* bgd_grad= NULL;
+	sky_grad = new GVector(npars);
+	bgd_grad = new GVector(npars);
 	// Working arrays
 	double* values = new double[npars];
 	int*    inx    = new int[npars];
@@ -960,7 +1009,13 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		// Loop over all energy bins
 	  for (int i = 0; i < m_on_spec.size(); ++i) {
 				
-	    // Get energy bin bounds
+		// Reinitialize working arrays
+		for (int j = 0; j < npars; ++j) {
+			(*sky_grad)[j] = 0.0;
+			(*bgd_grad)[j] = 0.0;
+		}
+		  
+		  // Get energy bin bounds
 		const GEnergy emin=m_on_spec.ebounds().emin(i);
 		const GEnergy emax=m_on_spec.ebounds().emax(i);
 		const GEnergy emean=m_on_spec.ebounds().elogmean(i);
@@ -973,8 +1028,11 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		double nonpred=0.0;
 			
 		// Get number of gamma and background events (and corresponding spectral model gradients)
-		ngam=model_on(models,pars,i,sky_grad);
 		nbgd=model_off(models,pars,i,bgd_grad);
+		ngam=model_on(models,pars,i,sky_grad);
+		
+		// For debug (to be removed later)
+	    std::cout << "Obs " << m_name << " Bin " << i << " Non=" << non << " Noff=" << noff << " Ngam=" << ngam << " Nbgd=" << nbgd << std::endl;
 		  
 		// Skip bin if model is too small (avoids -Inf or NaN gradients)
 		nonpred= ngam+m_alpha*nbgd;
