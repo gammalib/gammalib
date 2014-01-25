@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-24 January 2014
+25 January 2014
 
 
 1. Introduction
@@ -89,7 +89,8 @@ None
 
 15. VO module
 -------------
-None
+The vo module and GVOClient class have been added to the Python
+interface.
 
 
 16. Xspec module

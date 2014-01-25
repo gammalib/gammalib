@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the GammaLib Python bindings.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import test_GSupport
 import test_GTest
 import test_GXml
 import test_GXspec
+import test_GVO
 
 # Try importing MWL tests
 try:
@@ -86,6 +87,7 @@ if __name__ == '__main__':
     suite10 = test_GTest.Test()
     suite11 = test_GXml.Test()
     suite12 = test_GXspec.Test()
+    suite13 = test_GVO.Test()
 
     # Setup unit tests
     suite1.set()
@@ -100,6 +102,7 @@ if __name__ == '__main__':
     suite10.set()
     suite11.set()
     suite12.set()
+    suite13.set()
 
     # Append tests to container
     suites.append(suite1)
@@ -114,6 +117,7 @@ if __name__ == '__main__':
     suites.append(suite10)
     suites.append(suite11)
     suites.append(suite12)
+    suites.append(suite13)
 
     # Optionally handle MWL suite
     if has_mwl:

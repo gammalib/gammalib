@@ -31,7 +31,8 @@ pkg_name = 'gammalib'
 
 # Define core modules
 core_modules = ['app', 'base', 'fits', 'linalg', 'model', 'numerics', \
-                'obs', 'opt', 'sky', 'support', 'test', 'xml', 'xspec']
+                'obs', 'opt', 'sky', 'support', 'test', 'xml', 'xspec', \
+                'vo']
 
 # Detect execution mode
 is_build = True
