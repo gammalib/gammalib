@@ -247,6 +247,27 @@ double GRan::uniform(void)
 
 
 /***********************************************************************//**
+* @brief Returns normal deviates
+*
+***************************************************************************/
+double GRan::normal(const double& mean, const double& sigma)
+{
+    double x1;
+    double w;
+    do {
+        x1 = 2.0 * uniform() - 1.0;
+        double x2 = 2.0 * uniform() - 1.0;
+        w = x1 * x1 + x2 * x2;
+    } while (w >= 1.0);
+
+    // Compute random value
+    double val = x1 * std::sqrt((-2.0 * std::log(w)) / w);
+    return (sigma * val) + mean;
+}
+
+
+
+/***********************************************************************//**
  * @brief Returns exponential deviates
  *
  * @param[in] lambda Mean rate.
