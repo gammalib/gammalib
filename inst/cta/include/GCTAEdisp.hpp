@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAEdisp.hpp - Abstract CTA energy dispersion base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GFits.hpp"
+#include "GRan.hpp"
 #include "GEbounds.hpp"
 
 
