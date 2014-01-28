@@ -182,6 +182,34 @@ GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
     return;
 }
 
+/***********************************************************************//**
+ * @brief Construct from filename and observation
+ *
+ * @param[in] obs parent CTAObservation
+ * @param[in] filename filename of background table
+ * @param[in] spectral Spectral model component.
+ *
+ * Constructs a CTA background model from a spatial and a spectral
+ * model component. The temporal component is assumed to be constant.
+ * Please refer to the classes GModelSpatial and GModelSpectral to learn
+ * more about the definition of the spatial and spectral components.
+ ***************************************************************************/
+GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spectral)
+{
+	// Initialise private members for clean destruction
+	init_members();
+
+	// copying spectral model
+	m_spectral = spectral.clone();
+
+	// creating spatial cube from background file
+	set_spatial(obs, filename);
+
+	// Return
+	return;
+}
+
+
 
 /***********************************************************************//**
  * @brief Destructor
@@ -955,6 +983,23 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief create spatial cube model from background file
+ *
+ * @todo Document method.
+ ***************************************************************************/
+
+void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::string& filename)
+{
+
+	// Return
+	return;
+}
+
+
+
+
 
 /***********************************************************************//**
  * @brief Initialise class members
