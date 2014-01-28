@@ -322,11 +322,11 @@ double GCTAModelBackground::eval(const GEvent& event,
     // We need the GPhoton to evaluate the spatial model.
     // For the background, GEvent and GPhoton are identical
     // since the IRFs are not folded in
-    GPhoton photon(dir->dir(), event.energy(), event.time());
+    GPhoton ev_photon(dir->dir(), event.energy(), event.time());
 
     // Evaluate function and gradients
     double spat = (spatial() != NULL)
-                  ? spatial()->eval(photon) : 1.0;
+                  ? spatial()->eval(ev_photon) : 1.0;
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time()) : 1.0;
     double temp = (temporal() != NULL)
