@@ -58,6 +58,7 @@ public:
     explicit GCTAModelBackground(const GModelSpatial& spatial,
                                  const GModelSpectral& spectral);
     GCTAModelBackground(const GCTAModelBackground& model);
+    GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spec);
     virtual ~GCTAModelBackground(void);
 
     // Operators
@@ -87,6 +88,7 @@ public:
 
 protected:
     // Protected methods
+    void            set_spatial(const GCTAObservation& obs, const std::string& filename);
     void            init_members(void);
     void            copy_members(const GCTAModelBackground& model);
     void            free_members(void);
