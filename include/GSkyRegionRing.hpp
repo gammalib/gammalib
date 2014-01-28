@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GSkyRegionRing.hpp - Ring sky region class           *
+ *              GSkyRegionRing.hpp - Ring sky region class                 *
  * ----------------------------------------------------------------------- *
  * copyright (C) 2013 by Maria Krause, Anneli Schulz                       *
  * ----------------------------------------------------------------------- *
@@ -58,8 +58,8 @@ class GSkyRegionRing : public GSkyRegion {
 public:
     // Constructors and destructors
     GSkyRegionRing(void);
-    GSkyRegionRing(GSkyDir& centre, const double& radius);
-    GSkyRegionRing(const double& ra, const double& dec, const double& radius);
+    GSkyRegionRing(GSkyDir& centre, const double& radius1, const double& radius2);
+    GSkyRegionRing(const double& ra, const double& dec, const double& radius1, const double& radius2);
     explicit GSkyRegionRing(const std::string& line);
     GSkyRegionRing(const GSkyRegionRing& region);
     virtual ~GSkyRegionRing(void);
@@ -70,8 +70,10 @@ public:
     // Implemented methods
     void              clear(void);
     GSkyRegionRing* clone(void) const;
-    const double&     radius(void) const;
-    void              radius(const double& radius);
+    const double&     radius1(void) const;
+    void              radius1(const double& radius1);
+    const double&     radius2(void) const;
+    void              radius2(const double& radius2);
     const GSkyDir&    centre(void) const;
     void              centre(const GSkyDir& centre);
     void              centre(const double& ra,const double& dec);
@@ -93,21 +95,28 @@ protected:
 
     // Protected members
     GSkyDir	m_centre;   //!< Centre or reference point of the region
-    double 	m_radius;  	//!< Radius of circular the region [deg]
+    double 	m_radius1; 	//!< Radius of inner ring the region [deg]
+    double  m_radius2;  //!< Radius of outer ring the region [deg]
 };
 
 
 /***********************************************************************//**
- * @brief Return circular region radius (in degrees)
+ * @brief Return ring region inner (radius1) and outer (radius2) region (in degrees)
  *
  * @return Region radius [deg].
  *
  * Returns the region radius in degrees.
  ***************************************************************************/
 inline
-const double& GSkyRegionRing::radius(void) const
+const double& GSkyRegionRing::radius1(void) const
 {
-    return (m_radius);
+    return (m_radius1);
+}
+
+inline
+const double& GSkyRegionRing::radius2(void) const
+{
+    return (m_radius2);
 }
 
 

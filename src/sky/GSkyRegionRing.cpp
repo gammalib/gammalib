@@ -71,14 +71,15 @@ GSkyRegionRing::GSkyRegionRing(void)
  * @param[in] centre Centre sky direction.
  * @param[in] radius Region radius [deg].
  ***************************************************************************/
-GSkyRegionRing::GSkyRegionRing(GSkyDir& centre, const double& radius)
+GSkyRegionRing::GSkyRegionRing(GSkyDir& centre, const double& radius1, const double& radius2)
 {
     // Initialise members
 	init_members();
 
 	// Set members
 	this->centre(centre);
-    this->radius(radius);
+    this->radius1(radius1);
+    this->radius2(radius2);
 
 	// Compute solid angle
 	compute_solid_angle();
@@ -93,17 +94,19 @@ GSkyRegionRing::GSkyRegionRing(GSkyDir& centre, const double& radius)
  *
  * @param[in] ra Right Ascension of region centre [deg].
  * @param[in] dec Declination of region centre [deg].
- * @param[in] radius Region radius [deg].
+ * @param[in] radius1 inner Region radius [deg].
+ * @param[in] radius2 outer Region radius [deg].
  ***************************************************************************/
 GSkyRegionRing::GSkyRegionRing(const double& ra, const double& dec,
-                                   const double& radius)
+                                   const double& radius1, const double& radius2)
 {
     // Initialise members
 	init_members();
 
 	// Set members
 	this->centre(ra, dec);
-    this->radius(radius);
+    this->radius1(radius1);
+    this->radius2(radius2);
 
 	// Compute solid angle
 	compute_solid_angle();
@@ -137,7 +140,7 @@ GSkyRegionRing::GSkyRegionRing(const std::string& line)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] region Circular sky region.
+ * @param[in] region ring sky region.
  ***************************************************************************/
 GSkyRegionRing::GSkyRegionRing(const GSkyRegionRing& region)
 {
@@ -237,7 +240,8 @@ GSkyRegionRing* GSkyRegionRing::clone(void) const
 /***********************************************************************//**
  * @brief Set radius of circular region
  *
- * @param[in] radius Radius [deg].
+ * @param[in] radius1 inner region Radius [deg].
+ * @param[in] radius2 outer region Radius [deg]. 
  *
  * @exception GException::invalid_argument
  *            Radius value is less than 0.
@@ -245,19 +249,19 @@ GSkyRegionRing* GSkyRegionRing::clone(void) const
  * Sets the radius of the circular sky region. Only non-negative radii are
  * allowed.
  ***************************************************************************/
-void GSkyRegionRing::radius(const double& radius)
+void GSkyRegionRing::radius1(const double& radius1)
 {
-	if (radius < 0.0) {
+	if (radius1 < 0.0) {
         std::string msg =
-            "A radius of "+gammalib::str(radius)+" degrees has been"
-            " specified for a circular sky region.\n"
-            "The radius of a circular sky region can't be less than 0"
+            "A radius of "+gammalib::str(radius1)+" degrees has been"
+            " specified for a ring sky region.\n"
+            "The radius of a ring sky region can't be less than 0"
             " degrees.";
 		throw GException::invalid_argument(G_RADIUS, msg);
 	}
 
     // Set radius value
-    m_radius = radius;
+    m_radius1 = radius1;
 
     // Compute the solid angle
     compute_solid_angle();
@@ -266,6 +270,26 @@ void GSkyRegionRing::radius(const double& radius)
     return;
 }
 
+void GSkyRegionRing::radius2(const double& radius2)
+{
+	if (radius2 < 0.0 && radius2 < radius1) {
+        std::string msg =
+            "A radius of "+gammalib::str(radius2)+" degrees has been"
+            " specified for a ring sky region.\n"
+            "The radius of a ring sky region can't be less than 0"
+            " degrees.";
+		throw GException::invalid_argument(G_RADIUS, msg);
+	}
+
+    // Set radius value
+    m_radius2 = radius2;
+
+    // Compute the solid angle
+    compute_solid_angle();
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Read region from DS9 string
@@ -305,16 +329,17 @@ void GSkyRegionRing::read(const std::string& line)
 
 	// Get the values of the region x,y,and radius
 	std::vector<std::string> values = gammalib::split(Ringstring,",");
-	if (values.size() != 3) {
+	if (values.size() != 4) {
         std::string msg =
             "Invalid number of "+gammalib::str(values.size())+" arguments"
             " after the \"Ring\" key word in provided string \""+line+"\".\n"
-            "Exactly 3 arguments are expected.";
+            "Exactly 4 arguments are expected.";
 		throw GException::invalid_value(G_READ, msg);
 	}
-	double x      = gammalib::todouble(values[0]);
-	double y      = gammalib::todouble(values[1]);
-	double radius = gammalib::todouble(values[2]);
+	double x       = gammalib::todouble(values[0]);
+	double y       = gammalib::todouble(values[1]);
+	double radius1 = gammalib::todouble(values[2]);
+	double radius2 = gammalib::todouble(values[3]);
 
 	// Initialise centre direction
 	GSkyDir centre = GSkyDir();
@@ -337,7 +362,8 @@ void GSkyRegionRing::read(const std::string& line)
 
 	// Set members
 	this->centre(centre);
-    this->radius(radius);
+    this->radius1(radius1);
+    this->radius2(radius2);
 
 	// Compute solid angle
 	compute_solid_angle();
@@ -382,7 +408,9 @@ std::string GSkyRegionRing::write(void) const
 	result.append(",");
 	result.append(gammalib::str(m_centre.dec_deg()));
 	result.append(",");
-	result.append(gammalib::str(m_radius));
+	result.append(gammalib::str(m_radius1));
+	result.append(",");
+	result.append(gammalib::str(m_radius2));
 	result.append(")");
 
     // Optionally add region name
@@ -397,7 +425,7 @@ std::string GSkyRegionRing::write(void) const
 
 
 /***********************************************************************//**
- * @brief Print circular region
+ * @brief Print ring region
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing region information.
@@ -417,7 +445,9 @@ std::string GSkyRegionRing::print(const GChatter& chatter) const
         result.append(",");
         result.append(gammalib::str(m_centre.dec_deg()));
         result.append(",");
-        result.append(gammalib::str(m_radius));
+        result.append(gammalib::str(m_radius1));
+        result.append(",");
+        result.append(gammalib::str(m_radius2));
         result.append(")");
 
     } // endif: chatter was not silent
@@ -432,7 +462,7 @@ std::string GSkyRegionRing::print(const GChatter& chatter) const
  * @param[in] dir Sky direction.
  *
  * A sky direction lies within a region when its distance to the region
- * centre is not larger than the region radius.
+ * centre is not larger than the region ring (between inner and outer radius).
  ***************************************************************************/
 bool GSkyRegionRing::contains(const GSkyDir& dir) const
 {
@@ -443,7 +473,7 @@ bool GSkyRegionRing::contains(const GSkyDir& dir) const
 	double distance = dir.dist_deg(m_centre);
 
 	// Check if distance < radius
-	if (distance <= radius()) {
+	if (distance <= radius2() && distance >= radius1()) {
 		dir_is_in = true;
 	}
 
@@ -475,7 +505,7 @@ bool GSkyRegionRing::contains(const GSkyRegion& reg) const
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
 
 		// Check if the region is contained in this
-		if ((ang_dist + regcirc->radius()) <= m_radius) {
+		if ((ang_dist + regcirc->radius2()) <= m_radius2 && (ang_dist - regcirc->radius1()) >= m_radius1) {
 			fully_inside = true;
 		}
         
@@ -515,8 +545,18 @@ bool GSkyRegionRing::overlaps(const GSkyRegion& reg) const
 		// Calculate angular distance between the centres
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
 
-		// Check if the distance is smaller than the sum of both radii
-		if (ang_dist <= (m_radius + regcirc->radius())) {
+		// Check if the distance is smaller than the sum of both outer radii
+		if (ang_dist <= (m_radius2 + regcirc->radius2())) {
+			overlap = true;
+		}
+		
+	  // Check if the distance is smaller than the sum of both inner radii
+		if (ang_dist <= (m_radius1 + regcirc->radius1())) {
+			overlap = true;
+		}
+
+	  // Check if two regions overlap
+		if (ang_dist >= (m_radius1 + regcirc->radius1()) && ang_dist <= (m_radius2 + regcirc->radius2())) {
 			overlap = true;
 		}
         
@@ -546,9 +586,10 @@ bool GSkyRegionRing::overlaps(const GSkyRegion& reg) const
 void GSkyRegionRing::init_members(void)
 {
     // Initialise members
-	m_centre = GSkyDir();
-	m_radius = 0.0;
-	m_type   = "Ring";
+	m_centre  = GSkyDir();
+	m_radius1 = 0.0;
+	m_radius2 = 0.0;
+	m_type    = "Ring";
 
 	//Return
 	return;
@@ -563,8 +604,9 @@ void GSkyRegionRing::init_members(void)
 void GSkyRegionRing::copy_members(const GSkyRegionRing& region)
 {
 	// Copy attributes
-	m_centre = region.m_centre;
-	m_radius = region.m_radius;
+	m_centre  = region.m_centre;
+	m_radius1 = region.m_radius1;
+	m_radius2 = region.m_radius2;
 
     // Return
     return;
@@ -586,11 +628,13 @@ void GSkyRegionRing::free_members(void)
  ***************************************************************************/
 void GSkyRegionRing::compute_solid_angle(void)
 {
-	// Convert radius from degrees to radians
-	double radius_rad = m_radius * gammalib::deg2rad;
+	// Convert inner and outer radius from degrees to radians
+	double radius1_rad = m_radius1 * gammalib::deg2rad;
+	double radius2_rad = m_radius2 * gammalib::deg2rad;
 
 	// Compute solid angle
-	m_solid = gammalib::twopi * (1.0 - std::cos(radius_rad));
+	m_solid1 = gammalib::twopi * (1.0 - std::cos(radius1_rad));
+	m_solid2 = gammalib::twopi * (1.0 - std::cos(radius2_rad));
 
     // Return
     return;
