@@ -55,6 +55,17 @@ public:
     virtual GCTAEdisp*  clone(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
+    virtual double      mc(GRan&         ran,
+                           const double& logE,
+                           const double& theta = 0.0,
+                           const double& phi = 0.0,
+                           const double& zenith = 0.0,
+                           const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ebounds(const double& logE,
+                                const double& theta = 0.0,
+                                const double& phi = 0.0,
+                                const double& zenith = 0.0,
+                                const double& azimuth = 0.0) const = 0;
 };
 
 
