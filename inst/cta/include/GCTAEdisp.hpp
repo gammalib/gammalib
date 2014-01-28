@@ -32,6 +32,7 @@
 #include "GBase.hpp"
 #include "GFits.hpp"
 #include "GEbounds.hpp"
+#include "GRan.hpp"
 
 
 /***********************************************************************//**
@@ -66,7 +67,7 @@ public:
     virtual GCTAEdisp*  clone(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
-    virtual double      mc(GRan&         ran,
+    virtual GEnergy     mc(GRan&         ran,
                            const double& logE,
                            const double& theta = 0.0,
                            const double& phi = 0.0,

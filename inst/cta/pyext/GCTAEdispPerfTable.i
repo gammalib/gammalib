@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GCTAEdisp.i - Abstract CTA energy dispersion base class        *
+ *         GCTAEdispPerfTable.i - CTA performance table PSF class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,58 +19,63 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAEdisp.i
- * @brief Abstract CTA energy dispersion base class definition
- * @author Juergen Knoedlseder
+ * @file GCTAEdispPerfTable.i
+ * @brief CTA performance table energy dispersion class definition
+ * @author Christoph Deil & Ellis Owen
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTAEdisp.hpp"
+#include "GCTAEdispPerfTable.hpp"
+#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTAEdisp
+ * @class GCTAEdispPerfTable
  *
- * @brief Abstract CTA energy dispersion base class
+ * @brief CTA performance energy dispersion function class
  ***************************************************************************/
-class GCTAEdisp : public GBase {
+class GCTAEdispPerfTable : public GCTAEdisp {
 
 public:
     // Constructors and destructors
-    GCTAEdisp(void);
-    GCTAEdisp(const GCTAEdisp& edisp);
-    virtual ~GCTAEdisp(void);
+    GCTAEdispPerfTable(void);
+    GCTAEdispPerfTable(const std::string& filename);
+    GCTAEdispPerfTable(const GCTAEdispPerfTable& psf);
+    virtual ~GCTAEdispPerfTable(void);
 
-    // Pure virtual operators
-    virtual double operator()(const double& logEobs, 
-                              const double& logEsrc, 
-                              const double& theta = 0.0, 
-                              const double& phi = 0.0,
-                              const double& zenith = 0.0,
-                              const double& azimuth = 0.0) const = 0;
+    // Operators
+    double operator()(const double& logEobs,
+                      const double& logEsrc,
+                      const double& theta = 0.0,
+                      const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0) const;
 
-    // Pure virtual methods
-    virtual void        clear(void) = 0;
-    virtual GCTAEdisp*  clone(void) const = 0;
-    virtual void        load(const std::string& filename) = 0;
-    virtual std::string filename(void) const = 0;
-    virtual GEnergy     mc(GRan&         ran,
+    // Implemented pure virtual methods
+    void                clear(void);
+    GCTAEdispPerfTable* clone(void) const;
+    void                load(const std::string& filename);
+    std::string         filename(void) const;
+    GEnergy             mc(GRan&         ran,
                            const double& logE,
                            const double& theta = 0.0,
                            const double& phi = 0.0,
                            const double& zenith = 0.0,
-                           const double& azimuth = 0.0) const = 0;
-    virtual GEbounds    ebounds(const double& logE,
+                           const double& azimuth = 0.0) const;
+    GEbounds            ebounds(const double& logE,
                                 const double& theta = 0.0,
                                 const double& phi = 0.0,
                                 const double& zenith = 0.0,
-                                const double& azimuth = 0.0) const = 0;
+                                const double& azimuth = 0.0) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCTAEdisp class extension
+ * @brief GCTAEdispPerfTable class extension
  ***************************************************************************/
-%extend GCTAEdisp {
+%extend GCTAEdispPerfTable {
+    GCTAEdispPerfTable copy() {
+        return (*self);
+    }
 };
