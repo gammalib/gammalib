@@ -993,6 +993,16 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
 void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::string& filename)
 {
 
+	// Tie model to observation by assigning same id
+	ids(obs.id());
+
+	// Retrieve pointing
+	GSkyDir dir = obs.pointing().dir();
+
+	// Retrieve rotation rotation matrix
+	GMatrix rot = obs.pointing().rot();
+
+
 	// Return
 	return;
 }
