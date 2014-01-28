@@ -999,8 +999,54 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	// Retrieve pointing
 	GSkyDir dir = obs.pointing().dir();
 
-	// Retrieve rotation rotation matrix
-	GMatrix rot = obs.pointing().rot();
+	// Retrieve rotation matrix for sky coordinate to camera coordinate
+	GMatrix rot = obs.pointing().rot().invert();
+
+	// Read the fits file with the background information
+
+
+	// should be read from the file
+	double x_range = 10;
+	double y_range = 10;
+
+	// Creating the energies
+	GEnergies& energies;
+	
+	// creating the sky map
+	double bin_size_x = 0.1; // set by the user come back (function set_bin_size(x_size,y_size))
+	double bin_size_y = 0.1;
+	int nx = int (x_range/bin_size_x);
+	int ny = int (y_range/bin_size_y);
+
+	GSkymap   cube =  GSkymap("TAN","CEL",dir.ra_deg(),dir.dec_deg(),-1*bin_size,bin_size,nx,ny,energies.size());
+
+
+	
+	// loop on skymap pixel
+	for( int i_pixel = 0 ; i_pixel < cube.npix(); i_pixel++){
+	  
+	  GSkyDir pix_dir = cube.inx2dir(i_pixel);
+	  // Retrieve coordinate vector, implying radec system for rotation matrix
+	  GVector cube_radec = GVector(pix_dir.ra_deg(),pix_dir.dec_deg());
+	  GVector inst = rot * cube_radec
+	    
+	    // loop on the energy map
+	    for(int i_energy = 0 ; i_energy < energies.size(), i_energy++){
+	      
+	      //
+	      
+	      
+	      double value = 
+	      
+	      cube(i_pixel,i_energy) = value;
+	      
+	    }
+	  
+	}
+	
+
+	//Create the GModelSpatialDiffuseCube 
+	m_spatial = new GModelSpatialDiffuseCube(cube,energies);
 
 
 	// Return
