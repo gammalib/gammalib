@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GRan.cpp - Random number generator class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -202,8 +202,6 @@ void GRan::seed(unsigned long long int seed)
 
 /***********************************************************************//**
  * @brief Return 32-bit random unsigned integer
- *
- * This method is inspired from Numerical Recipes Third Edition, page 343.
  ***************************************************************************/
 unsigned long int GRan::int32(void)
 {
@@ -214,36 +212,32 @@ unsigned long int GRan::int32(void)
 
 /***********************************************************************//**
  * @brief Return 64-bit random unsigned integer
- *
- * This method is inspired from Numerical Recipes Third Edition, page 343.
  ***************************************************************************/
 unsigned long long int GRan::int64(void)
 {
     // Update u
-    m_u = m_u * 2862933555777941757LL + 7046029254386353087LL;
+    m_value1 = m_value1 * 2862933555777941757LL + 7046029254386353087LL;
 
     // Shuffle v
-    m_v ^= m_v >> 17;
-    m_v ^= m_v << 31;
-    m_v ^= m_v >> 8;
+    m_value2 ^= m_value2 >> 17;
+    m_value2 ^= m_value2 << 31;
+    m_value2 ^= m_value2 >> 8;
 
     // Update w
-    m_w = 4294957665U * (m_w & 0xffffffff) + (m_w >> 32);
+    m_value3 = 4294957665U * (m_value3 & 0xffffffff) + (m_value3 >> 32);
 
     // Compute x
-    unsigned long long int x = m_u ^ (m_u << 21);
+    unsigned long long int x = m_value1 ^ (m_value1 << 21);
     x ^= x >> 35;
     x ^= x << 4;
     
     // Return random value
-    return ((x + m_v) ^ m_w);
+    return ((x + m_value2) ^ m_value3);
 }
 
 
 /***********************************************************************//**
  * @brief Returns random double precision floating value in range 0 to 1
- *
- * This method is inspired from Numerical Recipes Third Edition, page 343.
  ***************************************************************************/
 double GRan::uniform(void)
 {
@@ -264,8 +258,6 @@ double GRan::uniform(void)
  * This method may be used to simulate the occurence time of an event, where
  * \f$\lambda\f$ is the mean event rate. Convsersely, \f$1/\lambda\f$ is the
  * mean waiting time between events.
- * 
- * This method is inspired from Numerical Recipes Third Edition, page 362.
  *
  * @todo Check that \f$\lambda>0\f$.
  ***************************************************************************/
@@ -293,51 +285,49 @@ double GRan::exp(const double& lambda)
  *
  * This method may be used to simulate the number of events in case that a
  * given mean number of events is expected.
- * 
- * This method is inspired from Numerical Recipes Third Edition, page 362.
  ***************************************************************************/
 double GRan::poisson(const double& lambda)
 {
     // Declare result
-    double em;
+    double value;
 
     // Use direct method for small numbers ...
     if (lambda < 12.0) {
-        if (lambda != m_oldm) {
-            m_oldm = lambda;
-            m_g    = std::exp(-lambda);
+        if (lambda != m_old_lambda) {
+            m_old_lambda = lambda;
+            m_exp_lambda = std::exp(-lambda);
         }
-        em       = -1.0;
-        double t =  1.0;
+        value      = -1.0;
+        double tmp =  1.0;
         do {
-            em += 1.0;
-            t  *= uniform();
-        } while (t > m_g);
+            value += 1.0;
+            tmp   *= uniform();
+        } while (tmp > m_exp_lambda);
     } // endif: direct method used
 
     // ... otherwise use rejection method        
     else {
-        double t;
-        if (lambda != m_oldm) {
-            m_oldm = lambda;
-            m_sq   = std::sqrt(2.0*lambda);
-            m_alxm = std::log(lambda);
-            m_g    = lambda * m_alxm - gammalib::gammln(lambda+1.0);
+        double tmp;
+        if (lambda != m_old_lambda) {
+            m_old_lambda  = lambda;
+            m_sqrt_lambda = std::sqrt(2.0*lambda);
+            m_log_lambda  = std::log(lambda);
+            m_exp_lambda  = lambda * m_log_lambda - gammalib::gammln(lambda+1.0);
         }
         do {
-            double y;
+            double factor;
             do {
-                y  = std::tan(gammalib::pi * uniform());
-                em = m_sq * y + lambda;
-            } while (em < 0.0);
-            em = floor(em);
-            t  = 0.9*(1.0+y*y) *
-                 std::exp(em*m_alxm - gammalib::gammln(em+1.0)-m_g);
-        } while (uniform() > t);
+                factor = std::tan(gammalib::pi * uniform());
+                value  = m_sqrt_lambda * factor + lambda;
+            } while (value < 0.0);
+            value = floor(value);
+            tmp   = 0.9*(1.0+factor*factor) *
+                    std::exp(value*m_log_lambda - gammalib::gammln(value+1.0)-m_exp_lambda);
+        } while (uniform() > tmp);
     }
     
     // Return random deviate
-    return em;
+    return value;
 }
 
 
@@ -384,9 +374,9 @@ std::string GRan::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Seed")+gammalib::str(m_seed));
-        result.append("\n"+gammalib::parformat("u")+gammalib::str(m_u));
-        result.append("\n"+gammalib::parformat("v")+gammalib::str(m_v));
-        result.append("\n"+gammalib::parformat("w")+gammalib::str(m_w));
+        result.append("\n"+gammalib::parformat("Value 1")+gammalib::str(m_value1));
+        result.append("\n"+gammalib::parformat("Value 2")+gammalib::str(m_value2));
+        result.append("\n"+gammalib::parformat("Value 3")+gammalib::str(m_value3));
 
     } // endif: chatter was not silent
 
@@ -407,20 +397,20 @@ std::string GRan::print(const GChatter& chatter) const
 void GRan::init_members(unsigned long long int seed)
 {
     // Initialise members
-    m_seed = seed;
-    m_v    = 4101842887655102017LL;
-    m_w    = 1;
-    m_oldm = -1.0;
-    m_sq   = 0.0;
-    m_alxm = 0.0;
-    m_g    = 0.0;
+    m_seed        = seed;
+    m_value2      = 4101842887655102017LL;
+    m_value3      = 1;
+    m_old_lambda  = -1.0;
+    m_sqrt_lambda = 0.0;
+    m_log_lambda  = 0.0;
+    m_exp_lambda  = 0.0;
 
-    // Initialise u, v, and w
-    m_u = m_seed ^ m_v;
+    // Initialise values
+    m_value1 = m_seed ^ m_value2;
     int64();
-    m_v = m_u;
+    m_value2 = m_value1;
     int64();
-    m_w = m_v;
+    m_value3 = m_value2;
     int64();
 
     // Return
@@ -436,14 +426,14 @@ void GRan::init_members(unsigned long long int seed)
 void GRan::copy_members(const GRan& ran)
 {
     // Copy members
-    m_seed = ran.m_seed;
-    m_u    = ran.m_u;
-    m_v    = ran.m_v;
-    m_w    = ran.m_w;
-    m_oldm = ran.m_oldm;
-    m_sq   = ran.m_sq;
-    m_alxm = ran.m_alxm;
-    m_g    = ran.m_g;
+    m_seed        = ran.m_seed;
+    m_value1      = ran.m_value1;
+    m_value2      = ran.m_value2;
+    m_value3      = ran.m_value3;
+    m_old_lambda  = ran.m_old_lambda;
+    m_sqrt_lambda = ran.m_sqrt_lambda;
+    m_log_lambda  = ran.m_log_lambda;
+    m_exp_lambda  = ran.m_exp_lambda;
     
     // Return
     return;

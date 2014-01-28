@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GRan.hpp - Random number generator class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,16 +71,16 @@ protected:
     void                   free_members(void);
 
     // Protected data members
-    unsigned long long int m_seed;  //!< Random number generator seed
-    unsigned long long int m_u;     //!< u
-    unsigned long long int m_v;     //!< v
-    unsigned long long int m_w;     //!< w
+    unsigned long long int m_seed;    //!< Random number generator seed
+    unsigned long long int m_value1;  //!< Value 1
+    unsigned long long int m_value2;  //!< Value 2
+    unsigned long long int m_value3;  //!< Value 3
 
     // Poisson cache
-    double                 m_oldm;
-    double                 m_sq;
-    double                 m_alxm;
-    double                 m_g;
+    double m_old_lambda;    //!< Old lambda value
+    double m_sqrt_lambda;   //!< sqrt(2*lambda)
+    double m_log_lambda;    //!< log(lambda)
+    double m_exp_lambda;    //!< exp(-lambda)
 };
 
 
