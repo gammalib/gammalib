@@ -633,8 +633,7 @@ void GSkyRegionRing::compute_solid_angle(void)
 	double radius2_rad = m_radius2 * gammalib::deg2rad;
 
 	// Compute solid angle
-	m_solid1 = gammalib::twopi * (1.0 - std::cos(radius1_rad));
-	m_solid2 = gammalib::twopi * (1.0 - std::cos(radius2_rad));
+	m_solid = gammalib::twopi * (1.0 - std::cos(radius2_rad)) - gammalib::twopi * (1.0 - std::cos(radius1_rad));
 
     // Return
     return;

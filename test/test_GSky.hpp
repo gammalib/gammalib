@@ -50,6 +50,8 @@ public:
     void              test_GSkyRegions_io(void);
     void              test_GSkyRegionCircle_construct(void);
     void              test_GSkyRegionCircle_logic(void);
+    void              test_GSkyRegionRing_construct(void);
+    void              test_GSkyRegionRing_logic(void);
 
 // Private methods
 private:
