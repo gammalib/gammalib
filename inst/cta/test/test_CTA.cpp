@@ -98,6 +98,7 @@ void TestGCTAModelBackground::set(void)
 
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred), "Test background spatial npred integration");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_dummy), "Test background dummy");
 
     // Return
     return;
@@ -491,6 +492,11 @@ void TestGCTAResponse::test_response(void)
 
     // Return
     return;
+}
+
+void TestGCTAModelBackground::test_modelbg_dummy(void)
+{
+    std::cout << "Dummy test" << std::endl;
 }
 
 
