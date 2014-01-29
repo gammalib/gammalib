@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GSkyRegionCircle.hpp"
+#include "GSkyRegionRing.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -522,6 +523,28 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
         
 	}
 
+	// If other region is ring use a simple way to calculate
+	else if (reg.type() == "Ring") {
+
+		// Create circular region from reg
+		const GSkyRegionRing* regring =
+              dynamic_cast<const GSkyRegionRing*>(&reg);
+
+		// Calculate angular distance between the centres
+		double ang_dist = m_centre.dist_deg(regring->centre());
+
+		// Check if the distance is smaller than the sum of the outer radii and the circular radii
+		if (ang_dist <= (m_radius + regring->radius2())) {
+			overlap = true;
+		}
+
+	   // Check if two regions overlap
+		if ((ang_dist + m_radius) < regring->radius1()) {
+			overlap = true;
+		}
+        
+	}
+	
     // ... otherwise throw an exception
 	else {
 		throw GException::feature_not_implemented(G_OVERLAPS,

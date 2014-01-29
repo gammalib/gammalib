@@ -929,6 +929,12 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
     GSkyRegionCircle refregion_raoffset(refdir_raoffset,10);
     GSkyRegionCircle refregion_rapole(refdir_rapole,3);
     GSkyRegionCircle refregion_decpole(refdir_decpole,3);
+    
+    GSkyRegionRing refregion_ring_smaller(refdir_radeczerozero,6,8);
+    GSkyRegionRing refregion_ring_larger(refdir_radeczerozero,20,25);
+    GSkyRegionRing refregion_ring_raoffset(refdir_raoffset,10,20);
+    GSkyRegionRing refregion_ring_rapole(refdir_rapole,3,6);
+    GSkyRegionRing refregion_ring_decpole(refdir_decpole,3,5);
 
     // Test contain dirs
 	test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
@@ -949,6 +955,12 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 	test_assert(refregion.overlaps(refregion_raoffset),"test3 for overlap");
 	test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
 
+    test_assert(refregion.overlaps(refregion_ring_smaller),"test5 for overlap");
+    test_assert(refregion.overlaps(refregion_ring_larger),"test6 for overlap");
+    test_assert(refregion.overlaps(refregion_ring_raoffset),"test7 for overlap");
+    test_assert(refregion.overlaps(refregion_ring_rapole),"test8 for overlap");
+    test_assert(!refregion.overlaps(refregion_ring_decpole),"test9 for overlap");
+    
 	// Exit test
     return;
 }
@@ -1167,6 +1179,12 @@ void TestGSky::test_GSkyRegionRing_logic(void)
     GSkyRegionRing refregion_raoffset(refdir_raoffset,10,20);
     GSkyRegionRing refregion_rapole(refdir_rapole,3,6);
     GSkyRegionRing refregion_decpole(refdir_decpole,3,5);
+    
+    GSkyRegionCircle refregion_circle_smaller(refdir_radeczerozero,12);
+    GSkyRegionCircle refregion_circle_larger(refdir_radeczerozero,12);
+    GSkyRegionCircle refregion_circle_raoffset(refdir_raoffset,12);
+    GSkyRegionCircle refregion_circle_rapole(refdir_rapole,12);
+    GSkyRegionCircle refregion_circle_decpole(refdir_decpole,12);
 
     // Test contain dirs
     test_assert(!refregion.contains(refdir_radeczerozero),"test for containment");
@@ -1175,9 +1193,9 @@ void TestGSky::test_GSkyRegionRing_logic(void)
     test_assert(!refregion.contains(refdir_outside_refregion), "test2 for containment");
 
     // Test contain regions
-    test_assert(!refregion.contains(refregion_smaller),"test for containment region");
+    test_assert(refregion.contains(refregion_smaller),"test for containment region");
     test_assert(!refregion.contains(refregion_larger), "test for containment region2 ");
-    test_assert(!refregion.contains(refregion), "test3 for containment region");
+    test_assert(refregion.contains(refregion), "test3 for containment region");
 
     test_assert(!refregion.contains(refdir_rapole), "rapole for containment region");
     test_assert(!refregion_decpole.contains(refdir_ndecpole), "rapole for containment region");
@@ -1187,6 +1205,13 @@ void TestGSky::test_GSkyRegionRing_logic(void)
     test_assert(refregion.overlaps(refregion_larger),"test2 for overlap");
     test_assert(refregion.overlaps(refregion_raoffset),"test3 for overlap");
     test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
+    
+    test_assert(refregion.overlaps(refregion_circle_smaller),"test5 for overlap");
+    test_assert(refregion.overlaps(refregion_circle_larger),"test6 for overlap");
+    test_assert(refregion.overlaps(refregion_circle_raoffset),"test7 for overlap");
+    test_assert(refregion.overlaps(refregion_circle_rapole),"test8 for overlap");
+    test_assert(!refregion.overlaps(refregion_circle_decpole),"test9 for overlap");
+   
 
 	  // Exit test
     return;

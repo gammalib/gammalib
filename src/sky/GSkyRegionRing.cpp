@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GSkyRegionRing.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -135,7 +136,6 @@ GSkyRegionRing::GSkyRegionRing(const std::string& line)
 	 return;
 
 }
-
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -498,16 +498,21 @@ bool GSkyRegionRing::contains(const GSkyRegion& reg) const
 	if (reg.type() == "Ring") {
 
 		// Create circular region from reg
-		const GSkyRegionRing* regcirc =
+		const GSkyRegionRing* regring =
               dynamic_cast<const GSkyRegionRing*>(&reg);
 
 		// Calculate angular distance between the centres
-		double ang_dist = m_centre.dist_deg(regcirc->centre());
+		double ang_dist = m_centre.dist_deg(regring->centre());
 
 		// Check if the region is contained in this
-		if ((ang_dist + regcirc->radius2()) <= m_radius2 && (ang_dist - regcirc->radius1()) >= m_radius1) {
+		if ((ang_dist + regring->radius2()) <= m_radius2 && (ang_dist - regring->radius2()) >= m_radius1) {
 			fully_inside = true;
 		}
+		
+		if ( (ang_dist + m_radius1) <= regring->radius1() && (ang_dist + regring->radius2()) <= m_radius2) {
+		    fully_inside = true;
+		}		
+		
         
 	}
     
@@ -539,24 +544,45 @@ bool GSkyRegionRing::overlaps(const GSkyRegion& reg) const
 	if (reg.type() == "Ring") {
 
 		// Create circular region from reg
-		const GSkyRegionRing* regcirc =
+		const GSkyRegionRing* regring =
               dynamic_cast<const GSkyRegionRing*>(&reg);
 
 		// Calculate angular distance between the centres
-		double ang_dist = m_centre.dist_deg(regcirc->centre());
+		double ang_dist = m_centre.dist_deg(regring->centre());
 
 		// Check if the distance is smaller than the sum of both outer radii
-		if (ang_dist <= (m_radius2 + regcirc->radius2())) {
+		if (ang_dist <= (m_radius2 + regring->radius2())) {
 			overlap = true;
 		}
 		
 	  // Check if the distance is smaller than the sum of both inner radii
-		if (ang_dist <= (m_radius1 + regcirc->radius1())) {
+		if (ang_dist <= (m_radius1 + regring->radius1())) {
 			overlap = true;
 		}
 
 	  // Check if two regions overlap
-		if (ang_dist >= (m_radius1 + regcirc->radius1()) && ang_dist <= (m_radius2 + regcirc->radius2())) {
+		if (ang_dist >= (m_radius1 + regring->radius1()) && ang_dist <= (m_radius2 + regring->radius2())) {
+			overlap = true;
+		}
+        
+	}
+	// If other region is Circle use a simple way to calculate
+	else if (reg.type() == "Circle") {
+
+		// Create circular region from reg
+		const GSkyRegionCircle* regcirc =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
+
+		// Calculate angular distance between the centres
+		double ang_dist = m_centre.dist_deg(regcirc->centre());
+
+		// Check if the distance is smaller than the sum of the outer radii and the circular radii
+		if (ang_dist <= (m_radius2 + regcirc->radius())) {
+			overlap = true;
+		}
+
+	    // Check if two regions overlap
+		if ((ang_dist + m_radius2) < regcirc->radius()) {
 			overlap = true;
 		}
         
@@ -599,7 +625,7 @@ void GSkyRegionRing::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] region Circular sky region.
+ * @param[in] region ring sky region.
  ***************************************************************************/
 void GSkyRegionRing::copy_members(const GSkyRegionRing& region)
 {

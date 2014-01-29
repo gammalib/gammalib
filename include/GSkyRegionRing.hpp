@@ -94,9 +94,10 @@ protected:
     void compute_solid_angle(void);
 
     // Protected members
-    GSkyDir	m_centre;   //!< Centre or reference point of the region
-    double 	m_radius1; 	//!< Radius of inner ring the region [deg]
-    double  m_radius2;  //!< Radius of outer ring the region [deg]
+    GSkyDir	m_centre;          //!< Centre or reference point of the region
+    double 	m_radius1; 	       //!< Radius of inner ring the region [deg]
+    double  m_radius2;         //!< Radius of outer ring the region [deg]
+    
 };
 
 
