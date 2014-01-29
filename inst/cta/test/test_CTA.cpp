@@ -50,6 +50,7 @@ const std::string cta_unbin_xml  = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml  = datadir+"/crab.xml";
 const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
+const std::string cta_modbck_fit = datadir+"/bg_test.fits";
 const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/000002";
 const std::string cta_irf_king   = "irf_test.fits";
 
@@ -97,10 +98,8 @@ void TestGCTAModelBackground::set(void)
     name("GCTAModelBackground");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_1), "Test background spatial constructor(models[0])");
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_2), "Test background spatial constructor( instrument coordinates )");
-    //append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_all), "Test background spatial npred integration");
-    //append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_dummy), "Test background dummy");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_xml), "Test background spatial constructor using xml model file");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_construct_fits), "Test background spatial constructor using fits file in instrument coords");
 
     // Return
     return;
@@ -496,22 +495,9 @@ void TestGCTAResponse::test_response(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Test CTA Model Background Npred computation
- *
- * Tests the Npred computation for the background source model using
- *  different constructors
- ***************************************************************************/
-void TestGCTAModelBackground::test_modelbg_npred_all(void)
-{
-    std::cout<<"Testing constructor 1:"<<std::endl;
-    test_modelbg_npred(1);
-    std::cout<<"Testing constructor 2:"<<std::endl;
-    test_modelbg_npred(2);
-}
 
 
-void TestGCTAModelBackground::test_modelbg_npred_1(void)
+void TestGCTAModelBackground::test_modelbg_npred_xml(void)
 {
     // Set reference value (~0.393469 result of a 2D Gaussian integrated 
     // within one sigma)
@@ -585,12 +571,39 @@ void TestGCTAModelBackground::test_modelbg_npred_1(void)
 	return ;
 }
 
-void TestGCTAModelBackground::test_modelbg_npred_2(void)
+/***********************************************************************//**
+ * @brief Test CTA Model Background Instrument Coordinate Constructor
+ *
+ * Tests that the 2nd constructor of GCTAModelBackground, that gets its 
+ * background information from an input fits file.
+ ***************************************************************************/
+void TestGCTAModelBackground::test_modelbg_construct_fits(void)
 {
-	//std::cout << std::endl << "test_modelbg_npred_2" << std::endl;
+	
+	GEnergy              ener ( 1.2, "TeV" ) ;
+	GModelSpectralPlaw * spec = new GModelSpectralPlaw( 1.0, -1.5, ener ) ;
+	GCTAObservation      obs  ;
+	
+	const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>( obs, cta_modbck_fit, spec );
+	
+	test_value( 2.0, 0.1, 10.0, "Dummy value from bg_test.fits file" ) ;
 	return ;
 }
 
+/***********************************************************************//**
+ * @brief Test CTA Model Background Npred computation
+ *
+ * Tests the Npred computation for the background source model using
+ *  different constructors
+ * DO NOT USE THIS FUNCTION, TAKE IT OUT
+ ***************************************************************************/
+void TestGCTAModelBackground::test_modelbg_npred_all(void)
+{
+    std::cout<<"Testing constructor 1:"<<std::endl;
+    test_modelbg_npred(1);
+    std::cout<<"Testing constructor 2:"<<std::endl;
+    test_modelbg_npred(2);
+}
 
 /***********************************************************************//**
  * @brief Test CTA Model Background Npred computation
@@ -598,6 +611,7 @@ void TestGCTAModelBackground::test_modelbg_npred_2(void)
  * Tests the Npred computation for the background source model. This is done
  * by loading the model from the XML file and by calling the
  * GCTAModelBackground::npred method. The test takes a few seconds.
+ * DO NOT USE THIS FUNCTION, TAKE IT OUT
  ***************************************************************************/
 void TestGCTAModelBackground::test_modelbg_npred(int constructnr)
 {
