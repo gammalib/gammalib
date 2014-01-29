@@ -97,8 +97,8 @@ void TestGCTAModelBackground::set(void)
     name("GCTAModelBackground");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred), "Test background spatial npred integration");
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_dummy), "Test background dummy");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_all), "Test background spatial npred integration");
+    //append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_dummy), "Test background dummy");
 
     // Return
     return;
@@ -494,10 +494,21 @@ void TestGCTAResponse::test_response(void)
     return;
 }
 
-void TestGCTAModelBackground::test_modelbg_dummy(void)
+/***********************************************************************//**
+ * @brief Test CTA Model Background Npred computation
+ *
+ * Tests the Npred computation for the background source model using
+ *  different constructors
+ ***************************************************************************/
+void TestGCTAModelBackground::test_modelbg_npred_all(void)
 {
-    std::cout << "Dummy test" << std::endl;
+    std::cout<<"Testing constructor 1:"<<std::endl;
+    test_modelbg_npred(1);
+    std::cout<<"Testing constructor 2:"<<std::endl;
+    test_modelbg_npred(2);
 }
+
+
 
 
 /***********************************************************************//**
@@ -507,17 +518,38 @@ void TestGCTAModelBackground::test_modelbg_dummy(void)
  * by loading the model from the XML file and by calling the
  * GCTAModelBackground::npred method. The test takes a few seconds.
  ***************************************************************************/
-void TestGCTAModelBackground::test_modelbg_npred(void)
+void TestGCTAModelBackground::test_modelbg_npred(int constructnr)
 {
     // Set reference value (~0.393469 result of a 2D Gaussian integrated 
     // within one sigma)
     const double ref = 1.0 - 1.0 / std::sqrt(std::exp(1.0));
-
+    
+    const GCTAModelBackground* bck =0;
     // Load models for Npred computation
     GModels models(cta_modbck_xml);
-
-    // Get the CTABackgroundModel
-    const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>(models[0]);
+    
+    std::string filename = cta_caldb_king + cta_irf_king;
+    GEnergy energy(1.0,"TeV");
+    GModelSpectralPlaw spectral = GModelSpectralPlaw(1.0,0.0,energy);
+    
+    GCTAObservation obstest;
+    obstest.load_unbinned(cta_events);
+    
+    //---------------------------
+    //------Constructor 1 -------
+    //---------------------------
+    if(constructnr==1){
+        bck = dynamic_cast<const GCTAModelBackground*>(models[0]);
+    }
+    //---------------------------
+    //------Constructor 2 -------
+    //---------------------------
+    else if(constructnr==2){
+        bck =  dynamic_cast<const GCTAModelBackground*>(obstest,filename,spectral);
+    }
+    else {
+        std::cout<<"Unkown constructor "<<constructnr<<std::endl;
+    }
 
     // Get the spectral and spatial components
     const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
