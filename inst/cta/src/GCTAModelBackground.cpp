@@ -47,6 +47,7 @@
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
 #include "GCTASupport.hpp"
+#include "GCTAResponseTable.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -194,7 +195,7 @@ GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
  * Please refer to the classes GModelSpatial and GModelSpectral to learn
  * more about the definition of the spatial and spectral components.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spectral)
+GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spectral) : GModelData()
 {
 	// Initialise private members for clean destruction
 	init_members();
@@ -1003,6 +1004,13 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	GMatrix rot = obs.pointing().rot().invert();
 
 	// Read the fits file with the background information
+	GFits fits(filename);
+
+	// Could have different extensions
+	const GFitsTable& table = *fits.table("BACKGROUND");
+
+	GCTAResponseTable background = GCTAResponseTable(table);
+	int n_energies = background.axis(2);
 
 
 	// should be read from the file
@@ -1010,7 +1018,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	double y_range = 10;
 
 	// Creating the energies
-	GEnergies& energies;
+	GEnergies energies;
 	
 	// creating the sky map
 	double bin_size_x = 0.1; // set by the user come back (function set_bin_size(x_size,y_size))
@@ -1018,7 +1026,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	int nx = int (x_range/bin_size_x);
 	int ny = int (y_range/bin_size_y);
 
-	GSkymap   cube =  GSkymap("TAN","CEL",dir.ra_deg(),dir.dec_deg(),-1*bin_size,bin_size,nx,ny,energies.size());
+	GSkymap   cube =  GSkymap("TAN","CEL",dir.ra_deg(),dir.dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,energies.size());
 
 
 	
@@ -1028,17 +1036,18 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	  GSkyDir pix_dir = cube.inx2dir(i_pixel);
 	  // Retrieve coordinate vector, implying radec system for rotation matrix
 	  GVector cube_radec = GVector(pix_dir.ra_deg(),pix_dir.dec_deg());
-	  GVector inst = rot * cube_radec
+	  GVector inst = rot * cube_radec;
 	    
 	    // loop on the energy map
-	    for(int i_energy = 0 ; i_energy < energies.size(), i_energy++){
+	    for(int i_energy = 0 ; i_energy < energies.size(); i_energy++){
 	      
-	      //
-	      
-	      
-	      double value = 
-	      
-	      cube(i_pixel,i_energy) = value;
+	    	double inst_x = inst[0];
+	    	double inst_y = inst[1];
+
+	        // Determine sigma and gamma by interpolating between nodes
+	        double value = background(0,inst_x, inst_y);
+
+	        cube(i_pixel,i_energy) = value;
 	      
 	    }
 	  
