@@ -73,6 +73,8 @@ public:
     virtual void                     set(void);
     virtual TestGCTAModelBackground* clone(void) const;
     void                             test_modelbg_npred_all(void);
+    void                             test_modelbg_npred_1(void);
+    void                             test_modelbg_npred_2(void);
     void                             test_modelbg_npred(int constructnr);
     //void                             test_modelbg_dummy(void);
 };
