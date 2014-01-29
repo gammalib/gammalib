@@ -322,8 +322,11 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
         result[i] = m_wgt1 * m_pars[i][m_inx1] +
                     m_wgt2 * m_pars[i][m_inx2] +
                     m_wgt3 * m_pars[i][m_inx3] +
-                    m_wgt4 * m_pars[i][m_inx4];
-	// lucie
+                    m_wgt4 * m_pars[i][m_inx4] +
+                    m_wgt5 * m_pars[i][m_inx5] +
+                    m_wgt6 * m_pars[i][m_inx6] +
+                    m_wgt7 * m_pars[i][m_inx7] +
+                    m_wgt8 * m_pars[i][m_inx8] ;
     }
     
     // Return result vector
@@ -449,8 +452,12 @@ double GCTAResponseTable::operator()(const int& index, const double& arg1,
     double result = m_wgt1 * m_pars[index][m_inx1] +
                     m_wgt2 * m_pars[index][m_inx2] +
                     m_wgt3 * m_pars[index][m_inx3] +
-                    m_wgt4 * m_pars[index][m_inx4];
-    // lucie
+                    m_wgt4 * m_pars[index][m_inx4] +
+                    m_wgt5 * m_pars[index][m_inx5] +
+                    m_wgt6 * m_pars[index][m_inx6] +
+                    m_wgt7 * m_pars[index][m_inx7] +
+                    m_wgt8 * m_pars[index][m_inx8];
+
 
     // Return result
     return result;
@@ -1338,20 +1345,32 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2, const dou
 
     // Compute offsets
     int size1        = axis(0);
-    int offset_left  = nodes2->inx_left()  * size1;
-    int offset_right = nodes2->inx_right() * size1;
+    int size2        = axis(1);
+    int offset_left_2  = nodes2->inx_left()  * size1;
+    int offset_right_2 = nodes2->inx_right() * size1;
+
+    int offset_left_3  = nodes3->inx_left()  * size1 * size2;
+    int offset_right_3 = nodes3->inx_right() * size1 * size2;
 
     // Set indices for bi-linear interpolation
-    m_inx1 = nodes1->inx_left()  + offset_left;
-    m_inx2 = nodes1->inx_left()  + offset_right;
-    m_inx3 = nodes1->inx_right() + offset_left;
-    m_inx4 = nodes1->inx_right() + offset_right;
+    m_inx1 = nodes1->inx_left()  + offset_left_2  + offset_left_3 ;
+    m_inx2 = nodes1->inx_left()  + offset_left_2  + offset_right_3;
+    m_inx3 = nodes1->inx_left()  + offset_right_2 + offset_left_3 ;
+    m_inx4 = nodes1->inx_left()  + offset_right_2 + offset_right_3;
+    m_inx5 = nodes1->inx_right() + offset_left_2  + offset_left_3 ;
+    m_inx6 = nodes1->inx_right() + offset_left_2  + offset_right_3;
+    m_inx7 = nodes1->inx_right() + offset_right_2 + offset_left_3 ;
+    m_inx8 = nodes1->inx_right() + offset_right_2 + offset_right_3;
 
     // Set weighting factors for bi-linear interpolation
-    m_wgt1 = nodes1->wgt_left()  * nodes2->wgt_left();
-    m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_right();
-    m_wgt3 = nodes1->wgt_right() * nodes2->wgt_left();
-    m_wgt4 = nodes1->wgt_right() * nodes2->wgt_right();
+    m_wgt1 = nodes1->wgt_left()  * nodes2->wgt_left() *  nodes3->wgt_left()  ;
+    m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_left() *  nodes3->wgt_right() ;
+    m_wgt3 = nodes1->wgt_left()  * nodes2->wgt_right()*  nodes3->wgt_left() ;
+    m_wgt4 = nodes1->wgt_left()  * nodes2->wgt_right()*  nodes3->wgt_right();
+    m_wgt5 = nodes1->wgt_right() * nodes2->wgt_left() *  nodes3->wgt_left() ;
+    m_wgt6 = nodes1->wgt_right() * nodes2->wgt_left() *  nodes3->wgt_right();
+    m_wgt7 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_left() ;
+    m_wgt8 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_right();
     
     // Return
     return;
