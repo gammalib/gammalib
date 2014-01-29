@@ -669,7 +669,7 @@ std::string GCTAOnOffObservation::print(const GChatter& chatter) const
 double GCTAOnOffObservation::model_on(const GModels&            models,
 									  const GOptimizerPars&     pars,
 										    int                 ibin,
-										    GVector*            mod_grad)
+										    GVector*            mod_grad) const
 {
 	// Get number of parameters
 	int npars = pars.size();
@@ -706,7 +706,7 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 			    const GModel* mptr = models[j];
 			    if (mptr != NULL) {
 				
-				    // Continue only if model applies to specific instrument and observation identifier
+					// Continue only if model applies to specific instrument and observation identifier
 				    if (mptr->is_valid(this->instrument(), this->id())) {
 					
 					    // If this model component is a sky component
@@ -726,25 +726,30 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 						
 						    // Spectral component (the useful one)
 						    speskyptr=skyptr->spectral();
-						    
-							// Number of gamma events in model
-						    // (Get flux over energy bin in ph/cm2/s and multiply by effective area and time)
 						    if (speskyptr != NULL)  {
-							    ngam += speskyptr->flux(emin,emax)*m_arf[ibin]*m_ontime;
-						    }
-							
-							// Gradients
-							// Evaluate model at current energy (also fills gradients)
-							double v=speskyptr->eval_gradients(emean,time);
-							// Loop over spectral model parameters
-							for (int k = 0; k < speskyptr->size(); ++k)  {  
-								const GModelPar sppar=(*speskyptr)[k];
-								if ((sppar.is_free()) && (i_par < npars))  {
-									mod_grad[i_par]=sppar.gradient();
-									i_par++;
-								}
 								
-							} // Looped over parameters of the spectral component of the current model
+								// Number of gamma events in model
+								// (Get flux over energy bin in ph/cm2/s and multiply by effective area and time)
+							    ngam += speskyptr->flux(emin,emax)*m_arf[ibin]*m_ontime;
+								// Debug
+								std::cout << "Updating number of gamma events..." << std::endl;
+								
+								// Gradients
+								// Evaluate model at current energy (also fills gradients)
+								double v=speskyptr->eval_gradients(emean,time);
+								// Loop over spectral model parameters
+								for (int k = 0; k < speskyptr->size(); ++k)  {  
+									GModelPar sppar=(*speskyptr)[k];
+									if (sppar.is_free() && i_par < npars)  {
+										// Debug
+										std::cout << "Setting model gradient for parameter " << i_par << "/" << mod_grad->size() << std::endl;
+										mod_grad[i_par]=sppar.gradient();
+										i_par++;
+									}
+									
+								} // Looped over parameters of the spectral component of the current model
+								
+						    }							
 							
 							// Increase parameter counter for temporal parameter
 							temskyptr=skyptr->temporal();
@@ -793,7 +798,7 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 double GCTAOnOffObservation::model_off(const GModels&            models,
 									   const GOptimizerPars&     pars,
 									         int                 ibin,
-									         GVector*            mod_grad)
+									         GVector*            mod_grad) const
 {
 	// Get number of parameters
 	int npars = pars.size();
@@ -831,7 +836,7 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 			    const GModel* mptr = models[j];
 			    if (mptr != NULL) {
 					
-				    // Continue only if model applies to specific instrument and observation identifier
+					// Continue only if model applies to specific instrument and observation identifier
 				    if (mptr->is_valid(this->instrument(), this->id())) {
 						
 					    // If this model component is a background component
@@ -847,26 +852,37 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 							}
 							
 						    // Spectral component (the useful one)
-						    spebgdptr=bgdptr->spectral();
-						    
-							// Number of gamma events in model
-						    // (Get flux over energy bin in ph/cm2/s and multiply by effective area and time)
-						    if (spebgdptr != NULL)  {
-							    nbgd += spebgdptr->flux(emin,emax)*m_offtime;
-						    }
-							
-							// Gradients
-							// Evaluate model at current energy (also fills gradients)
-							double v=spebgdptr->eval_gradients(emean,time);
-							// Loop over spectral model parameters
-							for (int k = 0; k < spebgdptr->size(); ++k)  {  
-								const GModelPar sppar=(*spebgdptr)[k];
-								if ((sppar.is_free()) && (i_par < npars))  {
-									mod_grad[i_par]=sppar.gradient();
-									i_par++;
-								}
+							spebgdptr=bgdptr->spectral();
+							if (spebgdptr != NULL)  {
 								
-							} // Looped over parameters of the spectral component of the current model
+								// Compute total solid angle for OFF regions
+								double totsolidangle=0.0;
+								for (int m = 0; m < m_off_regions.size(); ++m)  {
+									const GSkyRegion* skyreg=m_off_regions[m];
+									totsolidangle += skyreg->solidangle();
+								}								
+								// Number of gamma events in model
+								// (Get flux over energy bin in ph/cm2/s and multiply by effective area and time and solid angle)									
+								nbgd += spebgdptr->flux(emin,emax)*m_offtime*totsolidangle;
+								// Debug
+								std::cout << "Updating number of background events..." << std::endl;
+								
+								// Gradients
+								// Evaluate model at current energy (also fills gradients)
+								double v=spebgdptr->eval_gradients(emean,time);
+								// Loop over spectral model parameters
+								for (int k = 0; k < spebgdptr->size(); ++k)  {  
+									GModelPar sppar=(*spebgdptr)[k];
+									if (sppar.is_free() && i_par < npars)  {
+										// Debug
+										std::cout << "Setting model gradient for parameter " << i_par << "/" << mod_grad->size() << std::endl;
+										mod_grad[i_par]=sppar.gradient();
+										i_par++;
+									}
+									
+								} // Looped over parameters of the spectral component of the current model
+								
+							}
 							
 							// Increase parameter counter for temporal parameter
 							tembgdptr=bgdptr->temporal();
@@ -891,25 +907,37 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 								
 								// Spectral component (the useful one)
 								spebgdptr=bgdptr->spectral();
-								
-								// Number of gamma events in model
-								// (Get flux over energy bin in ph/cm2/s and multiply by effective area and time)
 								if (spebgdptr != NULL)  {
-									nbgd += spebgdptr->flux(emin,emax)*m_offtime;
-								}
-								
-								// Gradients
-								// Evaluate model at current energy (also fills gradients)
-								double v=spebgdptr->eval_gradients(emean,time);
-								// Loop over spectral model parameters
-								for (int k = 0; k < spebgdptr->size(); ++k)  {  
-									const GModelPar sppar=(*spebgdptr)[k];
-									if ((sppar.is_free()) && (i_par < npars))  {
-										mod_grad[i_par]=sppar.gradient();
-										i_par++;
+									
+									// Compute total solid angle for OFF regions
+									double totsolidangle=0.0;
+									for (int m = 0; m < m_off_regions.size(); ++m)  {
+										const GSkyRegion* skyreg=m_off_regions[m];
+										totsolidangle += skyreg->solidangle();
 									}
 									
-								} // Looped over parameters of the spectral component of the current model
+									// Number of gamma events in model
+									// (Get flux over energy bin in ph/cm2/s and multiply by effective area and time and solid angle)									
+									nbgd += spebgdptr->flux(emin,emax)*m_offtime*totsolidangle;
+									// Debug
+									std::cout << "Updating number of background events..." << std::endl;
+								
+								    // Gradients
+									// Evaluate model at current energy (also fills gradients)
+									double v=spebgdptr->eval_gradients(emean,time);
+									// Loop over spectral model parameters
+									for (int k = 0; k < spebgdptr->size(); ++k)  {  
+										GModelPar sppar=(*spebgdptr)[k];
+										if (sppar.is_free() && i_par < npars)  {
+											// Debug
+											std::cout << "Setting model gradient for parameter " << i_par << "/" << mod_grad->size() << std::endl;
+											mod_grad[i_par]=sppar.gradient();
+											i_par++;
+										}
+										
+									} // Looped over parameters of the spectral component of the current model
+								
+								}
 								
 								// Increase parameter counter for temporal parameter
 								tembgdptr=bgdptr->temporal();
@@ -965,11 +993,9 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
  *
  ***********************************************************************/
 double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            models,
-													  const GOptimizerPars&     pars,
 											                GMatrixSparse*      curvature,
 											                GVector*            gradient,
-											                double&             value,
-											                double&             npred)
+											                double&             npred) const
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -984,18 +1010,21 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
     int    n_zero_data   = 0;
     double sum_data      = 0.0;
     double sum_model     = 0.0;
-    double init_value    = value;
 	double init_npred    = npred;
     #endif
 	
-	// Get number of parameters
+	// Initialise likelihood value
+    double value = 0.0;
+	
+	// Get parameter array and number of parameters
+	// (Need to get rid of const qualifier before)
+	GModels* mod=const_cast<GModels*>(&models);
+	const GOptimizerPars pars=mod->pars();
 	int npars = pars.size();
 	
 	// Create model gradients array pointers (one for sky parameters, one for background parameters)
-	GVector* sky_grad= NULL;
-	GVector* bgd_grad= NULL;
-	sky_grad = new GVector(npars);
-	bgd_grad = new GVector(npars);
+	GVector sky_grad(npars);
+	GVector bgd_grad(npars);
 	// Working arrays
 	double* values = new double[npars];
 	int*    inx    = new int[npars];
@@ -1011,11 +1040,11 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 				
 		// Reinitialize working arrays
 		for (int j = 0; j < npars; ++j) {
-			(*sky_grad)[j] = 0.0;
-			(*bgd_grad)[j] = 0.0;
+			sky_grad[j] = 0.0;
+			bgd_grad[j] = 0.0;
 		}
 		  
-		  // Get energy bin bounds
+		// Get energy bin bounds
 		const GEnergy emin=m_on_spec.ebounds().emin(i);
 		const GEnergy emax=m_on_spec.ebounds().emax(i);
 		const GEnergy emean=m_on_spec.ebounds().elogmean(i);
@@ -1028,8 +1057,8 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		double nonpred=0.0;
 			
 		// Get number of gamma and background events (and corresponding spectral model gradients)
-		nbgd=model_off(models,pars,i,bgd_grad);
-		ngam=model_on(models,pars,i,sky_grad);
+		nbgd=model_off(models,pars,i,&bgd_grad);
+		ngam=model_on(models,pars,i,&sky_grad);
 		
 		// For debug (to be removed later)
 	    std::cout << "Obs " << m_name << " Bin " << i << " Non=" << non << " Noff=" << noff << " Ngam=" << ngam << " Nbgd=" << nbgd << std::endl;
@@ -1059,8 +1088,8 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		// (just needed in call to update hessian matrix)
 		int ndev = 0;
 		for (int j = 0; j < npars; ++j) {
-		     if (((*sky_grad)[j] != 0.0  && !gammalib::is_infinite((*sky_grad)[j])) || 
-				 ((*bgd_grad)[j] != 0.0  && !gammalib::is_infinite((*bgd_grad)[j])))  {
+		     if ((sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) || 
+				 (bgd_grad[j] != 0.0  && !gammalib::is_infinite(bgd_grad[j])))  {
 				  inx[ndev] = j;
 				  ndev++;
 			 }
@@ -1077,21 +1106,21 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 		for (int j = 0; j < npars; ++j) {
 			
 			// If spectral model for sky component is non-zero and non-infinite
-			if ((*sky_grad)[j] != 0.0  && !gammalib::is_infinite((*sky_grad)[j])) {
+			if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
 				
 				// Gradient
-				(*gradient)[j] += sky_factor*(*sky_grad)[j];
+				(*gradient)[j] += sky_factor*sky_grad[j];
 				
 				// Hessian (from first-order derivatives only)
 				for (int k = 0; k < npars; ++k) {
 				
 					// If spectral model for sky component is non-zero and non-infinite
-					if ((*sky_grad)[k] != 0.0  && !gammalib::is_infinite((*sky_grad)[k])) {	
-					    values[k]=(*sky_grad)[j]*(*sky_grad)[k]*fb;
+					if (sky_grad[k] != 0.0  && !gammalib::is_infinite(sky_grad[k])) {	
+					    values[k]=sky_grad[j]*sky_grad[k]*fb;
 					
 					// If spectral model for sky component is non-zero and non-infinite
-					} else if ((*bgd_grad)[k] != 0.0  && !gammalib::is_infinite((*bgd_grad)[k])) {
-						values[k]=(*sky_grad)[j]*(*bgd_grad)[k]*fc;
+					} else if (bgd_grad[k] != 0.0  && !gammalib::is_infinite(bgd_grad[k])) {
+						values[k]=sky_grad[j]*bgd_grad[k]*fc;
 						
 					// ...else neither sky nor background
 					} else {
@@ -1104,21 +1133,21 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
 				}
 			
 			// If spectral model for sky component is non-zero and non-infinite
-			} else if ((*bgd_grad)[j] != 0.0  && !gammalib::is_infinite((*bgd_grad)[j])) {
+			} else if (bgd_grad[j] != 0.0  && !gammalib::is_infinite(bgd_grad[j])) {
 				
 				// Gradient
-				(*gradient)[j] += bgd_factor*(*bgd_grad)[j];
+				(*gradient)[j] += bgd_factor*bgd_grad[j];
 				
 				// Hessian (from first-order derivatives only)
 				for (int k = 0; k < npars; ++k) {
 					
 					// If spectral model for sky component is non-zero and non-infinite
-					if ((*sky_grad)[k] != 0.0  && !gammalib::is_infinite((*sky_grad)[k])) {	
-					    values[k]=(*bgd_grad)[j]*(*sky_grad)[k]*fc;
+					if (sky_grad[k] != 0.0  && !gammalib::is_infinite(sky_grad[k])) {	
+					    values[k]=bgd_grad[j]*bgd_grad[k]*fc;
 						
 						// If spectral model for sky component is non-zero and non-infinite
-					} else if ((*bgd_grad)[k] != 0.0  && !gammalib::is_infinite((*bgd_grad)[k])) {
-						values[k]=(*bgd_grad)[j]*(*bgd_grad)[k]*fd;
+					} else if (bgd_grad[k] != 0.0  && !gammalib::is_infinite(bgd_grad[k])) {
+						values[k]=bgd_grad[j]*bgd_grad[k]*fd;
 						
 						// ...else neither sky nor background
 					} else {
@@ -1156,8 +1185,7 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
     std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
     std::cout << "Sum of data (ON): " << sum_data << std::endl;
     std::cout << "Sum of model (ON): " << sum_model << std::endl;
-    std::cout << "Initial statistics: " << init_value << std::endl;
-    std::cout << "Delta statistics: " << value-init_value << std::endl;
+    std::cout << "Statistics: " << value << std::endl;
     #endif
 	
     // Optionally dump gradient and curvature matrix
@@ -1173,7 +1201,7 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels&            
     #else
     double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     #endif
-    std::cout << "GCTAOnOffObservation::optimizer::poisson_onoff: CPU usage = "
+    std::cout << "GCTAOnOffObservation::optimizer::likelihood_poisson_onoff: CPU usage = "
 	          << t_elapse << " sec" << std::endl;
     #endif
 	

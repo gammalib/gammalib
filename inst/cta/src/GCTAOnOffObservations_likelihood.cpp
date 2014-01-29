@@ -202,15 +202,12 @@ void GCTAOnOffObservations::likelihood::eval(const GOptimizerPars& pars)
         m_curvature = new GMatrixSparse(npars,npars);
 		
 		// Loop over observations in container
-		double v=0.0;
 		for (int i = 0; i < m_this->size(); ++i) {
 			
 			// Compute likelihood
-			v += m_this->m_obs[i]->likelihood_poisson_onoff(m_this->models(),
-															pars,
+			m_value += m_this->m_obs[i]->likelihood_poisson_onoff(m_this->models(),
 											                m_curvature,
 															m_gradient,
-															m_value,
 											                m_npred);
 			
 		} // endfor: looped over observations	

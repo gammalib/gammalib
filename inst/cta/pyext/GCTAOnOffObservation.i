@@ -93,17 +93,15 @@ public:
     double                model_on(const GModels&             models,
 								   const GOptimizerPars&      pars,
 								   int                 ibin,
-								   GVector*            mod_grad);
+								   GVector*            mod_grad) const;
 	double                model_off(const GModels&            models,
 									const GOptimizerPars&     pars,
 									int                 ibin,
-									GVector*            mod_grad);
+									GVector*            mod_grad) const;
 	double                likelihood_poisson_onoff(const GModels&        models,
-												   const GOptimizerPars& pars,
 												   GMatrixSparse*  curvature,
 												   GVector*        gradient,
-												   double&         value,
-												   double&         npred);
+												   double&         npred) const;
 };
 
 
