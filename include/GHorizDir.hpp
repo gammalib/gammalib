@@ -111,7 +111,7 @@ private:
  * @return zenith angle in radians
  ***************************************************************************/
 inline
-double GHorizDir::zenith() 
+double GHorizDir::zenith() const
 {
     return gammalib::pihalf - m_alt;
 };
@@ -122,7 +122,7 @@ double GHorizDir::zenith()
  * @return zenith angle in radians
  ***************************************************************************/
 inline
-double GHorizDir::zenith_deg() 
+double GHorizDir::zenith_deg() const
 {
     return zenith() * gammalib::rad2deg;
 };
