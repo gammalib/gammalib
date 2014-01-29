@@ -89,8 +89,8 @@ private:
     void update(const double& logE) const;
 
     // Members
-    std::string         m_filename;  //!< Name of Aeff response file
-    GNodeArray          m_logE;      //!< log(E) nodes for Aeff interpolation
+    std::string         m_filename;  //!< Name of response file
+    GNodeArray          m_logE;      //!< log(E) nodes for interpolation
     std::vector<double> m_sigma;     //!< Sigma value (rms) of energy resolution
 
     // Precomputation cache
@@ -104,7 +104,7 @@ private:
 /***********************************************************************//**
  * @brief Return filename
  *
- * @return Returns filename from which energy resolution was loaded
+ * @return Returns filename from which the energy resolution was loaded
  ***************************************************************************/
 inline
 std::string GCTAEdispPerfTable::filename(void) const
