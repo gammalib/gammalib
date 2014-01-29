@@ -530,7 +530,7 @@ void TestGCTAModelBackground::test_modelbg_npred(int constructnr)
     
     std::string filename = cta_caldb_king + cta_irf_king;
     GEnergy energy(1.0,"TeV");
-    GModelSpectralPlaw spectral = GModelSpectralPlaw(1.0,0.0,energy);
+    GModelSpectralPlaw* spectral = new GModelSpectralPlaw(1.0,0.0,energy);
     
     GCTAObservation obstest;
     obstest.load_unbinned(cta_events);
