@@ -206,6 +206,9 @@ GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::
 	// creating spatial cube from background file
 	set_spatial(obs, filename);
 
+	 // Set parameter pointers
+	set_pointers();
+
 	// Return
 	return;
 }
