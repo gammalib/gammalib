@@ -115,10 +115,18 @@ private:
     mutable int    m_inx2;                           //!< Index of lower left node
     mutable int    m_inx3;                           //!< Index of upper right node
     mutable int    m_inx4;                           //!< Index of lower right node
+    mutable int    m_inx5;                           //!< Index of upper left node
+    mutable int    m_inx6;                           //!< Index of lower left node
+    mutable int    m_inx7;                           //!< Index of upper right node
+    mutable int    m_inx8;                           //!< Index of lower right node
     mutable double m_wgt1;                           //!< Weight of upper left node
     mutable double m_wgt2;                           //!< Weight of lower left node
     mutable double m_wgt3;                           //!< Weight of upper right node
     mutable double m_wgt4;                           //!< Weight of lower right node
+    mutable double m_wgt5;                           //!< Weight of upper left node
+    mutable double m_wgt6;                           //!< Weight of lower left node
+    mutable double m_wgt7;                           //!< Weight of upper right node
+    mutable double m_wgt8;                           //!< Weight of lower right node
 };
 
 
