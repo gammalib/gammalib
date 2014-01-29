@@ -51,6 +51,7 @@ class Test(GPythonTestSuite):
         # Append tests
         self.append(self.test_aeff, "Test CTA effective area classes")
         self.append(self.test_psf, "Test CTA PSF classes")
+        self.append(self.test_edisp, "Test CTA energy dispersion classes")
         self.append(self.test_onoff, "Test CTA ON/OFF analysis")
 
         # Return
@@ -161,6 +162,28 @@ class Test(GPythonTestSuite):
 
         # Return
         return
+
+    # Test point spread function response
+    def test_edisp(self):
+        """
+        Test GCTAEdisp classes.
+        """
+        # Load performance file
+        self.test_try("Test GCTAEdispPerfTable file constructor")
+        try:
+            edisp = GCTAEdispPerfTable("../inst/cta/caldb/kb_E_50h_v3.dat")
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to allocate GCTAEdispPerfTable from file.")
+
+        # Test energy dispersion values
+        print(edisp(0.001, 0.0, 0.0))
+        self.test_value(edisp(0.0, 0.0, 0.0), 537855.359317, 1.0e-6)
+        self.test_value(edisp(0.001, 0.0, 0.0), 42, 1.0e-6)
+        self.test_value(edisp(0.0, 1.0, 0.0), 1292609.56448, 1.0e-6)
+        self.test_value(edisp(0.001, 1.0, 0.0), 22277.2429186, 1.0e-6)
+        self.test_value(edisp(0.0, 1.0, 0.01745), 1292609.56448, 1.0e-6)
+        self.test_value(edisp(0.001, 1.0, 0.01745), 22277.2429186, 1.0e-6)
 
 
     # Test ON/OFF analysis
