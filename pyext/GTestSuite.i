@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuite.i - Abstract test suite base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2014 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -94,6 +94,8 @@ public:
     // Constructor
     GPythonTestSuite(void) {
         m_py_objects.clear();
+        m_py_names.clear();
+        m_py_suites.clear();
     }
 
     // Destructor
@@ -107,34 +109,78 @@ public:
     void set(void) {
     }
 
-    // Clone method
+    // Clone method (implementation makes this class non-abstract)
     GPythonTestSuite* clone(void) const {
         return new GPythonTestSuite(*this);
     }
 
     // Generic test function for Python callback
     void test(void) {
+
+        // Initialise failures, errors and test cases before testing
+        int failures = m_py_suites[m_index]->failures();
+        int errors   = m_py_suites[m_index]->errors();
+        int cases    = m_py_suites[m_index]->size();
+
+        // Execute unit test suite
         PyObject* args = Py_BuildValue("()");
         PyObject* func = static_cast<PyObject*>(m_py_objects[m_index]);
         PyObject* res  = PyEval_CallObject(func, args);
         Py_DECREF(args);
+
+        // Handle any error that occured during the test
         if (res == NULL) {
             throw GPythonException::test_error("GPythonTestSuite::test");
         }
         else {
             Py_DECREF(res);
         }
+
+        // Determine failures and errors after testing
+        m_failures += (m_py_suites[m_index]->failures() - failures);
+        m_errors   += (m_py_suites[m_index]->errors()   - errors);
+
+        // Recover test cases
+        for (int i = cases; i < m_py_suites[m_index]->size(); ++i) {
+    
+            // Get actual test case
+            GTestCase&  test = (*m_py_suites[m_index])[i];
+
+            // Kluge to set the test name correctly. For some reason, the
+            // m_index points to the first test case when the Python
+            // function is called, hence the name of the first test case
+            // gets prepended. The name is thus replaced by the correct
+            // name for all test cases following the first test case.
+            if (m_index > 0) {
+                std::string name = test.name();
+                name.erase(0, m_names[0].length());
+                name = m_names[m_index] + name;
+                test.name(name);
+            }
+
+            // Clone the test case and push it on stack
+            m_tests.push_back(new GTestCase(test));
+
+        } // endfor: looped over all test cases
+
+        // Return
         return;
     }
 
     // Append Python callback to function lists
     void append(PyObject* function, const std::string& name) {
         m_py_objects.push_back(function);
+        m_py_names.push_back(name);
+        m_py_suites.push_back(this);
         Py_INCREF(function);
         this->GTestSuite::append(static_cast<pfunction>(&GPythonTestSuite::test),
                                  name);
     }
-    std::vector<PyObject*> m_py_objects; //!< Python callback function list
+
+    // Callback information
+    std::vector<PyObject*>   m_py_objects; //!< Python callback function list
+    std::vector<std::string> m_py_names;   //!< Python callback function names
+    std::vector<GTestSuite*> m_py_suites;  //!< Python callback function pointers
 };
 %}
 
@@ -194,11 +240,6 @@ public:
  * @brief GTestSuite class extension
  ***************************************************************************/
 %extend GTestSuite {
-    /*
-    char *__str__() {
-        return gammalib::tochar(self->print());
-    }
-    */
     GTestCase& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-25 January 2014
+29 January 2014
 
 
 1. Introduction
@@ -100,7 +100,12 @@ None
 
 17. Test module
 ---------------
-None
+The results of the Python unit test were not correctly tracked due to
+some subtle problems related to the way how C++ code is called through the
+Python interface. A kluge has been found and added to GTestSuite.i to
+retrieve the Python test results and to propagate them to the C++ test
+suite, so now Python test results are also written into the XML file, and
+the Python tests signal failure in case that something goes wrong.
 
 
 18. Multi-wavelength interface

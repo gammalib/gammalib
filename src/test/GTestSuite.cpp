@@ -389,8 +389,8 @@ void GTestSuite::test_assert(const bool&        assert,
 
     // Return
     return;
-
 }
+
 
 /***********************************************************************//**
  * @brief Test a value
