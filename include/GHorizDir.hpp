@@ -24,8 +24,8 @@
  * @author K. Kosack
  */
 
-#ifndef GSKYDIR_HPP
-#define GSKYDIR_HPP
+#ifndef GHORIZDIR_HPP
+#define GHORIZDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
