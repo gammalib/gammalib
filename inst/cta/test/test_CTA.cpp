@@ -68,6 +68,7 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test Energy Dispersion");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
 
@@ -322,6 +323,41 @@ void TestGCTAResponse::test_response_npsf(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test CTA Energy Dispersion computation
+ *
+ * The Energy Dispersion computation is tested by integrating numerically the Edisp
+ * function. Integration is done in a rather simplistic way, by stepping
+ * radially away from the centre. The integration is done for a set of
+ * energies from 0.1-10 TeV.
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edisp(void)
+{
+    // Load response
+    GCTAResponse rsp;
+    rsp.caldb(cta_caldb);
+    rsp.load(cta_irf);
+
+    // Integrate Energy Dispersion
+    GEnergy eng;
+    for (double e = 0.1; e < 10.0; e *= 2.0) {
+        eng.TeV(e);
+        double r     = 0.0;
+        double dr    = 0.001;
+        int    steps = int(1.0/dr);
+        double sum   = 0.0;
+        for (int i = 0; i < steps; ++i) {
+            r   += dr;
+            sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
+                   gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
+                   gammalib::deg2rad;
+        }
+        test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
+    }
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test CTA IRF computation for diffuse source model
