@@ -195,8 +195,8 @@ void GHorizDir::altaz_deg(const double& alt, const double& az)
 {
 
     // Set direction
-    m_ra  = alt  * gammalib::deg2rad;
-    m_dec = az * gammalib::deg2rad;
+    m_az  = alt  * gammalib::deg2rad;
+    m_alt = az * gammalib::deg2rad;
 
     // Return
     return;
@@ -288,7 +288,7 @@ GVector GHorizDir::celvector(void) const
     double  sinaz  = std::sin(m_az);
     double  cosalt = std::cos(m_alt);
     double  sinalt = std::sin(m_alt);
-    GVector vector(cosdec*cosaz, cosdec*sinaz, sinalt);
+    GVector vector(cosalt*cosaz, cosalt*sinaz, sinalt);
 
     // Return vector
     return vector;
