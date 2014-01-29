@@ -195,8 +195,8 @@ void GHorizDir::altaz_deg(const double& alt, const double& az)
 {
 
     // Set direction
-    m_az  = alt  * gammalib::deg2rad;
-    m_alt = az * gammalib::deg2rad;
+    m_az  = az  * gammalib::deg2rad;
+    m_alt = alt * gammalib::deg2rad;
 
     // Return
     return;

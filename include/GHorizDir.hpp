@@ -71,10 +71,10 @@ public:
     void          altaz_deg(const double& alt, const double& az);
     void          celvector(const GVector& vector);
     void          rotate_deg(const double& phi, const double& theta);
-    const double& alt(void) const;
-    const double& az(void) const;
-    double        zenith() const;
-    double        zenith_deg() const;
+    const double& alt(void) const { return m_alt; }
+    const double& az(void) const { return m_az; }
+    double        zenith(void) const;
+    double        zenith_deg(void) const;
     double        alt_deg(void) const;
     double        az_deg(void) const;
     GVector       celvector(void) const;
@@ -125,7 +125,20 @@ inline
 double GHorizDir::zenith_deg() const
 {
     return zenith() * gammalib::rad2deg;
-};
+}
+
+
+inline
+double GHorizDir::alt_deg() const 
+{
+    return m_alt * gammalib::rad2deg;
+}
+
+inline
+double GHorizDir::az_deg() const 
+{
+    return m_az * gammalib::rad2deg;
+}
 
 
 #endif /* GHORIZDIR_HPP */

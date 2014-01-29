@@ -34,6 +34,7 @@
 #include "test_GSky.hpp"
 #include "GTools.hpp"
 
+
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
@@ -47,10 +48,10 @@
  * @brief Set parameters and tests
  ***************************************************************************/    
 void TestGSky::set(void){
-
+  
     // Test name
     name("GSky");
-
+  
     // Append tests
     append(static_cast<pfunction>(&TestGSky::test_GWcs),"Test GWcs");
     append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),"Test GSkyPixel");
@@ -61,6 +62,7 @@ void TestGSky::set(void){
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
+    append(static_cast<pfunction>(&TestGSky::test_GHorizDir),"Test GHorizDir");
 
     // Return
     return;
@@ -92,10 +94,10 @@ double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1,
 {
     // Initialise maximal distance
     double dist_max = 0.0;
-
+    
     // Loop over x pixels
     for (int ix = -nx; ix <= nx; ++ix) {
-
+        
         // Set x value
         double x = double(ix) + crpix1;
 
@@ -955,7 +957,7 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 /***************************************************************************
  * @brief Test GSkyRegions input and output
  ***************************************************************************/
-void TestGSky::test_GSkyRegions_io(void)
+ void TestGSky::test_GSkyRegions_io(void)
 {
 	// Set filenames
 	const std::string filename = "data/test_circle_region.reg";
@@ -1009,8 +1011,34 @@ void TestGSky::test_GSkyRegions_io(void)
 
     // Exit test
     return;
+        
 }
 
+void TestGSky::test_GHorizDir(void){
+    
+    GHorizDir nulldir;
+        
+    GHorizDir altaz;
+    double testalt = 45.0;
+    double testaz = 180.0;
+    altaz.altaz_deg( testalt, testaz );
+
+
+    double newalt = altaz.alt_deg();
+    double newaz = altaz.az_deg();
+    
+    // std::cout << altaz << std::endl;
+    // std::cout << newalt << "," << testalt << std::endl;
+    // std::cout << newaz << "," << testaz << std::endl;
+
+    test_value( newalt, testalt,1e-10,"ALT" );
+    test_value( newaz, testaz,1e-10,"AZ" );
+    test_value( altaz.zenith_deg(), 90-testalt,"ZENITH" );
+
+
+    return;
+}          
+          
 
 /***************************************************************************
  * @brief Main test function
@@ -1018,13 +1046,13 @@ void TestGSky::test_GSkyRegions_io(void)
 int main(void)
 {
     GTestSuites testsuites("GSky");
-
+           
     bool was_successful=true;
-
+            
     //Create a test suite
     TestGSky test;
-
-    //Append to the container
+            
+     //Append to the container
     testsuites.append(test);
 
     //Run
