@@ -1009,7 +1009,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	GSkyDir dir = pnt->dir();
 
 	// Retrieve rotation matrix for sky coordinate to camera coordinate
-	GMatrix rot = pnt->rot().invert();
+	GMatrixSparse rot = pnt->rot();//.invert();//TODO
 
 	// Read the fits file with the background information
 	GFits fits(filename);
@@ -1073,7 +1073,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	    for(int j = 0 ; j < energies.size(); j++) {
 
 	        // Determine background value in instrument system for given
-	        double value = background(0,inst[0], inst[1]);//,energies[j].log10TeV()); // TODO Energy interpolation missing
+	        double value = background(0,inst[0], inst[1],energies[j].log10TeV()); // TODO Energy interpolation missing
 	        cube(i,j) = value;
 	      
 	    } // endfor: loop over energies
