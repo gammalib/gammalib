@@ -82,6 +82,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GSkyRegion.hpp \
                      GSkyRegions.hpp \
                      GSkyRegionCircle.hpp \
+                     GSkyRegionRing.hpp \
                      GSkyProjection.hpp \
                      GHealpix.hpp \
                      GWcsRegistry.hpp \

@@ -141,6 +141,7 @@
 #include "GSkyRegions.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
+#include "GSkyRegionRing.hpp"
 #include "GSkyProjection.hpp"
 #include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"

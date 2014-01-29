@@ -12,6 +12,7 @@ sources = GSkyDir.cpp \
           GSkyRegions.cpp \
           GSkyRegion.cpp \
           GSkyRegionCircle.cpp \
+          GSkyRegionRing.cpp \
           GSkyProjection.cpp \
           GHealpix.cpp \
           GWcsRegistry.cpp \

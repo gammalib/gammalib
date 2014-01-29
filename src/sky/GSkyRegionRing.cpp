@@ -272,7 +272,7 @@ void GSkyRegionRing::radius1(const double& radius1)
 
 void GSkyRegionRing::radius2(const double& radius2)
 {
-	if (radius2 < 0.0 && radius2 < radius1) {
+	if (radius2 < 0.0 && radius2 < m_radius1) {
         std::string msg =
             "A radius of "+gammalib::str(radius2)+" degrees has been"
             " specified for a ring sky region.\n"
@@ -310,9 +310,9 @@ void GSkyRegionRing::read(const std::string& line)
 	std::string comment    = (substrings.size() > 1) ? substrings[1] : "";
 
 	// Finding the Ring
-	if (region_def.find("Ring") == std::string::npos) {
+	if (region_def.find("Annulus") == std::string::npos) {
         std::string msg =
-            "Unable to find the key word \"Ring\" in provided string"
+            "Unable to find the key word \"Annulus\" in provided string"
             " \""+line+"\".\n"
             "The \"Ring\" key word is mandatory.";
 		throw GException::invalid_value(G_READ, msg);
@@ -322,17 +322,17 @@ void GSkyRegionRing::read(const std::string& line)
 	std::string system = gammalib::split(region_def, ";")[0];
 
 	// Get the substring of the important values
-	unsigned    pos          = region_def.find("Ring(");
+	unsigned    pos          = region_def.find("Annulus(");
 	unsigned    end          = region_def.find(")");
-	std::string Ringstring = region_def.substr(pos+7, end);
+	std::string Ringstring = region_def.substr(pos+8, end);
 	Ringstring.erase(Ringstring.find(")"), 1);
 
-	// Get the values of the region x,y,and radius
+	// Get the values of the region x,y,and radius1 and 2
 	std::vector<std::string> values = gammalib::split(Ringstring,",");
 	if (values.size() != 4) {
         std::string msg =
             "Invalid number of "+gammalib::str(values.size())+" arguments"
-            " after the \"Ring\" key word in provided string \""+line+"\".\n"
+            " after the \"Annulus\" key word in provided string \""+line+"\".\n"
             "Exactly 4 arguments are expected.";
 		throw GException::invalid_value(G_READ, msg);
 	}
