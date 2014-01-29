@@ -206,6 +206,9 @@ GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::
 	// creating spatial cube from background file
 	set_spatial(obs, filename);
 
+	 // Set parameter pointers
+	set_pointers();
+
 	// Return
 	return;
 }
@@ -1040,12 +1043,11 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 
 	// Loop over energies
 	for(int i=0;i<n_energies;i++) {
-
-		// First create ebounds to get the logarithmic mean between two energies
-		// TODO: simplify
-		ebounds.append(GEnergy(background.axis_lo(i,2),"TeV"), GEnergy(background.axis_lo(i,2),"TeV"));
-		energies.append(ebounds.elogmean(i));
-
+	  // First create ebounds to get the logarithmic mean between two energies
+	  // TODO: simplify
+	  ebounds.append(GEnergy(background.axis_lo(2,i),"TeV"), GEnergy(background.axis_hi(2,i),"TeV"));
+	  energies.append(ebounds.elogmean(i));
+	  
 	} // endfor: loop over energies
 	
 	// creating the sky map
@@ -1065,16 +1067,13 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 
     	// Transform to instrument system
     	GVector inst = rot * cube_radec;
-	  
-    	double inst_x = inst[0];
-    	double inst_y = inst[1];
 
 	    // loop on the energy map
 	    for(int j = 0 ; j < energies.size(); j++) {
 
 	        // Determine background value in instrument system for given
-	        double value = background(0,inst[0], inst[1],energies[j].log10TeV()); // TODO Energy interpolation missing
-	        cube(i,j) = value;
+	        std::vector<double> value = background(inst[0], inst[1],energies[j].log10TeV());
+	        cube(i,j) = value[0];
 	      
 	    } // endfor: loop over energies
 
