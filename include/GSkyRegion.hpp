@@ -80,7 +80,7 @@ public:
     const std::string& type(void) const;
     const std::string& name(void) const;
 	void               name(const std::string& name);
-    const double&      solidangle(void) const;
+    double             solidangle(void) const;
 
 protected:
     // Protected methods
@@ -145,7 +145,7 @@ const std::string& GSkyRegion::type(void) const
  * Returns the solid angle subtended by the region (in steradian).
  ***************************************************************************/
 inline
-const double& GSkyRegion::solidangle(void) const
+double GSkyRegion::solidangle(void) const
 {
     return (m_solid);
 }

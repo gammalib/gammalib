@@ -677,8 +677,6 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 	// Initialize variables (vector has 0.0 values)
 	double ngam=0.0;
 	int i_par=0;
-	//if (mod_grad != NULL) delete mod_grad;
-	//mod_grad = new GVector(npars);
 	
 	// If bin number is in range
 	if (ibin < m_on_spec.size())  {
@@ -743,7 +741,7 @@ double GCTAOnOffObservation::model_on(const GModels&            models,
 									if (sppar.is_free() && i_par < npars)  {
 										// Debug
 										std::cout << "Setting model gradient for parameter " << i_par << "/" << mod_grad->size() << std::endl;
-										mod_grad[i_par]=sppar.gradient();
+										(*mod_grad)[i_par]=sppar.gradient();
 										i_par++;
 									}
 									
@@ -806,8 +804,6 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 	// Initialize variables (vector has 0.0 values)
 	double nbgd=0.0;
 	int i_par=0;
-	//if (mod_grad != NULL) delete mod_grad;
-	//mod_grad = new GVector(npars);
 	
 	// If bin number is in range
 	if (ibin < m_off_spec.size())  {
@@ -857,10 +853,13 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 								
 								// Compute total solid angle for OFF regions
 								double totsolidangle=0.0;
+								double solidangle=0.0;
 								for (int m = 0; m < m_off_regions.size(); ++m)  {
 									const GSkyRegion* skyreg=m_off_regions[m];
-									totsolidangle += skyreg->solidangle();
-								}								
+									solidangle=skyreg->solidangle();
+									totsolidangle += solidangle;
+								}
+								
 								// Number of gamma events in model
 								// (Get flux over energy bin in ph/cm2/s and multiply by effective area and time and solid angle)									
 								nbgd += spebgdptr->flux(emin,emax)*m_offtime*totsolidangle;
@@ -876,7 +875,7 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 									if (sppar.is_free() && i_par < npars)  {
 										// Debug
 										std::cout << "Setting model gradient for parameter " << i_par << "/" << mod_grad->size() << std::endl;
-										mod_grad[i_par]=sppar.gradient();
+										(*mod_grad)[i_par]=sppar.gradient();
 										i_par++;
 									}
 									
@@ -911,9 +910,11 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 									
 									// Compute total solid angle for OFF regions
 									double totsolidangle=0.0;
+									double solidangle=0.0;
 									for (int m = 0; m < m_off_regions.size(); ++m)  {
 										const GSkyRegion* skyreg=m_off_regions[m];
-										totsolidangle += skyreg->solidangle();
+										solidangle=skyreg->solidangle();
+										totsolidangle += solidangle;
 									}
 									
 									// Number of gamma events in model
@@ -931,7 +932,7 @@ double GCTAOnOffObservation::model_off(const GModels&            models,
 										if (sppar.is_free() && i_par < npars)  {
 											// Debug
 											std::cout << "Setting model gradient for parameter " << i_par << "/" << mod_grad->size() << std::endl;
-											mod_grad[i_par]=sppar.gradient();
+											(*mod_grad)[i_par]=sppar.gradient();
 											i_par++;
 										}
 										
