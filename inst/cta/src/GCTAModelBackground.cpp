@@ -997,66 +997,91 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	// Tie model to observation by assigning same id
 	ids(obs.id());
 
-	// Retrieve pointing
-	GSkyDir dir = obs.pointing().dir();
+	// Extract pointing information from CTAObservation
+	const GCTAPointing* pnt = dynamic_cast<const GCTAPointing*>(&obs.pointing());
+	if (pnt == NULL) {
+		std::string msg = "No CTA pointing found in observation.\n" +
+						  obs.print();
+		throw GException::invalid_argument(G_NPRED, msg);
+	}
+
+	// Retrieve pointing in sky direction
+	GSkyDir dir = pnt->dir();
 
 	// Retrieve rotation matrix for sky coordinate to camera coordinate
-	GMatrix rot = obs.pointing().rot().invert();
+	GMatrix rot = pnt->rot().invert();
 
 	// Read the fits file with the background information
 	GFits fits(filename);
 
-	// Could have different extensions
+	// TODO: Could have different extensions
 	const GFitsTable& table = *fits.table("BACKGROUND");
 
+	// Get the content as GCTAResponseTable
 	GCTAResponseTable background = GCTAResponseTable(table);
+
+	// read the length of the axes
+	int nx = background.axis(0);
+	int ny = background.axis(1);
 	int n_energies = background.axis(2);
 
+	// Set interpolation to logscale for energies
+	background.axis_log10(2);
 
-	// should be read from the file
-	double x_range = 10;
-	double y_range = 10;
+	// retrieve spatial bounds
+	double xlow = background.axis_lo(0,0);
+	double xhigh = background.axis_hi(0,background.axis(0)-1);
+	double ylow = background.axis_lo(1,0);
+	double yhigh = background.axis_hi(1,background.axis(1)-1);
 
 	// Creating the energies
+	GEbounds ebounds;
 	GEnergies energies;
+
+	// Loop over energies
+	for(int i=0;i<n_energies;i++) {
+
+		// First create ebounds to get the logarithmic mean between two energies
+		// TODO: simplify
+		ebounds.append(GEnergy(background.axis_lo(i,2),"TeV"), GEnergy(background.axis_lo(i,2),"TeV"));
+		energies.append(ebounds.elogmean(i));
+
+	} // endfor: loop over energies
 	
 	// creating the sky map
-	double bin_size_x = 0.1; // set by the user come back (function set_bin_size(x_size,y_size))
-	double bin_size_y = 0.1;
-	int nx = int (x_range/bin_size_x);
-	int ny = int (y_range/bin_size_y);
+	double bin_size_x = ( xhigh - xlow ) / nx;
+	double bin_size_y = ( yhigh - ylow ) / ny;
 
-	GSkymap   cube =  GSkymap("TAN","CEL",dir.ra_deg(),dir.dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,energies.size());
+	GSkymap  cube =  GSkymap("TAN","CEL",dir.ra_deg(),dir.dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
 
-
-	
 	// loop on skymap pixel
-	for( int i_pixel = 0 ; i_pixel < cube.npix(); i_pixel++){
+    for( int i = 0 ; i < cube.npix(); i++) {
+
+    	// Get sky direction from pixel number
+    	GSkyDir pix_dir = cube.inx2dir(i);
+
+    	// Retrieve coordinate vector, implying radec system for rotation matrix
+    	GVector cube_radec = GVector(pix_dir.ra_deg(),pix_dir.dec_deg());
+
+    	// Transform to instrument system
+    	GVector inst = rot * cube_radec;
 	  
-	  GSkyDir pix_dir = cube.inx2dir(i_pixel);
-	  // Retrieve coordinate vector, implying radec system for rotation matrix
-	  GVector cube_radec = GVector(pix_dir.ra_deg(),pix_dir.dec_deg());
-	  GVector inst = rot * cube_radec;
-	    
+    	double inst_x = inst[0];
+    	double inst_y = inst[1];
+
 	    // loop on the energy map
-	    for(int i_energy = 0 ; i_energy < energies.size(); i_energy++){
-	      
-	    	double inst_x = inst[0];
-	    	double inst_y = inst[1];
+	    for(int j = 0 ; j < energies.size(); j++) {
 
-	        // Determine sigma and gamma by interpolating between nodes
-	        double value = background(0,inst_x, inst_y);
-
-	        cube(i_pixel,i_energy) = value;
+	        // Determine background value in instrument system for given
+	        double value = background(0,inst[0], inst[1]);//,energies[j].log10TeV()); // TODO Energy interpolation missing
+	        cube(i,j) = value;
 	      
-	    }
-	  
-	}
+	    } // endfor: loop over energies
+
+	} // endfor: loop over sky bins
 	
-
 	//Create the GModelSpatialDiffuseCube 
 	m_spatial = new GModelSpatialDiffuseCube(cube,energies);
-
 
 	// Return
 	return;
