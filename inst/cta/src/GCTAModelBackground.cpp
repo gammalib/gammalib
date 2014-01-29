@@ -1009,10 +1009,14 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	}
 
 	// Retrieve pointing in sky direction
-	GSkyDir dir = pnt->dir();
+	GSkyDir pntdir = pnt->dir();
 
 	// Retrieve rotation matrix for sky coordinate to camera coordinate
-	GMatrixSparse rot = pnt->rot();//.invert();//TODO
+	GMatrix ry;
+	GMatrix rz;
+	ry.eulery(pntdir.dec_deg() - 90.0);
+	rz.eulerz(-pntdir.ra_deg());
+	GMatrix rot = (ry * rz);
 
 	// Read the fits file with the background information
 	GFits fits(filename);
@@ -1054,7 +1058,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	double bin_size_x = ( xhigh - xlow ) / nx;
 	double bin_size_y = ( yhigh - ylow ) / ny;
 
-	GSkymap  cube =  GSkymap("TAN","CEL",dir.ra_deg(),dir.dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
+	GSkymap  cube =  GSkymap("TAN","CEL",pntdir.ra_deg(),pntdir.dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
 
 	// loop on skymap pixel
     for( int i = 0 ; i < cube.npix(); i++) {
@@ -1063,23 +1067,40 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
     	GSkyDir pix_dir = cube.inx2dir(i);
 
     	// Retrieve coordinate vector, implying radec system for rotation matrix
-    	GVector cube_radec = GVector(pix_dir.ra_deg(),pix_dir.dec_deg());
+    	// Get celestial vector from sky coordinate
+    	GVector celvector = pntdir.celvector();
 
     	// Transform to instrument system
-    	GVector inst = rot * cube_radec;
+    	GVector inst = rot * celvector;
+
+    	double x_inst = 0.0;
+    	double y_inst = 0.0;
+
+    	double theta = std::acos(inst[2]);
+
+    	if ( theta > 0.0 ) {
+
+    		double phi = std::asin( inst[1] / std::sin(theta) );
+
+    		x_inst = theta * std::cos(phi);
+    		y_inst = theta * std::sin(phi);
+    	}
+
+
+        //GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
 
 	    // loop on the energy map
 	    for(int j = 0 ; j < energies.size(); j++) {
 
 	        // Determine background value in instrument system for given
-	        std::vector<double> value = background(inst[0], inst[1],energies[j].log10TeV());
+	        std::vector<double> value = background(x_inst, y_inst, energies[j].log10TeV());
 	        cube(i,j) = value[0];
 	      
 	    } // endfor: loop over energies
 
 	} // endfor: loop over sky bins
-	
-	//Create the GModelSpatialDiffuseCube 
+
+	// Create the GModelSpatialDiffuseCube
 	m_spatial = new GModelSpatialDiffuseCube(cube,energies);
 
 	// Return
