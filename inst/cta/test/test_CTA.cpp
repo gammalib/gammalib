@@ -97,7 +97,9 @@ void TestGCTAModelBackground::set(void)
     name("GCTAModelBackground");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_all), "Test background spatial npred integration");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_1), "Test background spatial constructor(models[0])");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_2), "Test background spatial constructor( instrument coordinates )");
+    //append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_all), "Test background spatial npred integration");
     //append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_dummy), "Test background dummy");
 
     // Return
@@ -509,6 +511,85 @@ void TestGCTAModelBackground::test_modelbg_npred_all(void)
 }
 
 
+void TestGCTAModelBackground::test_modelbg_npred_1(void)
+{
+    // Set reference value (~0.393469 result of a 2D Gaussian integrated 
+    // within one sigma)
+    const double ref = 1.0 - 1.0 / std::sqrt(std::exp(1.0));
+
+    // Load models for Npred computation
+    GModels models(cta_modbck_xml);
+
+    // Get the CTABackgroundModel
+    const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>(models[0]);
+
+    // Get the spectral and spatial components
+    const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
+    const GModelSpatialRadialGauss* spat = dynamic_cast<const GModelSpatialRadialGauss*>(bck->spatial());
+
+    // Get Integration centre for ROI position
+    double src_ra  = spat->ra();
+    double src_dec = spat->dec();
+    double sigma   = spat->sigma();
+    test_value(sigma, 1.0, 1e-7, "Input value from cta_modelbck.xml - file");
+
+    // Set ROI to sigma of Gaussian
+    double roi_rad = sigma;
+
+    // Setup ROI centred on the Gaussian mean with a radius of 1sigma
+    GCTARoi     roi;
+    GCTAInstDir instDir;
+    instDir.dir().radec_deg(src_ra, src_dec);
+    roi.centre(instDir);
+    roi.radius(roi_rad);
+
+    // Setup pointing with the same centre as ROI
+    GSkyDir skyDir;
+    skyDir.radec_deg(src_ra, src_dec);
+    GCTAPointing pnt;
+    pnt.dir(skyDir);
+
+    // Setup dummy event list
+    GGti     gti;
+    GEbounds ebounds;
+    GTime    tstart(0.0);
+    GTime    tstop(1800.0);
+    GEnergy  emin(0.1, "TeV");
+    GEnergy  emax(100.0, "TeV");
+    gti.append(tstart, tstop);
+    ebounds.append(emin, emax);
+    GCTAEventList events;
+    events.roi(roi);
+    events.gti(gti);
+    events.ebounds(ebounds);
+
+    // Setup dummy CTA observation without deadtime
+    GCTAObservation obs;
+    obs.ontime(1800.0);
+    obs.livetime(1800.0);
+    obs.deadc(1.0);
+    obs.response(cta_irf, cta_caldb);
+    obs.events(events);
+    obs.pointing(pnt);
+
+    // Perform Npred computation
+    double npred = bck->npred(spec->pivot(),tstart,obs);
+
+    // Divide npred by spectral normalisation to true containment fraction
+    npred /= spec->prefactor();
+
+    // Test Npred against the reference value
+    test_value(npred, ref , 1.0e-5,  "Npred computation for CTA background model");
+	
+	// Return
+	return ;
+}
+
+void TestGCTAModelBackground::test_modelbg_npred_2(void)
+{
+	//std::cout << std::endl << "test_modelbg_npred_2" << std::endl;
+	return ;
+}
 
 
 /***********************************************************************//**
@@ -550,6 +631,9 @@ void TestGCTAModelBackground::test_modelbg_npred(int constructnr)
     else {
         std::cout<<"Unkown constructor "<<constructnr<<std::endl;
     }
+	std::cout<< "Constructors finished." << std::endl;
+
+	return ;
 
     // Get the spectral and spatial components
     const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
