@@ -579,15 +579,37 @@ void TestGCTAModelBackground::test_modelbg_npred_xml(void)
  ***************************************************************************/
 void TestGCTAModelBackground::test_modelbg_construct_fits(void)
 {
-	
-	GEnergy              ener ( 1.2, "TeV" ) ;
-	GModelSpectralPlaw * spec = new GModelSpectralPlaw( 1.0, -1.5, ener ) ;
-	GCTAObservation      obs  ;
-	
-	const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>( obs, cta_modbck_fit, spec );
-	
-	test_value( 2.0, 0.1, 10.0, "Dummy value from bg_test.fits file" ) ;
-	return ;
+    
+    GEnergy              ener ( 1.2, "TeV" ) ;
+    std::cout<<ener<<std::endl;
+    
+    GModelSpectralPlaw   spec = GModelSpectralPlaw( 1.0, -1.5, ener ) ;
+    std::cout<<spec<<std::endl;
+    
+    GCTAObservation      obs  ;
+    obs.load_unbinned(cta_events);
+    std::cout<<obs<<std::endl;
+    
+    GCTAModelBackground bck = GCTAModelBackground(obs,cta_modbck_fit, spec );
+    
+    //const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>( obs, cta_modbck_fit, spec );
+    std::cout<< "Pointer "<<bck<<std::endl;
+    std::cout<<"Print :"<<bck.print()<< std::endl;
+    //test_value( 2.0, 0.1, 10.0, "Dummy value from bg_test.fits file" ) ;
+    
+    //Get rotation matrix between sky and instrument coordinates
+    //TODO: avoid replication of code from GCTAModelBackground.cpp for coordinate transformation
+    const GCTAPointing* pnt = dynamic_cast<const GCTAPointing*>(&obs.pointing());
+    GSkyDir pntdir = pnt->dir();
+    GMatrix ry;
+    GMatrix rz;
+    ry.eulery(pntdir.dec_deg() - 90.0);
+    rz.eulerz(-pntdir.ra_deg());
+    GMatrix rot = (ry * rz);
+    
+    std::cout<<rot.print()<<std::endl;
+    
+    return ;
 }
 
 /***********************************************************************//**
