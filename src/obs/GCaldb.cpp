@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCaldb.cpp - Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,7 +57,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  *
  * The void constructor determines the calibration database root directory
  * from the GAMMALIB_CALDB or CALDB environment variables.
@@ -67,7 +67,7 @@ GCaldb::GCaldb(void)
     // Initialise class members
     init_members();
     
-    // Set calibration database
+    // Set calibration database root directory
     set_database(rootdir());
 
     // Return
@@ -98,9 +98,6 @@ GCaldb::GCaldb(const GCaldb& caldb)
  *
  * @param[in] pathname Calibration database root directory.
  *
- * @exception GException::env_not_found
- *            CALDB or GAMMALIB_CALDB environment variables not found
- *
  * This constructor sets the calibration database using the specified root
  * directory. Unless the specified pathname is not empty, any existing CALDB
  * or GAMMALIB_CALDB environment variables will be ignored.
@@ -128,6 +125,35 @@ GCaldb::GCaldb(const std::string& pathname)
     else {
         set_database(rootdir());
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Calibration database constructor
+ *
+ * @param[in] mission Mission name (case insensitive).
+ * @param[in] instrument Instrument name (case insensitive).
+ *
+ * Constructs a calibration database instance by opening the calibration
+ * database for the specified @p mission and @p instrument. Opening consists
+ * of loading the Calibration Index File (CIF) in memory. Once opened,
+ * calibration information can be accessed.
+ *
+ * For more information about opening the database, refer to GCaldb::open.
+ ***************************************************************************/
+GCaldb::GCaldb(const std::string& mission, const std::string& instrument)
+{
+    // Initialise members
+    init_members();
+
+    // Set calibration database root directory
+    set_database(rootdir());
+
+    // Open database
+    open(mission, instrument);
 
     // Return
     return;
@@ -312,6 +338,139 @@ void GCaldb::close(void)
     
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return calibration file name based on selection parameters
+ *
+ * @param[in] detector Detector name (not used if empty).
+ * @param[in] filter Filter name (not used if empty).
+ * @param[in] codename Code name (not used if empty).
+ * @param[in] date Date in yyyy-mm-dd format (not used if empty).
+ * @param[in] time Time in hh:mm:ss format (not used if empty).
+ * @param[in] expr Boolean selection expression (not used if empty).
+ * @return Calibration filename (empty if not found).
+ *
+ * Returns a calibration file name based on selection parameters. If more
+ * files satisfy the specified selection parameters, the first file will
+ * be returned.
+ *
+ * @todo data should support "now" and probably be implemented using < condition.
+ * @todo time should support "now" and probably be implemented using < condition.
+ * @todo expr should support arbitrary Boolean expressions.
+ ***************************************************************************/
+std::string GCaldb::filename(const std::string& detector,
+                             const std::string& filter,
+                             const std::string& codename,
+                             const std::string& date,
+                             const std::string& time,
+                             const std::string& expr)
+{
+    // Initialise empty filename
+    std::string filename;
+
+    // Continue only if CIF is opened
+    if (m_cif != NULL) {
+
+        // Loop over all CIF entries
+        for (int i = 0; i < size(); ++i) {
+
+            // Initialise selection flags
+            bool match_detector = false;
+            bool match_filter   = false;
+            bool match_codename = false;
+            bool match_date     = false;
+            bool match_time     = false;
+            bool match_expr     = false;
+
+            // Check for detector
+            if (detector.length() > 0) {
+                const GFitsTableCol* column = (*m_cif)["DETNAM"];
+                if (detector == column->string(i)) {
+                    match_detector = true;
+                }
+            }
+            else {
+                match_detector = true;
+            }
+
+            // Check for filter
+            if (filter.length() > 0) {
+                const GFitsTableCol* column = (*m_cif)["FILTER"];
+                if (filter == column->string(i)) {
+                    match_filter = true;
+                }
+            }
+            else {
+                match_filter = true;
+            }
+
+            // Check for code name
+            if (codename.length() > 0) {
+                const GFitsTableCol* column = (*m_cif)["CAL_CNAM"];
+                if (codename == column->string(i)) {
+                    match_codename = true;
+                }
+            }
+            else {
+                match_codename = true;
+            }
+
+            // Check for date
+            if (date.length() > 0) {
+                const GFitsTableCol* column = (*m_cif)["CAL_VSD"];
+                if (date == column->string(i)) {
+                    match_date = true;
+                }
+            }
+            else {
+                match_date = true;
+            }
+
+            // Check for time
+            if (time.length() > 0) {
+                const GFitsTableCol* column = (*m_cif)["CAL_VST"];
+                if (time == column->string(i)) {
+                    match_time = true;
+                }
+            }
+            else {
+                match_time = true;
+            }
+
+            // Check for expression
+            if (expr.length() > 0) {
+                const GFitsTableCol* column = (*m_cif)["CAL_CBD"];
+                int num_columns = column->elements(i);
+                for (int k = 0; k < num_columns; ++k) {
+                    if (expr == column->string(i,k)) {
+                        match_expr = true;
+                        break;
+                    }
+                }
+            }
+            else {
+                match_expr = true;
+            }
+
+            // Select file if all selection match
+            if (match_detector && match_filter && match_codename &&
+                match_date && match_time && match_expr) {
+                const GFitsTableCol* cal_dir  = (*m_cif)["CAL_DIR"];
+                const GFitsTableCol* cal_file = (*m_cif)["CAL_FILE"];
+                filename = m_caldb + "/" +
+                           cal_dir->string(i) + "/" +
+                           cal_file->string(i);
+                break;
+            }
+
+        } // endfor: looped over all CIF entries
+        
+    } // endif: CIF has been opened
+
+    // Return filename
+    return filename;
 }
 
 
