@@ -1011,7 +1011,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	// Retrieve pointing in sky direction
 	GSkyDir pntdir = pnt->dir();
 
-	// Retrieve rotation matrix for sky coordinate to camera coordinate
+	// create rotation matrix
 	GMatrix ry;
 	GMatrix rz;
 	ry.eulery(pntdir.dec_deg() - 90.0);
@@ -1032,9 +1032,6 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	int ny = background.axis(1);
 	int n_energies = background.axis(2);
 
-	// Set interpolation to logscale for energies
-	background.axis_log10(2);
-
 	// retrieve spatial bounds
 	double xlow = background.axis_lo(0,0);
 	double xhigh = background.axis_hi(0,background.axis(0)-1);
@@ -1047,16 +1044,22 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 
 	// Loop over energies
 	for(int i=0;i<n_energies;i++) {
+
 	  // First create ebounds to get the logarithmic mean between two energies
-	  // TODO: simplify
 	  ebounds.append(GEnergy(background.axis_lo(2,i),"TeV"), GEnergy(background.axis_hi(2,i),"TeV"));
+
+	  // Append mean log energy to energies container
 	  energies.append(ebounds.elogmean(i));
 	  
 	} // endfor: loop over energies
 	
+
+	// Set interpolation to logscale for energies
+	background.axis_log10(2);
+
 	// creating the sky map
-	double bin_size_x = ( xhigh - xlow ) / nx;
-	double bin_size_y = ( yhigh - ylow ) / ny;
+	double bin_size_x = ( xhigh - xlow ) / nx * gammalib::rad2deg;
+	double bin_size_y = ( yhigh - ylow ) / ny * gammalib::rad2deg;
 
 	GSkymap  cube =  GSkymap("TAN","CEL",pntdir.ra_deg(),pntdir.dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
 
@@ -1066,39 +1069,41 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
     	// Get sky direction from pixel number
     	GSkyDir pix_dir = cube.inx2dir(i);
 
-    	// Retrieve coordinate vector, implying radec system for rotation matrix
     	// Get celestial vector from sky coordinate
-    	GVector celvector = pntdir.celvector();
+    	GVector celvector = pix_dir.celvector();
 
     	// Transform to instrument system
     	GVector inst = rot * celvector;
 
+    	// Initialise instrument coordinates
     	double x_inst = 0.0;
     	double y_inst = 0.0;
 
+    	// Get offset from cel vector, i.e. distance from camera center
     	double theta = std::acos(inst[2]);
 
+    	// Check if theta and phi are defined
     	if ( theta > 0.0 ) {
 
     		double phi = std::asin( inst[1] / std::sin(theta) );
-
     		x_inst = theta * std::cos(phi);
     		y_inst = theta * std::sin(phi);
     	}
 
-
-        //GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
-
-	    // loop on the energy map
+   	    // loop on the energy map
 	    for(int j = 0 ; j < energies.size(); j++) {
 
 	        // Determine background value in instrument system for given
 	        std::vector<double> value = background(x_inst, y_inst, energies[j].log10TeV());
+
+	        // Set skymap value
 	        cube(i,j) = value[0];
 	      
 	    } // endfor: loop over energies
 
 	} // endfor: loop over sky bins
+
+    cube.save("test_cube.fits",true);
 
 	// Create the GModelSpatialDiffuseCube
 	m_spatial = new GModelSpatialDiffuseCube(cube,energies);

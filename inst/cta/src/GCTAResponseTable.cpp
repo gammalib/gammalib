@@ -328,7 +328,7 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
                     m_wgt7 * m_pars[i][m_inx7] +
                     m_wgt8 * m_pars[i][m_inx8] ;
     }
-    
+
     // Return result vector
     return result;
 }
@@ -457,6 +457,7 @@ double GCTAResponseTable::operator()(const int& index, const double& arg1,
                     m_wgt6 * m_pars[index][m_inx6] +
                     m_wgt7 * m_pars[index][m_inx7] +
                     m_wgt8 * m_pars[index][m_inx8];
+
 
 
     // Return result
@@ -1343,6 +1344,7 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2, const dou
     nodes2->set_value(arg2);
     nodes3->set_value(arg3);
 
+    //std::cout<<"X="<<arg1<<" "<<nodes1->inx_left()<<" "<<nodes1->inx_right() <<std::endl;
     // Compute offsets
     int size1        = axis(0);
     int size2        = axis(1);
@@ -1371,7 +1373,7 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2, const dou
     m_wgt6 = nodes1->wgt_right() * nodes2->wgt_left() *  nodes3->wgt_right();
     m_wgt7 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_left() ;
     m_wgt8 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_right();
-    
+
     // Return
     return;
 }
