@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCTAObservation.i  -  CTA Observation class interface           *
+ *          GCTAObservation.i - CTA Observation class interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAObservation.i
- * @brief CTA observation class Python interface definition
+ * @brief CTA observation interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GCTAObservation
  *
- * @brief CTA observation class Python interface
+ * @brief CTA observation class
  ***************************************************************************/
 class GCTAObservation : public GObservation {
 public:
@@ -59,8 +59,8 @@ public:
     void                load_binned(const std::string& filename);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
-    void                response(const std::string& irfname,
-                                 const std::string& caldb = "");
+    void                response(const std::string& rspname,
+                                 const GCaldb& caldb);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     void                obs_id(const int& id);

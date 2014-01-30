@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAResponse.hpp - CTA Response class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GResponse.hpp"
+#include "GCaldb.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -63,7 +64,7 @@ public:
     // Constructors and destructors
     GCTAResponse(void);
     GCTAResponse(const GCTAResponse& rsp);
-    GCTAResponse(const std::string& rspname, const std::string& caldb = "");
+    GCTAResponse(const std::string& rspname, const GCaldb& caldb);
     virtual ~GCTAResponse(void);
 
     // Operators
@@ -101,12 +102,11 @@ public:
     // Other Methods
     GCTAEventAtom*     mc(const double& area, const GPhoton& photon,
                           const GObservation& obs, GRan& ran) const;
-    void               caldb(const std::string& caldb);
-    const std::string& caldb(void) const;
+    void               caldb(const GCaldb& caldb);
+    const GCaldb&      caldb(void) const;
     void               load(const std::string& rspname);
     void               eps(const double& eps);
     const double&      eps(void) const;
-    const std::string& rmffile(void) const;
     void               load_aeff(const std::string& filename);
     void               load_psf(const std::string& filename);
     void               load_edisp(const std::string& filename);
@@ -166,15 +166,15 @@ private:
                                         const GObservation& obs) const;
     const GCTAInstDir&     retrieve_dir(const std::string& origin,
                                         const GEvent&      event) const;
+    std::string            irf_filename(const std::string& filename) const;
 
     // Private data members
-    std::string         m_caldb;    //!< Name of or path to the calibration database
-    std::string         m_rspname;  //!< Name of the instrument response
-    std::string         m_rmffile;  //!< Name of RMF file
-    double              m_eps;      //!< Integration precision
-    GCTAAeff*           m_aeff;     //!< Effective area
-    GCTAPsf*            m_psf;      //!< Point spread function
-    GCTAEdisp*          m_edisp;    //!< Energy dispersion
+    GCaldb      m_caldb;    //!< Calibration database
+    std::string m_rspname;  //!< Name of the instrument response
+    double      m_eps;      //!< Integration precision
+    GCTAAeff*   m_aeff;     //!< Effective area
+    GCTAPsf*    m_psf;      //!< Point spread function
+    GCTAEdisp*  m_edisp;    //!< Energy dispersion
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
@@ -214,9 +214,24 @@ bool GCTAResponse::has_tdisp(void) const
  * @return Calibration database.
  ***************************************************************************/
 inline
-const std::string& GCTAResponse::caldb(void) const
+const GCaldb& GCTAResponse::caldb(void) const
 {
     return m_caldb;
+}
+
+
+/***********************************************************************//**
+ * @brief Set path to the calibration database
+ *
+ * @param[in] caldb Calibration database.
+ *
+ * Sets the calibration database for the CTA response.
+ ***************************************************************************/
+inline
+void GCTAResponse::caldb(const GCaldb& caldb)
+{
+    m_caldb = caldb;
+    return;
 }
 
 
@@ -242,18 +257,6 @@ inline
 const double& GCTAResponse::eps(void) const
 {
     return m_eps;
-}
-
-
-/***********************************************************************//**
- * @brief Return Redistribution Matrix File name
- *
- * @return Redistribution Matrix File name.
- ***************************************************************************/
-inline
-const std::string& GCTAResponse::rmffile(void) const
-{
-    return m_rmffile;
 }
 
 

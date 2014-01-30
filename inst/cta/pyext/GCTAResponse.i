@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse.i - CTA instrument response function class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCTAResponse(void);
     GCTAResponse(const GCTAResponse& rsp);
-    GCTAResponse(const std::string& rspname, const std::string& caldb = "");
+    GCTAResponse(const std::string& rspname, const GCaldb& caldb);
     virtual ~GCTAResponse(void);
 
     // Implement pure virtual base class methods
@@ -68,12 +68,11 @@ public:
     // Other Methods
     GCTAEventAtom*     mc(const double& area, const GPhoton& photon,
                           const GObservation& obs, GRan& ran) const;
-    void               caldb(const std::string& caldb);
-    const std::string& caldb(void) const;
+    void               caldb(const GCaldb& caldb);
+    const GCaldb&      caldb(void) const;
     void               load(const std::string& rspname);
     void               eps(const double& eps);
     const double&      eps(void) const;
-    const std::string& rmffile(void) const;
     void               load_aeff(const std::string& filename);
     void               load_psf(const std::string& filename);
     void               load_edisp(const std::string& filename);

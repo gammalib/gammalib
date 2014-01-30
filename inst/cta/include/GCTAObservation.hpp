@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.hpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,7 @@ class GTime;
 class GFitsHDU;
 class GResponse;
 class GXmlElement;
+class GCaldb;
 
 
 /***********************************************************************//**
@@ -77,8 +78,8 @@ public:
     void                load_binned(const std::string& filename);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
-    void                response(const std::string& irfname,
-                                 const std::string& caldb = "");
+    void                response(const std::string& rspname,
+                                 const GCaldb& caldb);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     void                obs_id(const int& id);
@@ -117,6 +118,8 @@ protected:
 
 /***********************************************************************//**
  * @brief Return CTA response function
+ *
+ * @return Response function.
  ***************************************************************************/
 inline
 const GCTAResponse& GCTAObservation::response(void) const
@@ -126,7 +129,9 @@ const GCTAResponse& GCTAObservation::response(void) const
 
 
 /***********************************************************************//**
- * @brief Return instrument
+ * @brief Return instrument name
+ *
+ * @return Instrument name.
  ***************************************************************************/
 inline
 std::string GCTAObservation::instrument(void) const
@@ -137,6 +142,8 @@ std::string GCTAObservation::instrument(void) const
 
 /***********************************************************************//**
  * @brief Return ontime
+ *
+ * @return Ontime in seconds.
  ***************************************************************************/
 inline
 double GCTAObservation::ontime(void) const
@@ -147,6 +154,8 @@ double GCTAObservation::ontime(void) const
 
 /***********************************************************************//**
  * @brief Return livetime
+ *
+ * @return Livetime in seconds.
  ***************************************************************************/
 inline
 double GCTAObservation::livetime(void) const
@@ -156,7 +165,13 @@ double GCTAObservation::livetime(void) const
 
 
 /***********************************************************************//**
- * @brief Return deadtime
+ * @brief Return deadtime correction factor
+ *
+ * @param[in] time Time.
+ * @return Deadtime correction factor.
+ *
+ * Returns the deadtime correction factor as function of time. The deadtime
+ * correction factor is defined by the livetime divided by the ontime.
  ***************************************************************************/
 inline
 double GCTAObservation::deadc(const GTime& time) const
@@ -166,7 +181,9 @@ double GCTAObservation::deadc(const GTime& time) const
 
 
 /***********************************************************************//**
- * @brief Return CTA pointing direction
+ * @brief Return CTA pointing
+ *
+ * @return CTA pointing
  ***************************************************************************/
 inline
 const GCTAPointing& GCTAObservation::pointing(void) const
@@ -176,9 +193,9 @@ const GCTAPointing& GCTAObservation::pointing(void) const
 
 
 /***********************************************************************//**
- * @brief Set CTA pointing direction
+ * @brief Set CTA pointing
  *
- * @param[in] pointing Pointing.
+ * @param[in] pointing CTA pointing.
  ***************************************************************************/
 inline
 void GCTAObservation::pointing(const GCTAPointing& pointing)

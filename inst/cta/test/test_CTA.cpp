@@ -181,7 +181,7 @@ void TestGCTAResponse::test_response_aeff(void)
 {
     // Load response
     GCTAResponse rsp;
-    rsp.caldb(cta_caldb);
+    rsp.caldb(GCaldb(cta_caldb));
     rsp.load(cta_irf);
 
     // Sum over effective area for control
@@ -213,7 +213,7 @@ void TestGCTAResponse::test_response_psf(void)
 {
     // Load response
     GCTAResponse rsp;
-    rsp.caldb(cta_caldb);
+    rsp.caldb(GCaldb(cta_caldb));
     rsp.load(cta_irf);
 
     // Integrate Psf
@@ -250,7 +250,7 @@ void TestGCTAResponse::test_response_psf_king(void)
 {
     // Load response
     GCTAResponse rsp;
-    rsp.caldb(cta_caldb_king);
+    rsp.caldb(GCaldb(cta_caldb_king));
     rsp.load(cta_irf_king);
 
     // Integrate Psf
@@ -283,7 +283,7 @@ void TestGCTAResponse::test_response_npsf(void)
 {
     // Setup CTA response
     GCTAResponse rsp;
-    rsp.caldb(cta_caldb);
+    rsp.caldb(GCaldb(cta_caldb));
     rsp.load(cta_irf);
 
     // Setup npsf computation
@@ -371,7 +371,7 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     obs.ontime(1800.0);
     obs.livetime(1600.0);
     obs.deadc(1600.0/1800.0);
-    obs.response(cta_irf, cta_caldb);
+    obs.response(cta_irf, GCaldb(cta_caldb));
     obs.events(cube);
     obs.pointing(pnt);
 
@@ -453,7 +453,7 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     obs.ontime(1800.0);
     obs.livetime(1600.0);
     obs.deadc(1600.0/1800.0);
-    obs.response(cta_irf, cta_caldb);
+    obs.response(cta_irf, GCaldb(cta_caldb));
     obs.events(events);
     obs.pointing(pnt);
 
@@ -481,7 +481,7 @@ void TestGCTAResponse::test_response(void)
     try {
         // Load response
         GCTAResponse rsp;
-        rsp.caldb(cta_caldb);
+        rsp.caldb(GCaldb(cta_caldb));
         rsp.load(cta_irf);
         test_try_success();
     }
@@ -558,7 +558,7 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
     obs.ontime(1800.0);
     obs.livetime(1800.0);
     obs.deadc(1.0);
-    obs.response(cta_irf, cta_caldb);
+    obs.response(cta_irf, GCaldb(cta_caldb));
     obs.events(events);
     obs.pointing(pnt);
 
@@ -593,7 +593,7 @@ void TestGCTAObservation::test_unbinned_obs(void)
     test_try("Load unbinned CTA observation");
     try {
         run.load_unbinned(cta_events);
-        run.response(cta_irf,cta_caldb);
+        run.response(cta_irf, GCaldb(cta_caldb));
         test_try_success();
     }
     catch (std::exception &e) {
@@ -654,7 +654,7 @@ void TestGCTAObservation::test_binned_obs(void)
     test_try("Load unbinned CTA observation");
     try {
         run.load_binned(cta_cntmap);
-        run.response(cta_irf,cta_caldb);
+        run.response(cta_irf, GCaldb(cta_caldb));
         test_try_success();
     }
     catch (std::exception &e) {
@@ -691,7 +691,7 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
     test_try("Load unbinned CTA observation");
     try {
         run.load_unbinned(cta_events);
-        run.response(cta_irf,cta_caldb);
+        run.response(cta_irf, GCaldb(cta_caldb));
         obs.append(run);
         test_try_success();
     }
@@ -753,7 +753,7 @@ void TestGCTAOptimize::test_binned_optimizer(void)
     test_try("Load binned CTA observation");
     try {
         run.load_binned(cta_cntmap);
-        run.response(cta_irf,cta_caldb);
+        run.response(cta_irf, GCaldb(cta_caldb));
         obs.append(run);
         test_try_success();
     }

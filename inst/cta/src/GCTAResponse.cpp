@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAResponse.cpp - CTA Response class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,7 +59,7 @@
 #include "GCTAEdisp.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CALDB                           "GCTAResponse::caldb(std::string&)"
+#define G_CALDB                                "GCTAResponse::caldb(GCaldb&)"
 #define G_IRF      "GCTAResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&,"\
                                           " GEnergy&, GTime&, GObservation&)"
 #define G_NPRED             "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
@@ -144,27 +144,23 @@ GCTAResponse::GCTAResponse(const GCTAResponse& rsp) : GResponse(rsp)
  * @brief Response constructor
  *
  * @param[in] rspname Response file name.
- * @param[in] caldb Calibration database path (defaults to "").
+ * @param[in] caldb Calibration database.
  *
- * Create instance of a CTA response object by specifying the response file
- * name and the calibration database path.
- *
- * If an empty string is passed as calibration database path, the method will
- * use the CALDB environment variable to determine calibration database path.
- * This is done in the method GCTAResponse::caldb which makes use of a
- * GCaldb object to locate the calibration database.
+ * Create instance of CTA response by specifying the response name and the
+ * calibration database. The response name can be either a response identifier
+ * or a filename (see GCTAResponse::load for more information).
  ***************************************************************************/
 GCTAResponse::GCTAResponse(const std::string& rspname,
-                           const std::string& caldb) : GResponse()
+                           const GCaldb& caldb) : GResponse()
 {
     // Initialise members
     init_members();
 
     // Set calibration database
-    this->caldb(caldb);
+    m_caldb = caldb;
 
     // Load IRF
-    this->load(rspname);
+    load(rspname);
 
     // Return
     return;
@@ -513,56 +509,49 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
 
 /***********************************************************************//**
- * @brief Set path to the calibration database
+ * @brief Load CTA response
  *
- * @param[in] caldb Path to calibration database
+ * @param[in] rspname CTA response name.
  *
- * This method stores the CALDB root directory as the path to the CTA
- * calibration database. Once the final calibration format has been decided
- * on, this method should be adjusted.
+ * Loads the CTA response with specified name @p rspname. The method first
+ * searchs for an appropriate response in the calibration database. If no
+ * appropriate response is found, the method takes the database root path
+ * and response name to build the full path to the response file, and tries
+ * to load the response from these paths.
  ***************************************************************************/
-void GCTAResponse::caldb(const std::string& caldb)
+void GCTAResponse::load(const std::string& rspname)
 {
-    // Allocate calibration database
-    GCaldb db(caldb);
-
-    // Store the path to the calibration database
-    m_caldb = db.dir();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load CTA response.
- *
- * @param[in] irfname Name of CTA response (without any file extension).
- ***************************************************************************/
-void GCTAResponse::load(const std::string& irfname)
-{
-    // Save calibration database name
-    std::string caldb = m_caldb;
-
-    // Clear instance
+    // Clear instance but conserve calibration database
+    GCaldb caldb = m_caldb;
     clear();
-
-    // Restore calibration database name
     m_caldb = caldb;
 
-    // Build filename. If file is not a FITS file then add ".dat" extension
-    // which is typical for a performance table.
-    std::string filename = m_caldb + "/" + irfname;
-    if (irfname.rfind(".fits")    == std::string::npos &&
-        irfname.rfind(".fits.gz") == std::string::npos) {
-        filename += ".dat";
+    // First attempt reading the response using the GCaldb interface
+    std::string expr      = "NAME("+gammalib::toupper(rspname)+")";
+    std::string aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
+    std::string psfname   = m_caldb.filename("","","RPSF","","",expr);
+    std::string edispname = m_caldb.filename("","","EDISP","","",expr);
+
+    // If filenames are empty then build filenames from CALDB root path and
+    // response name
+    if (aeffname.length() < 1) {
+        aeffname = irf_filename(m_caldb.dir() + "/" + rspname);
+    }
+    if (psfname.length() < 1) {
+        psfname = irf_filename(m_caldb.dir() + "/" + rspname);
+    }
+    if (edispname.length() < 1) {
+        edispname = irf_filename(m_caldb.dir() + "/" + rspname);
     }
 
     // Load effective area
-    load_aeff(filename);
+    load_aeff(aeffname);
 
     // Load point spread function
-    load_psf(filename);
+    load_psf(psfname);
+
+    // Load energy dispersion
+    load_edisp(edispname);
 
     // Remove theta cut
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
@@ -571,7 +560,7 @@ void GCTAResponse::load(const std::string& irfname)
     }
 
     // Store response name
-    m_rspname = irfname;
+    m_rspname = rspname;
 
     // Return
     return;
@@ -801,9 +790,10 @@ std::string GCTAResponse::print(const GChatter& chatter) const
         result.append("=== GCTAResponse ===");
 
         // Append response information
-        result.append("\n"+gammalib::parformat("Calibration database")+m_caldb);
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
-        result.append("\n"+gammalib::parformat("RMF file name")+m_rmffile);
+
+        // Append calibration database
+        result.append("\n"+m_caldb.print(gammalib::reduce(chatter)));
 
         // Append effective area information
         if (m_aeff != NULL) {
@@ -2166,7 +2156,6 @@ void GCTAResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_rmffile.clear();
     m_eps   = 1.0e-5; // Precision for Romberg integration
     m_aeff  = NULL;
     m_psf   = NULL;
@@ -2193,7 +2182,6 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     // Copy members
     m_caldb   = rsp.m_caldb;
     m_rspname = rsp.m_rspname;
-    m_rmffile = rsp.m_rmffile;
     m_eps     = rsp.m_eps;
 
     // Copy cache
@@ -2344,3 +2332,30 @@ const GCTAInstDir& GCTAResponse::retrieve_dir(const std::string& origin,
     return *dir;
 }
 
+
+/***********************************************************************//**
+ * @brief Return filename with appropriate extension
+ *
+ * @param[in] filename File name.
+ * @return File name.
+ *
+ * Checks if the specified @p filename exists, and if not, checks whether a
+ * file with the added suffix .dat exists. Returns the file name with the
+ * appropriate extension.
+ ***************************************************************************/
+std::string GCTAResponse::irf_filename(const std::string& filename) const
+{
+    // Set input filename as result filename
+    std::string result = filename;
+
+    // If file does not exist then try a variant with extension .dat
+    if (!gammalib::file_exists(result)) {
+        std::string testname = result + ".dat";
+        if (gammalib::file_exists(testname)) {
+            result = testname;
+        }
+    }
+
+    // Return result
+    return result;
+}

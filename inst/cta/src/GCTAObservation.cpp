@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,7 @@
 #include "GCTAAeff2D.hpp"
 #include "GCTAAeffArf.hpp"
 #include "GCTAAeffPerfTable.hpp"
+#include "GCTAEdisp.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCTAObservation      g_obs_cta_seed("CTA");
@@ -75,7 +76,7 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Creates empty class instance.
+ * Creates an empty CTA observation.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(void) : GObservation()
 {
@@ -95,7 +96,8 @@ GCTAObservation::GCTAObservation(void) : GObservation()
  * Creates empty CTA observation class for a given instrument. This enables
  * using the CTA specific interface for any other THE instrument. Note that
  * each other THE instruments needs a specific registry at the beginning
- * of the GCTAObservation.cpp file.
+ * of the GCTAObservation.cpp file. So far the following instruments are
+ * supported: CTA, HESS, VERITAS, MAGIC.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
 {
@@ -115,7 +117,7 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
  *
  * @param[in] obs CTA observation.
  *
- * Creates class instance by copying an existing CTA observation.
+ * Creates CTA observation by copying an existing CTA observation.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const GCTAObservation& obs) : GObservation(obs)
 {
@@ -156,7 +158,7 @@ GCTAObservation::~GCTAObservation(void)
  *
  * Assign CTA observation to this object.
  ***************************************************************************/
-GCTAObservation& GCTAObservation::operator= (const GCTAObservation& obs)
+GCTAObservation& GCTAObservation::operator=(const GCTAObservation& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
@@ -187,7 +189,7 @@ GCTAObservation& GCTAObservation::operator= (const GCTAObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear CTA observation
  ***************************************************************************/
 void GCTAObservation::clear(void)
 {
@@ -205,8 +207,10 @@ void GCTAObservation::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone CTA observation
+ *
+ * @return Pointer to deep copy of CTA observation.
+ ***************************************************************************/
 GCTAObservation* GCTAObservation::clone(void) const
 {
     return new GCTAObservation(*this);
@@ -243,11 +247,14 @@ void GCTAObservation::response(const GResponse& rsp)
 /***********************************************************************//**
  * @brief Set CTA response function
  *
- * @param[in] irfname Name of CTA response function.
- * @param[in] caldb Optional name of calibration database (defaults to "").
+ * @param[in] rspname Response name.
+ * @param[in] caldb Calibration database.
+ *
+ * Sets the CTA response function by specifying a response name and a
+ * calibration database. This method also loads the response function so that
+ * it is available for data analysis.
  ***************************************************************************/
-void GCTAObservation::response(const std::string& irfname,
-                               const std::string& caldb)
+void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
 {
     // Clear response function
     m_response.clear();
@@ -256,7 +263,7 @@ void GCTAObservation::response(const std::string& irfname,
     m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response.load(irfname);
+    m_response.load(rspname);
 
     // Return
     return;
@@ -605,7 +612,9 @@ void GCTAObservation::write(GXmlElement& xml) const
         // Handle RMF
         else if (par->attribute("name") == "EnergyDispersion") {
             std::string filename = "";
-            filename = m_response.rmffile();
+            if (m_response.edisp() != NULL) {
+                filename = m_response.edisp()->filename();
+            }
             par->attribute("file", filename);
             npar[3]++;
         }
