@@ -42,7 +42,7 @@
 /* __ Constants __________________________________________________________ */
 const std::string datadir        = PACKAGE_SOURCE"/inst/cta/test/data";
 const std::string cta_caldb      = PACKAGE_SOURCE"/inst/cta/caldb";
-const std::string cta_irf        = "kb_E_50h_v3";
+const std::string cta_irf        = "cta_dummy_irf";
 const std::string cta_events     = datadir+"/crab_events.fits.gz";
 const std::string cta_cntmap     = datadir+"/crab_cntmap.fits.gz";
 const std::string cta_bin_xml    = datadir+"/obs_binned.xml";
@@ -50,8 +50,8 @@ const std::string cta_unbin_xml  = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml  = datadir+"/crab.xml";
 const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
-const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/000002";
-const std::string cta_irf_king   = "irf_test.fits";
+const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
+const std::string cta_irf_king   = "irf_file.fits";
 
 
 /***********************************************************************//**
