@@ -75,19 +75,10 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTALib.hpp
 
 # Calibration files to distribute
-irfs = caldb/kb_A_50h_v3.dat \
-       caldb/kb_B_50h_v3.dat \
-       caldb/kb_C_50h_v3.dat \
-       caldb/kb_D_50h_v3.dat \
-       caldb/kb_E_50h_v3.dat \
-       caldb/kb_F_50h_v3.dat \
-       caldb/kb_G_50h_v3.dat \
-       caldb/kb_H_50h_v3.dat \
-       caldb/kb_I_50h_v3.dat \
-       caldb/kb_J_50h_v3.dat \
-       caldb/kb_K_50h_v3.dat \
-       caldb/kb_NA_50h_v3.dat \
-       caldb/kb_NB_50h_v3.dat
+caldb_perf = caldb/cta_dummy_irf.dat
+caldb_indx = caldb/data/cta/e/caldb.indx
+caldb_irf1 = caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits
+caldb_irf2 = caldb/data/cta/e/bcf/IFAE20120510_50h_King/irf_file.fits
 
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
@@ -95,6 +86,12 @@ libcta_la_SOURCES = $(sources)
 libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
 
 # Distribute calibration database files
-EXTRA_DIST = $(irfs)
-caldbdir = $(datadir)/caldb/cta
-caldb_DATA = $(irfs)
+EXTRA_DIST     = $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)
+caldbperfdir   = $(datadir)/caldb/data/cta/dummy
+caldbperf_DATA = $(caldb_perf)
+caldbindxdir   = $(datadir)/caldb/data/cta/e
+caldbindx_DATA = $(caldb_indx)
+caldbirf1dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h
+caldbirf1_DATA = $(caldb_irf1)
+caldbirf2dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h_King
+caldbirf2_DATA = $(caldb_irf2)
