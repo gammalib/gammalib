@@ -72,11 +72,8 @@ public:
     // Methods
     virtual void                     set(void);
     virtual TestGCTAModelBackground* clone(void) const;
-    void                             test_modelbg_npred_all(void);
     void                             test_modelbg_npred_xml(void);
     void                             test_modelbg_construct_fits(void);
-    void                             test_modelbg_npred(int constructnr);
-    //void                             test_modelbg_dummy(void);
 };
 
 
