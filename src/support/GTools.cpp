@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -824,6 +824,35 @@ bool gammalib::file_exists(const std::string& filename)
     // Return result
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Checks if directory exists
+ *
+ * @param[in] dirname Directory name.
+ *
+ * Checks if a directory exists.
+ ***************************************************************************/
+bool gammalib::dir_exists(const std::string& dirname)
+{
+    // Initialise result
+    bool result = false;
+
+    // Allocate file information structure
+    struct stat info;
+
+    // Get file information structure
+    int ret = stat(dirname.c_str(), &info);
+
+    // Check if we have a directory
+    if (ret == 0 && S_ISDIR(info.st_mode)) {
+        result = true;
+    }
+
+    // Return result
+    return result;
+}
+
 
 /***********************************************************************//**
  * @brief Checks if a substring is in a string

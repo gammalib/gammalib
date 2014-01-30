@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -88,6 +88,7 @@ namespace gammalib {
                                               const double& epivot,
                                               const double& gamma);
     bool                     file_exists(const std::string& filename);
+    bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);
     bool                     is_notanumber(const double& x);
     bool                     contains(const std::string& str,
