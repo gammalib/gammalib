@@ -50,6 +50,7 @@ const std::string cta_unbin_xml  = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml  = datadir+"/crab.xml";
 const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
+const std::string cta_modbck_fit = datadir+"/bg_test.fits";
 const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/000002";
 const std::string cta_irf_king   = "irf_test.fits";
 
@@ -97,10 +98,8 @@ void TestGCTAModelBackground::set(void)
     name("GCTAModelBackground");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_1), "Test background spatial constructor(models[0])");
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_2), "Test background spatial constructor( instrument coordinates )");
-    //append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_all), "Test background spatial npred integration");
-    //append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_dummy), "Test background dummy");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_xml), "Test background spatial constructor using xml model file");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_construct_fits), "Test background spatial constructor using fits file in instrument coords");
 
     // Return
     return;
@@ -496,22 +495,9 @@ void TestGCTAResponse::test_response(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Test CTA Model Background Npred computation
- *
- * Tests the Npred computation for the background source model using
- *  different constructors
- ***************************************************************************/
-void TestGCTAModelBackground::test_modelbg_npred_all(void)
-{
-    std::cout<<"Testing constructor 1:"<<std::endl;
-    test_modelbg_npred(1);
-    std::cout<<"Testing constructor 2:"<<std::endl;
-    test_modelbg_npred(2);
-}
 
 
-void TestGCTAModelBackground::test_modelbg_npred_1(void)
+void TestGCTAModelBackground::test_modelbg_npred_xml(void)
 {
     // Set reference value (~0.393469 result of a 2D Gaussian integrated 
     // within one sigma)
@@ -585,119 +571,24 @@ void TestGCTAModelBackground::test_modelbg_npred_1(void)
 	return ;
 }
 
-void TestGCTAModelBackground::test_modelbg_npred_2(void)
-{
-	//std::cout << std::endl << "test_modelbg_npred_2" << std::endl;
-	return ;
-}
-
-
 /***********************************************************************//**
- * @brief Test CTA Model Background Npred computation
+ * @brief Test CTA Model Background Instrument Coordinate Constructor
  *
- * Tests the Npred computation for the background source model. This is done
- * by loading the model from the XML file and by calling the
- * GCTAModelBackground::npred method. The test takes a few seconds.
+ * Tests that the 2nd constructor of GCTAModelBackground, that gets its 
+ * background information from an input fits file.
  ***************************************************************************/
-void TestGCTAModelBackground::test_modelbg_npred(int constructnr)
+void TestGCTAModelBackground::test_modelbg_construct_fits(void)
 {
-    // Set reference value (~0.393469 result of a 2D Gaussian integrated 
-    // within one sigma)
-    const double ref = 1.0 - 1.0 / std::sqrt(std::exp(1.0));
-    
-    const GCTAModelBackground* bck =0;
-    // Load models for Npred computation
-    GModels models(cta_modbck_xml);
-    
-    std::string filename = cta_caldb_king + cta_irf_king;
-    GEnergy energy(1.0,"TeV");
-    GModelSpectralPlaw* spectral = new GModelSpectralPlaw(1.0,0.0,energy);
-    
-    GCTAObservation obstest;
-    obstest.load_unbinned(cta_events);
-    
-    //---------------------------
-    //------Constructor 1 -------
-    //---------------------------
-    if(constructnr==1){
-        bck = dynamic_cast<const GCTAModelBackground*>(models[0]);
-    }
-    //---------------------------
-    //------Constructor 2 -------
-    //---------------------------
-    else if(constructnr==2){
-        bck =  dynamic_cast<const GCTAModelBackground*>(obstest,filename,spectral);
-    }
-    else {
-        std::cout<<"Unkown constructor "<<constructnr<<std::endl;
-    }
-	std::cout<< "Constructors finished." << std::endl;
-
+	
+	GEnergy              ener ( 1.2, "TeV" ) ;
+	GModelSpectralPlaw * spec = new GModelSpectralPlaw( 1.0, -1.5, ener ) ;
+	GCTAObservation      obs  ;
+	
+	const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>( obs, cta_modbck_fit, spec );
+	
+	test_value( 2.0, 0.1, 10.0, "Dummy value from bg_test.fits file" ) ;
 	return ;
-
-    // Get the spectral and spatial components
-    const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
-    const GModelSpatialRadialGauss* spat = dynamic_cast<const GModelSpatialRadialGauss*>(bck->spatial());
-
-    // Get Integration centre for ROI position
-    double src_ra  = spat->ra();
-    double src_dec = spat->dec();
-    double sigma   = spat->sigma();
-    test_value(sigma, 1.0, 1e-7, "Input value from cta_modelbck.xml - file");
-
-    // Set ROI to sigma of Gaussian
-    double roi_rad = sigma;
-
-    // Setup ROI centred on the Gaussian mean with a radius of 1sigma
-    GCTARoi     roi;
-    GCTAInstDir instDir;
-    instDir.dir().radec_deg(src_ra, src_dec);
-    roi.centre(instDir);
-    roi.radius(roi_rad);
-
-    // Setup pointing with the same centre as ROI
-    GSkyDir skyDir;
-    skyDir.radec_deg(src_ra, src_dec);
-    GCTAPointing pnt;
-    pnt.dir(skyDir);
-
-    // Setup dummy event list
-    GGti     gti;
-    GEbounds ebounds;
-    GTime    tstart(0.0);
-    GTime    tstop(1800.0);
-    GEnergy  emin(0.1, "TeV");
-    GEnergy  emax(100.0, "TeV");
-    gti.append(tstart, tstop);
-    ebounds.append(emin, emax);
-    GCTAEventList events;
-    events.roi(roi);
-    events.gti(gti);
-    events.ebounds(ebounds);
-
-    // Setup dummy CTA observation without deadtime
-    GCTAObservation obs;
-    obs.ontime(1800.0);
-    obs.livetime(1800.0);
-    obs.deadc(1.0);
-    obs.response(cta_irf, cta_caldb);
-    obs.events(events);
-    obs.pointing(pnt);
-
-    // Perform Npred computation
-    double npred = bck->npred(spec->pivot(),tstart,obs);
-
-    // Divide npred by spectral normalisation to true containment fraction
-    npred /= spec->prefactor();
-
-    // Test Npred against the reference value
-    test_value(npred, ref , 1.0e-5,  "Npred computation for CTA background model");
-
-    // Return
-    return;
 }
-
-
 
 /***********************************************************************//**
  * @brief Test unbinned observation handling
