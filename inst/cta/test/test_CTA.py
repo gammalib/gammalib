@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib CTA module.
 #
-# Copyright (C) 2012-2013 Juergen Knoedlseder
+# Copyright (C) 2012-2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,7 +64,10 @@ class Test(GPythonTestSuite):
         # Load 2D Aeff
         self.test_try("Test GCTAAeff2D file constructor")
         try:
-            aeff = GCTAAeff2D("../inst/cta/caldb/data/cta/e/bcf/000001/irf_test.fits")
+            db = GCaldb("../inst/cta/caldb")
+            db.open("cta", "e")
+            filename = db.filename("","","EFF_AREA","","","NAME(IFAE20120510_50h)")
+            aeff     = GCTAAeff2D(filename)
             self.test_try_success()
         except:
             self.test_try_failure("Unable to allocate GCTAAeff2D from file.")
@@ -78,7 +81,8 @@ class Test(GPythonTestSuite):
         # Load performance file
         self.test_try("Test GCTAAeffPerfTable file constructor")
         try:
-            aeff = GCTAAeffPerfTable("../inst/cta/caldb/kb_E_50h_v3.dat")
+            filename = "../inst/cta/caldb/cta_dummy_irf.dat"
+            aeff     = GCTAAeffPerfTable(filename)
             self.test_try_success()
         except:
             self.test_try_failure("Unable to allocate GCTAAeffPerfTable from file.")
@@ -92,7 +96,8 @@ class Test(GPythonTestSuite):
         # Load 1DC ARF response file
         self.test_try("Test GCTAAeffArf file constructor")
         try:
-            aeff = GCTAAeffArf("../inst/cta/test/caldb/dc1/arf.fits")
+            filename = "../inst/cta/test/caldb/dc1/arf.fits"
+            aeff     = GCTAAeffArf(filename)
             self.test_try_success()
         except:
             self.test_try_failure("Unable to allocate GCTAAeffArf from file.")
@@ -114,7 +119,10 @@ class Test(GPythonTestSuite):
         # Load 2D PSF
         self.test_try("Test GCTAPsf2D file constructor")
         try:
-            psf = GCTAPsf2D("../inst/cta/caldb/data/cta/e/bcf/000001/irf_test.fits")
+            db = GCaldb("../inst/cta/caldb")
+            db.open("cta", "e")
+            filename = db.filename("","","RPSF","","","NAME(IFAE20120510_50h)")
+            psf      = GCTAPsf2D(filename)
             self.test_try_success()
         except:
             self.test_try_failure("Unable to allocate GCTAPsf2D from file.")
@@ -127,10 +135,30 @@ class Test(GPythonTestSuite):
         self.test_value(psf(0.0, 1.0, 0.01745), 190115.769257, 1.0e-6)
         self.test_value(psf(0.001, 1.0, 0.01745), 104623.364268, 1.0e-6)
 
+        # Load King profile PSF
+        self.test_try("Test GCTAPsfKing file constructor")
+        try:
+            db = GCaldb("../inst/cta/caldb")
+            db.open("cta", "e")
+            filename = db.filename("","","RPSF","","","NAME(IFAE20120510_50h_King)")
+            psf      = GCTAPsfKing(filename)
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to allocate GCTAPsfKing from file.")
+
+        # Test PSF values
+        self.test_value(psf(0.0, 0.0, 0.0), 213666.253408, 1.0e-6)
+        self.test_value(psf(0.001, 0.0, 0.0), 90939.5585827, 1.0e-6)
+        self.test_value(psf(0.0, 1.0, 0.0), 1127688.29309, 1.0e-5)
+        self.test_value(psf(0.001, 1.0, 0.0), 54916.6796886, 1.0e-6)
+        self.test_value(psf(0.0, 1.0, 0.01745), 660973.856068, 1.0e-6)
+        self.test_value(psf(0.001, 1.0, 0.01745), 80272.5530008, 1.0e-6)
+
         # Load performance file
         self.test_try("Test GCTAPsfPerfTable file constructor")
         try:
-            psf = GCTAPsfPerfTable("../inst/cta/caldb/kb_E_50h_v3.dat")
+            filename = "../inst/cta/caldb/cta_dummy_irf.dat"
+            psf      = GCTAPsfPerfTable(filename)
             self.test_try_success()
         except:
             self.test_try_failure("Unable to allocate GCTAPsfPerfTable from file.")
@@ -146,7 +174,8 @@ class Test(GPythonTestSuite):
         # Load 1DC PSF file
         self.test_try("Test GCTAPsfVector file constructor")
         try:
-            psf = GCTAPsfVector("../inst/cta/test/caldb/dc1/psf_magic.fits")
+            filename = "../inst/cta/test/caldb/dc1/psf_magic.fits"
+            psf      = GCTAPsfVector(filename)
             self.test_try_success()
         except:
             self.test_try_failure("Unable to allocate GCTAPsfVector from file.")
