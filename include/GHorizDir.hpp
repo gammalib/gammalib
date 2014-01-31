@@ -31,6 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GVector.hpp"
+#include "GMath.hpp"
 
 /* __ Compile options ____________________________________________________ */
 #define G_SINCOS_CACHE

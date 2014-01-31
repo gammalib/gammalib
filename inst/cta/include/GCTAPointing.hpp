@@ -33,6 +33,7 @@
 #include "GTime.hpp"
 #include "GMatrix.hpp"
 #include "GNodeArray.hpp"
+#include "GHorizDir.hpp"
 
 /***********************************************************************//**
  * @class GCTAPointing
@@ -91,8 +92,10 @@ protected:
 
     bool                m_has_table; //!< table is loaded
     GNodeArray          m_table_nodes;
-    std::vector<double> m_table_az;
-    std::vector<double> m_table_alt;
+    std::vector<double> m_table_az; //!< table of azimuths (rad)
+    std::vector<double> m_table_alt; //!< table of altitudes (rad)
+    GTime               m_table_tmin; //!< min time bound in table
+    GTime               m_table_tmax; //!<max time bound in table
 
     // Cached members
     mutable bool    m_has_cache;  //!< Has transformation cache

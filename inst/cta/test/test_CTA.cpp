@@ -187,7 +187,11 @@ void TestGCTAPointing::set(void)
     name("GCTAPointing");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAPointing::test_load_table), "Test load pointing from table");
+    append(static_cast<pfunction>(&TestGCTAPointing::test_load_table), 
+           "Test load pointing from table");
+
+    append(static_cast<pfunction>(&TestGCTAPointing::test_interpolate_altaz),
+           "Test alt/az interpolation given a time");
 
     return;
 }
@@ -206,9 +210,8 @@ TestGCTAPointing* TestGCTAPointing::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Test CTA Npred computation
+ * @brief Test ability to load a CTA pointing table
  *
-
  ***************************************************************************/
 void TestGCTAPointing::test_load_table(void)
 {
@@ -218,6 +221,42 @@ void TestGCTAPointing::test_load_table(void)
 
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Test interpolation of alt/az pointing dir as a function of
+ * time
+ *
+ ***************************************************************************/
+void TestGCTAPointing::test_interpolate_altaz(void)
+{
+
+    GCTAObservation run;
+
+    GCTAPointing pnt;
+    pnt.load_pointing_table( cta_point_table );
+
+    // test an out-of bounds time
+    
+
+    try {
+      GTime time(155470378.7, "sec"); 
+      GHorizDir dir = pnt.dir_horiz( time );
+    }
+    catch (GException::out_of_range &exc) {
+      std::cout << exc.what() << std::endl;
+    }
+
+    // Get a time that is somewhere in the run:
+
+    GTime time(155470378.7, "sec"); 
+    GHorizDir dir = pnt.dir_horiz( time );
+    
+    std::cout << "time="<<time<<" dir="<<dir<<std::endl;
+
+    return;
+}
+
 
 
 /***********************************************************************//**

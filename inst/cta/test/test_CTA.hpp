@@ -137,6 +137,7 @@ public:
     virtual void              set(void);
     virtual TestGCTAPointing* clone(void) const;
     void                      test_load_table(void);
+    void                      test_interpolate_altaz(void);
 };
 
 

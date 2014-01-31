@@ -68,8 +68,11 @@ GCTAPointing::load_pointing_table(std::string filename)
     GFitsTableCol *stop  = (*table)["STOP"];
     GFitsTableCol *alt    = (*table)["ALT_PNT"];
     GFitsTableCol *az     = (*table)["AZ_PNT"];
-    //  GFitsTableCol *ra     = (*table)["RA_PNT"];
-    //GFitsTableCol *dec    = (*table)["DEC_PNT"];
+
+    // later on, may also interpolate RA/Dec, in the case of a drift
+    //  scan or other tracking mode:
+    //     GFitsTableCol *ra     = (*table)["RA_PNT"];
+    //     GFitsTableCol *dec    = (*table)["DEC_PNT"];
 
 
     // Loop over the elements and build a lookup table:
@@ -79,7 +82,7 @@ GCTAPointing::load_pointing_table(std::string filename)
 
     for (size_t ii=0; ii < table->nrows(); ii++) {
 
-      double midtime = 0.5*(stop->real(ii) - start->real(ii));
+      double midtime = 0.5*(stop->real(ii) + start->real(ii));
       GTime tt(midtime, "sec" );
       m_table_nodes.append( tt.secs() );
       m_table_az[ii] = az->real(ii) * gammalib::deg2rad;
