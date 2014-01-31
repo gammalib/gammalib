@@ -73,11 +73,16 @@ public:
                            const double& phi = 0.0,
                            const double& zenith = 0.0,
                            const double& azimuth = 0.0) const = 0;
-    virtual GEbounds    ebounds(const double& logE,
-                                const double& theta = 0.0,
-                                const double& phi = 0.0,
-                                const double& zenith = 0.0,
-                                const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ebounds_obs(const double& logEsrc,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ebounds_src(const double& logEobs,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:

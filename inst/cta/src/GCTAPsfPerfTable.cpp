@@ -238,14 +238,14 @@ GCTAPsfPerfTable* GCTAPsfPerfTable::clone(void) const
  ***************************************************************************/
 void GCTAPsfPerfTable::load(const std::string& filename)
 {
+    // Set conversion factor from 68% containment radius to 1 sigma
+    const double conv = 0.6624305 * gammalib::deg2rad;
+
     // Clear arrays
     m_logE.clear();
     m_r68.clear();
     m_r80.clear();
     m_sigma.clear();
-
-    // Set conversion factor from 68% containment radius to 1 sigma
-    const double conv = gammalib::gauss68containment2sigma * gammalib::deg2rad;
 
     // Allocate line buffer
     const int n = 1000;

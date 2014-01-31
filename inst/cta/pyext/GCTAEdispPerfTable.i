@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCTAEdispPerfTable.i - CTA performance table PSF class          *
+ *   GCTAEdispPerfTable.i - CTA performance table energy dispersion class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Christoph Deil & Ellis Owen                      *
+ *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAEdispPerfTable.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -40,7 +39,7 @@ class GCTAEdispPerfTable : public GCTAEdisp {
 public:
     // Constructors and destructors
     GCTAEdispPerfTable(void);
-    GCTAEdispPerfTable(const std::string& filename);
+    explicit GCTAEdispPerfTable(const std::string& filename);
     GCTAEdispPerfTable(const GCTAEdispPerfTable& psf);
     virtual ~GCTAEdispPerfTable(void);
 
@@ -63,11 +62,16 @@ public:
                            const double& phi = 0.0,
                            const double& zenith = 0.0,
                            const double& azimuth = 0.0) const;
-    GEbounds            ebounds(const double& logE,
-                                const double& theta = 0.0,
-                                const double& phi = 0.0,
-                                const double& zenith = 0.0,
-                                const double& azimuth = 0.0) const;
+    GEbounds            ebounds_obs(const double& logEsrc,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const;
+    GEbounds            ebounds_src(const double& logEobs,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const;
 };
 
 

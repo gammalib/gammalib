@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GCTAEdispPerfTable.cpp - CTA performance table energy dispersion class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Christoph Deil & Ellis Owen                 *
+ *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAEdispPerfTable.hpp
+ * @file GCTAEdispPerfTable.cpp
  * @brief CTA performance table energy dispersion class implementation
  * @author Christoph Deil & Ellis Owen
  */
@@ -74,7 +74,8 @@ GCTAEdispPerfTable::GCTAEdispPerfTable(void) : GCTAEdisp()
  * Construct instance by loading the energy dispersion information from
  * an ASCII performance table.
  ***************************************************************************/
-GCTAEdispPerfTable::GCTAEdispPerfTable(const std::string& filename) : GCTAEdisp()
+GCTAEdispPerfTable::GCTAEdispPerfTable(const std::string& filename) :
+                    GCTAEdisp()
 {
     // Initialise class members
     init_members();
@@ -92,7 +93,8 @@ GCTAEdispPerfTable::GCTAEdispPerfTable(const std::string& filename) : GCTAEdisp(
  *
  * @param[in] edisp Energy dispersion
  ***************************************************************************/
-GCTAEdispPerfTable::GCTAEdispPerfTable(const GCTAEdispPerfTable& edisp) : GCTAEdisp(edisp)
+GCTAEdispPerfTable::GCTAEdispPerfTable(const GCTAEdispPerfTable& edisp) :
+                    GCTAEdisp(edisp)
 {
     // Initialise class members
     init_members();
@@ -167,6 +169,13 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
  * Returns the energy resolution, i.e. the probability density in observed
  * photon energy at a given (log10(E_src), log10(E_obs)).
  * To be precise: energy dispersion = dP / d(log10(E_obs)).
+ * 
+ * Evaluates
+ *
+ * \f[
+ * S(E) = \frac{1}{\sqrt{2\pi}m\_sigma}
+ *        \exp(\frac{-(logEobs-logEsrc)^2}{2 m\_sigma^2})
+ * \f]
  ***************************************************************************/
 double GCTAEdispPerfTable::operator()(const double& logEobs,
                                       const double& logEsrc,
@@ -233,12 +242,16 @@ GCTAEdispPerfTable* GCTAEdispPerfTable::clone(void) const
  *            File could not be opened for read access.
  *
  * This method loads the energy dispersion information from an ASCII
- * performance table.
- *
- * TODO: share file parsing code with GCTAPsfPerfTable instead of duplicating it here.
+ * performance table. The energy resolution is stored in the 5th column
+ * of the performance table as RMS(ln(Eest/Etrue)). The method converts
+ * this internally to a sigma value by multiplying the stored values by
+ * 0.434294481903.
  ***************************************************************************/
 void GCTAEdispPerfTable::load(const std::string& filename)
 {
+    // Set conversion factor from RMS(ln(Eest/Etrue)) to RMS(log10(Eest/Etrue))
+    const double conv = 0.434294481903;
+
     // Clear arrays
     m_logE.clear();
     m_sigma.clear();
@@ -279,10 +292,7 @@ void GCTAEdispPerfTable::load(const std::string& filename)
 
         // Push elements in node array and vector
         m_logE.append(gammalib::todouble(elements[0]));
-
-        // Set conversion factor from 68% containment to 1 sigma
-        const double conv = gammalib::gauss68containment2sigma;
-        m_sigma.push_back(gammalib::todouble(elements[4])*conv);
+        m_sigma.push_back(gammalib::todouble(elements[4]) * conv);
 
     } // endwhile: looped over lines
 
@@ -306,6 +316,9 @@ void GCTAEdispPerfTable::load(const std::string& filename)
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ *
+ * Draws observed energy value from a normal distribution of width
+ * m_par_sigma around @p logE.
  ***************************************************************************/
 GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
                                const double& logE,
@@ -317,43 +330,89 @@ GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
     // Update the parameter cache
     update(logE);
 
-    // Draw log observed energy
-    double logEobs = ran.normal(0, m_par_sigma);
-    double energy = std::pow(10., logEobs);
-    
-    return GEnergy(energy, "TeV");
+    // Draw log observed energy in TeV
+    double logEobs = m_par_sigma * ran.normal() + logE;
+
+    // Set enegy
+    GEnergy energy;
+    energy.log10TeV(logEobs);
+
+    // Return energy
+    return energy;
 }
 
 
 /***********************************************************************//**
- * @brief Return energy interval that contains the energy dispersion.
+ * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
- * Determine the energy band outside of which the energy dispersion becomes negligible.
- * This band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
+ * Returns the band of observed energies outside of which the energy
+ * dispersion becomes negligible for a given true energy @p logEsrc. This
+ * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
  * Gaussian width of the energy dispersion.
  ***************************************************************************/
-GEbounds GCTAEdispPerfTable::ebounds(const double& logE,
-                                     const double& theta,
-                                     const double& phi,
-                                     const double& zenith,
-                                     const double& azimuth) const
+GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
+                                         const double& theta,
+                                         const double& phi,
+                                         const double& zenith,
+                                         const double& azimuth) const
 {
-    // Update the parameter cache
-    update(logE);
+    // Set energy band constant
+    const double number_of_sigmas = 5.0;
 
-    // Compute energy bounds
-    const double n_sigmas = 5.0;
-    double emin = std::pow(10., logE - n_sigmas * m_par_sigma);
-    double emax = std::pow(10., logE + n_sigmas * m_par_sigma);
-    GEbounds ebounds(GEnergy(emin, "TeV"), GEnergy(emax, "TeV"));
-    
-    return ebounds;
+    // Get energy dispersion sigma
+    double sigma = m_logE.interpolate(logEsrc, m_sigma);
+
+    // Compute energy boundaries
+    GEnergy emin;
+    GEnergy emax;
+    emin.log10TeV(logEsrc - number_of_sigmas * sigma);
+    emax.log10TeV(logEsrc + number_of_sigmas * sigma);
+
+    // Return energy boundaries
+    return (GEbounds(emin, emax));
+}
+
+
+/***********************************************************************//**
+ * @brief Return true energy interval that contains the energy dispersion.
+ *
+ * @param[in] logEobs Log10 of the observed event energy (TeV).
+ * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ *
+ * Returns the band of true photon energies outside of which the energy
+ * dispersion becomes negligible for a given observed energy @p logEobs. This
+ * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
+ * Gaussian width of the energy dispersion.
+ ***************************************************************************/
+GEbounds GCTAEdispPerfTable::ebounds_src(const double& logEobs,
+                                         const double& theta,
+                                         const double& phi,
+                                         const double& zenith,
+                                         const double& azimuth) const
+{
+    // Set energy band constant
+    const double number_of_sigmas = 5.0;
+
+    // Get energy dispersion sigma
+    double sigma = m_logE.interpolate(logEobs, m_sigma);
+
+    // Compute energy boundaries
+    GEnergy emin;
+    GEnergy emax;
+    emin.log10TeV(logEobs - number_of_sigmas * sigma);
+    emax.log10TeV(logEobs + number_of_sigmas * sigma);
+
+    // Return energy boundaries
+    return (GEbounds(emin, emax));
 }
 
 
@@ -470,13 +529,10 @@ void GCTAEdispPerfTable::update(const double& logE) const
         // Save energy
         m_par_logE = logE;
     
-        // Determine Gaussian sigma
+        // Determine Gaussian sigma and pre-compute Gaussian parameters
         m_par_sigma = m_logE.interpolate(logE, m_sigma);
-
-        // Derive width=-0.5/(sigma*sigma) and scale=1/(twopi*sigma*sigma)
-        double sigma2 = m_par_sigma * m_par_sigma;
-        m_par_scale   =  1.0 / (gammalib::twopi * sigma2);
-        m_par_width   = -0.5 / sigma2;
+        m_par_scale = gammalib::inv_sqrt2pi / m_par_sigma;
+        m_par_width = -0.5 / (m_par_sigma * m_par_sigma);
 
     }
 

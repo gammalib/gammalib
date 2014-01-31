@@ -49,7 +49,7 @@
  * @brief Integration kernel for npsf() method
  *
  * This class implements the integration kernel needed for the npsf() method.
- * method. It performs an azimuthal integration of the Point Spread Function
+ * It performs an azimuthal integration of the Point Spread Function
  * (PSF) for a given offset angle \f$delta\f$ using
  *
  * \f[
@@ -87,6 +87,41 @@ protected:
     double              m_cospsf;  //!< Cosine of PSF-ROI centre distance
     double              m_sinpsf;  //!< Sine of PSF-ROI centre distance
     const double&       m_logE;    //!< Log10 of true photon energy (E/TeV).
+    const double&       m_theta;   //!< Offset angle of source in camera system
+    const double&       m_phi;     //!< Azimuth angle of source in camera system
+    const double&       m_zenith;  //!< Zenith angle of source in Earth system
+    const double&       m_azimuth; //!< Azimuth angle of source in Earth system
+};
+
+
+/***********************************************************************//**
+ * @class cta_nedisp_kern
+ *
+ * @brief Integration kernel for nedisp() method
+ *
+ * This class implements the integration kernel for the nedisp() method.
+ * The cta_nedisp_kern::eval method evaluates the energy dispersion for a
+ * given log10 of true photon energy as function of the log10 of observed
+ * event energy.
+ ***************************************************************************/
+class cta_nedisp_kern : public GFunction {
+public:
+    cta_nedisp_kern(const GCTAResponse& rsp,
+                    const double&       logEsrc,
+                    const double&       theta,
+                    const double&       phi,
+                    const double&       zenith,
+                    const double&       azimuth) :
+                    m_rsp(rsp),
+                    m_logEsrc(logEsrc),
+                    m_theta(theta),
+                    m_phi(phi),
+                    m_zenith(zenith),
+                    m_azimuth(azimuth) { }
+    double eval(const double& logEobs);
+protected:
+    const GCTAResponse& m_rsp;     //!< CTA response function
+    const double&       m_logEsrc; //!< Log10 of true photon energy (E/TeV).
     const double&       m_theta;   //!< Offset angle of source in camera system
     const double&       m_phi;     //!< Azimuth angle of source in camera system
     const double&       m_zenith;  //!< Zenith angle of source in Earth system

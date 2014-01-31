@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.cpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,12 +29,13 @@
 #include <config.h>
 #endif
 #include <cmath>
-#include "GCTAResponse_helpers.hpp"
-#include "GCTASupport.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
 #include "GVector.hpp"
+#include "GCTAResponse_helpers.hpp"
+#include "GCTAEdisp.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -105,6 +106,30 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
         #endif
         
     } // endif: arclength was positive
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for nedisp() method
+ *
+ * @param[in] logEobs Observed event energy.
+ * @return Energy dispersion PDF value.
+ ***************************************************************************/
+double cta_nedisp_kern::eval(const double& logEobs)
+{
+    // Get value
+    double value = (*m_rsp.edisp())(logEobs,
+                                    m_logEsrc,
+                                    m_theta,
+                                    m_phi,
+                                    m_zenith,
+                                    m_azimuth);
+
+    // Correct for variable substitution
+    //value *= std::exp(logEobs);
 
     // Return
     return value;

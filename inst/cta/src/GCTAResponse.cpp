@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAResponse.cpp - CTA Response class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1918,15 +1918,15 @@ double GCTAResponse::npred_diffuse(const GSource& source,
  * @todo So far we have no means to pass additional parameters to the
  * GCTAEdisp::ebounds() method.
  ***************************************************************************/
-GEbounds GCTAResponse::src_ebounds(const GEnergy& obsEnergy) const
+GEbounds GCTAResponse::ebounds_src(const GEnergy& obsEnergy) const
 {
     // Initialise an empty boundary object
     GEbounds ebounds;
 
     // If energy dispersion is available then set the energy boundaries
     if (edisp() != NULL) {
-        double logE = obsEnergy.log10MeV();
-        ebounds = edisp()->ebounds(logE);
+        double logEobs = obsEnergy.log10MeV();
+        ebounds        = edisp()->ebounds_src(logEobs);
     }
 
     // Return energy boundaries
@@ -2188,7 +2188,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
  * @param[in] pnt CTA pointing.
  * @param[in] ebds Energy boundaries of data selection.
  *
- * @todo Implement integration over energy range.
+ * @todo Implement phi dependence in camera system
  ***************************************************************************/
 double GCTAResponse::nedisp(const GSkyDir&      srcDir,
                             const GEnergy&      srcEng,
@@ -2196,8 +2196,110 @@ double GCTAResponse::nedisp(const GSkyDir&      srcDir,
                             const GCTAPointing& pnt,
                             const GEbounds&     ebds) const
 {
-    // Dummy
+    // Initialise energy dispersion integral
     double nedisp = 1.0;
+
+    // Continue only if energy dispersion information is available
+    if (edisp() != NULL) {
+
+        // Get the observed energy boundaries for specified true energy
+        GEbounds ebounds = edisp()->ebounds_obs(srcEng.log10TeV());
+
+        // Check if at least one of the energy boundaries covered by the
+        // energy dispersion for the specified true energy lies outside
+        // any of the energy boundaries of the data selection (or lies
+        // within different energy boundaries of the data selection)
+        bool outside = false;
+        for (int k = 0; k < ebounds.size(); ++k) {
+            int imin = ebds.index(ebounds.emin(k));
+            int imax = ebds.index(ebounds.emax(k));
+            if (imin != imax || imin == -1 || imax == -1) {
+                outside = true;
+                break;
+            }
+        }
+
+        // If energy boundaries are not fully covered then integrate
+        // numerically
+        if (outside) {
+
+            // Initialise energy dispersion integral
+            nedisp = 0.0;
+
+            // Get pointing direction zenith angle and azimuth [radians]
+            double zenith  = pnt.zenith();
+            double azimuth = pnt.azimuth();
+
+            // Compute offset angle of source direction in camera system
+            double theta = pnt.dir().dist(srcDir);
+
+            // Compute azimuth angle of source direction in camera system
+            double phi = 0.0; //TODO: Implement phi dependence
+
+            // Loop over energy boundaries in observed energy
+            for (int i = 0; i < ebds.size(); ++i) {
+
+                // Get boundaries in observed energy
+                GEnergy emin_obs = ebds.emin(i);
+                GEnergy emax_obs = ebds.emax(i);
+
+                // Loop over energy boundaries of energy dispersion
+                for (int k = 0; k < ebounds.size(); ++k) {
+
+                    // Get boundaries of energy dispersion
+                    GEnergy emin_edisp = ebounds.emin(k);
+                    GEnergy emax_edisp = ebounds.emax(k);
+
+                    // Get energy dispersion interval that overlaps with
+                    // the observed energy interval
+                    GEnergy emin = (emin_edisp < emin_obs) ? emin_obs : emin_edisp;
+                    GEnergy emax = (emax_edisp > emax_obs) ? emax_obs : emax_edisp;
+
+                    // If interval has positive length then integrate over
+                    // the energy dispersion
+                    if (emin < emax) {
+
+                        // Get log10 of energy boundaries in TeV
+                        double e_log_min = emin.log10TeV();
+                        double e_log_max = emax.log10TeV();
+
+                        // Setup integration function
+                        cta_nedisp_kern integrand(*this,
+                                                  srcEng.log10TeV(),
+                                                  theta,
+                                                  phi,
+                                                  zenith,
+                                                  azimuth);
+                        GIntegral integral(&integrand);
+
+                        // Set integration precision
+                        //integral.eps(1.0e-5);
+
+                        // Do Romberg integration
+                        nedisp += integral.romb(e_log_min, e_log_max);
+
+                    } // endif: integration range was valid
+                
+                } // endfor: looped over energy boundaries of energy dispersion
+            } // endfor: looped over energy boundaries in observed energy
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(nedisp) || gammalib::is_infinite(nedisp)) {
+                std::cout << "*** ERROR: GCTAResponse::nedisp:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (nedisp=" << nedisp;
+                std::cout << ", srcEng=" << srcEng;
+                std::cout << ", srcTime=" << srcTime;
+                std::cout << ", pnt=" << pnt;
+                std::cout << ", ebds=" << ebds;
+                std::cout << ")" << std::endl;
+            }
+            #endif
+
+        } // endif: numerical integration was needed
+
+    } // endif: there is an energy dispersion response
 
     // Return integral
     return nedisp;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse.i - CTA instrument response function class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAResponse.i
- * @brief CTA instrument response function interface definition
+ * @brief CTA instrument response function class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -54,16 +54,22 @@ public:
                                 const GObservation& obs) const;
 
     // Overload virtual base class methods
-    virtual double irf_radial(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
-    virtual double irf_diffuse(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
-    virtual double npred_radial(const GSource&      source,
+    virtual double   irf_radial(const GEvent&       event,
+                                const GSource&      source,
                                 const GObservation& obs) const;
-    virtual double npred_diffuse(const GSource&      source,
+    virtual double   irf_elliptical(const GEvent&       event,
+                                    const GSource&      source,
+                                    const GObservation& obs) const;
+    virtual double   irf_diffuse(const GEvent&       event,
+                                 const GSource&      source,
                                  const GObservation& obs) const;
+    virtual double   npred_radial(const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double   npred_elliptical(const GSource&      source,
+                                      const GObservation& obs) const;
+    virtual double   npred_diffuse(const GSource&      source,
+                                   const GObservation& obs) const;
+    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
     GCTAEventAtom*     mc(const double& area, const GPhoton& photon,

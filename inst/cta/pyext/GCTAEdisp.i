@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAEdisp.i - Abstract CTA energy dispersion base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,11 +61,16 @@ public:
                            const double& phi = 0.0,
                            const double& zenith = 0.0,
                            const double& azimuth = 0.0) const = 0;
-    virtual GEbounds    ebounds(const double& logE,
-                                const double& theta = 0.0,
-                                const double& phi = 0.0,
-                                const double& zenith = 0.0,
-                                const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ebounds_obs(const double& logEsrc,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ebounds_src(const double& logEobs,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const = 0;
 };
 
 
