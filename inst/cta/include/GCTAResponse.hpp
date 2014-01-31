@@ -74,9 +74,9 @@ public:
     virtual void          clear(void);
     virtual GCTAResponse* clone(void) const;
     virtual bool          use_edisp(void) const;
-    virtual bool          apply_edisp(void) const;
-    virtual void          apply_edisp(bool apply_edisp);
     virtual bool          use_tdisp(void) const;
+    virtual bool          apply_edisp(void) const;
+    virtual void          apply_edisp(const bool& apply_edisp);
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -172,12 +172,13 @@ private:
     std::string            irf_filename(const std::string& filename) const;
 
     // Private data members
-    GCaldb      m_caldb;    //!< Calibration database
-    std::string m_rspname;  //!< Name of the instrument response
-    double      m_eps;      //!< Integration precision
-    GCTAAeff*   m_aeff;     //!< Effective area
-    GCTAPsf*    m_psf;      //!< Point spread function
-    GCTAEdisp*  m_edisp;    //!< Energy dispersion
+    GCaldb      m_caldb;       //!< Calibration database
+    std::string m_rspname;     //!< Name of the instrument response
+    double      m_eps;         //!< Integration precision
+    bool        m_apply_edisp; //!< Apply energy dispersion
+    GCTAAeff*   m_aeff;        //!< Effective area
+    GCTAPsf*    m_psf;         //!< Point spread function
+    GCTAEdisp*  m_edisp;       //!< Energy dispersion
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
@@ -194,8 +195,7 @@ private:
 inline
 bool GCTAResponse::use_edisp(void) const
 {
-    bool has_edisp = (m_edisp != NULL);
-    return m_apply_edisp && has_edisp;
+    return (m_apply_edisp && (m_edisp != NULL));
 }
 
 
@@ -216,7 +216,7 @@ bool GCTAResponse::apply_edisp(void) const
  * @param[in] apply_edisp Set true if energy dispersion should be applied
  ***************************************************************************/
 inline
-void GCTAResponse::apply_edisp(bool apply_edisp)
+void GCTAResponse::apply_edisp(const bool& apply_edisp)
 {
     m_apply_edisp = apply_edisp;
 }

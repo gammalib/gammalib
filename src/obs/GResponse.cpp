@@ -54,7 +54,7 @@
 #define G_NPRED_ELLIPTICAL            "GResponse::npred_elliptical(GSource&,"\
                                                             " GObservation&)"
 #define G_NPRED_DIFFUSE   "GResponse::npred_diffuse(GSource&, GObservation&)"
-#define G_SRC_EBOUNDS                      "GResponse::src_ebounds(GEnergy&)"
+#define G_EBOUNDS_SRC                      "GResponse::ebounds_src(GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -570,10 +570,10 @@ double GResponse::npred_diffuse(const GSource& source,
  * @exception GException::feature_not_implemented
  *            Method not yet implemented.
  ***************************************************************************/
-GEbounds GResponse::src_ebounds(const GEnergy& obsEnergy) const
+GEbounds GResponse::ebounds_src(const GEnergy& obsEnergy) const
 {
     // Feature not yet implemented
-    throw GException::feature_not_implemented(G_SRC_EBOUNDS,
+    throw GException::feature_not_implemented(G_EBOUNDS_SRC,
           "Npred computation not implemented for diffuse models.");
 
     // Return energy boundaries

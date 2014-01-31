@@ -560,9 +560,6 @@ void GCTAResponse::load(const std::string& rspname)
     // Load energy dispersion
     load_edisp(edispname);
 
-    // Load energy dispersion
-    load_edisp(filename);
-
     // Remove theta cut
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
     if (arf != NULL) {
@@ -2323,11 +2320,11 @@ void GCTAResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_eps   = 1.0e-5; // Precision for Romberg integration
-    m_aeff  = NULL;
-    m_psf   = NULL;
-    m_edisp = NULL;
-    m_apply_edisp = false;
+    m_eps         = 1.0e-5; //!< Precision for Romberg integration
+    m_aeff        = NULL;
+    m_psf         = NULL;
+    m_edisp       = NULL;
+    m_apply_edisp = false;  //!< Switched off by default
 
     // Initialise Npred cache
     m_npred_names.clear();
@@ -2348,10 +2345,9 @@ void GCTAResponse::init_members(void)
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
     // Copy members
-    m_caldb     = rsp.m_caldb;
-    m_rspname   = rsp.m_rspname;
-    m_rmffile   = rsp.m_rmffile;
-    m_eps       = rsp.m_eps;
+    m_caldb       = rsp.m_caldb;
+    m_rspname     = rsp.m_rspname;
+    m_eps         = rsp.m_eps;
     m_apply_edisp = rsp.m_apply_edisp;
 
     // Copy cache

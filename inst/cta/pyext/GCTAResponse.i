@@ -47,6 +47,8 @@ public:
     virtual GCTAResponse* clone(void) const;
     virtual bool          use_edisp(void) const;
     virtual bool          use_tdisp(void) const;
+    virtual bool          apply_edisp(void) const;
+    virtual void          apply_edisp(const bool& apply_edisp);
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;

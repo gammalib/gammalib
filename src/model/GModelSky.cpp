@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1383,7 +1383,7 @@ double GModelSky::integrate_energy(const GEvent& event,
     if (integrate) {
     
         // Retrieve true energy boundaries
-        GEbounds ebounds = rsp.src_ebounds(event.energy());
+        GEbounds ebounds = rsp.ebounds_src(event.energy());
     
         // Loop over all boundaries
         for (int i = 0; i < ebounds.size(); ++i) {
@@ -1403,8 +1403,8 @@ double GModelSky::integrate_energy(const GEvent& event,
                 //integral.eps(1.0e-5);
 
                 // Do Romberg integration
-                emin = log(emin);
-                emax = log(emax);
+                emin   = std::log(emin);
+                emax   = std::log(emax);
                 value += integral.romb(emin, emax);
     
             } // endif: interval was valid

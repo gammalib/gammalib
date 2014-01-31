@@ -216,7 +216,7 @@ class Test(GPythonTestSuite):
         # Load response
         self.test_try("Test GCTAResponse file constructor")
         try:
-            rsp = GCTAResponse("cta_dummy_irf", "../inst/cta/test/caldb")
+            rsp = GCTAResponse("cta_dummy_irf", GCaldb("../inst/cta/test/caldb"))
             self.test_try_success()
         except:
             self.test_try_failure("Unable to allocate GCTAResponse from file.")
