@@ -30,8 +30,88 @@
 #endif
 #include "GCTAPointing.hpp"
 #include "GTools.hpp"
+#include "GFits.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+
+/************************************************************************
+ * @brief load a pointing table from a pointing file for an observation
+ *
+ * Opens a FITS table with columns: START, STOP, ALT_PNT,AZ_PNT,
+ * describing the pointing direction as a function of time in
+ * horizontal coordinates, and creates an interpolation function for
+ * getting the pointing alt/az for an arbitrary time.
+ * 
+ * The advantage of this method is that ctools does not need to
+ * implement ra/dec to alt/az coordinate conversions, since the values
+ * are pre-calculated.
+ ************************************************************************/
+void 
+GCTAPointing::load_pointing_table(std::string filename)
+{
+
+  std::cout << "load pointing from: " << filename << std::endl;
+
+  // Open the pointing file and find the pointing table:
+  
+  try {
+    GFits pointingfile( filename );
+    GFitsTable *table = (GFitsTable*) pointingfile["POINTING"];
+    
+    // get the relevant columns:
+    GFitsTableCol *start = (*table)["START"];
+    GFitsTableCol *stop  = (*table)["STOP"];
+    GFitsTableCol *alt    = (*table)["ALT_PNT"];
+    GFitsTableCol *az     = (*table)["AZ_PNT"];
+    //  GFitsTableCol *ra     = (*table)["RA_PNT"];
+    //GFitsTableCol *dec    = (*table)["DEC_PNT"];
+
+
+    // Loop over the elements and build a lookup table:
+
+    m_table_az.resize( table->nrows() );
+    m_table_alt.resize( table->nrows() );
+
+    for (size_t ii=0; ii < table->nrows(); ii++) {
+
+      m_table_nodes.append( 0.5*(stop->real(ii) - start->real(ii)));
+      m_table_az[ii] = az->real(ii);
+      m_table_alt[ii] = alt->real(ii);
+      
+    }
+
+    m_has_table = true;
+       
+  }
+  catch (std::exception &e) {
+    std::cout << "caught: "<< e.what()<< std::endl;
+    throw e;
+  }
+
+
+}
+
+
+const GHorizDir 
+GCTAPointing::dir_horiz( const GTime &time ) const {
+
+  if (m_has_table == false) {
+    // no pointing table, so either throw exception or return the
+    // average direction...
+  }
+
+  // get interpolated alt and az for the given time using the pointing
+  // table:
+
+  alt = m_table_nodes.interpolate( time.sec(), m_table_alt );
+  az  = m_table_nodes.interpolate( time.sec(), m_table_az );
+  
+  // construct a GHorizDir and return it:
+  
+  return GHorizDir(alt,az);
+
+}
+
 
 /* __ Macros _____________________________________________________________ */
 
@@ -78,6 +158,7 @@ GCTAPointing::GCTAPointing(const GSkyDir& dir)
     // Return
     return;
 }
+
 
 
 /***********************************************************************//**
@@ -257,6 +338,8 @@ void GCTAPointing::init_members(void)
     m_azimuth   = 0.0;
     m_has_cache = false;
     m_Rback.clear();
+
+    m_has_table = false;
 
     // Return
     return;

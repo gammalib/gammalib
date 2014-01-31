@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include "GCTALib.hpp"
 #include "GTools.hpp"
+#include "GNodeArray.hpp"
 #include "test_CTA.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -52,6 +53,7 @@ const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
 const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/000002";
 const std::string cta_irf_king   = "irf_test.fits";
+const std::string cta_point_table= datadir+"/crab_pointing.fits.gz";
 
 
 /***********************************************************************//**
@@ -171,6 +173,50 @@ TestGCTAOptimize* TestGCTAOptimize::clone(void) const
 {
     // Clone test suite
     return new TestGCTAOptimize(*this);
+}
+
+
+
+
+/***********************************************************************//**
+ * @brief Set CTA pointing test methods
+ ***************************************************************************/
+void TestGCTAPointing::set(void)
+{
+    // Set test name
+    name("GCTAPointing");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAPointing::test_load_table), "Test load pointing from table");
+
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAPointing* TestGCTAPointing::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAPointing(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA Npred computation
+ *
+
+ ***************************************************************************/
+void TestGCTAPointing::test_load_table(void)
+{
+
+    GCTAPointing pnt;
+    pnt.load_pointing_table( cta_point_table );
+
+    return;
 }
 
 
@@ -825,11 +871,13 @@ int main(void)
     TestGCTAObservation     obs;
     TestGCTAModelBackground bck;
     TestGCTAOptimize        opt;
+    TestGCTAPointing        pnt;
     testsuites.append(rsp);
     if (has_data) {
     	testsuites.append(bck);
         testsuites.append(obs);
         testsuites.append(opt);
+        testsuites.append(pnt);
     }
 
     // Run the testsuites
