@@ -37,33 +37,26 @@
 /***********************************************************************//**
  * @class GCaldb
  *
- * @brief Interface for the Calibration database class
+ * @brief Calibration database class
  *
- * This class holds the definition of a calibration database. If the void
- * constructor is invoked it tries setting the calibration database access
- * path using the GAMMALIB_CALDB or CALDB environment variables (the former
- * takes precedence over the latter). Alternatively, the calibration database
- * path can be passed to the constructor to override the environment variable
- * or set using the dir() method.
+ * This class holds the definition of a calibration database. The
+ * calibration database is located in a root directory that can be set using
+ * the GCaldb::rootdir method. If no root directory is set, GCaldb will take
+ * the directory path from the CALDB environment variable, which is mandatory
+ * in case that no root directory has been set.
  *
  * It is assumed that the calibration data are found under
  *
  *     $CALDB/data/<mission>[/<instrument>]
  *
- * or
- *
- *     $GAMMALIB_CALDB/data/<mission>[/<instrument>]
- *
  * and that the Calibration Index File (CIF) is located at
  *
  *     $CALDB/data/<mission>[/<instrument>]/caldb.indx
  *
- * or
- *
- *     $GAMMALIB_CALDB/data/<mission>[/<instrument>]/caldb.indx
- *
  * where \<mission\> is the name of the mission and \<instrument\> is the
- * optional instrument name (all lower case).
+ * optional instrument name (all lower case). If the root directory has been
+ * set using the GCaldb::rootdir method, $CALDB is replaced by the root
+ * directory name.
  *
  * The calibration database for a given mission and instrument is opened
  * using the open() method. Once opened, database information can be
@@ -80,54 +73,42 @@ public:
     virtual ~GCaldb(void);
 
     // Operators
-    GCaldb& operator= (const GCaldb& caldb);
+    GCaldb& operator=(const GCaldb& caldb);
 
     // Methods
-    void               clear(void);
-    GCaldb*            clone(void) const;
-    int                size(void) const;
-    const std::string& dir(void) const;
-    void               dir(const std::string& pathname);
-    void               open(const std::string& mission,
-                            const std::string& instrument = "");
-    void               close(void);
-    std::string        filename(const std::string& detector,
-                                const std::string& filter,
-                                const std::string& codename,
-                                const std::string& date,
-                                const std::string& time,
-                                const std::string& expr);
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void        clear(void);
+    GCaldb*     clone(void) const;
+    int         size(void) const;
+    std::string rootdir(void) const;
+    void        rootdir(const std::string& pathname);
+    std::string path(const std::string& mission,
+                     const std::string& instrument = "");
+    std::string cifname(const std::string& mission,
+                        const std::string& instrument = "");
+    void        open(const std::string& mission,
+                     const std::string& instrument = "");
+    void        close(void);
+    std::string filename(const std::string& detector,
+                         const std::string& filter,
+                         const std::string& codename,
+                         const std::string& date,
+                         const std::string& time,
+                         const std::string& expr);
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
-    void        init_members(void);
-    void        copy_members(const GCaldb& caldb);
-    void        free_members(void);
-    std::string rootdir(void) const;
-    void        set_database(const std::string& pathname);
-    std::string path(const std::string& mission, const std::string& instrument = "");
-    std::string cifname(const std::string& mission, const std::string& instrument = "");
+    void init_members(void);
+    void copy_members(const GCaldb& caldb);
+    void free_members(void);
 
     // Protected data area
-    std::string m_caldb;        //!< CALDB root directory
+    std::string m_opt_rootdir;  //!< Optional root directory
     std::string m_mission;      //!< Mission of opened database
     std::string m_instrument;   //!< Instrument of opened database
     std::string m_cifname;      //!< CIF filename of opened database
     GFits       m_fits;         //!< CIF FITS file
     GFitsTable* m_cif;          //!< Pointer to CIF table
 };
-
-
-/***********************************************************************//**
- * @brief Return calibration directory
- *
- * @return Calibration directory.
- ***************************************************************************/
-inline
-const std::string& GCaldb::dir(void) const
-{
-    return m_caldb;
-}
 
 #endif /* GCALDB_HPP */

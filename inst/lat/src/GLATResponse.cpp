@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.cpp - Fermi/LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -210,7 +210,7 @@ void GLATResponse::caldb(const std::string& caldb)
     GCaldb db(caldb);
 
     // Store the path to the calibration database
-    m_caldb = db.dir();
+    m_caldb = db.rootdir();
 
     // Return
     return;

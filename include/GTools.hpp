@@ -47,6 +47,8 @@ namespace gammalib {
     std::string              strip_chars(const std::string& arg,
                                          const std::string& chars);
     std::string              expand_env(const std::string& arg);
+    std::string              filepath(const std::string& pathname,
+                                      const std::string& filename);
     std::string              str(const unsigned short int& value);
     std::string              str(const unsigned int& value);
     std::string              str(const unsigned long int& value);
