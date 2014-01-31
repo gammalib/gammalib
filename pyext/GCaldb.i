@@ -44,20 +44,24 @@ public:
     virtual ~GCaldb(void);
 
     // Methods
-    void               clear(void);
-    GCaldb*            clone(void) const;
-    int                size(void) const;
-    const std::string& dir(void) const;
-    void               dir(const std::string& pathname);
-    void               open(const std::string& mission,
-                            const std::string& instrument = "");
-    void               close(void);
-    std::string        filename(const std::string& detector,
-                                const std::string& filter,
-                                const std::string& codename,
-                                const std::string& date,
-                                const std::string& time,
-                                const std::string& expr);
+    void        clear(void);
+    GCaldb*     clone(void) const;
+    int         size(void) const;
+    std::string rootdir(void) const;
+    void        rootdir(const std::string& pathname);
+    std::string path(const std::string& mission,
+                     const std::string& instrument = "");
+    std::string cifname(const std::string& mission,
+                        const std::string& instrument = "");
+    void        open(const std::string& mission,
+                     const std::string& instrument = "");
+    void        close(void);
+    std::string filename(const std::string& detector,
+                         const std::string& filter,
+                         const std::string& codename,
+                         const std::string& date,
+                         const std::string& time,
+                         const std::string& expr);
 };
 
 
