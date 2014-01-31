@@ -600,18 +600,6 @@ void TestGCTAModelBackground::test_modelbg_construct_fits(void)
     //Get rotation matrix between sky and instrument coordinates
     //TODO: avoid replication of code from GCTAModelBackground.cpp for coordinate transformation
     const GCTAPointing* pnt = dynamic_cast<const GCTAPointing*>(&obs.pointing());
-    //GSkyDir pntdir = pnt->dir();
-    //GMatrix ry;
-    //GMatrix rz;
-    //ry.eulery(pntdir.dec_deg() - 90.0);
-    //rz.eulerz(-pntdir.ra_deg());
-    //GMatrix rot = pnt->rot();
-    //GVector instvec = GVector(0.1,0.1,0.);
-    //std::cout<<"Instrument vector:"<<instvec<<std::endl;
-    //GVector skyvec = rot * instvec;
-    //std::cout<<"Sky vector:"<<skyvec<<std::endl;
-    
-    std::cout<<rot.print()<<std::endl;
     
     return ;
 }
