@@ -31,6 +31,7 @@
 #include "GCTAPointing.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
+#include "GHorizDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -45,11 +46,15 @@
  * The advantage of this method is that ctools does not need to
  * implement ra/dec to alt/az coordinate conversions, since the values
  * are pre-calculated.
+ *
+ * \bug: GTimeReference should be used to convert the time from the
+ * FITS file to a GTime in the correct system
  ************************************************************************/
 void 
 GCTAPointing::load_pointing_table(std::string filename)
 {
 
+  
   std::cout << "load pointing from: " << filename << std::endl;
 
   // Open the pointing file and find the pointing table:
@@ -74,11 +79,22 @@ GCTAPointing::load_pointing_table(std::string filename)
 
     for (size_t ii=0; ii < table->nrows(); ii++) {
 
-      m_table_nodes.append( 0.5*(stop->real(ii) - start->real(ii)));
-      m_table_az[ii] = az->real(ii);
-      m_table_alt[ii] = alt->real(ii);
+      double midtime = 0.5*(stop->real(ii) - start->real(ii));
+      GTime tt(midtime, "sec" );
+      m_table_nodes.append( tt.secs() );
+      m_table_az[ii] = az->real(ii) * gammalib::deg2rad;
+      m_table_alt[ii] = alt->real(ii) * gammalib::deg2rad;
       
+      if (ii==0) {
+        m_table_tmin = tt;
+      }
+
+      if (ii==table->nrows()-1){
+        m_table_tmax = tt;
+      }
+
     }
+
 
     m_has_table = true;
        
@@ -100,17 +116,27 @@ GCTAPointing::dir_horiz( const GTime &time ) const {
     // average direction...
   }
 
+  // first check if time is inside table bounds
+
+  if (time<m_table_tmin || time>m_table_tmax) {
+    throw GException::out_of_range( __func__, time.secs(), 
+                                    m_table_tmin.secs(),
+                                    m_table_tmax.secs());
+  }
+
   // get interpolated alt and az for the given time using the pointing
   // table:
 
-  alt = m_table_nodes.interpolate( time.sec(), m_table_alt );
-  az  = m_table_nodes.interpolate( time.sec(), m_table_az );
+  double alt = m_table_nodes.interpolate( time.secs(), m_table_alt );
+  double az  = m_table_nodes.interpolate( time.secs(), m_table_az );
   
   // construct a GHorizDir and return it:
   
-  return GHorizDir(alt,az);
+  GHorizDir dir;
+  dir.altaz(alt,az);
+  return dir;
 
-}
+ }
 
 
 /* __ Macros _____________________________________________________________ */
