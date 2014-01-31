@@ -1909,6 +1909,31 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 }
 
 
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @todo So far we have no means to pass additional parameters to the
+ * GCTAEdisp::ebounds() method.
+ ***************************************************************************/
+GEbounds GCTAResponse::src_ebounds(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // If energy dispersion is available then set the energy boundaries
+    if (edisp() != NULL) {
+        double logE = obsEnergy.log10MeV();
+        ebounds = edisp()->ebounds(logE);
+    }
+
+    // Return energy boundaries
+    return ebounds;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                    Low-level CTA response methods                       =

@@ -34,6 +34,7 @@
 #include "GPhoton.hpp"
 #include "GSource.hpp"
 #include "GEnergy.hpp"
+#include "GEbounds.hpp"
 #include "GTime.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialElliptical.hpp"
@@ -107,6 +108,7 @@ public:
                                     const GObservation& obs) const;
     virtual double npred_diffuse(const GSource&      source,
                                  const GObservation& obs) const;
+    virtual GEbounds src_ebounds(const GEnergy& obsEnergy) const;
 
 protected:
     // Protected methods

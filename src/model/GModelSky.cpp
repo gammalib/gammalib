@@ -30,6 +30,7 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GIntegral.hpp"
 #include "GModelRegistry.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
@@ -1380,7 +1381,35 @@ double GModelSky::integrate_energy(const GEvent& event,
 
     // Case A: Integration
     if (integrate) {
-        throw GException::feature_not_implemented(G_INTEGRATE_ENERGY);
+    
+        // Retrieve true energy boundaries
+        GEbounds ebounds = rsp.src_ebounds(event.energy());
+    
+        // Loop over all boundaries
+        for (int i = 0; i < ebounds.size(); ++i) {
+
+            // Get boundaries in MeV
+            double emin = ebounds.emin(i).MeV();
+            double emax = ebounds.emax(i).MeV();
+
+            // Continue only if valid
+            if (emax > emin) {
+
+                // Setup integration function
+                GModelSky::edisp_kern integrand(this, event, srcTime, obs, grad);
+                GIntegral integral(&integrand);
+
+                // Set integration precision
+                //integral.eps(1.0e-5);
+
+                // Do Romberg integration
+                emin = log(emin);
+                emax = log(emax);
+                value += integral.romb(emin, emax);
+    
+            } // endif: interval was valid
+        } // endfor: looped over intervals
+
     }
 
     // Case B: No integration (assume no energy dispersion)
@@ -1547,4 +1576,48 @@ bool GModelSky::valid_model(void) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for edisp_kern() method
+ *
+ * @param[in] x Function value.
+ *
+ * This method implements the integration kernel needed for the edisp_kern()
+ * method.
+ ***************************************************************************/
+double GModelSky::edisp_kern::eval(const double& x)
+{
+    // Set energy
+    GEnergy eng;
+    double expx = std::exp(x);
+    eng.MeV(expx);
+
+    // Get function value
+    double value = m_parent->integrate_dir(m_event, eng, m_srcTime, m_obs, m_grad);
+
+    // Save value if needed
+    #if defined(G_NAN_CHECK)
+    double value_out = value;
+    #endif
+
+    // Correct for variable substitution
+    value *= expx;
+
+    // Compile option: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: GModelSky::edisp_kern::eval";
+        std::cout << "(x=" << x << "): ";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << " (value_out=" << value_out;
+        std::cout << " exp(x)=" << expx;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return value
+    return value;
 }
