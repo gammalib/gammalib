@@ -334,24 +334,36 @@ void TestGCTAResponse::test_response_npsf(void)
 void TestGCTAResponse::test_response_edisp(void)
 {
     // Load response
-    GCTAResponse rsp;
+	GCTAResponse rsp;
     rsp.caldb(cta_caldb);
     rsp.load(cta_irf);
-
     // Integrate Energy Dispersion
-    GEnergy eng;
-    for (double e = 0.1; e < 10.0; e *= 2.0) {
-        eng.TeV(e);
-        double r     = 0.0;
-        double dr    = 0.001;
-        int    steps = int(1.0/dr);
+
+    if (rsp.edisp() == NULL){
+    	return;
+    }
+
+    for (double e_src = 0.1; e_src < 10.0; e_src *= 2.0) {
+    	std::cerr << "asdf" << rsp.edisp() << std::endl;
+    	GEbounds ebs = rsp.edisp()->ebounds(std::log10(e_src), 0.0, 0.0, 0.0, 0.0);
+
+    	GEnergy emin = ebs.emin();
+    	GEnergy emax = ebs.emax();
+
+        double logE_min = std::log10(emin.TeV());
+        double logE_max = std::log10(emax.TeV());
+
+        int    steps = 1000;
+        double dlogE = (logE_max-logE_min)/steps;
+
         double sum   = 0.0;
+        double logE_obs = logE_min;
         for (int i = 0; i < steps; ++i) {
-            r   += dr;
-            sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
-                   gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
-                   gammalib::deg2rad;
+            logE_obs   += dlogE;
+
+            sum += (*rsp.edisp())(logE_obs, 0.0, 0.0, 0.0, 0.0) * dlogE;
         }
+        GEnergy eng(e_src, "TeV");
         test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
     }
 
