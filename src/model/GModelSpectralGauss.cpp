@@ -510,6 +510,7 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
 
     // Sample until we find a value within the requested energy range
     do {
+
         // Compute random value
     	double val = ran.normal();
 
