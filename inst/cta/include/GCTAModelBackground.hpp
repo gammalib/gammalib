@@ -59,7 +59,7 @@ public:
     explicit GCTAModelBackground(const GModelSpatial& spatial,
                                  const GModelSpectral& spectral);
     GCTAModelBackground(const GCTAModelBackground& model);
-    GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spec);
+    GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spec, const int& nx_sky = -999, const int& ny_sky = -999, const int& n_energy = -999 );
     virtual ~GCTAModelBackground(void);
 
     // Operators
@@ -82,15 +82,16 @@ public:
     virtual void                 write(GXmlElement& xml) const;
     virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
-    // Other methods
-    GModelSpatial*  spatial(void) const;
-    GModelSpectral* spectral(void) const;
-    GModelTemporal* temporal(void) const;
+  // Other methods
+  GModelSpatial*  spatial(void) const;
+  GModelSpectral* spectral(void) const;
+  GModelTemporal* temporal(void) const;
 
 protected:
     // Protected methods
-    void            set_spatial(const GCTAObservation& obs, const std::string& filename);
-    void            init_members(void);
+    //void            set_spatial(const GCTAObservation& obs, const std::string& filename);
+  void            set_spatial(const GCTAObservation& obs, const std::string& filename, const int& nx_sky = -999, const int& ny_sky = -999, const int& ne_user = -999 );
+  void            init_members(void);
     void            copy_members(const GCTAModelBackground& model);
     void            free_members(void);
     void            set_pointers(void);

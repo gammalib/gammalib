@@ -195,18 +195,18 @@ GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
  * Please refer to the classes GModelSpatial and GModelSpectral to learn
  * more about the definition of the spatial and spectral components.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spectral) : GModelData()
+GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spectral, const int& nx_sky, const int& ny_sky, const int& n_energy) : GModelData()
 {
-	// Initialise private members for clean destruction
+        // Initialise private members for clean destruction
 	init_members();
 
 	// copying spectral model
 	m_spectral = spectral.clone();
 
 	// creating spatial cube from background file
-	set_spatial(obs, filename);
+	set_spatial(obs, filename, nx_sky, ny_sky, n_energy);
 
-	 // Set parameter pointers
+	// Set parameter pointers
 	set_pointers();
 
 	// Return
@@ -297,7 +297,6 @@ void GCTAModelBackground::clear(void)
     // Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Clone instance
@@ -994,13 +993,18 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  * @todo Document method.
  ***************************************************************************/
 
-void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::string& filename)
+void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::string& filename, const int& nx_sky, const int& ny_sky, const int& n_energies_arg)
 {
+  // make sure the m_spatial is not already filled
+  // should not append if this function is used in a responsable way
+  // do we create exception or warning to secure this ????
+  if (m_spatial  != NULL) delete m_spatial;
+  m_spatial  = NULL;
 
-	// Tie model to observation by assigning same id
-	ids(obs.id());
-
-	// Extract pointing information from CTAObservation
+  // Tie model to observation by assigning same id
+  ids(obs.id());
+  
+  // Extract pointing information from CTAObservation
 	const GCTAPointing* pnt = dynamic_cast<const GCTAPointing*>(&obs.pointing());
 	if (pnt == NULL) {
 		std::string msg = "No CTA pointing found in observation.\n" +
@@ -1028,9 +1032,21 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	GCTAResponseTable background = GCTAResponseTable(table);
 
 	// read the length of the axes
-	int nx = background.axis(0);
-	int ny = background.axis(1);
-	int n_energies = background.axis(2);
+	int nx= 1;
+	int ny= 1;
+	if(nx_sky>0 && ny_sky > 0){
+	  nx = nx_sky;
+	  ny = ny_sky;
+	}else{
+	 nx = background.axis(0);
+	 ny = background.axis(1);
+	}
+	int n_energies = 1;
+	if(n_energies_arg >0){
+	  n_energies = n_energies_arg;
+	}else{
+	  n_energies = background.axis(2);
+	}
 
 	// retrieve spatial bounds
 	double xlow = background.axis_lo(0,0);
@@ -1105,9 +1121,9 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 
     cube.save("test_cube.fits",true);
 
-	// Create the GModelSpatialDiffuseCube
-	m_spatial = new GModelSpatialDiffuseCube(cube,energies);
-
+    // Create the GModelSpatialDiffuseCube
+    m_spatial = new GModelSpatialDiffuseCube(cube,energies);
+    
 	// Return
 	return;
 }
