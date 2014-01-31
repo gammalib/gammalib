@@ -206,6 +206,8 @@ void GCTAPointing::dir(const GSkyDir& dir)
 const GCTAInstDir& GCTAPointing::instdir(const GSkyDir& skydir) const
 {
 
+	update();
+
 	// Get celestial vector from sky coordinate
 	GVector celvector = skydir.celvector();
 
@@ -227,10 +229,14 @@ const GCTAInstDir& GCTAPointing::instdir(const GSkyDir& skydir) const
 		y_inst = theta * std::sin(phi);
 	}
 
+	std::cout<<"Inst "<<x_inst<<" "<<y_inst<<std::endl;
+
 	// Initialise instrument direction
 	GCTAInstDir inst_direction = GCTAInstDir(skydir);
 	inst_direction.detx(x_inst);
 	inst_direction.dety(y_inst);
+
+	std::cout<<"Inst2 "<<inst_direction.detx()<<" "<<inst_direction.dety()<<std::endl;
 
     // Return
     return inst_direction;
@@ -244,8 +250,10 @@ const GCTAInstDir& GCTAPointing::instdir(const GSkyDir& skydir) const
  *
  * Returns instrument direction as function of a sky direction
  ***************************************************************************/
-const GSkyDir& GCTAPointing::skydir(const GCTAInstDir& instdir) const
+GSkyDir& GCTAPointing::skydir(const GCTAInstDir& instdir)
 {
+
+	update();
 
 	double inst_x = instdir.detx();
 	double inst_y = instdir.dety();

@@ -1000,6 +1000,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
   // do we create exception or warning to secure this ????
   if (m_spatial  != NULL) delete m_spatial;
   m_spatial  = NULL;
+  int k=0;
 
   // Tie model to observation by assigning same id
   ids(obs.id());
@@ -1012,15 +1013,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 		throw GException::invalid_argument(G_NPRED, msg);
 	}
 
-	// Retrieve pointing in sky direction
-	GSkyDir pntdir = pnt->dir();
-
-	// create rotation matrix
-	GMatrix ry;
-	GMatrix rz;
-	ry.eulery(pntdir.dec_deg() - 90.0);
-	rz.eulerz(-pntdir.ra_deg());
-	GMatrix rot = (ry * rz);
+	GCTAPointing pointing = GCTAPointing(*pnt->clone());
 
 	// Read the fits file with the background information
 	GFits fits(filename);
@@ -1073,44 +1066,28 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	// Set interpolation to logscale for energies
 	background.axis_log10(2);
 
+
 	// creating the sky map
 	double bin_size_x = ( xhigh - xlow ) / nx * gammalib::rad2deg;
 	double bin_size_y = ( yhigh - ylow ) / ny * gammalib::rad2deg;
 
-	GSkymap  cube =  GSkymap("TAN","CEL",pntdir.ra_deg(),pntdir.dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
+	GSkymap  cube =  GSkymap("TAN","CEL", pointing.dir().ra_deg(), pointing.dir().dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
 
 	// loop on skymap pixel
     for( int i = 0 ; i < cube.npix(); i++) {
 
+
     	// Get sky direction from pixel number
     	GSkyDir pix_dir = cube.inx2dir(i);
 
-    	// Get celestial vector from sky coordinate
-    	GVector celvector = pix_dir.celvector();
-
-    	// Transform to instrument system
-    	GVector inst = rot * celvector;
-
-    	// Initialise instrument coordinates
-    	double x_inst = 0.0;
-    	double y_inst = 0.0;
-
-    	// Get offset from cel vector, i.e. distance from camera center
-    	double theta = std::acos(inst[2]);
-
-    	// Check if theta and phi are defined
-    	if ( theta > 0.0 ) {
-
-    		double phi = std::asin( inst[1] / std::sin(theta) );
-    		x_inst = theta * std::cos(phi);
-    		y_inst = theta * std::sin(phi);
-    	}
-
+    	// Get instrument coordinates for this pixel
+    	const GCTAInstDir instdir = pointing.instdir(pix_dir);
+    	std::cout<<"Inst3 "<<instdir.detx()<<" "<< instdir.dety()<<std::endl;
    	    // loop on the energy map
 	    for(int j = 0 ; j < energies.size(); j++) {
 
 	        // Determine background value in instrument system for given
-	        std::vector<double> value = background(x_inst, y_inst, energies[j].log10TeV());
+	        std::vector<double> value = background(instdir.detx(), instdir.dety(), energies[j].log10TeV());
 
 	        // Set skymap value
 	        cube(i,j) = value[0];
