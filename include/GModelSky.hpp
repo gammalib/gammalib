@@ -194,7 +194,28 @@ protected:
                                   bool grad) const;
     bool            valid_model(void) const;
 
-    // Proteced data members
+    class edisp_kern : public GFunction {
+    public:
+        edisp_kern(const GModelSky*    parent,
+                   const GEvent&       event,
+                   const GTime&        srcTime,
+                   const GObservation& obs,
+                   bool grad) :
+                   m_parent(parent),
+                   m_event(event),
+                   m_srcTime(srcTime),
+                   m_obs(obs),
+                   m_grad(grad) { }
+        double eval(const double& x);
+    protected:
+        const GModelSky*    m_parent;  //!< Pointer to parent
+        const GEvent&       m_event;   //!< Reference to event
+        const GTime&        m_srcTime; //!< Reference to true time
+        const GObservation& m_obs;     //!< Reference to observation
+        bool&               m_grad;    //!< Reference to gradient flag
+    };
+
+    // Protected data members
     std::string     m_type;       //!< Model type
     GModelSpatial*  m_spatial;    //!< Spatial model
     GModelSpectral* m_spectral;   //!< Spectral model

@@ -1,15 +1,16 @@
-2014-01-25  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-29  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
         
         * Bug fix Version 0.8.1 released
         ================================
         
         Added missing hyphens in pfiles synchronisation section (#1091)
         Add configuration test script (#1091)
-        GModelSky, GCTAModelBackground and GCTAModelRadialAcceptance write
-            id attribute into XML file (#1092)
+        GModelSky, GCTAModelBackground and GCTAModelRadialAcceptance write id attribute into XML file (#1092)
         Add GChatter typedef to Python interface
-        GAMMALIB_CALDB takes precedence over CALDB environment var (#1094)
+        GAMMALIB_CALDB takes precedence over CALDB environment variable (#1094)
         Added vo module and GVOClient class to Python interface
+        Track results of Python unit tests (#1119)
+
 
 2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

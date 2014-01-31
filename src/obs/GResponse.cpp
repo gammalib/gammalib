@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@
 #define G_NPRED_ELLIPTICAL            "GResponse::npred_elliptical(GSource&,"\
                                                             " GObservation&)"
 #define G_NPRED_DIFFUSE   "GResponse::npred_diffuse(GSource&, GObservation&)"
+#define G_SRC_EBOUNDS                      "GResponse::src_ebounds(GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -558,6 +559,27 @@ double GResponse::npred_diffuse(const GSource& source,
     // Return Npred
     return 0.0;
 }
+
+
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented.
+ ***************************************************************************/
+GEbounds GResponse::src_ebounds(const GEnergy& obsEnergy) const
+{
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_SRC_EBOUNDS,
+          "Npred computation not implemented for diffuse models.");
+
+    // Return energy boundaries
+    return (GEbounds());
+}
+
 
 
 /*==========================================================================

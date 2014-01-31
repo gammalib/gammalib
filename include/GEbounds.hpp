@@ -53,6 +53,7 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
+    GEbounds(const GEnergy& emin, const GEnergy& emax);
     explicit GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
                       const bool& log=true);
     explicit GEbounds(const std::string& filename,

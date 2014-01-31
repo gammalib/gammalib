@@ -34,6 +34,7 @@
 #include "GPhoton.hpp"
 #include "GSource.hpp"
 #include "GEnergy.hpp"
+#include "GEbounds.hpp"
 #include "GTime.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialElliptical.hpp"
@@ -72,8 +73,8 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GResponse*  clone(void) const = 0;
-    virtual bool        has_edisp(void) const = 0;
-    virtual bool        has_tdisp(void) const = 0;
+    virtual bool        use_edisp(void) const = 0;
+    virtual bool        use_tdisp(void) const = 0;
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
@@ -107,6 +108,7 @@ public:
                                     const GObservation& obs) const;
     virtual double npred_diffuse(const GSource&      source,
                                  const GObservation& obs) const;
+    virtual GEbounds src_ebounds(const GEnergy& obsEnergy) const;
 
 protected:
     // Protected methods

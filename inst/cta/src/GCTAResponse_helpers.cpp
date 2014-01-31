@@ -259,7 +259,7 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
                  m_rsp.psf(delta, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
 
     // Optionally take energy dispersion into account
-    if (m_rsp.has_edisp() && irf > 0.0) {
+    if (m_rsp.use_edisp() && irf > 0.0) {
         irf *= m_rsp.edisp(m_obsLogEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
     }
     
@@ -561,7 +561,7 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
               model;
 
         // Optionally take energy dispersion into account
-        if (m_rsp.has_edisp() && irf > 0.0) {
+        if (m_rsp.use_edisp() && irf > 0.0) {
             irf *= m_rsp.edisp(m_obsLogEng, theta, phi, 
                                m_zenith, m_azimuth, m_srcLogEng);
         }
@@ -890,7 +890,7 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
               m_rsp.aeff(offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
 
         // Optionally take energy dispersion into account
-        if (m_rsp.has_edisp() && irf > 0.0) {
+        if (m_rsp.use_edisp() && irf > 0.0) {
             irf *= m_rsp.edisp(m_obsLogEng, offset, azimuth,
                                m_zenith, m_azimuth, m_srcLogEng);
         }

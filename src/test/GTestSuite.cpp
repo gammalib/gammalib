@@ -279,6 +279,9 @@ bool GTestSuite::run(void)
             // Create a test of error type for function testing
             GTestCase* test = new GTestCase(GTestCase::ERROR_TEST, m_names[m_index]);
 
+            // Add test case to test suite
+            m_tests.push_back(test);
+
             // Set start time
             #ifdef _OPENMP
             double t_start = omp_get_wtime();
@@ -335,12 +338,9 @@ bool GTestSuite::run(void)
                 success = false;
             }
 
-            // Add test case to test suite
-            m_tests.push_back(test);
-
         } // endif: test case has a function pointer
 
-    } // endwhile: there were tests on the stack
+    } // endfor: looped over tests on the stack
 
     // Reset index
     m_index = 0;
@@ -354,7 +354,7 @@ bool GTestSuite::run(void)
  * @brief Test an assert
  *
  * @param[in] assert Assert (true/false).
- * @param[in] name Test case name (defaults to "").
+ * @param[in] name Test case name.
  * @param[in] message Test case name (defaults to "").
  *
  * Tests if a condition is true or false. This method adds a test case of
@@ -389,8 +389,8 @@ void GTestSuite::test_assert(const bool&        assert,
 
     // Return
     return;
-
 }
+
 
 /***********************************************************************//**
  * @brief Test a value

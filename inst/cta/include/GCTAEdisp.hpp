@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAEdisp.hpp - Abstract CTA energy dispersion base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,8 +31,8 @@
 #include <string>
 #include "GBase.hpp"
 #include "GFits.hpp"
-#include "GRan.hpp"
 #include "GEbounds.hpp"
+#include "GRan.hpp"
 
 
 /***********************************************************************//**
@@ -67,7 +67,7 @@ public:
     virtual GCTAEdisp*  clone(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
-    virtual double      mc(GRan&         ran,
+    virtual GEnergy     mc(GRan&         ran,
                            const double& logE,
                            const double& theta = 0.0,
                            const double& phi = 0.0,

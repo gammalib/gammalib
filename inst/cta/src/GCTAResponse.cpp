@@ -57,6 +57,7 @@
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
+#include "GCTAEdispPerfTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
@@ -327,7 +328,7 @@ double GCTAResponse::irf(const GEvent&       event,
             irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
 
             // Multiply-in energy dispersion
-            if (has_edisp() && irf > 0) {
+            if (use_edisp() && irf > 0) {
 
                 // Get log10(E/TeV) of measured photon energy.
                 double obsLogEng = obsEng.log10TeV();
@@ -404,7 +405,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
         npred *= npsf(srcDir, srcLogEng, srcTime, pnt, roi);
 
         // Multiply-in energy dispersion
-        if (has_edisp() && npred > 0.0) {
+        if (use_edisp() && npred > 0.0) {
 
             // Get energy dispersion
             npred *= nedisp(srcDir, srcEng, srcTime, pnt, cta.events()->ebounds());
@@ -495,12 +496,18 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
             GCTAInstDir inst_dir;
             inst_dir.dir(sky_dir);
 
+            GEnergy energy = photon.energy();
+            if (use_edisp()) {
+              energy = edisp()->mc(ran, srcLogEng, theta, phi, zenith, azimuth);
+            }
+
             // Allocate event
             event = new GCTAEventAtom;
 
             // Set event attributes
             event->dir(inst_dir);
-            event->energy(photon.energy());
+
+            event->energy(energy);
             event->time(photon.time());
 
         } // endif: detector was alive
@@ -563,6 +570,9 @@ void GCTAResponse::load(const std::string& irfname)
 
     // Load point spread function
     load_psf(filename);
+
+    // Load energy dispersion
+    load_edisp(filename);
 
     // Remove theta cut
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
@@ -723,6 +733,32 @@ void GCTAResponse::load_psf(const std::string& filename)
 
 
 /***********************************************************************//**
+ * @brief Load energy dispersion information
+ *
+ * @param[in] filename Energy dispersion file name.
+ ***************************************************************************/
+void GCTAResponse::load_edisp(const std::string& filename)
+{
+    // Free any existing point spread function instance
+    if (m_edisp != NULL) delete m_edisp;
+    m_edisp = NULL;
+
+    // Try opening the file as a FITS file
+    try {
+        // Open FITS file
+        GFits file(filename);
+
+        // TODO: Implement FITS energy resolution loading
+    }
+    catch (GException::fits_open_error &e) {
+      m_edisp = new GCTAEdispPerfTable(filename);
+    }
+
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set offset angle dependence (degrees)
  *
  * @param[in] sigma Offset angle dependence value (degrees).
@@ -815,6 +851,10 @@ std::string GCTAResponse::print(const GChatter& chatter) const
             result.append("\n"+m_psf->print(chatter));
         }
 
+        // Append energy dispersion information
+        if (m_edisp != NULL) {
+            result.append("\n"+m_edisp->print(chatter));
+        }
         // EXPLICIT: Append Npred cache information
         if (chatter >= EXPLICIT) {
             if (!m_npred_names.empty()) {
@@ -1869,6 +1909,31 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 }
 
 
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @todo So far we have no means to pass additional parameters to the
+ * GCTAEdisp::ebounds() method.
+ ***************************************************************************/
+GEbounds GCTAResponse::src_ebounds(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // If energy dispersion is available then set the energy boundaries
+    if (edisp() != NULL) {
+        double logE = obsEnergy.log10MeV();
+        ebounds = edisp()->ebounds(logE);
+    }
+
+    // Return energy boundaries
+    return ebounds;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                    Low-level CTA response methods                       =
@@ -2171,6 +2236,7 @@ void GCTAResponse::init_members(void)
     m_aeff  = NULL;
     m_psf   = NULL;
     m_edisp = NULL;
+    m_apply_edisp = false;
 
     // Initialise Npred cache
     m_npred_names.clear();
@@ -2191,10 +2257,11 @@ void GCTAResponse::init_members(void)
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
     // Copy members
-    m_caldb   = rsp.m_caldb;
-    m_rspname = rsp.m_rspname;
-    m_rmffile = rsp.m_rmffile;
-    m_eps     = rsp.m_eps;
+    m_caldb     = rsp.m_caldb;
+    m_rspname   = rsp.m_rspname;
+    m_rmffile   = rsp.m_rmffile;
+    m_eps       = rsp.m_eps;
+    m_apply_edisp = rsp.m_apply_edisp;
 
     // Copy cache
     m_npred_names    = rsp.m_npred_names;
