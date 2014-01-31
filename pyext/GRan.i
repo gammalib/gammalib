@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GRan.i - Random number generator class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,7 @@ public:
     unsigned long int      int32(void);
     unsigned long long int int64(void);
     double                 uniform(void);
-    double                 normal(const double& mean=0, const double& sigma=1);
+    double                 normal(void);
     double                 exp(const double& arg);
     double                 poisson(const double& arg);
     double                 chisq2(void);

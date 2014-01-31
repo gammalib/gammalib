@@ -247,11 +247,16 @@ double GRan::uniform(void)
 
 
 /***********************************************************************//**
-* @brief Returns normal deviates
-*
-***************************************************************************/
-double GRan::normal(const double& mean, const double& sigma)
+ * @brief Returns normal deviates
+ *
+ * Method Used: Box-Muller transform, outlined here:
+ * http://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+ *
+ * Code from: http://www.design.caltech.edu/erik/Misc/Gaussian.html
+ ***************************************************************************/
+double GRan::normal(void)
 {
+    // Get random value
     double x1;
     double w;
     do {
@@ -261,10 +266,11 @@ double GRan::normal(const double& mean, const double& sigma)
     } while (w >= 1.0);
 
     // Compute random value
-    double val = x1 * std::sqrt((-2.0 * std::log(w)) / w);
-    return (sigma * val) + mean;
+    double value = x1 * std::sqrt((-2.0 * std::log(w)) / w);
+    
+    // Return random value
+    return value;
 }
-
 
 
 /***********************************************************************//**
