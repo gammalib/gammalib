@@ -824,6 +824,18 @@ std::string GCTAResponse::print(const GChatter& chatter) const
 
         // Append response information
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
+        result.append("\n"+gammalib::parformat("Energy dispersion"));
+        if (use_edisp()) {
+            result.append("Used");
+        }
+        else {
+            if (apply_edisp()) {
+                result.append("Not available");
+            }
+            else {
+                result.append("Not used");
+            }
+        }
 
         // Append calibration database
         result.append("\n"+m_caldb.print(chatter));
