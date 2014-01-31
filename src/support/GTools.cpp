@@ -236,6 +236,42 @@ std::string gammalib::expand_env(const std::string& arg)
 
 
 /***********************************************************************//**
+ * @brief Build file path from path name and file name
+ *
+ * @param[in] pathname Path name.
+ * @param[in] filename File name.
+ * @return File path.
+ *
+ * Builds a file path by combining the @p pathname and the @p filename
+ * following
+ *
+ *      filepath = pathname/filename
+ *
+ * If @p pathname is an empty string, the method simply returns the
+ * @p filename.
+ ***************************************************************************/
+std::string gammalib::filepath(const std::string& pathname,
+                               const std::string& filename)
+{
+    // Initialise filepath
+    std::string filepath;
+
+    // If path name is empty, simply return the file name
+    if (pathname.empty()) {
+        filepath = filename;
+    }
+
+    // ... otherwise combine both
+    else {
+        filepath = pathname + "/" + filename;
+    }
+
+    // Return the file path
+    return filepath;
+}
+    
+
+/***********************************************************************//**
  * @brief Convert unsigned short integer value into string
  *
  * @param[in] value Unsigned short integer to be converted into string.

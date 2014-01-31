@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-30 January 2014
+31 January 2014
 
 
 1. Introduction
@@ -13,7 +13,8 @@ changes made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-None
+GCaldb
+  Changed dir() method to rootdir().
 
 
 3. Configuration
@@ -66,8 +67,9 @@ The GAMMALIB_CALDB environment variable takes precedence over the CALDB
 environment variable. This was the initial intention, but the code did the
 opposite.
 
-The calibration database usage has now been cleaned up throughout the code.
-GammaLib now makes use of the calibration index file.
+The calibration database interface implemented by GCaldb has been cleaned
+up. Now the CIF file is used to retrieve the filename to calibration files,
+providing full CALDB compliant support in GammaLib.
 
 
 11. Optimization module

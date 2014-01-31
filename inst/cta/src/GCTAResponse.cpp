@@ -535,13 +535,13 @@ void GCTAResponse::load(const std::string& rspname)
     // If filenames are empty then build filenames from CALDB root path and
     // response name
     if (aeffname.length() < 1) {
-        aeffname = irf_filename(m_caldb.dir() + "/" + rspname);
+        aeffname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
     if (psfname.length() < 1) {
-        psfname = irf_filename(m_caldb.dir() + "/" + rspname);
+        psfname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
     if (edispname.length() < 1) {
-        edispname = irf_filename(m_caldb.dir() + "/" + rspname);
+        edispname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
 
     // Load effective area
