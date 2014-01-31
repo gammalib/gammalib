@@ -826,7 +826,7 @@ std::string GCTAResponse::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
 
         // Append calibration database
-        result.append("\n"+m_caldb.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_caldb.print(chatter));
 
         // Append effective area information
         if (m_aeff != NULL) {
