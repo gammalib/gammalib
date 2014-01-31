@@ -1307,9 +1307,9 @@ double GModelSky::integrate_time(const GEvent& event,
     const GResponse& rsp = obs.response();
 
     // Determine if time integration is needed
-    bool integrate = rsp.has_tdisp();
+    bool integrate = rsp.use_tdisp();
 
-    // Case A: Integraion
+    // Case A: Integration
     if (integrate) {
         throw GException::feature_not_implemented(G_INTEGRATE_TIME);
     }
@@ -1376,9 +1376,9 @@ double GModelSky::integrate_energy(const GEvent& event,
     const GResponse& rsp = obs.response();
 
     // Determine if energy integration is needed
-    bool integrate = rsp.has_edisp();
+    bool integrate = rsp.use_edisp();
 
-    // Case A: Integraion
+    // Case A: Integration
     if (integrate) {
         throw GException::feature_not_implemented(G_INTEGRATE_ENERGY);
     }

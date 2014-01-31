@@ -72,8 +72,10 @@ public:
     // Implement pure virtual base class methods
     virtual void          clear(void);
     virtual GCTAResponse* clone(void) const;
-    virtual bool          has_edisp(void) const;
-    virtual bool          has_tdisp(void) const;
+    virtual bool          use_edisp(void) const;
+    virtual bool          apply_edisp(void) const;
+    virtual void          apply_edisp(bool apply_edisp);
+    virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -168,13 +170,14 @@ private:
                                         const GEvent&      event) const;
 
     // Private data members
-    std::string         m_caldb;    //!< Name of or path to the calibration database
-    std::string         m_rspname;  //!< Name of the instrument response
-    std::string         m_rmffile;  //!< Name of RMF file
-    double              m_eps;      //!< Integration precision
-    GCTAAeff*           m_aeff;     //!< Effective area
-    GCTAPsf*            m_psf;      //!< Point spread function
-    GCTAEdisp*          m_edisp;    //!< Energy dispersion
+    std::string         m_caldb;       //!< Name of or path to the calibration database
+    std::string         m_rspname;     //!< Name of the instrument response
+    std::string         m_rmffile;     //!< Name of RMF file
+    double              m_eps;         //!< Integration precision
+    GCTAAeff*           m_aeff;        //!< Effective area
+    GCTAPsf*            m_psf;         //!< Point spread function
+    GCTAEdisp*          m_edisp;       //!< Energy dispersion
+    bool                m_apply_edisp; //!< Apply energy dispersion?
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
@@ -183,26 +186,49 @@ private:
     mutable std::vector<double>      m_npred_values;   //!< Model values
 };
 
-
 /***********************************************************************//**
- * @brief Signal if energy dispersion has been implemented
+ * @brief Signal if response uses energy dispersion
  *
- * @return False.
+ * @return True if response uses energy dispersion
  ***************************************************************************/
 inline
-bool GCTAResponse::has_edisp(void) const
+bool GCTAResponse::use_edisp(void) const
 {
-    return false;
+    bool has_edisp = (m_edisp != NULL);
+    return m_apply_edisp && has_edisp;
 }
 
 
 /***********************************************************************//**
- * @brief Signal if time dispersion has been implemented
+ * @brief Signal if energy dispersion should be applied
+ *
+ * @return True if energy dispersion should be applied
+ ***************************************************************************/
+inline
+bool GCTAResponse::apply_edisp(void) const
+{
+    return m_apply_edisp;
+}
+
+/***********************************************************************//**
+ * @brief Signal if energy dispersion should be applied
+ *
+ * @param[in] apply_edisp Set true if energy dispersion should be applied
+ ***************************************************************************/
+inline
+void GCTAResponse::apply_edisp(bool apply_edisp)
+{
+    m_apply_edisp = apply_edisp;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if time dispersion will be used
  *
  * @return False.
  ***************************************************************************/
 inline
-bool GCTAResponse::has_tdisp(void) const
+bool GCTAResponse::use_tdisp(void) const
 {
     return false;
 }
@@ -254,18 +280,6 @@ inline
 const std::string& GCTAResponse::rmffile(void) const
 {
     return m_rmffile;
-}
-
-
-/***********************************************************************//**
- * @brief Load energy dispersion information
- *
- * @param[in] filename Energy dispersion file name.
- ***************************************************************************/
-inline
-void GCTAResponse::load_edisp(const std::string& filename)
-{
-    return;
 }
 
 
