@@ -69,6 +69,7 @@ public:
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;
+    const GVector& skytonom(const GVector& celvector) const;
 
 protected:
     // Protected methods
