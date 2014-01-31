@@ -1,4 +1,4 @@
-2014-01-29  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
         
         * Bug fix Version 0.8.1 released
         ================================
@@ -10,6 +10,7 @@
         GAMMALIB_CALDB takes precedence over CALDB environment variable (#1094)
         Added vo module and GVOClient class to Python interface
         Track results of Python unit tests (#1119)
+        Clean up calibration database usage (#1102)
 
 
 2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
