@@ -1000,20 +1000,17 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
   // do we create exception or warning to secure this ????
   if (m_spatial  != NULL) delete m_spatial;
   m_spatial  = NULL;
-  int k=0;
 
   // Tie model to observation by assigning same id
   ids(obs.id());
   
   // Extract pointing information from CTAObservation
-	const GCTAPointing* pnt = dynamic_cast<const GCTAPointing*>(&obs.pointing());
-	if (pnt == NULL) {
+	const GCTAPointing* pointing = dynamic_cast< const GCTAPointing*>(&obs.pointing());
+	if (pointing == NULL) {
 		std::string msg = "No CTA pointing found in observation.\n" +
 						  obs.print();
 		throw GException::invalid_argument(G_NPRED, msg);
 	}
-
-	GCTAPointing pointing = GCTAPointing(*pnt->clone());
 
 	// Read the fits file with the background information
 	GFits fits(filename);
@@ -1027,17 +1024,20 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	// read the length of the axes
 	int nx= 1;
 	int ny= 1;
-	if(nx_sky>0 && ny_sky > 0){
+	if( nx_sky > 0 && ny_sky > 0) {
 	  nx = nx_sky;
 	  ny = ny_sky;
-	}else{
+	}
+	else {
 	 nx = background.axis(0);
 	 ny = background.axis(1);
 	}
+
 	int n_energies = 1;
 	if(n_energies_arg >0){
 	  n_energies = n_energies_arg;
-	}else{
+	}
+	else {
 	  n_energies = background.axis(2);
 	}
 
@@ -1062,27 +1062,24 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	  
 	} // endfor: loop over energies
 	
-
 	// Set interpolation to logscale for energies
 	background.axis_log10(2);
-
 
 	// creating the sky map
 	double bin_size_x = ( xhigh - xlow ) / nx * gammalib::rad2deg;
 	double bin_size_y = ( yhigh - ylow ) / ny * gammalib::rad2deg;
 
-	GSkymap  cube =  GSkymap("TAN","CEL", pointing.dir().ra_deg(), pointing.dir().dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
+	GSkymap  cube =  GSkymap("TAN","CEL", pointing->dir().ra_deg(), pointing->dir().dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
 
 	// loop on skymap pixel
     for( int i = 0 ; i < cube.npix(); i++) {
-
 
     	// Get sky direction from pixel number
     	GSkyDir pix_dir = cube.inx2dir(i);
 
     	// Get instrument coordinates for this pixel
-    	const GCTAInstDir instdir = pointing.instdir(pix_dir);
-    	std::cout<<"Inst3 "<<instdir.detx()<<" "<< instdir.dety()<<std::endl;
+    	const GCTAInstDir instdir = pointing->instdir(pix_dir);
+
    	    // loop on the energy map
 	    for(int j = 0 ; j < energies.size(); j++) {
 
@@ -1095,8 +1092,6 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::str
 	    } // endfor: loop over energies
 
 	} // endfor: loop over sky bins
-
-    cube.save("test_cube.fits",true);
 
     // Create the GModelSpatialDiffuseCube
     m_spatial = new GModelSpatialDiffuseCube(cube,energies);

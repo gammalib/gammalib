@@ -49,7 +49,7 @@ public:
     // Other methods
     void           dir(const GSkyDir& dir);
     const GCTAInstDir& instdir(const GSkyDir& skydir) const;
-    GSkyDir& skydir(const GCTAInstDir& instdir);
+    const GSkyDir& skydir(const GCTAInstDir& instdir) const;
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;

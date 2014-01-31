@@ -220,6 +220,8 @@ void GCTAInstDir::init_members(void)
 {
     // Initialise members
     m_dir.clear();
+    m_detx = 0.0;
+    m_dety = 0.0;
 
     // Return
     return;
@@ -235,6 +237,8 @@ void GCTAInstDir::copy_members(const GCTAInstDir& dir)
 {
     // Copy attributes
     m_dir = dir.m_dir;
+    m_detx = dir.m_detx;
+    m_dety = dir.m_dety;
 
     // Return
     return;

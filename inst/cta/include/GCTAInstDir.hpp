@@ -64,7 +64,8 @@ public:
     const GSkyDir& dir(void) const;
     void detx(const double &x){m_detx = x;};
     void dety(const double &y){m_dety = y;};
-    const double& detx(void) const  {return m_detx;};
+
+    const double& detx(void) const {return m_detx;};
     const double& dety(void) const {return m_dety;};
 
 

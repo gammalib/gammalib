@@ -206,6 +206,7 @@ void GCTAPointing::dir(const GSkyDir& dir)
 const GCTAInstDir& GCTAPointing::instdir(const GSkyDir& skydir) const
 {
 
+	// compute rotation matrix
 	update();
 
 	// Get celestial vector from sky coordinate
@@ -229,14 +230,10 @@ const GCTAInstDir& GCTAPointing::instdir(const GSkyDir& skydir) const
 		y_inst = theta * std::sin(phi);
 	}
 
-	std::cout<<"Inst "<<x_inst<<" "<<y_inst<<std::endl;
-
 	// Initialise instrument direction
 	GCTAInstDir inst_direction = GCTAInstDir(skydir);
 	inst_direction.detx(x_inst);
 	inst_direction.dety(y_inst);
-
-	std::cout<<"Inst2 "<<inst_direction.detx()<<" "<<inst_direction.dety()<<std::endl;
 
     // Return
     return inst_direction;
@@ -250,14 +247,17 @@ const GCTAInstDir& GCTAPointing::instdir(const GSkyDir& skydir) const
  *
  * Returns instrument direction as function of a sky direction
  ***************************************************************************/
-GSkyDir& GCTAPointing::skydir(const GCTAInstDir& instdir)
+const GSkyDir& GCTAPointing::skydir(const GCTAInstDir& instdir)const
 {
 
+	// compute rotation matrix
 	update();
 
+	// retrieve instrument coordinates
 	double inst_x = instdir.detx();
 	double inst_y = instdir.dety();
 
+	// convert to polar coordinates
 	double theta = std::sqrt( inst_x * inst_x + inst_y * inst_y );
 	double phi = std::atan(inst_y / inst_x);
 
@@ -266,7 +266,7 @@ GSkyDir& GCTAPointing::skydir(const GCTAInstDir& instdir)
 	// Do we retrieve the correct vector here?
 	GVector  native(std::cos(phi)*std::cos(theta),std::cos(phi) * std::sin(theta), std::sin(phi));
 
-	// Transform to instrument system
+	// Transform to sky system
 	GVector skyvector = m_Rback * native;
 
 	GSkyDir sky = GSkyDir();
