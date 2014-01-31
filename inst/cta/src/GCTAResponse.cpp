@@ -527,7 +527,7 @@ void GCTAResponse::load(const std::string& rspname)
     m_caldb = caldb;
 
     // First attempt reading the response using the GCaldb interface
-    std::string expr      = "NAME("+gammalib::toupper(rspname)+")";
+    std::string expr      = "NAME("+rspname+")";
     std::string aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
     std::string psfname   = m_caldb.filename("","","RPSF","","",expr);
     std::string edispname = m_caldb.filename("","","EDISP","","",expr);

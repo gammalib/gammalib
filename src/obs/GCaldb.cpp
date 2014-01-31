@@ -387,7 +387,8 @@ std::string GCaldb::filename(const std::string& detector,
             // Check for detector
             if (detector.length() > 0) {
                 const GFitsTableCol* column = (*m_cif)["DETNAM"];
-                if (detector == column->string(i)) {
+                if (gammalib::toupper(detector) ==
+                    gammalib::toupper(column->string(i))) {
                     match_detector = true;
                 }
             }
@@ -398,7 +399,8 @@ std::string GCaldb::filename(const std::string& detector,
             // Check for filter
             if (filter.length() > 0) {
                 const GFitsTableCol* column = (*m_cif)["FILTER"];
-                if (filter == column->string(i)) {
+                if (gammalib::toupper(filter) ==
+                    gammalib::toupper(column->string(i))) {
                     match_filter = true;
                 }
             }
@@ -409,7 +411,8 @@ std::string GCaldb::filename(const std::string& detector,
             // Check for code name
             if (codename.length() > 0) {
                 const GFitsTableCol* column = (*m_cif)["CAL_CNAM"];
-                if (codename == column->string(i)) {
+                if (gammalib::toupper(codename) ==
+                    gammalib::toupper(column->string(i))) {
                     match_codename = true;
                 }
             }
@@ -420,7 +423,8 @@ std::string GCaldb::filename(const std::string& detector,
             // Check for date
             if (date.length() > 0) {
                 const GFitsTableCol* column = (*m_cif)["CAL_VSD"];
-                if (date == column->string(i)) {
+                if (gammalib::toupper(date) ==
+                    gammalib::toupper(column->string(i))) {
                     match_date = true;
                 }
             }
@@ -431,7 +435,8 @@ std::string GCaldb::filename(const std::string& detector,
             // Check for time
             if (time.length() > 0) {
                 const GFitsTableCol* column = (*m_cif)["CAL_VST"];
-                if (time == column->string(i)) {
+                if (gammalib::toupper(time) ==
+                    gammalib::toupper(column->string(i))) {
                     match_time = true;
                 }
             }
@@ -444,7 +449,8 @@ std::string GCaldb::filename(const std::string& detector,
                 const GFitsTableCol* column = (*m_cif)["CAL_CBD"];
                 int num_columns = column->elements(i);
                 for (int k = 0; k < num_columns; ++k) {
-                    if (expr == column->string(i,k)) {
+                    if (gammalib::toupper(expr) ==
+                        gammalib::toupper(column->string(i,k))) {
                         match_expr = true;
                         break;
                     }
