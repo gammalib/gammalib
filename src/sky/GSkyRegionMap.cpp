@@ -29,6 +29,8 @@
 #include <config.h>
 #endif
 #include "GSkyRegionMap.hpp"
+#include "GSkyRegionCircle.hpp"
+#include "GSkyDir.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -52,17 +54,21 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Void constructor
+ * @brief Set "write" function
+ *
+ * @return String to be written
  ***************************************************************************/
-GSkyRegionMap::GSkyRegionMap(void)
+std::string GSkyRegionMap::write(void) const
 {
-    // Initialise members
-    init_members();
+    // Allocate string
+	std::string result;
 
-    // Return
-    return;
+    // Set string
+	result.append("Warning: This function is not needed.");
+
+    // Return string
+	return result;
 }
-
 
 /***********************************************************************//**
  * @brief Direction constructor
@@ -70,14 +76,13 @@ GSkyRegionMap::GSkyRegionMap(void)
  * @param[in] centre Centre sky direction.
  * @param[in] radius Region radius [deg].
  ***************************************************************************/
-GSkyRegionMap::GSkyRegionMap(GSkyDir& centre, const double& radius)
+GSkyRegionMap::GSkyRegionMap(const GSkyRegionMap& region)
 {
     // Initialise members
 	init_members();
 
 	// Set members
-	this->centre(centre);
-    this->radius(radius);
+	this->map(region.map());
 
 	// Compute solid angle
 	compute_solid_angle();
@@ -85,70 +90,43 @@ GSkyRegionMap::GSkyRegionMap(GSkyDir& centre, const double& radius)
     // Return
     return;
 }
-
-
-/***********************************************************************//**
- * @brief Direction constructor
- *
- * @param[in] ra Right Ascension of region centre [deg].
- * @param[in] dec Declination of region centre [deg].
- * @param[in] radius Region radius [deg].
- ***************************************************************************/
-GSkyRegionMap::GSkyRegionMap(const double& ra, const double& dec,
-                                   const double& radius)
-{
-    // Initialise members
-	init_members();
-
-	// Set members
-	this->centre(ra, dec);
-    this->radius(radius);
-
-	// Compute solid angle
-	compute_solid_angle();
-
-    // Return
-    return;
-}
-
 
 /***********************************************************************//**
  * @brief String constructor
  *
- * @param[in] line DS9 region file line.
+ * @param[in] filename FITS file.
  *
- * Constructs region from a DS9 region file line.
+ * Constructs region from a FITS file.
  ***************************************************************************/
-GSkyRegionMap::GSkyRegionMap(const std::string& line)
+GSkyRegionMap::GSkyRegionMap(const GFits& file)
 {
-	 // Initialise members
-	 init_members();
+    // Initialise members
+    init_members();
 
-	 // Read information from DS9 region file line
-	 read(line);
+    // Load FITS file
+    load(file);
 
-	 // Return
-	 return;
-
+    // Return
+    return;
 }
-
 
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] region Circular sky region.
+ * @param[in] region sky map region.
  ***************************************************************************/
-GSkyRegionMap::GSkyRegionMap(const GSkyRegionMap& region)
+GSkyRegionMap::GSkyRegionMap(const GSkymap& map)
 {
     // Initialise members
     init_members();
 
     // Copy members
-    copy_members(region);
+    copy_members(map);
 
     // Return
     return;
 }
+
 
 
 /***********************************************************************//**
@@ -173,13 +151,13 @@ GSkyRegionMap::~GSkyRegionMap(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] circle Circular sky region.
- * @return Circular sky region.
+ * @param[in] sky map region.
+ * @return sky map region.
  ***************************************************************************/
-GSkyRegionMap& GSkyRegionMap::operator=(const GSkyRegionMap& circle)
+GSkyRegionMap& GSkyRegionMap::operator=(const GSkyRegionMap& region)
 {
     // Execute only if object is not identical
-    if (this != &circle) {
+    if (this != &region) {
 
         // Free members
         free_members();
@@ -188,7 +166,7 @@ GSkyRegionMap& GSkyRegionMap::operator=(const GSkyRegionMap& circle)
         init_members();
 
         // Copy members
-        copy_members(circle);
+        copy_members(region);
 
     } // endif: object was not identical
 
@@ -222,13 +200,13 @@ void GSkyRegionMap::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone circular sky region
+ * @brief Clone sky map region
  *
- * @return Deep copy to circular sky region.
+ * @return Deep copy to sky map region.
  ***************************************************************************/
 GSkyRegionMap* GSkyRegionMap::clone(void) const
 {
-    // Clone circular sky region
+    // Clone sky map region
     return new GSkyRegionMap(*this);
 }
 
@@ -236,98 +214,129 @@ GSkyRegionMap* GSkyRegionMap::clone(void) const
 /***********************************************************************//**
  * @brief Read region from DS9 string
  *
- * @param[in] line String in DS9 format.
+ * @param[in] filename String in DS9 format.
  *
  * @exception GException::invalid_value
  *            Invalid value found in DS9 format string.
  ***************************************************************************/
-void GSkyRegionMap::read(const std::string& line)
+/*void GSkyRegionMap::load(const GFits& file)
 {
 	// Clear the current instance
 	clear();
 
-	// Split the string into 2 parts seperated by #
-	std::vector<std::string> substrings = gammalib::split(line,"#");
-	std::string region_def = (substrings.size() > 0) ? substrings[0] : "";
-	std::string comment    = (substrings.size() > 1) ? substrings[1] : "";
-
-	// Finding the circle
-	if (region_def.find("circle") == std::string::npos) {
-        std::string msg =
-            "Unable to find the key word \"circle\" in provided string"
-            " \""+line+"\".\n"
-            "The \"circle\" key word is mandatory.";
-		throw GException::invalid_value(G_READ, msg);
-	}
-
-	// Get the the coordinate system of the values
-	std::string system = gammalib::split(region_def, ";")[0];
-
-	// Get the substring of the important values
-	unsigned    pos          = region_def.find("circle(");
-	unsigned    end          = region_def.find(")");
-	std::string circlestring = region_def.substr(pos+7, end);
-	circlestring.erase(circlestring.find(")"), 1);
-
-	// Get the values of the region x,y,and radius
-	std::vector<std::string> values = gammalib::split(circlestring,",");
-	if (values.size() != 3) {
-        std::string msg =
-            "Invalid number of "+gammalib::str(values.size())+" arguments"
-            " after the \"circle\" key word in provided string \""+line+"\".\n"
-            "Exactly 3 arguments are expected.";
-		throw GException::invalid_value(G_READ, msg);
-	}
-	double x      = gammalib::todouble(values[0]);
-	double y      = gammalib::todouble(values[1]);
-	double radius = gammalib::todouble(values[2]);
-
-	// Initialise centre direction
-	GSkyDir centre = GSkyDir();
-
-	// Set the values in the correct system
-	if (system == "fk5") {
-		centre.radec_deg(x,y);
-	}
-	else if (system == "galactic") {
-		centre.lb_deg(x,y);
-	}
-	else {
-        std::string msg =
-            "Unsupported coordinate system \""+system+"\" in provided string"
-            " \""+line+"\".\n"
-            "Only the following coordinate systems are supported: \"fk5\", "
-            "\"galactic\".";
-		throw GException::invalid_value(G_READ, msg);
-	}
-
-	// Set members
-	this->centre(centre);
-    this->radius(radius);
-
-	// Compute solid angle
-	compute_solid_angle();
-
-	// Check if there is a given name for the region and set it
-	std::vector<std::string>comments = gammalib::split(comment, " ");
-	for (int i = 0; i < comments.size(); i++) {
-		if (gammalib::contains(comments[i], "text")) {
-			std::vector<std::string> attributes = gammalib::split(comments[i], "=");
-			if (attributes.size() < 2) {
-                std::string msg =
-                      "Invalid character sequence encountered in provided"
-                      " string \""+line+"\".\n"
-                      "An attribute of the type \"text=Name\" is expected.";
-				throw GException::invalid_value(G_READ, msg);
-			}
-			m_name = attributes[1];
-		}
-	}
+    
 
 	// Return
 	return;
 }
+*/
+/***********************************************************************//**
+ * @brief Load skymap from FITS file.
+ *
+ * @param[in] filename FITS file name..
+ *
+ * Loads HEALPix and non HEALPix skymaps. First searches for HEALPix map in
+ * FITS file by scanning all HDUs for PIXTYPE=HEALPIX. If no HEALPix map has
+ * been found then search load first non-empty image.
+ *
+ * @todo Do we have to restrict a HEALPix map to a BinTable and a WCS map
+ * to a Double precision image???
+ ***************************************************************************/
+void GSkyRegionMap::load(const std::string& filename)
+{
+    // Free memory and initialise members
+    free_members();
+    init_members();
 
+    // Open FITS file
+    GFits fits(filename);
+
+    // Get number of HDUs
+    int num = fits.size();
+
+    // Initialize load flag
+    bool loaded = false;
+
+    // First search for HEALPix extension. We can skip the first extension
+    // since this is always an image and a HEALPix map is stored in a
+    // binary table
+    for (int extno = 1; extno < num; ++extno) {
+
+        // Get reference to HDU
+        const GFitsHDU& hdu = *fits.at(extno);
+        
+        // If PIXTYPE keyword equals "HEALPIX" then load map
+        if (hdu.has_card("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+            read_healpix(static_cast<const GFitsTable&>(hdu));
+            loaded = true;
+            break;
+        }
+
+    } // endfor: looped over HDUs
+
+    // If we have not found a HEALPIX map then search now for image.
+    // Skip empty images
+    if (!loaded) {
+        for (int extno = 0; extno < num; ++extno) {
+
+            // Get referene to HDU
+            const GFitsHDU& hdu = *fits.at(extno);
+
+            // Skip if extension is not an image
+            if (extno > 0) {
+                if (hdu.string("XTENSION") != "IMAGE")
+                    continue;
+            }
+
+            // Load WCS map
+            read_wcs(static_cast<const GFitsImage&>(hdu));
+            //loaded = true;
+            break;
+
+        } // endfor: looped over HDUs
+    } // endif: no HEALPix map found
+
+    // Close FITS file
+    fits.close();
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Read skymap from FITS HDU
+ *
+ * @param[in] hdu FITS HDU.
+ ***************************************************************************/
+void GSkyRegionMap::read(const GFitsHDU& hdu)
+{
+    // Free memory and initialise members
+    free_members();
+    init_members();
+
+    // Initialize load flag
+    bool loaded = false;
+
+    // If PIXTYPE keyword equals "HEALPIX" then load map
+    if (hdu.has_card("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+        read_healpix(static_cast<const GFitsTable&>(hdu));
+        loaded = true;
+    }
+
+    // ... otherwise try loading as non HEALPix map
+    if (!loaded) {
+
+        // Load only if HDU contains an image
+        if (hdu.exttype() == 0) {
+            read_wcs(static_cast<const GFitsImage&>(hdu));
+            //loaded = true;
+        }
+
+    } // endif
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Write region into a string
@@ -337,30 +346,18 @@ void GSkyRegionMap::read(const std::string& line)
  * Writes a DS9 region into a string. The region name is only written if it
  * is defined.
  ***************************************************************************/
-std::string GSkyRegionMap::write(void) const
+/*std::string GSkyRegionMap::read(void) const
 {
     // Allocate string
 	std::string result;
 
     // Set string
-	result.append("fk5;circle(");
-	result.append(gammalib::str(m_centre.ra_deg()));
-	result.append(",");
-	result.append(gammalib::str(m_centre.dec_deg()));
-	result.append(",");
-	result.append(gammalib::str(m_radius));
-	result.append(")");
-
-    // Optionally add region name
-    if (m_name.length() > 0) {
-        result.append(" # text=");
-        result.append(m_name);
-    }
+	result.append("Warning: This function is not needed and virtual.");
 
     // Return string
 	return result;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Print circular region
@@ -368,7 +365,7 @@ std::string GSkyRegionMap::write(void) const
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing region information.
  ***************************************************************************/
-std::string GSkyRegionMap::print(const GChatter& chatter) const
+/*std::string GSkyRegionMap::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;;
@@ -379,11 +376,7 @@ std::string GSkyRegionMap::print(const GChatter& chatter) const
         // Append string
     	result.append("=== GSkyRegionMap ===");
     	result.append("\n(");
-        result.append(gammalib::str(m_centre.ra_deg()));
-        result.append(",");
-        result.append(gammalib::str(m_centre.dec_deg()));
-        result.append(",");
-        result.append(gammalib::str(m_radius));
+        result.append(gammalib::str(m_map));
         result.append(")");
 
     } // endif: chatter was not silent
@@ -391,31 +384,62 @@ std::string GSkyRegionMap::print(const GChatter& chatter) const
     // Return result
     return result;
 }
-
+*/
 /***********************************************************************//**
- * @brief Checks if sky direction lies within region
+ * @brief Verifies if sky direction falls in map
  *
  * @param[in] dir Sky direction.
  *
- * A sky direction lies within a region when its distance to the region
- * centre is not larger than the region radius.
+ * This method checks if the specified sky direction falls within the pixels
+ * covered by the skymap region. The method uses the dir2xy method to convert 
+ * the sky direction into 2D pixel indices, and then checks whether the pixel
+ * indices fall in the skymap.
  ***************************************************************************/
 bool GSkyRegionMap::contains(const GSkyDir& dir) const
 {
-	// Initialise return value
-	bool dir_is_in = false;
-
-	// calculate distance from dir to centre
-	double distance = dir.dist_deg(m_centre);
-
-	// Check if distance < radius
-	if (distance <= radius()) {
-		dir_is_in = true;
-	}
-
-	// Return bool
-	return dir_is_in;
+    // Convert sky direction into sky pixel
+    GSkyPixel pixel = dir2pix(dir);
+    
+    // Return location flag
+    return (contains(pixel));
 }
+
+/***********************************************************************//**
+ * @brief Checks if sky map pixel falls in map
+ *
+ * @param[in] pixel Sky map pixel.
+ * @return Trus if pixels is within map, false otherwise.
+ *
+ * Checks whether the specified sky map @p pixel falls within the skymap
+ * or not. 
+ ***************************************************************************/
+bool GSkymap::contains(const GSkyPixel& pixel) const
+{
+    // Initialise containment flag
+    bool inmap = false;
+
+    // Test 1D pixels
+    if (pixel.is_1D()) {
+        if (pixel.index()+0.5 >= 0.0 && pixel.index()-0.5 < m_num_pixels) {
+            inmap = true;
+        }
+    }
+
+    // Test 2D pixels
+    else if (pixel.is_2D()) {
+
+        // If pixel is in range then set containment flag to true
+        if ((pixel.x()+0.5 >= 0.0 && pixel.x()-0.5 < m_num_x) &&
+            (pixel.y()+0.5 >= 0.0 && pixel.y()-0.5 < m_num_y)) {
+            inmap = true;
+        }
+
+    }
+
+    // Return containment flag
+    return inmap;
+}
+
 
 /***********************************************************************//**
  * @brief Checks if region is fully contained within this region
@@ -425,17 +449,17 @@ bool GSkyRegionMap::contains(const GSkyDir& dir) const
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
  ***************************************************************************/
-bool GSkyRegionMap::contains(const GSkyRegion& reg) const
+/*bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 {
 	// Initialise return value
 	bool fully_inside = false;
 
-	// If other region is circle use a simple way to calculate
+	// If other region is sky map region use a simple way to calculate
 	if (reg.type() == "Circle") {
 
 		// Create circular region from reg
-		const GSkyRegionMap* regcirc =
-              dynamic_cast<const GSkyRegionMap*>(&reg);
+		const GSkyRegionCircle* regcirc =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
 
 		// Calculate angular distance between the centres
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
@@ -456,7 +480,7 @@ bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 	// Return value
 	return fully_inside;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Checks if region is overlapping with this region
@@ -471,21 +495,28 @@ bool GSkyRegionMap::overlaps(const GSkyRegion& reg) const
 	// Initialise return value
 	bool overlap = false;
 
-	// If other region is circle use a simple way to calculate
-	if (reg.type() == "Circle") {
+	// If other region is sky map region use a simple way to calculate
+	if (reg.type() == "Map") {
 
 		// Create circular region from reg
-		const GSkyRegionMap* regcirc =
+		const GSkyRegionMap* regregionmap =
               dynamic_cast<const GSkyRegionMap*>(&reg);
+              
+        //double ang_dist = m_map.dist_deg(regregionmap->map());
 
-		// Calculate angular distance between the centres
-		double ang_dist = m_centre.dist_deg(regcirc->centre());
 
-		// Check if the distance is smaller than the sum of both radii
-		if (ang_dist <= (m_radius + regcirc->radius())) {
+		// Check if the sky region map and circle overlap
+	/*	for (int i =0; i < m_map.npix(); ++i)  {
+		GSkyPixel pix=m_map.inx2pix(i);
+		std::cout << pix.size() << std::endl;
+		if (num_pix_map[i] == ){
+		    num_pix_map[i] = i;
+		}
+	}
+		if () {
 			overlap = true;
 		}
-        
+     */   
 	}
 
     // ... otherwise throw an exception
@@ -523,7 +554,7 @@ void GSkyRegionMap::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] region Circular sky region.
+ * @param[in] region sky map region.
  ***************************************************************************/
 void GSkyRegionMap::copy_members(const GSkyRegionMap& map)
 {
@@ -554,7 +585,11 @@ void GSkyRegionMap::compute_solid_angle(void)
 	double value=0.0;
 	for (int i =0; i < m_map.npix(); ++i)  {
 		GSkyPixel pix=m_map.inx2pix(i);
-		value += m_map.solidangle(pix);
+		std::cout << pix.size() << std::endl;
+		//value += m_map.solidangle(pix);
+		if (pix.size() > 0){
+		    value += m_map.solidangle(pix);
+		}
 	}
 	
 	// Update member value
@@ -565,4 +600,24 @@ void GSkyRegionMap::compute_solid_angle(void)
 	
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get an array of pixels of the sky region map
+ ***************************************************************************/
+ void GSkyRegionMap::pixels_sky_region_map(void)
+ {
+    double num_pix_map[m_map.npix()];
+    
+    for (int i =0; i < m_map.npix(); ++i)  {
+		GSkyPixel pix=m_map.inx2pix(i);
+		std::cout << pix.size() << std::endl;
+		if (pix.size() > 0){
+		    num_pix_map[i] = i;
+		}
+	}
+	
+	// Return
+	return;
 }
