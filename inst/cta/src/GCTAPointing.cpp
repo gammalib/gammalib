@@ -366,10 +366,6 @@ void GCTAPointing::free_members(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Convert from celestial vector to
- ***************************************************************************/
- const GVector& skytonom(const GVector& celvector) const;
 
 /***********************************************************************//**
  * @brief Update coordinate transformation cache
