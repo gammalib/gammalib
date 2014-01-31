@@ -51,8 +51,6 @@ namespace gammalib {
     const double sqrt_onehalf = std::sqrt(1.0/2.0);
     const double sqrt_pihalf  = std::sqrt(pihalf);
     const double sqrt_two     = std::sqrt(2.0);
-    // Gauss distribution conversion factor from 68% containment radius to 1 sigma
-    const double gauss68containment2sigma = 0.6624305;
 }
 
 /* __ Prototypes _________________________________________________________ */
