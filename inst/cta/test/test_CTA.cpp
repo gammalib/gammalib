@@ -359,12 +359,26 @@ void TestGCTAResponse::test_response_edisp(void)
         double sum   = 0.0;
         double logE_obs = logE_min;
         for (int i = 0; i < steps; ++i) {
-            logE_obs   += dlogE;
 
-            sum += (*rsp.edisp())(logE_obs, 0.0, 0.0, 0.0, 0.0) * dlogE;
+
+            double dp_dlogE = (*rsp.edisp())(logE_obs, std::log10(e_src), 0.0, 0.0, 0.0, 0.0);
+
+            sum += dp_dlogE * dlogE;
+
+            std::cerr << i << " ";
+            std::cerr << emin << " ";
+//            std::cerr << emin << " ";
+            std::cerr << emax << " ";
+//            std::cerr << emax << " ";
+//            std::cerr << dlogE << " ";
+//            std::cerr << logE_obs << " ";
+            std::cerr << dp_dlogE << " ";
+            std::cerr << sum << " " << std::endl;
+            logE_obs   += dlogE;
         }
         GEnergy eng(e_src, "TeV");
         test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
+        //break;
     }
 
     // Return
