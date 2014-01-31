@@ -62,6 +62,11 @@ public:
     void           dir(const GSkyDir& dir);
     GSkyDir&       dir(void);
     const GSkyDir& dir(void) const;
+    void detx(const double &x){m_detx = x;};
+    void dety(const double &y){m_dety = y;};
+    const double detx() const {return m_detx;};
+    const double dety() const {return m_dety;};
+
 
 protected:
     // Protected methods
@@ -71,6 +76,11 @@ protected:
 
     // Data members
     GSkyDir m_dir;  //!< Observed incident direction of event
+    double m_detx; //!< Instrument coordinate X
+    double m_dety; //!< Instrument coordinate Y
+
+
+
 };
 
 
