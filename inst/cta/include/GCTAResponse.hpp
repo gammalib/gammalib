@@ -76,7 +76,7 @@ public:
     virtual bool          use_edisp(void) const;
     virtual bool          use_tdisp(void) const;
     virtual bool          apply_edisp(void) const;
-    virtual void          apply_edisp(const bool& apply_edisp);
+    virtual void          apply_edisp(const bool& apply_edisp) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -172,13 +172,13 @@ private:
     std::string            irf_filename(const std::string& filename) const;
 
     // Private data members
-    GCaldb      m_caldb;       //!< Calibration database
-    std::string m_rspname;     //!< Name of the instrument response
-    double      m_eps;         //!< Integration precision
-    bool        m_apply_edisp; //!< Apply energy dispersion
-    GCTAAeff*   m_aeff;        //!< Effective area
-    GCTAPsf*    m_psf;         //!< Point spread function
-    GCTAEdisp*  m_edisp;       //!< Energy dispersion
+    GCaldb       m_caldb;       //!< Calibration database
+    std::string  m_rspname;     //!< Name of the instrument response
+    double       m_eps;         //!< Integration precision
+    GCTAAeff*    m_aeff;        //!< Effective area
+    GCTAPsf*     m_psf;         //!< Point spread function
+    GCTAEdisp*   m_edisp;       //!< Energy dispersion
+    mutable bool m_apply_edisp; //!< Apply energy dispersion
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
@@ -187,10 +187,15 @@ private:
     mutable std::vector<double>      m_npred_values;   //!< Model values
 };
 
+
 /***********************************************************************//**
  * @brief Signal if response uses energy dispersion
  *
  * @return True if response uses energy dispersion
+ *
+ * Signals if the response uses energy dispersion. This implies that the
+ * apply_edisp flag has been set to true and that energy dispersion response
+ * information is available.
  ***************************************************************************/
 inline
 bool GCTAResponse::use_edisp(void) const
@@ -216,9 +221,10 @@ bool GCTAResponse::apply_edisp(void) const
  * @param[in] apply_edisp Set true if energy dispersion should be applied
  ***************************************************************************/
 inline
-void GCTAResponse::apply_edisp(const bool& apply_edisp)
+void GCTAResponse::apply_edisp(const bool& apply_edisp) const
 {
     m_apply_edisp = apply_edisp;
+    return;
 }
 
 
