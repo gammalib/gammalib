@@ -444,11 +444,15 @@ std::string GCTAEdispPerfTable::print(const GChatter& chatter) const
                       gammalib::str(num));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
+
+        /*
         for(int i=0; i < num; ++i) {
-          double sigma = m_sigma[i];
-          double logE=m_logE[i];
-          result.append("\n"+gammalib::str(logE)+"    "+gammalib::str(sigma));
+            double sigma = m_sigma[i];
+            double logE=m_logE[i];
+            result.append("\n"+gammalib::str(logE)+"    "+gammalib::str(sigma));
         }
+        */
+
     } // endif: chatter was not silent
 
     // Return result
