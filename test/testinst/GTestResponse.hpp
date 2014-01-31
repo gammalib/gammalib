@@ -99,8 +99,8 @@ public:
         return new GTestResponse(*this);
     }
     
-    virtual bool          has_edisp(void) const { return false; }
-    virtual bool          has_tdisp(void) const { return false; }
+    virtual bool          use_edisp(void) const { return false; }
+    virtual bool          use_tdisp(void) const { return false; }
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const { return 1.0; }

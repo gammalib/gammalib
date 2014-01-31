@@ -57,6 +57,7 @@
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
+#include "GCTAEdispPerfTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                                "GCTAResponse::caldb(GCaldb&)"
@@ -323,7 +324,7 @@ double GCTAResponse::irf(const GEvent&       event,
             irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
 
             // Multiply-in energy dispersion
-            if (has_edisp() && irf > 0) {
+            if (use_edisp() && irf > 0) {
 
                 // Get log10(E/TeV) of measured photon energy.
                 double obsLogEng = obsEng.log10TeV();
@@ -400,7 +401,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
         npred *= npsf(srcDir, srcLogEng, srcTime, pnt, roi);
 
         // Multiply-in energy dispersion
-        if (has_edisp() && npred > 0.0) {
+        if (use_edisp() && npred > 0.0) {
 
             // Get energy dispersion
             npred *= nedisp(srcDir, srcEng, srcTime, pnt, cta.events()->ebounds());
@@ -491,12 +492,18 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
             GCTAInstDir inst_dir;
             inst_dir.dir(sky_dir);
 
+            GEnergy energy = photon.energy();
+            if (use_edisp()) {
+              energy = edisp()->mc(ran, srcLogEng, theta, phi, zenith, azimuth);
+            }
+
             // Allocate event
             event = new GCTAEventAtom;
 
             // Set event attributes
             event->dir(inst_dir);
-            event->energy(photon.energy());
+
+            event->energy(energy);
             event->time(photon.time());
 
         } // endif: detector was alive
@@ -552,6 +559,9 @@ void GCTAResponse::load(const std::string& rspname)
 
     // Load energy dispersion
     load_edisp(edispname);
+
+    // Load energy dispersion
+    load_edisp(filename);
 
     // Remove theta cut
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
@@ -712,6 +722,32 @@ void GCTAResponse::load_psf(const std::string& filename)
 
 
 /***********************************************************************//**
+ * @brief Load energy dispersion information
+ *
+ * @param[in] filename Energy dispersion file name.
+ ***************************************************************************/
+void GCTAResponse::load_edisp(const std::string& filename)
+{
+    // Free any existing point spread function instance
+    if (m_edisp != NULL) delete m_edisp;
+    m_edisp = NULL;
+
+    // Try opening the file as a FITS file
+    try {
+        // Open FITS file
+        GFits file(filename);
+
+        // TODO: Implement FITS energy resolution loading
+    }
+    catch (GException::fits_open_error &e) {
+      m_edisp = new GCTAEdispPerfTable(filename);
+    }
+
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set offset angle dependence (degrees)
  *
  * @param[in] sigma Offset angle dependence value (degrees).
@@ -805,6 +841,10 @@ std::string GCTAResponse::print(const GChatter& chatter) const
             result.append("\n"+m_psf->print(chatter));
         }
 
+        // Append energy dispersion information
+        if (m_edisp != NULL) {
+            result.append("\n"+m_edisp->print(chatter));
+        }
         // EXPLICIT: Append Npred cache information
         if (chatter >= EXPLICIT) {
             if (!m_npred_names.empty()) {
@@ -1859,6 +1899,31 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 }
 
 
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @todo So far we have no means to pass additional parameters to the
+ * GCTAEdisp::ebounds() method.
+ ***************************************************************************/
+GEbounds GCTAResponse::ebounds_src(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // If energy dispersion is available then set the energy boundaries
+    if (edisp() != NULL) {
+        double logEobs = obsEnergy.log10MeV();
+        ebounds        = edisp()->ebounds_src(logEobs);
+    }
+
+    // Return energy boundaries
+    return ebounds;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                    Low-level CTA response methods                       =
@@ -2113,7 +2178,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
  * @param[in] pnt CTA pointing.
  * @param[in] ebds Energy boundaries of data selection.
  *
- * @todo Implement integration over energy range.
+ * @todo Implement phi dependence in camera system
  ***************************************************************************/
 double GCTAResponse::nedisp(const GSkyDir&      srcDir,
                             const GEnergy&      srcEng,
@@ -2121,8 +2186,110 @@ double GCTAResponse::nedisp(const GSkyDir&      srcDir,
                             const GCTAPointing& pnt,
                             const GEbounds&     ebds) const
 {
-    // Dummy
+    // Initialise energy dispersion integral
     double nedisp = 1.0;
+
+    // Continue only if energy dispersion information is available
+    if (edisp() != NULL) {
+
+        // Get the observed energy boundaries for specified true energy
+        GEbounds ebounds = edisp()->ebounds_obs(srcEng.log10TeV());
+
+        // Check if at least one of the energy boundaries covered by the
+        // energy dispersion for the specified true energy lies outside
+        // any of the energy boundaries of the data selection (or lies
+        // within different energy boundaries of the data selection)
+        bool outside = false;
+        for (int k = 0; k < ebounds.size(); ++k) {
+            int imin = ebds.index(ebounds.emin(k));
+            int imax = ebds.index(ebounds.emax(k));
+            if (imin != imax || imin == -1 || imax == -1) {
+                outside = true;
+                break;
+            }
+        }
+
+        // If energy boundaries are not fully covered then integrate
+        // numerically
+        if (outside) {
+
+            // Initialise energy dispersion integral
+            nedisp = 0.0;
+
+            // Get pointing direction zenith angle and azimuth [radians]
+            double zenith  = pnt.zenith();
+            double azimuth = pnt.azimuth();
+
+            // Compute offset angle of source direction in camera system
+            double theta = pnt.dir().dist(srcDir);
+
+            // Compute azimuth angle of source direction in camera system
+            double phi = 0.0; //TODO: Implement phi dependence
+
+            // Loop over energy boundaries in observed energy
+            for (int i = 0; i < ebds.size(); ++i) {
+
+                // Get boundaries in observed energy
+                GEnergy emin_obs = ebds.emin(i);
+                GEnergy emax_obs = ebds.emax(i);
+
+                // Loop over energy boundaries of energy dispersion
+                for (int k = 0; k < ebounds.size(); ++k) {
+
+                    // Get boundaries of energy dispersion
+                    GEnergy emin_edisp = ebounds.emin(k);
+                    GEnergy emax_edisp = ebounds.emax(k);
+
+                    // Get energy dispersion interval that overlaps with
+                    // the observed energy interval
+                    GEnergy emin = (emin_edisp < emin_obs) ? emin_obs : emin_edisp;
+                    GEnergy emax = (emax_edisp > emax_obs) ? emax_obs : emax_edisp;
+
+                    // If interval has positive length then integrate over
+                    // the energy dispersion
+                    if (emin < emax) {
+
+                        // Get log10 of energy boundaries in TeV
+                        double e_log_min = emin.log10TeV();
+                        double e_log_max = emax.log10TeV();
+
+                        // Setup integration function
+                        cta_nedisp_kern integrand(*this,
+                                                  srcEng.log10TeV(),
+                                                  theta,
+                                                  phi,
+                                                  zenith,
+                                                  azimuth);
+                        GIntegral integral(&integrand);
+
+                        // Set integration precision
+                        //integral.eps(1.0e-5);
+
+                        // Do Romberg integration
+                        nedisp += integral.romb(e_log_min, e_log_max);
+
+                    } // endif: integration range was valid
+                
+                } // endfor: looped over energy boundaries of energy dispersion
+            } // endfor: looped over energy boundaries in observed energy
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(nedisp) || gammalib::is_infinite(nedisp)) {
+                std::cout << "*** ERROR: GCTAResponse::nedisp:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (nedisp=" << nedisp;
+                std::cout << ", srcEng=" << srcEng;
+                std::cout << ", srcTime=" << srcTime;
+                std::cout << ", pnt=" << pnt;
+                std::cout << ", ebds=" << ebds;
+                std::cout << ")" << std::endl;
+            }
+            #endif
+
+        } // endif: numerical integration was needed
+
+    } // endif: there is an energy dispersion response
 
     // Return integral
     return nedisp;
@@ -2160,6 +2327,7 @@ void GCTAResponse::init_members(void)
     m_aeff  = NULL;
     m_psf   = NULL;
     m_edisp = NULL;
+    m_apply_edisp = false;
 
     // Initialise Npred cache
     m_npred_names.clear();
@@ -2180,9 +2348,11 @@ void GCTAResponse::init_members(void)
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
     // Copy members
-    m_caldb   = rsp.m_caldb;
-    m_rspname = rsp.m_rspname;
-    m_eps     = rsp.m_eps;
+    m_caldb     = rsp.m_caldb;
+    m_rspname   = rsp.m_rspname;
+    m_rmffile   = rsp.m_rmffile;
+    m_eps       = rsp.m_eps;
+    m_apply_edisp = rsp.m_apply_edisp;
 
     // Copy cache
     m_npred_names    = rsp.m_npred_names;

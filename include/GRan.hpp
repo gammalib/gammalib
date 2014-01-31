@@ -59,6 +59,7 @@ public:
     unsigned long int      int32(void);
     unsigned long long int int64(void);
     double                 uniform(void);
+    double                 normal(void);
     double                 exp(const double& lambda);
     double                 poisson(const double& lambda);
     double                 chisq2(void);

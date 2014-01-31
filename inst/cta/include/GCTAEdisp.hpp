@@ -31,6 +31,8 @@
 #include <string>
 #include "GBase.hpp"
 #include "GFits.hpp"
+#include "GEbounds.hpp"
+#include "GRan.hpp"
 
 
 /***********************************************************************//**
@@ -65,6 +67,22 @@ public:
     virtual GCTAEdisp*  clone(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
+    virtual GEnergy     mc(GRan&         ran,
+                           const double& logE,
+                           const double& theta = 0.0,
+                           const double& phi = 0.0,
+                           const double& zenith = 0.0,
+                           const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ebounds_obs(const double& logEsrc,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const = 0;
+    virtual GEbounds    ebounds_src(const double& logEobs,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:

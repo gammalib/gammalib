@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GCTAResponse.hpp - CTA Response class                  *
+ *        GCTAResponse.hpp - CTA instrument response function class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAResponse.hpp
- * @brief CTA instrument response function class interface definition
+ * @brief CTA instrument response function class definition
  * @author Juergen Knoedlseder
  */
 
@@ -73,8 +73,10 @@ public:
     // Implement pure virtual base class methods
     virtual void          clear(void);
     virtual GCTAResponse* clone(void) const;
-    virtual bool          has_edisp(void) const;
-    virtual bool          has_tdisp(void) const;
+    virtual bool          use_edisp(void) const;
+    virtual bool          apply_edisp(void) const;
+    virtual void          apply_edisp(bool apply_edisp);
+    virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -83,21 +85,22 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Overload virtual base class methods
-    virtual double irf_radial(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
-    virtual double irf_elliptical(const GEvent&       event,
-                                  const GSource&      source,
-                                  const GObservation& obs) const;
-    virtual double irf_diffuse(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
-    virtual double npred_radial(const GSource&      source,
+    virtual double   irf_radial(const GEvent&       event,
+                                const GSource&      source,
                                 const GObservation& obs) const;
-    virtual double npred_elliptical(const GSource&      source,
+    virtual double   irf_elliptical(const GEvent&       event,
+                                    const GSource&      source,
                                     const GObservation& obs) const;
-    virtual double npred_diffuse(const GSource&      source,
+    virtual double   irf_diffuse(const GEvent&       event,
+                                 const GSource&      source,
                                  const GObservation& obs) const;
+    virtual double   npred_radial(const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double   npred_elliptical(const GSource&      source,
+                                      const GObservation& obs) const;
+    virtual double   npred_diffuse(const GSource&      source,
+                                   const GObservation& obs) const;
+    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
     GCTAEventAtom*     mc(const double& area, const GPhoton& photon,
@@ -183,26 +186,49 @@ private:
     mutable std::vector<double>      m_npred_values;   //!< Model values
 };
 
-
 /***********************************************************************//**
- * @brief Signal if energy dispersion has been implemented
+ * @brief Signal if response uses energy dispersion
  *
- * @return False.
+ * @return True if response uses energy dispersion
  ***************************************************************************/
 inline
-bool GCTAResponse::has_edisp(void) const
+bool GCTAResponse::use_edisp(void) const
 {
-    return false;
+    bool has_edisp = (m_edisp != NULL);
+    return m_apply_edisp && has_edisp;
 }
 
 
 /***********************************************************************//**
- * @brief Signal if time dispersion has been implemented
+ * @brief Signal if energy dispersion should be applied
+ *
+ * @return True if energy dispersion should be applied
+ ***************************************************************************/
+inline
+bool GCTAResponse::apply_edisp(void) const
+{
+    return m_apply_edisp;
+}
+
+/***********************************************************************//**
+ * @brief Signal if energy dispersion should be applied
+ *
+ * @param[in] apply_edisp Set true if energy dispersion should be applied
+ ***************************************************************************/
+inline
+void GCTAResponse::apply_edisp(bool apply_edisp)
+{
+    m_apply_edisp = apply_edisp;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if time dispersion will be used
  *
  * @return False.
  ***************************************************************************/
 inline
-bool GCTAResponse::has_tdisp(void) const
+bool GCTAResponse::use_tdisp(void) const
 {
     return false;
 }
@@ -257,18 +283,6 @@ inline
 const double& GCTAResponse::eps(void) const
 {
     return m_eps;
-}
-
-
-/***********************************************************************//**
- * @brief Load energy dispersion information
- *
- * @param[in] filename Energy dispersion file name.
- ***************************************************************************/
-inline
-void GCTAResponse::load_edisp(const std::string& filename)
-{
-    return;
 }
 
 

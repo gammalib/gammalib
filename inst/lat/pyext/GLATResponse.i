@@ -44,8 +44,8 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GLATResponse* clone(void) const;
-    virtual bool          has_edisp(void) const;
-    virtual bool          has_tdisp(void) const;
+    virtual bool          use_edisp(void) const;
+    virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;

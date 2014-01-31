@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GCTAPsfPerfTable.cpp - CTA performance table PSF class         *
+ *  GCTAEdispPerfTable.cpp - CTA performance table energy dispersion class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAPsfPerfTable.hpp
- * @brief CTA performance table point spread function class implementation
- * @author Juergen Knoedlseder
+ * @file GCTAEdispPerfTable.cpp
+ * @brief CTA performance table energy dispersion class implementation
+ * @author Christoph Deil & Ellis Owen
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -32,11 +32,11 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
-#include "GCTAPsfPerfTable.hpp"
+#include "GCTAEdispPerfTable.hpp"
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                         "GCTAPsfPerfTable::load(std::string&)"
+#define G_LOAD                       "GCTAEdispPerfTable::load(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -56,7 +56,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAPsfPerfTable::GCTAPsfPerfTable(void) : GCTAPsf()
+GCTAEdispPerfTable::GCTAEdispPerfTable(void) : GCTAEdisp()
 {
     // Initialise class members
     init_members();
@@ -71,15 +71,16 @@ GCTAPsfPerfTable::GCTAPsfPerfTable(void) : GCTAPsf()
  *
  * @param[in] filename Performance table file name.
  *
- * Construct instance by loading the point spread function information from
+ * Construct instance by loading the energy dispersion information from
  * an ASCII performance table.
  ***************************************************************************/
-GCTAPsfPerfTable::GCTAPsfPerfTable(const std::string& filename) : GCTAPsf()
+GCTAEdispPerfTable::GCTAEdispPerfTable(const std::string& filename) :
+                    GCTAEdisp()
 {
     // Initialise class members
     init_members();
 
-    // Load point spread function from file
+    // Load energy dispersion from file
     load(filename);
 
     // Return
@@ -90,15 +91,16 @@ GCTAPsfPerfTable::GCTAPsfPerfTable(const std::string& filename) : GCTAPsf()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] psf Point spread function.
+ * @param[in] edisp Energy dispersion
  ***************************************************************************/
-GCTAPsfPerfTable::GCTAPsfPerfTable(const GCTAPsfPerfTable& psf) : GCTAPsf(psf)
+GCTAEdispPerfTable::GCTAEdispPerfTable(const GCTAEdispPerfTable& edisp) :
+                    GCTAEdisp(edisp)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(psf);
+    copy_members(edisp);
 
     // Return
     return;
@@ -108,7 +110,7 @@ GCTAPsfPerfTable::GCTAPsfPerfTable(const GCTAPsfPerfTable& psf) : GCTAPsf(psf)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAPsfPerfTable::~GCTAPsfPerfTable(void)
+GCTAEdispPerfTable::~GCTAEdispPerfTable(void)
 {
     // Free members
     free_members();
@@ -127,16 +129,16 @@ GCTAPsfPerfTable::~GCTAPsfPerfTable(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] psf Point spread function.
- * @return Point spread function.
+ * @param[in] edisp Energy dispersion
+ * @return Energy dispersion
  ***************************************************************************/
-GCTAPsfPerfTable& GCTAPsfPerfTable::operator=(const GCTAPsfPerfTable& psf)
+GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edisp)
 {
     // Execute only if object is not identical
-    if (this != &psf) {
+    if (this != &edisp) {
 
         // Copy base class members
-        this->GCTAPsf::operator=(psf);
+        this->GCTAEdisp::operator=(edisp);
 
         // Free members
         free_members();
@@ -145,7 +147,7 @@ GCTAPsfPerfTable& GCTAPsfPerfTable::operator=(const GCTAPsfPerfTable& psf)
         init_members();
 
         // Copy members
-        copy_members(psf);
+        copy_members(edisp);
 
     } // endif: object was not identical
 
@@ -155,36 +157,42 @@ GCTAPsfPerfTable& GCTAPsfPerfTable::operator=(const GCTAPsfPerfTable& psf)
 
 
 /***********************************************************************//**
- * @brief Return point spread function (in units of sr^-1)
+ * @brief Return energy dispersion.
  *
- * @param[in] delta Angular separation between true and measured photon
- *            directions (rad).
- * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] logEobs log10 of the observed photon energy (TeV).
+ * @param[in] logEsrc log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
- * @param[in] etrue Use true energy (true/false). Not used.
  *
- * Returns the point spread function for a given angular separation in units
- * of sr^-1 for a given energy.
+ * Returns the energy resolution, i.e. the probability density in observed
+ * photon energy at a given (log10(E_src), log10(E_obs)).
+ * To be precise: energy dispersion = dP / d(log10(E_obs)).
+ * 
+ * Evaluates
+ *
+ * \f[
+ * S(E) = \frac{1}{\sqrt{2\pi}m\_sigma}
+ *        \exp(\frac{-(logEobs-logEsrc)^2}{2 m\_sigma^2})
+ * \f]
  ***************************************************************************/
-double GCTAPsfPerfTable::operator()(const double& delta,
-                                    const double& logE, 
-                                    const double& theta, 
-                                    const double& phi,
-                                    const double& zenith,
-                                    const double& azimuth,
-                                    const bool&   etrue) const
+double GCTAEdispPerfTable::operator()(const double& logEobs,
+                                      const double& logEsrc,
+                                      const double& theta,
+                                      const double& phi,
+                                      const double& zenith,
+                                      const double& azimuth) const
 {
     // Update the parameter cache
-    update(logE);
+    update(logEsrc);
 
-    // Compute PSF value
-    double psf = m_par_scale * std::exp(m_par_width * delta * delta);
+    // Compute energy dispersion value
+    double delta = logEobs - logEsrc;
+    double edisp = m_par_scale * std::exp(m_par_width * delta * delta);
     
-    // Return PSF
-    return psf;
+    // Return energy dispersion
+    return edisp;
 }
 
 
@@ -199,14 +207,14 @@ double GCTAPsfPerfTable::operator()(const double& delta,
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GCTAPsfPerfTable::clear(void)
+void GCTAEdispPerfTable::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GCTAPsf::free_members();
+    this->GCTAEdisp::free_members();
 
     // Initialise members
-    this->GCTAPsf::init_members();
+    this->GCTAEdisp::init_members();
     init_members();
 
     // Return
@@ -217,34 +225,35 @@ void GCTAPsfPerfTable::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
- * @return Deep copy of point spread function instance.
+ * @return Deep copy of instance.
  ***************************************************************************/
-GCTAPsfPerfTable* GCTAPsfPerfTable::clone(void) const
+GCTAEdispPerfTable* GCTAEdispPerfTable::clone(void) const
 {
-    return new GCTAPsfPerfTable(*this);
+    return new GCTAEdispPerfTable(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Load point spread function from performance table
+ * @brief Load energy dispersion from performance table
  *
  * @param[in] filename Performance table file name.
  *
  * @exception GCTAExceptionHandler::file_open_error
  *            File could not be opened for read access.
  *
- * This method loads the point spread function information from an ASCII
- * performance table.
+ * This method loads the energy dispersion information from an ASCII
+ * performance table. The energy resolution is stored in the 5th column
+ * of the performance table as RMS(ln(Eest/Etrue)). The method converts
+ * this internally to a sigma value by multiplying the stored values by
+ * 0.434294481903.
  ***************************************************************************/
-void GCTAPsfPerfTable::load(const std::string& filename)
+void GCTAEdispPerfTable::load(const std::string& filename)
 {
-    // Set conversion factor from 68% containment radius to 1 sigma
-    const double conv = 0.6624305 * gammalib::deg2rad;
+    // Set conversion factor from RMS(ln(Eest/Etrue)) to RMS(log10(Eest/Etrue))
+    const double conv = 0.434294481903;
 
     // Clear arrays
     m_logE.clear();
-    m_r68.clear();
-    m_r80.clear();
     m_sigma.clear();
 
     // Allocate line buffer
@@ -283,9 +292,7 @@ void GCTAPsfPerfTable::load(const std::string& filename)
 
         // Push elements in node array and vector
         m_logE.append(gammalib::todouble(elements[0]));
-        m_r68.push_back(gammalib::todouble(elements[2]));
-        m_r80.push_back(gammalib::todouble(elements[3]));
-        m_sigma.push_back(gammalib::todouble(elements[2])*conv);
+        m_sigma.push_back(gammalib::todouble(elements[4]) * conv);
 
     } // endwhile: looped over lines
 
@@ -301,7 +308,7 @@ void GCTAPsfPerfTable::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Simulate PSF offset (radians)
+ * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
  * @param[in] logE Log10 of the true photon energy (TeV).
@@ -309,66 +316,113 @@ void GCTAPsfPerfTable::load(const std::string& filename)
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
- * @param[in] etrue Use true energy (true/false). Not used.
+ *
+ * Draws observed energy value from a normal distribution of width
+ * m_par_sigma around @p logE.
  ***************************************************************************/
-double GCTAPsfPerfTable::mc(GRan&         ran,
-                            const double& logE, 
-                            const double& theta, 
-                            const double& phi,
-                            const double& zenith,
-                            const double& azimuth,
-                            const bool&   etrue) const
+GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
+                               const double& logE,
+                               const double& theta,
+                               const double& phi,
+                               const double& zenith,
+                               const double& azimuth) const
 {
     // Update the parameter cache
     update(logE);
 
-    // Draw offset
-    double delta = m_par_sigma * ran.chisq2();
-    
-    // Return PSF offset
-    return delta;
+    // Draw log observed energy in TeV
+    double logEobs = m_par_sigma * ran.normal() + logE;
+
+    // Set enegy
+    GEnergy energy;
+    energy.log10TeV(logEobs);
+
+    // Return energy
+    return energy;
 }
 
 
 /***********************************************************************//**
- * @brief Return maximum size of PSF (radians)
+ * @brief Return observed energy interval that contains the energy dispersion.
  *
- * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
- * @param[in] etrue Use true energy (true/false). Not used.
  *
- * Determine the radius beyond which the PSF becomes negligible. This radius
- * is set by this method to \f$5 \times \sigma\f$, where \f$\sigma\f$ is the
- * Gaussian width of the largest PSF component.
+ * Returns the band of observed energies outside of which the energy
+ * dispersion becomes negligible for a given true energy @p logEsrc. This
+ * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
+ * Gaussian width of the energy dispersion.
  ***************************************************************************/
-double GCTAPsfPerfTable::delta_max(const double& logE, 
-                                   const double& theta, 
-                                   const double& phi,
-                                   const double& zenith,
-                                   const double& azimuth,
-                                   const bool&   etrue) const
+GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
+                                         const double& theta,
+                                         const double& phi,
+                                         const double& zenith,
+                                         const double& azimuth) const
 {
-    // Update the parameter cache
-    update(logE);
+    // Set energy band constant
+    const double number_of_sigmas = 5.0;
 
-    // Compute maximum PSF radius
-    double radius = 5.0 * m_par_sigma;
-    
-    // Return maximum PSF radius
-    return radius;
+    // Get energy dispersion sigma
+    double sigma = m_logE.interpolate(logEsrc, m_sigma);
+
+    // Compute energy boundaries
+    GEnergy emin;
+    GEnergy emax;
+    emin.log10TeV(logEsrc - number_of_sigmas * sigma);
+    emax.log10TeV(logEsrc + number_of_sigmas * sigma);
+
+    // Return energy boundaries
+    return (GEbounds(emin, emax));
 }
 
 
 /***********************************************************************//**
- * @brief Print point spread function information
+ * @brief Return true energy interval that contains the energy dispersion.
+ *
+ * @param[in] logEobs Log10 of the observed event energy (TeV).
+ * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ *
+ * Returns the band of true photon energies outside of which the energy
+ * dispersion becomes negligible for a given observed energy @p logEobs. This
+ * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
+ * Gaussian width of the energy dispersion.
+ ***************************************************************************/
+GEbounds GCTAEdispPerfTable::ebounds_src(const double& logEobs,
+                                         const double& theta,
+                                         const double& phi,
+                                         const double& zenith,
+                                         const double& azimuth) const
+{
+    // Set energy band constant
+    const double number_of_sigmas = 5.0;
+
+    // Get energy dispersion sigma
+    double sigma = m_logE.interpolate(logEobs, m_sigma);
+
+    // Compute energy boundaries
+    GEnergy emin;
+    GEnergy emax;
+    emin.log10TeV(logEobs - number_of_sigmas * sigma);
+    emax.log10TeV(logEobs + number_of_sigmas * sigma);
+
+    // Return energy boundaries
+    return (GEbounds(emin, emax));
+}
+
+
+/***********************************************************************//**
+ * @brief Print energy dispersion information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing point spread function information.
+ * @return String containing energy dispersion information.
  ***************************************************************************/
-std::string GCTAPsfPerfTable::print(const GChatter& chatter) const
+std::string GCTAEdispPerfTable::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -382,7 +436,7 @@ std::string GCTAPsfPerfTable::print(const GChatter& chatter) const
         double emax = std::pow(10.0, m_logE[num-1]);
 
         // Append header
-        result.append("=== GCTAPsfPerfTable ===");
+        result.append("=== GCTAEdispPerfTable ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
@@ -390,7 +444,11 @@ std::string GCTAPsfPerfTable::print(const GChatter& chatter) const
                       gammalib::str(num));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
-
+        for(int i=0; i < num; ++i) {
+          double sigma = m_sigma[i];
+          double logE=m_logE[i];
+          result.append("\n"+gammalib::str(logE)+"    "+gammalib::str(sigma));
+        }
     } // endif: chatter was not silent
 
     // Return result
@@ -407,13 +465,11 @@ std::string GCTAPsfPerfTable::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAPsfPerfTable::init_members(void)
+void GCTAEdispPerfTable::init_members(void)
 {
     // Initialise members
     m_filename.clear();
     m_logE.clear();
-    m_r68.clear();
-    m_r80.clear();
     m_sigma.clear();
     m_par_logE  = -1.0e30;
     m_par_scale = 1.0;
@@ -428,20 +484,18 @@ void GCTAPsfPerfTable::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] psf Point spread function.
+ * @param[in] edisp Energy dispersion
  ***************************************************************************/
-void GCTAPsfPerfTable::copy_members(const GCTAPsfPerfTable& psf)
+void GCTAEdispPerfTable::copy_members(const GCTAEdispPerfTable& edisp)
 {
     // Copy members
-    m_filename  = psf.m_filename;
-    m_logE      = psf.m_logE;
-    m_r68       = psf.m_r68;
-    m_r80       = psf.m_r80;
-    m_sigma     = psf.m_sigma;
-    m_par_logE  = psf.m_par_logE;
-    m_par_scale = psf.m_par_scale;
-    m_par_sigma = psf.m_par_sigma;
-    m_par_width = psf.m_par_width;
+    m_filename  = edisp.m_filename;
+    m_logE      = edisp.m_logE;
+    m_sigma     = edisp.m_sigma;
+    m_par_logE  = edisp.m_par_logE;
+    m_par_scale = edisp.m_par_scale;
+    m_par_sigma = edisp.m_par_sigma;
+    m_par_width = edisp.m_par_width;
 
     // Return
     return;
@@ -451,7 +505,7 @@ void GCTAPsfPerfTable::copy_members(const GCTAPsfPerfTable& psf)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAPsfPerfTable::free_members(void)
+void GCTAEdispPerfTable::free_members(void)
 {
     // Return
     return;
@@ -459,29 +513,26 @@ void GCTAPsfPerfTable::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Update PSF parameter cache
+ * @brief Update energy dispersion parameter cache
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
  *
- * This method updates the PSF parameter cache. As the performance table PSF
- * only depends on energy, the only parameter on which the cache values
- * depend is the energy.
+ * This method updates the energy dispersion parameter cache.
+ * As the performance table energy dispersion only depends on energy,
+ * the only parameter on which the cache values depend is the energy.
  ***************************************************************************/
-void GCTAPsfPerfTable::update(const double& logE) const
+void GCTAEdispPerfTable::update(const double& logE) const
 {
-    // Only compute PSF parameters if arguments have changed
+    // Only compute energy dispersion parameters if arguments have changed
     if (logE != m_par_logE) {
 
         // Save energy
         m_par_logE = logE;
     
-        // Determine Gaussian sigma in radians
+        // Determine Gaussian sigma and pre-compute Gaussian parameters
         m_par_sigma = m_logE.interpolate(logE, m_sigma);
-
-        // Derive width=-0.5/(sigma*sigma) and scale=1/(twopi*sigma*sigma)
-        double sigma2 = m_par_sigma * m_par_sigma;
-        m_par_scale   =  1.0 / (gammalib::twopi * sigma2);
-        m_par_width   = -0.5 / sigma2;
+        m_par_scale = gammalib::inv_sqrt2pi / m_par_sigma;
+        m_par_width = -0.5 / (m_par_sigma * m_par_sigma);
 
     }
 

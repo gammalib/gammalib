@@ -57,8 +57,8 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GMWLResponse* clone(void) const;
-    virtual bool          has_edisp(void) const;
-    virtual bool          has_tdisp(void) const;
+    virtual bool          use_edisp(void) const;
+    virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -75,24 +75,24 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Signal if response supports energy dispersion
+ * @brief Signal if response uses energy dispersion
  *
- * @return True if response supports energy dispersion.
+ * @return True if response uses energy dispersion.
  ***************************************************************************/
 inline
-bool GMWLResponse::has_edisp(void) const
+bool GMWLResponse::use_edisp(void) const
 {
     return false;
 }
 
 
 /***********************************************************************//**
- * @brief Signal if response supports time dispersion
+ * @brief Signal if response uses time dispersion
  *
- * @return True if response supports time dispersion.
+ * @return True if response uses time dispersion.
  ***************************************************************************/
 inline
-bool GMWLResponse::has_tdisp(void) const
+bool GMWLResponse::use_tdisp(void) const
 {
     return false;
 }

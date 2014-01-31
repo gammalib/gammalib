@@ -510,16 +510,9 @@ GEnergy GModelSpectralGauss::mc(const GEnergy& emin,
 
     // Sample until we find a value within the requested energy range
     do {
-        double x1;
-        double w;
-    	do {
-    		x1        = 2.0 * ran.uniform() - 1.0;
-    		double x2 = 2.0 * ran.uniform() - 1.0;
-    		w         = x1 * x1 + x2 * x2;
-    	} while (w >= 1.0);
 
         // Compute random value
-    	double val = x1 * std::sqrt((-2.0 * std::log(w)) / w);
+    	double val = ran.normal();
 
     	// Scale to specified width and shift by mean value
     	energy = m_sigma.value() * val + m_mean.value();

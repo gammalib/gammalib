@@ -247,6 +247,33 @@ double GRan::uniform(void)
 
 
 /***********************************************************************//**
+ * @brief Returns normal deviates
+ *
+ * Method Used: Box-Muller transform, outlined here:
+ * http://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+ *
+ * Code from: http://www.design.caltech.edu/erik/Misc/Gaussian.html
+ ***************************************************************************/
+double GRan::normal(void)
+{
+    // Get random value
+    double x1;
+    double w;
+    do {
+        x1 = 2.0 * uniform() - 1.0;
+        double x2 = 2.0 * uniform() - 1.0;
+        w = x1 * x1 + x2 * x2;
+    } while (w >= 1.0);
+
+    // Compute random value
+    double value = x1 * std::sqrt((-2.0 * std::log(w)) / w);
+    
+    // Return random value
+    return value;
+}
+
+
+/***********************************************************************//**
  * @brief Returns exponential deviates
  *
  * @param[in] lambda Mean rate.

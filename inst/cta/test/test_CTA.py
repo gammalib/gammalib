@@ -51,6 +51,7 @@ class Test(GPythonTestSuite):
         # Append tests
         self.append(self.test_aeff, "Test CTA effective area classes")
         self.append(self.test_psf, "Test CTA PSF classes")
+        self.append(self.test_edisp, "Test CTA energy dispersion classes")
         self.append(self.test_onoff, "Test CTA ON/OFF analysis")
 
         # Return
@@ -191,6 +192,51 @@ class Test(GPythonTestSuite):
         # Return
         return
 
+    # Test point spread function response
+    def test_edisp(self):
+        """
+        Test GCTAEdisp classes.
+        """
+        # Load performance file
+        self.test_try("Test GCTAEdispPerfTable file constructor")
+        try:
+            edisp = GCTAEdispPerfTable("../inst/cta/test/caldb/cta_dummy_irf.dat")
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to allocate GCTAEdispPerfTable from file.")
+
+        # Test energy dispersion values
+        self.test_value(edisp(0.0, 0.0), 9.99019627861, 1.0e-6)
+        self.test_value(edisp(0.001, 0.0), 9.9870644077, 1.0e-6)
+        self.test_value(edisp(0.01, 0.0), 9.68182, 1.0e-6)
+        self.test_value(edisp(0.1, 0.0), 0.434382, 1.0e-6)
+        self.test_value(edisp(1.0, 1.0), 18.064868197, 1.0e-6)
+        self.test_value(edisp(1.001, 1.0, 0.0), 18.0463571212, 1.0e-6)
+
+        # Load response
+        self.test_try("Test GCTAResponse file constructor")
+        try:
+            rsp = GCTAResponse("cta_dummy_irf", "../inst/cta/test/caldb")
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to allocate GCTAResponse from file.")
+
+        # Test nedisp computations
+        dir  = GSkyDir()
+        pnt  = GCTAPointing()
+        time = GTime()
+        self.test_value(rsp.nedisp(dir, GEnergy(3.7, "TeV"), time, pnt, 
+                                   GEbounds(GEnergy(0.1, "TeV"),
+                                            GEnergy(10.0, "TeV"))),
+                        1.0, 1.0e-6)
+        self.test_value(rsp.nedisp(dir, GEnergy(3.7, "TeV"), time, pnt, 
+                                   GEbounds(GEnergy(2.72345,  "TeV"),
+                                            GEnergy(5.026615, "TeV"))),
+                        1.0, 1.0e-6)
+        self.test_value(rsp.nedisp(dir, GEnergy(3.7, "TeV"), time, pnt, 
+                                   GEbounds(GEnergy(3.7, "TeV"),
+                                            GEnergy(10.0, "TeV"))),
+                        0.5, 1.0e-6)
 
     # Test ON/OFF analysis
     def test_onoff(self):

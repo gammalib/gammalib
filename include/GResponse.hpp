@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.hpp - Abstract response base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,7 @@
 #include "GPhoton.hpp"
 #include "GSource.hpp"
 #include "GEnergy.hpp"
+#include "GEbounds.hpp"
 #include "GTime.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialElliptical.hpp"
@@ -47,7 +48,7 @@ class GObservation;
 /***********************************************************************//**
  * @class GResponse
  *
- * @brief Abstract interface for the instrument response function
+ * @brief Abstract instrument response base class
  *
  * The response function provides conversion between physical parameters
  * (such as source position, flux, ...) and the measured instrumental
@@ -72,8 +73,8 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GResponse*  clone(void) const = 0;
-    virtual bool        has_edisp(void) const = 0;
-    virtual bool        has_tdisp(void) const = 0;
+    virtual bool        use_edisp(void) const = 0;
+    virtual bool        use_tdisp(void) const = 0;
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
@@ -82,31 +83,32 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
-    virtual double irf(const GEvent&       event,
-                       const GSource&      source,
-                       const GObservation& obs) const;
-    virtual double irf_ptsrc(const GEvent&       event,
-                             const GSource&      source,
-                             const GObservation& obs) const;
-    virtual double irf_radial(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
-    virtual double irf_elliptical(const GEvent&       event,
-                                  const GSource&      source,
-                                  const GObservation& obs) const;
-    virtual double irf_diffuse(const GEvent&       event,
+    virtual double   irf(const GEvent&       event,
+                         const GSource&      source,
+                         const GObservation& obs) const;
+    virtual double   irf_ptsrc(const GEvent&       event,
                                const GSource&      source,
                                const GObservation& obs) const;
-    virtual double npred(const GSource&      source,
-                         const GObservation& obs) const;
-    virtual double npred_ptsrc(const GSource&      source,
-                               const GObservation& obs) const;
-    virtual double npred_radial(const GSource&      source,
+    virtual double   irf_radial(const GEvent&       event,
+                                const GSource&      source,
                                 const GObservation& obs) const;
-    virtual double npred_elliptical(const GSource&      source,
+    virtual double   irf_elliptical(const GEvent&       event,
+                                    const GSource&      source,
                                     const GObservation& obs) const;
-    virtual double npred_diffuse(const GSource&      source,
+    virtual double   irf_diffuse(const GEvent&       event,
+                                 const GSource&      source,
                                  const GObservation& obs) const;
+    virtual double   npred(const GSource&      source,
+                           const GObservation& obs) const;
+    virtual double   npred_ptsrc(const GSource&      source,
+                                 const GObservation& obs) const;
+    virtual double   npred_radial(const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double   npred_elliptical(const GSource&      source,
+                                      const GObservation& obs) const;
+    virtual double   npred_diffuse(const GSource&      source,
+                                   const GObservation& obs) const;
+    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
 protected:
     // Protected methods

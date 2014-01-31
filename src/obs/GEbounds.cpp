@@ -91,6 +91,27 @@ GEbounds::GEbounds(const GEbounds& ebds)
 
 
 /***********************************************************************//**
+ * @brief Single energy band constructor
+ *
+ * @param[in] emin Minimum energy of the interval.
+ * @param[in] emax Maximum energy of the interval.
+ *
+ * Constructs energy bounds for one (emin, emax) energy band.
+ ***************************************************************************/
+GEbounds::GEbounds(const GEnergy& emin, const GEnergy& emax)
+{
+    // Initialise members
+    init_members();
+
+    append(emin, emax);
+    set_attributes();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Interval constructor
  *
  * @param[in] num Number of energy intervals.
