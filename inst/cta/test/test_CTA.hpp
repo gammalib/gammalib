@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@ public:
     void                      test_response(void);
 };
 
+
 /***********************************************************************//**
  * @class TestGCTAModel
  *
@@ -75,7 +76,6 @@ public:
     virtual TestGCTAModelBackground* clone(void) const;
     void                             test_modelbg_npred(void);
 };
-
 
 
 /***********************************************************************//**
@@ -97,7 +97,6 @@ public:
     void                         test_unbinned_obs(void);
     void                         test_binned_obs(void);
 };
-
 
 
 /***********************************************************************//**

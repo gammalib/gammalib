@@ -68,7 +68,7 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test Energy Dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
 
@@ -326,64 +326,55 @@ void TestGCTAResponse::test_response_npsf(void)
 /***********************************************************************//**
  * @brief Test CTA Energy Dispersion computation
  *
- * The Energy Dispersion computation is tested by integrating numerically the Edisp
- * function. Integration is done in a rather simplistic way, by stepping
- * radially away from the centre. The integration is done for a set of
- * energies from 0.1-10 TeV.
+ * The Energy Dispersion computation is tested by integrating numerically
+ * the edisp function. Integration is done in a rather simplistic way, by
+ * stepping through the energy range. The integration is done for a set of
+ * true energies from 0.1-10 TeV.
  ***************************************************************************/
 void TestGCTAResponse::test_response_edisp(void)
 {
     // Load response
 	GCTAResponse rsp;
-    rsp.caldb(cta_caldb);
+    rsp.caldb(GCaldb(cta_caldb));
     rsp.load(cta_irf);
-    // Integrate Energy Dispersion
 
-    if (rsp.edisp() == NULL){
-    	return;
-    }
+    // Continue only if energy dispersion is available
+    if (rsp.edisp() != NULL) {
 
-    for (double e_src = 0.1; e_src < 10.0; e_src *= 2.0) {
-    	std::cerr << "asdf" << rsp.edisp() << std::endl;
-    	GEbounds ebs = rsp.edisp()->ebounds(std::log10(e_src), 0.0, 0.0, 0.0, 0.0);
+        // Loop over source energies (0.1 TeV -> 10.0 TeV)
+        for (double e_src = 0.1; e_src < 10.0; e_src *= 2.0) {
+        
+            // Retrieve boundaries in observed energy
+            //std::cerr << "asdf" << rsp.edisp() << std::endl;
+            //GEbounds ebs = rsp.edisp()->ebounds_obs(std::log10(e_src), 0.0, 0.0, 0.0, 0.0);
+            GEbounds ebounds  = rsp.edisp()->ebounds_obs(std::log10(e_src));
+            GEnergy  emin     = ebounds.emin();
+            GEnergy  emax     = ebounds.emax();
+            double   logE_min = std::log10(emin.TeV());
+            double   logE_max = std::log10(emax.TeV());
 
-    	GEnergy emin = ebs.emin();
-    	GEnergy emax = ebs.emax();
+            // Compute step size for numerical integration
+            const int steps = 1000;
+            double    dlogE = (logE_max-logE_min)/steps;
 
-        double logE_min = std::log10(emin.TeV());
-        double logE_max = std::log10(emax.TeV());
-
-        int    steps = 1000;
-        double dlogE = (logE_max-logE_min)/steps;
-
-        double sum   = 0.0;
-        double logE_obs = logE_min;
-        for (int i = 0; i < steps; ++i) {
-
-
-            double dp_dlogE = (*rsp.edisp())(logE_obs, std::log10(e_src), 0.0, 0.0, 0.0, 0.0);
-
-            sum += dp_dlogE * dlogE;
-
-            std::cerr << i << " ";
-            std::cerr << emin << " ";
-//            std::cerr << emin << " ";
-            std::cerr << emax << " ";
-//            std::cerr << emax << " ";
-//            std::cerr << dlogE << " ";
-//            std::cerr << logE_obs << " ";
-            std::cerr << dp_dlogE << " ";
-            std::cerr << sum << " " << std::endl;
-            logE_obs   += dlogE;
+            // Perform numerical integration by summing
+            double sum      = 0.0;
+            double logE_obs = logE_min;
+            for (int i = 0; i < steps; ++i) {
+                double dp_dlogE = (*rsp.edisp())(logE_obs, std::log10(e_src));
+                sum            += dp_dlogE * dlogE;
+                logE_obs       += dlogE;
+            }
+            GEnergy eng(e_src, "TeV");
+            test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
         }
-        GEnergy eng(e_src, "TeV");
-        test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
-        //break;
-    }
+
+    } // endif: energy dispersion was available
 
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Test CTA IRF computation for diffuse source model
