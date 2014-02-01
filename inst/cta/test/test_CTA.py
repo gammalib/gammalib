@@ -228,15 +228,15 @@ class Test(GPythonTestSuite):
         self.test_value(rsp.nedisp(dir, GEnergy(3.7, "TeV"), time, pnt, 
                                    GEbounds(GEnergy(0.1, "TeV"),
                                             GEnergy(10.0, "TeV"))),
-                        1.0, 1.0e-6)
+                        1.0, 0.005)
         self.test_value(rsp.nedisp(dir, GEnergy(3.7, "TeV"), time, pnt, 
                                    GEbounds(GEnergy(2.72345,  "TeV"),
                                             GEnergy(5.026615, "TeV"))),
-                        1.0, 1.0e-6)
+                        1.0, 0.005)
         self.test_value(rsp.nedisp(dir, GEnergy(3.7, "TeV"), time, pnt, 
                                    GEbounds(GEnergy(3.7, "TeV"),
                                             GEnergy(10.0, "TeV"))),
-                        0.5, 1.0e-6)
+                        0.5, 0.005)
 
     # Test ON/OFF analysis
     def test_onoff(self):
