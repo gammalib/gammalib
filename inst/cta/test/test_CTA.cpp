@@ -343,11 +343,12 @@ void TestGCTAResponse::test_response_edisp(void)
 
         // Loop over source energies (0.1 TeV -> 10.0 TeV)
         for (double e_src = 0.1; e_src < 10.0; e_src *= 2.0) {
+
+            // Compute log10 of true energy
+            double log10_e_src = std::log10(e_src);
         
             // Retrieve boundaries in observed energy
-            //std::cerr << "asdf" << rsp.edisp() << std::endl;
-            //GEbounds ebs = rsp.edisp()->ebounds_obs(std::log10(e_src), 0.0, 0.0, 0.0, 0.0);
-            GEbounds ebounds  = rsp.edisp()->ebounds_obs(std::log10(e_src));
+            GEbounds ebounds  = rsp.edisp()->ebounds_obs(log10_e_src);
             GEnergy  emin     = ebounds.emin();
             GEnergy  emax     = ebounds.emax();
             double   logE_min = std::log10(emin.TeV());
@@ -361,12 +362,27 @@ void TestGCTAResponse::test_response_edisp(void)
             double sum      = 0.0;
             double logE_obs = logE_min;
             for (int i = 0; i < steps; ++i) {
-                double dp_dlogE = (*rsp.edisp())(logE_obs, std::log10(e_src));
+                double dp_dlogE = (*rsp.edisp())(logE_obs, log10_e_src);
                 sum            += dp_dlogE * dlogE;
                 logE_obs       += dlogE;
             }
             GEnergy eng(e_src, "TeV");
             test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
+
+            // And now in linear energies, test GCTAResponse::edisp() method
+            const int nE = 10000;
+            double E_min = emin.MeV();
+            double E_max = emax.MeV();
+            double dE    = (E_max-E_min)/nE;
+            double sum2  = 0.0;
+            double E_obs = E_min;
+            for (int i = 0; i < nE; ++i) {
+                logE_obs     = std::log10(E_obs) - 6.0;
+                double dp_dE = rsp.edisp(logE_obs, 0.0, 0.0, 0.0, 0.0, log10_e_src);
+                sum2        += dp_dE * dE;
+                E_obs       += dE;
+            }
+            test_value(sum2, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
         }
 
     } // endif: energy dispersion was available
