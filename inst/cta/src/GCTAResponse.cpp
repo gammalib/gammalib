@@ -2281,7 +2281,7 @@ double GCTAResponse::nedisp(const GSkyDir&      srcDir,
                         GIntegral integral(&integrand);
 
                         // Set integration precision
-                        //integral.eps(1.0e-5);
+                        integral.eps(1.0e-3);
 
                         // Do Romberg integration
                         nedisp += integral.romb(e_log_min, e_log_max);

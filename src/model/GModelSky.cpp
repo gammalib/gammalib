@@ -1400,7 +1400,7 @@ double GModelSky::integrate_energy(const GEvent& event,
                 GIntegral integral(&integrand);
 
                 // Set integration precision
-                //integral.eps(1.0e-5);
+                integral.eps(1.0e-3);
 
                 // Do Romberg integration
                 emin   = std::log(emin);

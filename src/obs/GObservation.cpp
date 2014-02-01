@@ -1402,8 +1402,19 @@ double GObservation::npred_spec(const GModel& model,
                                 const GTime&  obsTime) const
 {
     // Set integration energy interval in MeV
-    double emin = events()->ebounds().emin().MeV();
-    double emax = events()->ebounds().emax().MeV();
+    GEnergy e_min = events()->ebounds().emin();
+    GEnergy e_max = events()->ebounds().emax();
+
+    // If model is sky model and observation uses energy dispersion then
+    // add margin
+    if (dynamic_cast<const GModelSky*>(&model) != NULL && response().use_edisp()) {
+        e_min = response().ebounds_src(e_min).emin();
+        e_max = response().ebounds_src(e_max).emax();
+    }
+
+    // Get energy interval in MeV
+    double emin = e_min.MeV();
+    double emax = e_max.MeV();
 
     // Throw exception if energy range is not valid
     if (emax <= emin) {
