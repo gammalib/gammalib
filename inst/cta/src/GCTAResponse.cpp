@@ -437,6 +437,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
  * @param[in] photon Photon.
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
+ * @return Simulated event.
  *
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
@@ -492,9 +493,10 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
             GCTAInstDir inst_dir;
             inst_dir.dir(sky_dir);
 
+            // Set measured photon energy
             GEnergy energy = photon.energy();
             if (use_edisp()) {
-              energy = edisp()->mc(ran, srcLogEng, theta, phi, zenith, azimuth);
+                energy = edisp()->mc(ran, srcLogEng, theta, phi, zenith, azimuth);
             }
 
             // Allocate event
@@ -502,7 +504,6 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
             // Set event attributes
             event->dir(inst_dir);
-
             event->energy(energy);
             event->time(photon.time());
 
