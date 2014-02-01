@@ -324,13 +324,13 @@ double GCTAResponse::irf(const GEvent&       event,
             irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
 
             // Multiply-in energy dispersion
-            if (use_edisp() && irf > 0) {
+            if (use_edisp() && irf > 0.0) {
 
                 // Get log10(E/TeV) of measured photon energy.
-                double obsLogEng = obsEng.log10TeV();
+                //double obsLogEng = obsEng.log10TeV();
 
                 // Multiply-in energy dispersion
-                irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
+                irf *= edisp(obsEng, theta, phi, zenith, azimuth, srcLogEng);
 
             } // endif: energy dispersion was available and PSF was non-zero
 
@@ -1924,8 +1924,8 @@ GEbounds GCTAResponse::ebounds_src(const GEnergy& obsEnergy) const
 
     // If energy dispersion is available then set the energy boundaries
     if (edisp() != NULL) {
-        double logEobs = obsEnergy.log10MeV();
-        ebounds        = edisp()->ebounds_src(logEobs);
+        double obsLogEng = obsEnergy.log10TeV();
+        ebounds          = edisp()->ebounds_src(obsLogEng); // Requires TeV
     }
 
     // Return energy boundaries
@@ -2039,24 +2039,35 @@ double GCTAResponse::psf_delta_max(const double& theta,
 /***********************************************************************//**
  * @brief Return energy dispersion (in units or MeV^-1)
  *
- * @param[in] obsLogEng Log10 of measured photon energy (E/TeV).
+ * @param[in] obsLogEng Measured event energy.
  * @param[in] theta Radial offset angle in camera (radians).
  * @param[in] phi Polar angle in camera (radians).
  * @param[in] zenith Zenith angle of telescope pointing (radians).
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  ***************************************************************************/
-double GCTAResponse::edisp(const double& obsLogEng,
-                           const double& theta,
-                           const double& phi,
-                           const double& zenith,
-                           const double& azimuth,
-                           const double& srcLogEng) const
+double GCTAResponse::edisp(const GEnergy& obsEng,
+                           const double&  theta,
+                           const double&  phi,
+                           const double&  zenith,
+                           const double&  azimuth,
+                           const double&  srcLogEng) const
 {
-    // Compute energy dispersion
-    double edisp = (m_edisp != NULL)
-                 ? (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth)
-                 : 0.0;
+    // Initialise energy dispersion
+    double edisp = 0.0;
+
+    // If energy dispersion is available then compute PDF
+    if (m_edisp != NULL) {
+
+        // Compute log10 energy in TeV and linear energy in MeV
+        double obsLogEng = obsEng.log10TeV();
+        double energy    = obsEng.MeV();
+
+        // Compute energy dispersion
+        edisp = (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth) /
+                (gammalib::ln10 * energy);
+
+    } // endif: had energy dispersion
 
     // Return energy dispersion
     return edisp;

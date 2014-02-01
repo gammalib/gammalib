@@ -377,8 +377,7 @@ void TestGCTAResponse::test_response_edisp(void)
             double sum2  = 0.0;
             double E_obs = E_min;
             for (int i = 0; i < nE; ++i) {
-                logE_obs     = std::log10(E_obs) - 6.0;
-                double dp_dE = rsp.edisp(logE_obs, 0.0, 0.0, 0.0, 0.0, log10_e_src);
+                double dp_dE = rsp.edisp(GEnergy(E_obs,"MeV"), 0.0, 0.0, 0.0, 0.0, log10_e_src);
                 sum2        += dp_dE * dE;
                 E_obs       += dE;
             }

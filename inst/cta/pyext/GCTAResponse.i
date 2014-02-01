@@ -110,12 +110,12 @@ public:
                          const double& zenith,
                          const double& azimuth,
                          const double& srcLogEng) const;
-    double edisp(const double& obsLogEng,
-                 const double& theta,
-                 const double& phi,
-                 const double& zenith,
-                 const double& azimuth,
-                 const double& srcLogEng) const;
+    double edisp(const GEnergy& obsEng,
+                 const double&  theta,
+                 const double&  phi,
+                 const double&  zenith,
+                 const double&  azimuth,
+                 const double&  srcLogEng) const;
     double npsf(const GSkyDir&      srcDir,
                 const double&       srcLogEng,
                 const GTime&        srcTime,
