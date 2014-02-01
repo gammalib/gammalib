@@ -257,7 +257,7 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
             if (!converged) {
                 std::string origin = "GIntegral::romb("+
                                      gammalib::str(a)+", "+
-                                     gammalib::str(a)+", "+
+                                     gammalib::str(b)+", "+
                                      gammalib::str(k)+")";
                 std::string msg = "Integration uncertainty "+
                                   gammalib::str(std::abs(dss))+
