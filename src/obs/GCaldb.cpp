@@ -667,7 +667,13 @@ std::string GCaldb::print(const GChatter& chatter) const
         result.append("=== GCaldb ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("Database root")+rootdir());
+        result.append("\n"+gammalib::parformat("Database root"));
+        try {
+            result.append(rootdir());
+        }
+        catch (std::exception& e) {
+            result.append("undefined");
+        }
 
         // Append information about opened database
         if (m_cif != NULL) {
