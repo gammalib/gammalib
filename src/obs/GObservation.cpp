@@ -299,8 +299,16 @@ double GObservation::model(const GModels& models, const GEvent& event,
             // observation identifier
             if (mptr->is_valid(instrument(), id())) {
 
-                // Compute value and add to model
-                model += mptr->eval_gradients(event, *this);
+                // Compute value and add to model. If energy dispersion
+                // is used, don't compute model gradients as we cannot
+                // use them. This is somehow a kluge, but makes the
+                // code faster
+                if (response().use_edisp()) {
+                    model += mptr->eval(event, *this);
+                }
+                else {
+                    model += mptr->eval_gradients(event, *this);
+                }
 
                 // Optionally determine model gradients
                 if (gradient != NULL) {
@@ -442,8 +450,12 @@ double GObservation::model_grad(const GModel& model,
     // Compute gradient only if parameter is free
     if (par.is_free()) {
 
-        // If model has a gradient then use it
-        if (par.has_grad()) {
+        // If model has a gradient then use it, unless we have energy
+        // dispersion. For energy dispersion, no gradients are available
+        // as we have not implemented code that integrates the gradients
+        // over the energy dispersion. Here it's simpler to just use
+        // numerical gradients.
+        if (par.has_grad() && !response().use_edisp()) {
             grad = par.factor_gradient();
         }
 
