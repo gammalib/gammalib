@@ -194,7 +194,7 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
                                             m_zenith,
                                             m_azimuth,
                                             m_srcLogEng,
-                                            m_obsLogEng,
+                                            m_obsEng,
                                             m_zeta,
                                             m_lambda,
                                             m_omega0,
@@ -285,7 +285,7 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
 
     // Optionally take energy dispersion into account
     if (m_rsp.use_edisp() && irf > 0.0) {
-        irf *= m_rsp.edisp(m_obsLogEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
+        irf *= m_rsp.edisp(m_obsEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
     }
     
     // Compile option: Check for NaN/Inf
@@ -491,7 +491,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
                                                 m_srcEng,
                                                 m_srcTime,
                                                 m_srcLogEng,
-                                                m_obsLogEng,
+                                                m_obsEng,
                                                 m_obsOmega,
                                                 m_omega0,
                                                 rho,
@@ -587,7 +587,7 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
 
         // Optionally take energy dispersion into account
         if (m_rsp.use_edisp() && irf > 0.0) {
-            irf *= m_rsp.edisp(m_obsLogEng, theta, phi, 
+            irf *= m_rsp.edisp(m_obsEng, theta, phi, 
                                m_zenith, m_azimuth, m_srcLogEng);
         }
 
@@ -813,7 +813,7 @@ double cta_irf_diffuse_kern_theta::eval(const double& theta)
                                                m_srcEng,
                                                m_srcTime,
                                                m_srcLogEng,
-                                               m_obsLogEng,
+                                               m_obsEng,
                                                m_rot,
                                                sin_theta,
                                                cos_theta,
@@ -916,7 +916,7 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
 
         // Optionally take energy dispersion into account
         if (m_rsp.use_edisp() && irf > 0.0) {
-            irf *= m_rsp.edisp(m_obsLogEng, offset, azimuth,
+            irf *= m_rsp.edisp(m_obsEng, offset, azimuth,
                                m_zenith, m_azimuth, m_srcLogEng);
         }
 

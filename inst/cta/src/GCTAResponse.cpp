@@ -976,9 +976,8 @@ double GCTAResponse::irf_radial(const GEvent&       event,
         omega0     = gammalib::acos(arg);
     }
 
-    // Get log10(E/TeV) of true and measured photon energies
+    // Get log10(E/TeV) of true photon energy
     double srcLogEng = srcEng.log10TeV();
-    double obsLogEng = obsEng.log10TeV();
 
     // Assign the observed theta angle (eta) as the true theta angle
     // between the source and the pointing directions. This is a (not
@@ -1015,7 +1014,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
                                           srcEng,
                                           srcTime,
                                           srcLogEng,
-                                          obsLogEng,
+                                          obsEng,
                                           zeta,
                                           lambda,
                                           omega0,
@@ -1146,9 +1145,8 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
         omega0     = gammalib::acos(arg);
     }
 
-    // Get log10(E/TeV) of true and measured photon energies
+    // Get log10(E/TeV) of true photon energy
     double srcLogEng = srcEng.log10TeV();
-    double obsLogEng = obsEng.log10TeV();
 
     // Get maximum PSF radius [radians]. We assign here the measured theta
     // angle (eta) as the true theta angle between the source and the pointing
@@ -1182,7 +1180,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
                                               srcEng,
                                               srcTime,
                                               srcLogEng,
-                                              obsLogEng,
+                                              obsEng,
                                               zeta,
                                               lambda,
                                               obsOmega,
@@ -1317,9 +1315,8 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
         // pointing direction [radians]
         double eta = pnt.dir().dist(dir.dir());
 
-        // Get log10(E/TeV) of true and measured photon energies
+        // Get log10(E/TeV) of true photon energy
         double srcLogEng = srcEng.log10TeV();
-        double obsLogEng = obsEng.log10TeV();
 
         // Assign the observed theta angle (eta) as the true theta angle
         // between the source and the pointing directions. This is a (not
@@ -1356,7 +1353,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
                                                  srcEng,
                                                  srcTime,
                                                  srcLogEng,
-                                                 obsLogEng,
+                                                 obsEng,
                                                  rot,
                                                  eta);
 

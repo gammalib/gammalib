@@ -166,7 +166,7 @@ public:
                             const GEnergy&             srcEng,
                             const GTime&               srcTime,
                             const double&              srcLogEng,
-                            const double&              obsLogEng,
+                            const GEnergy&             obsEng,
                             const double&              zeta,
                             const double&              lambda,
                             const double&              omega0,
@@ -178,7 +178,7 @@ public:
                             m_srcEng(srcEng),
                             m_srcTime(srcTime),
                             m_srcLogEng(srcLogEng),
-                            m_obsLogEng(obsLogEng),
+                            m_obsEng(obsEng),
                             m_zeta(zeta),
                             m_cos_zeta(std::cos(zeta)),
                             m_sin_zeta(std::sin(zeta)),
@@ -197,7 +197,7 @@ protected:
     const GEnergy&             m_srcEng;        //!< True photon energy
     const GTime&               m_srcTime;       //!< True photon time
     const double&              m_srcLogEng;     //!< True photon log10 energy
-    const double&              m_obsLogEng;     //!< Measured photon energy
+    const GEnergy&             m_obsEng;        //!< Measured event energy
     const double&              m_zeta;          //!< Distance model centre - measured photon
     double                     m_cos_zeta;      //!< Cosine of zeta
     double                     m_sin_zeta;      //!< Sine of zeta
@@ -234,7 +234,7 @@ public:
                               const double&       zenith,
                               const double&       azimuth,
                               const double&       srcLogEng,
-                              const double&       obsLogEng,
+                              const GEnergy&      obsEng,
                               const double&       zeta,
                               const double&       lambda,
                               const double&       omega0,
@@ -247,7 +247,7 @@ public:
                               m_zenith(zenith),
                               m_azimuth(azimuth),
                               m_srcLogEng(srcLogEng),
-                              m_obsLogEng(obsLogEng),
+                              m_obsEng(obsEng),
                               m_zeta(zeta),
                               m_lambda(lambda),
                               m_omega0(omega0),
@@ -262,7 +262,7 @@ protected:
     const double&       m_zenith;        //!< Zenith angle
     const double&       m_azimuth;       //!< Azimuth angle
     const double&       m_srcLogEng;     //!< True photon energy
-    const double&       m_obsLogEng;     //!< Measured photon energy
+    const GEnergy&      m_obsEng;        //!< Measured event energy
     const double&       m_zeta;          //!< Distance model centre - measured photon
     const double&       m_lambda;        //!< Distance model centre - pointing
     const double&       m_omega0;        //!< Azimuth of pointing in model system
@@ -430,7 +430,7 @@ public:
                                 const GEnergy&                 srcEng,
                                 const GTime&                   srcTime,
                                 const double&                  srcLogEng,
-                                const double&                  obsLogEng,
+                                const GEnergy&                 obsEng,
                                 const double&                  zeta,
                                 const double&                  lambda,
                                 const double&                  obsOmega,
@@ -443,7 +443,7 @@ public:
                                 m_srcEng(srcEng),
                                 m_srcTime(srcTime),
                                 m_srcLogEng(srcLogEng),
-                                m_obsLogEng(obsLogEng),
+                                m_obsEng(obsEng),
                                 m_zeta(zeta),
                                 m_cos_zeta(std::cos(zeta)),
                                 m_sin_zeta(std::sin(zeta)),
@@ -463,7 +463,7 @@ public:
     const GEnergy&                 m_srcEng;        //!< True photon energy
     const GTime&                   m_srcTime;       //!< True photon time
     const double&                  m_srcLogEng;     //!< True photon log energy
-    const double&                  m_obsLogEng;     //!< Measured photon energy
+    const GEnergy&                 m_obsEng;        //!< Measured event energy
     const double&                  m_zeta;          //!< Distance model centre - measured photon
     double                         m_cos_zeta;      //!< Cosine of zeta
     double                         m_sin_zeta;      //!< Sine of zeta
@@ -505,7 +505,7 @@ public:
                                   const GEnergy&                 srcEng,
                                   const GTime&                   srcTime,
                                   const double&                  srcLogEng,
-                                  const double&                  obsLogEng,
+                                  const GEnergy&                 obsEng,
                                   const double&                  obsOmega,
                                   const double&                  omega0,
                                   const double&                  rho,
@@ -520,7 +520,7 @@ public:
                                   m_srcEng(srcEng),
                                   m_srcTime(srcTime),
                                   m_srcLogEng(srcLogEng),
-                                  m_obsLogEng(obsLogEng),
+                                  m_obsEng(obsEng),
                                   m_obsOmega(obsOmega),
                                   m_omega0(omega0),
                                   m_rho(rho),
@@ -537,7 +537,7 @@ public:
     const GEnergy&                 m_srcEng;     //!< True photon energy
     const GTime&                   m_srcTime;    //!< True photon time
     const double&                  m_srcLogEng;  //!< True photon log energy
-    const double&                  m_obsLogEng;  //!< Measured photon energy
+    const GEnergy&                 m_obsEng;     //!< Measured event energy
     const double&                  m_obsOmega;   //!< Measured photon position angle from model centre
     const double&                  m_omega0;     //!< Azimuth of pointing in model system
     const double&                  m_rho;        //!< Model zenith angle
@@ -713,7 +713,7 @@ public:
                                const GEnergy&       srcEng,
                                const GTime&         srcTime,
                                const double&        srcLogEng,
-                               const double&        obsLogEng,
+                               const GEnergy&       obsEng,
                                const GMatrix&       rot,
                                const double&        eta) :
                                m_rsp(rsp),
@@ -725,7 +725,7 @@ public:
                                m_srcEng(srcEng),
                                m_srcTime(srcTime),
                                m_srcLogEng(srcLogEng),
-                               m_obsLogEng(obsLogEng),
+                               m_obsEng(obsEng),
                                m_rot(rot),
                                m_sin_eta(std::sin(eta)),
                                m_cos_eta(std::cos(eta)) { }
@@ -740,7 +740,7 @@ protected:
     const GEnergy&       m_srcEng;     //!< True photon energy
     const GTime&         m_srcTime;    //!< True photon arrival time
     const double&        m_srcLogEng;  //!< True photon log energy
-    const double&        m_obsLogEng;  //!< Measured photon energy
+    const GEnergy&       m_obsEng;     //!< Measured event energy
     const GMatrix&       m_rot;        //!< Rotation matrix
     double               m_sin_eta;    //!< Sine of angular distance between
                                        //   observed photon direction and
@@ -780,7 +780,7 @@ public:
                              const GEnergy&       srcEng,
                              const GTime&         srcTime,
                              const double&        srcLogEng,
-                             const double&        obsLogEng,
+                             const GEnergy&       obsEng,
                              const GMatrix&       rot,
                              const double&        sin_theta,
                              const double&        cos_theta,
@@ -793,7 +793,7 @@ public:
                              m_srcEng(srcEng),
                              m_srcTime(srcTime),
                              m_srcLogEng(srcLogEng),
-                             m_obsLogEng(obsLogEng),
+                             m_obsEng(obsEng),
                              m_rot(rot),
                              m_sin_theta(sin_theta),
                              m_cos_theta(cos_theta),
@@ -808,7 +808,7 @@ protected:
     const GEnergy&       m_srcEng;     //!< True photon energy
     const GTime&         m_srcTime;    //!< True photon arrival time
     const double&        m_srcLogEng;  //!< True photon log energy
-    const double&        m_obsLogEng;  //!< Measured photon energy
+    const GEnergy&       m_obsEng;     //!< Measured event energy
     const GMatrix&       m_rot;        //!< Rotation matrix
     const double&        m_sin_theta;  //!< Sine of offset angle
     const double&        m_cos_theta;  //!< Cosine of offset angle

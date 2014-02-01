@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GIntegral.cpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -255,15 +255,19 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
         // Dump warning
         if (!m_silent) {
             if (!converged) {
+                std::string origin = "GIntegral::romb("+
+                                     gammalib::str(a)+", "+
+                                     gammalib::str(a)+", "+
+                                     gammalib::str(k)+")";
                 std::string msg = "Integration uncertainty "+
                                   gammalib::str(std::abs(dss))+
                                   " exceeds tolerance of "+
                                   gammalib::str(m_eps * std::abs(ss))+
                                   " after "+gammalib::str(m_iter)+
                                   " iterations. Result "+
-                                  gammalib::str(result)+
+                                  gammalib::str(ss)+
                                   " is inaccurate.";
-                gammalib::warning(G_ROMB, msg);
+                gammalib::warning(origin, msg);
             }
         }
     

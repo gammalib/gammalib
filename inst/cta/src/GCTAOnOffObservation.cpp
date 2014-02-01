@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA on-off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Chia-Chun Lu & Christoph Deil                    *
+ *  copyright (C) 2014 by Chia-Chun Lu & Christoph Deil                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -578,7 +578,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
         for (int ireco = 0; ireco < nreco; ++ireco) {
 
             // Compute reconstructed energy
-            double eng_reco = ereco.elogmean(ireco).log10TeV();
+            //double eng_reco = ereco.elogmean(ireco).log10TeV();
 
             // Loop over true energy
             for (int itrue = 0; itrue < ntrue; ++itrue) {
@@ -587,7 +587,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                 double eng_true = etrue.elogmean(itrue).log10TeV();
 
                 // Set RMF value
-                m_rmf(itrue, ireco) = response.edisp(eng_reco,
+                m_rmf(itrue, ireco) = response.edisp(ereco.elogmean(ireco),
                                                      theta,
                                                      phi,
                                                      zenith,
