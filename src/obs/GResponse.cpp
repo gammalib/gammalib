@@ -576,8 +576,11 @@ GEbounds GResponse::ebounds_src(const GEnergy& obsEnergy) const
     throw GException::feature_not_implemented(G_EBOUNDS_SRC,
           "Npred computation not implemented for diffuse models.");
 
+    // Allocate dummy energy boundaries
+    GEbounds ebounds;
+
     // Return energy boundaries
-    return (GEbounds());
+    return (ebounds);
 }
 
 
