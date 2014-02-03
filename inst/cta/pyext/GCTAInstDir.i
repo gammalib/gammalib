@@ -50,6 +50,10 @@ public:
     // Other methods
     void     dir(const GSkyDir& dir);
     GSkyDir& dir(void);
+    void detx(const double& x);
+    void dety(const double& y);
+    const double& detx(void);
+    const double& dety(void);
 };
 
 

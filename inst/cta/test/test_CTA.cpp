@@ -52,6 +52,7 @@ const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
 const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king   = "irf_file.fits";
+const std::string cta_modbck_fit = datadir+"/bg_test.fits";
 
 
 /***********************************************************************//**
@@ -98,7 +99,8 @@ void TestGCTAModelBackground::set(void)
     name("GCTAModelBackground");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred), "Test background spatial npred integration");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_xml), "Test background spatial constructor using xml model file");
+    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_construct_fits), "Test background spatial constructor using fits file in instrument coords");
 
     // Return
     return;
@@ -563,13 +565,9 @@ void TestGCTAResponse::test_response(void)
 
 
 /***********************************************************************//**
- * @brief Test CTA Model Background Npred computation
- *
- * Tests the Npred computation for the background source model. This is done
- * by loading the model from the XML file and by calling the
- * GCTAModelBackground::npred method. The test takes a few seconds.
+ * @brief Test CTA background Npred computation
  ***************************************************************************/
-void TestGCTAModelBackground::test_modelbg_npred(void)
+void TestGCTAModelBackground::test_modelbg_npred_xml(void)
 {
     // Set reference value (~0.393469 result of a 2D Gaussian integrated 
     // within one sigma)
@@ -638,11 +636,39 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
 
     // Test Npred against the reference value
     test_value(npred, ref , 1.0e-5,  "Npred computation for CTA background model");
-
-    // Return
-    return;
+	
+	// Return
+	return ;
 }
 
+/***********************************************************************//**
+ * @brief Test CTA Model Background Instrument Coordinate Constructor
+ *
+ * Tests the 2nd constructor of GCTAModelBackground that gets its background
+ * information from an input fits file.
+ ***************************************************************************/
+void TestGCTAModelBackground::test_modelbg_construct_fits(void)
+{
+    // Test CTA background constuctor
+    test_try("Test CTA background constuctor");
+    try {
+        // Setup spectral model
+        GEnergy energy(1.2, "TeV");
+        GModelSpectralPlaw spectrum(1.0, -1.5, energy);
+
+        // Load CTA event list
+        GCTAObservation obs ;
+        obs.load_unbinned(cta_events);
+
+        // Load background model
+        GCTAModelBackground bck(obs, cta_modbck_fit, spectrum);
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    return ;
+}
 
 
 /***********************************************************************//**

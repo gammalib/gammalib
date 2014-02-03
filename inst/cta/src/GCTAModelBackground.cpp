@@ -47,6 +47,7 @@
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
 #include "GCTASupport.hpp"
+#include "GCTAResponseTable.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -182,6 +183,37 @@ GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
     return;
 }
 
+/***********************************************************************//**
+ * @brief Construct from filename and observation
+ *
+ * @param[in] obs parent CTAObservation
+ * @param[in] filename filename of background table
+ * @param[in] spectral Spectral model component.
+ *
+ * Constructs a CTA background model from a spatial and a spectral
+ * model component. The temporal component is assumed to be constant.
+ * Please refer to the classes GModelSpatial and GModelSpectral to learn
+ * more about the definition of the spatial and spectral components.
+ ***************************************************************************/
+GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spectral, const int& nx_sky, const int& ny_sky, const int& n_energy) : GModelData()
+{
+        // Initialise private members for clean destruction
+	init_members();
+
+	// copying spectral model
+	m_spectral = spectral.clone();
+
+	// creating spatial cube from background file
+	set_spatial(obs, filename, nx_sky, ny_sky, n_energy);
+
+	// Set parameter pointers
+	set_pointers();
+
+	// Return
+	return;
+}
+
+
 
 /***********************************************************************//**
  * @brief Destructor
@@ -266,7 +298,6 @@ void GCTAModelBackground::clear(void)
     return;
 }
 
-
 /***********************************************************************//**
  * @brief Clone instance
  *
@@ -322,11 +353,11 @@ double GCTAModelBackground::eval(const GEvent& event,
     // We need the GPhoton to evaluate the spatial model.
     // For the background, GEvent and GPhoton are identical
     // since the IRFs are not folded in
-    GPhoton photon(dir->dir(), event.energy(), event.time());
+    GPhoton ev_photon(dir->dir(), event.energy(), event.time());
 
     // Evaluate function and gradients
     double spat = (spatial() != NULL)
-                  ? spatial()->eval(photon) : 1.0;
+                  ? spatial()->eval(ev_photon) : 1.0;
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time()) : 1.0;
     double temp = (temporal() != NULL)
@@ -955,6 +986,123 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief create spatial cube model from background file
+ *
+ * @todo Document method.
+ ***************************************************************************/
+
+void GCTAModelBackground::set_spatial(const GCTAObservation& obs, const std::string& filename, const int& nx_sky, const int& ny_sky, const int& n_energies_arg)
+{
+  // make sure the m_spatial is not already filled
+  // should not append if this function is used in a responsable way
+  // do we create exception or warning to secure this ????
+  if (m_spatial  != NULL) delete m_spatial;
+  m_spatial  = NULL;
+
+  // Tie model to observation by assigning same id
+  ids(obs.id());
+  
+  // Extract pointing information from CTAObservation
+	const GCTAPointing* pointing = dynamic_cast< const GCTAPointing*>(&obs.pointing());
+	if (pointing == NULL) {
+		std::string msg = "No CTA pointing found in observation.\n" +
+						  obs.print();
+		throw GException::invalid_argument(G_NPRED, msg);
+	}
+
+	// Read the fits file with the background information
+	GFits fits(filename);
+
+	// TODO: Could have different extensions
+	const GFitsTable& table = *fits.table("BACKGROUND");
+
+	// Get the content as GCTAResponseTable
+	GCTAResponseTable background = GCTAResponseTable(table);
+
+	// read the length of the axes
+	int nx= 1;
+	int ny= 1;
+	if( nx_sky > 0 && ny_sky > 0) {
+	  nx = nx_sky;
+	  ny = ny_sky;
+	}
+	else {
+	 nx = background.axis(0);
+	 ny = background.axis(1);
+	}
+
+	int n_energies = 1;
+	if(n_energies_arg >0){
+	  n_energies = n_energies_arg;
+	}
+	else {
+	  n_energies = background.axis(2);
+	}
+
+	// retrieve spatial bounds
+	double xlow = background.axis_lo(0,0);
+	double xhigh = background.axis_hi(0,background.axis(0)-1);
+	double ylow = background.axis_lo(1,0);
+	double yhigh = background.axis_hi(1,background.axis(1)-1);
+
+	// Creating the energies
+	GEbounds ebounds;
+	GEnergies energies;
+
+	// Loop over energies
+	for(int i=0;i<n_energies;i++) {
+
+	  // First create ebounds to get the logarithmic mean between two energies
+	  ebounds.append(GEnergy(background.axis_lo(2,i),"TeV"), GEnergy(background.axis_hi(2,i),"TeV"));
+
+	  // Append mean log energy to energies container
+	  energies.append(ebounds.elogmean(i));
+	  
+	} // endfor: loop over energies
+	
+	// Set interpolation to logscale for energies
+	background.axis_log10(2);
+
+	// creating the sky map
+	double bin_size_x = ( xhigh - xlow ) / nx * gammalib::rad2deg;
+	double bin_size_y = ( yhigh - ylow ) / ny * gammalib::rad2deg;
+
+	GSkymap  cube =  GSkymap("TAN","CEL", pointing->dir().ra_deg(), pointing->dir().dec_deg(),-1*bin_size_x,bin_size_y,nx,ny,ebounds.size());
+
+	// loop on skymap pixel
+    for( int i = 0 ; i < cube.npix(); i++) {
+
+    	// Get sky direction from pixel number
+    	GSkyDir pix_dir = cube.inx2dir(i);
+
+    	// Get instrument coordinates for this pixel
+    	const GCTAInstDir instdir = pointing->instdir(pix_dir);
+
+   	    // loop on the energy map
+	    for(int j = 0 ; j < energies.size(); j++) {
+
+	        // Determine background value in instrument system for given
+	        std::vector<double> value = background(instdir.detx(), instdir.dety(), energies[j].log10TeV());
+
+	        // Set skymap value
+	        cube(i,j) = value[0];
+	      
+	    } // endfor: loop over energies
+
+	} // endfor: loop over sky bins
+
+    // Create the GModelSpatialDiffuseCube
+    m_spatial = new GModelSpatialDiffuseCube(cube,energies);
+    
+	// Return
+	return;
+}
+
+
+
+
 
 /***********************************************************************//**
  * @brief Initialise class members

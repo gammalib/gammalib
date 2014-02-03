@@ -43,6 +43,7 @@ class GCTAModelBackground : public GModelData {
     explicit GCTAModelBackground(const GModelSpatial& spatial,
                                        const GModelSpectral& spectral);
     GCTAModelBackground(const GCTAModelBackground& model);
+    GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spec, const int& nx_sky = -999, const int& ny_sky = -999, const int& n_energy = -999 );
     virtual ~GCTAModelBackground(void);
     
     // Implemented pure virtual methods

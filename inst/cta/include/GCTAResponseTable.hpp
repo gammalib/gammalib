@@ -52,13 +52,16 @@ public:
     explicit GCTAResponseTable(const GFitsTable& hdu);
     virtual ~GCTAResponseTable(void);
 
-    // Operators
-    GCTAResponseTable&  operator= (const GCTAResponseTable& table);
-    std::vector<double> operator()(const double& arg) const;
-    std::vector<double> operator()(const double& arg1, const double& arg2) const;
-    double              operator()(const int& index, const double& arg) const;
-    double              operator()(const int& index, const double& arg1,
-                                   const double& arg2) const;
+  // Operators
+  GCTAResponseTable&  operator= (const GCTAResponseTable& table);
+  std::vector<double> operator()(const double& arg) const;
+  std::vector<double> operator()(const double& arg1, const double& arg2) const;
+  std::vector<double> operator()(const double& arg1, const double& arg2, const double& arg3) const;
+  double              operator()(const int& index, const double& arg) const;
+  double              operator()(const int& index, const double& arg1,
+				 const double& arg2) const;
+  double              operator()(const int& index, const double& arg1,
+				 const double& arg2,const double& arg3) const;
 
     // Methods
     void               clear(void);
@@ -87,6 +90,7 @@ private:
     void read_pars(const GFitsTable& hdu);
     void update(const double& arg) const;
     void update(const double& arg1, const double& arg2) const;
+    void update(const double& arg1, const double& arg2, const double& arg3) const;
 
     // Table information
     int                               m_naxes;       //!< Number of axes
@@ -111,10 +115,18 @@ private:
     mutable int    m_inx2;                           //!< Index of lower left node
     mutable int    m_inx3;                           //!< Index of upper right node
     mutable int    m_inx4;                           //!< Index of lower right node
+    mutable int    m_inx5;                           //!< Index of upper left node
+    mutable int    m_inx6;                           //!< Index of lower left node
+    mutable int    m_inx7;                           //!< Index of upper right node
+    mutable int    m_inx8;                           //!< Index of lower right node
     mutable double m_wgt1;                           //!< Weight of upper left node
     mutable double m_wgt2;                           //!< Weight of lower left node
     mutable double m_wgt3;                           //!< Weight of upper right node
     mutable double m_wgt4;                           //!< Weight of lower right node
+    mutable double m_wgt5;                           //!< Weight of upper left node
+    mutable double m_wgt6;                           //!< Weight of lower left node
+    mutable double m_wgt7;                           //!< Weight of upper right node
+    mutable double m_wgt8;                           //!< Weight of lower right node
 };
 
 

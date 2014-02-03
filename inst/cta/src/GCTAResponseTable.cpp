@@ -278,6 +278,60 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
     // Return result vector
     return result;
 }
+/***********************************************************************//**
+ * @brief linear interpolation operator for 3D tables
+ *
+ * @param[in] arg1 Value for first axis.
+ * @param[in] arg2 Value for second axis.
+ * @param[in] arg3 Value for second axis.
+ * @return Bilinearly interpolated response parameter vector.
+ *
+ * @exception GCTAException::bad_rsp_table_dim
+ *            Response table has less than one dimension.
+ *
+ * Evaluates all response parameters at a given pair of values for a
+ * two-dimensional parameter vector. The evaluation is performed by a linear
+ * interpolation of the vector. If the specified value lies outside the range
+ * covered by the vector, the parameter is linearily extrapolated from using
+ * the first (or last) two vector elements.
+ *
+ * @todo Write down formula.
+ ***************************************************************************/
+std::vector<double> GCTAResponseTable::operator()(const double& arg1,
+						  const double& arg2,
+                                                  const double& arg3) const
+{
+    // Get parameter vector size
+    int num = m_colname_par.size();
+
+    // Optionally check that we have at least two dimensions
+    #if defined(G_RANGE_CHECK)
+    if (num < 1) {
+        throw GCTAException::bad_rsp_table_dim(G_OPERATOR2, num, 2);
+    }
+    #endif
+    
+    // Initialise result vector
+    std::vector<double> result(num);
+
+    // Set indices and weighting factors for interpolation
+    update(arg1, arg2, arg3);
+
+    // Perform 3D interpolation
+    for (int i = 0; i < num; ++i) {
+        result[i] = m_wgt1 * m_pars[i][m_inx1] +
+                    m_wgt2 * m_pars[i][m_inx2] +
+                    m_wgt3 * m_pars[i][m_inx3] +
+                    m_wgt4 * m_pars[i][m_inx4] +
+                    m_wgt5 * m_pars[i][m_inx5] +
+                    m_wgt6 * m_pars[i][m_inx6] +
+                    m_wgt7 * m_pars[i][m_inx7] +
+                    m_wgt8 * m_pars[i][m_inx8] ;
+    }
+
+    // Return result vector
+    return result;
+}
 
 
 /***********************************************************************//**
@@ -357,6 +411,55 @@ double GCTAResponseTable::operator()(const int& index, const double& arg1,
                     m_wgt3 * m_pars[index][m_inx3] +
                     m_wgt4 * m_pars[index][m_inx4];
     
+    // Return result
+    return result;
+}
+/***********************************************************************//**
+ * @brief Bilinear interpolation operator for 3D tables
+ *
+ * @param[in] index Table index [0,...,size()-1].
+ * @param[in] arg1 Value for first axis.
+ * @param[in] arg2 Value for second axis.
+ * @param[in] arg3 Value for second axis.
+ * @return Bilinearly interpolated response parameter vector.
+ *
+ * @exception GCTAException::bad_rsp_table_dim
+ *            Response table has less than one dimension.
+ *
+ * Evaluates all response parameters at a given pair of values for a
+ * two-dimensional parameter vector. The evaluation is performed by a linear
+ * interpolation of the vector. If the specified value lies outside the range
+ * covered by the vector, the parameter is linearily extrapolated from using
+ * the first (or last) two vector elements.
+ *
+ * @todo Write down formula.
+ ***************************************************************************/
+double GCTAResponseTable::operator()(const int& index, const double& arg1, 
+				     const double& arg2,
+                                     const double& arg3) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OPERATOR4, index, size()-1);
+    }
+    #endif
+
+    // Set indices and weighting factors for interpolation
+    update(arg1, arg2, arg3);
+
+    // Perform 3D interpolation
+    double result = m_wgt1 * m_pars[index][m_inx1] +
+                    m_wgt2 * m_pars[index][m_inx2] +
+                    m_wgt3 * m_pars[index][m_inx3] +
+                    m_wgt4 * m_pars[index][m_inx4] +
+                    m_wgt5 * m_pars[index][m_inx5] +
+                    m_wgt6 * m_pars[index][m_inx6] +
+                    m_wgt7 * m_pars[index][m_inx7] +
+                    m_wgt8 * m_pars[index][m_inx8];
+
+
+
     // Return result
     return result;
 }
@@ -1211,6 +1314,66 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2) const
     m_wgt3 = nodes1->wgt_right() * nodes2->wgt_left();
     m_wgt4 = nodes1->wgt_right() * nodes2->wgt_right();
     
+    // Return
+    return;
+}
+/***********************************************************************//**
+ * @brief Update 3D cache
+ *
+ * @param[in] arg1 Argument for first axis.
+ * @param[in] arg2 Argument for second axis.
+ * @param[in] arg3 Argument for second axis.
+ *
+ * Updates the 3D interpolation cache. The interpolation cache is composed
+ * of four indices and weights that define 4 data values of the 2D table
+ * that are used for bilinear interpolation.
+ *
+ * @todo Write down formula
+ *
+ * @todo Makes GNodeArray::set_value method const and use mutable members
+ ***************************************************************************/
+void GCTAResponseTable::update(const double& arg1, const double& arg2, const double& arg3) const
+{
+    // Get pointers to node arrays (circumvent const correctness)
+    GNodeArray* nodes1 = const_cast<GNodeArray*>(&(m_axis_nodes[0]));
+    GNodeArray* nodes2 = const_cast<GNodeArray*>(&(m_axis_nodes[1]));
+    GNodeArray* nodes3 = const_cast<GNodeArray*>(&(m_axis_nodes[2]));
+
+    // Set values for node arrays
+    nodes1->set_value(arg1);
+    nodes2->set_value(arg2);
+    nodes3->set_value(arg3);
+
+    //std::cout<<"X="<<arg1<<" "<<nodes1->inx_left()<<" "<<nodes1->inx_right() <<std::endl;
+    // Compute offsets
+    int size1        = axis(0);
+    int size2        = axis(1);
+    int offset_left_2  = nodes2->inx_left()  * size1;
+    int offset_right_2 = nodes2->inx_right() * size1;
+
+    int offset_left_3  = nodes3->inx_left()  * size1 * size2;
+    int offset_right_3 = nodes3->inx_right() * size1 * size2;
+
+    // Set indices for bi-linear interpolation
+    m_inx1 = nodes1->inx_left()  + offset_left_2  + offset_left_3 ;
+    m_inx2 = nodes1->inx_left()  + offset_left_2  + offset_right_3;
+    m_inx3 = nodes1->inx_left()  + offset_right_2 + offset_left_3 ;
+    m_inx4 = nodes1->inx_left()  + offset_right_2 + offset_right_3;
+    m_inx5 = nodes1->inx_right() + offset_left_2  + offset_left_3 ;
+    m_inx6 = nodes1->inx_right() + offset_left_2  + offset_right_3;
+    m_inx7 = nodes1->inx_right() + offset_right_2 + offset_left_3 ;
+    m_inx8 = nodes1->inx_right() + offset_right_2 + offset_right_3;
+
+    // Set weighting factors for bi-linear interpolation
+    m_wgt1 = nodes1->wgt_left()  * nodes2->wgt_left() *  nodes3->wgt_left()  ;
+    m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_left() *  nodes3->wgt_right() ;
+    m_wgt3 = nodes1->wgt_left()  * nodes2->wgt_right()*  nodes3->wgt_left() ;
+    m_wgt4 = nodes1->wgt_left()  * nodes2->wgt_right()*  nodes3->wgt_right();
+    m_wgt5 = nodes1->wgt_right() * nodes2->wgt_left() *  nodes3->wgt_left() ;
+    m_wgt6 = nodes1->wgt_right() * nodes2->wgt_left() *  nodes3->wgt_right();
+    m_wgt7 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_left() ;
+    m_wgt8 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_right();
+
     // Return
     return;
 }

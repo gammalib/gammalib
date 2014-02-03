@@ -32,6 +32,7 @@
 #include "GSkyDir.hpp"
 #include "GTime.hpp"
 #include "GMatrix.hpp"
+#include "GCTAInstDir.hpp"
 
 
 /***********************************************************************//**
@@ -62,10 +63,13 @@ public:
     virtual void           clear(void);
     virtual GCTAPointing*  clone(void) const;
     virtual const GSkyDir& dir(void) const;
+
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void           dir(const GSkyDir& dir);
+    const GCTAInstDir& instdir(const GSkyDir& skydir) const;
+    const GSkyDir& skydir(const GCTAInstDir& instdir) const;
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;
