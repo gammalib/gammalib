@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseTable.cpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,16 +38,24 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR1                  "GCTAResponseTable::operator()(double&)"
-#define G_OPERATOR2          "GCTAResponseTable::operator()(double&,double&)"
-#define G_OPERATOR3             "GCTAResponseTable::operator()(int&,double&)"
-#define G_OPERATOR4     "GCTAResponseTable::operator()(int&,double&,double&)"
+#define G_OPERATOR2         "GCTAResponseTable::operator()(double&, double&)"
+#define G_OPERATOR3         "GCTAResponseTable::operator()(double&, double&,"\
+                                                                  " double&)"
+#define G_INX_OPERATOR1        "GCTAResponseTable::operator()(int&, double&)"
+#define G_INX_OPERATOR2        "GCTAResponseTable::operator()(int&, double&,"\
+                                                                  " double&)"
+#define G_INX_OPERATOR3        "GCTAResponseTable::operator()(int&, double&,"\
+                                                         " double&, double&)"
 #define G_AXIS                                "GCTAResponseTable::axis(int&)"
-#define G_AXIS_LO                     "GCTAResponseTable::axis_lo(int&,int&)"
-#define G_AXIS_HI                     "GCTAResponseTable::axis_hi(int&,int&)"
+#define G_AXIS_LO_UNIT                "GCTAResponseTable::axis_lo_unit(int&)"
+#define G_AXIS_HI_UNIT                "GCTAResponseTable::axis_hi_unit(int&)"
+#define G_UNIT                                "GCTAResponseTable::unit(int&)"
+#define G_AXIS_LO                    "GCTAResponseTable::axis_lo(int&, int&)"
+#define G_AXIS_HI                    "GCTAResponseTable::axis_hi(int&, int&)"
 #define G_AXIS_LINEAR                  "GCTAResponseTable::axis_linear(int&)"
 #define G_AXIS_LOG10                    "GCTAResponseTable::axis_log10(int&)"
 #define G_AXIS_RADIANS                "GCTAResponseTable::axis_radians(int&)"
-#define G_SCALE                      "GCTAResponseTable::scale(int&,double&)"
+#define G_SCALE                     "GCTAResponseTable::scale(int&, double&)"
 #define G_READ                         "GCTAResponseTable::read(GFitsTable*)"
 #define G_READ_COLNAMES       "GCTAResponseTable::read_colnames(GFitsTable*)"
 #define G_READ_AXES               "GCTAResponseTable::read_axes(GFitsTable*)"
@@ -256,7 +264,7 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
 
     // Optionally check that we have at least two dimensions
     #if defined(G_RANGE_CHECK)
-    if (num < 1) {
+    if (num < 2) {
         throw GCTAException::bad_rsp_table_dim(G_OPERATOR2, num, 2);
     }
     #endif
@@ -279,35 +287,35 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
     return result;
 }
 /***********************************************************************//**
- * @brief linear interpolation operator for 3D tables
+ * @brief Trilinear interpolation operator for 3D tables
  *
  * @param[in] arg1 Value for first axis.
  * @param[in] arg2 Value for second axis.
- * @param[in] arg3 Value for second axis.
- * @return Bilinearly interpolated response parameter vector.
+ * @param[in] arg3 Value for third axis.
+ * @return Trilinearly interpolated response parameter vector.
  *
  * @exception GCTAException::bad_rsp_table_dim
  *            Response table has less than one dimension.
  *
- * Evaluates all response parameters at a given pair of values for a
- * two-dimensional parameter vector. The evaluation is performed by a linear
- * interpolation of the vector. If the specified value lies outside the range
- * covered by the vector, the parameter is linearily extrapolated from using
- * the first (or last) two vector elements.
+ * Evaluates all response parameters at a given triplet of values for a
+ * three-dimensional parameter vector. The evaluation is performed by a
+ * tri-linear interpolation of the vector. If the specified value lies
+ * outside the range covered by the vector, the parameter is linearily
+ * extrapolated from using the first (or last) two vector elements.
  *
  * @todo Write down formula.
  ***************************************************************************/
 std::vector<double> GCTAResponseTable::operator()(const double& arg1,
-						  const double& arg2,
+                                                  const double& arg2,
                                                   const double& arg3) const
 {
     // Get parameter vector size
     int num = m_colname_par.size();
 
-    // Optionally check that we have at least two dimensions
+    // Optionally check that we have at least three dimensions
     #if defined(G_RANGE_CHECK)
-    if (num < 1) {
-        throw GCTAException::bad_rsp_table_dim(G_OPERATOR2, num, 2);
+    if (num < 3) {
+        throw GCTAException::bad_rsp_table_dim(G_OPERATOR3, num, 3);
     }
     #endif
     
@@ -357,7 +365,7 @@ double GCTAResponseTable::operator()(const int& index, const double& arg) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OPERATOR3, index, size()-1);
+        throw GException::out_of_range(G_INX_OPERATOR1, index, size()-1);
     }
     #endif
     
@@ -398,7 +406,7 @@ double GCTAResponseTable::operator()(const int& index, const double& arg1,
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OPERATOR4, index, size()-1);
+        throw GException::out_of_range(G_INX_OPERATOR2, index, size()-1);
     }
     #endif
 
@@ -415,33 +423,34 @@ double GCTAResponseTable::operator()(const int& index, const double& arg1,
     return result;
 }
 /***********************************************************************//**
- * @brief Bilinear interpolation operator for 3D tables
+ * @brief Trilinear interpolation operator for 3D tables
  *
  * @param[in] index Table index [0,...,size()-1].
  * @param[in] arg1 Value for first axis.
  * @param[in] arg2 Value for second axis.
  * @param[in] arg3 Value for second axis.
- * @return Bilinearly interpolated response parameter vector.
+ * @return Trilinearly interpolated response parameter vector.
  *
  * @exception GCTAException::bad_rsp_table_dim
  *            Response table has less than one dimension.
  *
- * Evaluates all response parameters at a given pair of values for a
- * two-dimensional parameter vector. The evaluation is performed by a linear
- * interpolation of the vector. If the specified value lies outside the range
- * covered by the vector, the parameter is linearily extrapolated from using
- * the first (or last) two vector elements.
+ * Evaluates all response parameters at a given triplet of values for a
+ * three-dimensional parameter vector. The evaluation is performed by a
+ * trilinear interpolation of the vector. If the specified value lies outside
+ * the range covered by the vector, the parameter is linearily extrapolated
+ * from using the first (or last) two vector elements.
  *
  * @todo Write down formula.
  ***************************************************************************/
-double GCTAResponseTable::operator()(const int& index, const double& arg1, 
-				     const double& arg2,
+double GCTAResponseTable::operator()(const int&    index,
+                                     const double& arg1, 
+                                     const double& arg2,
                                      const double& arg3) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OPERATOR4, index, size()-1);
+        throw GException::out_of_range(G_INX_OPERATOR3, index, size()-1);
     }
     #endif
 
@@ -457,8 +466,6 @@ double GCTAResponseTable::operator()(const int& index, const double& arg1,
                     m_wgt6 * m_pars[index][m_inx6] +
                     m_wgt7 * m_pars[index][m_inx7] +
                     m_wgt8 * m_pars[index][m_inx8];
-
-
 
     // Return result
     return result;
@@ -527,6 +534,81 @@ int GCTAResponseTable::axis(const int& index) const
 
     // Return axis length
     return (m_axis_lo[index].size());
+}
+
+
+/***********************************************************************//**
+ * @brief Return axis lower boundary unit
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return Unit of lower boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the unit of the lower boundary for the specified axis.
+ ***************************************************************************/
+std::string GCTAResponseTable::axis_lo_unit(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_units_lo[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return axis upper boundary unit
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return Unit of upper boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the unit of the upper boundary for the specified axis.
+ ***************************************************************************/
+std::string GCTAResponseTable::axis_hi_unit(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_units_hi[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter unit
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Unit of parameter.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the unit of the parameter for the specified index.
+ ***************************************************************************/
+std::string GCTAResponseTable::unit(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_UNIT, index, size()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_units_par[index]);
 }
 
 
@@ -838,9 +920,17 @@ std::string GCTAResponseTable::print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("Axis " +
                           gammalib::str(i)));
             result.append(gammalib::str(axis(i)));
-            result.append(" ["+m_colname_lo[i]);
+            result.append(" (");
+            result.append(m_colname_lo[i]);
+            if (!m_units_lo[i].empty()) {
+                result.append(" ["+m_units_lo[i]+"]");
+            }
             result.append(", ");
-            result.append(m_colname_hi[i]+"]");
+            result.append(m_colname_hi[i]);
+            if (!m_units_hi[i].empty()) {
+                result.append(" ["+m_units_hi[i]+"]");
+            }
+            result.append(")");
         }
 
         // Append parameter information
@@ -848,6 +938,9 @@ std::string GCTAResponseTable::print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("Parameter " +
                           gammalib::str(i)));
             result.append(m_colname_par[i]);
+            if (!m_units_par[i].empty()) {
+                result.append(" ["+m_units_par[i]+"]");
+            }
         }
 
     } // endif: chatter was not silent
@@ -879,6 +972,9 @@ void GCTAResponseTable::init_members(void)
     m_colname_par.clear();
     m_axis_lo.clear();
     m_axis_hi.clear();
+    m_units_lo.clear();
+    m_units_hi.clear();
+    m_units_par.clear();
     m_axis_nodes.clear();
     m_pars.clear();
 
@@ -891,10 +987,18 @@ void GCTAResponseTable::init_members(void)
     m_inx2      = 0;
     m_inx3      = 0;
     m_inx4      = 0;
+    m_inx5      = 0;
+    m_inx6      = 0;
+    m_inx7      = 0;
+    m_inx8      = 0;
     m_wgt1      = 0.0;
     m_wgt2      = 0.0;
     m_wgt3      = 0.0;
     m_wgt4      = 0.0;
+    m_wgt5      = 0.0;
+    m_wgt6      = 0.0;
+    m_wgt7      = 0.0;
+    m_wgt8      = 0.0;
 
     // Return
     return;
@@ -919,6 +1023,9 @@ void GCTAResponseTable::copy_members(const GCTAResponseTable& table)
     m_colname_par = table.m_colname_par;
     m_axis_lo     = table.m_axis_lo;
     m_axis_hi     = table.m_axis_hi;
+    m_units_lo    = table.m_units_lo;
+    m_units_hi    = table.m_units_hi;
+    m_units_par   = table.m_units_par;
     m_axis_nodes  = table.m_axis_nodes;
     m_pars        = table.m_pars;
 
@@ -931,10 +1038,18 @@ void GCTAResponseTable::copy_members(const GCTAResponseTable& table)
     m_inx2      = table.m_inx2;
     m_inx3      = table.m_inx3;
     m_inx4      = table.m_inx4;
+    m_inx5      = table.m_inx5;
+    m_inx6      = table.m_inx6;
+    m_inx7      = table.m_inx7;
+    m_inx8      = table.m_inx8;
     m_wgt1      = table.m_wgt1;
     m_wgt2      = table.m_wgt2;
     m_wgt3      = table.m_wgt3;
     m_wgt4      = table.m_wgt4;
+    m_wgt5      = table.m_wgt5;
+    m_wgt6      = table.m_wgt6;
+    m_wgt7      = table.m_wgt7;
+    m_wgt8      = table.m_wgt8;
 
     // Return
     return;
@@ -1004,7 +1119,7 @@ void GCTAResponseTable::read_colnames(const GFitsTable& hdu)
     // Extract column names for all axes
     for (int i = 0; i < hdu.ncols(); ++i) {
 
-        // Get column name
+        // Get column name and unit
         std::string colname = hdu[i]->name();
 
         // If we search for a "_LO" column, check if we have one. If one
@@ -1082,7 +1197,7 @@ void GCTAResponseTable::read_colnames(const GFitsTable& hdu)
             }
         }
 
-    } // endfor: looped over all column names
+    } // endfor: looped over all columns
 
     // Store number of axes
     m_naxes = m_colname_lo.size();
@@ -1165,6 +1280,10 @@ void GCTAResponseTable::read_axes(const GFitsTable& hdu)
         m_axis_lo.push_back(axis_lo);
         m_axis_hi.push_back(axis_hi);
 
+        // Push units on storage
+        m_units_lo.push_back(col_lo->unit());
+        m_units_hi.push_back(col_hi->unit());
+
         // Create node array
         m_axis_nodes.push_back(GNodeArray(axis_nodes));
 
@@ -1233,6 +1352,9 @@ void GCTAResponseTable::read_pars(const GFitsTable& hdu)
 
         // Push cube into storage
         m_pars.push_back(pars);
+
+        // Push units on storage
+        m_units_par.push_back(col->unit());
 
     } // endfor: looped over all parameter cubes
 
@@ -1332,7 +1454,8 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2) const
  *
  * @todo Makes GNodeArray::set_value method const and use mutable members
  ***************************************************************************/
-void GCTAResponseTable::update(const double& arg1, const double& arg2, const double& arg3) const
+void GCTAResponseTable::update(const double& arg1, const double& arg2,
+                               const double& arg3) const
 {
     // Get pointers to node arrays (circumvent const correctness)
     GNodeArray* nodes1 = const_cast<GNodeArray*>(&(m_axis_nodes[0]));
@@ -1344,17 +1467,15 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2, const dou
     nodes2->set_value(arg2);
     nodes3->set_value(arg3);
 
-    //std::cout<<"X="<<arg1<<" "<<nodes1->inx_left()<<" "<<nodes1->inx_right() <<std::endl;
     // Compute offsets
-    int size1        = axis(0);
-    int size2        = axis(1);
+    int size1          = axis(0);
+    int size2          = axis(1);
     int offset_left_2  = nodes2->inx_left()  * size1;
     int offset_right_2 = nodes2->inx_right() * size1;
-
     int offset_left_3  = nodes3->inx_left()  * size1 * size2;
     int offset_right_3 = nodes3->inx_right() * size1 * size2;
 
-    // Set indices for bi-linear interpolation
+    // Set indices for tri-linear interpolation
     m_inx1 = nodes1->inx_left()  + offset_left_2  + offset_left_3 ;
     m_inx2 = nodes1->inx_left()  + offset_left_2  + offset_right_3;
     m_inx3 = nodes1->inx_left()  + offset_right_2 + offset_left_3 ;
@@ -1364,15 +1485,15 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2, const dou
     m_inx7 = nodes1->inx_right() + offset_right_2 + offset_left_3 ;
     m_inx8 = nodes1->inx_right() + offset_right_2 + offset_right_3;
 
-    // Set weighting factors for bi-linear interpolation
-    m_wgt1 = nodes1->wgt_left()  * nodes2->wgt_left() *  nodes3->wgt_left()  ;
-    m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_left() *  nodes3->wgt_right() ;
-    m_wgt3 = nodes1->wgt_left()  * nodes2->wgt_right()*  nodes3->wgt_left() ;
-    m_wgt4 = nodes1->wgt_left()  * nodes2->wgt_right()*  nodes3->wgt_right();
-    m_wgt5 = nodes1->wgt_right() * nodes2->wgt_left() *  nodes3->wgt_left() ;
-    m_wgt6 = nodes1->wgt_right() * nodes2->wgt_left() *  nodes3->wgt_right();
-    m_wgt7 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_left() ;
-    m_wgt8 = nodes1->wgt_right() * nodes2->wgt_right()*  nodes3->wgt_right();
+    // Set weighting factors for tri-linear interpolation
+    m_wgt1 = nodes1->wgt_left()  * nodes2->wgt_left()  *  nodes3->wgt_left();
+    m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_left()  *  nodes3->wgt_right();
+    m_wgt3 = nodes1->wgt_left()  * nodes2->wgt_right() *  nodes3->wgt_left();
+    m_wgt4 = nodes1->wgt_left()  * nodes2->wgt_right() *  nodes3->wgt_right();
+    m_wgt5 = nodes1->wgt_right() * nodes2->wgt_left()  *  nodes3->wgt_left();
+    m_wgt6 = nodes1->wgt_right() * nodes2->wgt_left()  *  nodes3->wgt_right();
+    m_wgt7 = nodes1->wgt_right() * nodes2->wgt_right() *  nodes3->wgt_left();
+    m_wgt8 = nodes1->wgt_right() * nodes2->wgt_right() *  nodes3->wgt_right();
 
     // Return
     return;

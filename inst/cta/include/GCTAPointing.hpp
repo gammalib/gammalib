@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.hpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,13 +63,12 @@ public:
     virtual void           clear(void);
     virtual GCTAPointing*  clone(void) const;
     virtual const GSkyDir& dir(void) const;
-
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void           dir(const GSkyDir& dir);
-    const GCTAInstDir& instdir(const GSkyDir& skydir) const;
-    const GSkyDir& skydir(const GCTAInstDir& instdir) const;
+    GCTAInstDir    instdir(const GSkyDir& skydir) const;
+    GSkyDir        skydir(const GCTAInstDir& instdir) const;
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;

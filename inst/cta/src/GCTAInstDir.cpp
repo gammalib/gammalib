@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAInstDir.cpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -156,7 +156,7 @@ GCTAInstDir& GCTAInstDir::operator=(const GCTAInstDir& dir)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear CTA instrument direction
  ***************************************************************************/
 void GCTAInstDir::clear(void)
 {
@@ -174,7 +174,9 @@ void GCTAInstDir::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief CTA instrument direction
+ *
+ * @return Pointer to deep copy of CTA instrument direction.
  ***************************************************************************/
 GCTAInstDir* GCTAInstDir::clone(void) const
 {
@@ -236,7 +238,7 @@ void GCTAInstDir::init_members(void)
 void GCTAInstDir::copy_members(const GCTAInstDir& dir)
 {
     // Copy attributes
-    m_dir = dir.m_dir;
+    m_dir  = dir.m_dir;
     m_detx = dir.m_detx;
     m_dety = dir.m_dety;
 

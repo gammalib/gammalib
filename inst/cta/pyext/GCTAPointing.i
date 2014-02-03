@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAPointing.i  -  CTA pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2014 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,8 +38,9 @@ class GCTAPointing {
 public:
     // Constructors and destructors
     GCTAPointing(void);
+    explicit GCTAPointing(const GSkyDir& dir);
     GCTAPointing(const GCTAPointing& pnt);
-    ~GCTAPointing(void);
+    virtual ~GCTAPointing(void);
 
     // Implemented pure virtual methods
     virtual void           clear(void);
@@ -48,8 +49,8 @@ public:
 
     // Other methods
     void           dir(const GSkyDir& dir);
-    const GCTAInstDir& instdir(const GSkyDir& skydir) const;
-    const GSkyDir& skydir(const GCTAInstDir& instdir) const;
+    GCTAInstDir    instdir(const GSkyDir& skydir) const;
+    GSkyDir        skydir(const GCTAInstDir& instdir) const;
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;

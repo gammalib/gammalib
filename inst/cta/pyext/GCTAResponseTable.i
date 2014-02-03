@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAResponseTable.i - CTA response table class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,11 +50,16 @@ public:
     virtual ~GCTAResponseTable(void);
 
     // Interpolation operators
-    std::vector<double> operator()(const double& arg) const;
-    std::vector<double> operator()(const double& arg1, const double& arg2) const;
-    double              operator()(const int& index, const double& arg) const;
-    double              operator()(const int& index, const double& arg1,
-                                   const double& arg2) const;
+  std::vector<double> operator()(const double& arg) const;
+  std::vector<double> operator()(const double& arg1, const double& arg2) const;
+  std::vector<double> operator()(const double& arg1, const double& arg2,
+                                 const double& arg3) const;
+  double              operator()(const int& index, const double& arg) const;
+  double              operator()(const int& index, const double& arg1,
+				                                   const double& arg2) const;
+  double              operator()(const int& index, const double& arg1,
+				                                   const double& arg2,
+                                                   const double& arg3) const;
 
     // Methods
     void               clear(void);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelBackground - generic CTA background model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,10 +40,15 @@ class GCTAModelBackground : public GModelData {
     // Constructors and destructors
     GCTAModelBackground(void);
     explicit GCTAModelBackground(const GXmlElement& xml);
-    explicit GCTAModelBackground(const GModelSpatial& spatial,
-                                       const GModelSpectral& spectral);
+    GCTAModelBackground(const GModelSpatial& spatial,
+                        const GModelSpectral& spectral);
     GCTAModelBackground(const GCTAModelBackground& model);
-    GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spec, const int& nx_sky = -999, const int& ny_sky = -999, const int& n_energy = -999 );
+    GCTAModelBackground(const GCTAObservation& obs,
+                        const std::string&     filename,
+                        const GModelSpectral&  spectral,
+                        const int&             nx_sky   = 0,
+                        const int&             ny_sky   = 0,
+                        const int&             n_energy = 0);
     virtual ~GCTAModelBackground(void);
     
     // Implemented pure virtual methods
@@ -62,9 +67,9 @@ class GCTAModelBackground : public GModelData {
     virtual void                       write(GXmlElement& xml) const;
     
     // Other methods
-    GModelSpatial* spatial(void)   const;
-    GModelSpectral*  spectral(void) const;
-    GModelTemporal*  temporal(void) const;
+    GModelSpatial*  spatial(void)   const;
+    GModelSpectral* spectral(void) const;
+    GModelTemporal* temporal(void) const;
 };
 
 /***********************************************************************//**

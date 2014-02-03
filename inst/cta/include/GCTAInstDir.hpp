@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAInstDir.hpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,12 +62,10 @@ public:
     void           dir(const GSkyDir& dir);
     GSkyDir&       dir(void);
     const GSkyDir& dir(void) const;
-    void detx(const double &x){m_detx = x;};
-    void dety(const double &y){m_dety = y;};
-
-    const double& detx(void) const {return m_detx;};
-    const double& dety(void) const {return m_dety;};
-
+    void           detx(const double &x);
+    void           dety(const double &y);
+    const double&  detx(void) const;
+    const double&  dety(void) const;
 
 protected:
     // Protected methods
@@ -77,8 +75,8 @@ protected:
 
     // Data members
     GSkyDir m_dir;  //!< Observed incident direction of event
-    double m_detx; //!< Instrument coordinate X
-    double m_dety; //!< Instrument coordinate Y
+    double m_detx;  //!< Instrument coordinate X
+    double m_dety;  //!< Instrument coordinate Y
 
 
 
@@ -86,7 +84,7 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Returns reference to sky direction
+ * @brief Return reference to sky direction
  *
  * @return Reference to sky direction.
  *
@@ -100,7 +98,7 @@ GSkyDir& GCTAInstDir::dir(void)
 
 
 /***********************************************************************//**
- * @brief Returns reference to sky direction (const version)
+ * @brief Return reference to sky direction (const version)
  *
  * @return Reference to sky direction.
  *
@@ -124,6 +122,64 @@ inline
 void GCTAInstDir::dir(const GSkyDir& dir)
 {
     m_dir = dir;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to DETX coordinate
+ *
+ * @return Reference to DETX coordinate.
+ *
+ * Returns reference DETX coordinate.
+ ***************************************************************************/
+inline
+const double& GCTAInstDir::detx(void) const
+{
+    return (m_detx);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to DETY coordinate
+ *
+ * @return Reference to DETY coordinate.
+ *
+ * Returns reference DETY coordinate.
+ ***************************************************************************/
+inline
+const double& GCTAInstDir::dety(void) const
+{
+    return (m_dety);
+}
+
+
+/***********************************************************************//**
+ * @brief Set DETX coordinate
+ *
+ * @param[in] x DETX coordinate.
+ *
+ * Set DETX coordinate.
+ ***************************************************************************/
+inline
+void GCTAInstDir::detx(const double &x)
+{
+    m_detx = x;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set DETY coordinate
+ *
+ * @param[in] y DETY coordinate.
+ *
+ * Set DETY coordinate.
+ ***************************************************************************/
+inline
+void GCTAInstDir::dety(const double &y)
+{
+    m_dety = y;
     return;
 }
 

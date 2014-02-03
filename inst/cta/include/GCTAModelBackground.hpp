@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelBackground.hpp - Generic CTA background model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,10 +56,15 @@ public:
     // Constructors and destructors
 	GCTAModelBackground(void);
     explicit GCTAModelBackground(const GXmlElement& xml);
-    explicit GCTAModelBackground(const GModelSpatial& spatial,
-                                 const GModelSpectral& spectral);
+    GCTAModelBackground(const GModelSpatial& spatial,
+                        const GModelSpectral& spectral);
     GCTAModelBackground(const GCTAModelBackground& model);
-    GCTAModelBackground(const GCTAObservation& obs, const std::string& filename, const GModelSpectral& spec, const int& nx_sky = -999, const int& ny_sky = -999, const int& n_energy = -999 );
+    GCTAModelBackground(const GCTAObservation& obs,
+                        const std::string&     filename,
+                        const GModelSpectral&  spectral,
+                        const int&             nx_sky   = 0,
+                        const int&             ny_sky   = 0,
+                        const int&             n_energy = 0);
     virtual ~GCTAModelBackground(void);
 
     // Operators
@@ -89,9 +94,12 @@ public:
 
 protected:
     // Protected methods
-    //void            set_spatial(const GCTAObservation& obs, const std::string& filename);
-  void            set_spatial(const GCTAObservation& obs, const std::string& filename, const int& nx_sky = -999, const int& ny_sky = -999, const int& ne_user = -999 );
-  void            init_members(void);
+    void            set_spatial(const GCTAObservation& obs,
+                                const std::string& filename,
+                                const int& nx_sky   = 0,
+                                const int& ny_sky   = 0,
+                                const int& n_energy = 0);
+    void            init_members(void);
     void            copy_members(const GCTAModelBackground& model);
     void            free_members(void);
     void            set_pointers(void);

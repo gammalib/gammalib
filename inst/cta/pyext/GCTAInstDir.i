@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAInstDir.i - CTA instrument direction class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,12 +48,13 @@ public:
     GCTAInstDir* clone(void) const;
 
     // Other methods
-    void     dir(const GSkyDir& dir);
-    GSkyDir& dir(void);
-    void detx(const double& x);
-    void dety(const double& y);
-    const double& detx(void);
-    const double& dety(void);
+    void           dir(const GSkyDir& dir);
+    GSkyDir&       dir(void);
+    const GSkyDir& dir(void) const;
+    void           detx(const double &x);
+    void           dety(const double &y);
+    const double&  detx(void) const;
+    const double&  dety(void) const;
 };
 
 
