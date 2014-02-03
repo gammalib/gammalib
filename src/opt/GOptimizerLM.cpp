@@ -458,7 +458,7 @@ std::string GOptimizerLM::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Optimized function value"));
-        result.append(gammalib::str(m_value));
+        result.append(gammalib::str(m_value, 3));
         result.append("\n"+gammalib::parformat("Absolute precision"));
         result.append(gammalib::str(m_eps));
 
