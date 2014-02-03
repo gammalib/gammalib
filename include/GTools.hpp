@@ -57,8 +57,8 @@ namespace gammalib {
     std::string              str(const int& value);
     std::string              str(const long int& value);
     std::string              str(const long long int& value);
-    std::string              str(const float& value);
-    std::string              str(const double& value);
+    std::string              str(const float& value, const int& precision = 0);
+    std::string              str(const double& value, const int& precision = 0);
     char*                    tochar(const std::string& arg);
     short                    toshort(const std::string& arg);
     unsigned short           toushort(const std::string& arg);
