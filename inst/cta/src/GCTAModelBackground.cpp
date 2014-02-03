@@ -1010,6 +1010,7 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  * response table.
  *
  * @todo Document method.
+ * @todo Throw an exception if nx, ny or n_energy is zero.
  ***************************************************************************/
 void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
                                       const std::string&     filename,
@@ -1048,11 +1049,21 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
         ny = background.axis(1);
 	}
 
-	// Retrieve spatial bounds from rsponse table
+	// Retrieve spatial bounds from response table
 	double xlow  = background.axis_lo(0,0);
 	double xhigh = background.axis_hi(0,background.axis(0)-1);
 	double ylow  = background.axis_lo(1,0);
 	double yhigh = background.axis_hi(1,background.axis(1)-1);
+
+    // Retrieve energy units ("TeV" if undefined)
+    std::string unit_lo("TeV");
+    std::string unit_hi("TeV");
+    if (!background.axis_lo_unit(2).empty()) {
+        unit_lo = background.axis_lo_unit(2);
+    }
+    if (!background.axis_hi_unit(2).empty()) {
+        unit_hi = background.axis_hi_unit(2);
+    }
 
 	// Create energies as the log means of the energy bins
     int       n_energies;
@@ -1063,8 +1074,8 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
         n_energies = n_energy;
 
         // Create logarthmic energy boundaries
-        GEnergy  emin(background.axis_lo(2,0), "TeV");
-        GEnergy  emax(background.axis_hi(2,background.axis(2)-1), "TeV");
+        GEnergy  emin(background.axis_lo(2,0), unit_lo);
+        GEnergy  emax(background.axis_hi(2,background.axis(2)-1), unit_hi);
         GEbounds ebounds(n_energies, emin, emax);
 
         // Extract log mean energies
@@ -1080,8 +1091,9 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
 
         // Loop over energy bins
         for (int i = 0; i < n_energies; ++i) {
-            energies.append(gammalib::elogmean(GEnergy(background.axis_lo(2,i),"TeV"),
-                                               GEnergy(background.axis_hi(2,i),"TeV")));
+            GEnergy  emin(background.axis_lo(2,0), unit_lo);
+            GEnergy  emax(background.axis_hi(2,background.axis(2)-1), unit_hi);
+            energies.append(gammalib::elogmean(emin, emax));
         }
 
     } // endelse: used energy bins of table
@@ -1102,7 +1114,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
                                   n_energies);
 
 	// Loop over skymap pixel
-    for(int i = 0; i < cube.npix(); ++i) {
+    for (int i = 0; i < cube.npix(); ++i) {
 
     	// Get sky direction from pixel number
     	GSkyDir pix_dir = cube.inx2dir(i);
