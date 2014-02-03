@@ -32,6 +32,7 @@
 #include <string>
 #include <cmath>
 #include <cfloat>
+#include "GEnergy.hpp"
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -89,6 +90,7 @@ namespace gammalib {
                                               const double& emax,
                                               const double& epivot,
                                               const double& gamma);
+    GEnergy                  elogmean(const GEnergy& a, const GEnergy& b);
     bool                     file_exists(const std::string& filename);
     bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);

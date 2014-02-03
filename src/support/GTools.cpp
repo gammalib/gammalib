@@ -834,6 +834,30 @@ double gammalib::plaw_energy_flux(const double& emin, const double& emax,
 
 
 /***********************************************************************//**
+ * @brief Computes log mean energy
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return Log mean energy.
+ *
+ * Computes the logarithmic mean energy
+ * \f$10^{0.5 * (\log E_{\rm a} + \log E_{\rm b})}\f$
+ * for two energies.
+ ***************************************************************************/
+GEnergy gammalib::elogmean(const GEnergy& a, const GEnergy& b)
+{
+    // Compute logarithmic mean energy
+    GEnergy elogmean;
+    double  eloga = a.log10MeV();
+    double  elogb = b.log10MeV();
+    elogmean.MeV(std::pow(10.0, 0.5 * (eloga + elogb)));
+
+    // Return
+    return elogmean;
+}
+
+
+/***********************************************************************//**
  * @brief Checks if file exists
  *
  * @param[in] filename File name.
