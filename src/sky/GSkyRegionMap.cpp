@@ -440,93 +440,46 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
     return inmap;
 }
 
-
-/***********************************************************************//**
- * @brief Checks if region is fully contained within this region
- *
- * @param[in] reg Sky region.
- *
- * @exception GException::feature_not_implemented
- *            Regions differ in type.
- ***************************************************************************/
-/*bool GSkyRegionMap::contains(const GSkyRegion& reg) const
-{
-	// Initialise return value
-	bool fully_inside = false;
-
-	// If other region is sky map region use a simple way to calculate
-	if (reg.type() == "Circle") {
-
-		// Create circular region from reg
-		const GSkyRegionCircle* regcirc =
-              dynamic_cast<const GSkyRegionCircle*>(&reg);
-
-		// Calculate angular distance between the centres
-		double ang_dist = m_centre.dist_deg(regcirc->centre());
-
-		// Check if the region is contained in this
-		if ((ang_dist + regcirc->radius()) <= m_radius) {
-			fully_inside = true;
-		}
-        
-	}
-    
-    // ... otherwise throw an exception
-	else {
-		throw GException::feature_not_implemented(G_CONTAINS,
-              "Cannot compare two different region types yet");
-	}
-    
-	// Return value
-	return fully_inside;
-}
-*/
-
 /***********************************************************************//**
  * @brief Checks if region is overlapping with this region
  *
  * @param[in] reg Sky region.
  *
+ * @TODO: region sky map overlap with ring or circle region
+ *
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
  ***************************************************************************/
-bool GSkyRegionMap::overlaps(const GSkyRegion& reg) const
+bool GSkyRegionMap::overlaps(const GSkyDir& dir) const
 {
 	// Initialise return value
 	bool overlap = false;
 
-	// If other region is sky map region use a simple way to calculate
-	if (reg.type() == "Map") {
-
-		// Create circular region from reg
-		const GSkyRegionMap* regregionmap =
-              dynamic_cast<const GSkyRegionMap*>(&reg);
-              
-        //double ang_dist = m_map.dist_deg(regregionmap->map());
-
-
-		// Check if the sky region map and circle overlap
-	/*	for (int i =0; i < m_map.npix(); ++i)  {
-		GSkyPixel pix=m_map.inx2pix(i);
-		std::cout << pix.size() << std::endl;
-		if (num_pix_map[i] == ){
-		    num_pix_map[i] = i;
-		}
-	}
-		if () {
-			overlap = true;
-		}
-     */   
-	}
-
-    // ... otherwise throw an exception
-	else {
-		throw GException::feature_not_implemented(G_OVERLAPS,
-              "Cannot compare two different region types yet");
-	}
-
+    // Convert sky direction into sky pixel
+    GSkyPixel pixel = dir2pix(dir);
+    
+    // Return location flag
+    return (contains(pixel));
+    
+/*  GSkyDir dir;
+    for (int i=0; i<360; i++){
+        for (int j=0; j<90; j++){
+        
+           const GSkyDir* regdir =
+                 dynamic_cast<const GSkyDir*>(&dir);
+           double direction = dir->radec_deg(i,j);
+        
+           if (reg->contains(dir)) {
+               overlap = true;
+           }
+           else {
+               overlap = false;
+           }
+        }  
+    }
 	// Return value
 	return overlap;
+	*/
 }
 
 

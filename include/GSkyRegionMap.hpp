@@ -73,6 +73,7 @@ public:
     bool              contains(const GSkyRegion& reg) const;
     bool              contains(const GSkyPixel& pixel) const;
     bool              overlaps(const GSkyRegion& reg) const;
+    bool              overlaps(const GSkyDir& dir) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
     std::string       write(void) const;
     virtual void      read(const std::string& regstring);
