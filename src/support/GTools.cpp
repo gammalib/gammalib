@@ -374,16 +374,24 @@ std::string gammalib::str(const long long int& value)
     return s_value.str();
 }
 
-
+  
 /***********************************************************************//**
  * @brief Convert single precision value into string
  *
  * @param[in] value Single precision value to be converted into string.
+ * @param[in] precision Floating point precision (optional).
  ***************************************************************************/
-std::string gammalib::str(const float& value)
+std::string gammalib::str(const float& value, const int& precision)
 {
     std::ostringstream s_value;
+    if (precision > 0) {
+        s_value.precision(precision);
+        s_value.setf(std::ios::fixed, std::ios::floatfield);
+    }
     s_value << value;
+    if (precision > 0) {
+        s_value.unsetf(std::ios::floatfield);
+    }
     return s_value.str();
 }
 
@@ -392,11 +400,19 @@ std::string gammalib::str(const float& value)
  * @brief Convert double precision value into string
  *
  * @param[in] value Double precision value to be converted into string.
+ * @param[in] precision Floating point precision (optional).
  ***************************************************************************/
-std::string gammalib::str(const double& value)
+std::string gammalib::str(const double& value, const int& precision)
 {
     std::ostringstream s_value;
+    if (precision > 0) {
+        s_value.precision(precision);
+        s_value.setf(std::ios::fixed, std::ios::floatfield);
+    }
     s_value << value;
+    if (precision > 0) {
+        s_value.unsetf(std::ios::floatfield);
+    }
     return s_value.str();
 }
 

@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [0.8.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [0.8.1], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects])
