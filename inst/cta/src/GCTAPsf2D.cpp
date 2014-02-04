@@ -317,10 +317,10 @@ double GCTAPsf2D::mc(GRan&         ran,
     double sum3  = m_sigma3 * m_norm3;
     double sum   = sum1 + sum2 + sum3;
     double u     = ran.uniform() * sum;
-    if (u >= sum2) {
+    if (sum2 > 0.0 && u >= sum2) {
         sigma = m_sigma3;
     }
-    else if (u >= sum1) {
+    else if (sum1 > 0.0 && u >= sum1) {
         sigma = m_sigma2;
     }
 
@@ -383,12 +383,27 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
+        // Compute energy boundaries in TeV
+        double emin = m_psf.axis_lo(0,0);
+        double emax = m_psf.axis_hi(0,m_psf.axis(0)-1);
+
+        // Compute offset angle boundaries in deg
+        double omin = m_psf.axis_lo(1,0);
+        double omax = m_psf.axis_hi(1,m_psf.axis(1)-1);
+
         // Append header
         result.append("=== GCTAPsf2D ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
-        result.append("\n"+m_psf.print(chatter));
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(m_psf.axis(0)));
+        result.append("\n"+gammalib::parformat("Number of offset bins") +
+                      gammalib::str(m_psf.axis(1)));
+        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Offset angle range"));
+        result.append(gammalib::str(omin)+" - "+gammalib::str(omax)+" deg");
 
     } // endif: chatter was not silent
 
