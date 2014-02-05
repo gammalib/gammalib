@@ -985,7 +985,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
 
         // Integrate over zenith angle
         GIntegral integral(&integrand);
-        integral.eps(m_eps);
+        integral.eps(1.0e-5);
         irf = integral.romb(rho_min, rho_max);
 
         // Compile option: Check for NaN/Inf
@@ -1153,7 +1153,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
 
         // Integrate over zenith angle
         GIntegral integral(&integrand);
-        integral.eps(m_eps);
+        integral.eps(1.0e-5);
         irf = integral.romb(rho_min, rho_max);
 
         // Compile option: Check for NaN/Inf
@@ -1496,6 +1496,7 @@ double GCTAResponse::npred_radial(const GSource& source,
 
         // Integrate over theta
         GIntegral integral(&integrand);
+        integral.eps(1.0e-5);
         npred = integral.romb(rho_min, rho_max);
 
         // Compile option: Show integration results
@@ -1656,6 +1657,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
 
         // Integrate over theta
         GIntegral integral(&integrand);
+        integral.eps(1.0e-5);
         npred = integral.romb(rho_min, rho_max);
 
         // Compile option: Show integration results
@@ -1822,7 +1824,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 
             // Integrate over theta
             GIntegral integral(&integrand);
-            integral.eps(1.0e-4);
+            integral.eps(1.0e-5);
             npred = integral.romb(0.0, roi_psf_radius);
 
             // Compile option: Show integration results
@@ -2068,7 +2070,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 
             // Setup integration
             GIntegral integral(&integrand);
-            integral.eps(m_eps);
+            integral.eps(1.0e-5);
 
             // Radially integrate PSF. In case that the radial integration
             // region is small, we do the integration using a simple
