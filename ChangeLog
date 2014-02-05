@@ -1,4 +1,4 @@
-2014-02-04  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
         
         * Bug fix Version 0.8.1 released
         ================================
@@ -12,6 +12,7 @@
         Track results of Python unit tests (#1119)
         Clean-up calibration database interface (#1102)
         Correct 2D PSF Monte-Carlo simulations (#1128)
+        Correct deadtime computation for CTA non point source response (#1133)
 
 
 2014-01-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

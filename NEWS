@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-4 February 2014
+5 February 2014
 
 
 1. Introduction
@@ -133,6 +133,9 @@ model component.
 The GCTAPsf2D::mc() method did not sample the PSF correctly in case that
 the sigma and normalization parameters were zero for the second and/or
 third component. This has now been corrected for.
+
+The deadtime correction had been applied twice in the computation of the
+non point source Npred computations. This has now been corrected for.
 
 
 21. COMPTEL interface
