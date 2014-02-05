@@ -136,13 +136,13 @@ public:
     GCTAResponse copy() {
         return (*self);
     }
-    GCTAResponse* cta(GResponse* rsp) {
+    GCTAResponse(GResponse* rsp) {
         GCTAResponse* ptr = dynamic_cast<GCTAResponse*>(rsp);
         if (ptr != NULL) {
-            return ptr;
+            return (ptr->clone());
         }
         else {
-            throw GException::bad_type("cta(GResponse*)",
+            throw GException::bad_type("GCTAResponse(GResponse*)",
                                        "GResponse not of type GCTAResponse");
         }
     }
