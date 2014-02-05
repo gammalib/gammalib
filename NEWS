@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-01
 
 Author(s) : Juergen Knoedlseder
 
-31 January 2014
+4 February 2014
 
 
 1. Introduction
@@ -129,6 +129,10 @@ The GCTAModelBackground and GCTAModelRadialAcceptance classes now write
 the id attribute to the XML file in case that identifiers are specified.
 Furthermore, GCTAModelRadialAcceptance no longer write the temporal
 model component.
+
+The GCTAPsf2D::mc() method did not sample the PSF correctly in case that
+the sigma and normalization parameters were zero for the second and/or
+third component. This has now been corrected for.
 
 
 21. COMPTEL interface
