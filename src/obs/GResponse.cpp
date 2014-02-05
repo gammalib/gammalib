@@ -435,6 +435,9 @@ double GResponse::npred_radial(const GSource& source,
             GIntegral integral(&integrand);
             npred = integral.romb(theta_min, theta_max);
 
+            // Apply deadtime correction
+            npred *= obs.deadc(source.time());
+
             // Compile option: Show integration results
             #if defined(G_DEBUG_NPRED_RADIAL)
             std::cout << "GResponse::npred_radial:";
@@ -509,6 +512,9 @@ double GResponse::npred_elliptical(const GSource& source,
             // Integrate over theta
             GIntegral integral(&integrand);
             npred = integral.romb(theta_min, theta_max);
+
+            // Apply deadtime correction
+            npred *= obs.deadc(source.time());
 
             // Compile option: Show integration results
             #if defined(G_DEBUG_NPRED_ELLIPTICAL)
