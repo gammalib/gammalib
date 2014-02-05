@@ -1,15 +1,12 @@
 #! /usr/bin/env python
 # ==========================================================================
-# This script simulated the PSF distribution.
+# This script simulates the PSF distribution.
 #
-# Based on the MAGIC spectrum of the Crab nebula, and by assuming a powerlaw,
-# it will create a Monte Carlo sample of photons.
-#
-# If matplotlib is installed, the spectrum will be displayed on the screen.
+# If matplotlib is installed, the PSF will be displayed on the screen.
 #
 # --------------------------------------------------------------------------
 #
-# Copyright (C) 2013 Juergen Knoedlseder
+# Copyright (C) 2013-2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,47 +26,9 @@ from gammalib import *
 from math import *
 
 
-# ======================== #
-# Simulate CTA observation #
-# ======================== #
-def simulate(xmlname, e_min, e_max, area, duration):
-    """
-    Simulate CTA observation.
-    """
-    # Allocate MC parameters
-    dir  = GSkyDir()
-    emin = GEnergy()
-    emax = GEnergy()
-    tmin = GTime(0.0)
-    tmax = GTime(duration)
-
-    # Define MC parameters
-    dir.radec_deg(83.6331, 22.0145)
-    radius = 10.0
-    emin.TeV(e_min)
-    emax.TeV(e_max)
-
-    # Allocate random number generator
-    ran = GRan()
-
-    # Load models and extract first model
-    models = GModels(xmlname)
-    model = models[0]
-    print(model)
-
-    # Simulate photons
-    photons = model.mc(area, dir, radius, emin, emax, tmin, tmax, ran)
-
-    # Print photons
-    print(str(len(photons)) + " photons simulated.")
-
-    # Return photons
-    return photons
-
-
-# ======== #
-# Show PSF #
-# ======== #
+# ============ #
+# Simulate PSF #
+# ============ #
 def sim_psf(response, energy, r_max=0.8, rbins=1000, nmc=1000000):
     """
     Simulate PSF and show results using matplotlib (if available).
@@ -160,8 +119,8 @@ if __name__ == '__main__':
     print("****************")
 
     # Load response
-    rsp = GCTAResponse("irf_test.fits",
-                       "../caldb/data/cta/e/bcf/000002")
+    rsp = GCTAResponse("irf_file.fits",
+                       GCaldb("../caldb/data/cta/e/bcf/IFAE20120510_50h_King"))
 
     # Simulate PSF
     sim_psf(rsp, 1.0)
