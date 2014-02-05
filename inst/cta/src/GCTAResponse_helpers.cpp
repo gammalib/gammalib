@@ -966,8 +966,7 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
 
         // Integrate over phi
         GIntegral integral(&integrand);
-        //integral.eps(1.0e-4);
-        integral.eps(1.0e-5);
+        integral.eps(1.0e-4);
         npred = integral.romb(0.0, gammalib::twopi) * sin_theta;
 
         // Debug: Check for NaN
