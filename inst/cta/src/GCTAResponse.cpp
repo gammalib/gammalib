@@ -65,8 +65,7 @@
                                           " GEnergy&, GTime&, GObservation&)"
 #define G_NPRED             "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_MC            "GCTAResponse::mc(double&,GPhoton&,GPointing&,GRan&)"
-
+#define G_MC      "GCTAResponse::mc(double&, GPhoton&, GObservation&, GRan&)"
 #define G_IRF_RADIAL            "GCTAResponse::irf_radial(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_IRF_ELLIPTICAL    "GCTAResponse::irf_elliptical(GEvent&, GSource&,"\
@@ -472,6 +471,18 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
     // Compute limiting value
     double ulimite = effective_area / area;
+
+    // Warning if ulimite is larger than one
+    if (ulimite > 1.0) {
+        std::string msg = "Effective area "+
+                          gammalib::str(effective_area)+
+                          " cm2 is larger than simulation surface area "+
+                          gammalib::str(area)+
+                          " cm2 for photon energy "+
+                          gammalib::str(photon.energy().TeV())+
+                          " TeV. Simulations are inaccurate.";
+        gammalib::warning(G_MC, msg);
+    }
 
     // Continue only if event is detected
     if (ran.uniform() <= ulimite) {
@@ -1023,7 +1034,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
 
         // Integrate over zenith angle
         GIntegral integral(&integrand);
-        integral.eps(m_eps);
+        integral.eps(1.0e-5);
         irf = integral.romb(rho_min, rho_max);
 
         // Compile option: Check for NaN/Inf
@@ -1190,7 +1201,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
 
         // Integrate over zenith angle
         GIntegral integral(&integrand);
-        integral.eps(m_eps);
+        integral.eps(1.0e-5);
         irf = integral.romb(rho_min, rho_max);
 
         // Compile option: Check for NaN/Inf
@@ -1532,10 +1543,8 @@ double GCTAResponse::npred_radial(const GSource& source,
 
         // Integrate over theta
         GIntegral integral(&integrand);
+        integral.eps(1.0e-5);
         npred = integral.romb(rho_min, rho_max);
-
-        // Apply deadtime correction
-        npred *= obs.deadc(srcTime);
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_RADIAL)
@@ -1695,10 +1704,8 @@ double GCTAResponse::npred_elliptical(const GSource& source,
 
         // Integrate over theta
         GIntegral integral(&integrand);
+        integral.eps(1.0e-5);
         npred = integral.romb(rho_min, rho_max);
-
-        // Apply deadtime correction
-        npred *= obs.deadc(srcTime);
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_ELLIPTICAL)
@@ -1864,11 +1871,8 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 
             // Integrate over theta
             GIntegral integral(&integrand);
-            integral.eps(1.0e-4);
+            integral.eps(1.0e-5);
             npred = integral.romb(0.0, roi_psf_radius);
-
-            // Apply deadtime correction
-            npred *= obs.deadc(srcTime);
 
             // Compile option: Show integration results
             #if defined(G_DEBUG_NPRED_DIFFUSE)
@@ -2149,7 +2153,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 
             // Setup integration
             GIntegral integral(&integrand);
-            integral.eps(m_eps);
+            integral.eps(1.0e-5);
 
             // Radially integrate PSF. In case that the radial integration
             // region is small, we do the integration using a simple

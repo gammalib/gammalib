@@ -364,6 +364,7 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
 
         // Integrate over phi
         GIntegral integral(&integrand);
+        integral.eps(1.0e-5);
         npred = integral.romb(omega_min, omega_max) * sin_rho * model;
 
         // Debug: Check for NaN
@@ -668,6 +669,7 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
 
         // Integrate over phi
         GIntegral integral(&integrand);
+        integral.eps(1.0e-5);
         npred = integral.romb(omega_min, omega_max) * sin_rho;
 
         // Debug: Check for NaN
@@ -991,7 +993,7 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
 
         // Integrate over phi
         GIntegral integral(&integrand);
-        integral.eps(1.0e-4);
+        integral.eps(1.0e-5);
         npred = integral.romb(0.0, gammalib::twopi) * sin_theta;
 
         // Debug: Check for NaN
