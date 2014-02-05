@@ -1817,7 +1817,8 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 
             // Integrate over theta
             GIntegral integral(&integrand);
-            integral.eps(1.0e-4);
+            //integral.eps(1.0e-4);
+            integral.eps(1.0e-5);
             npred = integral.romb(0.0, roi_psf_radius);
 
             // Apply deadtime correction
