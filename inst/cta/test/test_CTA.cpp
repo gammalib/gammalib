@@ -414,7 +414,8 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     // Set reference value
     //double ref = 11212.26274; // npred_spec precision of 1e-6
     //const double ref = 11212.437464; // npred_spec precision of 1e-5
-    const double ref = 11212.4370702; // After GWcs::solidangle improvement
+    //const double ref = 11212.4370702; // After GWcs::solidangle improvement
+    const double ref = 12644.3391902; // After correcting for deadtime bug
 
     // Set parameters
     double src_ra  = 201.3651;
