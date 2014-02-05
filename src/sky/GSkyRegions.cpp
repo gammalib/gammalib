@@ -842,7 +842,7 @@ std::string GSkyRegions::print(const GChatter& chatter) const
 
  
 /***********************************************************************//**
- * @brief Tells if region overlaps one of the regions
+ * @brief Tells if region one of the regions
  *
  * @param[in] reg A sky region
  * @return True or False

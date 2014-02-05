@@ -86,6 +86,10 @@ GSkyRegionMap::GSkyRegionMap(const GSkyRegionMap& region)
 
 	// Compute solid angle
 	compute_solid_angle();
+	
+	// Get non-zero indices
+	std::vector<int> pix_array;
+	get_array_nonzero(pix_array);
 
     // Return
     return;
@@ -386,58 +390,70 @@ void GSkyRegionMap::read(const GFitsHDU& hdu)
 }
 */
 /***********************************************************************//**
- * @brief Verifies if sky direction falls in map
+ * @brief Tells if direction is contained in one of the region maps
  *
- * @param[in] dir Sky direction.
+ * @param[in] dir A Sky direction.
  *
- * This method checks if the specified sky direction falls within the pixels
- * covered by the skymap region. The method uses the dir2xy method to convert 
- * the sky direction into 2D pixel indices, and then checks whether the pixel
- * indices fall in the skymap.
+ * @return True or False
+ *
+ * Tells if direction is contained in one of the regions
  ***************************************************************************/
 bool GSkyRegionMap::contains(const GSkyDir& dir) const
 {
+    bool fully_inside = false;
+    
+    // Get non zeros indices of sky region map
+    std::vector<int> pix_array;
+    get_array_nonzero(pix_array);
+    
     // Convert sky direction into sky pixel
     GSkyPixel pixel = dir2pix(dir);
     
-    // Return location flag
-    return (contains(pixel));
+    for (int i = 0; i < pix_array.size(); i++ ) {
+        GSkyDir direc = m_map.pix2dir(pix_array[i]);
+        if (i < pix_array.size() && dir==direc) { 
+            fully_inside = true;
+        }
+        else {
+            throw GException::feature_not_implemented(G_CONTAINS,
+              "Cannot compare two different region types yet");
+        }
+    }
+    
+	// Return value
+	return fully_inside;
 }
 
 /***********************************************************************//**
- * @brief Checks if sky map pixel falls in map
+ * @brief Checks if region is fully contained within this region
  *
- * @param[in] pixel Sky map pixel.
- * @return Trus if pixels is within map, false otherwise.
+ * @param[in] reg Sky region map.
  *
- * Checks whether the specified sky map @p pixel falls within the skymap
- * or not. 
+ * @exception GException::feature_not_implemented
+ *            Regions differ in type.
  ***************************************************************************/
-bool GSkymap::contains(const GSkyPixel& pixel) const
+bool GSkyRegionMap::contains(const GSkyRegion& reg) const
 {
-    // Initialise containment flag
-    bool inmap = false;
+	// Initialise return value
+	bool fully_inside = false;
 
-    // Test 1D pixels
-    if (pixel.is_1D()) {
-        if (pixel.index()+0.5 >= 0.0 && pixel.index()-0.5 < m_num_pixels) {
-            inmap = true;
+    // Get non zeros indices of sky region map
+    std::vector<int> pix_array;
+    get_array_nonzero(pix_array);
+    
+    for (int i = 0; i < pix_array.size(); i++ ) {
+        GSkyDir dir = m_map.pix2dir(pix_array[i]);
+        if (i < pix_array.size() && reg.contains(dir)) { 
+            fully_inside = true;
+        }
+        else {
+            throw GException::feature_not_implemented(G_CONTAINS,
+              "Cannot compare two different region types yet");
         }
     }
-
-    // Test 2D pixels
-    else if (pixel.is_2D()) {
-
-        // If pixel is in range then set containment flag to true
-        if ((pixel.x()+0.5 >= 0.0 && pixel.x()-0.5 < m_num_x) &&
-            (pixel.y()+0.5 >= 0.0 && pixel.y()-0.5 < m_num_y)) {
-            inmap = true;
-        }
-
-    }
-
-    // Return containment flag
-    return inmap;
+    
+	// Return value
+	return fully_inside;
 }
 
 /***********************************************************************//**
@@ -445,43 +461,27 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
  *
  * @param[in] reg Sky region.
  *
- * @TODO: region sky map overlap with ring or circle region
- *
  * @exception GException::feature_not_implemented
  *            Regions differ in type.
  ***************************************************************************/
-bool GSkyRegionMap::overlaps(const GSkyDir& dir) const
+bool GSkyRegionMap::overlaps(const GSkyRegion& reg) const
 {
 	// Initialise return value
 	bool overlap = false;
 
-    // Convert sky direction into sky pixel
-    GSkyPixel pixel = dir2pix(dir);
+    // Get non zeros indices of sky region map
+    std::vector<int> pix_array;
+    get_array_nonzero(pix_array);
     
-    // Return location flag
-    return (contains(pixel));
-    
-/*  GSkyDir dir;
-    for (int i=0; i<360; i++){
-        for (int j=0; j<90; j++){
-        
-           const GSkyDir* regdir =
-                 dynamic_cast<const GSkyDir*>(&dir);
-           double direction = dir->radec_deg(i,j);
-        
-           if (reg->contains(dir)) {
-               overlap = true;
-           }
-           else {
-               overlap = false;
-           }
-        }  
+    for (int i = 0; i < pix_array.size(); i++ ) {
+        GSkyDir dir = m_map.pix2dir(pix_array[i]);
+        reg.contains(dir);
+        if (overlap) break;
     }
-	// Return value
-	return overlap;
-	*/
-}
 
+    // Return if region is in map or not
+    return overlap;
+}
 
 
 /*==========================================================================
@@ -539,7 +539,6 @@ void GSkyRegionMap::compute_solid_angle(void)
 	for (int i =0; i < m_map.npix(); ++i)  {
 		GSkyPixel pix=m_map.inx2pix(i);
 		std::cout << pix.size() << std::endl;
-		//value += m_map.solidangle(pix);
 		if (pix.size() > 0){
 		    value += m_map.solidangle(pix);
 		}
@@ -557,20 +556,21 @@ void GSkyRegionMap::compute_solid_angle(void)
 
 
 /***********************************************************************//**
- * @brief Get an array of pixels of the sky region map
+ * @brief Create an array of pixels
  ***************************************************************************/
- void GSkyRegionMap::pixels_sky_region_map(void)
- {
-    double num_pix_map[m_map.npix()];
-    
-    for (int i =0; i < m_map.npix(); ++i)  {
-		GSkyPixel pix=m_map.inx2pix(i);
-		std::cout << pix.size() << std::endl;
+void GSkyRegionMap::get_array_nonzero(std::vector<int> pix_array) const
+{
+    //std::vector<int> pix_array; 
+
+    for (int i = 0; i < m_map.npix(); i++) 
+    {
+        GSkyPixel pix=m_map.inx2pix(i);
+        std::cout << pix.size() << std::endl;
 		if (pix.size() > 0){
-		    num_pix_map[i] = i;
-		}
-	}
-	
-	// Return
-	return;
+		    pix_array.push_back(pix);
+		} 
+    }
+    
+    std::cout << pix_array.size() << std::endl;
+    
 }

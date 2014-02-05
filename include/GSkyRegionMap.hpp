@@ -33,6 +33,7 @@
 #include "GMath.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyRegion.hpp"
+#include "GSkyRegions.hpp"
 #include "GFits.hpp"
 #include "GSkymap.hpp"
 #include "GSkyRegionCircle.hpp"
@@ -71,9 +72,7 @@ public:
     const GSkymap&    map(void) const;
 	bool              contains(const GSkyDir& dir) const;
     bool              contains(const GSkyRegion& reg) const;
-    bool              contains(const GSkyPixel& pixel) const;
     bool              overlaps(const GSkyRegion& reg) const;
-    bool              overlaps(const GSkyDir& dir) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
     std::string       write(void) const;
     virtual void      read(const std::string& regstring);
@@ -86,30 +85,14 @@ protected:
     void copy_members(const GSkyRegionMap& region);
     void free_members(void);
     void compute_solid_angle(void);
-    void pixels_sky_region_map(void);
+    void get_array_nonzero(std::vector<int> pix_array) const;
 
     // Protected members
     GSkymap	  m_map;          //!< The map
     GSkyPixel             dir2pix(const GSkyDir& dir) const;
-    GSkyDir	m_centre;   //!< Centre or reference point of the region
-    double 	m_radius;  	//!< Radius of circular the region [deg]
     
 };
 
-
-/***********************************************************************//**
- * @brief Return region sky map
- *
- * @return region sky map.
- *
- * Returns the region sky map.
- ***************************************************************************/
-/*inline
-const double& GSkyRegionMap::map(void) const
-{
-    return (m_map);
-}
-*/
 /***********************************************************************//**
  * @brief Set sky map region
  * 
