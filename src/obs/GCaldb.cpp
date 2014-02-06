@@ -318,20 +318,22 @@ std::string GCaldb::rootdir(void) const
  ***************************************************************************/
 void GCaldb::rootdir(const std::string& pathname)
 {
+    // Expand pathname
+    std::string rootdir = gammalib::expand_env(pathname);
+
     // Verify that specified root directory exists
-    //if (access(pathname.c_str(), F_OK) != 0) {
-    if (!gammalib::dir_exists(pathname)) {
-        throw GException::directory_not_found(G_SET_ROOTDIR, pathname);
+    if (!gammalib::dir_exists(rootdir)) {
+        throw GException::directory_not_found(G_SET_ROOTDIR, rootdir);
     }
 
     // Verify that specified root directory allows read access
-    if (access(pathname.c_str(), R_OK) != 0) {
-        throw GException::directory_not_accessible(G_SET_ROOTDIR, pathname,
+    if (access(rootdir.c_str(), R_OK) != 0) {
+        throw GException::directory_not_accessible(G_SET_ROOTDIR, rootdir,
               "Requested read permission not granted.");
     }
 
     // Set calibration database root directory
-    m_opt_rootdir = gammalib::expand_env(pathname);
+    m_opt_rootdir = rootdir;
 
     // Return
     return;
