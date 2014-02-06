@@ -855,7 +855,8 @@ double gammalib::plaw_energy_flux(const double& emin, const double& emax,
  * @param[in] filename File name.
  *
  * Checks if a file exists. If a directory with the same name if found, false
- * is returned.
+ * is returned. The function expands any environment variable prior to
+ * checking.
  ***************************************************************************/
 bool gammalib::file_exists(const std::string& filename)
 {
@@ -866,7 +867,7 @@ bool gammalib::file_exists(const std::string& filename)
     struct stat info;
 
     // Get file information structure
-    int ret = stat(filename.c_str(), &info);
+    int ret = stat(gammalib::expand_env(filename).c_str(), &info);
 
     // Check if file is a regular file
     if (ret == 0 && S_ISREG(info.st_mode)) {
@@ -883,7 +884,8 @@ bool gammalib::file_exists(const std::string& filename)
  *
  * @param[in] dirname Directory name.
  *
- * Checks if a directory exists.
+ * Checks if a directory exists. The function expands any environment
+ * variable prior to checking.
  ***************************************************************************/
 bool gammalib::dir_exists(const std::string& dirname)
 {
@@ -894,7 +896,7 @@ bool gammalib::dir_exists(const std::string& dirname)
     struct stat info;
 
     // Get file information structure
-    int ret = stat(dirname.c_str(), &info);
+    int ret = stat(gammalib::expand_env(dirname).c_str(), &info);
 
     // Check if we have a directory
     if (ret == 0 && S_ISDIR(info.st_mode)) {
