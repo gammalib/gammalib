@@ -1151,6 +1151,11 @@ void GModelSky::set_type(void)
             m_type = "ExtendedSource";
         }
 
+        // ... otherwise, is spatial model an elliptical source?
+        else if (dynamic_cast<const GModelSpatialElliptical*>(m_spatial) != NULL) {
+            m_type = "ExtendedSource";
+        }
+
         // ... otherwise we have a diffuse model
         else {
             m_type = "DiffuseSource";
