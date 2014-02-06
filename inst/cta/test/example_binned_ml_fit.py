@@ -2,7 +2,7 @@
 # ==========================================================================
 # This script performs a binned maximum likelihood analysis of CTA data.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -109,13 +109,13 @@ if __name__ == '__main__':
     print("... please wait for a few seconds")
 
     # Set parameters
-    irf    = "kb_E_50h_v3"
+    irf    = "cta_dummy_irf"
     caldb  = "../caldb"
     model  = "data/crab.xml"
     cntmap = "data/crab_cntmap.fits"
 
     # Perform binned analysis
-    result = binned_analysis(model, cntmap, irf, caldb)
+    result = binned_analysis(model, cntmap, irf, GCaldb(caldb))
 
     # Print model results
     print(result)

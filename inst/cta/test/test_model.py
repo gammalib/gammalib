@@ -2,7 +2,7 @@
 # ==========================================================================
 # This script tests the model computations using the CTA response function.
 #
-# Copyright (C) 2011-2013 Jurgen Knodlseder
+# Copyright (C) 2011-2014 Jurgen Knodlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ def observation(ra=0.0, dec=0.0, emin=0.1, emax=100.0,
     obs = GCTAObservation()
 
     # Set response
-    obs.response("kb_E_50h_v3", "../caldb")
+    obs.response("cta_dummy_irf", GCaldb("../caldb"))
 
     # Set pointing
     dir = GSkyDir()
