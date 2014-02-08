@@ -105,7 +105,10 @@ None
 
 20. CTA interface
 -----------------
-None
+Energy dispersion has been added to the CTA module. The class
+GCTAEdispPerfTable implements a simple Gaussian energy dispersion that
+is based on the energy dispersion rms value provided in the ASCII
+performance files.
 
 
 21. COMPTEL interface

@@ -1,5 +1,13 @@
 2014-02-08  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
+        * Version 0.9.0 released
+        ========================
+
+        Add energy dispersion to CTA module
+
+
+2014-02-08  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
         * Bug fix Version 0.8.2 released
         ================================
 
