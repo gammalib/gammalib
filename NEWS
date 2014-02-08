@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-08-01
+New Features and Important Changes in GammaLib 00-08-02
 
 Author(s) : Juergen Knoedlseder
 
-5 February 2014
+8 February 2014
 
 
 1. Introduction
@@ -13,26 +13,17 @@ changes made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-GCaldb
-  Changed dir() method to rootdir().
+None
 
 
 3. Configuration
 -----------------
-Some hyphens were missing in the configuration script when synchronising
-the user and system parameter files. This led to an error message on the
-console, but did not impact the proper configuration. Hyphens have now
-been added as needed.
-
-The configuration test script testconf.sh has been added to allow testing
-configuration script during continous integration.
+None
 
 
 4. Application module
 ---------------------
-The GChatter typedef has been added to the Python interface, and a specific
-GLog::chatter() method has been added that takes integers as arguments to
-allow chatter level adjustments from within Python.
+None
 
 
 5. Base module
@@ -52,8 +43,9 @@ None
 
 8. Model module
 ---------------
-The GModelSky class now writes the id attribute to the XML file in case
-that identifiers are specified.
+A division by zero error occured in GModelSpectralPlaw2::eval_gradients
+in case that the integral was zero. The code has been changed to avoid
+this situation.
 
 
 9. Numerics module
@@ -63,13 +55,7 @@ None
 
 10. Observation module
 ----------------------
-The GAMMALIB_CALDB environment variable takes precedence over the CALDB
-environment variable. This was the initial intention, but the code did the
-opposite.
-
-The calibration database interface implemented by GCaldb has been cleaned
-up. Now the CIF file is used to retrieve the filename to calibration files,
-providing full CALDB compliant support in GammaLib.
+None
 
 
 11. Optimization module
@@ -94,8 +80,7 @@ None
 
 15. VO module
 -------------
-The vo module and GVOClient class have been added to the Python
-interface.
+None
 
 
 16. Xspec module
@@ -105,12 +90,7 @@ None
 
 17. Test module
 ---------------
-The results of the Python unit test were not correctly tracked due to
-some subtle problems related to the way how C++ code is called through the
-Python interface. A kluge has been found and added to GTestSuite.i to
-retrieve the Python test results and to propagate them to the C++ test
-suite, so now Python test results are also written into the XML file, and
-the Python tests signal failure in case that something goes wrong.
+None
 
 
 18. Multi-wavelength interface
@@ -125,20 +105,9 @@ None
 
 20. CTA interface
 -----------------
-The GCTAModelBackground and GCTAModelRadialAcceptance classes now write
-the id attribute to the XML file in case that identifiers are specified.
-Furthermore, GCTAModelRadialAcceptance no longer write the temporal
-model component.
-
-The GCTAPsf2D::mc() method did not sample the PSF correctly in case that
-the sigma and normalization parameters were zero for the second and/or
-third component. This has now been corrected for.
-
-The deadtime correction had been applied twice in the computation of the
-non point source Npred computations. This has now been corrected for.
+None
 
 
 21. COMPTEL interface
 ---------------------
 None
-
