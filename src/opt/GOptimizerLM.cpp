@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,7 @@
 //#define G_DEBUG_OPT              //!< Define to debug optimize() method
 //#define G_DEBUG_ITER             //!< Define to debug iteration() method
 //#define G_DEBUG_SHOW_GRAD_COVAR  //!< Define to show grad and curvature
+
 
 /*==========================================================================
  =                                                                         =
@@ -677,6 +678,11 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         // Get LM step size
         double step = step_size(*grad, pars);
 
+        // Debug option: dump step size
+        #if defined(G_DEBUG_ITER)
+        std::cout << "Step size = " << step << std::endl;
+        #endif
+
         // Derive new parameter vector
         for (int ipar = 0; ipar < m_npars; ++ipar) {
 
@@ -693,7 +699,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
                 // Debug option: dump new parameter value
                 #if defined(G_DEBUG_ITER)
-                std::cout << "Trial ";
+                std::cout << "Trial factor value of ";
                 std::cout << pars[ipar]->name() << " = ";
                 std::cout << p << std::endl;
                 #endif
@@ -750,6 +756,13 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
                 // Set new parameter value
                 pars[ipar]->factor_value(p);
+
+                // Debug option: dump new parameter value
+                #if defined(G_DEBUG_ITER)
+                std::cout << "New value of ";
+                std::cout << pars[ipar]->name() << " = ";
+                std::cout << pars[ipar]->value() << std::endl;
+                #endif
 
             } // endif: Parameter was free
 
