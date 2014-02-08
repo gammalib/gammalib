@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw2.cpp - Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -374,7 +374,7 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
     double value = m_integral.value() * m_norm * m_power;
 
     // Integral flux gradient
-    if (m_integral.is_free()) {
+    if (m_integral.is_free() && m_integral.factor_value() > 0.0) {
          g_integral = value / m_integral.factor_value();
     }
 
