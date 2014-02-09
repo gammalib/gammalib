@@ -56,12 +56,8 @@ const GCTAModelBackground g_cta_model_background_seed;
 const GModelRegistry      g_cta_model_background_registry(&g_cta_model_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SPATIAL                        "GCTAModelBackground::set_spatial("\
-                                               "const GCTAObservation& obs,"\
-                                              "const std::string& filename,"\
-                                                        "const int& nx_sky,"\
-                                                        "const int& ny_sky,"\
-                                                      "const int& n_energy)"
+#define G_SET_SPATIAL   "GCTAModelBackground::set_spatial(GCTAObservation&, "\
+                                            "std::string&, int&, int&, int&)"
 #define G_EVAL            "GCTAModelBackground::eval(GEvent&, GObservation&)"
 #define G_EVAL_GRADIENTS       "GCTAModelBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
@@ -221,7 +217,7 @@ GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs,
 	// Create spatial cube from background file
 	set_spatial(obs, filename, nx_sky, ny_sky, n_energy);
 
-	// set the temporal model
+	// Set the temporal model
 	GModelTemporalConst temporal;
 	m_temporal = temporal.clone();
 
@@ -596,7 +592,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 
 			// Setup integrator
 			GIntegral integral(&integrand);
-			integral.eps(1e-3);
+			integral.eps(1.0e-3);
 
 			// Setup integration boundaries
             #if defined(G_NPRED_AROUND_ROI)
@@ -1016,11 +1012,13 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  * @param[in] ny_sky Number of bins in y direction (optional).
  * @param[in] n_energy Number of energy bins (optional).
  *
+ * @exception GException::invalid_argument
+ *            Invalid argument encountered.
+ *
  * The method assumes that energies are stored in units of TeV in the
  * response table.
  *
  * @todo Document method.
- * @todo Throw an exception if nx, ny or n_energy is zero.
  ***************************************************************************/
 void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
                                       const std::string&     filename,
@@ -1054,18 +1052,23 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
         nx = nx_sky;
         ny = ny_sky;
 	}
-	else if(nx_sky == 0 && ny_sky == 0){
+	else if (nx_sky == 0 && ny_sky == 0) {
         nx = background.axis(0);
         ny = background.axis(1);
-	}else{
-	  std::string msg = "Number of ";
-	  if(nx_sky<0){
-	    msg+=" x bin is below zero \n";
-	  }
-	  if(nx_sky<0){
-	    msg+=" y bin is below zero \n";
-	  }
-	  throw GException::invalid_argument(G_SPATIAL, msg);
+	}
+    else {
+        std::string msg = "Specified number of ";
+        if (nx_sky < 0) {
+            msg += "x bins "+gammalib::str(nx_sky)+" ";
+        }
+        if (ny_sky < 0) {
+            if (nx_sky < 0) {
+                msg += "and ";
+            }
+            msg += "y bins "+gammalib::str(ny_sky)+" ";
+        }
+        msg += "is smaller than zero.";
+        throw GException::invalid_argument(G_SET_SPATIAL, msg);
 	}
 
 	// Retrieve spatial bounds from response table
@@ -1084,30 +1087,29 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
         unit_hi = background.axis_hi_unit(2);
     }
 
-    // Create energies as the log means of the energy bins
+    // Set number of energy bins
     GEnergies energies; 
     int       n_energies;
-    // setting the number of energy bin to be used
     if (n_energy > 0) {
-      // Set number of energy bins
-      n_energies = n_energy;
+        n_energies = n_energy;
     }
-    else if(n_energy == 0){
-      // Set number of energy bins
-      n_energies = background.axis(2);
-    } // endelse: used energy bins of table
-    else{
-      std::string msg = "Number of energy bin cannot be below zero";
-      throw GException::invalid_argument(G_SPATIAL, msg);
+    else if (n_energy == 0) {
+        n_energies = background.axis(2);
     }
-    //------ Filling the GEnergies
+    else {
+        std::string msg = "Specified number of energy bins "+
+                          gammalib::str(n_energy)+" is smaller than zero.";
+        throw GException::invalid_argument(G_SET_SPATIAL, msg);
+    }
+
+    // Create energies as the log means of the energy bins
     // Create logarthmic energy boundaries
     GEnergy  emin(background.axis_lo(2,0), unit_lo);
     GEnergy  emax(background.axis_hi(2,background.axis(2)-1), unit_hi);
     GEbounds ebounds(n_energies, emin, emax);
     // Extract log mean energies
     for (int i = 0; i < n_energies; ++i) {
-      energies.append(ebounds.elogmean(i));
+        energies.append(ebounds.elogmean(i));
     }
     
 	// Set interpolation to logscale for energies
@@ -1116,14 +1118,14 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
 	// Creating the sky map
 	double  bin_size_x = (xhigh - xlow) / nx * gammalib::rad2deg;
 	double  bin_size_y = (yhigh - ylow) / ny * gammalib::rad2deg;
-	GSkymap cube       =  GSkymap("TAN", "CEL",
-                                  pointing.dir().ra_deg(),
-                                  pointing.dir().dec_deg(),
-                                  -bin_size_x,
-                                  bin_size_y,
-                                  nx,
-                                  ny,
-                                  n_energies);
+	GSkymap cube       = GSkymap("TAN", "CEL",
+                                 pointing.dir().ra_deg(),
+                                 pointing.dir().dec_deg(),
+                                 -bin_size_x,
+                                 bin_size_y,
+                                 nx,
+                                 ny,
+                                 n_energies);
 
 	// Loop over skymap pixel
     for (int i = 0; i < cube.npix(); ++i) {
