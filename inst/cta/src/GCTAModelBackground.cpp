@@ -56,6 +56,12 @@ const GCTAModelBackground g_cta_model_background_seed;
 const GModelRegistry      g_cta_model_background_registry(&g_cta_model_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SPATIAL                        "GCTAModelBackground::set_spatial("\
+                                               "const GCTAObservation& obs,"\
+                                              "const std::string& filename,"\
+                                                        "const int& nx_sky,"\
+                                                        "const int& ny_sky,"\
+                                                      "const int& n_energy)"
 #define G_EVAL            "GCTAModelBackground::eval(GEvent&, GObservation&)"
 #define G_EVAL_GRADIENTS       "GCTAModelBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
@@ -214,6 +220,10 @@ GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs,
 
 	// Create spatial cube from background file
 	set_spatial(obs, filename, nx_sky, ny_sky, n_energy);
+
+	// set the temporal model
+	GModelTemporalConst temporal;
+	m_temporal = temporal.clone();
 
 	// Set parameter pointers
 	set_pointers();
@@ -1044,9 +1054,18 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
         nx = nx_sky;
         ny = ny_sky;
 	}
-	else {
+	else if(nx_sky == 0 && ny_sky == 0){
         nx = background.axis(0);
         ny = background.axis(1);
+	}else{
+	  std::string msg = "Number of ";
+	  if(nx_sky<0){
+	    msg+=" x bin is below zero \n";
+	  }
+	  if(nx_sky<0){
+	    msg+=" y bin is below zero \n";
+	  }
+	  throw GException::invalid_argument(G_SPATIAL, msg);
 	}
 
 	// Retrieve spatial bounds from response table
@@ -1065,39 +1084,32 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
         unit_hi = background.axis_hi_unit(2);
     }
 
-	// Create energies as the log means of the energy bins
+    // Create energies as the log means of the energy bins
+    GEnergies energies; 
     int       n_energies;
-	GEnergies energies;
+    // setting the number of energy bin to be used
     if (n_energy > 0) {
-
-        // Set number of energy bins
-        n_energies = n_energy;
-
-        // Create logarthmic energy boundaries
-        GEnergy  emin(background.axis_lo(2,0), unit_lo);
-        GEnergy  emax(background.axis_hi(2,background.axis(2)-1), unit_hi);
-        GEbounds ebounds(n_energies, emin, emax);
-
-        // Extract log mean energies
-        for (int i = 0; i < n_energies; ++i) {
-            energies.append(ebounds.elogmean(i));
-        }
-
+      // Set number of energy bins
+      n_energies = n_energy;
     }
-    else {
-
-        // Set number of energy bins
-        n_energies = background.axis(2);
-
-        // Loop over energy bins
-        for (int i = 0; i < n_energies; ++i) {
-            GEnergy  emin(background.axis_lo(2,0), unit_lo);
-            GEnergy  emax(background.axis_hi(2,background.axis(2)-1), unit_hi);
-            energies.append(gammalib::elogmean(emin, emax));
-        }
-
+    else if(n_energy == 0){
+      // Set number of energy bins
+      n_energies = background.axis(2);
     } // endelse: used energy bins of table
-
+    else{
+      std::string msg = "Number of energy bin cannot be below zero";
+      throw GException::invalid_argument(G_SPATIAL, msg);
+    }
+    //------ Filling the GEnergies
+    // Create logarthmic energy boundaries
+    GEnergy  emin(background.axis_lo(2,0), unit_lo);
+    GEnergy  emax(background.axis_hi(2,background.axis(2)-1), unit_hi);
+    GEbounds ebounds(n_energies, emin, emax);
+    // Extract log mean energies
+    for (int i = 0; i < n_energies; ++i) {
+      energies.append(ebounds.elogmean(i));
+    }
+    
 	// Set interpolation to logscale for energies
 	background.axis_log10(2);
 
