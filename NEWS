@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-02
 
 Author(s) : Juergen Knoedlseder
 
-8 February 2014
+10 February 2014
 
 
 1. Introduction
@@ -55,7 +55,7 @@ None
 
 10. Observation module
 ----------------------
-None
+Added __len__ and copy() methods to GEvents Python interface.
 
 
 11. Optimization module

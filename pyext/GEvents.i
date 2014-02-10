@@ -103,4 +103,10 @@ public:
                                            index, self->size());
         }
     }
+    int __len__() {
+        return (self->size());
+    }
+    GEvents* copy() {
+        return (self->clone());
+    }
 };

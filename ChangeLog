@@ -1,4 +1,4 @@
-2014-02-08  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-02-10  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -12,6 +12,7 @@
         ================================
 
         Avoid division by zero error in GModelSpectralPlaw2 (#1141)
+	Add __len__ and copy() methods to GEvents Python interface
 
 
 2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
