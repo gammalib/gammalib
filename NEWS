@@ -114,4 +114,6 @@ None
 
 21. COMPTEL interface
 ---------------------
-None
+The COMPTEL response handling is now based on GCaldb functionnalities. The
+COMPTEL calibration database has been restructured for this purpose and a
+calibration database index has been added.
