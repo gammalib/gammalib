@@ -251,8 +251,6 @@ int GCaldb::size(void) const
  *
  *     $CALDB/data/<mission>
  *     $CALDB/data/<mission>/<instrument>
- *     $GAMMALIB_CALDB/data/<mission>
- *     $GAMMALIB_CALDB/data/<mission>/<instrument>
  *
  * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case). The arguments provided to the
@@ -268,30 +266,21 @@ std::string GCaldb::rootdir(void) const
     // variable has not been set
     if (rootdir.empty()) {
 
-        // Get root directory from GAMMALIB_CALDB and CALDB environment variables
-        char* ptr1 = std::getenv("GAMMALIB_CALDB");
-        char* ptr2 = std::getenv("CALDB");
+        // Get root directory from CALDB environment variables
+        char* ptr1 = std::getenv("CALDB");
 
         // Throw an exception if non of the environment variables was set
-        if (ptr1 == NULL && ptr2 == NULL) {
+        if (ptr1 == NULL) {
             throw GException::env_not_found(G_GET_ROOTDIR,
-                  "GAMMALIB_CALDB or CALDB",
-                  "Please set the GAMMALIB_CALDB or the CALDB environment"
+                  "CALDB",
+                  "Please set the CALDB environment"
                   " variable to a valid calibration database root directory.");
         }
 
-        // If GAMMALIB_CALDB was set then check whether the directory exists
+        // If CALDB was set then check whether the directory exists
         if (ptr1 != NULL) {
             if (access(ptr1, F_OK) == 0) {
                 rootdir = std::string(ptr1);
-            }
-        }
-
-        // ... otherwise, if CALDB was set then check whether the directory
-        // exists
-        else if (ptr2 != NULL) {
-            if (access(ptr2, F_OK) == 0) {
-                rootdir = std::string(ptr2);
             }
         }
 
@@ -355,8 +344,6 @@ void GCaldb::rootdir(const std::string& pathname)
  *
  *     $CALDB/data/<mission>
  *     $CALDB/data/<mission>/<instrument>
- *     $GAMMALIB_CALDB/data/<mission>
- *     $GAMMALIB_CALDB/data/<mission>/<instrument>
  *
  * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case). The arguments provided to the
@@ -366,7 +353,6 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
 {
     // Verify that mission name is valid and directory is accessible
     std::string path = rootdir() + "/data/" + gammalib::tolower(mission);
-//    if (access(path.c_str(), F_OK) != 0) {
     if (!gammalib::dir_exists(path)) {
         throw GException::directory_not_found(G_PATH, path,
               "Requested mission \""+gammalib::toupper(mission)+"\" not found in"
@@ -386,7 +372,6 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
         path += "/" + gammalib::tolower(instrument);
 
         // Verify path
-        //if (access(path.c_str(), F_OK) != 0) {
         if (!gammalib::dir_exists(path)) {
             throw GException::directory_not_found(G_PATH, path,
                   "Requested instrument \""+gammalib::toupper(instrument)+"\" on"
@@ -420,8 +405,6 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
  *
  *     $CALDB/data/<mission>/caldb.indx
  *     $CALDB/data/<mission>/<instrument>/caldb.indx
- *     $GAMMALIB_CALDB/data/<mission>/caldb.indx
- *     $GAMMALIB_CALDB/data/<mission>/<instrument>/caldb.indx
  *
  * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case). The arguments provided to the
