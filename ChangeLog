@@ -12,7 +12,8 @@
         ================================
 
         Avoid division by zero error in GModelSpectralPlaw2 (#1141)
-	Add __len__ and copy() methods to GEvents Python interface
+        Add __len__ and copy() methods to GEvents Python interface
+        Increase Npred spectral integration precision to 1e-8 (#1142)
 
 
 2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

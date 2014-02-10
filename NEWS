@@ -57,6 +57,10 @@ None
 ----------------------
 Added __len__ and copy() methods to GEvents Python interface.
 
+The integration precision in GObservation::npred_spec has been increased
+to 1e-8 to cope with strongly fluctuating file functions (as they appear
+for CTA background models). See bug #1142 for more information.
+
 
 11. Optimization module
 -----------------------
