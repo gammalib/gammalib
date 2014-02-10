@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1426,7 +1426,7 @@ double GObservation::npred_spec(const GModel& model,
     GIntegral                     integral(&integrand);
 
     // Set integration precision
-    integral.eps(1.0e-5);
+    integral.eps(1.0e-8); // Needed for fluctuating bgd. model !!!
 
     // Do Romberg integration
     #if defined(G_LN_ENERGY_INT)
