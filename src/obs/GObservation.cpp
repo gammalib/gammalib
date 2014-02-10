@@ -1430,8 +1430,8 @@ double GObservation::npred_spec(const GModel& model,
 
     // Do Romberg integration
     #if defined(G_LN_ENERGY_INT)
-    emin = log(emin);
-    emax = log(emax);
+    emin = std::log(emin);
+    emax = std::log(emax);
     #endif
     double result = integral.romb(emin, emax);
 
