@@ -485,7 +485,8 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     //double ref = 11212.26274; // npred_spec precision of 1e-6
     //const double ref = 11212.437464; // npred_spec precision of 1e-5
     //const double ref = 11212.4370702; // After GWcs::solidangle improvement
-    const double ref = 12644.3391902; // After correcting for deadtime bug
+    //const double ref = 12644.3391902; // After correcting for deadtime bug
+    const double ref = 12643.6159142; // npred_spec precision of 1e-6
 
     // Set parameters
     double src_ra  = 201.3651;
@@ -801,7 +802,7 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.656246512e-16, 1.91458426e-17,
-                            -2.48426, -0.02573396361,
+                            -2.484100472, -0.02573396361,
                             300000, 0,
                             1, 0,
                             2.993705325, 0.03572658413,
