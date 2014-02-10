@@ -48,13 +48,12 @@ public:
     GCTAInstDir* clone(void) const;
 
     // Other methods
-    void           dir(const GSkyDir& dir);
-    GSkyDir&       dir(void);
-    const GSkyDir& dir(void) const;
-    void           detx(const double &x);
-    void           dety(const double &y);
-    const double&  detx(void) const;
-    const double&  dety(void) const;
+    void          dir(const GSkyDir& dir);
+    GSkyDir&      dir(void);
+    void          detx(const double &x);
+    void          dety(const double &y);
+    const double& detx(void) const;
+    const double& dety(void) const;
 };
 
 
