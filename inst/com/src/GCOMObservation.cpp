@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -247,14 +247,13 @@ void GCOMObservation::response(const GResponse& rsp)
 /***********************************************************************//**
  * @brief Set response function
  *
- * @param[in] iaqname Name of COMPTEL IAQ response file.
- * @param[in] caldb Optional name of calibration database.
+ * @param[in] rspname Name of COMPTEL response.
+ * @param[in] caldb Calibration database.
  *
  * Sets the response function by loading the response information from an
  * IAQ file.
  ***************************************************************************/
-void GCOMObservation::response(const std::string& iaqname,
-                               const std::string& caldb)
+void GCOMObservation::response(const std::string& rspname, const GCaldb& caldb)
 {
     // Clear COM response function
     m_response.clear();
@@ -263,7 +262,7 @@ void GCOMObservation::response(const std::string& iaqname,
     m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response.load(iaqname);
+    m_response.load(rspname);
 
     // Return
     return;
@@ -367,7 +366,7 @@ void GCOMObservation::read(const GXmlElement& xml)
     load(drename, drbname, drgname, drxname);
 
     // Load IAQ
-    response(iaqname);
+    response(iaqname, GCaldb("cgro", "com"));
 
     // Return
     return;
@@ -448,7 +447,7 @@ void GCOMObservation::write(GXmlElement& xml) const
         // Handle IAQ
         else if (par->attribute("name") == "IAQ") {
             std::string iaqname = "";
-            iaqname = m_response.iaqname();
+            iaqname = m_response.rspname();
             par->attribute("file", iaqname);
             npar[4]++;
         }

@@ -40,7 +40,8 @@
 /* __ Constants __________________________________________________________ */
 const std::string datadir       = PACKAGE_SOURCE"/inst/com/test/data";
 const std::string com_caldb     = PACKAGE_SOURCE"/inst/com/caldb";
-const std::string com_iaq       = "u47569_iaq.fits";          // 1-3 MeV
+//const std::string com_iaq       = "u47569_iaq.fits";          // 1-3 MeV
+const std::string com_iaq       = "ENERG(1.0-3.0)MeV";          // 1-3 MeV
 const std::string com_dre       = datadir+"/m50439_dre.fits"; // 1-3 MeV
 const std::string com_drb       = datadir+"/m34997_drg.fits";
 const std::string com_drg       = datadir+"/m34997_drg.fits";
@@ -231,7 +232,7 @@ void TestGCOMResponse::test_response(void)
     test_try("Test response loading");
     try {
         // Construct response from datasets
-        GCOMResponse rsp(com_iaq, com_caldb);
+        GCOMResponse rsp(com_iaq, GCaldb("cgro", "com"));
 
         // If we arrived here, signal success
         test_try_success();
@@ -282,7 +283,6 @@ void TestGCOMObservation::test_binned_obs(void)
     try {
         // Construct observation from datasets
         GCOMObservation obs(com_dre, com_drb, com_drg, com_drx);
-//std::cout << obs << std::endl;
 
         // If we arrived here, signal success
         test_try_success();
@@ -296,7 +296,6 @@ void TestGCOMObservation::test_binned_obs(void)
     try {
         // Construct observation from datasets
         GObservations obs(com_obs);
-//std::cout << obs << std::endl;
 
         // If we arrived here, signal success
         test_try_success();
@@ -513,7 +512,7 @@ void TestGCOMOptimize::test_binned_optimizer(void)
     test_try("Load binned COMPTEL observation");
     try {
         run.load(com_dre, com_drb, com_drg, com_drx);
-        run.response(com_iaq, com_caldb);
+        run.response(com_iaq, GCaldb("cgro", "com"));
         obs.append(run);
         test_try_success();
     }
@@ -615,8 +614,8 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("COMPTEL instrument specific class testing");
 
-    // Set GAMMALIB_CALDB environment variable
-    std::string caldb = "GAMMALIB_CALDB="+com_caldb;
+    // Set CALDB environment variable
+    std::string caldb = "CALDB="+com_caldb;
     putenv((char*)caldb.c_str());
 
     // Initially assume that we pass all tests

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCOMResponse.i  -  COMPTEL Response class               *
+ *                  GCOMResponse.i - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCOMResponse(void);
     GCOMResponse(const GCOMResponse& rsp);
-    explicit GCOMResponse(const std::string& iaqname, const std::string& caldb = "");
+    GCOMResponse(const std::string& rspname, const GCaldb& caldb);
     virtual ~GCOMResponse(void);
 
     // Implement pure virtual base class methods
@@ -54,11 +54,11 @@ public:
                                 const GObservation& obs) const;
 
     // Other Methods
-    void        caldb(const std::string& caldb);
-    std::string caldb(void) const;
-    std::string iaqname(void) const;
-    void        load(const std::string& iaqname);
-    void        read(const GFitsImage& hdu);
+    void               caldb(const GCaldb& caldb);
+    const GCaldb&      caldb(void) const;
+    const std::string& rspname(void) const;
+    void               load(const std::string& rspname);
+    void               read(const GFitsImage& hdu);
 };
 
 

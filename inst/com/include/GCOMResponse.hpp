@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMResponse.hpp - COMPTEL Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GObservation.hpp"
 #include "GResponse.hpp"
 #include "GFitsImage.hpp"
+#include "GCaldb.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -50,17 +51,17 @@ public:
     // Constructors and destructors
     GCOMResponse(void);
     GCOMResponse(const GCOMResponse& rsp);
-    explicit GCOMResponse(const std::string& iaqname, const std::string& caldb = "");
+    GCOMResponse(const std::string& rspname, const GCaldb& caldb);
     virtual ~GCOMResponse(void);
 
     // Operators
-    virtual GCOMResponse& operator= (const GCOMResponse & rsp);
+    virtual GCOMResponse& operator=(const GCOMResponse & rsp);
 
     // Implement pure virtual base class methods
     virtual void          clear(void);
     virtual GCOMResponse* clone(void) const;
-    virtual bool          use_edisp(void) const { return false; }
-    virtual bool          use_tdisp(void) const { return false; }
+    virtual bool          use_edisp(void) const;
+    virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -69,11 +70,11 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods
-    void        caldb(const std::string& caldb);
-    std::string caldb(void) const;
-    std::string iaqname(void) const;
-    void        load(const std::string& iaqname);
-    void        read(const GFitsImage& hdu);
+    void               caldb(const GCaldb& caldb);
+    const GCaldb&      caldb(void) const;
+    const std::string& rspname(void) const;
+    void               load(const std::string& rspname);
+    void               read(const GFitsImage& hdu);
 
 private:
     // Private methods
@@ -82,8 +83,8 @@ private:
     void free_members(void);
 
     // Private data members
-    std::string         m_caldb;             //!< Name of or path to the calibration database
-    std::string         m_iaqname;           //!< Name of IAQ file
+    GCaldb              m_caldb;             //!< Name of or path to the calibration database
+    std::string         m_rspname;           //!< Response name
     std::vector<double> m_iaq;               //!< IAQ array
     int                 m_phigeo_bins;       //!< Number of Phigeo bins
     int                 m_phibar_bins;       //!< Number of Phibar bins
@@ -96,5 +97,69 @@ private:
     double              m_phibar_bin_size;   //!< Phigeo binsize (deg)
     double              m_phibar_min;        //!< Phigeo value of first bin (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Signal if energy dispersion will be used
+ *
+ * @return False.
+ ***************************************************************************/
+inline
+bool GCOMResponse::use_edisp(void) const
+{
+    return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if time dispersion will be used
+ *
+ * @return False.
+ ***************************************************************************/
+inline
+bool GCOMResponse::use_tdisp(void) const
+{
+    return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Return calibration database
+ *
+ * @return Calibration database.
+ ***************************************************************************/
+inline
+const GCaldb& GCOMResponse::caldb(void) const
+{
+    return m_caldb;
+}
+
+
+/***********************************************************************//**
+ * @brief Set path to the calibration database
+ *
+ * @param[in] caldb Calibration database.
+ *
+ * Sets the calibration database for the COMPTEL response.
+ ***************************************************************************/
+inline
+void GCOMResponse::caldb(const GCaldb& caldb)
+{
+    m_caldb = caldb;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return response name
+ *
+ * @return Response name.
+ ***************************************************************************/
+inline
+const std::string& GCOMResponse::rspname(void) const
+{
+    // Return response name
+    return m_rspname;
+}
 
 #endif /* GCOMRESPONSE_HPP */

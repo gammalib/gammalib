@@ -180,10 +180,10 @@ else
 fi
 
 #
-# Set GAMMALIB_CALDB (if not yet set)
+# Set CALDB (if not yet set)
 # ===================================
-if [ "x$GAMMALIB_CALDB" = x ]; then
-  GAMMALIB_CALDB="$caldb_dir"
+if [ "x$CALDB" = x ]; then
+  CALDB="$caldb_dir"
 fi
 
 #
@@ -191,7 +191,7 @@ fi
 # =================================================
 varlist="LD_LIBRARY_PATH DYLD_LIBRARY_PATH PATH"
 varlist="$varlist PYTHONPATH PKG_CONFIG_PATH MANPATH"
-varlist="$varlist PFILES PFCLOBBER GAMMALIB_CALDB"
+varlist="$varlist PFILES PFCLOBBER CALDB"
 
 #
 # Save values in output initialization shell scripts

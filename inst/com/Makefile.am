@@ -28,10 +28,11 @@ pkginclude_HEADERS = include/GCOMException.hpp \
                      include/GCOMLib.hpp
 
 # Calibration files to distribute
-irfs = caldb/u47512_iaq.fits.gz \
-       caldb/u47569_iaq.fits.gz \
-       caldb/u47741_iaq.fits.gz \
-       caldb/u48091_iaq.fits.gz
+caldb_indx = caldb/data/cgro/com/caldb.indx
+caldb_irfs = caldb/data/cgro/com/bcf/u47512_iaq.fits.gz \
+             caldb/data/cgro/com/bcf/u47569_iaq.fits.gz \
+             caldb/data/cgro/com/bcf/u47741_iaq.fits.gz \
+             caldb/data/cgro/com/bcf/u48091_iaq.fits.gz
 
 # Build libtool library
 noinst_LTLIBRARIES = libcom.la
@@ -39,6 +40,8 @@ libcom_la_SOURCES = $(sources)
 libcom_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
 
 # Distribute calibration database files
-EXTRA_DIST = $(irfs)
-caldbdir   = $(datadir)/caldb/com
-caldb_DATA = $(irfs)
+EXTRA_DIST     = $(caldb_indx) $(caldb_irfs)
+caldbindxdir   = $(datadir)/caldb/data/com
+caldbindx_DATA = $(caldb_indx)
+caldbirfsdir   = $(datadir)/caldb/data/com/bcf
+caldbirfs_DATA = $(caldb_irfs)
