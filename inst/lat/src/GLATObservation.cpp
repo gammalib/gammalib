@@ -511,23 +511,28 @@ std::string GLATObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Ontime")+gammalib::str(ontime()));
         result.append("\n"+gammalib::parformat("Livetime")+gammalib::str(livetime()));
 
-        // Append response
-        result.append("\n"+m_response.print(gammalib::reduce(chatter)));
+        // Append detailed information
+        if (gammalib::reduce(chatter) != SILENT) {
 
-        // Append livetime cube
-        if (m_ltcube != NULL) {
-            result.append("\n"+m_ltcube->print(gammalib::reduce(chatter)));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("LAT livetime cube")+"undefined");
-        }
+            // Append response
+            result.append("\n"+m_response.print(gammalib::reduce(chatter)));
 
-        // EXPLICIT: Append events
-        if (chatter >= EXPLICIT) {
-            if (m_events != NULL) {
-                result.append("\n"+m_events->print(gammalib::reduce(chatter)));
+            // Append livetime cube
+            if (m_ltcube != NULL) {
+                result.append("\n"+m_ltcube->print(gammalib::reduce(chatter)));
             }
-        }
+            else {
+                result.append("\n"+gammalib::parformat("LAT livetime cube")+"undefined");
+            }
+
+            // EXPLICIT: Append events
+            if (chatter >= EXPLICIT) {
+                if (m_events != NULL) {
+                    result.append("\n"+m_events->print(gammalib::reduce(chatter)));
+                }
+            }
+
+        } // endif: appended detailed information
 
     } // endif: chatter was not silent
 
