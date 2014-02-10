@@ -40,9 +40,9 @@
 #include "GCOMException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_IRF         "GCOMResponse::irf(GInstDir&,GEnergy&,GTime&,GSkyDir&,"\
-                                             "GEnergy&,GTime&,GObservation&)"
-#define G_NPRED               "GCOMResponse::npred(GSkyDir&,GEnergy&,GTime&,"\
+#define G_IRF     "GCOMResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&, "\
+                                           "GEnergy&, GTime&, GObservation&)"
+#define G_NPRED            "GCOMResponse::npred(GSkyDir&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -97,17 +97,13 @@ GCOMResponse::GCOMResponse(const GCOMResponse& rsp) : GResponse(rsp)
  * @brief Response constructor
  *
  * @param[in] iaqname IAQ file name.
- * @param[in] caldb Calibration database path (defaults to "").
+ * @param[in] caldb Calibration database.
  *
- * Create COMPTEL response by loading an IAQ file.
- *
- * If an empty string is passed as calibration database path, the method will
- * use the CALDB environment variable to determine the calibration database
- * path. This is done in the method GCOMResponse::caldb which makes use of a
- * GCaldb object to locate the calibration database.
+ * Create COMPTEL response by loading an IAQ file from a calibration
+ * database.
  ***************************************************************************/
 GCOMResponse::GCOMResponse(const std::string& iaqname,
-                           const std::string& caldb) : GResponse()
+                           const GCaldb&      caldb) : GResponse()
 {
     // Initialise members
     init_members();
@@ -370,74 +366,46 @@ double GCOMResponse::npred(const GPhoton&      photon,
 
 
 /***********************************************************************//**
- * @brief Set path to the calibration database
- *
- * @param[in] caldb Path to calibration database
- *
- * This method stores the CALDB root directory as the path to the COMPTEL
- * calibration database. Once the final calibration format has been decided
- * on, this method should be adjusted.
- ***************************************************************************/
-void GCOMResponse::caldb(const std::string& caldb)
-{
-    // Allocate calibration database
-    GCaldb db(caldb);
-
-    // Store the path to the calibration database
-    m_caldb = db.rootdir();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return path to the calibration database
- *
- * @return Path to calibration database.
- ***************************************************************************/
-std::string GCOMResponse::caldb(void) const
-{
-    // Return path to calibration database
-    return m_caldb;
-}
-
-
-/***********************************************************************//**
- * @brief Return IAQ filename
- *
- * @return IAQ filename.
- ***************************************************************************/
-std::string GCOMResponse::iaqname(void) const
-{
-    // Return IAQ name
-    return m_iaqname;
-}
-
-
-/***********************************************************************//**
  * @brief Load COMPTEL response.
  *
- * @param[in] iaqname Name of IAQ file.
+ * @param[in] rspname COMPTEL response name.
  *
- * Load COMPTEL response from IAQ file.
+ * Loads the COMPTEL response with specified name @p rspname. The method first
+ * searchs for an appropriate response in the calibration database. If no
+ * appropriate response is found, the method takes the database root path
+ * and response name to build the full path to the response file, and tries
+ * to load the response from these paths.
  ***************************************************************************/
-void GCOMResponse::load(const std::string& iaqname)
+void GCOMResponse::load(const std::string& rspname)
 {
-    // Save calibration database name
-    std::string caldb = m_caldb;
-
-    // Clear instance
+    // Clear instance but conserve calibration database
+    GCaldb caldb = m_caldb;
     clear();
-
-    // Restore calibration database name
     m_caldb = caldb;
 
-    // Save IAQ name
-    m_iaqname = iaqname;
+    // Save response name
+    m_rspname = rspname;
 
-    // Build filename
-    std::string filename = m_caldb + "/" + m_iaqname;
+    // First attempt reading the response using the GCaldb interface
+    std::string filename = m_caldb.filename("","","IAQ","","",rspname);
+
+    // If filename is empty then build filename from CALDB root path and
+    // response name
+    if (filename.empty()) {
+        filename = gammalib::filepath(m_caldb.rootdir(), rspname);
+        if (!gammalib::file_exists(filename)) {
+            std::string testname = filename + ".fits";
+            if (gammalib::file_exists(testname)) {
+                filename = testname;
+            }
+            else {
+                std::string testname = filename + ".fits.gz";
+                if (gammalib::file_exists(testname)) {
+                    filename = testname;
+                }
+            }
+        }
+    }
 
     // Open FITS file
     GFits file(filename);
@@ -530,11 +498,13 @@ std::string GCOMResponse::print(const GChatter& chatter) const
         // Append header
         result.append("=== GCOMResponse ===");
 
+        // Append response name
+        result.append("\n"+gammalib::parformat("Response name")+m_rspname);
+
+        // Append calibration database
+        result.append("\n"+m_caldb.print(chatter));
+
         // Append information
-        result.append("\n"+gammalib::parformat("Calibration database"));
-        result.append(m_caldb);
-        result.append("\n"+gammalib::parformat("IAQ file name"));
-        result.append(m_iaqname);
         result.append("\n"+gammalib::parformat("Number of Phigeo bins"));
         result.append(gammalib::str(m_phigeo_bins));
         result.append("\n"+gammalib::parformat("Number of Phibar bins"));
@@ -576,7 +546,7 @@ void GCOMResponse::init_members(void)
 {
     // Initialise members
     m_caldb.clear();
-    m_iaqname.clear();
+    m_rspname.clear();
     m_iaq.clear();
     m_phigeo_bins      = 0;
     m_phibar_bins      = 0;
@@ -603,7 +573,7 @@ void GCOMResponse::copy_members(const GCOMResponse& rsp)
 {
     // Copy attributes
     m_caldb            = rsp.m_caldb;
-    m_iaqname          = rsp.m_iaqname;
+    m_rspname          = rsp.m_rspname;
     m_iaq              = rsp.m_iaq;
     m_phigeo_bins      = rsp.m_phigeo_bins;
     m_phibar_bins      = rsp.m_phibar_bins;

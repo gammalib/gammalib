@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.hpp - COMPTEL observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GModel.hpp"
 #include "GSkymap.hpp"
 #include "GCOMResponse.hpp"
+#include "GCaldb.hpp"
 
 
 /***********************************************************************//**
@@ -49,10 +50,10 @@ class GCOMObservation : public GObservation {
 public:
     // Constructors and destructors
     GCOMObservation(void);
-    explicit GCOMObservation(const std::string& drename,
-                             const std::string& drbname,
-                             const std::string& drgname,
-                             const std::string& drxname);
+    GCOMObservation(const std::string& drename,
+                    const std::string& drbname,
+                    const std::string& drgname,
+                    const std::string& drxname);
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
 
@@ -77,8 +78,7 @@ public:
                         const std::string& drbname,
                         const std::string& drgname,
                         const std::string& drxname);
-    void           response(const std::string& iaqname,
-                            const std::string& caldb = "");
+    void           response(const std::string& rspname, const GCaldb& caldb);
     void           obs_id(const double& id) { m_obs_id=id; }
     void           ontime(const double& ontime) { m_ontime=ontime; }
     void           livetime(const double& livetime) { m_livetime=livetime; }
