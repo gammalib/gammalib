@@ -383,7 +383,7 @@ double GLATAeff::efficiency_factor1(const GEnergy& srcEng) const
     double factor = 1.0;
 
     // Compute efficiency factor. Note that the factor 1 uses the functor 2,
-    // following the philosophie implemented in the ScienceTools method
+    // following the philosophy implemented in the ScienceTools method
     // EfficiencyFactor::getLivetimeFactors
     if (m_eff_func2 != NULL) {
         factor = (*m_eff_func2)(srcEng.log10MeV());
@@ -412,7 +412,7 @@ double GLATAeff::efficiency_factor2(const GEnergy& srcEng) const
     double factor = 0.0;
 
     // Compute efficiency factor. Note that the factor 2 uses the functor 1,
-    // following the philosophie implemented in the ScienceTools method
+    // following the philosophy implemented in the ScienceTools method
     // EfficiencyFactor::getLivetimeFactors
     if (m_eff_func1 != NULL) {
         factor = (*m_eff_func1)(srcEng.log10MeV());
@@ -632,7 +632,7 @@ void GLATAeff::read_efficiency(const GFitsTable& hdu)
         }
     }
 
-    // If we have a back section then read the front parameters
+    // If we have a back section then read the back parameters
     else if (m_back) {
         for (int i = 0; i < 6; ++i) {
             par1.push_back(ptr->real(2,i));
