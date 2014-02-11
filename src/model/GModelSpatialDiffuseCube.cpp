@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -121,11 +121,11 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
     // Set parameter
     m_value.value(value);
 
-    // Load the file
-    load(filename);
-
     // Perform autoscaling of parameter
     autoscale();
+
+    // Store filename
+    m_filename = filename;
 
     // Return
     return;
@@ -287,6 +287,9 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
     // Initialise value
     double value = 0.0;
 
+    // Fetch cube
+    fetch_cube();
+
     // Continue only if there is energy information for the map cube
     if (m_logE.size() > 0) {
 
@@ -325,6 +328,9 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 {
     // Initialise intensity
     double intensity = 0.0;
+
+    // Fetch cube
+    fetch_cube();
 
     // Continue only if there is energy information for the map cube
     if (m_logE.size() > 0) {
@@ -388,6 +394,9 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
 {
     // Allocate sky direction
     GSkyDir dir;
+
+    // Fetch cube
+    fetch_cube();
 
     // Determine number of skymap pixels
     int npix = pixels();
@@ -513,10 +522,7 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
     }
 
     // Save filename
-    m_filename = gammalib::expand_env(xml.attribute("file"));
-
-    // Load the cube
-    load(xml.attribute("file"));
+    m_filename = xml.attribute("file");
 
     // Return
     return;
@@ -621,11 +627,14 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
     // variables
     m_filename = filename;
 
+    // Get expanded filename
+    std::string fname = gammalib::expand_env(filename);
+
     // Load cube
-    m_cube.load(m_filename);
+    m_cube.load(fname);
 
     // Load energies
-    GEnergies energies(m_filename);
+    GEnergies energies(fname);
 
     // Extract number of energy bins
     int num = energies.size();
@@ -645,6 +654,9 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
     for (int i = 0; i < num; ++i) {
         m_logE.append(energies[i].log10MeV());
     }
+
+    // Signal that cube has been loaded
+    m_loaded = true;
 
     // Set energy boundaries
     set_energy_boundaries();
@@ -671,6 +683,9 @@ void GModelSpatialDiffuseCube::energies(const GEnergies& energies)
 {
     // Initialise energies
     m_logE.clear();
+
+    // Fetch cube
+    fetch_cube();
 
     // Extract number of energies in vector
     int num = energies.size();
@@ -713,6 +728,9 @@ GEnergies GModelSpatialDiffuseCube::energies(void)
     // Initialise energies container
     GEnergies energies;
 
+    // Fetch cube
+    fetch_cube();
+
     // Get number of map energies
     int num = m_logE.size();
 
@@ -751,6 +769,9 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
     // Initialise cache
     m_mc_cache.clear();
     m_mc_spectrum.clear();
+
+    // Fetch cube
+    fetch_cube();
 
     // Determine number of cube pixels and maps
     int npix  = pixels();
@@ -862,54 +883,62 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
 
         // Append parameters
         result.append("\n"+gammalib::parformat("Map cube file")+m_filename);
+        if (m_loaded) {
+            result.append(" [loaded]");
+        }
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }
 
-        // NORMAL: Append sky map
-        if (chatter >= NORMAL) {
-            result.append("\n"+m_cube.print(chatter));
-        }
+        // Append detailed information only if a map cube exists
+        if (m_cube.npix() > 0) {
 
-        // EXPLICIT: Append energy nodes
-        if (chatter >= EXPLICIT) {
-            result.append("\n"+gammalib::parformat("Map energy values"));
-            if (m_logE.size() > 0) {
-                for (int i = 0; i < m_logE.size(); ++i) {
-                    result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
-                    result.append(gammalib::str(std::pow(10.0, m_logE[i])));
-                    result.append(" MeV (log10E=");
-                    result.append(gammalib::str(m_logE[i]));
-                    result.append(")");
-                    if (m_ebounds.size() == m_logE.size()) {
-                        result.append(" [");
-                        result.append(m_ebounds.emin(i).print());
-                        result.append(", ");
-                        result.append(m_ebounds.emax(i).print());
-                        result.append("]");
+            // NORMAL: Append sky map
+            if (chatter >= NORMAL) {
+                result.append("\n"+m_cube.print(chatter));
+            }
+
+            // EXPLICIT: Append energy nodes
+            if (chatter >= EXPLICIT && m_logE.size() > 0) {
+                result.append("\n"+gammalib::parformat("Map energy values"));
+                if (m_logE.size() > 0) {
+                    for (int i = 0; i < m_logE.size(); ++i) {
+                        result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
+                        result.append(gammalib::str(std::pow(10.0, m_logE[i])));
+                        result.append(" MeV (log10E=");
+                        result.append(gammalib::str(m_logE[i]));
+                        result.append(")");
+                        if (m_ebounds.size() == m_logE.size()) {
+                            result.append(" [");
+                            result.append(m_ebounds.emin(i).print());
+                            result.append(", ");
+                            result.append(m_ebounds.emax(i).print());
+                            result.append("]");
+                        }
                     }
                 }
-            }
-            else {
-                result.append("not specified");
-            }
-        }
-
-        // VERBOSE: Append MC cache
-        if (chatter >= VERBOSE) {
-            result.append("\n"+gammalib::parformat("Map flux"));
-            if (m_mc_spectrum.nodes() > 0) {
-                for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
-                    result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
-                    result.append(gammalib::str(m_mc_spectrum.intensity(i)));
+                else {
+                    result.append("not specified");
                 }
             }
-            else {
-                result.append("not specified");
+
+            // VERBOSE: Append MC cache
+            if (chatter >= VERBOSE) {
+                result.append("\n"+gammalib::parformat("Map flux"));
+                if (m_mc_spectrum.nodes() > 0) {
+                    for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
+                        result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
+                        result.append(gammalib::str(m_mc_spectrum.intensity(i)));
+                    }
+                }
+                else {
+                    result.append("not specified");
+                }
             }
-        }
+
+        } // endif: map cube exists
 
     } // endif: chatter was not silent
 
@@ -948,6 +977,7 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_cube.clear();
     m_logE.clear();
     m_ebounds.clear();
+    m_loaded = false;
 
     // Initialise MC cache
     m_mc_cache.clear();
@@ -971,6 +1001,7 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     m_cube     = model.m_cube;
     m_logE     = model.m_logE;
     m_ebounds  = model.m_ebounds;
+    m_loaded   = model.m_loaded;
 
     // Copy MC cache
     m_mc_cache    = model.m_mc_cache;
@@ -990,6 +1021,23 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
  ***************************************************************************/
 void GModelSpatialDiffuseCube::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch cube
+ *
+ * Load diffuse cube if it is not yet loaded.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::fetch_cube(void) const
+{
+    // Load cube if it is not yet loaded
+    if (!m_loaded && !m_filename.empty()) {
+        const_cast<GModelSpatialDiffuseCube*>(this)->load(m_filename);
+    }
+
     // Return
     return;
 }

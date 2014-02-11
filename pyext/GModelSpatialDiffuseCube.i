@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseCube.i - Spatial map cube model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,11 +40,11 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
-    explicit GModelSpatialDiffuseCube(const std::string& filename,
-                                      const double&      value = 1.0);
-    explicit GModelSpatialDiffuseCube(const GSkymap&   map,
-                                      const GEnergies& energies,
-                                      const double&    value = 1.0);
+    GModelSpatialDiffuseCube(const std::string& filename,
+                             const double&      value = 1.0);
+    GModelSpatialDiffuseCube(const GSkymap&   map,
+                             const GEnergies& energies,
+                             const double&    value = 1.0);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
     virtual ~GModelSpatialDiffuseCube(void);
 

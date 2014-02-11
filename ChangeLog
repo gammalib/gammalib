@@ -8,6 +8,7 @@
         Increase Npred spectral integration precision to 1e-8 (#1142)
         Use GCaldb for COMPTEL response handling
         Add Pass 7 response files for Fermi/LAT
+        Load cube in GModelSpatialDiffuseCube only when needed (#1143)
 
 
 2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseCube.hpp - Spatial map cube model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,11 +57,11 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
-    explicit GModelSpatialDiffuseCube(const std::string& filename,
-                                      const double&      value = 1.0);
-    explicit GModelSpatialDiffuseCube(const GSkymap&   cube,
-                                      const GEnergies& energies,
-                                      const double&    value = 1.0);
+    GModelSpatialDiffuseCube(const std::string& filename,
+                             const double&      value = 1.0);
+    GModelSpatialDiffuseCube(const GSkymap&   cube,
+                             const GEnergies& energies,
+                             const double&    value = 1.0);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
     virtual ~GModelSpatialDiffuseCube(void);
 
@@ -102,12 +102,14 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialDiffuseCube& model);
     void free_members(void);
+    void fetch_cube(void) const;
     void set_energy_boundaries(void);
     void update_mc_cache(void);
 
     // Protected members
     GModelPar           m_value;       //!< Value
     std::string         m_filename;    //!< Name of map cube
+    bool                m_loaded;      //!< Signals if map cube has been loaded
     GSkymap             m_cube;        //!< Map cube
     GNodeArray          m_logE;        //!< Log10(energy) values of the maps
     GEbounds            m_ebounds;     //!< Energy bounds of the maps
@@ -242,7 +244,9 @@ const GSkymap& GModelSpatialDiffuseCube::cube(void) const
 inline
 void GModelSpatialDiffuseCube::cube(const GSkymap& cube)
 {
-    m_cube = cube;
+    m_filename.clear();
+    m_loaded = false;
+    m_cube   = cube;
     update_mc_cache();
     return;
 }
