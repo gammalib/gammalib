@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEbounds.i - Energy boundaries class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,10 +40,11 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
-    explicit GEbounds(const GEnergy& emin, const GEnergy& emax);
-    explicit GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
-                      const bool& log=true);
-    explicit GEbounds(const std::string& filename, const std::string& extname);
+    GEbounds(const GEnergy& emin, const GEnergy& emax);
+    GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
+             const bool& log=true);
+    GEbounds(const std::string& filename,
+             const std::string& extname = "EBOUNDS");
     virtual ~GEbounds(void);
 
     // Methods
