@@ -107,6 +107,8 @@ public:
     double&       at(const int& index);
     const double& at(const int& index) const;
     int           non_zeros(void) const;
+    int           first_nonzero(void) const;
+    int           last_nonzero(void) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:

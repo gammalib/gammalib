@@ -83,6 +83,7 @@
 %include "GCTAPsfKing.i"
 %include "GCTAEdisp.i"
 %include "GCTAEdispPerfTable.i"
+%include "GCTAEdispRMF.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
 %include "GCTAModelBackground.i"

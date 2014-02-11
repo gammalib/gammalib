@@ -50,6 +50,7 @@
 #include "GCTAAeffPerfTable.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
+#include "GCTAEdispRMF.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAPsf2D.hpp"
 #include "GCTAPsfKing.hpp"

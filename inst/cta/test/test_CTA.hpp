@@ -52,6 +52,7 @@ public:
     void                      test_response_psf_king(void);
     void                      test_response_npsf(void);
     void                      test_response_edisp(void);
+    void                      test_response_edispRMF(void);
     void                      test_response_irf_diffuse(void);
     void                      test_response_npred_diffuse(void);
     void                      test_response(void);

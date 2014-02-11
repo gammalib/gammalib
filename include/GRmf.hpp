@@ -68,6 +68,7 @@ public:
     const double&      at(const int& itrue, const int& imeasured) const;
     const GEbounds&    etrue(void) const;
     const GEbounds&    emeasured(void) const;
+    const GMatrixSparse& matrix(void) const;
     void               load(const std::string& filename);
     void               save(const std::string& filename,
                             const bool& clobber = false) const;
@@ -190,6 +191,18 @@ inline
 const GEbounds& GRmf::emeasured(void) const
 {
     return m_ebds_measured;
+}
+
+
+/***********************************************************************//**
+ * @brief Return redistribution matrix
+ *
+ * @return Redistribution matrix.
+ ***************************************************************************/
+inline
+const GMatrixSparse& GRmf::matrix(void) const
+{
+    return m_matrix;
 }
 
 
