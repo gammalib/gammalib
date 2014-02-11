@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATLtCube.cpp - Fermi/LAT livetime cube class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -450,11 +450,12 @@ std::string GLATLtCube::print(const GChatter& chatter) const
         // Append header
         result.append("=== GLATLtCube ===");
 
-        // Append information
-        if (chatter > TERSE) {
-            result.append("\n"+m_exposure.print(gammalib::reduce(chatter)));
-            result.append("\n"+m_weighted_exposure.print(gammalib::reduce(chatter)));
-            result.append("\n"+m_gti.print(gammalib::reduce(chatter)));
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
+            result.append("\n"+m_exposure.print(reduced_chatter));
+            result.append("\n"+m_weighted_exposure.print(reduced_chatter));
+            result.append("\n"+m_gti.print(reduced_chatter));
         }
 
     } // endif: chatter was not silent

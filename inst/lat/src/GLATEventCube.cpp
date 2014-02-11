@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -468,21 +468,27 @@ std::string GLATEventCube::print(const GChatter& chatter) const
             result.append("not defined");
         }
 
-        // Append sky projection
-        if (m_map.projection() != NULL) {
-            result.append("\n"+m_map.projection()->print(chatter));
-        }
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
 
-        // Append source maps
-        result.append("\n"+gammalib::parformat("Number of source maps"));
-        result.append(gammalib::str(m_srcmap.size()));
-        for (int i = 0; i < m_srcmap.size(); ++i) {
-            result.append("\n"+gammalib::parformat(" "+m_srcmap_names[i]));
-            result.append(gammalib::str(m_srcmap[i]->nx()));
-            result.append(" x ");
-            result.append(gammalib::str(m_srcmap[i]->ny()));
-            result.append(" x ");
-            result.append(gammalib::str(m_srcmap[i]->nmaps()));
+            // Append sky projection
+            if (m_map.projection() != NULL) {
+                result.append("\n"+m_map.projection()->print(reduced_chatter));
+            }
+
+            // Append source maps
+            result.append("\n"+gammalib::parformat("Number of source maps"));
+            result.append(gammalib::str(m_srcmap.size()));
+            for (int i = 0; i < m_srcmap.size(); ++i) {
+                result.append("\n"+gammalib::parformat(" "+m_srcmap_names[i]));
+                result.append(gammalib::str(m_srcmap[i]->nx()));
+                result.append(" x ");
+                result.append(gammalib::str(m_srcmap[i]->ny()));
+                result.append(" x ");
+                result.append(gammalib::str(m_srcmap[i]->nmaps()));
+            }
+
         }
 
     } // endif: chatter was not silent
