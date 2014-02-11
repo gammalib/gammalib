@@ -278,8 +278,8 @@ void GLATPsfBase::write_scale(GFits& file) const
 double GLATPsfBase::scale_factor(const double& energy) const
 {
     // Compute scale factor
-    double f1    = m_scale_par1 * pow(0.01*energy, m_scale_index);
-    double scale = sqrt(f1*f1 + m_scale_par2*m_scale_par2);
+    double f1    = m_scale_par1 * std::pow(0.01*energy, m_scale_index);
+    double scale = std::sqrt(f1*f1 + m_scale_par2*m_scale_par2);
 
     // Return scale factor
     return scale;
