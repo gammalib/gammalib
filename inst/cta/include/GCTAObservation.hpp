@@ -93,6 +93,8 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    void                bgdfile(const std::string& filename);
+    const std::string&  bgdfile(void) const;
 
 protected:
     // Protected methods
@@ -105,6 +107,7 @@ protected:
     // Protected members
     std::string  m_instrument;   //!< Instrument name
     std::string  m_eventfile;    //!< Event filename
+    std::string  m_bgdfile;      //!< Background filename
     GCTAResponse m_response;     //!< Instrument response functions
     GCTAPointing m_pointing;     //!< Pointing direction
     int          m_obs_id;       //!< Observation ID
@@ -341,6 +344,31 @@ inline
 const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
+}
+
+
+/***********************************************************************//**
+ * @brief Set background file name
+ *
+ * @param[in] filename Background file name.
+ ***************************************************************************/
+inline
+void GCTAObservation::bgdfile(const std::string& filename)
+{
+    m_bgdfile = filename;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return background file name
+ *
+ * @return Background file name.
+ ***************************************************************************/
+inline
+const std::string& GCTAObservation::bgdfile(void) const
+{
+    return m_bgdfile;
 }
 
 #endif /* GCTAOBSERVATION_HPP */

@@ -288,6 +288,7 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for an unbinned observation and
@@ -297,6 +298,7 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for a binned observation.
@@ -315,14 +317,14 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4) {
+    // Verify that XML element has exactly 5 parameters
+    if (xml.elements() != 5 || npars != 5) {
         throw GException::xml_invalid_parnum(G_READ, xml,
-              "CTA observation requires exactly 4 parameters.");
+              "CTA observation requires exactly 5 parameters.");
     }
 
     // Extract parameters
-    int npar[] = {0, 0, 0, 0};
+    int npar[] = {0, 0, 0, 0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
@@ -443,13 +445,24 @@ void GCTAObservation::read(const GXmlElement& xml)
             npar[3]++;
         }
 
+        // Handle Background file
+        else if (par->attribute("name") == "Background") {
+
+            // Get filename
+            m_bgdfile = par->attribute("file");
+
+            // Increase number of parameters
+            npar[4]++;
+        }
+
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1|| npar[4] != 1) {
         throw GException::xml_invalid_parnames(G_READ, xml,
               "Require \"EventList\" or \"CountsMap\" and \"EffectiveArea\""
-              ", \"PointSpreadFunction\" and \"EnergyDispersion\" parameters.");
+              ", \"PointSpreadFunction\", \"EnergyDispersion\" and"
+              " \"Background\" parameters.");
     }
 
     // If we have an ARF then remove thetacut if necessary
@@ -827,6 +840,7 @@ void GCTAObservation::init_members(void)
     // Initialise members
     m_instrument = "CTA";
     m_eventfile.clear();
+    m_bgdfile.clear();
     m_response.clear();
     m_pointing.clear();
     m_obs_id     = 0;
@@ -851,6 +865,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     // Copy members
     m_instrument = obs.m_instrument;
     m_eventfile  = obs.m_eventfile;
+    m_bgdfile    = obs.m_bgdfile;
     m_response   = obs.m_response;
     m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
