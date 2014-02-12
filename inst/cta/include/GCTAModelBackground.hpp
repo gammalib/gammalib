@@ -87,10 +87,10 @@ public:
     virtual void                 write(GXmlElement& xml) const;
     virtual std::string          print(const GChatter& chatter = NORMAL) const;
 
-  // Other methods
-  GModelSpatial*  spatial(void) const;
-  GModelSpectral* spectral(void) const;
-  GModelTemporal* temporal(void) const;
+    // Other methods
+    GModelSpatial*  spatial(void) const;
+    GModelSpectral* spectral(void) const;
+    GModelTemporal* temporal(void) const;
 
 protected:
     // Protected methods

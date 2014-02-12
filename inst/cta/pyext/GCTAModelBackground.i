@@ -67,7 +67,7 @@ class GCTAModelBackground : public GModelData {
     virtual void                       write(GXmlElement& xml) const;
     
     // Other methods
-    GModelSpatial*  spatial(void)   const;
+    GModelSpatial*  spatial(void) const;
     GModelSpectral* spectral(void) const;
     GModelTemporal* temporal(void) const;
 };
