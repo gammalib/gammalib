@@ -53,18 +53,61 @@ pkginclude_HEADERS = include/GLATLib.hpp \
 
 # CALDB to distribute
 caldb_indx  = caldb/data/glast/lat/caldb.indx
+caldb_add   = caldb/data/glast/lat/bcf/irf_index.fits
 caldb_ea    = caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_front.fits \
               caldb/data/glast/lat/bcf/ea/aeff_P6_v3_diff_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7CLEAN_V6_front.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7CLEAN_V6_back.fits \
               caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_front.fits \
-              caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_back.fits
+              caldb/data/glast/lat/bcf/ea/aeff_P7SOURCE_V6_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7TRANSIENT_V6_front.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7TRANSIENT_V6_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7ULTRACLEAN_V6_front.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7ULTRACLEAN_V6_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_CLEAN_V15_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_CLEAN_V15_front.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_SOURCE_V15_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_SOURCE_V15_front.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_TRANSIENT_V15_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_TRANSIENT_V15_front.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_ULTRACLEAN_V15_back.fits \
+              caldb/data/glast/lat/bcf/ea/aeff_P7REP_ULTRACLEAN_V15_front.fits
 caldb_edisp = caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_front.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P6_v3_diff_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7CLEAN_V6_front.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7CLEAN_V6_back.fits \
               caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_front.fits \
-              caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_back.fits
+              caldb/data/glast/lat/bcf/edisp/edisp_P7SOURCE_V6_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7TRANSIENT_V6_front.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7TRANSIENT_V6_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7ULTRACLEAN_V6_front.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7ULTRACLEAN_V6_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_CLEAN_V15_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_CLEAN_V15_front.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_SOURCE_V15_front.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_TRANSIENT_V15_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_TRANSIENT_V15_front.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_ULTRACLEAN_V15_back.fits \
+              caldb/data/glast/lat/bcf/edisp/edisp_P7REP_ULTRACLEAN_V15_front.fits
 caldb_psf   = caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_front.fits \
               caldb/data/glast/lat/bcf/psf/psf_P6_v3_diff_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7CLEAN_V6_front.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7CLEAN_V6_back.fits \
               caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_front.fits \
-              caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_back.fits
+              caldb/data/glast/lat/bcf/psf/psf_P7SOURCE_V6_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7TRANSIENT_V6_front.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7TRANSIENT_V6_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7ULTRACLEAN_V6_front.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7ULTRACLEAN_V6_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_CLEAN_V15_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_CLEAN_V15_front.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_SOURCE_V15_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_SOURCE_V15_front.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_TRANSIENT_V15_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_TRANSIENT_V15_front.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_ULTRACLEAN_V15_back.fits \
+              caldb/data/glast/lat/bcf/psf/psf_P7REP_ULTRACLEAN_V15_front.fits
 
 # Build libtool library
 noinst_LTLIBRARIES = liblat.la
@@ -72,9 +115,11 @@ liblat_la_SOURCES = $(sources)
 liblat_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
 
 # Distribute calibration database files
-EXTRA_DIST      = $(caldb_indx) $(caldb_ea) $(caldb_edisp) $(caldb_psf)
+EXTRA_DIST      = $(caldb_indx) $(caldb_add) $(caldb_ea) $(caldb_edisp) $(caldb_psf)
 caldbindxdir    = $(datadir)/caldb/data/glast/lat
 caldbindx_DATA  = $(caldb_indx)
+caldbadddir     = $(datadir)/caldb/data/glast/lat/bcf
+caldbadd_DATA   = $(caldb_add)
 caldbeadir      = $(datadir)/caldb/data/glast/lat/bcf/ea
 caldbea_DATA    = $(caldb_ea)
 caldbedispdir   = $(datadir)/caldb/data/glast/lat/bcf/edisp

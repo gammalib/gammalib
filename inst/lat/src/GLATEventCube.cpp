@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -311,11 +311,20 @@ void GLATEventCube::load(const std::string& filename)
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing FITS file? (default=false)
  *
- * @todo To be implemented.
+ * Save the LAT event cube into FITS file.
  ***************************************************************************/
 void GLATEventCube::save(const std::string& filename,
                          const bool& clobber) const
 {
+    // Create empty FITS file
+    GFits fits;
+
+    // Write event cube
+    write(fits);
+    
+    // Save FITS file
+    fits.saveto(filename, clobber);
+
     // Return
     return;
 }
@@ -368,11 +377,23 @@ void GLATEventCube::read(const GFits& fits)
  * @brief Write LAT event cube into FITS file
  *
  * @param[in] fits FITS file.
- *
- * @todo To be implemented.
  ***************************************************************************/
 void GLATEventCube::write(GFits& fits) const
 {
+    // Write cube
+    m_map.write(fits);
+
+    // Write energy boundaries
+    ebounds().write(fits);
+
+    // Write Good Time intervals
+    gti().write(fits);
+
+    // Write additional source maps
+    for (int i = 0; i < m_srcmap.size(); ++i) {
+        m_srcmap[i]->write(fits);
+    }
+
     // Return
     return;
 }
@@ -468,21 +489,27 @@ std::string GLATEventCube::print(const GChatter& chatter) const
             result.append("not defined");
         }
 
-        // Append sky projection
-        if (m_map.projection() != NULL) {
-            result.append("\n"+m_map.projection()->print(chatter));
-        }
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
 
-        // Append source maps
-        result.append("\n"+gammalib::parformat("Number of source maps"));
-        result.append(gammalib::str(m_srcmap.size()));
-        for (int i = 0; i < m_srcmap.size(); ++i) {
-            result.append("\n"+gammalib::parformat(" "+m_srcmap_names[i]));
-            result.append(gammalib::str(m_srcmap[i]->nx()));
-            result.append(" x ");
-            result.append(gammalib::str(m_srcmap[i]->ny()));
-            result.append(" x ");
-            result.append(gammalib::str(m_srcmap[i]->nmaps()));
+            // Append sky projection
+            if (m_map.projection() != NULL) {
+                result.append("\n"+m_map.projection()->print(reduced_chatter));
+            }
+
+            // Append source maps
+            result.append("\n"+gammalib::parformat("Number of source maps"));
+            result.append(gammalib::str(m_srcmap.size()));
+            for (int i = 0; i < m_srcmap.size(); ++i) {
+                result.append("\n"+gammalib::parformat(" "+m_srcmap_names[i]));
+                result.append(gammalib::str(m_srcmap[i]->nx()));
+                result.append(" x ");
+                result.append(gammalib::str(m_srcmap[i]->ny()));
+                result.append(" x ");
+                result.append(gammalib::str(m_srcmap[i]->nmaps()));
+            }
+
         }
 
     } // endif: chatter was not silent

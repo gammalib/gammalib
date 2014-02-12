@@ -662,20 +662,21 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Deadtime correction"));
         result.append(gammalib::str(m_deadc));
 
-        // Append pointing
-        if (gammalib::reduce(chatter) > SILENT) {
-            result.append("\n"+pointing().print(gammalib::reduce(chatter)));
-        }
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
 
-        // Append response
-        if (gammalib::reduce(chatter) > SILENT) {
-            result.append("\n"+response().print(gammalib::reduce(chatter)));
-        }
+            // Append pointing
+            result.append("\n"+pointing().print(reduced_chatter));
 
-        // Append events
-        if (m_events != NULL && gammalib::reduce(chatter) > SILENT) {
-            result.append("\n"+m_events->print(gammalib::reduce(chatter)));
-        }
+            result.append("\n"+response().print(reduced_chatter));
+
+            // Append events
+            if (m_events != NULL) {
+                result.append("\n"+m_events->print(reduced_chatter));
+            }
+        
+        } // endif: appended detailed information
 
     } // endif: chatter was not silent
 

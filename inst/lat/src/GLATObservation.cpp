@@ -508,26 +508,33 @@ std::string GLATObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
         result.append("\n"+gammalib::parformat("Statistics")+statistics());
-        result.append("\n"+gammalib::parformat("Ontime")+gammalib::str(ontime()));
-        result.append("\n"+gammalib::parformat("Livetime")+gammalib::str(livetime()));
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(ontime())+" s");
+        result.append("\n"+gammalib::parformat("Livetime"));
+        result.append(gammalib::str(livetime())+" s");
 
-        // Append response
-        result.append("\n"+m_response.print(gammalib::reduce(chatter)));
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
 
-        // Append livetime cube
-        if (m_ltcube != NULL) {
-            result.append("\n"+m_ltcube->print(gammalib::reduce(chatter)));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("LAT livetime cube")+"undefined");
-        }
+            // Append response
+            result.append("\n"+m_response.print(reduced_chatter));
 
-        // EXPLICIT: Append events
-        if (chatter >= EXPLICIT) {
-            if (m_events != NULL) {
-                result.append("\n"+m_events->print(gammalib::reduce(chatter)));
+            // Append livetime cube
+            if (m_ltcube != NULL) {
+                result.append("\n"+m_ltcube->print(reduced_chatter));
             }
-        }
+            else {
+                result.append("\n"+gammalib::parformat("LAT livetime cube"));
+                result.append("undefined");
+            }
+
+            // Append events
+            if (m_events != NULL) {
+                result.append("\n"+m_events->print(reduced_chatter));
+            }
+
+        } // endif: appended detailed information
 
     } // endif: chatter was not silent
 

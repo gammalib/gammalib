@@ -320,11 +320,13 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     // degrees - this is the hardwired value in the ST). For this purpose
     // set the costhetamin parameter of Aeff to m_theta_max. Store also the
     // original values in a vector for later restoration.
+    /*
     std::vector<double> save_costhetamin;
     for (int i = 0; i < rsp.size(); ++i) {
         save_costhetamin.push_back(rsp.aeff(i)->costhetamin());
         rsp.aeff(i)->costhetamin(cos(m_theta_max*gammalib::deg2rad));
     }
+    */
     
     // Allocate room for arrays
     m_psf.reserve(size());
@@ -374,9 +376,11 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     } // endfor: looped over energies
 
     // Restore initial Aeff zenith angle restriction
+    /*
     for (int i = 0; i < rsp.size(); ++i) {
         rsp.aeff(i)->costhetamin(save_costhetamin[i]);
     }
+    */
 
     // Compute map corrections
     set_map_corrections(obs);
@@ -733,8 +737,9 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
                     if (offset <= radius) {
 
                         // Accumulate energy dependent pixel sum
-                        for (int ieng = 0; ieng < m_energy.size(); ++ieng)
+                        for (int ieng = 0; ieng < m_energy.size(); ++ieng) {
                             sum[ieng] += psf(offset, m_energy[ieng]) * solidangle;
+                        }
                         
                     } // endif: pixel was within maximum PSF radius
 

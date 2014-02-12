@@ -345,6 +345,8 @@ void GLATPsfV3::write(GFits& file) const
  * Evaluates point spread function by doing a bi-linear interpolation of
  * PSF values obtained at the 4 corners that bound the specified energy and
  * cos(theta) value.
+ *
+ * This method is inspired by the Fermi/LAT Science Tools method Psf3::value.
  ***************************************************************************/
 double GLATPsfV3::psf(const double& offset, const double& logE,
                       const double& ctheta)
@@ -519,6 +521,9 @@ double GLATPsfV3::base_int(const double& u, const double& gamma)
  * of PSF parameters. The parameter set that is used is specified by the
  * index parameter. The energy parameter only serves to scale the score and
  * stail parameters of the PSF.
+ *
+ * This method is inspired from the Fermi/LAT Science Tools method
+ * Psf3::evaluate.
  ***************************************************************************/
 double GLATPsfV3::eval_psf(const double& offset, const double& energy,
                            const int& index)

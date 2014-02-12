@@ -315,14 +315,14 @@ void GLATPsf::read(const GFits& fits)
         break;
     }
 
+    // Set PSF attributes (needed before reading scaling parameters)
+    m_psf->front(front);
+
     // Read PSF scaling parameters
     m_psf->read_scale(hdu_scale);
 
     // Read PSF
     m_psf->read(hdu_rpsf);
-
-    // Set PSF attributes
-    m_psf->front(front);
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventCube.i - Fermi/LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,5 +81,15 @@ public:
 %extend GLATEventCube {
     GLATEventCube copy() {
         return (*self);
+    }
+    GLATEventCube(GEventCube* cube) {
+        GLATEventCube* ptr = dynamic_cast<GLATEventCube*>(cube);
+        if (ptr != NULL) {
+            return (ptr->clone());
+        }
+        else {
+            throw GException::bad_type("GLATEventCube(GEventCube*)",
+                                       "GEventCube not of type GLATEventCube");
+        }
     }
 };

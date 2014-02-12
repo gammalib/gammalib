@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-02
 
 Author(s) : Juergen Knoedlseder
 
-10 February 2014
+12 February 2014
 
 
 1. Introduction
@@ -46,6 +46,11 @@ None
 A division by zero error occured in GModelSpectralPlaw2::eval_gradients
 in case that the integral was zero. The code has been changed to avoid
 this situation.
+
+The map cube in GModelSpatialDiffuseCube is now only loaded from the file
+when needed. This allows manipulating GModelSpatialDiffuseCube objects
+that describe huge map cubes without need for loading the map cubes into
+memory. This property is useful for Fermi/LAT analysis.
 
 
 9. Numerics module
@@ -104,7 +109,13 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-None
+Pass 7 response files have been added.
+
+A bug in the computation of the Point Spread Function (PSF) has been corrected
+that led to differences between Fermi/LAT ScienceTools and GammaLib results.
+The former code applied in fact the front energy scaling to the back PSF. This
+has now been fixed and checked with a test dataset. GammaLib results are now
+very close to Fermi/LAT ScienceTools results.
 
 
 20. CTA interface
