@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-02
 
 Author(s) : Juergen Knoedlseder
 
-10 February 2014
+12 February 2014
 
 
 1. Introduction
@@ -110,6 +110,12 @@ None
 19. Fermi-LAT interface
 ----------------------
 Pass 7 response files have been added.
+
+A bug in the computation of the Point Spread Function (PSF) has been corrected
+that led to differences between Fermi/LAT ScienceTools and GammaLib results.
+The former code applied in fact the front energy scaling to the back PSF. This
+has now been fixed and checked with a test dataset. GammaLib results are now
+very close to Fermi/LAT ScienceTools results.
 
 
 20. CTA interface
