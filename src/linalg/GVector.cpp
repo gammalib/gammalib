@@ -549,6 +549,54 @@ int GVector::non_zeros(void) const
     return non_zeros;
 }
 
+/***********************************************************************//**
+ * @brief Returns the first non-zero element in a vector
+ *
+ * @return First non-zero element in vector.
+ ***************************************************************************/
+int GVector::first_nonzero(void) const
+{
+    // Initialise number of non-zeros
+    int non_zeros = 0;
+    int first_non_zero = 0;
+
+    // Gather all non-zero elements
+    for (int i = 0; i < m_num; ++i) {
+        if (m_data[i] != 0.0) {
+        	first_non_zero = m_data[i];
+        	if (first_non_zero != 0) {
+        		break;
+        	}
+        }
+    }
+
+    // Return number of non-zero elements
+    return first_non_zero;
+}
+
+/***********************************************************************//**
+ * @brief Returns the last non-zero element in a vector
+ *
+ * @return Last non-zero element in vector.
+ ***************************************************************************/
+int GVector::last_nonzero(void) const
+{
+    // Initialise number of non-zeros
+    int non_zeros = 0;
+    int last_non_zero = 0;
+
+    // Gather all non-zero elements
+    for (int i = m_num; i > 0; --i) {
+    	if (m_data[i] != 0.0) {
+    		last_non_zero = m_data[i];
+    	    if (last_non_zero != 0) {
+    	    	break;
+    	    }
+    	}
+    }
+    // Return number of non-zero elements
+    return last_non_zero;
+}
 
 /***********************************************************************//**
  * @brief Print vector information
