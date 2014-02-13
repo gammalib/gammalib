@@ -861,7 +861,7 @@ void GCTAModelBackground::read(const GXmlElement& xml)
 
         // Set observation ID from id attribute
         obs.id(xml.attribute("id"));
-        
+
         // Set spatial model
         set_spatial(obs, obs.bgdfile());
 
@@ -1047,7 +1047,7 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief create spatial cube model from background file
+ * @brief Create spatial cube model from background file
  *
  * @param[in] obs CTA observation.
  * @param[in] filename Background table filename.
@@ -1078,30 +1078,36 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
 
     // Tie model to observation by assigning the same id
     ids(obs.id());
-  
+
     // Extract pointing information from CTA observation
-	const GCTAPointing& pointing = obs.pointing();
+    const GCTAPointing& pointing = obs.pointing();
 
-	// Read the fits file with the background information
-	GFits fits(filename);
+    // Read the fits file with the background information
+    GFits fits(filename);
 
-	// TODO: Could have different extensions
-	const GFitsTable& table = *fits.table("BACKGROUND");
+    // TODO: Could have different extensions
+    const GFitsTable& table = *fits.table("BACKGROUND");
 
-	// Get the content as GCTAResponseTable
-	GCTAResponseTable background(table);
+    // Get the content as GCTAResponseTable
+    GCTAResponseTable background(table);
 
-	// Read the length of the axes
-	int nx;
-	int ny;
-	if (nx_sky > 0 && ny_sky > 0) {
+    // Retrieve spatial bounds from response table
+    double xlow  = background.axis_lo(0,0);
+    double xhigh = background.axis_hi(0,background.axis(0)-1);
+    double ylow  = background.axis_lo(1,0);
+    double yhigh = background.axis_hi(1,background.axis(1)-1);
+
+    // Read the length of the axes
+    int nx;
+    int ny;
+    if (nx_sky > 0 && ny_sky > 0) {
         nx = nx_sky;
         ny = ny_sky;
-	}
-	else if (nx_sky == 0 && ny_sky == 0) {
+    }
+    else if (nx_sky == 0 && ny_sky == 0) {
         nx = background.axis(0);
         ny = background.axis(1);
-	}
+    }
     else {
         std::string msg = "Specified number of ";
         if (nx_sky < 0) {
@@ -1115,13 +1121,17 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
         }
         msg += "is smaller than zero.";
         throw GException::invalid_argument(G_SET_SPATIAL, msg);
-	}
+    }
 
-	// Retrieve spatial bounds from response table
-	double xlow  = background.axis_lo(0,0);
-	double xhigh = background.axis_hi(0,background.axis(0)-1);
-	double ylow  = background.axis_lo(1,0);
-	double yhigh = background.axis_hi(1,background.axis(1)-1);
+    // Retrieve DETX and DETY units ("radians" if undefined)
+    std::string unit_detx("rad");
+    std::string unit_dety("rad");
+    if (!background.axis_lo_unit(0).empty()) {
+        unit_detx = background.axis_lo_unit(0);
+    }
+    if (!background.axis_lo_unit(1).empty()) {
+        unit_dety = background.axis_lo_unit(1);
+    }
 
     // Retrieve energy units ("TeV" if undefined)
     std::string unit_lo("TeV");
@@ -1149,22 +1159,34 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
     }
 
     // Create energies as the log means of the energy bins
-    // Create logarthmic energy boundaries
     GEnergy  emin(background.axis_lo(2,0), unit_lo);
     GEnergy  emax(background.axis_hi(2,background.axis(2)-1), unit_hi);
     GEbounds ebounds(n_energies, emin, emax);
-    // Extract log mean energies
     for (int i = 0; i < n_energies; ++i) {
         energies.append(ebounds.elogmean(i));
     }
-    
-	// Set interpolation to logscale for energies
-	background.axis_log10(2);
 
-	// Creating the sky map
-	double  bin_size_x = (xhigh - xlow) / nx * gammalib::rad2deg;
-	double  bin_size_y = (yhigh - ylow) / ny * gammalib::rad2deg;
-	GSkymap cube       = GSkymap("TAN", "CEL",
+    // Set interpolation unit for DETX and DETY to radians. This is only needed
+    // if DETX and/or DETY are given in degrees. We also set conversion factors
+    // for the x and y binsize which is needed in degrees.
+    double x_convert = gammalib::rad2deg;
+    double y_convert = gammalib::rad2deg;
+    if (gammalib::tolower(unit_detx) == "deg") {
+        background.axis_radians(0); // Switch degrees to radians
+        x_convert = 1.0;
+    }
+    if (gammalib::tolower(unit_dety) == "deg") {
+        background.axis_radians(1); // Switch degrees to radians
+        y_convert = 1.0;
+    }
+
+    // Set interpolation to logscale for energies
+    background.axis_log10(2);
+
+    // Creating the sky map
+    double  bin_size_x = (xhigh - xlow) / nx * x_convert;
+    double  bin_size_y = (yhigh - ylow) / ny * y_convert;
+    GSkymap cube       = GSkymap("TAN", "CEL",
                                  pointing.dir().ra_deg(),
                                  pointing.dir().dec_deg(),
                                  -bin_size_x,
@@ -1173,35 +1195,40 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
                                  ny,
                                  n_energies);
 
-	// Loop over skymap pixel
+    // Loop over skymap pixel
     for (int i = 0; i < cube.npix(); ++i) {
 
-    	// Get sky direction from pixel number
-    	GSkyDir pix_dir = cube.inx2dir(i);
+        // Get sky direction from pixel number
+        GSkyDir pix_dir = cube.inx2dir(i);
 
-    	// Get instrument coordinates for this pixel
-    	const GCTAInstDir instdir = pointing.instdir(pix_dir);
+        // Get instrument coordinates for this pixel
+        const GCTAInstDir instdir = pointing.instdir(pix_dir);
 
-   	    // loop on the energy map
-	    for (int j = 0; j < energies.size(); ++j) {
+        // loop on the energy map
+        for (int j = 0; j < energies.size(); ++j) {
 
-	        // Determine background value in instrument system
-	        double value = background(0, instdir.detx(),
+            // Determine background value in instrument system
+            double value = background(0, instdir.detx(),
                                          instdir.dety(),
                                          energies[j].log10TeV());
 
-	        // Set skymap value
-	        cube(i,j) = value;
-	      
-	    } // endfor: loop over energies
+            // Make sure that value is positive
+            if (value < 0.0) {
+                value = 0.0;
+            }
 
-	} // endfor: loop over sky bins
+            // Set skymap value
+            cube(i,j) = value;
+
+        } // endfor: loop over energies
+
+    } // endfor: loop over sky bins
 
     // Create the GModelSpatialDiffuseCube
     m_spatial = new GModelSpatialDiffuseCube(cube, energies);
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
