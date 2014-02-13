@@ -275,33 +275,54 @@ void TestGModel::test_model_par(void)
         test_try_failure(e);
     }
 
-    // Test rescaling
-    test_try("Test rescaling");
-    try {
-        GModelPar par("Test parameter", 3.0);
-        par.error(3.0);
-        par.gradient(3.0);
-        par.min(3.0);
-        par.max(3.0);
-        par.scale(1.0);
-        test_value(par.scale(), 1.0);
-        test_value(par.factor_value(), 3.0);
-        test_value(par.factor_error(), 3.0);
-        test_value(par.factor_gradient(), 3.0);
-        test_value(par.factor_min(), 3.0);
-        test_value(par.factor_max(), 3.0);
-        par.autoscale();
-        test_value(par.scale(), 3.0);
-        test_value(par.factor_value(), 1.0);
-        test_value(par.factor_error(), 1.0);
-        test_value(par.factor_gradient(), 1.0);
-        test_value(par.factor_min(), 1.0);
-        test_value(par.factor_max(), 1.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test autoscaling
+    GModelPar par("Test parameter", 3.0);
+    par.error(3.0);
+    par.gradient(3.0);
+    par.min(3.0);
+    par.max(3.0);
+    par.scale(1.0);
+    test_value(par.scale(), 1.0);
+    test_value(par.factor_value(), 3.0);
+    test_value(par.factor_error(), 3.0);
+    test_value(par.factor_gradient(), 3.0);
+    test_value(par.factor_min(), 3.0);
+    test_value(par.factor_max(), 3.0);
+    par.autoscale();
+    test_value(par.scale(), 3.0);
+    test_value(par.factor_value(), 1.0);
+    test_value(par.factor_error(), 1.0);
+    test_value(par.factor_gradient(), 1.0);
+    test_value(par.factor_min(), 1.0);
+    test_value(par.factor_max(), 1.0);
+    //
+    par.clear();
+    par.value(5.0e-16);
+    par.error(1.0e-16);
+    par.gradient(1.0e-16);
+    par.min(3.0e-16);
+    par.max(8.0e-16);
+    par.autoscale();
+    test_value(par.scale(), 5.0e-16);
+    test_value(par.value(), 5.0e-16);
+    test_value(par.error(), 1.0e-16);
+    test_value(par.gradient(), 1.0e-16);
+    test_value(par.min(), 3.0e-16);
+    test_value(par.max(), 8.0e-16);
+    //
+    par.clear();
+    par.value(-5.0e-16);
+    par.error(1.0e-16);
+    par.gradient(2.0e-16);
+    par.min(-8.0e-16);
+    par.max(-3.0e-16);
+    par.autoscale();
+    test_value(par.scale(), -5.0e-16);
+    test_value(par.value(), -5.0e-16);
+    test_value(par.error(), 1.0e-16);
+    test_value(par.gradient(), 2.0e-16);
+    test_value(par.min(), -8.0e-16);
+    test_value(par.max(), -3.0e-16);
 
     // Exit test
     return;
