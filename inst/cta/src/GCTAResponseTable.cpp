@@ -220,10 +220,10 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg) const
         throw GCTAException::bad_rsp_table_dim(G_OPERATOR1, num, 1);
     }
     #endif
-    
+
     // Initialise result vector
     std::vector<double> result(num);
-    
+
     // Set indices and weighting factors for interpolation
     update(arg);
 
@@ -232,7 +232,7 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg) const
         result[i] = m_wgt_left  * m_pars[i][m_inx_left] +
                     m_wgt_right * m_pars[i][m_inx_right];
     }
-    
+
     // Return result vector
     return result;
 }
@@ -268,7 +268,7 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
         throw GCTAException::bad_rsp_table_dim(G_OPERATOR2, num, 2);
     }
     #endif
-    
+
     // Initialise result vector
     std::vector<double> result(num);
 
@@ -282,10 +282,12 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
                     m_wgt3 * m_pars[i][m_inx3] +
                     m_wgt4 * m_pars[i][m_inx4];
     }
-    
+
     // Return result vector
     return result;
 }
+
+
 /***********************************************************************//**
  * @brief Trilinear interpolation operator for 3D tables
  *
@@ -318,7 +320,7 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
         throw GCTAException::bad_rsp_table_dim(G_OPERATOR3, num, 3);
     }
     #endif
-    
+
     // Initialise result vector
     std::vector<double> result(num);
 
@@ -368,14 +370,14 @@ double GCTAResponseTable::operator()(const int& index, const double& arg) const
         throw GException::out_of_range(G_INX_OPERATOR1, index, size()-1);
     }
     #endif
-    
+
     // Set indices and weighting factors for interpolation
     update(arg);
 
     // Perform 1D interpolation
     double result = m_wgt_left  * m_pars[index][m_inx_left] +
                     m_wgt_right * m_pars[index][m_inx_right];
-    
+
     // Return result
     return result;
 }
@@ -418,10 +420,12 @@ double GCTAResponseTable::operator()(const int& index, const double& arg1,
                     m_wgt2 * m_pars[index][m_inx2] +
                     m_wgt3 * m_pars[index][m_inx3] +
                     m_wgt4 * m_pars[index][m_inx4];
-    
+
     // Return result
     return result;
 }
+
+
 /***********************************************************************//**
  * @brief Trilinear interpolation operator for 3D tables
  *
@@ -914,7 +918,7 @@ std::string GCTAResponseTable::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Dimension") +
                       gammalib::str(axes()));
-    
+
         // Append axes information
         for (int i = 0; i < axes(); ++i) {
             result.append("\n"+gammalib::parformat("Axis " +
@@ -1105,7 +1109,7 @@ void GCTAResponseTable::read_colnames(const GFitsTable& hdu)
     m_colname_lo.clear();
     m_colname_hi.clear();
     m_colname_par.clear();
-    
+
     // Initialise search mode. There are three search modes:
     // 0 - we're looking for the next axis by searching for a column
     //     terminating with "_LO"
@@ -1243,7 +1247,7 @@ void GCTAResponseTable::read_axes(const GFitsTable& hdu)
     m_axis_lo.clear();
     m_axis_hi.clear();
     m_axis_nodes.clear();
-    
+
     // Loop over all dimensions
     for (int i = 0; i < axes(); ++i) {
 
@@ -1317,13 +1321,13 @@ void GCTAResponseTable::read_pars(const GFitsTable& hdu)
 {
     // Clear parameter cubes
     m_pars.clear();
-    
+
     // Compute expected cube size
     m_nelements = axis(0);
     for (int i = 1; i < axes(); ++i) {
         m_nelements *= axis(i);
     }
-    
+
     // Loop over all parameter cubes
     for (int i = 0; i < size(); ++i) {
 
@@ -1389,7 +1393,7 @@ void GCTAResponseTable::update(const double& arg) const
     m_inx_right = nodes->inx_right();
     m_wgt_left  = nodes->wgt_left();
     m_wgt_right = nodes->wgt_right();
-    
+
     // Return
     return;
 }
@@ -1435,7 +1439,7 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2) const
     m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_right();
     m_wgt3 = nodes1->wgt_right() * nodes2->wgt_left();
     m_wgt4 = nodes1->wgt_right() * nodes2->wgt_right();
-    
+
     // Return
     return;
 }
