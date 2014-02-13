@@ -4,5 +4,6 @@
     <parameter name="EffectiveArea"       file=""/>
     <parameter name="PointSpreadFunction" file=""/>
     <parameter name="EnergyDispersion"    file=""/>
+    <parameter name="Background"          file=""/>
   </observation>
 </observation_list>

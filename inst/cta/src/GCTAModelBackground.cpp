@@ -603,7 +603,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 			double rmax = roi_radius + roi_distance;
             #endif
 
-			// Spatially integrate radial component
+			// Spatially integrate spatial component
 			npred = integral.romb(rmin, rmax);
 
 	        // Store result in Npred cache
@@ -809,10 +809,33 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
  *
  * @param[in] xml XML element.
  *
- * The model is composed of a spectrum component ('spectral'), a spatial
+ * The model is composed of a spectrum component ('spectrum'), a spatial
  * component ('spatialModel'), and, optionally, of a temporal component
- * ('lightcurve'). If no temporal component is found a constant model is
+ * ('temporalModel'). If no temporal component is found a constant model is
  * assumed.
+ *
+ * The method also handles a instrumental background models that are defined
+ * using information found in the "BACKGROUND" extension of the instrument
+ * response functions. For this purpose a special spatialModel of type
+ * "Instrumental" has been implemented, following the format
+ *
+ *     <spatialModel type="Instrumental" instrument="CTA">
+ *       <parameter name="EventList"           file="events.fits"/>
+ *       <parameter name="EffectiveArea"       file=""/>
+ *       <parameter name="PointSpreadFunction" file=""/>
+ *       <parameter name="EnergyDispersion"    file=""/>
+ *       <parameter name="Background"          file="background.fits"/>
+ *     </spatialModel>
+ *
+ * The format is identical to the format used for an observation definition,
+ * and the XML element is in fact parsed using the GCTAObservation::read
+ * method. This is for simplicity for the moment, yet the instrument response
+ * related parameters are in fact not used. It should also be noted that the
+ * actual code requires that the model identifier is set to exactly the same
+ * identifier that is used for the corresponding CTA observation. This is
+ * needed because the source models and the observation container are not
+ * necessarily linked, hence there is no general way to pass this information
+ * directly.
  ***************************************************************************/
 void GCTAModelBackground::read(const GXmlElement& xml)
 {
@@ -820,26 +843,47 @@ void GCTAModelBackground::read(const GXmlElement& xml)
     clear();
 
     // Initialise XML elements
-    const GXmlElement* spat = NULL;
-    const GXmlElement* spec = NULL;
-    const GXmlElement* temp = NULL;
+    const GXmlElement* spatial  = NULL;
+    const GXmlElement* spectral = NULL;
+    const GXmlElement* temporal = NULL;
 
-    // Get pointers on spectrum and radial model
-    spat = xml.element("spatialModel", 0);
-    spec = xml.element("spectrum", 0);
+    // Get pointers on spectrum and spatial model
+    spatial  = xml.element("spatialModel", 0);
+    spectral = xml.element("spectrum", 0);
 
-    // Clone radial and spectral models
-    m_spatial  = xml_spatial(*spat);
-    m_spectral = xml_spectral(*spec);
+    // Handle special case of instrumental background model
+    std::string type = spatial->attribute("type");
+    if (type == "Instrumental") {
+
+        // Create CTA observation from information in XML file
+        GCTAObservation obs;
+        obs.read(*spatial);
+
+        // Set observation ID from id attribute
+        obs.id(xml.attribute("id"));
+        
+        // Set spatial model
+        set_spatial(obs, obs.bgdfile());
+
+        // Set spectral model
+        m_spectral = xml_spectral(*spectral);
+
+    } // endif: handled special case of instrumental background
+
+    // ... otherwise clone spatial and spectral models
+    else {
+        m_spatial  = xml_spatial(*spatial);
+        m_spectral = xml_spectral(*spectral);
+    }
 
     // Optionally get temporal model
     if (xml.elements("temporalModel")) {
-        temp       = xml.element("temporalModel", 0);
-        m_temporal = xml_temporal(*temp);
+        temporal   = xml.element("temporalModel", 0);
+        m_temporal = xml_temporal(*temporal);
     }
     else {
-        GModelTemporalConst temporal;
-        m_temporal = temporal.clone();
+        GModelTemporalConst constant;
+        m_temporal = constant.clone();
     }
 
     // Set model name
@@ -945,7 +989,7 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
         result.append("=== GCTAModelBackground ===");
 
         // Determine number of parameters per type
-        int n_radial   = (spatial()  != NULL) ? spatial()->size()  : 0;
+        int n_spatial  = (spatial()  != NULL) ? spatial()->size()  : 0;
         int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
         int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
 
@@ -954,7 +998,7 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
 
         // Append model type
         result.append("\n"+gammalib::parformat("Model type"));
-        if (n_radial > 0) {
+        if (n_spatial > 0) {
             result.append("\""+spatial()->type()+"\"");
             if (n_spectral > 0 || n_temporal > 0) {
                 result.append(" * ");
@@ -974,8 +1018,8 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Number of parameters") +
                       gammalib::str(size()));
         result.append("\n"+gammalib::parformat("Number of spatial par's") +
-                      gammalib::str(n_radial));
-        for (int i = 0; i < n_radial; ++i) {
+                      gammalib::str(n_spatial));
+        for (int i = 0; i < n_spatial; ++i) {
             result.append("\n"+(*spatial())[i].print());
         }
         result.append("\n"+gammalib::parformat("Number of spectral par's") +
@@ -1019,6 +1063,8 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  * response table.
  *
  * @todo Document method.
+ * @todo We do not really need a CTA observation, we only need the pointing
+ *       direction.
  ***************************************************************************/
 void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
                                       const std::string&     filename,
@@ -1197,7 +1243,7 @@ void GCTAModelBackground::copy_members(const GCTAModelBackground& model)
     m_npred_times    = model.m_npred_times;
     m_npred_values   = model.m_npred_values;
 
-    // Clone radial, spectral and temporal model components
+    // Clone spatial, spectral and temporal model components
     m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
     m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
     m_temporal = (model.m_temporal != NULL) ? model.m_temporal->clone() : NULL;
@@ -1249,16 +1295,16 @@ void GCTAModelBackground::set_pointers(void)
     m_pars.clear();
 
     // Determine the number of parameters
-    int n_radial   = (spatial()  != NULL) ? spatial()->size()  : 0;
+    int n_spatial  = (spatial()  != NULL) ? spatial()->size()  : 0;
     int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
     int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
-    int n_pars     = n_radial + n_spectral + n_temporal;
+    int n_pars     = n_spatial + n_spectral + n_temporal;
 
     // Continue only if there are parameters
     if (n_pars > 0) {
 
-        // Gather radial parameter pointers
-        for (int i = 0; i < n_radial; ++i) {
+        // Gather spatial parameter pointers
+        for (int i = 0; i < n_spatial; ++i) {
             m_pars.push_back(&((*spatial())[i]));
         }
 
@@ -1309,10 +1355,10 @@ bool GCTAModelBackground::valid_model(void) const
  ***************************************************************************/
 GModelSpatial* GCTAModelBackground::xml_spatial(const GXmlElement& spatial) const
 {
-    // Get radial model type
+    // Get spatial model type
     std::string type = spatial.attribute("type");
 
-    // Get radial model
+    // Get spatial model
     GModelSpatialRegistry registry;
     GModelSpatial*        ptr = registry.alloc(type);
 

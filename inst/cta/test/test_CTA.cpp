@@ -50,6 +50,7 @@ const std::string cta_unbin_xml  = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml  = datadir+"/crab.xml";
 const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
+const std::string cta_obsbck_xml = datadir+"/cta_modelbg_obs.xml";
 const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king   = "irf_file.fits";
 const std::string cta_modbck_fit = datadir+"/bg_test.fits";
@@ -640,7 +641,7 @@ void TestGCTAModelBackground::test_modelbg_npred_xml(void)
     test_value(npred, ref , 1.0e-5,  "Npred computation for CTA background model");
 	
 	// Return
-	return ;
+	return;
 }
 
 /***********************************************************************//**
@@ -668,8 +669,18 @@ void TestGCTAModelBackground::test_modelbg_construct_fits(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
+
+    // Load model from XML file and check the parameters
+    GModels models(cta_obsbck_xml);
+//std::cout << models << std::endl;
+    test_value((*models[0])[0].value(), 1.0, 1e-6, "Normalization expected to be 1.0");
+    test_value((*models[0])[1].value(), 1.0, 1e-6, "Prefactor expected to be 1.0");
+    test_value((*models[0])[2].value(), 0.0, 1e-6, "Index expected to be 0.0");
+    test_value((*models[0])[3].value(), 1e6, 1e-6, "Pivot expected to be 1e6");
+    test_value((*models[0])[4].value(), 1.0, 1e-6, "Constant expected to be 1.0");
     
-    return ;
+    // Return
+    return;
 }
 
 
