@@ -573,28 +573,31 @@ void GOptimizerPar::scale(const double& scale)
  ***************************************************************************/
 void GOptimizerPar::autoscale(void)
 {
-    // Continue only if the value factor is non-zero
-    if (m_factor_value != 0.0) {
+    // Get value
+    double value = this->value();
 
-        // Set the scale factor
-        m_scale *= m_factor_value;
+    // Continue only if the value is non-zero
+    if (value != 0.0) {
 
-        // Get inverse scaling factor
-        double invscale = 1.0 / m_factor_value;
+        // Get the renormalization factor
+        double renormalization = m_scale / value;
 
-        // Set values, error, gradient, min and max
-        m_factor_value    *= invscale;
-        m_factor_error    *= invscale;
-        m_factor_gradient *= invscale;
+        // Set the new scale factor to the actual value
+        m_scale = value;
+
+        // Renormalize values, error, gradient, min and max
+        m_factor_value    *= renormalization;
+        m_factor_error    *= renormalization;
+        m_factor_gradient *= renormalization;
         if (m_has_min) {
-            m_factor_min *= invscale;
+            m_factor_min *= renormalization;
         }
         if (m_has_max) {
-            m_factor_max *= invscale;
+            m_factor_max *= renormalization;
         }
 
         // Takes care of boundaries in case of sign change
-        if (invscale < 0.0) {
+        if (renormalization < 0.0) {
             if (m_has_min && m_has_max) {
                 double swap  = m_factor_min;
                 m_factor_min = m_factor_max;
