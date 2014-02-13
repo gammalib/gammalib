@@ -206,33 +206,33 @@ void GCTAPointing::dir(const GSkyDir& dir)
  ***************************************************************************/
 GCTAInstDir GCTAPointing::instdir(const GSkyDir& skydir) const
 {
-	// Compute rotation matrix
-	update();
+    // Compute rotation matrix
+    update();
 
-	// Get celestial vector from sky coordinate
-	GVector celvector = skydir.celvector();
+    // Get celestial vector from sky coordinate
+    GVector celvector = skydir.celvector();
 
-	// Transform to instrument system
-	GVector inst = m_Rback.transpose() * celvector;
+    // Transform to instrument system
+    GVector inst = m_Rback.transpose() * celvector;
 
-	// Initialise instrument coordinates
-	double x_inst = 0.0;
-	double y_inst = 0.0;
+    // Initialise instrument coordinates
+    double x_inst = 0.0;
+    double y_inst = 0.0;
 
-	// Get offset from cel vector, i.e. distance from camera center
-	double theta = std::acos(inst[2]);
+    // Get offset from cel vector, i.e. distance from camera center
+    double theta = std::acos(inst[2]);
 
-	// Check if theta and phi are defined
-	if (theta > 0.0 ) {
-		double phi = std::asin(inst[1] / std::sin(theta));
-		x_inst     = theta * std::cos(phi);
-		y_inst     = theta * std::sin(phi);
-	}
+    // Check if theta and phi are defined
+    if (theta > 0.0 ) {
+        double phi = std::asin(inst[1] / std::sin(theta));
+        x_inst     = theta * std::cos(phi);
+        y_inst     = theta * std::sin(phi);
+    }
 
-	// Initialise instrument direction
-	GCTAInstDir inst_direction(skydir);
-	inst_direction.detx(x_inst);
-	inst_direction.dety(y_inst);
+    // Initialise instrument direction
+    GCTAInstDir inst_direction(skydir);
+    inst_direction.detx(x_inst);
+    inst_direction.dety(y_inst);
 
     // Return
     return inst_direction;

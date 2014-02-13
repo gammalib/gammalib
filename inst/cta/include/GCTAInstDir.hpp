@@ -74,12 +74,9 @@ protected:
     void free_members(void);
 
     // Data members
-    GSkyDir m_dir;  //!< Observed incident direction of event
-    double m_detx;  //!< Instrument coordinate X
-    double m_dety;  //!< Instrument coordinate Y
-
-
-
+    GSkyDir m_dir;   //!< Observed incident direction of event
+    double  m_detx;  //!< Instrument coordinate X (radians)
+    double  m_dety;  //!< Instrument coordinate Y (radians)
 };
 
 
@@ -127,11 +124,11 @@ void GCTAInstDir::dir(const GSkyDir& dir)
 
 
 /***********************************************************************//**
- * @brief Return reference to DETX coordinate
+ * @brief Return reference to DETX coordinate (in radians)
  *
- * @return Reference to DETX coordinate.
+ * @return Reference to DETX coordinate (in radians).
  *
- * Returns reference DETX coordinate.
+ * Returns reference DETX coordinate (in radians).
  ***************************************************************************/
 inline
 const double& GCTAInstDir::detx(void) const
@@ -141,11 +138,11 @@ const double& GCTAInstDir::detx(void) const
 
 
 /***********************************************************************//**
- * @brief Return reference to DETY coordinate
+ * @brief Return reference to DETY coordinate (in radians)
  *
- * @return Reference to DETY coordinate.
+ * @return Reference to DETY coordinate (in radians).
  *
- * Returns reference DETY coordinate.
+ * Returns reference DETY coordinate (in radians).
  ***************************************************************************/
 inline
 const double& GCTAInstDir::dety(void) const
@@ -155,9 +152,9 @@ const double& GCTAInstDir::dety(void) const
 
 
 /***********************************************************************//**
- * @brief Set DETX coordinate
+ * @brief Set DETX coordinate (in radians)
  *
- * @param[in] x DETX coordinate.
+ * @param[in] x DETX coordinate (in radians).
  *
  * Set DETX coordinate.
  ***************************************************************************/
@@ -170,9 +167,9 @@ void GCTAInstDir::detx(const double &x)
 
 
 /***********************************************************************//**
- * @brief Set DETY coordinate
+ * @brief Set DETY coordinate (in radians)
  *
- * @param[in] y DETY coordinate.
+ * @param[in] y DETY coordinate (in radians).
  *
  * Set DETY coordinate.
  ***************************************************************************/
