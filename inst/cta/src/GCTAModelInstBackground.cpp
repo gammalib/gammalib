@@ -29,6 +29,8 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GMath.hpp"
+#include "GIntegral.hpp"
 #include "GModelRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
@@ -47,6 +49,8 @@ const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_backgro
 #define G_EVAL        "GCTAModelInstBackground::eval(GEvent&, GObservation&)"
 #define G_EVAL_GRADIENTS   "GCTAModelInstBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
+#define G_NPRED            "GCTAModelInstBackground::npred(GEnergy&, GTime&,"\
+                                                            " GObservation&)"
 #define G_MC              "GCTAModelInstBackground::mc(GObservation&, GRan&)"
 #define G_XML_SPECTRAL  "GCTAModelInstBackground::xml_spectral(GXmlElement&)"
 #define G_XML_TEMPORAL  "GCTAModelInstBackground::xml_temporal(GXmlElement&)"
@@ -54,11 +58,15 @@ const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_backgro
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_USE_NPRED_CACHE
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DUMP_MC
+//#define G_DEBUG_NPRED
 
 /* __ Constants __________________________________________________________ */
+const double g_cta_inst_background_npred_theta_eps = 1.0e-4;
+const double g_cta_inst_background_npred_phi_eps   = 1.0e-4;
 
 
 /*==========================================================================
@@ -85,10 +93,29 @@ GCTAModelInstBackground::GCTAModelInstBackground(void) : GModelData()
  *
  * @param[in] xml XML element.
  *
- * Constructs a CTA instrumental background model from the information that
- * is found in a XML element. Please refer to the method
- * GCTAModelInstBackground::read to learn more about the information that is
- * expected in the XML element.
+ * Constructs a CTA instrumental background model from the information
+ * provided by an XML element. The XML element is expected to have the
+ * following structure
+ *
+ *     <source name="..." type="..." instrument="...">
+ *       <spectrum type="...">
+ *         ...
+ *       </spectrum>
+ *     </source>
+ *
+ * Optionally, a temporal model may be provided using the following
+ * syntax
+ *
+ *     <source name="..." type="..." instrument="...">
+ *       <spectrum type="...">
+ *         ...
+ *       </spectrum>
+ *       <temporalModel type="...">
+ *         ...
+ *       </temporalModel>
+ *     </source>
+ *
+ * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
 GCTAModelInstBackground::GCTAModelInstBackground(const GXmlElement& xml) :
                          GModelData(xml)
@@ -287,7 +314,7 @@ double GCTAModelInstBackground::eval(const GEvent& event,
     GCTAInstDir inst_dir = pnt.instdir(dir->dir());
 
     // Evaluate function
-    double logE = event.energy().log10TeV(); // TODO: Make unit save
+    double logE = event.energy().log10TeV();
     double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time()) : 1.0;
@@ -348,7 +375,7 @@ double GCTAModelInstBackground::eval_gradients(const GEvent& event,
     GCTAInstDir inst_dir = pnt.instdir(dir->dir());
 
     // Evaluate function
-    double logE = event.energy().log10TeV(); // TODO: Make unit save
+    double logE = event.energy().log10TeV();
     double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
     double spec = (spectral() != NULL)
                   ? spectral()->eval_gradients(event.energy(), event.time())
@@ -388,21 +415,135 @@ double GCTAModelInstBackground::eval_gradients(const GEvent& event,
 
 
 /***********************************************************************//**
- * @brief Return spatially integrated data model
+ * @brief Return spatially integrated background model
  *
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
  * @return Spatially integrated model.
  *
- * @todo Implement method
+ * @exception GException::invalid_argument
+ *            The specified observation is not a CTA observation.
+ *
+ * Spatially integrates the instrumental background model for a given
+ * measured event energy and event time. This method also applies a deadtime
+ * correction factor, so that the normalization of the model is a real rate
+ * (counts/MeV/s).
  ***************************************************************************/
 double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
                                       const GTime&        obsTime,
                                       const GObservation& obs) const
 {
-    // Return
-    return 0.0;
+    // Initialise result
+    double npred     = 0.0;
+    bool   has_npred = false;
+
+    // Build unique identifier
+    std::string id = obs.instrument() + "::" + obs.id();
+
+    // Check if Npred value is already in cache
+    #if defined(G_USE_NPRED_CACHE)
+    if (!m_npred_names.empty()) {
+
+        // Search for unique identifier, and if found, recover Npred value
+		// and break
+		for (int i = 0; i < m_npred_names.size(); ++i) {
+			if (m_npred_names[i] == id && m_npred_energies[i] == obsEng) {
+				npred     = m_npred_values[i];
+				has_npred = true;
+				#if defined(G_DEBUG_NPRED)
+				std::cout << "GCTAModelInstBackground::npred:";
+				std::cout << " cache=" << i;
+				std::cout << " npred=" << npred << std::endl;
+				#endif
+				break;
+			}
+		}
+
+    } // endif: there were values in the Npred cache
+    #endif
+
+    // Continue only if no Npred cache value has been found
+    if (!has_npred) {
+
+        // Evaluate only if model is valid
+        if (valid_model()) {
+
+            // Get pointer on CTA observation
+            const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
+            if (cta == NULL) {
+                std::string msg = "Specified observation is not a CTA"
+                                  " observation.\n" + obs.print();
+                throw GException::invalid_argument(G_NPRED, msg);
+            }
+
+            // Retrieve pointer to CTA background
+            const GCTABackground* bgd = cta->response().background();
+            if (bgd == NULL) {
+                std::string msg = "Specified observation contains no background"
+                                  " information.\n" + obs.print();
+                throw GException::invalid_argument(G_NPRED, msg);
+            }
+
+            // Get CTA event list
+			const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+            if (events == NULL) {
+                std::string msg = "No CTA event list found in observation.\n" +
+                                  obs.print();
+                throw GException::invalid_argument(G_NPRED, msg);
+            }
+
+            // Get reference to ROI centre
+            const GSkyDir& roi_centre = events->roi().centre().dir();
+
+			// Get ROI radius in radians
+			double roi_radius = events->roi().radius() * gammalib::deg2rad;
+
+            // Get log10 of energy in TeV
+            double logE = obsEng.log10TeV();
+
+			// Setup integration function
+			GCTAModelInstBackground::npred_roi_kern_theta integrand(bgd, logE);
+
+			// Setup integrator
+			GIntegral integral(&integrand);
+			integral.eps(g_cta_inst_background_npred_theta_eps);
+
+			// Spatially integrate radial component
+			npred = integral.romb(0.0, roi_radius);
+
+	        // Store result in Npred cache
+	        #if defined(G_USE_NPRED_CACHE)
+	        m_npred_names.push_back(id);
+	        m_npred_energies.push_back(obsEng);
+	        m_npred_times.push_back(obsTime);
+	        m_npred_values.push_back(npred);
+	        #endif
+
+	        // Debug: Check for NaN
+	        #if defined(G_NAN_CHECK)
+	        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+                std::string origin  = "GCTAModelInstBackground::npred";
+                std::string message = " NaN/Inf encountered (npred=" +
+                                      gammalib::str(npred) + ", roi_radius=" +
+                                      gammalib::str(roi_radius) + ")";
+                gammalib::warning(origin, message);
+	        }
+	        #endif
+
+        } // endif: model was valid
+
+    } // endif: Npred computation required
+
+	// Multiply in spectral and temporal components
+	npred *= spectral()->eval(obsEng, obsTime);
+	npred *= temporal()->eval(obsTime);
+
+	// Apply deadtime correction
+	npred *= obs.deadc(obsTime);
+
+    // Return Npred
+    return npred;
 }
 
 
@@ -414,7 +555,22 @@ double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
  * @return Pointer to list of simulated events (needs to be de-allocated by
  *         client)
  *
- * @todo Implement method
+ * @exception GException::invalid_argument
+ *            Specified observation is not a CTA observation.
+ *
+ * Draws a sample of events from the background model using a Monte
+ * Carlo simulation. The region of interest, the energy boundaries and the
+ * good time interval for the sampling will be extracted from the observation
+ * argument that is passed to the method. The method also requires a random
+ * number generator of type GRan which is passed by reference, hence the
+ * state of the random number generator will be changed by the method.
+ *
+ * The method also applies a deadtime correction using a Monte Carlo process,
+ * taking into account temporal deadtime variations. For this purpose, the
+ * method makes use of the time dependent GObservation::deadc method.
+ *
+ * For each event in the returned event list, the sky direction, the nominal
+ * coordinates (DETX and DETY), the energy and the time will be set.
  ***************************************************************************/
 GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) const
 {
@@ -587,9 +743,29 @@ GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) c
  *
  * @param[in] xml XML element.
  *
- * The model is composed of a spectrum component ('spectrum') and optionally
- * of a temporal component ('temporalModel'). If no temporal component is
- * found a constant model is assumed.
+ * Set up CTA instrument background model from the information provided by
+ * an XML element. The XML element is expected to have the following
+ * structure
+ *
+ *     <source name="..." type="..." instrument="...">
+ *       <spectrum type="...">
+ *         ...
+ *       </spectrum>
+ *     </source>
+ *
+ * Optionally, a temporal model may be provided using the following
+ * syntax
+ *
+ *     <source name="..." type="..." instrument="...">
+ *       <spectrum type="...">
+ *         ...
+ *       </spectrum>
+ *       <temporalModel type="...">
+ *         ...
+ *       </temporalModel>
+ *     </source>
+ *
+ * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
 void GCTAModelInstBackground::read(const GXmlElement& xml)
 {
@@ -638,7 +814,28 @@ void GCTAModelInstBackground::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @todo Document method.
+ * Write CTA instrument background model information into an XML element.
+ * The XML element will have the following structure
+ *
+ *     <source name="..." type="..." instrument="...">
+ *       <spectrum type="...">
+ *         ...
+ *       </spectrum>
+ *     </source>
+ *
+ * If the model contains a non-constant temporal model, the temporal
+ * component will also be written following the syntax
+ *
+ *     <source name="..." type="..." instrument="...">
+ *       <spectrum type="...">
+ *         ...
+ *       </spectrum>
+ *       <temporalModel type="...">
+ *         ...
+ *       </temporalModel>
+ *     </source>
+ *
+ * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
 void GCTAModelInstBackground::write(GXmlElement& xml) const
 {
@@ -655,11 +852,20 @@ void GCTAModelInstBackground::write(GXmlElement& xml) const
         }
     }
 
+    // If we have a temporal model that is either not a constant, or a
+    // constant with a normalization value that differs from 1.0 then
+    // write the temporal component into the XML element. This logic
+    // assures compatibility with the Fermi/LAT format as this format
+    // does not handle temporal components.
+    bool write_temporal = ((m_temporal != NULL) &&
+                           (m_temporal->type() != "Constant" ||
+                            (*m_temporal)[0].value() != 1.0));
+
     // If no source with corresponding name was found then append one
     if (src == NULL) {
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
-        //if (temporal() != NULL) src->append(GXmlElement("temporalModel"));
+        if (write_temporal)     src->append(GXmlElement("temporalModel"));
     }
 
     // Set model type, name and optionally instruments
@@ -679,15 +885,13 @@ void GCTAModelInstBackground::write(GXmlElement& xml) const
         spectral()->write(*spec);
     }
 
-    // Write temporal model
-    /*
-    if (temporal() != NULL) {
+    // Optionally write temporal model
+    if (write_temporal) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
             GXmlElement* temp = src->element("temporalModel", 0);
             temporal()->write(*temp);
         }
     }
-    */
 
     // Return
     return;
@@ -766,6 +970,12 @@ void GCTAModelInstBackground::init_members(void)
     m_spectral = NULL;
     m_temporal = NULL;
 
+    // Initialise Npred cache
+    m_npred_names.clear();
+    m_npred_energies.clear();
+    m_npred_times.clear();
+    m_npred_values.clear();
+
     // Return
     return;
 }
@@ -778,6 +988,12 @@ void GCTAModelInstBackground::init_members(void)
  ***************************************************************************/
 void GCTAModelInstBackground::copy_members(const GCTAModelInstBackground& bgd)
 {
+    // Copy cache
+    m_npred_names    = bgd.m_npred_names;
+    m_npred_energies = bgd.m_npred_energies;
+    m_npred_times    = bgd.m_npred_times;
+    m_npred_values   = bgd.m_npred_values;
+
     // Clone spectral and temporal model components
     m_spectral = (bgd.m_spectral != NULL) ? bgd.m_spectral->clone() : NULL;
     m_temporal = (bgd.m_temporal != NULL) ? bgd.m_temporal->clone() : NULL;
@@ -925,4 +1141,105 @@ GModelTemporal* GCTAModelInstBackground::xml_temporal(const GXmlElement& tempora
 
     // Return pointer
     return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for offset angle integration of background model
+ *
+ * @param[in] theta Offset angle from ROI centre (radians).
+ *
+ * Computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \theta \times
+ *                     \int_{0}^{2\pi}
+ *                     B(\theta,\phi | E, t) d\phi
+ * \f]
+ *
+ * where \f$B(\theta,\phi | E, t)\f$ is the background model for a specific
+ * observed energy \f$E\f$ and time \f$t\f$.
+ ***************************************************************************/
+double GCTAModelInstBackground::npred_roi_kern_theta::eval(const double& theta)
+{
+    // Initialise value
+    double value = 0.0;
+
+    // Continue only if offset angle is positive
+    if (theta > 0.0) {
+
+        // Setup phi integration kernel
+        GCTAModelInstBackground::npred_roi_kern_phi integrand(m_bgd,
+                                                              m_logE,
+                                                              theta);
+
+        // Integrate over phi
+        GIntegral integral(&integrand);
+        integral.eps(g_cta_inst_background_npred_phi_eps);
+        value = integral.romb(0.0, gammalib::twopi) * std::sin(theta);
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+            std::string origin  = "GCTAModelInstBackground::npred_roi_kern_theta::eval"
+                                  "(" + gammalib::str(theta) + ")";
+            std::string message = " NaN/Inf encountered (value=" +
+                                  gammalib::str(value) + ")";
+            gammalib::warning(origin, message);
+        }
+        #endif
+
+    } // endif: offset angle was positive
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuth angle integration of background model
+ *
+ * @param[in] phi Azimuth angle around ROI centre (radians).
+ *
+ * Computes
+ *
+ * \f[
+ *    B(\theta, \phi | E, t)
+ * \f]
+ *
+ * using
+ *
+ * \f[ {\rm detx} = \theta \cos \phi \f]
+ * \f[ {\rm dety} = \theta \sin \phi \f]
+ *
+ * @todo Verify correct orientation of detx and dety with respect to phi
+ ***************************************************************************/
+double GCTAModelInstBackground::npred_roi_kern_phi::eval(const double& phi)
+{
+	// Compute detx and dety
+    double detx(0.0);
+    double dety(0.0);
+	if (m_theta > 0.0 ) {
+		detx = m_theta * std::cos(phi);
+		dety = m_theta * std::sin(phi);
+	}
+
+    // Get background value
+    double value = (*m_bgd)(m_logE, detx, dety);
+
+	// Debug: Check for NaN
+	#if defined(G_NAN_CHECK)
+	if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::string origin  = "GCTAModelInstBackground::npred_roi_kern_phi::eval"
+                              "(" + gammalib::str(phi) + ")";
+        std::string message = " NaN/Inf encountered (value=" +
+                              gammalib::str(value) + ", detx=" +
+                              gammalib::str(detx) + ", dety=" +
+                              gammalib::str(dety) + ")";
+        gammalib::warning(origin, message);
+	}
+	#endif
+
+    // Return Npred
+    return value;
 }

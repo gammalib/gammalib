@@ -32,7 +32,9 @@
 #include "GModelData.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelTemporal.hpp"
+#include "GFunction.hpp"
 #include "GCTAEventList.hpp"
+#include "GCTABackground.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -86,9 +88,44 @@ private:
     GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
 
+    // ROI integration kernel over theta
+    class npred_roi_kern_theta : public GFunction {
+    public:
+    	npred_roi_kern_theta(const GCTABackground* bgd,
+                             const double&         logE) :
+                             m_bgd(bgd),
+                             m_logE(logE) { }
+        double eval(const double& theta);
+    protected:
+        const GCTABackground* m_bgd;  //!< Pointer to background
+        const double&         m_logE; //!< Log10 of energy
+    };
+
+    // ROI integration kernel over phi
+    class npred_roi_kern_phi : public GFunction {
+    public:
+    	npred_roi_kern_phi(const GCTABackground* bgd,
+                           const double&         logE,
+                           const double&         theta) :
+                           m_bgd(bgd),
+                           m_logE(logE),
+                           m_theta(theta) { }
+        double eval(const double& phi);
+    protected:
+        const GCTABackground* m_bgd;   //!< Pointer to background
+        const double&         m_logE;  //!< Log10 of energy
+        const double&         m_theta; //!< Offset angle (radians)
+    };
+
     // Members
     GModelSpectral* m_spectral;   //!< Spectral model
     GModelTemporal* m_temporal;   //!< Temporal model
+
+    // Npred cache
+    mutable std::vector<std::string> m_npred_names;    //!< Model names
+    mutable std::vector<GEnergy>     m_npred_energies; //!< Model energy
+    mutable std::vector<GTime>       m_npred_times;    //!< Model time
+    mutable std::vector<double>      m_npred_values;   //!< Model values
 };
 
 
