@@ -252,23 +252,22 @@ GSkyDir GCTAPointing::skydir(const GCTAInstDir& instdir)const
 	// Compute rotation matrix
 	update();
 
-	// retrieve instrument coordinates
+	// Retrieve instrument coordinates
 	double inst_x = instdir.detx();
 	double inst_y = instdir.dety();
 
-	// convert to polar coordinates
-	double theta = std::sqrt(inst_x * inst_x + inst_y * inst_y);
-	double phi   = std::atan2(inst_y, inst_x);
+	// Convert to polar coordinates
+	double theta     = std::sqrt(inst_x * inst_x + inst_y * inst_y);
+	double phi       = std::atan2(inst_y, inst_x);
+    double sin_phi   = std::sin(phi);
+    double cos_phi   = std::cos(phi);
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
 
-	// Get celestial vector from sky coordinate
-	// TODO: this has to be checked!
-	// Do we retrieve the correct vector here?
-    double cos_phi = std::cos(phi);
-	GVector native(cos_phi * std::cos(theta),
-                   cos_phi * std::sin(theta),
-                   std::sin(phi));
+	// Build vector from polar coordinates
+	GVector native(-cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
 
-	// Transform to sky system
+	// Rotate from instrument system into sky system
 	GVector skyvector = m_Rback * native;
 	GSkyDir sky;
 	sky.celvector(skyvector);
