@@ -98,7 +98,7 @@ private:
     void init_members(void);
     void copy_members(const GCTAEdispRMF& psf);
     void free_members(void);
-    void update(const double& logE) const;
+    void convert_cdf(void);
 
     // Members
     std::string         m_filename;  //!< Name of response file
@@ -108,6 +108,8 @@ private:
     GEbounds            m_ebounds_src;     //!< Source energy boundaries
     GEbounds            m_ebounds_obs;     //!< Observed energy boundaries
     GMatrixSparse       m_matrix;          //!< Sparse redistribution matrix
+    GVector 			m_mc_cache;        //!< Monte Carlo cache
+    std::vector<GVector> m_cdf_cache;     //!< Vector of GVectors from RMF file
     // TODO: optionally implement interpolated (linear or spline) model
     // and store interpolation object here.
     //GNodeArray          m_logE;      //!< log(E) nodes for interpolation

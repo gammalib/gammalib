@@ -32,7 +32,10 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GRmf.hpp"
+#include "GRan.hpp"
+#include "GEnergy.hpp"
 #include "GMath.hpp"
+#include "GVector.hpp"
 #include "GIntegral.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
@@ -238,23 +241,18 @@ GCTAEdispRMF* GCTAEdispRMF::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load energy dispersion from performance table
+ * @brief Load energy dispersion from RMF file
  *
- * @param[in] filename Performance table file name.
+ * @param[in] filename of RMF file.
  *
  * @exception GCTAExceptionHandler::file_open_error
  *            File could not be opened for read access.
  *
- * This method loads the energy dispersion information from an ASCII
- * performance table. The energy resolution is stored in the 5th column
- * of the performance table as RMS(ln(Eest/Etrue)). The method converts
- * this internally to a sigma value by multiplying the stored values by
- * 0.434294481903.
+ * This method loads the energy dispersion information from an RMF file.
  ***************************************************************************/
 void GCTAEdispRMF::load(const std::string& filename)
 {
-	GRmf rmf;
-	rmf.filename();
+	GRmf rmf(filename);
 
 	m_ebounds_src = rmf.etrue();
 	m_ebounds_obs = rmf.emeasured();
@@ -274,8 +272,7 @@ void GCTAEdispRMF::load(const std::string& filename)
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
- * Draws observed energy value from a normal distribution of width
- * m_par_sigma around @p logE.
+ * Draws observed energy value from RMF matrix
  ***************************************************************************/
 GEnergy GCTAEdispRMF::mc(GRan&         ran,
                          const double& logE,
@@ -284,9 +281,23 @@ GEnergy GCTAEdispRMF::mc(GRan&         ran,
                          const double& zenith,
                          const double& azimuth) const
 {
-    // TODO
-    // Return energy
-    // return energy;
+	//Random selection of a GVector from vector of GVectors
+
+	double u = ran.uniform();
+	GVector vector = m_cdf_cache[u];
+
+	//Random selection of element in GVector
+	int ref = ran.sample_cdf_GVector(vector);
+
+   	// Convert index into an energy
+    double logEobs = vector[ref];
+
+    // Draw log observed energy in TeV
+    GEnergy energy;
+    energy.log10TeV(logEobs);
+
+	// Return energy
+	return energy;
 }
 
 
@@ -300,19 +311,29 @@ GEnergy GCTAEdispRMF::mc(GRan&         ran,
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
  * Returns the band of observed energies outside of which the energy
- * dispersion becomes negligible for a given true energy @p logEsrc. This
- * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
- * Gaussian width of the energy dispersion.
+ * dispersion becomes negligible for a given true energy @p logEsrc.
  ***************************************************************************/
 GEbounds GCTAEdispRMF::ebounds_obs(const double& logEsrc,
                                          const double& theta,
                                          const double& phi,
                                          const double& zenith,
                                          const double& azimuth) const
-{
-    // TODO
+{	GRan ran;
+	int low = ran.sample_cdf_GVector(m_mc_cache);
+	GVector EVector = m_matrix.column(low);
+
+	int emin_index = EVector.first_nonzero();
+	int emax_index = EVector.last_nonzero();
+
+	double emin_val = EVector[emin_index];
+	double emax_val = EVector[emax_index];
+
+	GEnergy emin = GEnergy(emin_val, "MeV");
+	GEnergy emax = GEnergy(emax_val, "MeV");
+
     // Return energy boundaries
-    //return (GEbounds(emin, emax));
+    return (GEbounds(emin, emax));
+
 }
 
 
@@ -326,35 +347,98 @@ GEbounds GCTAEdispRMF::ebounds_obs(const double& logEsrc,
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
  * Returns the band of true photon energies outside of which the energy
- * dispersion becomes negligible for a given observed energy @p logEobs. This
- * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
- * Gaussian width of the energy dispersion.
+ * dispersion becomes negligible for a given observed energy @p logEobs.
  ***************************************************************************/
 GEbounds GCTAEdispRMF::ebounds_src(const double& logEobs,
                                          const double& theta,
                                          const double& phi,
                                          const double& zenith,
                                          const double& azimuth) const
-{
-   // TODO
+{	GRan ran;
+	int low = ran.sample_cdf_GVector(m_mc_cache);
+	GVector EVector = m_matrix.row(low);
 
-    // Return energy boundaries
-    //return (GEbounds(emin, emax));
-}
+	int emin_index = EVector.first_nonzero();
+	int emax_index = EVector.last_nonzero();
 
+	double emin_val = EVector[emin_index];
+	double emax_val = EVector[emax_index];
+
+	GEnergy emin = GEnergy(emin_val, "MeV");
+	GEnergy emax = GEnergy(emax_val, "MeV");
+
+	// Return energy boundaries
+	return (GEbounds(emin, emax));
+
+	}
 
 /***********************************************************************//**
- * @brief Print energy dispersion information
+ * @brief Calculates std::vector of cdf GVectors.
+ *
+ * Makes std::vector of cdf GVectors from RMF matrix columns and puts
+ * result in m_cdf_cache in the cache.
+ ***************************************************************************/
+void GCTAEdispRMF::convert_cdf(void)
+{
+
+	GVector Row = m_matrix.row(0);
+	int row_sz = Row.size();
+
+	//Iterate over vectors
+	for(int j = 0; j <= row_sz; ++j) {
+		GVector Vector = m_matrix.column(j);
+		//Get minimum and maximum non-zero indices for vector
+		int min_index = Vector.first_nonzero();
+		int max_index = Vector.last_nonzero();
+		int size = Vector.size();
+		//Construct new vector for these non-zero values
+		GVector v1 = Vector.slice_vector((Vector[0] + min_index), (Vector[size] - max_index));
+		int v1_size = v1.size();
+		//First element of the new vector
+		double el_1 = v1[0];
+		//Copy new vector for iteration
+		GVector v_add = v1;
+
+
+		//Compute the cdf from shortened vector
+		double element = v_add[0];
+		//Iterate over elements of each vector
+		for (int i = 0; i <= size; ++i) {
+			double element_i = v_add[i];
+			double new_element_i = element + element_i;
+			//Insert replacement element into the vector at position i
+			v_add[i] = new_element_i;
+			double element = element_i;
+		}
+		//Adds the GVector cdf to the std::vector of GVectors
+		GVector vector_cdf = v_add;
+		m_cdf_cache[j] = vector_cdf;
+		}
+
+	return;
+
+}
+
+/***********************************************************************//**
+ * @brief Print RMF information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing energy dispersion information.
+ *
+ * TODO: Print something useful.
  ***************************************************************************/
 std::string GCTAEdispRMF::print(const GChatter& chatter) const
-{
-	// TODO
+{ // Initialise result string
+    std::string result;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+    } // endif: chatter was not silent
 
     // Return result
-    //return result;
+    return result;
+
 }
 
 

@@ -333,7 +333,7 @@ GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
     // Draw log observed energy in TeV
     double logEobs = m_par_sigma * ran.normal() + logE;
 
-    // Set enegy
+    // Set energy
     GEnergy energy;
     energy.log10TeV(logEobs);
 
