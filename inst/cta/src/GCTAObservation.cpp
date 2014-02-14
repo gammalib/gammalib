@@ -44,6 +44,7 @@
 #include "GCTAAeffArf.hpp"
 #include "GCTAAeffPerfTable.hpp"
 #include "GCTAEdisp.hpp"
+#include "GCTABackground.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCTAObservation      g_obs_cta_seed("CTA");
@@ -288,6 +289,7 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for an unbinned observation and
@@ -297,12 +299,12 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for a binned observation.
  *
  * @todo Still supports old ARF, PSF and RMF parameter names.
- * @todo PSF correction for ARF not yet implemented.
  ***************************************************************************/
 void GCTAObservation::read(const GXmlElement& xml)
 {
@@ -315,14 +317,14 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4) {
+    // Verify that XML element has exactly 5 parameters
+    if (xml.elements() != 5 || npars != 5) {
         throw GException::xml_invalid_parnum(G_READ, xml,
-              "CTA observation requires exactly 4 parameters.");
+              "CTA observation requires exactly 5 parameters.");
     }
 
     // Extract parameters
-    int npar[] = {0, 0, 0, 0};
+    int npar[] = {0, 0, 0, 0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
@@ -443,13 +445,29 @@ void GCTAObservation::read(const GXmlElement& xml)
             npar[3]++;
         }
 
+        // Handle background model
+        else if (par->attribute("name") == "Background") {
+
+            // Get filename
+            std::string filename = par->attribute("file");
+
+            // If filename is not empty then load background model
+            if (gammalib::strip_whitespace(filename).length() > 0) {
+                m_response.load_background(filename);
+            }
+
+            // Increase number of parameters
+            npar[4]++;
+        }
+
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
         throw GException::xml_invalid_parnames(G_READ, xml,
               "Require \"EventList\" or \"CountsMap\" and \"EffectiveArea\""
-              ", \"PointSpreadFunction\" and \"EnergyDispersion\" parameters.");
+              ", \"PointSpreadFunction\", \"EnergyDispersion\" and"
+              " \"Background\" parameters.");
     }
 
     // If we have an ARF then remove thetacut if necessary
@@ -485,6 +503,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for an unbinned observation and
@@ -494,6 +513,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for a binned observation.
@@ -514,7 +534,7 @@ void GCTAObservation::write(GXmlElement& xml) const
     // Set event list flag
     bool is_list = (list != NULL);
 
-    // If XML element has 0 nodes then append 4 parameter nodes
+    // If XML element has 0 nodes then append 5 parameter nodes
     if (xml.elements() == 0) {
         if (is_list) {
             xml.append(GXmlElement("parameter name=\"EventList\""));
@@ -525,17 +545,18 @@ void GCTAObservation::write(GXmlElement& xml) const
         xml.append(GXmlElement("parameter name=\"EffectiveArea\""));
         xml.append(GXmlElement("parameter name=\"PointSpreadFunction\""));
         xml.append(GXmlElement("parameter name=\"EnergyDispersion\""));
+        xml.append(GXmlElement("parameter name=\"Background\""));
     }
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
+    // Verify that XML element has exactly 5 parameters
+    if (xml.elements() != 5 || xml.elements("parameter") != 5) {
         throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "CTA observation requires exactly 4 parameters.");
+              "CTA observation requires exactly 5 parameters.");
     }
 
     // Set or update parameter attributes
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
+    int npar[] = {0, 0, 0, 0, 0};
+    for (int i = 0; i < 5; ++i) {
 
         // Get parameter element
         GXmlElement* par = xml.element("parameter", i);
@@ -619,13 +640,24 @@ void GCTAObservation::write(GXmlElement& xml) const
             npar[3]++;
         }
 
+        // Handle Background
+        else if (par->attribute("name") == "Background") {
+            std::string filename = "";
+            if (m_response.background() != NULL) {
+                filename = m_response.background()->filename();
+            }
+            par->attribute("file", filename);
+            npar[4]++;
+        }
+
     } // endfor: looped over all parameters
 
     // Verify that all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
         throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"EventList\" or \"CountsMap\" and \"ARF\", \"RMF\""
-              " \"PSF\" parameters.");
+              "Require \"EventList\" or \"CountsMap\" and"
+              " \"PointSpreadFunction\", \"EnergyDispersion\""
+              " and \"Background\" parameters.");
     }
 
     // Return

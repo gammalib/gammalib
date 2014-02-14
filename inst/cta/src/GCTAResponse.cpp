@@ -58,6 +58,7 @@
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
+#include "GCTABackground.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                                "GCTAResponse::caldb(GCaldb&)"
@@ -737,7 +738,7 @@ void GCTAResponse::load_psf(const std::string& filename)
  ***************************************************************************/
 void GCTAResponse::load_edisp(const std::string& filename)
 {
-    // Free any existing point spread function instance
+    // Free any existing energy dispersion instance
     if (m_edisp != NULL) delete m_edisp;
     m_edisp = NULL;
 
@@ -752,6 +753,25 @@ void GCTAResponse::load_edisp(const std::string& filename)
       m_edisp = new GCTAEdispPerfTable(filename);
     }
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load background model
+ *
+ * @param[in] filename Background model file name.
+ *
+ * @todo Method to be implemented.
+ ***************************************************************************/
+void GCTAResponse::load_background(const std::string& filename)
+{
+    // Free any existing background model instance
+    if (m_background != NULL) delete m_background;
+    m_background = NULL;
+
+    // Return
     return;
 }
 
@@ -2349,6 +2369,7 @@ void GCTAResponse::init_members(void)
     m_aeff        = NULL;
     m_psf         = NULL;
     m_edisp       = NULL;
+    m_background  = NULL;
     m_apply_edisp = false;  //!< Switched off by default
 
     // Initialise Npred cache
@@ -2382,9 +2403,10 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_npred_values   = rsp.m_npred_values;
 
     // Clone members
-    m_aeff  = (rsp.m_aeff  != NULL) ? rsp.m_aeff->clone()  : NULL;
-    m_psf   = (rsp.m_psf   != NULL) ? rsp.m_psf->clone()   : NULL;
-    m_edisp = (rsp.m_edisp != NULL) ? rsp.m_edisp->clone() : NULL;
+    m_aeff       = (rsp.m_aeff       != NULL) ? rsp.m_aeff->clone()  : NULL;
+    m_psf        = (rsp.m_psf        != NULL) ? rsp.m_psf->clone()   : NULL;
+    m_edisp      = (rsp.m_edisp      != NULL) ? rsp.m_edisp->clone() : NULL;
+    m_background = (rsp.m_background != NULL) ? rsp.m_background->clone() : NULL;
 
     // Return
     return;
@@ -2397,14 +2419,16 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
 void GCTAResponse::free_members(void)
 {
     // Free memory
-    if (m_aeff  != NULL) delete m_aeff;
-    if (m_psf   != NULL) delete m_psf;
-    if (m_edisp != NULL) delete m_edisp;
+    if (m_aeff       != NULL) delete m_aeff;
+    if (m_psf        != NULL) delete m_psf;
+    if (m_edisp      != NULL) delete m_edisp;
+    if (m_background != NULL) delete m_background;
 
     // Initialise pointers
-    m_aeff  = NULL;
-    m_psf   = NULL;
-    m_edisp = NULL;
+    m_aeff       = NULL;
+    m_psf        = NULL;
+    m_edisp      = NULL;
+    m_background = NULL;
 
     // Return
     return;

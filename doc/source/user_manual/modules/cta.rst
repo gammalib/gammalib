@@ -98,6 +98,7 @@ the format:
         <parameter name="EffectiveArea"       file="..."/>
         <parameter name="PointSpreadFunction" file="..."/>
         <parameter name="EnergyDispersion"    file="..."/>
+        <parameter name="Background"          file="..."/>
     </observation>
 
 for an unbinned observation and:
@@ -109,6 +110,7 @@ for an unbinned observation and:
         <parameter name="EffectiveArea"       file="..."/>
         <parameter name="PointSpreadFunction" file="..."/>
         <parameter name="EnergyDispersion"    file="..."/>
+        <parameter name="Background"          file="..."/>
     </observation>
  
 for a binned observation. Each parameter within the ``<observation>`` tag
@@ -129,6 +131,8 @@ about the off-axis reponse and event selection (see
 So far, energy dispersion is not supported by GammaLib, hence the
 ``file`` attribute for the ``EnergyDispersion`` parameter can be left 
 blank.
+The ``Background`` parameter allows specifying of a file that contains
+the instrument background model for the observation.
 
 The ``instrument`` attribute of CTA observations can be one of
 ``CTA``, ``HESS``, ``MAGIC`` or ``VERITAS``. This allows mixing of
