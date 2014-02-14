@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GVector.hpp"
+#include "GMatrixSparse.hpp"
 #include "GTools.hpp"
 
 
@@ -165,7 +166,6 @@ GVector::GVector(const double& a, const double& b, const double& c)
     // Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -550,9 +550,9 @@ int GVector::non_zeros(void) const
 }
 
 /***********************************************************************//**
- * @brief Returns the first non-zero element in a vector
+ * @brief Returns the index of the first non-zero element in a vector
  *
- * @return First non-zero element in vector.
+ * @return Index of first non-zero element in vector.
  ***************************************************************************/
 int GVector::first_nonzero(void) const
 {
@@ -563,7 +563,7 @@ int GVector::first_nonzero(void) const
     // Gather all non-zero elements
     for (int i = 0; i < m_num; ++i) {
         if (m_data[i] != 0.0) {
-        	first_non_zero = m_data[i];
+        	first_non_zero = i;
         	if (first_non_zero != 0) {
         		break;
         	}
@@ -575,9 +575,9 @@ int GVector::first_nonzero(void) const
 }
 
 /***********************************************************************//**
- * @brief Returns the last non-zero element in a vector
+ * @brief Returns the index of the last non-zero element in a vector
  *
- * @return Last non-zero element in vector.
+ * @return Index of last non-zero element in vector.
  ***************************************************************************/
 int GVector::last_nonzero(void) const
 {
@@ -588,7 +588,7 @@ int GVector::last_nonzero(void) const
     // Gather all non-zero elements
     for (int i = m_num; i > 0; --i) {
     	if (m_data[i] != 0.0) {
-    		last_non_zero = m_data[i];
+    		last_non_zero = i;
     	    if (last_non_zero != 0) {
     	    	break;
     	    }
@@ -597,6 +597,29 @@ int GVector::last_nonzero(void) const
     // Return number of non-zero elements
     return last_non_zero;
 }
+
+
+/***********************************************************************//**
+ * @brief Vector slice operator
+ *
+ * @param[in] index Element indices [a, b]; a, b = [0,...,size()-1]
+ * @return GVector of referenced to vector elements.
+ ***************************************************************************/
+
+GVector GVector::slice_vector(const int& index_a, const int& index_b) const
+{
+	//Allocate vector
+	GVector sliced_vector;
+    //Return vector slice between original elements a and b (inclusive)
+
+	for (int i = index_a; i <= index_b; ++i) {
+		double element = m_data[i];
+		sliced_vector[i] = element;
+	}
+    return sliced_vector;
+}
+
+/***********************************************************************//**
 
 /***********************************************************************//**
  * @brief Print vector information

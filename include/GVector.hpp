@@ -87,6 +87,7 @@ public:
     double&       operator[](const int& index);
     const double& operator[](const int& index) const;
 
+
     // Vector operators
     bool     operator==(const GVector& vector) const;
     bool     operator!=(const GVector& vector) const;
@@ -110,6 +111,8 @@ public:
     int           first_nonzero(void) const;
     int           last_nonzero(void) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
+    GVector slice_vector(const int& index_a, const int& index_b) const;
+
 
 private:
     // Private methods
@@ -117,6 +120,7 @@ private:
     void alloc_members(void);
     void copy_members(const GVector& vector);
     void free_members(void);
+
 
     // Private data area
     int     m_num;    //!< Number of elements in vector
@@ -133,7 +137,7 @@ private:
 inline
 double& GVector::operator[](const int& index)
 {
-    // Return vector element
+	// Return vector element
     return m_data[index];
 }
 
