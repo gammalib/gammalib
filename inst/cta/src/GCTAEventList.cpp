@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.cpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -657,14 +657,14 @@ void GCTAEventList::read_events_v0(const GFitsTable& table)
             event.m_index     = i;
             event.m_time.set(ptr_time->real(i), m_gti.reference());
             event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+            event.m_dir.detx(ptr_detx->real(i));
+            event.m_dir.dety(ptr_dety->real(i));
             event.m_energy.TeV(ptr_energy->real(i));
             event.m_event_id    = ptr_eid->integer(i);
             event.m_obs_id      = 0;
             event.m_multip      = ptr_multip->integer(i);
             event.m_telmask     = 0;
             event.m_dir_err     = ptr_dir_err->real(i);
-            event.m_detx        = ptr_detx->real(i);
-            event.m_dety        = ptr_dety->real(i);
             event.m_alt         = ptr_alt->real(i);
             event.m_az          = ptr_az->real(i);
             event.m_corex       = ptr_corex->real(i);
@@ -736,14 +736,14 @@ void GCTAEventList::read_events_v1(const GFitsTable& table)
             event.m_index     = i;
             event.m_time.set(ptr_time->real(i), m_gti.reference());
             event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+            event.m_dir.detx(ptr_detx->real(i));
+            event.m_dir.dety(ptr_dety->real(i));
             event.m_energy.TeV(ptr_energy->real(i));
             event.m_event_id    = ptr_eid->integer(i);
             event.m_obs_id      = ptr_oid->integer(i);
             event.m_multip      = ptr_multip->integer(i);
             event.m_telmask     = 0;
             event.m_dir_err     = ptr_dir_err->real(i);
-            event.m_detx        = ptr_detx->real(i);
-            event.m_dety        = ptr_dety->real(i);
             event.m_alt         = ptr_alt->real(i);
             event.m_az          = ptr_az->real(i);
             event.m_corex       = ptr_corex->real(i);
@@ -1017,8 +1017,8 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
             col_ra(i)          = m_events[i].dir().dir().ra_deg();
             col_dec(i)         = m_events[i].dir().dir().dec_deg();
             col_direrr(i)      = m_events[i].m_dir_err;
-            col_detx(i)        = m_events[i].m_detx;
-            col_dety(i)        = m_events[i].m_dety;
+            col_detx(i)        = m_events[i].dir().detx();
+            col_dety(i)        = m_events[i].dir().dety();
             col_alt(i)         = m_events[i].m_alt;
             col_az(i)          = m_events[i].m_az;
             col_corex(i)       = m_events[i].m_corex;
