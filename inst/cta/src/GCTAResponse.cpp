@@ -59,6 +59,7 @@
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTABackground.hpp"
+#include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                                "GCTAResponse::caldb(GCaldb&)"
@@ -551,6 +552,7 @@ void GCTAResponse::load(const std::string& rspname)
     std::string aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
     std::string psfname   = m_caldb.filename("","","RPSF","","",expr);
     std::string edispname = m_caldb.filename("","","EDISP","","",expr);
+    std::string bgdname   = m_caldb.filename("","","BGD","","",expr);
 
     // If filenames are empty then build filenames from CALDB root path and
     // response name
@@ -563,6 +565,9 @@ void GCTAResponse::load(const std::string& rspname)
     if (edispname.length() < 1) {
         edispname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
+    if (bgdname.length() < 1) {
+        bgdname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+    }
 
     // Load effective area
     load_aeff(aeffname);
@@ -572,6 +577,9 @@ void GCTAResponse::load(const std::string& rspname)
 
     // Load energy dispersion
     load_edisp(edispname);
+
+    // Load background
+    load_background(bgdname);
 
     // Remove theta cut
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
@@ -750,7 +758,7 @@ void GCTAResponse::load_edisp(const std::string& filename)
         // TODO: Implement FITS energy resolution loading
     }
     catch (GException::fits_open_error &e) {
-      m_edisp = new GCTAEdispPerfTable(filename);
+        m_edisp = new GCTAEdispPerfTable(filename);
     }
 
     // Return
@@ -762,14 +770,21 @@ void GCTAResponse::load_edisp(const std::string& filename)
  * @brief Load background model
  *
  * @param[in] filename Background model file name.
- *
- * @todo Method to be implemented.
  ***************************************************************************/
 void GCTAResponse::load_background(const std::string& filename)
 {
     // Free any existing background model instance
     if (m_background != NULL) delete m_background;
     m_background = NULL;
+
+    // Try opening the file as a FITS file
+    try {
+        // Load background as 3D background
+        m_background = new GCTABackground3D(filename);
+    }
+    catch (GException::fits_open_error &e) {
+        m_background = NULL;
+    }
 
     // Return
     return;
@@ -886,6 +901,12 @@ std::string GCTAResponse::print(const GChatter& chatter) const
         if (m_edisp != NULL) {
             result.append("\n"+m_edisp->print(chatter));
         }
+
+        // Append background information
+        if (m_background != NULL) {
+            result.append("\n"+m_background->print(chatter));
+        }
+
         // EXPLICIT: Append Npred cache information
         if (chatter >= EXPLICIT) {
             if (!m_npred_names.empty()) {

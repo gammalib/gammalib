@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GCTABackground.i - CTA background model base class          *
+ *              GCTABackground3D.hpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,39 +19,73 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTABackground.i
- * @brief CTA background model base class definition
+ * @file GCTABackground3D.hpp
+ * @brief CTA 3D background class definition
  * @author Juergen Knoedlseder
  */
-%{
-/* Put headers and other declarations here that are needed for compilation */
+
+#ifndef GCTABACKGROUND3D_HPP
+#define GCTABACKGROUND3D_HPP
+
+/* __ Includes ___________________________________________________________ */
+#include <string>
+//#include "GFits.hpp"
 #include "GCTABackground.hpp"
-//#include "GTools.hpp"
-%}
+#include "GCTAResponseTable.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFits;
 
 
 /***********************************************************************//**
- * @class GCTABackground
+ * @class GCTABackground3D
  *
- * @brief Abstract base class for the CTA background model
+ * @brief CTA 3D background class
  ***************************************************************************/
-class GCTABackground : public GBase {
+class GCTABackground3D : public GCTABackground {
+
 public:
     // Constructors and destructors
-    GCTABackground(void);
-    GCTABackground(const GCTABackground& bgd);
-    virtual ~GCTABackground(void);
+    GCTABackground3D(void);
+    explicit GCTABackground3D(const std::string& filename);
+    GCTABackground3D(const GCTABackground3D& bgd);
+    virtual ~GCTABackground3D(void);
 
-    // Pure virtual methods
-    virtual void            clear(void) = 0;
-    virtual GCTABackground* clone(void) const = 0;
-    virtual void            load(const std::string& filename) = 0;
-    virtual std::string     filename(void) const = 0;
+    // Operators
+    GCTABackground3D& operator=(const GCTABackground3D& bgd);
+
+    // Implemented pure virtual methods
+    void              clear(void);
+    GCTABackground3D* clone(void) const;
+    void              load(const std::string& filename);
+    std::string       filename(void) const;
+    std::string       print(const GChatter& chatter = NORMAL) const;
+
+    // Methods
+    void read(const GFits& file);
+    
+private:
+    // Methods
+    void init_members(void);
+    void copy_members(const GCTABackground3D& bgd);
+    void free_members(void);
+
+    // Members
+    std::string       m_filename;    //!< Name of background response file
+    GCTAResponseTable m_background;  //!< Background response table
 };
 
 
 /***********************************************************************//**
- * @brief GCTABackground class extension
+ * @brief Return filename
+ *
+ * @return Returns filename from which the background was loaded.
  ***************************************************************************/
-%extend GCTABackground {
-};
+inline
+std::string GCTABackground3D::filename(void) const
+{
+    // Return filename
+    return m_filename;
+}
+
+#endif /* GCTABACKGROUND3D_HPP */

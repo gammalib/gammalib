@@ -103,7 +103,7 @@ GCTABackground::~GCTABackground(void)
  * @param[in] bgd CTA background.
  * @return CTA background.
  ***************************************************************************/
-GCTABackground& GCTABackground::operator= (const GCTABackground& bgd)
+GCTABackground& GCTABackground::operator=(const GCTABackground& bgd)
 {
     // Execute only if object is not identical
     if (this != &bgd) {
