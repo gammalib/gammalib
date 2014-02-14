@@ -29,7 +29,9 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GBase.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -63,6 +65,8 @@ public:
     double                 exp(const double& lambda);
     double                 poisson(const double& lambda);
     double                 chisq2(void);
+    int                    sample_cdf(const std::vector<double>& cdf);
+    int 				   sample_cdf_GVector(const GVector& cdf);
     std::string            print(const GChatter& chatter = NORMAL) const;
   
 protected:

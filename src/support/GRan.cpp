@@ -411,6 +411,55 @@ std::string GRan::print(const GChatter& chatter) const
     return result;
 }
 
+/***********************************************************************//**
+ * @brief Random sampling of elements in a cdf std::vector<double>
+ ***************************************************************************/
+
+int GRan::sample_cdf(const std::vector<double>& cdf)
+{
+	// Get uniform random number
+	double u = uniform();
+	// Get pixel index according to random number. We use a bi-section
+	// method to find the corresponding skymap pixel
+	int low  = 0;
+	int high = cdf.size();
+	while ((high - low) > 1) {
+		int mid = (low+high) / 2;
+		if (u < cdf[mid]) {
+			high = mid;
+		}
+		else if (cdf[mid] <= u) {
+			low = mid;
+		}
+	}
+	return low;
+}
+
+/***********************************************************************//**
+ * @brief Random sampling of elements in a cdf GVector
+ *
+ * TODO: Somehow merge with the above method to reduce code repetition
+ ***************************************************************************/
+
+int GRan::sample_cdf_GVector(const GVector& cdf)
+{
+	// Get uniform random number
+	double u = uniform();
+	// Get pixel index according to random number. We use a bi-section
+	// method to find the corresponding skymap pixel
+	int low  = 0;
+	int high = cdf.size();
+	while ((high - low) > 1) {
+		int mid = (low+high) / 2;
+		if (u < cdf[mid]) {
+			high = mid;
+		}
+		else if (cdf[mid] <= u) {
+			low = mid;
+		}
+	}
+	return low;
+}
 
 /*==========================================================================
  =                                                                         =
