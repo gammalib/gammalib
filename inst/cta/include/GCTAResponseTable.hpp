@@ -52,18 +52,21 @@ public:
     explicit GCTAResponseTable(const GFitsTable& hdu);
     virtual ~GCTAResponseTable(void);
 
-  // Operators
-  GCTAResponseTable&  operator=(const GCTAResponseTable& table);
-  std::vector<double> operator()(const double& arg) const;
-  std::vector<double> operator()(const double& arg1, const double& arg2) const;
-  std::vector<double> operator()(const double& arg1, const double& arg2,
-                                 const double& arg3) const;
-  double              operator()(const int& index, const double& arg) const;
-  double              operator()(const int& index, const double& arg1,
-				                                   const double& arg2) const;
-  double              operator()(const int& index, const double& arg1,
-				                                   const double& arg2,
-                                                   const double& arg3) const;
+    // Operators
+    GCTAResponseTable&  operator=(const GCTAResponseTable& table);
+    std::vector<double> operator()(const double& arg) const;
+    std::vector<double> operator()(const double& arg1, const double& arg2) const;
+    std::vector<double> operator()(const double& arg1, const double& arg2,
+                                   const double& arg3) const;
+    const double&       operator()(const int& element) const;
+    double&             operator()(const int& element);
+    const double&       operator()(const int& index, const int& element) const;
+    double&             operator()(const int& index, const int& element);
+    double              operator()(const int& index, const double& arg) const;
+    double              operator()(const int& index, const double& arg1,
+                                   const double& arg2) const;
+    double              operator()(const int& index, const double& arg1,
+                                   const double& arg2, const double& arg3) const;
 
     // Methods
     void               clear(void);

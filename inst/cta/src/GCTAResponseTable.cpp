@@ -41,6 +41,8 @@
 #define G_OPERATOR2         "GCTAResponseTable::operator()(double&, double&)"
 #define G_OPERATOR3         "GCTAResponseTable::operator()(double&, double&,"\
                                                                   " double&)"
+#define G_ELEMENT_OPERATOR1             "GCTAResponseTable::operator()(int&)"
+#define G_ELEMENT_OPERATOR2       "GCTAResponseTable::operator()(int&, int&)"
 #define G_INX_OPERATOR1        "GCTAResponseTable::operator()(int&, double&)"
 #define G_INX_OPERATOR2        "GCTAResponseTable::operator()(int&, double&,"\
                                                                   " double&)"
@@ -339,6 +341,106 @@ std::vector<double> GCTAResponseTable::operator()(const double& arg1,
 
     // Return result vector
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Element access operator
+ *
+ * @param[in] element Element index [0,...,elements()-1].
+ * @return Response table element.
+ *
+ * @exception GCTAException::out_of_range
+ *            @p index or @p element are outside valid range
+ ***************************************************************************/
+double& GCTAResponseTable::operator()(const int& element)
+{
+    // Optionally check if the index and element is valid
+    #if defined(G_RANGE_CHECK)
+    if (element < 0 || element >= elements()) {
+        throw GException::out_of_range(G_ELEMENT_OPERATOR2, element, elements()-1);
+    }
+    #endif
+
+    // Return elements
+    return (m_pars[0][element]);
+}
+
+
+/***********************************************************************//**
+ * @brief Element access operator (const version)
+ *
+ * @param[in] element Element index [0,...,elements()-1].
+ * @return Response table element.
+ *
+ * @exception GCTAException::out_of_range
+ *            @p index or @p element are outside valid range
+ ***************************************************************************/
+const double& GCTAResponseTable::operator()(const int& element) const
+{
+    // Optionally check if the index and element is valid
+    #if defined(G_RANGE_CHECK)
+    if (element < 0 || element >= elements()) {
+        throw GException::out_of_range(G_ELEMENT_OPERATOR2, element, elements()-1);
+    }
+    #endif
+
+    // Return elements
+    return (m_pars[0][element]);
+}
+
+
+/***********************************************************************//**
+ * @brief Element access operator
+ *
+ * @param[in] index Table index [0,...,size()-1].
+ * @param[in] element Element index [0,...,elements()-1].
+ * @return Response table element.
+ *
+ * @exception GCTAException::out_of_range
+ *            @p index or @p element are outside valid range
+ ***************************************************************************/
+double& GCTAResponseTable::operator()(const int& index, const int& element)
+{
+    // Optionally check if the index and element is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_ELEMENT_OPERATOR2, index, size()-1);
+    }
+    if (element < 0 || element >= elements()) {
+        throw GException::out_of_range(G_ELEMENT_OPERATOR2, element, elements()-1);
+    }
+    #endif
+
+    // Return elements
+    return (m_pars[index][element]);
+}
+
+
+/***********************************************************************//**
+ * @brief Element access operator (const version)
+ *
+ * @param[in] index Table index [0,...,size()-1].
+ * @param[in] element Element index [0,...,elements()-1].
+ * @return Response table element.
+ *
+ * @exception GCTAException::out_of_range
+ *            @p index or @p element are outside valid range
+ ***************************************************************************/
+const double& GCTAResponseTable::operator()(const int& index, const int& element) const
+{
+    // Optionally check if the index and element is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_ELEMENT_OPERATOR2, index, size()-1);
+    }
+    if (element < 0 || element >= elements()) {
+        throw GException::out_of_range(G_ELEMENT_OPERATOR2, element, elements()-1);
+    }
+    #endif
+
+    // Return elements
+    return (m_pars[index][element]);
 }
 
 
