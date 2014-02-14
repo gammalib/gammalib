@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GEnergy.i - Energy class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     // Operators
     GEnergy& operator+=(const GEnergy& eng);
     GEnergy& operator-=(const GEnergy& eng);
+    double   operator()(const std::string& unit) const;
 
     // Methods
     void     clear(void);

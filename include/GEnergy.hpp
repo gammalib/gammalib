@@ -71,6 +71,7 @@ public:
     GEnergy& operator=(const GEnergy& eng);
     GEnergy& operator+=(const GEnergy& eng);
     GEnergy& operator-=(const GEnergy& eng);
+    double   operator()(const std::string& unit) const;
 
     // Methods
     void        clear(void);

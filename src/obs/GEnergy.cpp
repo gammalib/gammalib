@@ -38,6 +38,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT                 "GEnergy::GEnergy(double&, std::string&)"
+#define G_OPERATOR                        "GEnergy::operator()(std::string&)"
 #define G_LOG10                       "GEnergy::log10(double&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -172,6 +173,47 @@ GEnergy& GEnergy::operator=(const GEnergy& eng)
   
     // Return
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Unit access operator
+ *
+ * @param[in] unit Unit.
+ * @return Energy in requested units.
+ *
+ * Returns the energy in the requested units.
+ ***************************************************************************/
+double GEnergy::operator()(const std::string& unit) const
+{ 
+    // Initialise energy
+    double energy = 0.0;
+
+    // Set energy according to unit string
+    std::string eunit = gammalib::tolower(unit);
+    if (eunit == "erg" || eunit == "ergs") {
+        energy = this->erg();
+    }
+    else if (eunit == "kev") {
+        energy = this->keV();
+    }
+    else if (eunit == "mev") {
+        energy = this->MeV();
+    }
+    else if (eunit == "gev") {
+        energy = this->GeV();
+    }
+    else if (eunit == "tev") {
+        energy = this->TeV();
+    }
+    else {
+        throw GException::invalid_argument(G_OPERATOR, unit,
+              "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
+              " \"GeV\", or \"TeV\" (case insensitive).");
+    }
+  
+    // Return energy
+    return energy;
 }
 
 
