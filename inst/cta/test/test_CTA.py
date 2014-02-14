@@ -206,12 +206,9 @@ class Test(GPythonTestSuite):
             self.test_try_failure("Unable to allocate GCTAEdispRMF from file.")
         
         #Test energy dispersion values
-        self.test_value(edisp(0.0, 0.0), 9.99019627861, 1.0e-6)
-        self.test_value(edisp(0.001, 0.0), 9.9870644077, 1.0e-6)
-        self.test_value(edisp(0.01, 0.0), 9.68182, 1.0e-6)
-        self.test_value(edisp(0.1, 0.0), 0.434382, 1.0e-6)
-        self.test_value(edisp(1.0, 1.0), 18.064868197, 1.0e-6)
-        self.test_value(edisp(1.001, 1.0, 0.0), 18.0463571212, 1.0e-6)
+        self.test_value(edisp(log10(30),log10(1)), 0.0, 1.0e-9)
+        self.test_value(edisp(log10(30),log10(30)), 0.354952753, 1.0e-9)
+        self.test_value(edisp(log10(1),log10(30)), 0.0, 1.0e-9)
         
         # Load performance file
         self.test_try("Test GCTAEdispPerfTable file constructor")
