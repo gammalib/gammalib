@@ -33,8 +33,11 @@
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
+#include "GModelSpectralNodes.hpp"
 #include "GCTAModelInstBackground.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAResponse.hpp"
+#include "GCTABackground.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelInstBackground g_cta_inst_background_seed;
@@ -44,6 +47,7 @@ const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_backgro
 #define G_EVAL        "GCTAModelInstBackground::eval(GEvent&, GObservation&)"
 #define G_EVAL_GRADIENTS   "GCTAModelInstBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
+#define G_MC              "GCTAModelInstBackground::mc(GObservation&, GRan&)"
 #define G_XML_SPECTRAL  "GCTAModelInstBackground::xml_spectral(GXmlElement&)"
 #define G_XML_TEMPORAL  "GCTAModelInstBackground::xml_temporal(GXmlElement&)"
 
@@ -52,6 +56,7 @@ const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_backgro
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DUMP_MC
 
 /* __ Constants __________________________________________________________ */
 
@@ -327,8 +332,162 @@ double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
  ***************************************************************************/
 GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) const
 {
+    // Initialise new event list
+    GCTAEventList* list = new GCTAEventList;
+
+    // Continue only if model is valid)
+    if (valid_model()) {
+
+        // Retrieve CTA observation
+        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
+        if (cta == NULL) {
+            std::string msg = "Specified observation is not a CTA observation.\n" +
+                              obs.print();
+            throw GException::invalid_argument(G_MC, msg);
+        }
+
+        // Retrieve CTA response and pointing
+        const GCTAResponse& rsp = cta->response();
+        const GCTAPointing& pnt = cta->pointing();
+        
+        // Get pointer to CTA background
+        const GCTABackground* bgd = rsp.background();
+
+        // Retrieve event list to access the ROI, energy boundaries and GTIs
+        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+        if (events == NULL) {
+            std::string msg = "No CTA event list found in observation.\n" +
+                              obs.print();
+            throw GException::invalid_argument(G_MC, msg);
+        }
+
+        // Get simulation region
+        const GCTARoi&  roi     = events->roi();
+        const GEbounds& ebounds = events->ebounds();
+        const GGti&     gti     = events->gti();
+
+        // Set simulation region for result event list
+        list->roi(roi);
+        list->ebounds(ebounds);
+        list->gti(gti);
+
+        // Create a spectral model that combines the information from the
+        // background information and the spectrum provided by the model
+        GModelSpectralNodes spectral(bgd->spectrum());
+        for (int i = 0; i < spectral.nodes(); ++i) {
+            GEnergy energy    = spectral.energy(i);
+            double  intensity = spectral.intensity(i);
+            double  norm      = m_spectral->eval(energy, events->tstart());
+            spectral.intensity(i, norm*intensity);
+        }
+
+        // Loop over all energy boundaries
+        for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
+
+            // Compute the background rate in model within the energy
+            // boundaries from spectral component (units: cts/s).
+            // Note that the time here is ontime. Deadtime correction will
+            // be done later.
+            double rate = spectral.flux(ebounds.emin(ieng), ebounds.emax(ieng));
+
+            // Debug option: dump rate
+            #if defined(G_DUMP_MC)
+            std::cout << "GCTAModelInstBackground::mc(\"" << name() << "\": ";
+            std::cout << "rate=" << rate << " cts/s)" << std::endl;
+            #endif
+
+            // Loop over all good time intervals
+            for (int itime = 0; itime < gti.size(); ++itime) {
+
+                // Get Monte Carlo event arrival times from temporal model
+                GTimes times = m_temporal->mc(rate,
+                                              gti.tstart(itime),
+                                              gti.tstop(itime),
+                                              ran);
+
+                // Get number of events
+                int n_events = times.size();
+
+                // Reserve space for events
+                if (n_events > 0) {
+                    list->reserve(n_events);
+                }
+
+                // Debug option: provide number of times and initialize
+                // statisics
+                #if defined(G_DUMP_MC)
+                std::cout << " Interval " << itime;
+                std::cout << " times=" << n_events << std::endl;
+                int n_killed_by_deadtime = 0;
+                int n_killed_by_roi      = 0;
+                #endif
+
+                // Loop over events
+                for (int i = 0; i < n_events; ++i) {
+
+                    // Apply deadtime correction
+                    double deadc = obs.deadc(times[i]);
+                    if (deadc < 1.0) {
+                        if (ran.uniform() > deadc) {
+                            #if defined(G_DUMP_MC)
+                            n_killed_by_deadtime++;
+                            #endif
+                            continue;
+                        }
+                    }
+
+                    // Get Monte Carlo event energy from spectral model
+                    GEnergy energy = spectral.mc(ebounds.emin(ieng),
+                                                 ebounds.emax(ieng),
+                                                 times[i],
+                                                 ran);
+
+                    // Get Monte Carlo event direction from spatial model.
+                    // This only will set the DETX and DETY coordinates.
+                    GCTAInstDir instdir = bgd->mc(energy, times[i], ran);
+
+                    // Derive sky direction from instrument coordinates
+                    GSkyDir skydir = pnt.skydir(instdir);
+
+                    // Set sky direction in GCTAInstDir object
+                    instdir.dir(skydir);
+
+                    // Allocate event
+                    GCTAEventAtom event;
+
+                    // Set event attributes
+                    event.dir(instdir);
+                    event.energy(energy);
+                    event.time(times[i]);
+
+                    // Append event to list if it falls in ROI
+                    if (events->roi().contains(event)) {
+                        list->append(event);
+                    }
+                    #if defined(G_DUMP_MC)
+                    else {
+                        n_killed_by_roi++;
+                    }
+                    #endif
+
+                } // endfor: looped over all events
+
+                // Debug option: provide  statisics
+                #if defined(G_DUMP_MC)
+                std::cout << " Killed by deadtime=";
+                std::cout << n_killed_by_deadtime << std::endl;
+                std::cout << " Killed by ROI=";
+                std::cout << n_killed_by_roi << std::endl;
+                #endif
+
+            } // endfor: looped over all GTIs
+
+        } // endfor: looped over all energy boundaries
+
+    } // endif: model was valid
+
     // Return
-    return NULL;
+    return list;
 }
 
 

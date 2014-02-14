@@ -29,16 +29,21 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GMath.hpp"
+#include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_MC_INIT
+//#define G_DEBUG_CACHE
 
 /* __ Constants __________________________________________________________ */
 
@@ -252,6 +257,106 @@ void GCTABackground3D::read(const GFits& fits)
 
 
 /***********************************************************************//**
+ * @brief Returns MC instrument direction
+ *
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
+ * @return CTA instrument direction.
+ ***************************************************************************/
+GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
+                                 const GTime&   time,
+                                 GRan&          ran) const
+{
+    // Initialise Monte Carlo Cache
+    if (m_mc_cache.empty()) {
+        init_mc_cache();
+    }
+
+    // Allocate instrument direction
+    GCTAInstDir dir;
+
+    // Determine number of cube pixels and maps
+    int n_detx = m_background.axis(0);
+    int n_dety = m_background.axis(1);
+    int npix   = n_detx * n_dety;
+    int nmaps  = m_background.axis(2);
+
+    // Continue only if there are cube pixels and maps
+    if (npix > 0 && nmaps > 0) {
+
+        // Determine the map that corresponds best to the specified energy.
+        // This is not 100% clean, as ideally some map interpolation should
+        // be done to the exact energy specified. However, as long as the map
+        // does not change drastically with energy, taking the closest map
+        // seems to be fine.
+        int index = -1;
+        for (int i = 0; i < nmaps; ++i) {
+            if ((energy(m_background.axis_lo_unit(2)) >= m_background.axis_lo(2,i)) &&
+                (energy(m_background.axis_hi_unit(2)) <= m_background.axis_hi(2,i))) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            std::string msg = "The specified energy "+energy.print()+" does"
+                              " not fall in any of the energy boundaries of"
+                              " the background response cube.\n"
+                              "Please select an energy range that is comprised"
+                              " in the range ["+
+                              gammalib::str(m_background.axis_lo(2,0))+
+                              " "+m_background.axis_lo_unit(2)+" - "+
+                              gammalib::str(m_background.axis_hi(2,m_background.axis(2)-1))+
+                              " "+m_background.axis_hi_unit(2)+"].";
+            throw GException::invalid_value(G_MC, msg);
+        }
+
+        // Get uniform random number
+        double u = ran.uniform();
+
+        // Get pixel index according to random number. We use a bi-section
+        // method to find the corresponding response cube pixel
+        int offset = index * (npix+1);
+        int low    = offset;
+        int high   = offset + npix;
+        while ((high - low) > 1) {
+            int mid = (low+high) / 2;
+            if (u < m_mc_cache[mid]) {
+                high = mid;
+            }
+            else if (m_mc_cache[mid] <= u) {
+                low = mid;
+            }
+        }
+
+        // Get pixel indices in x and y
+        int pixel = low - offset;
+        int idetx = pixel % n_detx;
+        int idety = pixel / n_detx;
+//std::cout << pixel << " " << idetx << " " << idety << std::endl;
+
+        // Get minimum and binsize for the pixel
+        double xbin_min = m_background.axis_lo(0,idetx);
+        double xbin_bin = m_background.axis_hi(0,idetx) - xbin_min;
+        double ybin_min = m_background.axis_lo(1,idety);
+        double ybin_bin = m_background.axis_hi(1,idety) - ybin_min;
+
+        // Randomize detx and dety
+        double detx = xbin_min + xbin_bin * ran.uniform();
+        double dety = ybin_min + ybin_bin * ran.uniform();
+
+        // Set instrument direction (in radians)
+        dir.detx(detx * gammalib::deg2rad);
+        dir.dety(dety * gammalib::deg2rad);
+
+    } // endif: there were cube pixels and maps
+
+    // Return instrument direction
+    return dir;
+}
+
+
+/***********************************************************************//**
  * @brief Print background information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -318,6 +423,10 @@ void GCTABackground3D::init_members(void)
     m_filename.clear();
     m_background.clear();
 
+    // Initialise MC cache
+    m_mc_cache.clear();
+    m_mc_spectrum.clear();
+
     // Return
     return;
 }
@@ -334,6 +443,10 @@ void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
     m_filename   = bgd.m_filename;
     m_background = bgd.m_background;
 
+    // Copy MC cache
+    m_mc_cache    = bgd.m_mc_cache;
+    m_mc_spectrum = bgd.m_mc_spectrum;
+
     // Return
     return;
 }
@@ -344,6 +457,114 @@ void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
  ***************************************************************************/
 void GCTABackground3D::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise Monte Carlo cache
+ *
+ * @todo Verify assumption made about the solid angles of the response table
+ *       elements.
+ * @todo Add optional sampling on a finer spatial grid.
+ ***************************************************************************/
+void GCTABackground3D::init_mc_cache(void) const
+{
+    // Initialise cache
+    m_mc_cache.clear();
+    m_mc_spectrum.clear();
+
+    // Determine number of cube pixels and maps
+    int npix  = m_background.axis(0) * m_background.axis(1);
+    int nmaps = m_background.axis(2);
+
+    // Compute DETX boundaries and width in deg
+    double detx_min = m_background.axis_lo(0,0);
+    double detx_max = m_background.axis_hi(0,m_background.axis(0)-1);
+    double detx_bin = (detx_max - detx_min) / m_background.axis(0);
+
+    // Compute DETY boundaries and width in deg
+    double dety_min = m_background.axis_lo(1,0);
+    double dety_max = m_background.axis_hi(1,m_background.axis(1)-1);
+    double dety_bin = (dety_max - dety_min) / m_background.axis(1);
+
+    // Determine solid angle of pixel (we assume here simply that we have
+    // square pixels of identical solid angle; it needs to be checked whether
+    // this is a valid assumption)
+    double solidangle = detx_bin * gammalib::deg2rad *
+                        dety_bin * gammalib::deg2rad;
+
+    // Continue only if there are pixels and maps
+    if (npix > 0 && nmaps > 0) {
+
+        // Reserve space for all pixels in cache
+        m_mc_cache.reserve((npix+1)*nmaps);
+
+        // Loop over all maps
+        for (int i = 0; i < nmaps; ++i) {
+
+            // Compute pixel offset
+            int offset = i * (npix+1);
+
+            // Set first cache value to 0
+            m_mc_cache.push_back(0.0);
+
+            // Initialise cache with cumulative pixel fluxes and compute
+            // total flux in response table for normalization. Negative
+            // pixels are excluded from the cumulative map.
+            double total_rate = 0.0;
+        	for (int k = 0, element = i*npix; k < npix; ++k, ++element) {
+
+                // Determine background rate
+                double rate = m_background(element) * solidangle;
+                if (rate > 0.0) {
+                    total_rate += rate;
+                }
+
+                // Push back flux
+                m_mc_cache.push_back(total_rate); // units: events/s/MeV
+        	}
+
+            // Normalize cumulative pixel fluxes so that the values in the
+            // cache run from 0 to 1
+            if (total_rate > 0.0) {
+        		for (int k = 0, element = offset; k < npix; ++k, ++element) {
+        			m_mc_cache[element] /= total_rate;
+        		}
+        	}
+
+            // Make sure that last pixel in the cache is >1
+            m_mc_cache[npix+offset] = 1.0001;
+
+            // Set energy value (unit independent)
+            GEnergy energy;
+            energy.log10(m_background.nodes(2)[i], m_background.axis_lo_unit(2));
+                
+            // Only append node if rate > 0
+            if (total_rate > 0.0) {
+                m_mc_spectrum.append(energy, total_rate);
+            }
+
+            // Dump spectrum for debugging
+            #if defined(G_DEBUG_MC_INIT)
+            std::cout << "Energy=" << energy;
+            std::cout << " Rate=" << total_rate;
+            std::cout << " events/s/MeV" << std::endl;
+            #endif
+
+        } // endfor: looped over all maps
+
+        // Dump cache values for debugging
+        #if defined(G_DEBUG_CACHE)
+        for (int i = 0; i < m_mc_cache.size(); ++i) {
+            std::cout << "i=" << i;
+            std::cout << " c=" << m_mc_cache[i] << std::endl;
+        }
+        #endif
+
+    } // endif: there were cube pixels and maps
+
     // Return
     return;
 }

@@ -30,7 +30,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GCTAEventList.hpp"
+#include "GModelSpectralNodes.hpp"
+#include "GCTAInstDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 
@@ -52,11 +53,15 @@ public:
     GCTABackground& operator=(const GCTABackground& bgd);
 
     // Pure virtual methods
-    virtual void            clear(void) = 0;
-    virtual GCTABackground* clone(void) const = 0;
-    virtual void            load(const std::string& filename) = 0;
-    virtual std::string     filename(void) const = 0;
-    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
+    virtual void                       clear(void) = 0;
+    virtual GCTABackground*            clone(void) const = 0;
+    virtual void                       load(const std::string& filename) = 0;
+    virtual std::string                filename(void) const = 0;
+    virtual GCTAInstDir                mc(const GEnergy& energy,
+                                          const GTime& time,
+                                          GRan& ran) const = 0;
+    virtual const GModelSpectralNodes& spectrum(void) const = 0;
+    virtual std::string                print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Methods

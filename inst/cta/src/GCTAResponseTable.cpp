@@ -358,7 +358,7 @@ double& GCTAResponseTable::operator()(const int& element)
     // Optionally check if the index and element is valid
     #if defined(G_RANGE_CHECK)
     if (element < 0 || element >= elements()) {
-        throw GException::out_of_range(G_ELEMENT_OPERATOR2, element, elements()-1);
+        throw GException::out_of_range(G_ELEMENT_OPERATOR1, element, elements()-1);
     }
     #endif
 
@@ -381,7 +381,7 @@ const double& GCTAResponseTable::operator()(const int& element) const
     // Optionally check if the index and element is valid
     #if defined(G_RANGE_CHECK)
     if (element < 0 || element >= elements()) {
-        throw GException::out_of_range(G_ELEMENT_OPERATOR2, element, elements()-1);
+        throw GException::out_of_range(G_ELEMENT_OPERATOR1, element, elements()-1);
     }
     #endif
 

@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-//#include "GFits.hpp"
 #include "GCTABackground.hpp"
 #include "GCTAResponseTable.hpp"
 
@@ -55,11 +54,15 @@ public:
     GCTABackground3D& operator=(const GCTABackground3D& bgd);
 
     // Implemented pure virtual methods
-    void              clear(void);
-    GCTABackground3D* clone(void) const;
-    void              load(const std::string& filename);
-    std::string       filename(void) const;
-    std::string       print(const GChatter& chatter = NORMAL) const;
+    void                       clear(void);
+    GCTABackground3D*          clone(void) const;
+    void                       load(const std::string& filename);
+    std::string                filename(void) const;
+    GCTAInstDir                mc(const GEnergy& energy,
+                                  const GTime& time,
+                                  GRan& ran) const;
+    const GModelSpectralNodes& spectrum(void) const;
+    std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Methods
     void read(const GFits& file);
@@ -69,10 +72,15 @@ private:
     void init_members(void);
     void copy_members(const GCTABackground3D& bgd);
     void free_members(void);
+    void init_mc_cache(void) const;
 
     // Members
-    std::string       m_filename;    //!< Name of background response file
-    GCTAResponseTable m_background;  //!< Background response table
+    std::string         m_filename;    //!< Name of background response file
+    GCTAResponseTable   m_background;  //!< Background response table
+
+    // Monte Carlo cache
+    mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
+    mutable GModelSpectralNodes m_mc_spectrum; //!< Response cube spectrum
 };
 
 
@@ -86,6 +94,23 @@ std::string GCTABackground3D::filename(void) const
 {
     // Return filename
     return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Get response cube spectrum
+ *
+ * @return Response cube spectrum.
+ *
+ * Returns the response cube spectrum.
+ ***************************************************************************/
+inline
+const GModelSpectralNodes& GCTABackground3D::spectrum(void) const
+{
+    if (m_mc_spectrum.nodes() == 0) {
+        init_mc_cache();
+    }
+    return (m_mc_spectrum);
 }
 
 #endif /* GCTABACKGROUND3D_HPP */
