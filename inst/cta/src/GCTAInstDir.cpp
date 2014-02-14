@@ -199,8 +199,11 @@ std::string GCTAInstDir::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append instrument direction
-        result.append("RA="+gammalib::str(m_dir.ra_deg()) +
-                      ", DEC="+gammalib::str(m_dir.dec_deg()));
+        std::string msg = "RA=" + gammalib::str(m_dir.ra_deg()) +
+                          ", DEC=" + gammalib::str(m_dir.dec_deg()) +
+                          " [" + gammalib::str(m_detx) +
+                          ", " + gammalib::str(m_dety) + "]";
+        result.append(msg);
 
     } // endif: chatter was not silent
 
