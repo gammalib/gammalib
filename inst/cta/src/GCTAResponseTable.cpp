@@ -907,6 +907,31 @@ void GCTAResponseTable::axis_radians(const int& index)
 
 
 /***********************************************************************//**
+ * @brief Return axis nodes
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return Node array for axis.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the node array of the specified axis.
+ ***************************************************************************/
+const GNodeArray& GCTAResponseTable::nodes(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS, index, axes()-1);
+    }
+    #endif
+
+    // Return node array
+    return (m_axis_nodes[index]);
+}
+
+
+/***********************************************************************//**
  * @brief Set nodes for a radians axis
  *
  * @param[in] index Parameter index [0,...,size()-1].

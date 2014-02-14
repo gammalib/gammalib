@@ -77,6 +77,7 @@ public:
     std::string        axis_lo_unit(const int& index) const;
     std::string        axis_hi_unit(const int& index) const;
     std::string        unit(const int& index) const;
+    const GNodeArray&  nodes(const int& index) const;
     void               scale(const int& index, const double& scale);
     void               read(const GFitsTable& hdu);
     void               write(GFitsTable& hdu) const;
