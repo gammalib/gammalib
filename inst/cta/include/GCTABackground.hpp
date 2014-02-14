@@ -53,7 +53,7 @@ public:
     virtual double operator()(const double& logE, 
                               const double& detx, 
                               const double& dety,
-                              const bool&   etrue = true) const = 0;
+                              const bool&   etrue = false) const = 0;
 
     // Operators
     GCTABackground& operator=(const GCTABackground& bgd);

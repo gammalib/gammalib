@@ -162,7 +162,7 @@ GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] detx Tangential coord in nominal sys (rad).
  * @param[in] dety Tangential coord in nominal sys (rad).
- * @param[in] etrue Use true energy (true/false). Defaults to true.
+ * @param[in] etrue Use true energy (true/false). Defaults to false.
  *
  * Returns the background rate in units of events/s/MeV/sr for a given energy
  * and detector coordinates. The method assures that the background rate
