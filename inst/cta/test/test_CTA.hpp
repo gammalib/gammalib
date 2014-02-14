@@ -65,17 +65,18 @@ public:
  *
  * This class defines a unit test suite for the CTA model class.
  ***************************************************************************/
-class TestGCTAModelBackground : public GTestSuite {
+class TestGCTAModel : public GTestSuite {
 public:
     // Constructors and destructors
-	TestGCTAModelBackground(void) : GTestSuite() {}
-    virtual ~TestGCTAModelBackground(void) {}
+	TestGCTAModel(void) : GTestSuite() {}
+    virtual ~TestGCTAModel(void) {}
 
     // Methods
-    virtual void                     set(void);
-    virtual TestGCTAModelBackground* clone(void) const;
-    void                             test_modelbg_npred_xml(void);
-    void                             test_modelbg_construct_fits(void);
+    virtual void           set(void);
+    virtual TestGCTAModel* clone(void) const;
+    void                   test_modelbg_npred_xml(void);
+    void                   test_modelbg_construct_fits(void);
+    void                   test_model_inst_bgd(void);
 };
 
 

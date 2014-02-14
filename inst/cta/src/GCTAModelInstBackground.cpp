@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GCTAInstBackground.cpp - CTA instrument background model class     *
+ *   GCTAModelInstBackground.cpp - CTA instrument background model class   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAInstBackground.cpp
+ * @file GCTAModelInstBackground.cpp
  * @brief CTA instrument background model class implementation
  * @author Juergen Knoedlseder
  */
@@ -33,19 +33,19 @@
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
-#include "GCTAInstBackground.hpp"
+#include "GCTAModelInstBackground.hpp"
 #include "GCTAObservation.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const GCTAInstBackground g_cta_inst_background_seed;
-const GModelRegistry     g_cta_inst_background_registry(&g_cta_inst_background_seed);
+const GCTAModelInstBackground g_cta_inst_background_seed;
+const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL             "GCTAInstBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS        "GCTAInstBackground::eval_gradients(GEvent&,"\
+#define G_EVAL        "GCTAModelInstBackground::eval(GEvent&, GObservation&)"
+#define G_EVAL_GRADIENTS   "GCTAModelInstBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
-#define G_XML_SPECTRAL       "GCTAInstBackground::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL       "GCTAInstBackground::xml_temporal(GXmlElement&)"
+#define G_XML_SPECTRAL  "GCTAModelInstBackground::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL  "GCTAModelInstBackground::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,10 +65,68 @@ const GModelRegistry     g_cta_inst_background_registry(&g_cta_inst_background_s
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAInstBackground::GCTAInstBackground(void) : GModelData()
+GCTAModelInstBackground::GCTAModelInstBackground(void) : GModelData()
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs a CTA instrumental background model from the information that
+ * is found in a XML element. Please refer to the method
+ * GCTAModelInstBackground::read to learn more about the information that is
+ * expected in the XML element.
+ ***************************************************************************/
+GCTAModelInstBackground::GCTAModelInstBackground(const GXmlElement& xml) :
+                         GModelData(xml)
+{
+    // Initialise members
+    init_members();
+
+    // Read XML
+    read(xml);
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct from spectral component
+ *
+ * @param[in] spectral Spectral model component.
+ *
+ * Constructs a CTA instrumental background model from a spectral
+ * model component. The temporal component is assumed to be constant.
+ * Please refer to the classe GModelSpectral to learn more about the
+ * definition of the spectral components.
+ ***************************************************************************/
+GCTAModelInstBackground::GCTAModelInstBackground(const GModelSpectral& spectral) :
+                         GModelData()
+{
+    // Initialise members
+    init_members();
+
+    // Allocate temporal constant model
+    GModelTemporalConst temporal;
+
+    // Clone model components
+    m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
 
     // Return
     return;
@@ -80,8 +138,8 @@ GCTAInstBackground::GCTAInstBackground(void) : GModelData()
  *
  * @param[in] bgd CTA instrument background model.
  ***************************************************************************/
-GCTAInstBackground::GCTAInstBackground(const GCTAInstBackground& bgd) :
-                    GModelData(bgd)
+GCTAModelInstBackground::GCTAModelInstBackground(const GCTAModelInstBackground& bgd) :
+                         GModelData(bgd)
 {
     // Initialise class members
     init_members();
@@ -97,7 +155,7 @@ GCTAInstBackground::GCTAInstBackground(const GCTAInstBackground& bgd) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAInstBackground::~GCTAInstBackground(void)
+GCTAModelInstBackground::~GCTAModelInstBackground(void)
 {
     // Free members
     free_members();
@@ -119,7 +177,7 @@ GCTAInstBackground::~GCTAInstBackground(void)
  * @param[in] bgd CTA instrument background model.
  * @return CTA instrument background model.
  ***************************************************************************/
-GCTAInstBackground& GCTAInstBackground::operator=(const GCTAInstBackground& bgd)
+GCTAModelInstBackground& GCTAModelInstBackground::operator=(const GCTAModelInstBackground& bgd)
 {
     // Execute only if object is not identical
     if (this != &bgd) {
@@ -155,7 +213,7 @@ GCTAInstBackground& GCTAInstBackground::operator=(const GCTAInstBackground& bgd)
  * This method properly resets the CTA instrument background model to an
  * initial state.
  ***************************************************************************/
-void GCTAInstBackground::clear(void)
+void GCTAModelInstBackground::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -175,9 +233,9 @@ void GCTAInstBackground::clear(void)
  *
  * @return Pointer to deep copy of CTA instrument background model.
  ***************************************************************************/
-GCTAInstBackground* GCTAInstBackground::clone(void) const
+GCTAModelInstBackground* GCTAModelInstBackground::clone(void) const
 {
-    return new GCTAInstBackground(*this);
+    return new GCTAModelInstBackground(*this);
 }
 
 
@@ -193,8 +251,8 @@ GCTAInstBackground* GCTAInstBackground::clone(void) const
  *
  * @todo Implement method
  ***************************************************************************/
-double GCTAInstBackground::eval(const GEvent& event,
-                                const GObservation& obs) const
+double GCTAModelInstBackground::eval(const GEvent& event,
+                                     const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
@@ -221,8 +279,8 @@ double GCTAInstBackground::eval(const GEvent& event,
  *
  * @todo Implement method
  ***************************************************************************/
-double GCTAInstBackground::eval_gradients(const GEvent& event,
-                                          const GObservation& obs) const
+double GCTAModelInstBackground::eval_gradients(const GEvent& event,
+                                               const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
@@ -248,9 +306,9 @@ double GCTAInstBackground::eval_gradients(const GEvent& event,
  *
  * @todo Implement method
  ***************************************************************************/
-double GCTAInstBackground::npred(const GEnergy&      obsEng,
-                                 const GTime&        obsTime,
-                                 const GObservation& obs) const
+double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
+                                      const GTime&        obsTime,
+                                      const GObservation& obs) const
 {
     // Return
     return 0.0;
@@ -267,7 +325,7 @@ double GCTAInstBackground::npred(const GEnergy&      obsEng,
  *
  * @todo Implement method
  ***************************************************************************/
-GCTAEventList* GCTAInstBackground::mc(const GObservation& obs, GRan& ran) const
+GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) const
 {
     // Return
     return NULL;
@@ -283,7 +341,7 @@ GCTAEventList* GCTAInstBackground::mc(const GObservation& obs, GRan& ran) const
  * of a temporal component ('temporalModel'). If no temporal component is
  * found a constant model is assumed.
  ***************************************************************************/
-void GCTAInstBackground::read(const GXmlElement& xml)
+void GCTAModelInstBackground::read(const GXmlElement& xml)
 {
     // Clear model
     clear();
@@ -332,7 +390,7 @@ void GCTAInstBackground::read(const GXmlElement& xml)
  *
  * @todo Document method.
  ***************************************************************************/
-void GCTAInstBackground::write(GXmlElement& xml) const
+void GCTAModelInstBackground::write(GXmlElement& xml) const
 {
     // Initialise pointer on source
     GXmlElement* src = NULL;
@@ -392,7 +450,7 @@ void GCTAInstBackground::write(GXmlElement& xml) const
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing CTA instrument background model information.
  ***************************************************************************/
-std::string GCTAInstBackground::print(const GChatter& chatter) const
+std::string GCTAModelInstBackground::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -401,7 +459,7 @@ std::string GCTAInstBackground::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTAInstBackground ===");
+        result.append("=== GCTAModelInstBackground ===");
 
         // Determine number of parameters per type
         int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
@@ -452,7 +510,7 @@ std::string GCTAInstBackground::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAInstBackground::init_members(void)
+void GCTAModelInstBackground::init_members(void)
 {
     // Initialise members
     m_spectral = NULL;
@@ -468,11 +526,14 @@ void GCTAInstBackground::init_members(void)
  *
  * @param[in] bgd CTA background model.
  ***************************************************************************/
-void GCTAInstBackground::copy_members(const GCTAInstBackground& bgd)
+void GCTAModelInstBackground::copy_members(const GCTAModelInstBackground& bgd)
 {
     // Clone spectral and temporal model components
     m_spectral = (bgd.m_spectral != NULL) ? bgd.m_spectral->clone() : NULL;
     m_temporal = (bgd.m_temporal != NULL) ? bgd.m_temporal->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
 
     // Return
     return;
@@ -482,7 +543,7 @@ void GCTAInstBackground::copy_members(const GCTAInstBackground& bgd)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAInstBackground::free_members(void)
+void GCTAModelInstBackground::free_members(void)
 {
     // Free memory
     if (m_spectral != NULL) delete m_spectral;
@@ -503,7 +564,7 @@ void GCTAInstBackground::free_members(void)
  * Set pointers to all model parameters. The pointers are stored in a vector
  * that is member of the GModelData base class.
  ***************************************************************************/
-void GCTAInstBackground::set_pointers(void)
+void GCTAModelInstBackground::set_pointers(void)
 {
     // Clear parameters
     m_pars.clear();
@@ -539,7 +600,7 @@ void GCTAInstBackground::set_pointers(void)
  * Returns 'true' if models has a spectral and a temporal component.
  * Otherwise returns 'false'.
  ***************************************************************************/
-bool GCTAInstBackground::valid_model(void) const
+bool GCTAModelInstBackground::valid_model(void) const
 {
     // Set result
     bool result = ((spectral() != NULL) && (temporal() != NULL));
@@ -559,7 +620,7 @@ bool GCTAInstBackground::valid_model(void) const
  *
  * Returns pointer to a spectral model that is defined in an XML element.
  ***************************************************************************/
-GModelSpectral* GCTAInstBackground::xml_spectral(const GXmlElement& spectral) const
+GModelSpectral* GCTAModelInstBackground::xml_spectral(const GXmlElement& spectral) const
 {
     // Get spectral model type
     std::string type = spectral.attribute("type");
@@ -593,7 +654,7 @@ GModelSpectral* GCTAInstBackground::xml_spectral(const GXmlElement& spectral) co
  *
  * Returns pointer to a temporal model that is defined in an XML element.
  ***************************************************************************/
-GModelTemporal* GCTAInstBackground::xml_temporal(const GXmlElement& temporal) const
+GModelTemporal* GCTAModelInstBackground::xml_temporal(const GXmlElement& temporal) const
 {
     // Get temporal model type
     std::string type = temporal.attribute("type");

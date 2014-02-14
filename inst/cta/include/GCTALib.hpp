@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTALib.hpp - CTA Support Header files                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,12 +50,15 @@
 #include "GCTAAeffPerfTable.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
+#include "GCTABackground.hpp"
+#include "GCTABackground3D.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAPsf2D.hpp"
 #include "GCTAPsfKing.hpp"
 #include "GCTAPsfPerfTable.hpp"
 #include "GCTAPsfVector.hpp"
 #include "GCTAModelBackground.hpp"
+#include "GCTAModelInstBackground.hpp"
 #include "GCTAModelRadial.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialGauss.hpp"

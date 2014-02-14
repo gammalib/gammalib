@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GCTAInstBackground.hpp - CTA instrument background model class     *
+ *   GCTAModelInstBackground.hpp - CTA instrument background model class   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAInstBackground.hpp
+ * @file GCTAModelInstBackground.hpp
  * @brief CTA instrument background model class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCTAINSTBACKGROUND_HPP
-#define GCTAINSTBACKGROUND_HPP
+#ifndef GCTAMODELINSTBACKGROUND_HPP
+#define GCTAMODELINSTBACKGROUND_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -38,37 +38,39 @@
 
 
 /***********************************************************************//**
- * @class GCTAInstBackground
+ * @class GCTAModelInstBackground
  *
  * @brief CTA instrument background model class
  ***************************************************************************/
-class GCTAInstBackground : public GModelData {
+class GCTAModelInstBackground : public GModelData {
 
 public:
     // Constructors and destructors
-    GCTAInstBackground(void);
-    GCTAInstBackground(const GCTAInstBackground& bgd);
-    virtual ~GCTAInstBackground(void);
+    GCTAModelInstBackground(void);
+    explicit GCTAModelInstBackground(const GXmlElement& xml);
+    explicit GCTAModelInstBackground(const GModelSpectral& spectral);
+    GCTAModelInstBackground(const GCTAModelInstBackground& bgd);
+    virtual ~GCTAModelInstBackground(void);
 
     // Operators
-    GCTAInstBackground& operator=(const GCTAInstBackground& bgd);
+    GCTAModelInstBackground& operator=(const GCTAModelInstBackground& bgd);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
-    virtual GCTAInstBackground* clone(void) const;
-    virtual std::string         type(void) const;
-    virtual bool                is_constant(void) const;
-    virtual double              eval(const GEvent& event,
-                                     const GObservation& obs) const;
-    virtual double              eval_gradients(const GEvent& event,
-                                               const GObservation& obs) const;
-    virtual double              npred(const GEnergy& obsEng,
-                                      const GTime& obsTime,
-                                      const GObservation& obs) const;
-    virtual GCTAEventList*      mc(const GObservation& obs, GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
-    virtual std::string         print(const GChatter& chatter = NORMAL) const;
+    virtual void                     clear(void);
+    virtual GCTAModelInstBackground* clone(void) const;
+    virtual std::string              type(void) const;
+    virtual bool                     is_constant(void) const;
+    virtual double                   eval(const GEvent& event,
+                                          const GObservation& obs) const;
+    virtual double                   eval_gradients(const GEvent& event,
+                                                    const GObservation& obs) const;
+    virtual double                   npred(const GEnergy& obsEng,
+                                           const GTime& obsTime,
+                                           const GObservation& obs) const;
+    virtual GCTAEventList*           mc(const GObservation& obs, GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
+    virtual std::string              print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GModelSpectral* spectral(void) const;
@@ -77,7 +79,7 @@ public:
 private:
     // Methods
     void            init_members(void);
-    void            copy_members(const GCTAInstBackground& bgd);
+    void            copy_members(const GCTAModelInstBackground& bgd);
     void            free_members(void);
     void            set_pointers(void);
     bool            valid_model(void) const;
@@ -85,8 +87,8 @@ private:
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
 
     // Members
-    GModelSpectral*   m_spectral;    //!< Spectral model
-    GModelTemporal*   m_temporal;    //!< Temporal model
+    GModelSpectral* m_spectral;   //!< Spectral model
+    GModelTemporal* m_temporal;   //!< Temporal model
 };
 
 
@@ -98,9 +100,9 @@ private:
  * Returns the type of the data model.
  ***************************************************************************/
 inline
-std::string GCTAInstBackground::type(void) const
+std::string GCTAModelInstBackground::type(void) const
 {
-    return ("GCTAInstBackground");
+    return ("CTAInstBackground");
 }
 
 
@@ -113,7 +115,7 @@ std::string GCTAInstBackground::type(void) const
  * model is a model that has a temporal component of type "Constant".
  ***************************************************************************/
 inline
-bool GCTAInstBackground::is_constant(void) const
+bool GCTAModelInstBackground::is_constant(void) const
 {
     return (m_temporal != NULL && m_temporal->type() == "Constant");
 }
@@ -129,7 +131,7 @@ bool GCTAInstBackground::is_constant(void) const
  * returned if the sky model has no spectral model component.
  ***************************************************************************/
 inline
-GModelSpectral* GCTAInstBackground::spectral(void) const
+GModelSpectral* GCTAModelInstBackground::spectral(void) const
 {
     return (m_spectral);
 }
@@ -145,9 +147,9 @@ GModelSpectral* GCTAInstBackground::spectral(void) const
  * returned if the sky model has no temporal model component.
  ***************************************************************************/
 inline
-GModelTemporal* GCTAInstBackground::temporal(void) const
+GModelTemporal* GCTAModelInstBackground::temporal(void) const
 {
     return (m_temporal);
 }
 
-#endif /* GCTAINSTBACKGROUND_HPP */
+#endif /* GCTAMODELINSTBACKGROUND_HPP */
