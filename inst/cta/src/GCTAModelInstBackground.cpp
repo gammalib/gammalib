@@ -254,21 +254,54 @@ GCTAModelInstBackground* GCTAModelInstBackground::clone(void) const
  * @exception GException::invalid_argument
  *            Specified observation is not of the expected type.
  *
- * @todo Implement method
+ * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
  ***************************************************************************/
 double GCTAModelInstBackground::eval(const GEvent& event,
                                      const GObservation& obs) const
 {
     // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
+    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
+    if (cta == NULL) {
         std::string msg = "Specified observation is not a CTA observation.\n" +
                           obs.print();
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
-    // Return
-    return 0.0;
+    // Retrieve pointer to CTA background
+    const GCTABackground* bgd = cta->response().background();
+    if (bgd == NULL) {
+        std::string msg = "Specified observation contains no background"
+                          " information.\n" + obs.print();
+        throw GException::invalid_argument(G_EVAL, msg);
+    }
+
+    // Extract CTA instrument direction from event
+    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
+    if (dir == NULL) {
+        std::string msg = "No CTA instrument direction found in event.";
+        throw GException::invalid_argument(G_EVAL, msg);
+    }
+
+    // DUMMY CODE: GET DETX an DETY
+    const GCTAPointing& pnt = cta->pointing();
+    GCTAInstDir inst_dir = pnt.instdir(dir->dir());
+
+    // Evaluate function
+    double logE = event.energy().log10TeV(); // TODO: Make unit save
+    double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
+    double spec = (spectral() != NULL)
+                  ? spectral()->eval(event.energy(), event.time()) : 1.0;
+    double temp = (temporal() != NULL)
+                  ? temporal()->eval(event.time()) : 1.0;
+
+    // Compute value
+    double value = spat * spec * temp;
+
+    // Apply deadtime correction
+    value *= obs.deadc(event.time());
+
+    // Return value
+    return value;
 }
 
 
@@ -282,23 +315,76 @@ double GCTAModelInstBackground::eval(const GEvent& event,
  * @exception GException::invalid_argument
  *            Specified observation is not of the expected type.
  *
- * @todo Implement method
+ * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
  ***************************************************************************/
 double GCTAModelInstBackground::eval_gradients(const GEvent& event,
                                                const GObservation& obs) const
 {
     // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
+    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
+    if (cta == NULL) {
         std::string msg = "Specified observation is not a CTA observation.\n" +
                           obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
+        throw GException::invalid_argument(G_EVAL, msg);
     }
 
-    // Return
-    return 0.0;
-}
+    // Retrieve pointer to CTA background
+    const GCTABackground* bgd = cta->response().background();
+    if (bgd == NULL) {
+        std::string msg = "Specified observation contains no background"
+                          " information.\n" + obs.print();
+        throw GException::invalid_argument(G_EVAL, msg);
+    }
 
+    // Extract CTA instrument direction from event
+    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
+    if (dir == NULL) {
+        std::string msg = "No CTA instrument direction found in event.";
+        throw GException::invalid_argument(G_EVAL, msg);
+    }
+
+    // DUMMY CODE: GET DETX an DETY
+    const GCTAPointing& pnt = cta->pointing();
+    GCTAInstDir inst_dir = pnt.instdir(dir->dir());
+
+    // Evaluate function
+    double logE = event.energy().log10TeV(); // TODO: Make unit save
+    double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
+    double spec = (spectral() != NULL)
+                  ? spectral()->eval_gradients(event.energy(), event.time())
+                  : 1.0;
+    double temp = (temporal() != NULL)
+                  ? temporal()->eval_gradients(event.time())
+                  : 1.0;
+
+    // Compute value
+    double value = spat * spec * temp;
+
+    // Apply deadtime correction
+    double deadc = obs.deadc(event.time());
+    value       *= deadc;
+
+    // Multiply factors to spectral gradients
+    if (spectral() != NULL) {
+        double fact = spat * temp * deadc;
+        if (fact != 1.0) {
+            for (int i = 0; i < spectral()->size(); ++i)
+                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
+        }
+    }
+
+    // Multiply factors to temporal gradients
+    if (temporal() != NULL) {
+        double fact = spat * spec * deadc;
+        if (fact != 1.0) {
+            for (int i = 0; i < temporal()->size(); ++i)
+                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
+        }
+    }
+
+    // Return value
+    return value;
+}
 
 
 /***********************************************************************//**
@@ -352,6 +438,11 @@ GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) c
         
         // Get pointer to CTA background
         const GCTABackground* bgd = rsp.background();
+        if (bgd == NULL) {
+            std::string msg = "Specified observation contains no background"
+                              " information.\n" + obs.print();
+            throw GException::invalid_argument(G_MC, msg);
+        }
 
         // Retrieve event list to access the ROI, energy boundaries and GTIs
         const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());

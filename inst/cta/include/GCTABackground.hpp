@@ -49,6 +49,12 @@ public:
     GCTABackground(const GCTABackground& bgd);
     virtual ~GCTABackground(void);
 
+    // Pure virtual operators
+    virtual double operator()(const double& logE, 
+                              const double& detx, 
+                              const double& dety,
+                              const bool&   etrue = true) const = 0;
+
     // Operators
     GCTABackground& operator=(const GCTABackground& bgd);
 

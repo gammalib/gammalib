@@ -50,6 +50,12 @@ public:
     GCTABackground3D(const GCTABackground3D& bgd);
     virtual ~GCTABackground3D(void);
 
+    // Implemented pure virtual operators
+    virtual double operator()(const double& logE, 
+                              const double& detx, 
+                              const double& dety,
+                              const bool&   etrue = true) const;
+
     // Operators
     GCTABackground3D& operator=(const GCTABackground3D& bgd);
 
