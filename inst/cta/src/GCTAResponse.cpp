@@ -59,6 +59,7 @@
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTABackground.hpp"
+#include "GCTABackgroundPerfTable.hpp"
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -783,7 +784,8 @@ void GCTAResponse::load_background(const std::string& filename)
         m_background = new GCTABackground3D(filename);
     }
     catch (GException::fits_open_error &e) {
-        m_background = NULL;
+        // Load background as performance table background
+        m_background = new GCTABackgroundPerfTable(filename);
     }
 
     // Return

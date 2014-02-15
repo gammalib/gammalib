@@ -32,6 +32,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAEdisp.cpp \
           src/GCTAEdispPerfTable.cpp \
           src/GCTABackground.cpp \
+          src/GCTABackgroundPerfTable.cpp \
           src/GCTABackground3D.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
@@ -71,6 +72,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAEdisp.hpp \
 			         include/GCTAEdispPerfTable.hpp \
                      include/GCTABackground.hpp \
+                     include/GCTABackgroundPerfTable.hpp \
                      include/GCTABackground3D.hpp \
                      include/GCTAModelBackground.hpp \
                      include/GCTAModelInstBackground.hpp \

@@ -51,6 +51,7 @@
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTABackground.hpp"
+#include "GCTABackgroundPerfTable.hpp"
 #include "GCTABackground3D.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAPsf2D.hpp"
