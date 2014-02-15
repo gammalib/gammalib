@@ -188,7 +188,7 @@ double GCTAAeffPerfTable::operator()(const double& logE,
     if (m_sigma != 0.0) {
         double offset = theta * gammalib::rad2deg;
         double arg    = offset * offset / m_sigma;
-        double scale  = exp(-0.5 * arg * arg);
+        double scale  = std::exp(-0.5 * arg * arg);
         aeff         *= scale;
     }
     
