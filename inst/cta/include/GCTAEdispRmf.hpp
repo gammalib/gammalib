@@ -29,14 +29,15 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GFits.hpp"
 #include "GRan.hpp"
-#include "GMatrixSparse.hpp"
-#include "GEbounds.hpp"
+#include "GRmf.hpp"
+#include "GVector.hpp"
 #include "GCTAEdisp.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GCTAResponse;
+class GRan;
+class GEnergy;
+class GEbounds;
 
 
 /***********************************************************************//**
@@ -68,7 +69,7 @@ public:
     void          load(const std::string& filename);
     std::string   filename(void) const;
     GEnergy       mc(GRan& ran,
-                     const double& logE,
+                     const double& logEsrc,
                      const double& theta = 0.0,
                      const double& phi = 0.0,
                      const double& zenith = 0.0,
@@ -86,42 +87,47 @@ public:
     std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int size(void) const;
+    int   size(void) const;
+    const GRmf& rmf(void) const;
 
 private:
     // Methods
     void init_members(void);
     void copy_members(const GCTAEdispRmf& psf);
     void free_members(void);
-    void convert_cdf(void);
+    void set_mc_cache(void);
 
     // Members
-    std::string         m_filename;  //!< Name of response file
+    std::string m_filename;  //!< Name of response file
+    GRmf        m_rmf;       //!< Redistribution matrix file
 
-    // For now, let's just store the plain RMF info and implement it
-    // as a step function model.
-    GEbounds             m_ebounds_src;  //!< Source energy boundaries
-    GEbounds             m_ebounds_obs;  //!< Observed energy boundaries
-    GMatrixSparse        m_matrix;       //!< Sparse redistribution matrix
-    GVector 			 m_mc_cache;     //!< Monte Carlo cache
-    std::vector<GVector> m_cdf_cache;    //!< Vector of GVectors from RMF file
-    // TODO: optionally implement interpolated (linear or spline) model
-    // and store interpolation object here.
-    //GNodeArray          m_logE;       //!< log(E) nodes for interpolation
-    //std::vector<double> m_aeff;       //!< Effective area in cm2
-
+    // Monte Carlo cache
+    mutable std::vector<int>     m_mc_measured_start;
+    mutable std::vector<GVector> m_mc_measured_cdf;
 };
 
 
 /***********************************************************************//**
  * @brief Return filename
  *
- * @return Returns filename from which the energy resolution was loaded
+ * @return Returns filename from which the Redistribution Matrix was loaded.
  ***************************************************************************/
 inline
 std::string GCTAEdispRmf::filename(void) const
 {
     return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Redistribution Matrix File
+ *
+ * @return Returns Redistribution Matrix File.
+ ***************************************************************************/
+inline
+const GRmf& GCTAEdispRmf::rmf(void) const
+{
+    return m_rmf;
 }
 
 #endif /* GCTAEDISPRMF_HPP */

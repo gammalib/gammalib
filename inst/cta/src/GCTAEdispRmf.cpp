@@ -30,18 +30,9 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
-#include "GRmf.hpp"
-#include "GRan.hpp"
-#include "GEnergy.hpp"
 #include "GMath.hpp"
-#include "GVector.hpp"
-//#include "GIntegral.hpp"
-//#include "GFitsTable.hpp"
-//#include "GFitsTableCol.hpp"
+#include "GEnergy.hpp"
 #include "GCTAEdispRmf.hpp"
-//#include "GCTAResponse.hpp"
-//#include "GCTAResponse_helpers.hpp"
-//#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                             "GCTAEdispRmf::load(std::string&)"
@@ -77,10 +68,9 @@ GCTAEdispRmf::GCTAEdispRmf(void) : GCTAEdisp()
 /***********************************************************************//**
  * @brief File constructor
  *
- * @param[in] filename Performance table file name.
+ * @param[in] filename Redistribution Matrix File name.
  *
- * Construct instance by loading the energy dispersion information from
- * an ASCII performance table.
+ * Construct instance by loading the Redistribution Matrix File.
  ***************************************************************************/
 GCTAEdispRmf::GCTAEdispRmf(const std::string& filename) : GCTAEdisp()
 {
@@ -176,14 +166,8 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * photon energy at a given (log10(E_src), log10(E_obs)).
  * To be precise: energy dispersion = dP / d(log10(E_obs)).
  * 
- * Evaluates
- *
- * \f[
- * S(E) = \frac{1}{\sqrt{2\pi}m\_sigma}
- *        \exp(\frac{-(logEobs-logEsrc)^2}{2 m\_sigma^2})
- * \f]
- *
  * @todo Implement interpolation method
+ * @todo So far the operator returns a matrix element and not a density!!!
  ***************************************************************************/
 double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& logEsrc,
@@ -192,12 +176,20 @@ double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& zenith,
                                 const double& azimuth) const
 {
+    // Set true energy
+    GEnergy etrue;
+    etrue.log10TeV(logEsrc);
+
+    // Set measured energy
+    GEnergy emeasured;
+    emeasured.log10TeV(logEobs);
+
     // Get indices for observed and true energy 
-	int i_obs = m_ebounds_obs.index(GEnergy(std::pow(10.0, logEobs), "TeV"));
-	int i_src = m_ebounds_src.index(GEnergy(std::pow(10.0, logEsrc), "TeV"));
+	int itrue     = m_rmf.etrue().index(etrue);
+	int imeasured = m_rmf.emeasured().index(emeasured);
 
     // Extract matrix element
-	double edisp = m_matrix(i_src, i_obs);
+	double edisp = m_rmf.matrix()(itrue, imeasured);
     
     // Return energy dispersion
     return edisp;
@@ -247,60 +239,73 @@ GCTAEdispRmf* GCTAEdispRmf::clone(void) const
  * @param[in] filename of RMF file.
  *
  * This method loads the energy dispersion information from an RMF file.
- *
- * @todo Why not storing simply GRmf as a member of GCTAEdispRmf
  ***************************************************************************/
 void GCTAEdispRmf::load(const std::string& filename)
 {
     // Load RMF file
-	GRmf rmf(filename);
+    m_rmf.load(filename);
 
-    // Extract infomation
-	m_ebounds_src = rmf.etrue();
-	m_ebounds_obs = rmf.emeasured();
-	m_matrix      = rmf.matrix();
+    // Store the filename
+    m_filename = filename;
+
+    // Set Monte Carlo cache
+    set_mc_cache();
 
 	// Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
  * Draws observed energy value from RMF matrix.
- *
- * @todo Are you sure this method works??? I think the vector index should
- * be extracted from logE. Also, never copy a vector, get references to it.
- * Another problem is that the method will always return the bin centres,
- * but we want to sample energies to infinite precision!!!
  ***************************************************************************/
 GEnergy GCTAEdispRmf::mc(GRan&         ran,
-                         const double& logE,
+                         const double& logEsrc,
                          const double& theta,
                          const double& phi,
                          const double& zenith,
                          const double& azimuth) const
 {
-	// Random selection of a GVector from vector of GVectors
-	double  u      = ran.uniform();
-	GVector vector = m_cdf_cache[u]; // Does this work??? u=[0,1]
-
-	// Random selection of element in GVector
-	int ref = ran.cdf(vector);
-
-   	// Convert index into an energy
-    double logEobs = vector[ref];
-
-    // Draw log observed energy in TeV
+    // Set true energy
     GEnergy energy;
-    energy.log10TeV(logEobs);
+    energy.log10TeV(logEsrc);
+
+    // Determine true energy index
+    int itrue = m_rmf.etrue().index(energy);
+
+    // Continue only if the true energy index lies within a true energy
+    // boundary of the redistribution matrix file
+    if (itrue != -1) {
+
+        // Get offset in measured energy. Continue only if offset is valid
+        int offset = m_mc_measured_start[itrue];
+        if (offset != -1) {
+
+            // Determine measured energy index from Monte-Carlo cache
+            int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
+
+            // Get log10 energy minimum and bin width
+            double emin   = m_rmf.emeasured().emin(imeasured).log10TeV();
+            double ewidth = m_rmf.emeasured().emax(imeasured).log10TeV() - emin;
+
+            // Draw a random energy from this interval
+            double e = emin + ewidth * ran.uniform();
+
+            // Set interval
+            energy.log10TeV(e);
+        
+        } // endif: offset was valid
+
+    } // endif: there was redistribution information
 
 	// Return energy
 	return energy;
@@ -318,8 +323,6 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
  *
  * Returns the band of observed energies outside of which the energy
  * dispersion becomes negligible for a given true energy @p logEsrc.
- *
- * @todo Convert logEsrc into index!!!
  ***************************************************************************/
 GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
                                    const double& theta,
@@ -327,46 +330,12 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
                                    const double& zenith,
                                    const double& azimuth) const
 {
-    // WRONG!!! No random sampling needed here!!!
-    GRan ran;
-	int low = ran.cdf(m_mc_cache);
-	GVector EVector = m_matrix.column(low);
+    // Set true energy
+    GEnergy etrue;
+    etrue.log10TeV(logEsrc);
 
-    // Initialise energy boundaries
-    GEbounds ebounds;
-
-    // Determine vector column that corresponds to specified true energy
-    GEnergy energy;
-    energy.log10TeV(logEsrc);
-    int column = m_ebounds_src.index(energy);
-    if (column != -1) {
-    
-        // Determine first and last non-zero indices
-        int i_emin = -1;
-        int i_emax = -1;
-        for (int row = 0; row < m_matrix.rows(); ++row) {
-            if (m_matrix(row, column) > 0.0) {
-                i_emin = row;
-                break;
-            }
-        }
-        for (int row = m_matrix.rows()-1; row >= 0; --row) {
-            if (m_matrix(row, column) > 0.0) {
-                i_emax = row;
-                break;
-            }
-        }
-
-        // Set energy boundaries if valid indices have been found
-        if (i_emin != -1 && i_emax != -1) {
-            ebounds = GEbounds(m_ebounds_obs.emin(i_emin),
-                               m_ebounds_obs.emax(i_emax));
-        }
-
-    } // endif: information found for source energy
-
-    // Return energy boundaries
-    return ebounds;
+    // Return measured energy boundaries
+    return (m_rmf.emeasured(etrue));
 }
 
 
@@ -388,85 +357,45 @@ GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
                                    const double& zenith,
                                    const double& azimuth) const
 {
-    GRan ran;
-	int low = ran.cdf(m_mc_cache);
-	GVector EVector = m_matrix.row(low);
+    // Set measured energy
+    GEnergy emeasured;
+    emeasured.log10TeV(logEobs);
 
-	int emin_index = EVector.first_nonzero();
-	int emax_index = EVector.last_nonzero();
-
-	double emin_val = EVector[emin_index];
-	double emax_val = EVector[emax_index];
-
-	GEnergy emin = GEnergy(emin_val, "MeV");
-	GEnergy emax = GEnergy(emax_val, "MeV");
-
-	// Return energy boundaries
-	return (GEbounds(emin, emax));
-
-	}
-
-/***********************************************************************//**
- * @brief Calculates std::vector of cdf GVectors.
- *
- * Makes std::vector of cdf GVectors from RMF matrix columns and puts
- * result in m_cdf_cache in the cache.
- ***************************************************************************/
-void GCTAEdispRmf::convert_cdf(void)
-{
-
-	GVector Row = m_matrix.row(0);
-	int row_sz = Row.size();
-
-	//Iterate over vectors
-	for(int j = 0; j <= row_sz; ++j) {
-		GVector Vector = m_matrix.column(j);
-		//Get minimum and maximum non-zero indices for vector
-		int min_index = Vector.first_nonzero();
-		int max_index = Vector.last_nonzero();
-		int size = Vector.size();
-		//Construct new vector for these non-zero values
-		GVector v1 = Vector.slice((Vector[0] + min_index), (Vector[size] - max_index));
-		int v1_size = v1.size();
-		//First element of the new vector
-		double el_1 = v1[0];
-		//Copy new vector for iteration
-		GVector v_add = v1;
-
-
-		//Compute the cdf from shortened vector
-		double element = v_add[0];
-		//Iterate over elements of each vector
-		for (int i = 0; i <= size; ++i) {
-			double element_i = v_add[i];
-			double new_element_i = element + element_i;
-			//Insert replacement element into the vector at position i
-			v_add[i] = new_element_i;
-			double element = element_i;
-		}
-		//Adds the GVector cdf to the std::vector of GVectors
-		GVector vector_cdf = v_add;
-		m_cdf_cache[j] = vector_cdf;
-		}
-
-	return;
-
+    // Return true energy boundaries
+    return (m_rmf.etrue(emeasured));
 }
+
 
 /***********************************************************************//**
  * @brief Print RMF information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing energy dispersion information.
- *
- * TODO: Print something useful.
  ***************************************************************************/
 std::string GCTAEdispRmf::print(const GChatter& chatter) const
-{ // Initialise result string
+{ 
+    // Initialise result string
     std::string result;
 
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTAEdispRmf ===");
+
+        // Append energy boundary information
+        result.append("\n"+gammalib::parformat("Number of true energy bins"));
+        result.append(gammalib::str(m_rmf.etrue().size()));
+        result.append("\n"+gammalib::parformat("Number of measured bins"));
+        result.append(gammalib::str(m_rmf.emeasured().size()));
+        result.append("\n"+gammalib::parformat("True energy range"));
+        result.append(m_rmf.etrue().emin().print());
+        result.append(" - ");
+        result.append(m_rmf.etrue().emax().print());
+        result.append("\n"+gammalib::parformat("Measured energy range"));
+        result.append(m_rmf.emeasured().emin().print());
+        result.append(" - ");
+        result.append(m_rmf.emeasured().emax().print());
 
     } // endif: chatter was not silent
 
@@ -489,6 +418,11 @@ void GCTAEdispRmf::init_members(void)
 {
     // Initialise members
     m_filename.clear();
+    m_rmf.clear();
+
+    // Initialise cache
+    m_mc_measured_start.clear();
+    m_mc_measured_cdf.clear();
 
     // Return
     return;
@@ -503,7 +437,12 @@ void GCTAEdispRmf::init_members(void)
 void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
 {
     // Copy members
-    m_filename  = edisp.m_filename;
+    m_filename = edisp.m_filename;
+    m_rmf      = edisp.m_rmf;
+
+    // Copy cache
+    m_mc_measured_start = edisp.m_mc_measured_start;
+    m_mc_measured_cdf   = edisp.m_mc_measured_cdf;
 
     // Return
     return;
@@ -519,3 +458,82 @@ void GCTAEdispRmf::free_members(void)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Update the Monte-Carlo cache values
+ *
+ * Sets the following private class members:
+ *
+ *      m_mc_measured_start: start index in emeasured boundaries for each true energy
+ *      m_mc_measured_stop:  stop index in emeasured boundaries for each true energy
+ *      m_mc_measured_cdf:   CDF for each true energy
+ *
+ ***************************************************************************/
+void GCTAEdispRmf::set_mc_cache(void)
+{
+    // Clear MC cache
+    m_mc_measured_start.clear();
+    m_mc_measured_cdf.clear();
+
+    // Reserve some space
+    m_mc_measured_start.reserve(m_rmf.ntrue());
+    m_mc_measured_cdf.reserve(m_rmf.ntrue());
+
+    // Loop over true energies
+    for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
+
+        // Determine first non-zero measured energy
+        int imeasured_start = -1;
+        for (int i = 0; i < m_rmf.nmeasured(); ++i) {
+            if (m_rmf(itrue, i) > 0.0) {
+                imeasured_start = i;
+                break;
+            }
+        }
+        m_mc_measured_start.push_back(imeasured_start);
+
+        // Determine last non-zero measured energy
+        int imeasured_stop = -1;
+        for (int i = m_rmf.nmeasured()-1; i >= 0; --i) {
+            if (m_rmf(itrue, i) > 0.0) {
+                imeasured_stop = i;
+                break;
+            }
+        }
+
+        // Determine number of elements
+        int num = (imeasured_stop - imeasured_start);
+        if (num < 0) {
+            num = 0;
+        }
+
+        // Allocate vector
+        GVector vector(num+1);
+
+        // If there are measured energies for this true energy then build
+        // now the CDF ...
+        if (imeasured_start != -1 && imeasured_stop != -1) {
+            double sum = 0.0;
+            vector[0] = 0.0;
+            for (int i = imeasured_start, k = 1; i <= imeasured_stop; ++i, ++k) {
+                sum      += m_rmf(itrue, i);
+                vector[k] = sum;
+            }
+            if (sum > 0.0) {
+                for (int k = 0; k < num; ++k) {
+                    vector[k] /= sum;
+                }
+            }
+        }
+
+        // Make sure that last pixel in the cache is >1
+        vector[num] = 1.0001;
+
+        // Push vector on cache
+        m_mc_measured_cdf.push_back(vector);
+    
+    } // endfor: looped over all true energies
+
+    // Return
+	return;
+}
