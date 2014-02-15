@@ -44,6 +44,7 @@
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_MC_INIT
 //#define G_DEBUG_CACHE
+#define G_LOG_INTERPOLATION   //!< Energy interpolate log10(background rate)
 
 /* __ Constants __________________________________________________________ */
 
@@ -172,6 +173,9 @@ GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
  * the background rate as function of true energy, specify etrue=true
  * (this is the default). The obtained the background rate as function of
  * reconstructed energy, specify etrue=false.
+ *
+ * The method interpolates linearly in DETX and DETY, and logarithmically
+ * in the energy direction.
  ***************************************************************************/
 double GCTABackground3D::operator()(const double& logE, 
                                     const double& detx, 
@@ -182,7 +186,72 @@ double GCTABackground3D::operator()(const double& logE,
     int index = (etrue) ? 0 : 1;
 
     // Get background rate
+    #if defined(G_LOG_INTERPOLATION)
+    // Retrieve node arrays
+    const GNodeArray& detx_nodes   = m_background.nodes(0);
+    const GNodeArray& dety_nodes   = m_background.nodes(1);
+    const GNodeArray& energy_nodes = m_background.nodes(2);
+
+    // Set values for node arrays
+    detx_nodes.set_value(detx);
+    dety_nodes.set_value(dety);
+    energy_nodes.set_value(logE);
+
+    // Compute offsets of DETY in DETX-DETY plane
+    int size1        = m_background.axis(0);
+    int offset_left  = dety_nodes.inx_left()  * size1;
+    int offset_right = dety_nodes.inx_right() * size1;
+
+    // Set indices for bi-linear interpolation in DETX-DETY plane
+    int inx_ll = detx_nodes.inx_left()  + offset_left;
+    int inx_lr = detx_nodes.inx_left()  + offset_right;
+    int inx_rl = detx_nodes.inx_right() + offset_left;
+    int inx_rr = detx_nodes.inx_right() + offset_right;
+
+    // Set weighting factors for bi-linear interpolation in DETX-DETY plane
+    double wgt_ll = detx_nodes.wgt_left()  * dety_nodes.wgt_left();
+    double wgt_lr = detx_nodes.wgt_left()  * dety_nodes.wgt_right();
+    double wgt_rl = detx_nodes.wgt_right() * dety_nodes.wgt_left();
+    double wgt_rr = detx_nodes.wgt_right() * dety_nodes.wgt_right();
+
+    // Set indices for energy interpolation
+    int inx_emin = energy_nodes.inx_left();
+    int inx_emax = energy_nodes.inx_right();
+
+    // Set weighting factors for energy interpolation
+    double wgt_emin = energy_nodes.wgt_left();
+    double wgt_emax = energy_nodes.wgt_right();
+
+    // Compute offsets in energy dimension
+    int npixels     = m_background.axis(0) * m_background.axis(1);
+    int offset_emin = inx_emin * npixels;
+    int offset_emax = inx_emax * npixels;
+
+    // Bi-linear interpolation the rates in both energy layers
+    double rate(0.0);
+    double rate_emin = wgt_ll * m_background(index, inx_ll + offset_emin) +
+                       wgt_lr * m_background(index, inx_lr + offset_emin) +
+                       wgt_rl * m_background(index, inx_rl + offset_emin) +
+                       wgt_rr * m_background(index, inx_rr + offset_emin);
+    double rate_emax = wgt_ll * m_background(index, inx_ll + offset_emax) +
+                       wgt_lr * m_background(index, inx_lr + offset_emax) +
+                       wgt_rl * m_background(index, inx_rl + offset_emax) +
+                       wgt_rr * m_background(index, inx_rr + offset_emax);
+
+    // If both rates are positive then perform a logarithmic
+    // interpolation in energy
+    if (rate_emin > 0.0 && rate_emax > 0.0) {
+        rate = std::pow(10.0, wgt_emin * std::log10(rate_emin) +
+                              wgt_emax * std::log10(rate_emax));
+    }
+
+    // ... otherwise perform a linear interpolation
+    else {
+        rate = wgt_emin * rate_emin + wgt_emax * rate_emax;
+    }
+    #else
     double rate = m_background(index, detx, dety, logE);
+    #endif
 
     // Make sure that background rate is not negative
     if (rate < 0.0) {
@@ -371,7 +440,6 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
         int pixel = low - offset;
         int idetx = pixel % n_detx;
         int idety = pixel / n_detx;
-//std::cout << pixel << " " << idetx << " " << idety << std::endl;
 
         // Get minimum and binsize for the pixel
         double xbin_min = m_background.axis_lo(0,idetx);
@@ -507,7 +575,7 @@ void GCTABackground3D::free_members(void)
  *       elements.
  * @todo Add optional sampling on a finer spatial grid.
  ***************************************************************************/
-void GCTABackground3D::init_mc_cache(void) const
+void GCTABackground3D::init_mc_cache(const int& table) const
 {
     // Initialise cache
     m_mc_cache.clear();
@@ -555,7 +623,7 @@ void GCTABackground3D::init_mc_cache(void) const
         	for (int k = 0, element = i*npix; k < npix; ++k, ++element) {
 
                 // Determine background rate
-                double rate = m_background(element) * solidangle;
+                double rate = m_background(table, element) * solidangle;
                 if (rate > 0.0) {
                     total_rate += rate;
                 }

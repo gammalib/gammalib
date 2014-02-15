@@ -78,7 +78,7 @@ private:
     void init_members(void);
     void copy_members(const GCTABackground3D& bgd);
     void free_members(void);
-    void init_mc_cache(void) const;
+    void init_mc_cache(const int& table = 1) const;
 
     // Members
     std::string         m_filename;    //!< Name of background response file
