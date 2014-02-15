@@ -54,7 +54,7 @@ class GCTAModelBackground : public GModelData {
 
 public:
     // Constructors and destructors
-	GCTAModelBackground(void);
+    GCTAModelBackground(void);
     explicit GCTAModelBackground(const GXmlElement& xml);
     GCTAModelBackground(const GModelSpatial& spatial,
                         const GModelSpectral& spectral);

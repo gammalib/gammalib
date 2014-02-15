@@ -84,4 +84,14 @@ public:
     GCTAObservation copy() {
         return (*self);
     }
+    GCTAObservation(GObservation* obs) {
+        GCTAObservation* ptr = dynamic_cast<GCTAObservation*>(obs);
+        if (ptr != NULL) {
+            return (ptr->clone());
+        }
+        else {
+            throw GException::bad_type("GCTAObservation(GObservation*)",
+                                       "GObservation not of type GCTAObservation");
+        }
+    }
 };
