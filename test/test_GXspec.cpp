@@ -32,6 +32,10 @@
 #include "GTools.hpp"
 
 
+/* __ Constants __________________________________________________________ */
+const std::string rmfname = PACKAGE_SOURCE"/test/data/rmf.fits";
+
+
 /***********************************************************************//**
  * @brief Set parameters and tests
  **************************************************************************/
@@ -253,6 +257,16 @@ void TestGXspec::test_GRmf(void)
     test_try("GRmf void constructor");
     try {
         GRmf rmf;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test filename constructor
+    test_try("GRmf filename constructor");
+    try {
+        GRmf rmf(rmfname);
         test_try_success();
     }
     catch (std::exception &e) {
