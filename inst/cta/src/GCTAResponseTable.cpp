@@ -1566,6 +1566,8 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2) const
     // Return
     return;
 }
+
+
 /***********************************************************************//**
  * @brief Update 3D cache
  *
