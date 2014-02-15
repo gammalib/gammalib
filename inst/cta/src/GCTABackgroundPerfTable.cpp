@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
