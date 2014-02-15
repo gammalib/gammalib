@@ -1,5 +1,5 @@
 /***************************************************************************
- *  GCTAEdispRMF.i - CTA RMF energy dispersion class *
+ *             GCTAEdispRmf.i - CTA RMF energy dispersion class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
@@ -19,29 +19,29 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAEdispRMF.i
+ * @file GCTAEdispRmf.i
  * @brief CTA RMF energy dispersion class definition
  * @author Christoph Deil & Ellis Owen
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTAEdispRMF.hpp"
+#include "GCTAEdispRmf.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTAEdispRMF
+ * @class GCTAEdispRmf
  *
- * @brief CTA RMF energy dispersion class
+ * @brief CTA Redistribution Matrix File (RMF) energy dispersion class
  ***************************************************************************/
-class GCTAEdispRMF : public GCTAEdisp {
+class GCTAEdispRmf : public GCTAEdisp {
 
 public:
     // Constructors and destructors
-    GCTAEdispRMF(void);
-    explicit GCTAEdispRMF(const std::string& filename);
-    GCTAEdispRMF(const GCTAEdispRMF& psf);
-    virtual ~GCTAEdispRMF(void);
+    GCTAEdispRmf(void);
+    explicit GCTAEdispRmf(const std::string& filename);
+    GCTAEdispRmf(const GCTAEdispRmf& psf);
+    virtual ~GCTAEdispRmf(void);
 
     // Operators
     double operator()(const double& logEobs,
@@ -52,34 +52,34 @@ public:
                       const double& azimuth = 0.0) const;
 
     // Implemented pure virtual methods
-    void                clear(void);
-    GCTAEdispRMF* 		clone(void) const;
-    void                load(const std::string& filename);
-    std::string         filename(void) const;
-    GEnergy             mc(GRan&         ran,
-                           const double& logE,
-                           const double& theta = 0.0,
-                           const double& phi = 0.0,
-                           const double& zenith = 0.0,
-                           const double& azimuth = 0.0) const;
-    GEbounds            ebounds_obs(const double& logEsrc,
-                                    const double& theta = 0.0,
-                                    const double& phi = 0.0,
-                                    const double& zenith = 0.0,
-                                    const double& azimuth = 0.0) const;
-    GEbounds            ebounds_src(const double& logEobs,
-                                    const double& theta = 0.0,
-                                    const double& phi = 0.0,
-                                    const double& zenith = 0.0,
-                                    const double& azimuth = 0.0) const;
+    void          clear(void);
+    GCTAEdispRmf* clone(void) const;
+    void          load(const std::string& filename);
+    std::string   filename(void) const;
+    GEnergy       mc(GRan& ran,
+                     const double& logE,
+                     const double& theta = 0.0,
+                     const double& phi = 0.0,
+                     const double& zenith = 0.0,
+                     const double& azimuth = 0.0) const;
+    GEbounds      ebounds_obs(const double& logEsrc,
+                              const double& theta = 0.0,
+                              const double& phi = 0.0,
+                              const double& zenith = 0.0,
+                              const double& azimuth = 0.0) const;
+    GEbounds      ebounds_src(const double& logEobs,
+                              const double& theta = 0.0,
+                              const double& phi = 0.0,
+                              const double& zenith = 0.0,
+                              const double& azimuth = 0.0) const;
 };
 
 
 /***********************************************************************//**
  * @brief Return filename
  ***************************************************************************/
-%extend GCTAEdispRMF {
-    GCTAEdispRMF copy() {
+%extend GCTAEdispRmf {
+    GCTAEdispRmf copy() {
         return (*self);
     }
 };

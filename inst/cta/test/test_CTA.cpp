@@ -455,7 +455,7 @@ void TestGCTAResponse::test_response_edispRMF(void)
     }
 
     //
-    GCTAEdispRMF edisp(cta_edisp_rmf);
+    GCTAEdispRmf edisp(cta_edisp_rmf);
 
     // Test if non-diagonal element (below diagonal) is zero
     test_value(edisp(std::log10(30),std::log10(1)), 0.0);

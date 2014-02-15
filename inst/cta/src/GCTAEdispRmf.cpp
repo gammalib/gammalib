@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAEdispRMF.cpp - CTA RMF energy dispersion class           *
+ *            GCTAEdispRmf.cpp - CTA RMF energy dispersion class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAEdispRMF.cpp
+ * @file GCTAEdispRmf.cpp
  * @brief CTA RMF energy dispersion class implementation
  * @author Christoph Deil & Ellis Owen
  */
@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include <cmath>
 #include "GTools.hpp"
 #include "GRmf.hpp"
@@ -36,16 +35,16 @@
 #include "GEnergy.hpp"
 #include "GMath.hpp"
 #include "GVector.hpp"
-#include "GIntegral.hpp"
-#include "GFitsTable.hpp"
-#include "GFitsTableCol.hpp"
-#include "GCTAEdispRMF.hpp"
-#include "GCTAResponse.hpp"
-#include "GCTAResponse_helpers.hpp"
-#include "GCTAException.hpp"
+//#include "GIntegral.hpp"
+//#include "GFitsTable.hpp"
+//#include "GFitsTableCol.hpp"
+#include "GCTAEdispRmf.hpp"
+//#include "GCTAResponse.hpp"
+//#include "GCTAResponse_helpers.hpp"
+//#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                       "GCTAEdispRMF::load(std::string&)"
+#define G_LOAD                             "GCTAEdispRmf::load(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,7 +64,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAEdispRMF::GCTAEdispRMF(void) : GCTAEdisp()
+GCTAEdispRmf::GCTAEdispRmf(void) : GCTAEdisp()
 {
     // Initialise class members
     init_members();
@@ -83,7 +82,7 @@ GCTAEdispRMF::GCTAEdispRMF(void) : GCTAEdisp()
  * Construct instance by loading the energy dispersion information from
  * an ASCII performance table.
  ***************************************************************************/
-GCTAEdispRMF::GCTAEdispRMF(const std::string& filename) : GCTAEdisp()
+GCTAEdispRmf::GCTAEdispRmf(const std::string& filename) : GCTAEdisp()
 {
     // Initialise class members
     init_members();
@@ -101,7 +100,7 @@ GCTAEdispRMF::GCTAEdispRMF(const std::string& filename) : GCTAEdisp()
  *
  * @param[in] edisp Energy dispersion
  ***************************************************************************/
-GCTAEdispRMF::GCTAEdispRMF(const GCTAEdispRMF& edisp) : GCTAEdisp(edisp)
+GCTAEdispRmf::GCTAEdispRmf(const GCTAEdispRmf& edisp) : GCTAEdisp(edisp)
 {
     // Initialise class members
     init_members();
@@ -117,7 +116,7 @@ GCTAEdispRMF::GCTAEdispRMF(const GCTAEdispRMF& edisp) : GCTAEdisp(edisp)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAEdispRMF::~GCTAEdispRMF(void)
+GCTAEdispRmf::~GCTAEdispRmf(void)
 {
     // Free members
     free_members();
@@ -139,7 +138,7 @@ GCTAEdispRMF::~GCTAEdispRMF(void)
  * @param[in] edisp Energy dispersion
  * @return Energy dispersion
  ***************************************************************************/
-GCTAEdispRMF& GCTAEdispRMF::operator=(const GCTAEdispRMF& edisp)
+GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
 {
     // Execute only if object is not identical
     if (this != &edisp) {
@@ -186,7 +185,7 @@ GCTAEdispRMF& GCTAEdispRMF::operator=(const GCTAEdispRMF& edisp)
  *
  * @todo Implement interpolation method
  ***************************************************************************/
-double GCTAEdispRMF::operator()(const double& logEobs,
+double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& logEsrc,
                                 const double& theta,
                                 const double& phi,
@@ -216,7 +215,7 @@ double GCTAEdispRMF::operator()(const double& logEobs,
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GCTAEdispRMF::clear(void)
+void GCTAEdispRmf::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -236,9 +235,9 @@ void GCTAEdispRMF::clear(void)
  *
  * @return Deep copy of instance.
  ***************************************************************************/
-GCTAEdispRMF* GCTAEdispRMF::clone(void) const
+GCTAEdispRmf* GCTAEdispRmf::clone(void) const
 {
-    return new GCTAEdispRMF(*this);
+    return new GCTAEdispRmf(*this);
 }
 
 
@@ -247,14 +246,11 @@ GCTAEdispRMF* GCTAEdispRMF::clone(void) const
  *
  * @param[in] filename of RMF file.
  *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
- *
  * This method loads the energy dispersion information from an RMF file.
  *
- * @todo Why not storing simply GRmf as a member of GCTAEdispRMF
+ * @todo Why not storing simply GRmf as a member of GCTAEdispRmf
  ***************************************************************************/
-void GCTAEdispRMF::load(const std::string& filename)
+void GCTAEdispRmf::load(const std::string& filename)
 {
     // Load RMF file
 	GRmf rmf(filename);
@@ -285,7 +281,7 @@ void GCTAEdispRMF::load(const std::string& filename)
  * Another problem is that the method will always return the bin centres,
  * but we want to sample energies to infinite precision!!!
  ***************************************************************************/
-GEnergy GCTAEdispRMF::mc(GRan&         ran,
+GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& logE,
                          const double& theta,
                          const double& phi,
@@ -325,7 +321,7 @@ GEnergy GCTAEdispRMF::mc(GRan&         ran,
  *
  * @todo Convert logEsrc into index!!!
  ***************************************************************************/
-GEbounds GCTAEdispRMF::ebounds_obs(const double& logEsrc,
+GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
                                    const double& theta,
                                    const double& phi,
                                    const double& zenith,
@@ -386,7 +382,7 @@ GEbounds GCTAEdispRMF::ebounds_obs(const double& logEsrc,
  * Returns the band of true photon energies outside of which the energy
  * dispersion becomes negligible for a given observed energy @p logEobs.
  ***************************************************************************/
-GEbounds GCTAEdispRMF::ebounds_src(const double& logEobs,
+GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
                                    const double& theta,
                                    const double& phi,
                                    const double& zenith,
@@ -416,7 +412,7 @@ GEbounds GCTAEdispRMF::ebounds_src(const double& logEobs,
  * Makes std::vector of cdf GVectors from RMF matrix columns and puts
  * result in m_cdf_cache in the cache.
  ***************************************************************************/
-void GCTAEdispRMF::convert_cdf(void)
+void GCTAEdispRmf::convert_cdf(void)
 {
 
 	GVector Row = m_matrix.row(0);
@@ -465,7 +461,7 @@ void GCTAEdispRMF::convert_cdf(void)
  *
  * TODO: Print something useful.
  ***************************************************************************/
-std::string GCTAEdispRMF::print(const GChatter& chatter) const
+std::string GCTAEdispRmf::print(const GChatter& chatter) const
 { // Initialise result string
     std::string result;
 
@@ -489,7 +485,7 @@ std::string GCTAEdispRMF::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAEdispRMF::init_members(void)
+void GCTAEdispRmf::init_members(void)
 {
     // Initialise members
     m_filename.clear();
@@ -504,7 +500,7 @@ void GCTAEdispRMF::init_members(void)
  *
  * @param[in] edisp Energy dispersion
  ***************************************************************************/
-void GCTAEdispRMF::copy_members(const GCTAEdispRMF& edisp)
+void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
 {
     // Copy members
     m_filename  = edisp.m_filename;
@@ -517,7 +513,7 @@ void GCTAEdispRMF::copy_members(const GCTAEdispRMF& edisp)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAEdispRMF::free_members(void)
+void GCTAEdispRmf::free_members(void)
 {
     // Return
     return;

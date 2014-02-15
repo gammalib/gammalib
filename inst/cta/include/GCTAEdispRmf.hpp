@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GCTAEdispRMF.hpp - CTA RMF energy dispersion class          *
+ *             GCTAEdispRmf.hpp - CTA RMF energy dispersion class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAEdispRMF.hpp
+ * @file GCTAEdispRmf.hpp
  * @brief CTA RMF energy dispersion class definition
  * @author Christoph Deil & Ellis Owen
  */
@@ -40,26 +40,21 @@ class GCTAResponse;
 
 
 /***********************************************************************//**
- * @class GCTAEdispRMF
+ * @class GCTAEdispRmf
  *
- * @brief CTA performance table energy dispersion class
- *
- * This class implements the CTA energy dispersion response as function
- * of energy as determined from a performance table. The performance table is
- * an ASCII file that specifies the CTA performance parameters in a simple
- * way.
+ * @brief CTA Redistribution Matrix File (RMF) energy dispersion class
  ***************************************************************************/
-class GCTAEdispRMF : public GCTAEdisp {
+class GCTAEdispRmf : public GCTAEdisp {
 
 public:
     // Constructors and destructors
-    GCTAEdispRMF(void);
-    explicit GCTAEdispRMF(const std::string& filename);
-    GCTAEdispRMF(const GCTAEdispRMF& edisp);
-    virtual ~GCTAEdispRMF(void);
+    GCTAEdispRmf(void);
+    explicit GCTAEdispRmf(const std::string& filename);
+    GCTAEdispRmf(const GCTAEdispRmf& edisp);
+    virtual ~GCTAEdispRmf(void);
 
     // Operators
-    GCTAEdispRMF& operator=(const GCTAEdispRMF& edisp);
+    GCTAEdispRmf& operator=(const GCTAEdispRmf& edisp);
     double operator()(const double& logEobs,
                       const double& logEsrc,
                       const double& theta = 0.0,
@@ -68,27 +63,27 @@ public:
                       const double& azimuth = 0.0) const;
 
     // Implemented pure virtual methods
-    void                clear(void);
-    GCTAEdispRMF* 		clone(void) const;
-    void                load(const std::string& filename);
-    std::string         filename(void) const;
-    GEnergy             mc(GRan& ran,
-                           const double& logE,
-                           const double& theta = 0.0,
-                           const double& phi = 0.0,
-                           const double& zenith = 0.0,
-                           const double& azimuth = 0.0) const;
-    GEbounds            ebounds_obs(const double& logEsrc,
-                                    const double& theta = 0.0,
-                                    const double& phi = 0.0,
-                                    const double& zenith = 0.0,
-                                    const double& azimuth = 0.0) const;
-    GEbounds            ebounds_src(const double& logEobs,
-                                    const double& theta = 0.0,
-                                    const double& phi = 0.0,
-                                    const double& zenith = 0.0,
-                                    const double& azimuth = 0.0) const;
-    std::string         print(const GChatter& chatter = NORMAL) const;
+    void          clear(void);
+    GCTAEdispRmf* clone(void) const;
+    void          load(const std::string& filename);
+    std::string   filename(void) const;
+    GEnergy       mc(GRan& ran,
+                     const double& logE,
+                     const double& theta = 0.0,
+                     const double& phi = 0.0,
+                     const double& zenith = 0.0,
+                     const double& azimuth = 0.0) const;
+    GEbounds      ebounds_obs(const double& logEsrc,
+                              const double& theta = 0.0,
+                              const double& phi = 0.0,
+                              const double& zenith = 0.0,
+                              const double& azimuth = 0.0) const;
+    GEbounds      ebounds_src(const double& logEobs,
+                              const double& theta = 0.0,
+                              const double& phi = 0.0,
+                              const double& zenith = 0.0,
+                              const double& azimuth = 0.0) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     int size(void) const;
@@ -96,7 +91,7 @@ public:
 private:
     // Methods
     void init_members(void);
-    void copy_members(const GCTAEdispRMF& psf);
+    void copy_members(const GCTAEdispRmf& psf);
     void free_members(void);
     void convert_cdf(void);
 
@@ -124,7 +119,7 @@ private:
  * @return Returns filename from which the energy resolution was loaded
  ***************************************************************************/
 inline
-std::string GCTAEdispRMF::filename(void) const
+std::string GCTAEdispRmf::filename(void) const
 {
     return m_filename;
 }
