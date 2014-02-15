@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -601,17 +601,20 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite any existing file  (defaults to false)?
  * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS").
+ * @param[in] unit Energy units (defaults to "keV")
  *
  * Saves the energy boundaries into extension @p extname of a FITS file.
  ***************************************************************************/
-void GEbounds::save(const std::string& filename, const bool& clobber,
-                    const std::string& extname) const
+void GEbounds::save(const std::string& filename,
+                    const bool&        clobber,
+                    const std::string& extname,
+                    const std::string& unit) const
 {
     // Allocate FITS file
     GFits file;
 
     // Write energy boundaries to FITS file
-    write(file, extname);
+    write(file, extname, unit);
 
     // Save to file
     file.saveto(filename, clobber);
@@ -626,12 +629,9 @@ void GEbounds::save(const std::string& filename, const bool& clobber,
  *
  * @param[in] table FITS table.
  *
- * Reads the energy boundaries from a FITS table. It is assumed that the
- * energies are stored in units of keV.
- *
- * @todo Needs to interpret energy units. We could also add an optional
- *       string parameter that allows external specification about how
- *       the energies should be interpreted.
+ * Reads the energy boundaries from a FITS table. The method interprets the
+ * energy units provide in the FITS header. If no energy units are found it
+ * is assumed that the energies are stored in units of keV.
  ***************************************************************************/
 void GEbounds::read(const GFitsTable& table)
 {
@@ -649,10 +649,20 @@ void GEbounds::read(const GFitsTable& table)
         m_min = new GEnergy[m_num];
         m_max = new GEnergy[m_num];
 
+        // Get units
+        std::string emin_unit = table["E_MIN"]->unit();
+        std::string emax_unit = table["E_MAX"]->unit();
+        if (emin_unit.empty()) {
+            emin_unit = "keV";
+        }
+        if (emax_unit.empty()) {
+            emax_unit = "keV";
+        }
+
         // Copy information
         for (int i = 0; i < m_num; ++i) {
-            m_min[i].keV(table["E_MIN"]->real(i));
-            m_max[i].keV(table["E_MAX"]->real(i));
+            m_min[i](table["E_MIN"]->real(i), emin_unit);
+            m_max[i](table["E_MAX"]->real(i), emax_unit);
         }
 
         // Set attributes
@@ -670,14 +680,17 @@ void GEbounds::read(const GFitsTable& table)
  *
  * @param[in] file FITS file.
  * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS")
+ * @param[in] unit Energy units (defaults to "keV")
  *
- * Writes the energy boundaries into a FITS object. Energies are written in
- * units of keV.
+ * Writes the energy boundaries into a FITS object. The @p unit parameter
+ * specifies in which unit the energies are written. By default, the energy
+ * units are keV.
  *
  * @todo Write header keywords.
- * @todo Should we allow for the possibility to specify the energy units?
  ***************************************************************************/
-void GEbounds::write(GFits& file, const std::string& extname) const
+void GEbounds::write(GFits&             file,
+                     const std::string& extname,
+                     const std::string& unit) const
 {
     // Create energy boundary columns
     GFitsTableDoubleCol cemin = GFitsTableDoubleCol("E_MIN", m_num);
@@ -685,13 +698,13 @@ void GEbounds::write(GFits& file, const std::string& extname) const
 
     // Fill energy boundary columns
     for (int i = 0; i < m_num; ++i) {
-        cemin(i) = m_min[i].keV();
-        cemax(i) = m_max[i].keV();
+        cemin(i) = m_min[i](unit);
+        cemax(i) = m_max[i](unit);
     }
 
-    // Set energy units to keV
-    cemin.unit("keV");
-    cemax.unit("keV");
+    // Set energy units
+    cemin.unit(unit);
+    cemax.unit(unit);
 
     // Create binary table
     GFitsBinTable* table = new GFitsBinTable(m_num);
