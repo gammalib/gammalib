@@ -71,6 +71,7 @@ public:
     GEnergy& operator=(const GEnergy& eng);
     GEnergy& operator+=(const GEnergy& eng);
     GEnergy& operator-=(const GEnergy& eng);
+    double   operator()(const std::string& unit) const;
 
     // Methods
     void        clear(void);
@@ -80,6 +81,7 @@ public:
     double      MeV(void) const;
     double      GeV(void) const;
     double      TeV(void) const;
+    double      log10erg(void) const;
     double      log10keV(void) const;
     double      log10MeV(void) const;
     double      log10GeV(void) const;
@@ -89,10 +91,12 @@ public:
     void        MeV(const double& eng);
     void        GeV(const double& eng);
     void        TeV(const double& eng);
+    void        log10erg(const double& eng);
     void        log10keV(const double& eng);
     void        log10MeV(const double& eng);
     void        log10GeV(const double& eng);
     void        log10TeV(const double& eng);
+    void        log10(const double& eng, const std::string& unit);
     std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:

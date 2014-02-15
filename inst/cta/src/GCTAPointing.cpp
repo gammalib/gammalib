@@ -36,6 +36,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_USE_VECTORS
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -206,6 +207,7 @@ void GCTAPointing::dir(const GSkyDir& dir)
  ***************************************************************************/
 GCTAInstDir GCTAPointing::instdir(const GSkyDir& skydir) const
 {
+    #if defined(G_USE_VECTORS)
 	// Compute rotation matrix
 	update();
 
@@ -216,8 +218,8 @@ GCTAInstDir GCTAPointing::instdir(const GSkyDir& skydir) const
 	GVector inst = m_Rback.transpose() * celvector;
 
 	// Initialise instrument coordinates
-	double x_inst = 0.0;
-	double y_inst = 0.0;
+    double detx(0.0);
+    double dety(0.0);
 
 	// Get offset from cel vector, i.e. distance from camera center
 	double theta = std::acos(inst[2]);
@@ -225,14 +227,24 @@ GCTAInstDir GCTAPointing::instdir(const GSkyDir& skydir) const
 	// Check if theta and phi are defined
 	if (theta > 0.0 ) {
 		double phi = std::asin(inst[1] / std::sin(theta));
-		x_inst     = theta * std::cos(phi);
-		y_inst     = theta * std::sin(phi);
+		detx       = theta * std::cos(phi);
+		dety       = theta * std::sin(phi);
 	}
+    #else
+    double theta = m_dir.dist(skydir);
+    double phi   = m_dir.posang(skydir);
+    double detx(0.0);
+    double dety(0.0);
+	if (theta > 0.0 ) {
+		detx = theta * std::cos(phi);
+		dety = theta * std::sin(phi);
+	}
+    #endif
 
 	// Initialise instrument direction
 	GCTAInstDir inst_direction(skydir);
-	inst_direction.detx(x_inst);
-	inst_direction.dety(y_inst);
+	inst_direction.detx(detx);
+	inst_direction.dety(dety);
 
     // Return
     return inst_direction;
@@ -252,23 +264,22 @@ GSkyDir GCTAPointing::skydir(const GCTAInstDir& instdir)const
 	// Compute rotation matrix
 	update();
 
-	// retrieve instrument coordinates
+	// Retrieve instrument coordinates
 	double inst_x = instdir.detx();
 	double inst_y = instdir.dety();
 
-	// convert to polar coordinates
-	double theta = std::sqrt(inst_x * inst_x + inst_y * inst_y);
-	double phi   = std::atan2(inst_y, inst_x);
+	// Convert to polar coordinates
+	double theta     = std::sqrt(inst_x * inst_x + inst_y * inst_y);
+	double phi       = std::atan2(inst_y, inst_x);
+    double sin_phi   = std::sin(phi);
+    double cos_phi   = std::cos(phi);
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
 
-	// Get celestial vector from sky coordinate
-	// TODO: this has to be checked!
-	// Do we retrieve the correct vector here?
-    double cos_phi = std::cos(phi);
-	GVector native(cos_phi * std::cos(theta),
-                   cos_phi * std::sin(theta),
-                   std::sin(phi));
+	// Build vector from polar coordinates
+	GVector native(-cos_phi*sin_theta, sin_phi*sin_theta, cos_theta);
 
-	// Transform to sky system
+	// Rotate from instrument system into sky system
 	GVector skyvector = m_Rback * native;
 	GSkyDir sky;
 	sky.celvector(skyvector);

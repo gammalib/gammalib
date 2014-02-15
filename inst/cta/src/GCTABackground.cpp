@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GCTAInstDir.cpp - CTA instrument direction class            *
+ *            GCTABackground.cpp - CTA background model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAInstDir.cpp
- * @brief CTA instrument direction class implementation
+ * @file GCTABackground.cpp
+ * @brief CTA background model base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,9 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GTools.hpp"
-#include "GMath.hpp"
-#include "GCTAInstDir.hpp"
+#include "GCTABackground.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -40,42 +38,22 @@
 
 /* __ Debug definitions __________________________________________________ */
 
-/* __ Prototypes _________________________________________________________ */
+/* __ Constants __________________________________________________________ */
 
 
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAInstDir::GCTAInstDir(void) : GInstDir()
+GCTABackground::GCTABackground(void)
 {
     // Initialise class members
     init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief GSkyDir constructor
- *
- * @param[in] dir Sky direction.
- *
- * Construct CTA instrument direction from sky direction.
- ***************************************************************************/
-GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
-{
-    // Initialise class members
-    init_members();
-
-    // Assign sky direction
-    m_dir = dir;
 
     // Return
     return;
@@ -85,15 +63,15 @@ GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir CTA instrument direction.
+ * @param[in] bgd CTA background.
  ***************************************************************************/
-GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir) : GInstDir(dir)
+GCTABackground::GCTABackground(const GCTABackground& bgd)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(dir);
+    copy_members(bgd);
 
     // Return
     return;
@@ -103,7 +81,7 @@ GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir) : GInstDir(dir)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAInstDir::~GCTAInstDir(void)
+GCTABackground::~GCTABackground(void)
 {
     // Free members
     free_members();
@@ -115,23 +93,20 @@ GCTAInstDir::~GCTAInstDir(void)
 
 /*==========================================================================
  =                                                                         =
- =                                Operators                                =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] dir CTA instrument direction.
- * @return CTA instrument direction.
+ * @param[in] bgd CTA background.
+ * @return CTA background.
  ***************************************************************************/
-GCTAInstDir& GCTAInstDir::operator=(const GCTAInstDir& dir)
+GCTABackground& GCTABackground::operator=(const GCTABackground& bgd)
 {
     // Execute only if object is not identical
-    if (this != &dir) {
-
-        // Copy base class members
-        this->GInstDir::operator=(dir);
+    if (this != &bgd) {
 
         // Free members
         free_members();
@@ -140,7 +115,7 @@ GCTAInstDir& GCTAInstDir::operator=(const GCTAInstDir& dir)
         init_members();
 
         // Copy members
-        copy_members(dir);
+        copy_members(bgd);
 
     } // endif: object was not identical
 
@@ -151,83 +126,21 @@ GCTAInstDir& GCTAInstDir::operator=(const GCTAInstDir& dir)
 
 /*==========================================================================
  =                                                                         =
- =                              Public methods                             =
+ =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Clear CTA instrument direction
- ***************************************************************************/
-void GCTAInstDir::clear(void)
-{
-    // Free members
-    free_members();
-    this->GInstDir::free_members();
-
-    // Initialise private members
-    this->GInstDir::init_members();
-    init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief CTA instrument direction
- *
- * @return Pointer to deep copy of CTA instrument direction.
- ***************************************************************************/
-GCTAInstDir* GCTAInstDir::clone(void) const
-{
-    return new GCTAInstDir(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Print instrument direction information
- *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing instrument direction information.
- ***************************************************************************/
-std::string GCTAInstDir::print(const GChatter& chatter) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Continue only if chatter is not silent
-    if (chatter != SILENT) {
-
-        // Append instrument direction
-        std::string msg = "RA=" + gammalib::str(m_dir.ra_deg()) +
-                          ", DEC=" + gammalib::str(m_dir.dec_deg()) +
-                          " [" + gammalib::str(m_detx) +
-                          ", " + gammalib::str(m_dety) + "]";
-        result.append(msg);
-
-    } // endif: chatter was not silent
-
-    // Return result
-    return result;
-}
-
-
 /*==========================================================================
  =                                                                         =
- =                             Private methods                             =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAInstDir::init_members(void)
+void GCTABackground::init_members(void)
 {
-    // Initialise members
-    m_dir.clear();
-    m_detx = 0.0;
-    m_dety = 0.0;
-
     // Return
     return;
 }
@@ -236,15 +149,10 @@ void GCTAInstDir::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir CTA instrument direction.
+ * @param[in] bgd CTA background.
  ***************************************************************************/
-void GCTAInstDir::copy_members(const GCTAInstDir& dir)
+void GCTABackground::copy_members(const GCTABackground& bgd)
 {
-    // Copy attributes
-    m_dir  = dir.m_dir;
-    m_detx = dir.m_detx;
-    m_dety = dir.m_dety;
-
     // Return
     return;
 }
@@ -253,7 +161,7 @@ void GCTAInstDir::copy_members(const GCTAInstDir& dir)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAInstDir::free_members(void)
+void GCTABackground::free_members(void)
 {
     // Return
     return;

@@ -233,7 +233,7 @@ double GCTAModelRadialGauss::eval(const double& offset) const
 {
     // Compute value
     double arg   = offset * offset / sigma();
-    double value = exp(-0.5 * arg * arg);
+    double value = std::exp(-0.5 * arg * arg);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

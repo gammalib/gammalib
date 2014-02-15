@@ -31,10 +31,14 @@ sources = src/GCTASupport.cpp \
           src/GCTAPsfKing.cpp \
           src/GCTAEdisp.cpp \
           src/GCTAEdispPerfTable.cpp \
+          src/GCTABackground.cpp \
+          src/GCTABackgroundPerfTable.cpp \
+          src/GCTABackground3D.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
           src/GCTAModelBackground.cpp \
+          src/GCTAModelInstBackground.cpp \
           src/GCTAModelRadialRegistry.cpp \
           src/GCTAModelRadial.cpp \
           src/GCTAModelRadialGauss.cpp \
@@ -67,7 +71,11 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAPsfKing.hpp \
                      include/GCTAEdisp.hpp \
 			         include/GCTAEdispPerfTable.hpp \
+                     include/GCTABackground.hpp \
+                     include/GCTABackgroundPerfTable.hpp \
+                     include/GCTABackground3D.hpp \
                      include/GCTAModelBackground.hpp \
+                     include/GCTAModelInstBackground.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \

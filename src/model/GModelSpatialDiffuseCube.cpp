@@ -982,6 +982,8 @@ void GModelSpatialDiffuseCube::init_members(void)
     // Initialise MC cache
     m_mc_cache.clear();
     m_mc_spectrum.clear();
+    m_mc_cone_dir.clear();
+    m_mc_cone_rad = 0.0;
 
     // Return
     return;
@@ -1006,6 +1008,8 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     // Copy MC cache
     m_mc_cache    = model.m_mc_cache;
     m_mc_spectrum = model.m_mc_spectrum;
+    m_mc_cone_dir = model.m_mc_cone_dir;
+    m_mc_cone_rad = model.m_mc_cone_rad;
 
     // Set parameter pointer(s)
     m_pars.clear();

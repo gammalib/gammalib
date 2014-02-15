@@ -51,6 +51,7 @@ class GCTAInstDir;
 class GCTAAeff;
 class GCTAPsf;
 class GCTAEdisp;
+class GCTABackground;
 
 
 /***********************************************************************//**
@@ -103,24 +104,27 @@ public:
     virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
-    GCTAEventAtom*     mc(const double& area, const GPhoton& photon,
-                          const GObservation& obs, GRan& ran) const;
-    void               caldb(const GCaldb& caldb);
-    const GCaldb&      caldb(void) const;
-    void               load(const std::string& rspname);
-    void               eps(const double& eps);
-    const double&      eps(void) const;
-    void               load_aeff(const std::string& filename);
-    void               load_psf(const std::string& filename);
-    void               load_edisp(const std::string& filename);
-    void               offset_sigma(const double& sigma);
-    double             offset_sigma(void) const;
-    const GCTAAeff*    aeff(void) const;
-    void               aeff(GCTAAeff* aeff);
-    const GCTAPsf*     psf(void) const;
-    void               psf(GCTAPsf* psf);
-    const GCTAEdisp*   edisp(void) const;
-    void               edisp(GCTAEdisp* edisp);
+    GCTAEventAtom*        mc(const double& area, const GPhoton& photon,
+                             const GObservation& obs, GRan& ran) const;
+    void                  caldb(const GCaldb& caldb);
+    const GCaldb&         caldb(void) const;
+    void                  load(const std::string& rspname);
+    void                  eps(const double& eps);
+    const double&         eps(void) const;
+    void                  load_aeff(const std::string& filename);
+    void                  load_psf(const std::string& filename);
+    void                  load_edisp(const std::string& filename);
+    void                  load_background(const std::string& filename);
+    void                  offset_sigma(const double& sigma);
+    double                offset_sigma(void) const;
+    const GCTAAeff*       aeff(void) const;
+    void                  aeff(GCTAAeff* aeff);
+    const GCTAPsf*        psf(void) const;
+    void                  psf(GCTAPsf* psf);
+    const GCTAEdisp*      edisp(void) const;
+    void                  edisp(GCTAEdisp* edisp);
+    const GCTABackground* background(void) const;
+    void                  background(GCTABackground* background);
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -172,13 +176,14 @@ private:
     std::string            irf_filename(const std::string& filename) const;
 
     // Private data members
-    GCaldb       m_caldb;       //!< Calibration database
-    std::string  m_rspname;     //!< Name of the instrument response
-    double       m_eps;         //!< Integration precision
-    GCTAAeff*    m_aeff;        //!< Effective area
-    GCTAPsf*     m_psf;         //!< Point spread function
-    GCTAEdisp*   m_edisp;       //!< Energy dispersion
-    mutable bool m_apply_edisp; //!< Apply energy dispersion
+    GCaldb          m_caldb;       //!< Calibration database
+    std::string     m_rspname;     //!< Name of the instrument response
+    double          m_eps;         //!< Integration precision
+    GCTAAeff*       m_aeff;        //!< Effective area
+    GCTAPsf*        m_psf;         //!< Point spread function
+    GCTAEdisp*      m_edisp;       //!< Energy dispersion
+    GCTABackground* m_background;  //!< Energy dispersion
+    mutable bool    m_apply_edisp; //!< Apply energy dispersion
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
@@ -363,6 +368,33 @@ inline
 void GCTAResponse::edisp(GCTAEdisp* edisp)
 {
     m_edisp = edisp;
+    return;
+}
+
+
+
+
+/***********************************************************************//**
+ * @brief Return pointer to background model
+ *
+ * @return Pointer to background model.
+ ***************************************************************************/
+inline
+const GCTABackground* GCTAResponse::background(void) const
+{
+    return m_background;
+}
+
+
+/***********************************************************************//**
+ * @brief Set pointer to background model
+ *
+ * @param[in] edisp Pointer to background model.
+ ***************************************************************************/
+inline
+void GCTAResponse::background(GCTABackground* background)
+{
+    m_background = background;
     return;
 }
 

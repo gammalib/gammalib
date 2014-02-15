@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-08-02
+New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-12 February 2014
+15 February 2014
 
 
 1. Introduction
@@ -120,10 +120,21 @@ very close to Fermi/LAT ScienceTools results.
 
 20. CTA interface
 -----------------
-Energy dispersion has been added to the CTA module. The class
-GCTAEdispPerfTable implements a simple Gaussian energy dispersion that
-is based on the energy dispersion rms value provided in the ASCII
-performance files.
+Energy dispersion has been added to the CTA module. The class GCTAEdispPerfTable
+implements a simple Gaussian energy dispersion that is based on the energy dispersion
+rms value provided in the ASCII performance files.
+
+Classes have been implemented to support background modelling for CTA in the
+instrument system. Background information has been added to the CTA response in
+form of the abstract GCTABackground base class, being able to represent an expected
+background rate as function of energy and spatial parameters.
+
+GCTABackgroundPerfTable implements background rate information extracted from a
+performance table, GCTABackground3D implements background information provided by
+a cube spanned by DETX, DETY and energy.
+
+The instrumental background is handled by the GCTAModelInstBackground class that
+derives from GModelData.
 
 
 21. COMPTEL interface

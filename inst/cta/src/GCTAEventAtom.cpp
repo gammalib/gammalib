@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAEventAtom.cpp - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2014 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -213,8 +213,6 @@ void GCTAEventAtom::init_members(void)
     m_multip      = 0;
     m_telmask     = 0;
     m_dir_err     = 0.0;
-    m_detx        = 0.0;
-    m_dety        = 0.0;
     m_alt         = 0.0;
     m_az          = 0.0;
     m_corex       = 0.0;
@@ -252,8 +250,6 @@ void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
     m_multip      = atom.m_multip;
     m_telmask     = atom.m_telmask; 
     m_dir_err     = atom.m_dir_err;
-    m_detx        = atom.m_detx;
-    m_dety        = atom.m_dety;
     m_alt         = atom.m_alt;
     m_az          = atom.m_az;
     m_corex       = atom.m_corex;

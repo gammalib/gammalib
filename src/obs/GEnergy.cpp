@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GEnergy.cpp - Energy class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT                 "GEnergy::GEnergy(double&, std::string&)"
+#define G_OPERATOR                        "GEnergy::operator()(std::string&)"
+#define G_LOG10                       "GEnergy::log10(double&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -123,7 +125,6 @@ GEnergy::GEnergy(const double& eng, const std::string& unit)
               " \"GeV\", or \"TeV\" (case insensitive).");
     }
 
-
     // Return
     return;
 }
@@ -154,7 +155,7 @@ GEnergy::~GEnergy(void)
  * @param[in] eng Energy.
  * @return Energy.
  ***************************************************************************/
-GEnergy& GEnergy::operator= (const GEnergy& eng)
+GEnergy& GEnergy::operator=(const GEnergy& eng)
 { 
     // Execute only if object is not identical
     if (this != &eng) {
@@ -172,6 +173,47 @@ GEnergy& GEnergy::operator= (const GEnergy& eng)
   
     // Return
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Unit access operator
+ *
+ * @param[in] unit Unit.
+ * @return Energy in requested units.
+ *
+ * Returns the energy in the requested units.
+ ***************************************************************************/
+double GEnergy::operator()(const std::string& unit) const
+{ 
+    // Initialise energy
+    double energy = 0.0;
+
+    // Set energy according to unit string
+    std::string eunit = gammalib::tolower(unit);
+    if (eunit == "erg" || eunit == "ergs") {
+        energy = this->erg();
+    }
+    else if (eunit == "kev") {
+        energy = this->keV();
+    }
+    else if (eunit == "mev") {
+        energy = this->MeV();
+    }
+    else if (eunit == "gev") {
+        energy = this->GeV();
+    }
+    else if (eunit == "tev") {
+        energy = this->TeV();
+    }
+    else {
+        throw GException::invalid_argument(G_OPERATOR, unit,
+              "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
+              " \"GeV\", or \"TeV\" (case insensitive).");
+    }
+  
+    // Return energy
+    return energy;
 }
 
 
@@ -278,6 +320,23 @@ double GEnergy::TeV(void) const
     
     // Return energy
     return energy; 
+}
+
+
+/***********************************************************************//**
+ * @brief Return log10 of energy in erg
+ *
+ * @return Energy in log10 erg.
+ *
+ * Returns the log10 of the energy in erg.
+ ***************************************************************************/
+double GEnergy::log10erg(void) const
+{
+    // Set offset
+    const double offset = std::log10(gammalib::MeV2erg);
+
+    // Return log10 energy
+    return (log10MeV()+offset); 
 }
 
 
@@ -437,6 +496,24 @@ void GEnergy::TeV(const double& eng)
 
 
 /***********************************************************************//**
+ * @brief Set log10 of energy in erg
+ *
+ * @param[in] eng log10 of energy in erg.
+ ***************************************************************************/
+void GEnergy::log10erg(const double& eng)
+{
+    // Set offset
+    const double offset = std::log10(gammalib::MeV2erg);
+
+    // Set energy
+    log10MeV(eng-offset);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set log10 of energy in keV
  *
  * @param[in] eng log10 of energy in keV.
@@ -492,6 +569,42 @@ void GEnergy::log10TeV(const double& eng)
 {
     // Set energy
     log10MeV(eng+6.0);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set log10 of energy with unit specification
+ *
+ * @param[in] eng log10 of energy.
+ * @param[in] unit Unit of log10 of energy.
+ ***************************************************************************/
+void GEnergy::log10(const double& eng, const std::string& unit)
+{
+    // Set energy according to unit string
+    std::string eunit = gammalib::tolower(unit);
+    if (eunit == "erg" || eunit == "ergs") {
+        this->log10erg(eng);
+    }
+    else if (eunit == "kev") {
+        this->log10keV(eng);
+    }
+    else if (eunit == "mev") {
+        this->log10MeV(eng);
+    }
+    else if (eunit == "gev") {
+        this->log10GeV(eng);
+    }
+    else if (eunit == "tev") {
+        this->log10TeV(eng);
+    }
+    else {
+        throw GException::invalid_argument(G_LOG10, unit,
+              "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
+              " \"GeV\", or \"TeV\" (case insensitive).");
+    }
     
     // Return
     return;

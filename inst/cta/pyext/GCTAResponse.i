@@ -74,24 +74,27 @@ public:
     virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
-    GCTAEventAtom*     mc(const double& area, const GPhoton& photon,
-                          const GObservation& obs, GRan& ran) const;
-    void               caldb(const GCaldb& caldb);
-    const GCaldb&      caldb(void) const;
-    void               load(const std::string& rspname);
-    void               eps(const double& eps);
-    const double&      eps(void) const;
-    void               load_aeff(const std::string& filename);
-    void               load_psf(const std::string& filename);
-    void               load_edisp(const std::string& filename);
-    void               offset_sigma(const double& sigma);
-    double             offset_sigma(void) const;
-    const GCTAAeff*    aeff(void) const;
-    void               aeff(GCTAAeff* aeff);
-    const GCTAPsf*     psf(void) const;
-    void               psf(GCTAPsf* psf);
-    const GCTAEdisp*   edisp(void) const;
-    void               edisp(GCTAEdisp* edisp);
+    GCTAEventAtom*        mc(const double& area, const GPhoton& photon,
+                             const GObservation& obs, GRan& ran) const;
+    void                  caldb(const GCaldb& caldb);
+    const GCaldb&         caldb(void) const;
+    void                  load(const std::string& rspname);
+    void                  eps(const double& eps);
+    const double&         eps(void) const;
+    void                  load_aeff(const std::string& filename);
+    void                  load_psf(const std::string& filename);
+    void                  load_edisp(const std::string& filename);
+    void                  load_background(const std::string& filename);
+    void                  offset_sigma(const double& sigma);
+    double                offset_sigma(void) const;
+    const GCTAAeff*       aeff(void) const;
+    void                  aeff(GCTAAeff* aeff);
+    const GCTAPsf*        psf(void) const;
+    void                  psf(GCTAPsf* psf);
+    const GCTAEdisp*      edisp(void) const;
+    void                  edisp(GCTAEdisp* edisp);
+    const GCTABackground* background(void) const;
+    void                  background(GCTABackground* background);
 
     // Low-level response methods
     double aeff(const double& theta,

@@ -58,6 +58,9 @@
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
+#include "GCTABackground.hpp"
+#include "GCTABackgroundPerfTable.hpp"
+#include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                                "GCTAResponse::caldb(GCaldb&)"
@@ -550,6 +553,7 @@ void GCTAResponse::load(const std::string& rspname)
     std::string aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
     std::string psfname   = m_caldb.filename("","","RPSF","","",expr);
     std::string edispname = m_caldb.filename("","","EDISP","","",expr);
+    std::string bgdname   = m_caldb.filename("","","BGD","","",expr);
 
     // If filenames are empty then build filenames from CALDB root path and
     // response name
@@ -562,6 +566,9 @@ void GCTAResponse::load(const std::string& rspname)
     if (edispname.length() < 1) {
         edispname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
+    if (bgdname.length() < 1) {
+        bgdname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
+    }
 
     // Load effective area
     load_aeff(aeffname);
@@ -571,6 +578,9 @@ void GCTAResponse::load(const std::string& rspname)
 
     // Load energy dispersion
     load_edisp(edispname);
+
+    // Load background
+    load_background(bgdname);
 
     // Remove theta cut
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
@@ -737,7 +747,7 @@ void GCTAResponse::load_psf(const std::string& filename)
  ***************************************************************************/
 void GCTAResponse::load_edisp(const std::string& filename)
 {
-    // Free any existing point spread function instance
+    // Free any existing energy dispersion instance
     if (m_edisp != NULL) delete m_edisp;
     m_edisp = NULL;
 
@@ -749,9 +759,36 @@ void GCTAResponse::load_edisp(const std::string& filename)
         // TODO: Implement FITS energy resolution loading
     }
     catch (GException::fits_open_error &e) {
-      m_edisp = new GCTAEdispPerfTable(filename);
+        m_edisp = new GCTAEdispPerfTable(filename);
     }
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load background model
+ *
+ * @param[in] filename Background model file name.
+ ***************************************************************************/
+void GCTAResponse::load_background(const std::string& filename)
+{
+    // Free any existing background model instance
+    if (m_background != NULL) delete m_background;
+    m_background = NULL;
+
+    // Try opening the file as a FITS file
+    try {
+        // Load background as 3D background
+        m_background = new GCTABackground3D(filename);
+    }
+    catch (GException::fits_open_error &e) {
+        // Load background as performance table background
+        m_background = new GCTABackgroundPerfTable(filename);
+    }
+
+    // Return
     return;
 }
 
@@ -866,6 +903,12 @@ std::string GCTAResponse::print(const GChatter& chatter) const
         if (m_edisp != NULL) {
             result.append("\n"+m_edisp->print(chatter));
         }
+
+        // Append background information
+        if (m_background != NULL) {
+            result.append("\n"+m_background->print(chatter));
+        }
+
         // EXPLICIT: Append Npred cache information
         if (chatter >= EXPLICIT) {
             if (!m_npred_names.empty()) {
@@ -2349,6 +2392,7 @@ void GCTAResponse::init_members(void)
     m_aeff        = NULL;
     m_psf         = NULL;
     m_edisp       = NULL;
+    m_background  = NULL;
     m_apply_edisp = false;  //!< Switched off by default
 
     // Initialise Npred cache
@@ -2382,9 +2426,10 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_npred_values   = rsp.m_npred_values;
 
     // Clone members
-    m_aeff  = (rsp.m_aeff  != NULL) ? rsp.m_aeff->clone()  : NULL;
-    m_psf   = (rsp.m_psf   != NULL) ? rsp.m_psf->clone()   : NULL;
-    m_edisp = (rsp.m_edisp != NULL) ? rsp.m_edisp->clone() : NULL;
+    m_aeff       = (rsp.m_aeff       != NULL) ? rsp.m_aeff->clone()  : NULL;
+    m_psf        = (rsp.m_psf        != NULL) ? rsp.m_psf->clone()   : NULL;
+    m_edisp      = (rsp.m_edisp      != NULL) ? rsp.m_edisp->clone() : NULL;
+    m_background = (rsp.m_background != NULL) ? rsp.m_background->clone() : NULL;
 
     // Return
     return;
@@ -2397,14 +2442,16 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
 void GCTAResponse::free_members(void)
 {
     // Free memory
-    if (m_aeff  != NULL) delete m_aeff;
-    if (m_psf   != NULL) delete m_psf;
-    if (m_edisp != NULL) delete m_edisp;
+    if (m_aeff       != NULL) delete m_aeff;
+    if (m_psf        != NULL) delete m_psf;
+    if (m_edisp      != NULL) delete m_edisp;
+    if (m_background != NULL) delete m_background;
 
     // Initialise pointers
-    m_aeff  = NULL;
-    m_psf   = NULL;
-    m_edisp = NULL;
+    m_aeff       = NULL;
+    m_psf        = NULL;
+    m_edisp      = NULL;
+    m_background = NULL;
 
     // Return
     return;

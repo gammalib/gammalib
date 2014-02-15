@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventAtom.hpp - CTA event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -91,8 +91,6 @@ protected:
     int           m_multip;         //!< Multiplicity
     char          m_telmask;        //!< Telescope mask
     float         m_dir_err;        //!< Error on event direction
-    float         m_detx;           //!< Tangential coordinate in nominal sys
-    float         m_dety;           //!< Tangential coordinate in nominal sys
     float         m_alt;            //!< Event altitude
     float         m_az;             //!< Event azimuth
     float         m_corex;          //!< Position on ground (m)

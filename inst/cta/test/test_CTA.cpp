@@ -50,7 +50,7 @@ const std::string cta_unbin_xml  = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml  = datadir+"/crab.xml";
 const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
-const std::string cta_obsbck_xml = datadir+"/cta_modelbg_obs.xml";
+const std::string cta_instbg_xml = datadir+"/cta_model_inst_bgd.xml";
 const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king   = "irf_file.fits";
 const std::string cta_modbck_fit = datadir+"/bg_test.fits";
@@ -94,14 +94,15 @@ TestGCTAResponse* TestGCTAResponse::clone(void) const
 /***********************************************************************//**
  * @brief Set CTA model test methods
  ***************************************************************************/
-void TestGCTAModelBackground::set(void)
+void TestGCTAModel::set(void)
 {
     // Set test name
-    name("GCTAModelBackground");
+    name("Test CTA models");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_npred_xml), "Test background spatial constructor using xml model file");
-    append(static_cast<pfunction>(&TestGCTAModelBackground::test_modelbg_construct_fits), "Test background spatial constructor using fits file in instrument coords");
+    append(static_cast<pfunction>(&TestGCTAModel::test_modelbg_npred_xml), "Test background spatial constructor using xml model file");
+    append(static_cast<pfunction>(&TestGCTAModel::test_modelbg_construct_fits), "Test background spatial constructor using fits file in instrument coords");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_inst_bgd), "Test instrumental background model");
 
     // Return
     return;
@@ -113,10 +114,10 @@ void TestGCTAModelBackground::set(void)
  *
  * @return Pointer to deep copy of test suite.
  ***************************************************************************/
-TestGCTAModelBackground* TestGCTAModelBackground::clone(void) const
+TestGCTAModel* TestGCTAModel::clone(void) const
 {
     // Clone test suite
-    return new TestGCTAModelBackground(*this);
+    return new TestGCTAModel(*this);
 }
 
 
@@ -570,7 +571,7 @@ void TestGCTAResponse::test_response(void)
 /***********************************************************************//**
  * @brief Test CTA background Npred computation
  ***************************************************************************/
-void TestGCTAModelBackground::test_modelbg_npred_xml(void)
+void TestGCTAModel::test_modelbg_npred_xml(void)
 {
     // Set reference value (~0.393469 result of a 2D Gaussian integrated 
     // within one sigma)
@@ -650,7 +651,7 @@ void TestGCTAModelBackground::test_modelbg_npred_xml(void)
  * Tests the 2nd constructor of GCTAModelBackground that gets its background
  * information from an input fits file.
  ***************************************************************************/
-void TestGCTAModelBackground::test_modelbg_construct_fits(void)
+void TestGCTAModel::test_modelbg_construct_fits(void)
 {
     // Test CTA background constuctor
     test_try("Test CTA background constuctor");
@@ -665,6 +666,7 @@ void TestGCTAModelBackground::test_modelbg_construct_fits(void)
 
         // Load background model
         GCTAModelBackground bck(obs, cta_modbck_fit, spectrum);
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
@@ -679,6 +681,75 @@ void TestGCTAModelBackground::test_modelbg_construct_fits(void)
     test_value((*models[0])[3].value(), 1e6, 1e-6, "Pivot expected to be 1e6");
     test_value((*models[0])[4].value(), 1.0, 1e-6, "Constant expected to be 1.0");
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA instrumental background model
+ ***************************************************************************/
+void TestGCTAModel::test_model_inst_bgd(void)
+{
+    // Test void constuctor
+    test_try("Test void constuctor");
+    try {
+        GCTAModelInstBackground model;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML constuctor
+    test_try("Test XML constuctor");
+    try {
+        GXml xml(cta_instbg_xml);
+        const GXmlElement& lib = *xml.element("source_library", 0);
+        const GXmlElement& src = *lib.element("source", 0);
+        GCTAModelInstBackground model(src);
+        test_value(model["Prefactor"].value(), 1.0);
+        test_value(model["Index"].value(), 0.0);
+        test_value(model["PivotEnergy"].value(), 1.0e6);
+        test_assert(model.is_constant(), "Model is expected to be constant.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test spectral constuctor
+    test_try("Test spectral constuctor");
+    try {
+        GModelSpectralPlaw plaw(1.0, 0.0, GEnergy(1.0, "TeV"));
+        GCTAModelInstBackground model(plaw);
+        test_value(model["Prefactor"].value(), 1.0);
+        test_value(model["Index"].value(), 0.0);
+        test_value(model["PivotEnergy"].value(), 1.0e6);
+        test_assert(model.is_constant(), "Model is expected to be constant.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML loading of instrumental background
+    GModels models(cta_instbg_xml);
+    GModel* model = models["My model"];
+    test_value((*model)["Prefactor"].value(), 1.0);
+    test_value((*model)["Index"].value(), 0.0);
+    test_value((*model)["PivotEnergy"].value(), 1.0e6);
+    test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Test XML saving and reloading of instrumental background
+    models.save("test.xml");
+    models.load("test.xml");
+    model = models["My model"];
+    test_value((*model)["Prefactor"].value(), 1.0);
+    test_value((*model)["Index"].value(), 0.0);
+    test_value((*model)["PivotEnergy"].value(), 1.0e6);
+    test_assert(model->is_constant(), "Model is expected to be constant.");
+
     // Return
     return;
 }
@@ -928,13 +999,13 @@ int main(void)
     bool success = true;
 
     // Create test suites and append them to the container
-    TestGCTAResponse        rsp;
-    TestGCTAObservation     obs;
-    TestGCTAModelBackground bck;
-    TestGCTAOptimize        opt;
+    TestGCTAResponse    rsp;
+    TestGCTAModel       model;
+    TestGCTAOptimize    opt;
+    TestGCTAObservation obs;
     testsuites.append(rsp);
     if (has_data) {
-    	testsuites.append(bck);
+    	testsuites.append(model);
         testsuites.append(obs);
         testsuites.append(opt);
     }

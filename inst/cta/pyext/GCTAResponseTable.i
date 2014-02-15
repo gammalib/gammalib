@@ -49,16 +49,18 @@ public:
     explicit GCTAResponseTable(const GFitsTable& hdu);
     virtual ~GCTAResponseTable(void);
 
-    // Operators
+    // Interpolation operators
     std::vector<double> operator()(const double& arg) const;
     std::vector<double> operator()(const double& arg1, const double& arg2) const;
     std::vector<double> operator()(const double& arg1, const double& arg2,
                                    const double& arg3) const;
+    double&             operator()(const int& element);
+    double&             operator()(const int& index, const int& element);
     double              operator()(const int& index, const double& arg) const;
     double              operator()(const int& index, const double& arg1,
-				                   const double& arg2) const;
+                                   const double& arg2) const;
     double              operator()(const int& index, const double& arg1,
-				                   const double& arg2, const double& arg3) const;
+                                   const double& arg2, const double& arg3) const;
 
     // Methods
     void               clear(void);
@@ -75,6 +77,7 @@ public:
     std::string        axis_lo_unit(const int& index) const;
     std::string        axis_hi_unit(const int& index) const;
     std::string        unit(const int& index) const;
+    const GNodeArray&  nodes(const int& index) const;
     void               scale(const int& index, const double& scale);
     void               read(const GFitsTable& hdu);
     void               write(GFitsTable& hdu) const;
