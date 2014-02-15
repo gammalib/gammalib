@@ -38,7 +38,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT                 "GEnergy::GEnergy(double&, std::string&)"
-#define G_OPERATOR                        "GEnergy::operator()(std::string&)"
+#define G_OPERATOR1              "GEnergy::operator()(double&, std::string&)"
+#define G_OPERATOR2                       "GEnergy::operator()(std::string&)"
 #define G_LOG10                       "GEnergy::log10(double&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -91,9 +92,6 @@ GEnergy::GEnergy(const GEnergy& eng)
  * @param[in] eng Energy.
  * @param[in] unit Energy unit (one of erg(s), keV, MeV, GeV, TeV).
  *
- * @exception GException::invalid_argument
- *            Invalid energy unit specified.
- *
  * Construct energy from an energy value and unit. The constructor interprets
  * the unit string and performs automatic conversion of the energy value. 
  ***************************************************************************/
@@ -103,27 +101,7 @@ GEnergy::GEnergy(const double& eng, const std::string& unit)
     init_members();
 
     // Set energy according to unit string
-    std::string eunit = gammalib::tolower(unit);
-    if (eunit == "erg" || eunit == "ergs") {
-        this->erg(eng);
-    }
-    else if (eunit == "kev") {
-        this->keV(eng);
-    }
-    else if (eunit == "mev") {
-        this->MeV(eng);
-    }
-    else if (eunit == "gev") {
-        this->GeV(eng);
-    }
-    else if (eunit == "tev") {
-        this->TeV(eng);
-    }
-    else {
-        throw GException::invalid_argument(G_CONSTRUCT, unit,
-              "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
-              " \"GeV\", or \"TeV\" (case insensitive).");
-    }
+    this->operator()(eng, unit);
 
     // Return
     return;
@@ -177,10 +155,55 @@ GEnergy& GEnergy::operator=(const GEnergy& eng)
 
 
 /***********************************************************************//**
+ * @brief Unit set operator
+ *
+ * @param[in] eng Energy.
+ * @param[in] unit Energy unit (one of erg(s), keV, MeV, GeV, TeV).
+ *
+ * @exception GException::invalid_argument
+ *            Invalid energy unit specified.
+ *
+ * Construct energy from an energy value and unit. The constructor interprets
+ * the unit string and performs automatic conversion of the energy value. 
+ ***************************************************************************/
+void GEnergy::operator()(const double& eng, const std::string& unit)
+{ 
+    // Set energy according to unit string
+    std::string eunit = gammalib::tolower(unit);
+    if (eunit == "erg" || eunit == "ergs") {
+        this->erg(eng);
+    }
+    else if (eunit == "kev") {
+        this->keV(eng);
+    }
+    else if (eunit == "mev") {
+        this->MeV(eng);
+    }
+    else if (eunit == "gev") {
+        this->GeV(eng);
+    }
+    else if (eunit == "tev") {
+        this->TeV(eng);
+    }
+    else {
+        throw GException::invalid_argument(G_OPERATOR1, unit,
+              "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
+              " \"GeV\", or \"TeV\" (case insensitive).");
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Unit access operator
  *
  * @param[in] unit Unit.
  * @return Energy in requested units.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid energy unit specified.
  *
  * Returns the energy in the requested units.
  ***************************************************************************/
@@ -207,7 +230,7 @@ double GEnergy::operator()(const std::string& unit) const
         energy = this->TeV();
     }
     else {
-        throw GException::invalid_argument(G_OPERATOR, unit,
+        throw GException::invalid_argument(G_OPERATOR2, unit,
               "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
               " \"GeV\", or \"TeV\" (case insensitive).");
     }
