@@ -383,6 +383,66 @@ double GRan::chisq2(void)
 
 
 /***********************************************************************//**
+ * @brief Random sampling from a cummulative density function
+ *
+ * @param[in] cdf Array containing cumulative density function
+ ***************************************************************************/
+int GRan::cdf(const std::vector<double>& cdf)
+{
+    // Get uniform random number
+    double u = uniform();
+	
+    // Get pixel index according to random number. We use a bi-section
+    // method to find the corresponding pixel index
+    int low  = 0;
+    int high = cdf.size();
+    while ((high - low) > 1) {
+        int mid = (low+high) / 2;
+        if (u < cdf[mid]) {
+            high = mid;
+        }
+        else if (cdf[mid] <= u) {
+            low = mid;
+        }
+    }
+
+    // Return index
+	return low;
+}
+
+
+/***********************************************************************//**
+ * @brief Random sampling from a cummulative density function
+ *
+ * @param[in] cdf Vector containing cumulative density function
+ *
+ * @todo Somehow merge with the above method to reduce code repetition
+ ***************************************************************************/
+int GRan::cdf(const GVector& cdf)
+{
+    // Get uniform random number
+    double u = uniform();
+
+    // Get pixel index according to random number. We use a bi-section
+    // method to find the corresponding pixel index
+    int low  = 0;
+    int high = cdf.size();
+    while ((high - low) > 1) {
+        int mid = (low+high) / 2;
+        if (u < cdf[mid]) {
+            high = mid;
+        }
+        else if (cdf[mid] <= u) {
+            low = mid;
+        }
+    }
+    
+    // Return index
+	return low;
+}
+
+
+/***********************************************************************//**
  * @brief Print random number generator information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).

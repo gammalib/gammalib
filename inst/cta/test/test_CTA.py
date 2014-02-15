@@ -197,6 +197,19 @@ class Test(GPythonTestSuite):
         """
         Test GCTAEdisp classes.
         """
+        # Load RMF file
+        self.test_try("Test GCTAEdispRMF file constructor")
+        try:
+            edisp = GCTAEdispRMF("../inst/cta/test/caldb/dc1/rmf.fits")
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to allocate GCTAEdispRMF from file.")
+        
+        # Test energy dispersion values
+        self.test_value(edisp(log10(30),log10(1)), 0.0, 1.0e-9)
+        #self.test_value(edisp(log10(30),log10(30)), 0.354952753, 1.0e-9)
+        self.test_value(edisp(log10(1),log10(30)), 0.0, 1.0e-9)
+        
         # Load performance file
         self.test_try("Test GCTAEdispPerfTable file constructor")
         try:

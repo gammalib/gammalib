@@ -29,7 +29,9 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GBase.hpp"
+#include "GVector.hpp"
 
 
 /***********************************************************************//**
@@ -49,7 +51,7 @@ public:
     virtual ~GRan(void);
  
     // Operators
-    GRan& operator= (const GRan& ran);
+    GRan& operator=(const GRan& ran);
 
     // Methods
     void                   clear(void);
@@ -63,6 +65,8 @@ public:
     double                 exp(const double& lambda);
     double                 poisson(const double& lambda);
     double                 chisq2(void);
+    int                    cdf(const std::vector<double>& cdf);
+    int 				   cdf(const GVector& cdf);
     std::string            print(const GChatter& chatter = NORMAL) const;
   
 protected:

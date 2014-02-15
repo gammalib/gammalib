@@ -333,27 +333,13 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
     // Continue only if there are skymap pixels
     if (npix > 0) {
 
-        // Get uniform random number
-        double u = ran.uniform();
+        // Get pixel index from CDF
+    	int index = ran.cdf(m_mc_cache);
 
-        // Get pixel index according to random number. We use a bi-section
-        // method to find the corresponding skymap pixel
-        int low  = 0;
-        int high = npix;
-        while ((high - low) > 1) {
-            int mid = (low+high) / 2;
-            if (u < m_mc_cache[mid]) {
-                high = mid;
-            }
-            else if (m_mc_cache[mid] <= u) {
-                low = mid;
-            }
-        }
+    	// Convert sky map index to sky map pixel
+    	GSkyPixel pixel = m_map.inx2pix(index);
 
-        // Convert sky map index to sky map pixel
-        GSkyPixel pixel = m_map.inx2pix(low);
-
-        // Randomize pixel
+    	//Randomize pixel
         pixel.x(pixel.x() + ran.uniform() - 0.5);
         pixel.y(pixel.y() + ran.uniform() - 0.5);
 

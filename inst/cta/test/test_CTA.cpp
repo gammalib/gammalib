@@ -53,6 +53,7 @@ const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
 const std::string cta_instbg_xml = datadir+"/cta_model_inst_bgd.xml";
 const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king   = "irf_file.fits";
+const std::string cta_edisp_rmf   = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
 const std::string cta_modbck_fit = datadir+"/bg_test.fits";
 
 
@@ -71,6 +72,7 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispRMF), "Test energy dispersion RMF computation");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
 
@@ -334,66 +336,139 @@ void TestGCTAResponse::test_response_npsf(void)
  * the edisp function. Integration is done in a rather simplistic way, by
  * stepping through the energy range. The integration is done for a set of
  * true energies from 0.1-10 TeV.
+ *
+ * Note: test_energy_integration is separated out so that it may be more easily
+ * called in other tests where it is useful (e.g.test_response_edispRMF and
+ * future additions)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edisp(void)
 {
     // Load response
 	GCTAResponse rsp;
+
+	test_energy_integration(rsp);
+
+	// Return
+	return;
+}
+
+void TestGCTAResponse::test_energy_integration(GCTAResponse rsp) {
+
+	// Load response
+	    rsp.caldb(GCaldb(cta_caldb));
+	    rsp.load(cta_irf);
+
+	    // Continue only if energy dispersion is available
+	    if (rsp.edisp() != NULL) {
+
+	        // Loop over source energies (0.1 TeV -> 10.0 TeV)
+	        for (double e_src = 0.1; e_src < 10.0; e_src *= 2.0) {
+
+	            // Compute log10 of true energy
+	            double log10_e_src = std::log10(e_src);
+
+	            // Retrieve boundaries in observed energy
+	            GEbounds ebounds  = rsp.edisp()->ebounds_obs(log10_e_src);
+	            GEnergy  emin     = ebounds.emin();
+	            GEnergy  emax     = ebounds.emax();
+	            double   logE_min = std::log10(emin.TeV());
+	            double   logE_max = std::log10(emax.TeV());
+
+	            // Compute step size for numerical integration
+	            const int steps = 1000;
+	            double    dlogE = (logE_max-logE_min)/steps;
+
+	            // Perform numerical integration by summing
+	            double sum      = 0.0;
+	            double logE_obs = logE_min;
+	            for (int i = 0; i < steps; ++i) {
+	                double dp_dlogE = (*rsp.edisp())(logE_obs, log10_e_src);
+	                sum            += dp_dlogE * dlogE;
+	                logE_obs       += dlogE;
+	            }
+	            GEnergy eng(e_src, "TeV");
+	            test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
+
+	            // And now in linear energies, test GCTAResponse::edisp() method
+	            const int nE = 10000;
+	            double E_min = emin.MeV();
+	            double E_max = emax.MeV();
+	            double dE    = (E_max-E_min)/nE;
+	            double sum2  = 0.0;
+	            double E_obs = E_min;
+	            for (int i = 0; i < nE; ++i) {
+	                double dp_dE = rsp.edisp(GEnergy(E_obs,"MeV"), 0.0, 0.0, 0.0, 0.0, log10_e_src);
+	                sum2        += dp_dE * dE;
+	                E_obs       += dE;
+	            }
+	            test_value(sum2, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
+	        }
+
+	    } // endif: energy dispersion was available
+
+	    // Return
+	    return;
+}
+
+/***********************************************************************//**
+ * @brief Test CTA Edisp RMF computation
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edispRMF(void)
+{
+    // Load response
+    GCTAResponse rsp;
     rsp.caldb(GCaldb(cta_caldb));
-    rsp.load(cta_irf);
 
-    // Continue only if energy dispersion is available
-    if (rsp.edisp() != NULL) {
+    // Test Energy Dispersion
+    test_energy_integration(rsp);
 
-        // Loop over source energies (0.1 TeV -> 10.0 TeV)
-        for (double e_src = 0.1; e_src < 10.0; e_src *= 2.0) {
+    // Test void constructor
+    test_try("GRmf void constructor");
+    try {
+        GRmf rmf;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-            // Compute log10 of true energy
-            double log10_e_src = std::log10(e_src);
-        
-            // Retrieve boundaries in observed energy
-            GEbounds ebounds  = rsp.edisp()->ebounds_obs(log10_e_src);
-            GEnergy  emin     = ebounds.emin();
-            GEnergy  emax     = ebounds.emax();
-            double   logE_min = std::log10(emin.TeV());
-            double   logE_max = std::log10(emax.TeV());
+    // Test source energy boundary constructor
+    test_try("GRmf energy boundary constructor");
+    try {
+        GEbounds ebounds_src(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+        GRmf     rmf(ebounds_src, ebounds_src);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-            // Compute step size for numerical integration
-            const int steps = 1000;
-            double    dlogE = (logE_max-logE_min)/steps;
-
-            // Perform numerical integration by summing
-            double sum      = 0.0;
-            double logE_obs = logE_min;
-            for (int i = 0; i < steps; ++i) {
-                double dp_dlogE = (*rsp.edisp())(logE_obs, log10_e_src);
-                sum            += dp_dlogE * dlogE;
-                logE_obs       += dlogE;
-            }
-            GEnergy eng(e_src, "TeV");
-            test_value(sum, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
-
-            // And now in linear energies, test GCTAResponse::edisp() method
-            const int nE = 10000;
-            double E_min = emin.MeV();
-            double E_max = emax.MeV();
-            double dE    = (E_max-E_min)/nE;
-            double sum2  = 0.0;
-            double E_obs = E_min;
-            for (int i = 0; i < nE; ++i) {
-                double dp_dE = rsp.edisp(GEnergy(E_obs,"MeV"), 0.0, 0.0, 0.0, 0.0, log10_e_src);
-                sum2        += dp_dE * dE;
-                E_obs       += dE;
-            }
-            test_value(sum2, 1.0, 0.001, "Energy Dispersion integration for "+eng.print());
+    // Test observed energy boundary constructor
+    test_try("GRmf energy boundary constructor");
+    try {
+        GEbounds ebounds_obs(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+        GRmf     rmf(ebounds_obs, ebounds_obs);
+        test_try_success();
         }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-    } // endif: energy dispersion was available
+    //
+    GCTAEdispRMF edisp(cta_edisp_rmf);
+
+    // Test if non-diagonal element (below diagonal) is zero
+    test_value(edisp(std::log10(30),std::log10(1)), 0.0);
+
+    // Test that diagonal element is non-zero
+    //test_value(edisp(std::log10(30),std::log10(30)), 0.354952753 ,1e-9);
+
+    // Test if non-diagonal element (above diagonal) is zero
+    test_value(edisp(std::log10(1),std::log10(30)), 0.0);
 
     // Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Test CTA IRF computation for diffuse source model

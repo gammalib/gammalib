@@ -58,6 +58,8 @@ public:
     double                 exp(const double& arg);
     double                 poisson(const double& arg);
     double                 chisq2(void);
+    int                    cdf(const std::vector<double>& cdf);
+    int 				   cdf(const GVector& cdf);
 };
 
 

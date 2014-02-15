@@ -1,5 +1,5 @@
 /***************************************************************************
- *  GCTAEdispPerfTable.cpp - CTA performance table energy dispersion class *
+ *            GCTAEdispRMF.cpp - CTA RMF energy dispersion class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAEdispPerfTable.cpp
- * @brief CTA performance table energy dispersion class implementation
+ * @file GCTAEdispRMF.cpp
+ * @brief CTA RMF energy dispersion class implementation
  * @author Christoph Deil & Ellis Owen
  */
 
@@ -31,12 +31,21 @@
 #include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include <cmath>
 #include "GTools.hpp"
+#include "GRmf.hpp"
+#include "GRan.hpp"
+#include "GEnergy.hpp"
 #include "GMath.hpp"
-#include "GCTAEdispPerfTable.hpp"
+#include "GVector.hpp"
+#include "GIntegral.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsTableCol.hpp"
+#include "GCTAEdispRMF.hpp"
+#include "GCTAResponse.hpp"
+#include "GCTAResponse_helpers.hpp"
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                       "GCTAEdispPerfTable::load(std::string&)"
+#define G_LOAD                       "GCTAEdispRMF::load(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -56,7 +65,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAEdispPerfTable::GCTAEdispPerfTable(void) : GCTAEdisp()
+GCTAEdispRMF::GCTAEdispRMF(void) : GCTAEdisp()
 {
     // Initialise class members
     init_members();
@@ -74,8 +83,7 @@ GCTAEdispPerfTable::GCTAEdispPerfTable(void) : GCTAEdisp()
  * Construct instance by loading the energy dispersion information from
  * an ASCII performance table.
  ***************************************************************************/
-GCTAEdispPerfTable::GCTAEdispPerfTable(const std::string& filename) :
-                    GCTAEdisp()
+GCTAEdispRMF::GCTAEdispRMF(const std::string& filename) : GCTAEdisp()
 {
     // Initialise class members
     init_members();
@@ -93,8 +101,7 @@ GCTAEdispPerfTable::GCTAEdispPerfTable(const std::string& filename) :
  *
  * @param[in] edisp Energy dispersion
  ***************************************************************************/
-GCTAEdispPerfTable::GCTAEdispPerfTable(const GCTAEdispPerfTable& edisp) :
-                    GCTAEdisp(edisp)
+GCTAEdispRMF::GCTAEdispRMF(const GCTAEdispRMF& edisp) : GCTAEdisp(edisp)
 {
     // Initialise class members
     init_members();
@@ -110,7 +117,7 @@ GCTAEdispPerfTable::GCTAEdispPerfTable(const GCTAEdispPerfTable& edisp) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAEdispPerfTable::~GCTAEdispPerfTable(void)
+GCTAEdispRMF::~GCTAEdispRMF(void)
 {
     // Free members
     free_members();
@@ -132,7 +139,7 @@ GCTAEdispPerfTable::~GCTAEdispPerfTable(void)
  * @param[in] edisp Energy dispersion
  * @return Energy dispersion
  ***************************************************************************/
-GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edisp)
+GCTAEdispRMF& GCTAEdispRMF::operator=(const GCTAEdispRMF& edisp)
 {
     // Execute only if object is not identical
     if (this != &edisp) {
@@ -176,20 +183,22 @@ GCTAEdispPerfTable& GCTAEdispPerfTable::operator=(const GCTAEdispPerfTable& edis
  * S(E) = \frac{1}{\sqrt{2\pi}m\_sigma}
  *        \exp(\frac{-(logEobs-logEsrc)^2}{2 m\_sigma^2})
  * \f]
+ *
+ * @todo Implement interpolation method
  ***************************************************************************/
-double GCTAEdispPerfTable::operator()(const double& logEobs,
-                                      const double& logEsrc,
-                                      const double& theta,
-                                      const double& phi,
-                                      const double& zenith,
-                                      const double& azimuth) const
+double GCTAEdispRMF::operator()(const double& logEobs,
+                                const double& logEsrc,
+                                const double& theta,
+                                const double& phi,
+                                const double& zenith,
+                                const double& azimuth) const
 {
-    // Update the parameter cache
-    update(logEsrc);
+    // Get indices for observed and true energy 
+	int i_obs = m_ebounds_obs.index(GEnergy(std::pow(10.0, logEobs), "TeV"));
+	int i_src = m_ebounds_src.index(GEnergy(std::pow(10.0, logEsrc), "TeV"));
 
-    // Compute energy dispersion value
-    double delta = logEobs - logEsrc;
-    double edisp = m_par_scale * std::exp(m_par_width * delta * delta);
+    // Extract matrix element
+	double edisp = m_matrix(i_src, i_obs);
     
     // Return energy dispersion
     return edisp;
@@ -207,7 +216,7 @@ double GCTAEdispPerfTable::operator()(const double& logEobs,
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GCTAEdispPerfTable::clear(void)
+void GCTAEdispRMF::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -227,85 +236,37 @@ void GCTAEdispPerfTable::clear(void)
  *
  * @return Deep copy of instance.
  ***************************************************************************/
-GCTAEdispPerfTable* GCTAEdispPerfTable::clone(void) const
+GCTAEdispRMF* GCTAEdispRMF::clone(void) const
 {
-    return new GCTAEdispPerfTable(*this);
+    return new GCTAEdispRMF(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Load energy dispersion from performance table
+ * @brief Load energy dispersion from RMF file
  *
- * @param[in] filename Performance table file name.
+ * @param[in] filename of RMF file.
  *
  * @exception GCTAExceptionHandler::file_open_error
  *            File could not be opened for read access.
  *
- * This method loads the energy dispersion information from an ASCII
- * performance table. The energy resolution is stored in the 5th column
- * of the performance table as RMS(ln(Eest/Etrue)). The method converts
- * this internally to a sigma value by multiplying the stored values by
- * 0.434294481903.
+ * This method loads the energy dispersion information from an RMF file.
+ *
+ * @todo Why not storing simply GRmf as a member of GCTAEdispRMF
  ***************************************************************************/
-void GCTAEdispPerfTable::load(const std::string& filename)
+void GCTAEdispRMF::load(const std::string& filename)
 {
-    // Set conversion factor from RMS(ln(Eest/Etrue)) to RMS(log10(Eest/Etrue))
-    const double conv = 0.434294481903;
+    // Load RMF file
+	GRmf rmf(filename);
 
-    // Clear arrays
-    m_logE.clear();
-    m_sigma.clear();
+    // Extract infomation
+	m_ebounds_src = rmf.etrue();
+	m_ebounds_obs = rmf.emeasured();
+	m_matrix      = rmf.matrix();
 
-    // Allocate line buffer
-    const int n = 1000;
-    char  line[n];
-
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
-    // Open performance table readonly
-    FILE* fptr = std::fopen(fname.c_str(), "r");
-    if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_LOAD, fname);
-    }
-
-    // Read lines
-    while (std::fgets(line, n, fptr) != NULL) {
-
-        // Split line in elements. Strip empty elements from vector.
-        std::vector<std::string> elements = gammalib::split(line, " ");
-        for (int i = elements.size()-1; i >= 0; i--) {
-            if (gammalib::strip_whitespace(elements[i]).length() == 0) {
-                elements.erase(elements.begin()+i);
-            }
-        }
-
-        // Skip header
-        if (elements[0].find("log(E)") != std::string::npos) {
-            continue;
-        }
-
-        // Break loop if end of data table has been reached
-        if (elements[0].find("----------") != std::string::npos) {
-            break;
-        }
-
-        // Push elements in node array and vector
-        m_logE.append(gammalib::todouble(elements[0]));
-        m_sigma.push_back(gammalib::todouble(elements[4]) * conv);
-
-    } // endwhile: looped over lines
-
-    // Close file
-    std::fclose(fptr);
-
-    // Store filename
-    m_filename = filename;
-
-    // Return
+	// Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Simulate energy dispersion
@@ -317,28 +278,36 @@ void GCTAEdispPerfTable::load(const std::string& filename)
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
- * Draws observed energy value from a normal distribution of width
- * m_par_sigma around @p logE.
+ * Draws observed energy value from RMF matrix.
+ *
+ * @todo Are you sure this method works??? I think the vector index should
+ * be extracted from logE. Also, never copy a vector, get references to it.
+ * Another problem is that the method will always return the bin centres,
+ * but we want to sample energies to infinite precision!!!
  ***************************************************************************/
-GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
-                               const double& logE,
-                               const double& theta,
-                               const double& phi,
-                               const double& zenith,
-                               const double& azimuth) const
+GEnergy GCTAEdispRMF::mc(GRan&         ran,
+                         const double& logE,
+                         const double& theta,
+                         const double& phi,
+                         const double& zenith,
+                         const double& azimuth) const
 {
-    // Update the parameter cache
-    update(logE);
+	// Random selection of a GVector from vector of GVectors
+	double  u      = ran.uniform();
+	GVector vector = m_cdf_cache[u]; // Does this work??? u=[0,1]
+
+	// Random selection of element in GVector
+	int ref = ran.cdf(vector);
+
+   	// Convert index into an energy
+    double logEobs = vector[ref];
 
     // Draw log observed energy in TeV
-    double logEobs = m_par_sigma * ran.normal() + logE;
-
-    // Set energy
     GEnergy energy;
     energy.log10TeV(logEobs);
 
-    // Return energy
-    return energy;
+	// Return energy
+	return energy;
 }
 
 
@@ -352,30 +321,56 @@ GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
  * Returns the band of observed energies outside of which the energy
- * dispersion becomes negligible for a given true energy @p logEsrc. This
- * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
- * Gaussian width of the energy dispersion.
+ * dispersion becomes negligible for a given true energy @p logEsrc.
+ *
+ * @todo Convert logEsrc into index!!!
  ***************************************************************************/
-GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
-                                         const double& theta,
-                                         const double& phi,
-                                         const double& zenith,
-                                         const double& azimuth) const
+GEbounds GCTAEdispRMF::ebounds_obs(const double& logEsrc,
+                                   const double& theta,
+                                   const double& phi,
+                                   const double& zenith,
+                                   const double& azimuth) const
 {
-    // Set energy band constant
-    const double number_of_sigmas = 5.0;
+    // WRONG!!! No random sampling needed here!!!
+    GRan ran;
+	int low = ran.cdf(m_mc_cache);
+	GVector EVector = m_matrix.column(low);
 
-    // Get energy dispersion sigma
-    double sigma = m_logE.interpolate(logEsrc, m_sigma);
+    // Initialise energy boundaries
+    GEbounds ebounds;
 
-    // Compute energy boundaries
-    GEnergy emin;
-    GEnergy emax;
-    emin.log10TeV(logEsrc - number_of_sigmas * sigma);
-    emax.log10TeV(logEsrc + number_of_sigmas * sigma);
+    // Determine vector column that corresponds to specified true energy
+    GEnergy energy;
+    energy.log10TeV(logEsrc);
+    int column = m_ebounds_src.index(energy);
+    if (column != -1) {
+    
+        // Determine first and last non-zero indices
+        int i_emin = -1;
+        int i_emax = -1;
+        for (int row = 0; row < m_matrix.rows(); ++row) {
+            if (m_matrix(row, column) > 0.0) {
+                i_emin = row;
+                break;
+            }
+        }
+        for (int row = m_matrix.rows()-1; row >= 0; --row) {
+            if (m_matrix(row, column) > 0.0) {
+                i_emax = row;
+                break;
+            }
+        }
+
+        // Set energy boundaries if valid indices have been found
+        if (i_emin != -1 && i_emax != -1) {
+            ebounds = GEbounds(m_ebounds_obs.emin(i_emin),
+                               m_ebounds_obs.emax(i_emax));
+        }
+
+    } // endif: information found for source energy
 
     // Return energy boundaries
-    return (GEbounds(emin, emax));
+    return ebounds;
 }
 
 
@@ -389,74 +384,99 @@ GEbounds GCTAEdispPerfTable::ebounds_obs(const double& logEsrc,
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
  * Returns the band of true photon energies outside of which the energy
- * dispersion becomes negligible for a given observed energy @p logEobs. This
- * band is set to \f$\pm 5 \times \sigma\f$, where \f$\sigma\f$ is the
- * Gaussian width of the energy dispersion.
+ * dispersion becomes negligible for a given observed energy @p logEobs.
  ***************************************************************************/
-GEbounds GCTAEdispPerfTable::ebounds_src(const double& logEobs,
-                                         const double& theta,
-                                         const double& phi,
-                                         const double& zenith,
-                                         const double& azimuth) const
+GEbounds GCTAEdispRMF::ebounds_src(const double& logEobs,
+                                   const double& theta,
+                                   const double& phi,
+                                   const double& zenith,
+                                   const double& azimuth) const
 {
-    // Set energy band constant
-    const double number_of_sigmas = 5.0;
+    GRan ran;
+	int low = ran.cdf(m_mc_cache);
+	GVector EVector = m_matrix.row(low);
 
-    // Get energy dispersion sigma
-    double sigma = m_logE.interpolate(logEobs, m_sigma);
+	int emin_index = EVector.first_nonzero();
+	int emax_index = EVector.last_nonzero();
 
-    // Compute energy boundaries
-    GEnergy emin;
-    GEnergy emax;
-    emin.log10TeV(logEobs - number_of_sigmas * sigma);
-    emax.log10TeV(logEobs + number_of_sigmas * sigma);
+	double emin_val = EVector[emin_index];
+	double emax_val = EVector[emax_index];
 
-    // Return energy boundaries
-    return (GEbounds(emin, emax));
-}
+	GEnergy emin = GEnergy(emin_val, "MeV");
+	GEnergy emax = GEnergy(emax_val, "MeV");
 
+	// Return energy boundaries
+	return (GEbounds(emin, emax));
+
+	}
 
 /***********************************************************************//**
- * @brief Print energy dispersion information
+ * @brief Calculates std::vector of cdf GVectors.
+ *
+ * Makes std::vector of cdf GVectors from RMF matrix columns and puts
+ * result in m_cdf_cache in the cache.
+ ***************************************************************************/
+void GCTAEdispRMF::convert_cdf(void)
+{
+
+	GVector Row = m_matrix.row(0);
+	int row_sz = Row.size();
+
+	//Iterate over vectors
+	for(int j = 0; j <= row_sz; ++j) {
+		GVector Vector = m_matrix.column(j);
+		//Get minimum and maximum non-zero indices for vector
+		int min_index = Vector.first_nonzero();
+		int max_index = Vector.last_nonzero();
+		int size = Vector.size();
+		//Construct new vector for these non-zero values
+		GVector v1 = Vector.slice((Vector[0] + min_index), (Vector[size] - max_index));
+		int v1_size = v1.size();
+		//First element of the new vector
+		double el_1 = v1[0];
+		//Copy new vector for iteration
+		GVector v_add = v1;
+
+
+		//Compute the cdf from shortened vector
+		double element = v_add[0];
+		//Iterate over elements of each vector
+		for (int i = 0; i <= size; ++i) {
+			double element_i = v_add[i];
+			double new_element_i = element + element_i;
+			//Insert replacement element into the vector at position i
+			v_add[i] = new_element_i;
+			double element = element_i;
+		}
+		//Adds the GVector cdf to the std::vector of GVectors
+		GVector vector_cdf = v_add;
+		m_cdf_cache[j] = vector_cdf;
+		}
+
+	return;
+
+}
+
+/***********************************************************************//**
+ * @brief Print RMF information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing energy dispersion information.
+ *
+ * TODO: Print something useful.
  ***************************************************************************/
-std::string GCTAEdispPerfTable::print(const GChatter& chatter) const
-{
-    // Initialise result string
+std::string GCTAEdispRMF::print(const GChatter& chatter) const
+{ // Initialise result string
     std::string result;
 
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Compute energy boundaries in TeV
-        int    num  = m_logE.size();
-        double emin = std::pow(10.0, m_logE[0]);
-        double emax = std::pow(10.0, m_logE[num-1]);
-
-        // Append header
-        result.append("=== GCTAEdispPerfTable ===");
-
-        // Append information
-        result.append("\n"+gammalib::parformat("Filename")+m_filename);
-        result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(num));
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
-        result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
-
-        /*
-        for(int i=0; i < num; ++i) {
-            double sigma = m_sigma[i];
-            double logE=m_logE[i];
-            result.append("\n"+gammalib::str(logE)+"    "+gammalib::str(sigma));
-        }
-        */
-
     } // endif: chatter was not silent
 
     // Return result
     return result;
+
 }
 
 
@@ -469,16 +489,10 @@ std::string GCTAEdispPerfTable::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAEdispPerfTable::init_members(void)
+void GCTAEdispRMF::init_members(void)
 {
     // Initialise members
     m_filename.clear();
-    m_logE.clear();
-    m_sigma.clear();
-    m_par_logE  = -1.0e30;
-    m_par_scale = 1.0;
-    m_par_sigma = 0.0;
-    m_par_width = 0.0;
 
     // Return
     return;
@@ -490,16 +504,10 @@ void GCTAEdispPerfTable::init_members(void)
  *
  * @param[in] edisp Energy dispersion
  ***************************************************************************/
-void GCTAEdispPerfTable::copy_members(const GCTAEdispPerfTable& edisp)
+void GCTAEdispRMF::copy_members(const GCTAEdispRMF& edisp)
 {
     // Copy members
     m_filename  = edisp.m_filename;
-    m_logE      = edisp.m_logE;
-    m_sigma     = edisp.m_sigma;
-    m_par_logE  = edisp.m_par_logE;
-    m_par_scale = edisp.m_par_scale;
-    m_par_sigma = edisp.m_par_sigma;
-    m_par_width = edisp.m_par_width;
 
     // Return
     return;
@@ -509,37 +517,9 @@ void GCTAEdispPerfTable::copy_members(const GCTAEdispPerfTable& edisp)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAEdispPerfTable::free_members(void)
+void GCTAEdispRMF::free_members(void)
 {
     // Return
     return;
 }
 
-
-/***********************************************************************//**
- * @brief Update energy dispersion parameter cache
- *
- * @param[in] logE Log10 of the true photon energy (TeV).
- *
- * This method updates the energy dispersion parameter cache.
- * As the performance table energy dispersion only depends on energy,
- * the only parameter on which the cache values depend is the energy.
- ***************************************************************************/
-void GCTAEdispPerfTable::update(const double& logE) const
-{
-    // Only compute energy dispersion parameters if arguments have changed
-    if (logE != m_par_logE) {
-
-        // Save energy
-        m_par_logE = logE;
-    
-        // Determine Gaussian sigma and pre-compute Gaussian parameters
-        m_par_sigma = m_logE.interpolate(logE, m_sigma);
-        m_par_scale = gammalib::inv_sqrt2pi / m_par_sigma;
-        m_par_width = -0.5 / (m_par_sigma * m_par_sigma);
-
-    }
-
-    // Return
-    return;
-}

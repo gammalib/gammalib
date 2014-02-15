@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GVector.hpp - Vector class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -87,6 +87,7 @@ public:
     double&       operator[](const int& index);
     const double& operator[](const int& index) const;
 
+
     // Vector operators
     bool     operator==(const GVector& vector) const;
     bool     operator!=(const GVector& vector) const;
@@ -107,7 +108,11 @@ public:
     double&       at(const int& index);
     const double& at(const int& index) const;
     int           non_zeros(void) const;
+    int           first_nonzero(void) const;
+    int           last_nonzero(void) const;
+    GVector       slice(const int& start, const int& stop) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
+
 
 private:
     // Private methods
@@ -115,6 +120,7 @@ private:
     void alloc_members(void);
     void copy_members(const GVector& vector);
     void free_members(void);
+
 
     // Private data area
     int     m_num;    //!< Number of elements in vector
@@ -131,7 +137,7 @@ private:
 inline
 double& GVector::operator[](const int& index)
 {
-    // Return vector element
+	// Return vector element
     return m_data[index];
 }
 

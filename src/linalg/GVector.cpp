@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GVector.cpp - Vector class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -165,7 +165,6 @@ GVector::GVector(const double& a, const double& b, const double& c)
     // Return
     return;
 }
-
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -547,6 +546,85 @@ int GVector::non_zeros(void) const
 
     // Return number of non-zero elements
     return non_zeros;
+}
+
+/***********************************************************************//**
+ * @brief Return the index of the first non-zero element in a vector
+ *
+ * @return Index of first non-zero element in vector.
+ *
+ * Returns the index of the first non-zero element. If all elements are zero
+ * the method will return -1.
+ ***************************************************************************/
+int GVector::first_nonzero(void) const
+{
+    // Initialise index
+    int first_non_zero = -1;
+
+    // Gather all non-zero elements
+    for (int i = 0; i < m_num; ++i) {
+        if (m_data[i] != 0.0) {
+        	first_non_zero = i;
+            break;
+        }
+    }
+
+    // Return number of non-zero elements
+    return first_non_zero;
+}
+
+
+/***********************************************************************//**
+ * @brief Return the index of the last non-zero element in a vector
+ *
+ * @return Index of last non-zero element in vector.
+ *
+ * Returns the index of the last non-zero element. If all elements are zero
+ * the method will return -1.
+ ***************************************************************************/
+int GVector::last_nonzero(void) const
+{
+    // Initialise index
+    int last_non_zero = -1;
+
+    // Gather all non-zero elements
+    for (int i = m_num-1; i >= 0; --i) {
+    	if (m_data[i] != 0.0) {
+    		last_non_zero = i;
+            break;
+    	}
+    }
+
+    // Return number of non-zero elements
+    return last_non_zero;
+}
+
+
+/***********************************************************************//**
+ * @brief Vector slice operator
+ *
+ * @param[in] start Start index [0,...,size()-1]
+ * @param[in] stop Stop index [0,...,size()-1]
+ * @return Vector made of elements [start,...,stop].
+ ***************************************************************************/
+GVector GVector::slice(const int& start, const int& stop) const
+{
+    // Determine number of elements in vector
+    int num = stop - start;
+    if (num < 0) {
+        num = 0;
+    }
+
+    // Allocate vector
+    GVector vector(num);
+    
+    // Build vector slice between original elements a and b (inclusive)
+    for (int i = start; i <= stop; ++i) {
+        vector.m_data[i-start] = m_data[i];
+    }
+
+    // Return sliced vector
+    return vector;
 }
 
 
