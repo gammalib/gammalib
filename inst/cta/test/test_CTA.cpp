@@ -672,15 +672,6 @@ void TestGCTAModel::test_modelbg_construct_fits(void)
         test_try_failure(e);
     }
 
-    // Load model from XML file and check the parameters
-    GModels models(cta_obsbck_xml);
-//std::cout << models << std::endl;
-    test_value((*models[0])[0].value(), 1.0, 1e-6, "Normalization expected to be 1.0");
-    test_value((*models[0])[1].value(), 1.0, 1e-6, "Prefactor expected to be 1.0");
-    test_value((*models[0])[2].value(), 0.0, 1e-6, "Index expected to be 0.0");
-    test_value((*models[0])[3].value(), 1e6, 1e-6, "Pivot expected to be 1e6");
-    test_value((*models[0])[4].value(), 1.0, 1e-6, "Constant expected to be 1.0");
-    
     // Return
     return;
 }
