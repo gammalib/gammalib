@@ -309,10 +309,9 @@ double GCTAModelInstBackground::eval(const GEvent& event,
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
-    // DUMMY CODE: GET DETX an DETY
-    const GCTAPointing& pnt = cta->pointing();
-    GCTAInstDir inst_dir = pnt.instdir(dir->dir());
-
+    // Set DETX and DETY in instrument direction
+    GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
+    
     // Evaluate function
     double logE = event.energy().log10TeV();
     double spat = (*bgd)(logE, inst_dir.detx(), inst_dir.dety());
@@ -370,9 +369,8 @@ double GCTAModelInstBackground::eval_gradients(const GEvent& event,
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
-    // DUMMY CODE: GET DETX an DETY
-    const GCTAPointing& pnt = cta->pointing();
-    GCTAInstDir inst_dir = pnt.instdir(dir->dir());
+    // Set DETX and DETY in instrument direction
+    GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
 
     // Evaluate function
     double logE = event.energy().log10TeV();
