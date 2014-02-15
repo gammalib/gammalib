@@ -49,7 +49,7 @@ public:
     // Constructors and destructors
     GRmf(void);
     explicit GRmf(const std::string& filename);
-    explicit GRmf(const GEbounds& etrue, const GEbounds& emeasured);
+    GRmf(const GEbounds& etrue, const GEbounds& emeasured);
     GRmf(const GRmf& rmf);
     virtual ~GRmf(void);
 
@@ -68,12 +68,16 @@ public:
     const double&        at(const int& itrue, const int& imeasured) const;
     const GEbounds&      etrue(void) const;
     const GEbounds&      emeasured(void) const;
+    GEbounds             etrue(const GEnergy& emeasured) const;
+    GEbounds             emeasured(const GEnergy& etrue) const;
     const GMatrixSparse& matrix(void) const;
     void                 load(const std::string& filename);
     void                 save(const std::string& filename,
-                              const bool& clobber = false) const;
+                              const bool& clobber = false,
+                              const std::string& unit = "keV") const;
     void                 read(const GFitsTable& table);
-    void                 write(GFits& fits) const;
+    void                 write(GFits& fits,
+                               const std::string& unit = "keV") const;
     const std::string&   filename(void) const;
     std::string          print(const GChatter& chatter = NORMAL) const;
 

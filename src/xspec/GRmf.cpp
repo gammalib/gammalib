@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.cpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -260,6 +260,109 @@ const double& GRmf::at(const int& itrue, const int& imeasured) const
 
 
 /***********************************************************************//**
+ * @brief Return true energy boundaries for specified measured energy
+ *
+ * @param[in] emeasured Measured energy.
+ * @return True energy boundaries for specified measured energy.
+ *
+ * Returns the true energy boundaries for the specified measured energy
+ * @p emeasured. If the RMF is not covering the specified measured energy,
+ * an empty energy boundary object is returned.
+ ***************************************************************************/
+GEbounds GRmf::etrue(const GEnergy& emeasured) const
+{
+    // Initialise empty energy boundaries
+    GEbounds ebounds;
+
+    // Determine matrix column that corresponds to specified measued energy
+    int column = m_ebds_measured.index(emeasured);
+
+    // If matrix column was found then determine the boundaries for this
+    // column
+    if (column != -1) {
+
+        // Determine first and last non-zero indices
+        int row_start = -1;
+        int row_stop  = -1;
+        for (int row = 0; row < m_matrix.rows(); ++row) {
+            if (m_matrix(row, column) > 0.0) {
+                row_start = row;
+                break;
+            }
+        }
+        for (int row = m_matrix.rows()-1; row >= 0; --row) {
+            if (m_matrix(row, column) > 0.0) {
+                row_stop = row;
+                break;
+            }
+        }
+
+        // Set energy boundaries if valid indices have been found
+        if (row_start != -1 && row_stop != -1) {
+            ebounds = GEbounds(m_ebds_true.emin(row_start),
+                               m_ebds_true.emax(row_stop));
+        }
+
+    } // endif: row containing true energy was found
+
+    // Return energy boundaries
+    return ebounds;
+}
+//m_matrix(itrue, imeasured) (row, column)
+
+
+/***********************************************************************//**
+ * @brief Return measured energy boundaries for specified true energy
+ *
+ * @param[in] etrue True energy.
+ * @return Measured energy boundaries for specified true energy.
+ *
+ * Returns the measured energy boundaries for the specified true energy
+ * @p etrue. If the RMF is not covering the specified true energy,
+ * an empty energy boundary object is returned.
+ ***************************************************************************/
+GEbounds GRmf::emeasured(const GEnergy& etrue) const
+{
+    // Initialise empty energy boundaries
+    GEbounds ebounds;
+
+    // Determine matrix row that corresponds to specified true energy
+    int row = m_ebds_true.index(etrue);
+
+    // If matrix row was found then determine the boundaries for this
+    // row
+    if (row != -1) {
+
+        // Determine first and last non-zero indices
+        int column_start = -1;
+        int column_stop  = -1;
+        for (int column = 0; column < m_matrix.columns(); ++column) {
+            if (m_matrix(row, column) > 0.0) {
+                column_start = column;
+                break;
+            }
+        }
+        for (int column = m_matrix.columns()-1; column >= 0; --column) {
+            if (m_matrix(row, column) > 0.0) {
+                column_stop = column;
+                break;
+            }
+        }
+
+        // Set energy boundaries if valid indices have been found
+        if (column_start != -1 && column_stop != -1) {
+            ebounds = GEbounds(m_ebds_measured.emin(column_start),
+                               m_ebds_measured.emax(column_stop));
+        }
+
+    } // endif: row containing true energy was found
+
+    // Return energy boundaries
+    return ebounds;
+}
+
+
+/***********************************************************************//**
  * @brief Load Redistribution Matrix File
  *
  * @param[in] filename File name.
@@ -297,14 +400,17 @@ void GRmf::load(const std::string& filename)
  *
  * @param[in] filename File name.
  * @param[in] clobber Overwrite existing file? (defaults to true)
+ * @param[in] unit Energy unit (defaults to "keV")
  ***************************************************************************/
-void GRmf::save(const std::string& filename, const bool& clobber) const
+void GRmf::save(const std::string& filename,
+                const bool&        clobber,
+                const std::string& unit) const
 {
     // Open FITS file
     GFits fits;
 
     // Write RMF into file
-    write(fits);
+    write(fits, unit);
 
     // Close FITS file
     fits.saveto(filename, clobber);
@@ -377,8 +483,9 @@ void GRmf::read(const GFitsTable& table)
  * @brief Write Redistribution Matrix File
  *
  * @param[in] fits FITS file.
+ * @param[in] unit Energy unit (defaults to "keV")
  ***************************************************************************/
-void GRmf::write(GFits& fits) const
+void GRmf::write(GFits& fits, const std::string& unit) const
 {
     // Set table length
     int length = ntrue();
@@ -454,8 +561,8 @@ void GRmf::write(GFits& fits) const
             }
     
             // Set energy bin
-            energy_lo(itrue) = m_ebds_true.emin(itrue).keV();
-            energy_hi(itrue) = m_ebds_true.emax(itrue).keV();
+            energy_lo(itrue) = m_ebds_true.emin(itrue)(unit);
+            energy_hi(itrue) = m_ebds_true.emax(itrue)(unit);
 
             // Set group information
             n_grp(itrue)  = 1;
@@ -470,8 +577,8 @@ void GRmf::write(GFits& fits) const
         } // endfor: looped over true energy bins
 
         // Set column units
-        energy_lo.unit("keV");
-        energy_hi.unit("keV");
+        energy_lo.unit(unit);
+        energy_hi.unit(unit);
 
         // Set table attributes
         hdu->extname("MATRIX");

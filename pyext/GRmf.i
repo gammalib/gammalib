@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GRmf.i - XSPEC Redistribution Matrix File class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,24 +43,30 @@ public:
     // Constructors and destructors
     GRmf(void);
     explicit GRmf(const std::string& filename);
-    explicit GRmf(const GEbounds& etrue, const GEbounds& emeasured);
+    GRmf(const GEbounds& etrue, const GEbounds& emeasured);
     GRmf(const GRmf& rmf);
     virtual ~GRmf(void);
 
     // Methods
-    void            clear(void);
-    GRmf*           clone(void) const;
-    int             size(void) const;
-    int             ntrue(void) const;
-    int             nmeasured(void) const;
-    double&         at(const int& itrue, const int& imeasured);
-    const GEbounds& etrue(void) const;
-    const GEbounds& emeasured(void) const;
-    void            load(const std::string& filename);
-    void            save(const std::string& filename,
-                         const bool& clobber = false) const;
-    void            read(const GFitsTable& table);
-    void            write(GFits& fits) const;
+    void                 clear(void);
+    GRmf*                clone(void) const;
+    int                  size(void) const;
+    int                  ntrue(void) const;
+    int                  nmeasured(void) const;
+    double&              at(const int& itrue, const int& imeasured);
+    const GEbounds&      etrue(void) const;
+    const GEbounds&      emeasured(void) const;
+    GEbounds             etrue(const GEnergy& emeasured) const;
+    GEbounds             emeasured(const GEnergy& etrue) const;
+    const GMatrixSparse& matrix(void) const;
+    void                 load(const std::string& filename);
+    void                 save(const std::string& filename,
+                              const bool& clobber = false,
+                              const std::string& unit = "keV") const;
+    void                 read(const GFitsTable& table);
+    void                 write(GFits& fits,
+                               const std::string& unit = "keV") const;
+    const std::string&   filename(void) const;
 };
 
 
