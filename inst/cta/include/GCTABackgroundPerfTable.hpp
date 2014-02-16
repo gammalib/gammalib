@@ -39,7 +39,7 @@ class GFits;
 /***********************************************************************//**
  * @class GCTABackgroundPerfTable
  *
- * @brief CTA 3D background class
+ * @brief CTA performance table background class
  ***************************************************************************/
 class GCTABackgroundPerfTable : public GCTABackground {
 

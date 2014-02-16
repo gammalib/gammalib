@@ -86,6 +86,7 @@
 %include "GCTAEdispPerfTable.i"
 %include "GCTABackground.i"
 %include "GCTABackground3D.i"
+%include "GCTABackgroundPerfTable.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
 %include "GCTAModelBackground.i"
