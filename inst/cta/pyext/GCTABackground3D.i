@@ -42,6 +42,15 @@ public:
     GCTABackground3D(const GCTABackground3D& bgd);
     virtual ~GCTABackground3D(void);
 
+    // Implemented pure virtual operators
+    virtual double operator()(const double& logE, 
+                              const double& detx, 
+                              const double& dety,
+                              const bool&   etrue = false) const;
+
+    // Operators
+    GCTABackground3D& operator=(const GCTABackground3D& bgd);
+
     // Implemented pure virtual methods
     void                       clear(void);
     GCTABackground3D*          clone(void) const;

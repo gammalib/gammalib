@@ -42,11 +42,24 @@ public:
     GCTABackground(const GCTABackground& bgd);
     virtual ~GCTABackground(void);
 
+    // Pure virtual operators
+    virtual double operator()(const double& logE, 
+                              const double& detx, 
+                              const double& dety,
+                              const bool&   etrue = false) const = 0;
+
+    // Operators
+    GCTABackground& operator=(const GCTABackground& bgd);
+
     // Pure virtual methods
-    virtual void            clear(void) = 0;
-    virtual GCTABackground* clone(void) const = 0;
-    virtual void            load(const std::string& filename) = 0;
-    virtual std::string     filename(void) const = 0;
+    virtual void                       clear(void) = 0;
+    virtual GCTABackground*            clone(void) const = 0;
+    virtual void                       load(const std::string& filename) = 0;
+    virtual std::string                filename(void) const = 0;
+    virtual GCTAInstDir                mc(const GEnergy& energy,
+                                          const GTime& time,
+                                          GRan& ran) const = 0;
+    virtual const GModelSpectralNodes& spectrum(void) const = 0;
 };
 
 
