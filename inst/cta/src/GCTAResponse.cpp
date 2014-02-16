@@ -57,6 +57,7 @@
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
+#include "GCTAEdispRmf.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTABackground.hpp"
 #include "GCTABackgroundPerfTable.hpp"
@@ -753,11 +754,27 @@ void GCTAResponse::load_edisp(const std::string& filename)
 
     // Try opening the file as a FITS file
     try {
+
         // Open FITS file
         GFits file(filename);
 
-        // TODO: Implement FITS energy resolution loading
+        // If file contains an "ENERGY DISPERSION" extension then load it
+        // as CTA response table
+        if (file.contains("ENERGY DISPERSION")) {
+            file.close();
+            //m_edisp = new GCTAEdisp2D(filename);
+        }
+
+        // ... else load it as RMF
+        else {
+            file.close();
+            m_edisp = new GCTAEdispRmf(filename);
+        }
+
     }
+
+    // If FITS file opening failed then assume that we have a performance
+    // table
     catch (GException::fits_open_error &e) {
         m_edisp = new GCTAEdispPerfTable(filename);
     }
