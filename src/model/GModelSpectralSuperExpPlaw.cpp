@@ -369,7 +369,7 @@ double GModelSpectralSuperExpPlaw::eval_gradients(const GEnergy& srcEng,
     double g_pivot = (m_pivot.is_free())
                      ? -value * m_last_index1 / m_pivot.factor_value() : 0.0;
     double g_index2 = (m_index2.is_free())
-                             ? - value * m_index2.scale() * std::log(m_last_e_cut) * m_last_exponent: 0.0;
+                             ? - value * m_index2.scale() * std::log(m_last_e_cut) * m_last_exponent : 0.0;
 
     // Set gradients
     m_norm.factor_gradient(g_norm);
@@ -971,7 +971,7 @@ void GModelSpectralSuperExpPlaw::update_eval_cache(const GEnergy& energy) const
         double eng    = energy.MeV();
         m_last_e_norm = eng / m_last_pivot;
         m_last_e_cut  = eng / m_last_ecut;
-        m_last_exponent = std::pow(m_last_ecut, m_last_index2);
+        m_last_exponent = std::pow(m_last_e_cut, m_last_index2);
         m_last_power  = std::pow(m_last_e_norm, m_last_index1) *
                         std::exp(-m_last_exponent);
 
