@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GCTABackground3D.i - CTA 3D background class              *
+ *    GCTABackgroundPerfTable.i - CTA performance table background class   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,28 +19,28 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTABackground3D.i
- * @brief CTA background model base class definition
+ * @file GCTABackgroundPerfTable.i
+ * @brief CTA performance table background class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTABackground3D.hpp"
+#include "GCTABackgroundPerfTable.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTABackground3D
+ * @class GCTABackgroundPerfTable
  *
- * @brief Abstract base class for the CTA background model
+ * @brief CTA performance table background class
  ***************************************************************************/
-class GCTABackground3D : public GCTABackground {
+class GCTABackgroundPerfTable : public GCTABackground {
 public:
     // Constructors and destructors
-    GCTABackground3D(void);
-    explicit GCTABackground3D(const std::string& filename);
-    GCTABackground3D(const GCTABackground3D& bgd);
-    virtual ~GCTABackground3D(void);
+    GCTABackgroundPerfTable(void);
+    explicit GCTABackgroundPerfTable(const std::string& filename);
+    GCTABackgroundPerfTable(const GCTABackgroundPerfTable& bgd);
+    virtual ~GCTABackgroundPerfTable(void);
 
     // Implemented pure virtual operators
     virtual double operator()(const double& logE, 
@@ -48,29 +48,29 @@ public:
                               const double& dety,
                               const bool&   etrue = false) const;
 
-    // Operators
-    GCTABackground3D& operator=(const GCTABackground3D& bgd);
-
     // Implemented pure virtual methods
     void                       clear(void);
-    GCTABackground3D*          clone(void) const;
+    GCTABackgroundPerfTable*   clone(void) const;
     void                       load(const std::string& filename);
     std::string                filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
+    std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Methods
-    void read(const GFits& file);
+    int           size(void) const;
+    void          sigma(const double& sigma);
+    const double& sigma(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCTABackground3D class extension
+ * @brief GCTABackgroundPerfTable class extension
  ***************************************************************************/
-%extend GCTABackground3D {
-    GCTABackground3D copy() {
+%extend GCTABackgroundPerfTable {
+    GCTABackgroundPerfTable copy() {
         return (*self);
     }
 };
