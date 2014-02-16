@@ -384,6 +384,7 @@ std::string GCTAEdispRmf::print(const GChatter& chatter) const
         result.append("=== GCTAEdispRmf ===");
 
         // Append energy boundary information
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of true energy bins"));
         result.append(gammalib::str(m_rmf.etrue().size()));
         result.append("\n"+gammalib::parformat("Number of measured bins"));
@@ -502,7 +503,7 @@ void GCTAEdispRmf::set_mc_cache(void)
         }
 
         // Determine number of elements
-        int num = (imeasured_stop - imeasured_start);
+        int num = (imeasured_stop - imeasured_start + 1);
         if (num < 0) {
             num = 0;
         }
