@@ -52,6 +52,7 @@ class Test(GPythonTestSuite):
         self.append(self.test_aeff, "Test CTA effective area classes")
         self.append(self.test_psf, "Test CTA PSF classes")
         self.append(self.test_edisp, "Test CTA energy dispersion classes")
+        self.append(self.test_response, "Test CTA response classes")
         self.append(self.test_onoff, "Test CTA ON/OFF analysis")
 
         # Return
@@ -250,6 +251,23 @@ class Test(GPythonTestSuite):
                                    GEbounds(GEnergy(3.7, "TeV"),
                                             GEnergy(10.0, "TeV"))),
                         0.5, 0.005)
+
+    # Test response
+    def test_response(self):
+        """
+        Test response classes
+        """
+        # Load 1DC CTA observation (ARF, PSF, RMF)
+        self.test_try("Test 1DC responses")
+        try:
+            obs = GObservations("../inst/cta/test/data/irf_1dc.xml")
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to load 1DC responses.")
+
+        # Return
+        return
+
 
     # Test ON/OFF analysis
     def test_onoff(self):
