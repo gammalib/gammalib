@@ -141,6 +141,10 @@ Language features
 
 -  Avoid using templates.
 
+-  Do not use an integer for a floating point argument (i.e. write 10.0
+   instead of 10). Some older compilers give an error when using
+   integers in some floating point functions, such as log10().
+
 
 Python rules
 ------------
