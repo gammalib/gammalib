@@ -30,6 +30,7 @@
 #endif
 #include <stdlib.h>
 #include <iostream>
+#include <cmath>
 #include <unistd.h>
 #include "GCTALib.hpp"
 #include "GTools.hpp"
@@ -458,17 +459,18 @@ void TestGCTAResponse::test_response_edispRMF(void)
     GCTAEdispRmf edisp(cta_edisp_rmf);
 
     // Test if non-diagonal element (below diagonal) is zero
-    test_value(edisp(std::log10(30),std::log10(1)), 0.0);
+    test_value(edisp(std::log10(30.0),std::log10(1.0)), 0.0);
 
     // Test that diagonal element is non-zero
-    //test_value(edisp(std::log10(30),std::log10(30)), 0.354952753 ,1e-9);
+    //test_value(edisp(std::log10(30.0),std::log10(30.0)), 0.354952753 ,1e-9);
 
     // Test if non-diagonal element (above diagonal) is zero
-    test_value(edisp(std::log10(1),std::log10(30)), 0.0);
+    test_value(edisp(std::log10(1.0),std::log10(30.0)), 0.0);
 
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Test CTA IRF computation for diffuse source model
