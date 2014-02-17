@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GModelSpectralSuperExpPlaw.cpp - Super exponential cut off power law model     *
+ *   GModelSpectralSuperExpPlaw.cpp - Super exp. cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,12 +39,13 @@
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpectralSuperExpPlaw  g_spectral_supexpplaw_seed;
-const GModelSpectralRegistry g_spectral_supexpplaw_registry(&g_spectral_supexpplaw_seed);
+const GModelSpectralRegistry      g_spectral_supexpplaw_registry(&g_spectral_supexpplaw_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC   "GModelSpectralSuperExpPlaw::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
-#define G_READ                    "GModelSpectralSuperExpPlaw::read(GXmlElement&)"
-#define G_WRITE                  "GModelSpectralSuperExpPlaw::write(GXmlElement&)"
+#define G_MC     "GModelSpectralSuperExpPlaw::mc(GEnergy&, GEnergy&, GTime&,"\
+                                                                    " GRan&)"
+#define G_READ               "GModelSpectralSuperExpPlaw::read(GXmlElement&)"
+#define G_WRITE             "GModelSpectralSuperExpPlaw::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -84,16 +85,16 @@ GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(void) : GModelSpectral()
  * Construct an exponentially cut off power law from
  * - a prefactor value (in units of ph/cm2/s/MeV)
  * - a spectral index,
- * - a pivot energy, and
- * - a cut off energy.
+ * - a pivot energy,
+ * - a cut off energy, and
  * - a cut off exponent
  ***************************************************************************/
 GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(const double&  prefactor,
-                                             const double&  index1,
-                                             const GEnergy& pivot,
-                                             const GEnergy& cutoff,
-                                             const double& index2) :
-                       GModelSpectral()
+                                                       const double&  index1,
+                                                       const GEnergy& pivot,
+                                                       const GEnergy& cutoff,
+                                                       const double&  index2) :
+                            GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -123,7 +124,7 @@ GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(const double&  prefactor,
  * information about the expected structure of the XML element.
  ***************************************************************************/
 GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(const GXmlElement& xml) :
-                       GModelSpectral()
+                            GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -142,7 +143,7 @@ GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(const GXmlElement& xml) :
  * @param[in] model Super exponentially cut off power law model.
  ***************************************************************************/
 GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(const GModelSpectralSuperExpPlaw& model) :
-                       GModelSpectral(model)
+                            GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -267,7 +268,7 @@ GModelSpectralSuperExpPlaw* GModelSpectralSuperExpPlaw::clone(void) const
  *       values.
  ***************************************************************************/
 double GModelSpectralSuperExpPlaw::eval(const GEnergy& srcEng,
-                                   const GTime&   srcTime) const
+                                        const GTime&   srcTime) const
 {
     // Update the evaluation cache
     update_eval_cache(srcEng);
@@ -349,7 +350,7 @@ double GModelSpectralSuperExpPlaw::eval(const GEnergy& srcEng,
  *       values.
  ***************************************************************************/
 double GModelSpectralSuperExpPlaw::eval_gradients(const GEnergy& srcEng,
-                                             const GTime&   srcTime)
+                                                  const GTime&   srcTime)
 {
     // Update the evaluation cache
     update_eval_cache(srcEng);
@@ -369,7 +370,7 @@ double GModelSpectralSuperExpPlaw::eval_gradients(const GEnergy& srcEng,
     double g_pivot = (m_pivot.is_free())
                      ? -value * m_last_index1 / m_pivot.factor_value() : 0.0;
     double g_index2 = (m_index2.is_free())
-                             ? - value * m_index2.scale() * std::log(m_last_e_cut) * m_last_exponent : 0.0;
+                      ? - value * m_index2.scale() * std::log(m_last_e_cut) * m_last_exponent : 0.0;
 
     // Set gradients
     m_norm.factor_gradient(g_norm);
@@ -417,7 +418,7 @@ double GModelSpectralSuperExpPlaw::eval_gradients(const GEnergy& srcEng,
  * The integration is done numerically.
  ***************************************************************************/
 double GModelSpectralSuperExpPlaw::flux(const GEnergy& emin,
-                                   const GEnergy& emax) const
+                                        const GEnergy& emax) const
 {
     // Initialise flux
     double flux = 0.0;
@@ -463,7 +464,7 @@ double GModelSpectralSuperExpPlaw::flux(const GEnergy& emin,
  * The integration is done numerically.
  ***************************************************************************/
 double GModelSpectralSuperExpPlaw::eflux(const GEnergy& emin,
-                                    const GEnergy& emax) const
+                                         const GEnergy& emax) const
 {
     // Initialise flux
     double eflux = 0.0;
@@ -512,9 +513,9 @@ double GModelSpectralSuperExpPlaw::eflux(const GEnergy& emin,
  * on an acceptance fraction that is computed from the exponential cut off.
  ***************************************************************************/
 GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
-                                  const GEnergy& emax,
-                                  const GTime&   time,
-                                  GRan&          ran) const
+                                       const GEnergy& emax,
+                                       const GTime&   time,
+                                       GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
@@ -587,17 +588,17 @@ GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
  *
- *     <spectrum type="SuperExpCutoff">
+ *     <spectrum type="PLSuperExpCutoff">
  *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index1"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index1"    scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index2"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index2"    scale=".." value=".." min=".." max=".." free=".."/>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 4 parameters
+    // Verify that XML element has exactly 5 parameters
     if (xml.elements() != 5 || xml.elements("parameter") != 5) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Super Exponential Power law model requires exactly 5 parameters.");
@@ -669,7 +670,7 @@ void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
- *     <spectrum type="ExpCutoff">
+ *     <spectrum type="PLSuperExpCutoff">
  *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Index1"     scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
@@ -681,16 +682,16 @@ void GModelSpectralSuperExpPlaw::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "SuperExpCutoff");
+        xml.attribute("type", "PLSuperExpCutoff");
     }
 
     // Verify model type
-    if (xml.attribute("type") != "SuperExpCutoff") {
+    if (xml.attribute("type") != "PLSuperExpCutoff") {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"SuperExpCutoff\".");
+              "Spectral model is not of type \"PLSuperExpCutoff\".");
     }
 
-    // If XML element has 0 nodes then append 4 parameter nodes
+    // If XML element has 0 nodes then append 5 parameter nodes
     if (xml.elements() == 0) {
         xml.append(GXmlElement("parameter name=\"Prefactor\""));
         xml.append(GXmlElement("parameter name=\"Index1\""));
@@ -699,7 +700,7 @@ void GModelSpectralSuperExpPlaw::write(GXmlElement& xml) const
         xml.append(GXmlElement("parameter name=\"Index2\""));
     }
 
-    // Verify that XML element has exactly 4 parameters
+    // Verify that XML element has exactly 5 parameters
     if (xml.elements() != 5 || xml.elements("parameter") != 5) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Super Exponetial Power law model requires exactly 5 parameters.");
@@ -955,25 +956,25 @@ void GModelSpectralSuperExpPlaw::update_eval_cache(const GEnergy& energy) const
     // If the energy or one of the parameters index1, index2, cut-off or pivot
     // energy has changed then recompute the cache
     if ((m_last_energy != energy) ||
-        (m_last_index1  != index1)  ||
+        (m_last_index1 != index1) ||
         (m_last_ecut   != ecut)   ||
         (m_last_pivot  != pivot)  ||
         (m_last_index2 != index2)) {
 
         // Store actual energy and parameter values
         m_last_energy = energy;
-        m_last_index1  = index1;
+        m_last_index1 = index1;
         m_last_ecut   = ecut;
         m_last_pivot  = pivot;
-        m_last_index2  = index2;
+        m_last_index2 = index2;
 
         // Compute and store value
-        double eng    = energy.MeV();
-        m_last_e_norm = eng / m_last_pivot;
-        m_last_e_cut  = eng / m_last_ecut;
+        double eng      = energy.MeV();
+        m_last_e_norm   = eng / m_last_pivot;
+        m_last_e_cut    = eng / m_last_ecut;
         m_last_exponent = std::pow(m_last_e_cut, m_last_index2);
-        m_last_power  = std::pow(m_last_e_norm, m_last_index1) *
-                        std::exp(-m_last_exponent);
+        m_last_power    = std::pow(m_last_e_norm, m_last_index1) *
+                          std::exp(-m_last_exponent);
 
     } // endif: recomputation was required
 
@@ -1035,11 +1036,11 @@ void GModelSpectralSuperExpPlaw::update_mc_cache(const GEnergy& emin,
 double GModelSpectralSuperExpPlaw::flux_kernel::eval(const double& energy)
 {
     // Evaluate function value
-    double e_norm = energy * m_inv_pivot;
-    double e_cut  = energy * m_inv_ecut;
+    double e_norm   = energy * m_inv_pivot;
+    double e_cut    = energy * m_inv_ecut;
     double exponent = std::pow(e_cut, m_index2);
-    double power  = std::pow(e_norm, m_index1) * std::exp(-exponent);
-    double value  = m_norm * power;
+    double power    = std::pow(e_norm, m_index1) * std::exp(-exponent);
+    double value    = m_norm * power;
 
     // Return value
     return value;
@@ -1054,11 +1055,11 @@ double GModelSpectralSuperExpPlaw::flux_kernel::eval(const double& energy)
 double GModelSpectralSuperExpPlaw::eflux_kernel::eval(const double& energy)
 {
     // Evaluate function value
-    double e_norm = energy * m_inv_pivot;
-    double e_cut  = energy * m_inv_ecut;
+    double e_norm   = energy * m_inv_pivot;
+    double e_cut    = energy * m_inv_ecut;
     double exponent = std::pow(e_cut, m_index2);
-    double power  = std::pow(e_norm, m_index1) * std::exp(-exponent);
-    double value  = m_norm * power * energy;
+    double power    = std::pow(e_norm, m_index1) * std::exp(-exponent);
+    double value    = m_norm * power * energy;
 
     // Return value
     return value;

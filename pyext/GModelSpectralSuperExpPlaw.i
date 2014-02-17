@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelSpectralSuperExpPlaw.i - Super Exponential power law model   *
+ *    GModelSpectralSuperExpPlaw.i - Super exp. cut off power law model    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpectralSuperExpPlaw.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -39,33 +38,33 @@ class GModelSpectralSuperExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralSuperExpPlaw(void);
-    explicit GModelSpectralSuperExpPlaw(const double&  prefactor,
-                                   const double&  index1,
-                                   const GEnergy& pivot,
-                                   const GEnergy& cutoff,
-                                   const double index2);
+    GModelSpectralSuperExpPlaw(const double&  prefactor,
+                               const double&  index1,
+                               const GEnergy& pivot,
+                               const GEnergy& cutoff,
+                               const double&  index2);
     explicit GModelSpectralSuperExpPlaw(const GXmlElement& xml);
     GModelSpectralSuperExpPlaw(const GModelSpectralSuperExpPlaw& model);
     virtual ~GModelSpectralSuperExpPlaw(void);
 
     // Implemented pure virtual methods
-    virtual void                   clear(void);
+    virtual void                        clear(void);
     virtual GModelSpectralSuperExpPlaw* clone(void) const;
-    virtual std::string            type(void) const;
-    virtual double                 eval(const GEnergy& srcEng,
-                                        const GTime&   srcTime) const;
-    virtual double                 eval_gradients(const GEnergy& srcEng,
-                                                  const GTime&   srcTime);
-    virtual double                 flux(const GEnergy& emin,
-                                        const GEnergy& emax) const;
-    virtual double                 eflux(const GEnergy& emin,
-                                         const GEnergy& emax) const;
-    virtual GEnergy                mc(const GEnergy& emin,
-                                      const GEnergy& emax,
-                                      const GTime&   time,
-                                      GRan&          ran) const;
-    virtual void                   read(const GXmlElement& xml);
-    virtual void                   write(GXmlElement& xml) const;
+    virtual std::string                 type(void) const;
+    virtual double                      eval(const GEnergy& srcEng,
+                                             const GTime&   srcTime) const;
+    virtual double                      eval_gradients(const GEnergy& srcEng,
+                                                       const GTime&   srcTime);
+    virtual double                      flux(const GEnergy& emin,
+                                             const GEnergy& emax) const;
+    virtual double                      eflux(const GEnergy& emin,
+                                              const GEnergy& emax) const;
+    virtual GEnergy                     mc(const GEnergy& emin,
+                                           const GEnergy& emax,
+                                           const GTime&   time,
+                                           GRan&          ran) const;
+    virtual void                        read(const GXmlElement& xml);
+    virtual void                        write(GXmlElement& xml) const;
 
     // Other methods
     double  prefactor(void) const;

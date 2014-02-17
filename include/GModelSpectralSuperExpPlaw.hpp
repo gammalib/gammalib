@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GModelSpectralSuperExpPlaw.hpp - Super exponential cut off power law model     *
+ *   GModelSpectralSuperExpPlaw.hpp - Super exp. cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,8 +41,8 @@
  *
  * @brief Super exponential cut off power law spectral class
  *
- * This class implements a power law spectrum with super exponential cut off. The
- * model is defined by
+ * This class implements a power law spectrum with super exponential cut off.
+ * The model is defined by
  *
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
@@ -51,22 +51,23 @@
  * \f]
  *
  * where
- * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
- * - \f${\tt m\_index1}\f$ is the spectral index,
- * - \f${\tt m\_ecut}\f$ is the cut off energy, and
- * - \f${\tt m\_pivot}\f$ is the pivot energy.
- * - \f${\tt m\_index2}\f$ is index defining the cutoff shape,
+ *
+ *      \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ *      \f${\tt m\_index1}\f$ is the spectral index,
+ *      \f${\tt m\_ecut}\f$ is the cut off energy, and
+ *      \f${\tt m\_pivot}\f$ is the pivot energy.
+ *      \f${\tt m\_index2}\f$ is index defining the cutoff shape,
  ***************************************************************************/
 class GModelSpectralSuperExpPlaw : public GModelSpectral {
 
 public:
     // Constructors and destructors
 	GModelSpectralSuperExpPlaw(void);
-    explicit GModelSpectralSuperExpPlaw(const double&  prefactor,
-                                   const double&  index1,
-                                   const GEnergy& pivot,
-                                   const GEnergy& cutoff,
-                                   const double& index2);
+    GModelSpectralSuperExpPlaw(const double&  prefactor,
+                               const double&  index1,
+                               const GEnergy& pivot,
+                               const GEnergy& cutoff,
+                               const double&  index2);
     explicit GModelSpectralSuperExpPlaw(const GXmlElement& xml);
     GModelSpectralSuperExpPlaw(const GModelSpectralSuperExpPlaw& model);
     virtual ~GModelSpectralSuperExpPlaw(void);
@@ -75,24 +76,24 @@ public:
     virtual GModelSpectralSuperExpPlaw& operator=(const GModelSpectralSuperExpPlaw& model);
 
     // Implemented pure virtual methods
-    virtual void                   clear(void);
+    virtual void                        clear(void);
     virtual GModelSpectralSuperExpPlaw* clone(void) const;
-    virtual std::string            type(void) const;
-    virtual double                 eval(const GEnergy& srcEng,
-                                        const GTime&   srcTime) const;
-    virtual double                 eval_gradients(const GEnergy& srcEng,
-                                                  const GTime&   srcTime);
-    virtual double                 flux(const GEnergy& emin,
-                                        const GEnergy& emax) const;
-    virtual double                 eflux(const GEnergy& emin,
-                                         const GEnergy& emax) const;
-    virtual GEnergy                mc(const GEnergy& emin,
-                                      const GEnergy& emax,
-                                      const GTime&   time,
-                                      GRan&          ran) const;
-    virtual void                   read(const GXmlElement& xml);
-    virtual void                   write(GXmlElement& xml) const;
-    virtual std::string            print(const GChatter& chatter = NORMAL) const;
+    virtual std::string                 type(void) const;
+    virtual double                      eval(const GEnergy& srcEng,
+                                             const GTime&   srcTime) const;
+    virtual double                      eval_gradients(const GEnergy& srcEng,
+                                                       const GTime&   srcTime);
+    virtual double                      flux(const GEnergy& emin,
+                                             const GEnergy& emax) const;
+    virtual double                      eflux(const GEnergy& emin,
+                                              const GEnergy& emax) const;
+    virtual GEnergy                     mc(const GEnergy& emin,
+                                           const GEnergy& emax,
+                                           const GTime&   time,
+                                           GRan&          ran) const;
+    virtual void                        read(const GXmlElement& xml);
+    virtual void                        write(GXmlElement& xml) const;
+    virtual std::string                 print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     double  prefactor(void) const;
@@ -130,10 +131,10 @@ protected:
         double eval(const double& eng);
     protected:
         const double& m_norm;      //!< Normalization
-        const double& m_index1;     //!< Index1
+        const double& m_index1;    //!< Index1
         double        m_inv_pivot; //!< 1 / Pivot energy
         double        m_inv_ecut;  //!< 1 / Cut off energy
-        const double& m_index2;     //!< Index2
+        const double& m_index2;    //!< Index2
     };
 
     // Energy flux integration kernel
@@ -152,28 +153,28 @@ protected:
         double eval(const double& eng);
     protected:
         const double& m_norm;      //!< Normalization
-        const double& m_index1;     //!< Index
-        const double& m_index2;     //!< Index
+        const double& m_index1;    //!< Index1
         double        m_inv_pivot; //!< 1 / Pivot energy
         double        m_inv_ecut;  //!< 1 / Cut off energy
+        const double& m_index2;    //!< Index2
     };
 
     // Protected members
-    GModelPar m_norm;               //!< Normalization factor
-    GModelPar m_index1;              //!< Spectral index
-    GModelPar m_index2;              //!< Index of cutoff
-    GModelPar m_ecut;               //!< Exponential cut off energy
-    GModelPar m_pivot;              //!< Pivot energy
+    GModelPar m_norm;    //!< Normalization factor
+    GModelPar m_index1;  //!< Spectral index
+    GModelPar m_index2;  //!< Index of cutoff
+    GModelPar m_ecut;    //!< Exponential cut off energy
+    GModelPar m_pivot;   //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;   //!< Last energy value
-    mutable double  m_last_index1;    //!< Last index1 parameter
+    mutable double  m_last_index1;   //!< Last index1 parameter
     mutable double  m_last_ecut;     //!< Last energy cut-off parameter
     mutable double  m_last_pivot;    //!< Last pivot parameter
-    mutable double  m_last_index2;    //!< Last index2 parameter
+    mutable double  m_last_index2;   //!< Last index2 parameter
     mutable double  m_last_e_norm;   //!< Last E/Epivot value
     mutable double  m_last_e_cut;    //!< Last E/Ecut value
-    mutable double m_last_exponent; //!< last pow(E/Ecut,index2) value
+    mutable double  m_last_exponent; //!< last pow(E/Ecut,index2) value
     mutable double  m_last_power;    //!< Last power value
     mutable double  m_mc_emin;       //!< Minimum energy
     mutable double  m_mc_emax;       //!< Maximum energy
