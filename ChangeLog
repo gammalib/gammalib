@@ -1,4 +1,4 @@
-2014-02-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-02-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -19,6 +19,7 @@
         Load cube in GModelSpatialDiffuseCube only when needed (#1143)
         Correct bug in Fermi/LAT PSF computation (#1004)
         Implement CTA instrument background (#1146)
+        Add GModelSpectralSuperExpPlaw spectral model (#1147)
 
 
 2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

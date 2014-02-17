@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-15 February 2014
+17 February 2014
 
 
 1. Introduction
@@ -51,6 +51,9 @@ The map cube in GModelSpatialDiffuseCube is now only loaded from the file
 when needed. This allows manipulating GModelSpatialDiffuseCube objects
 that describe huge map cubes without need for loading the map cubes into
 memory. This property is useful for Fermi/LAT analysis.
+
+Implement GModelSpectralSuperExpPlaw class to model a super exponentially
+cut off power law spectral functions.
 
 
 9. Numerics module
