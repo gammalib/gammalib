@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.cpp - Spatial map model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,12 +100,14 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GXmlElement& xml) :
  *
  * @param[in] filename File name.
  * @param[in] value Normalization factor (defaults to 1).
+ * @param[in] normalize Normalize map (defaults to true).
  *
  * Constructs spatial map model by loading a skymap from the file specified
  * by @p filename and by setting the normalization @p value.
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename,
-                                                 const double&      value) :
+                                                 const double&      value,
+                                                 const bool&        normalize) :
                          GModelSpatialDiffuse()
 {
     // Initialise members
@@ -113,6 +115,9 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename,
 
     // Set normalization parameter
     m_value.value(value);
+
+    // Set normalization flag
+    m_normalize = normalize;
 
     // Load skymap
     load(filename);
@@ -127,12 +132,14 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename,
  *
  * @param[in] map Sky map.
  * @param[in] value Normalization factor (defaults to 1).
+ * @param[in] normalize Normalize map (defaults to true).
  *
  * Constructs spatial map model by setting the sky @p map and by setting the
  * normalization @p value.
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkymap& map,
-                                                 const double&  value) :
+                                                 const double&  value,
+                                                 const bool&    normalize) :
                          GModelSpatialDiffuse()
 {
     // Initialise members
@@ -140,6 +147,9 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkymap& map,
 
     // Set normalization parameter
     m_value.value(value);
+
+    // Set normalization flag
+    m_normalize = normalize;
 
     // Set and prepare skymap
     m_map = map;
@@ -402,6 +412,15 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
               " \"Normalization\" parameter.");
     }
 
+    // Get optional normalization attribute
+    std::string arg = xml.attribute("normalize");
+    if (arg == "" || arg == "1" || gammalib::tolower(arg) == "true") {
+        m_normalize = true;
+    }
+    else {
+        m_normalize = false;
+    }
+
     // Load skymap
     load(xml.attribute("file"));
 
@@ -470,6 +489,11 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
               " \"Normalization\" parameter.");
     }
 
+    // Set optional normalization attribute
+    if (!normalize()) {
+        xml.attribute("normalize", "0");
+    }
+
     // Return
     return;
 }
@@ -494,6 +518,13 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
 
         // Append parameters
         result.append("\n"+gammalib::parformat("Sky map file")+m_filename);
+        result.append("\n"+gammalib::parformat("Map normalization"));
+        if (normalize()) {
+            result.append("yes");
+        }
+        else {
+            result.append("no");
+        }
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
@@ -566,6 +597,7 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_map.clear();
     m_filename.clear();
     m_mc_cache.clear();
+    m_normalize = true;
 
     // Return
     return;
@@ -580,10 +612,11 @@ void GModelSpatialDiffuseMap::init_members(void)
 void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
 {
     // Copy members
-    m_value    = model.m_value;
-    m_map      = model.m_map;
-    m_filename = model.m_filename;
-    m_mc_cache = model.m_mc_cache;
+    m_value     = model.m_value;
+    m_map       = model.m_map;
+    m_filename  = model.m_filename;
+    m_mc_cache  = model.m_mc_cache;
+    m_normalize = model.m_normalize;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -651,12 +684,19 @@ void GModelSpatialDiffuseMap::prepare_map(void)
             m_mc_cache.push_back(sum);
         }
 
-        // Normalize skymap and pixel fluxes in the cache so that the values
-        // in the cache run from 0 to 1
+        // Normalize fluxes in the cache so that the values in the cache
+        // run from 0 to 1. Optionally also normalize the sky map.
         if (sum > 0.0) {
-            for (int i = 0; i < npix; ++i) {
-                m_map(i)      /= sum;
-                m_mc_cache[i] /= sum;
+            if (normalize()) {
+                for (int i = 0; i < npix; ++i) {
+                    m_map(i)      /= sum;
+                    m_mc_cache[i] /= sum;
+                }
+            }
+            else {
+                for (int i = 0; i < npix; ++i) {
+                    m_mc_cache[i] /= sum;
+                }
             }
         }
 

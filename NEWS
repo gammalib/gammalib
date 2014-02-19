@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-02
 
 Author(s) : Juergen Knoedlseder
 
-17 February 2014
+19 February 2014
 
 
 1. Introduction
@@ -54,6 +54,10 @@ memory. This property is useful for Fermi/LAT analysis.
 
 Implement GModelSpectralSuperExpPlaw class to model a super exponentially
 cut off power law spectral functions.
+
+Added normalize attribute to GModelSpatialDiffuseMap that allows control
+over the internal normalization of the map. By default, the map is normalized,
+but by specifying normalize="0" the normalization can be switched off.
 
 
 9. Numerics module

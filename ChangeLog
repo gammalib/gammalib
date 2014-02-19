@@ -1,4 +1,4 @@
-2014-02-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-02-19  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix Version 0.8.2 released
         ================================
@@ -12,6 +12,7 @@
         Correct bug in Fermi/LAT PSF computation (#1004)
         Implement CTA instrument background (#1146)
         Add GModelSpectralSuperExpPlaw spectral model (#1147)
+        Added normalize attribute to GModelSpatialDiffuseMap (#1134)
 
 
 2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
