@@ -519,11 +519,9 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
         // Append parameters
         result.append("\n"+gammalib::parformat("Sky map file")+m_filename);
         result.append("\n"+gammalib::parformat("Map normalization"));
+        result.append(gammalib::str(m_norm)+" ph/cm2/s");
         if (normalize()) {
-            result.append("yes");
-        }
-        else {
-            result.append("no");
+            result.append(" [normalized]");
         }
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
@@ -598,6 +596,7 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_filename.clear();
     m_mc_cache.clear();
     m_normalize = true;
+    m_norm      = 0.0;
 
     // Return
     return;
@@ -617,6 +616,7 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_filename  = model.m_filename;
     m_mc_cache  = model.m_mc_cache;
     m_normalize = model.m_normalize;
+    m_norm      = model.m_norm;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -692,11 +692,13 @@ void GModelSpatialDiffuseMap::prepare_map(void)
                     m_map(i)      /= sum;
                     m_mc_cache[i] /= sum;
                 }
+                m_norm = 1.0;
             }
             else {
                 for (int i = 0; i < npix; ++i) {
                     m_mc_cache[i] /= sum;
                 }
+                m_norm = sum;
             }
         }
 

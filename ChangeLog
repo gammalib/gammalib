@@ -1,4 +1,4 @@
-2014-02-19  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-02-20  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix Version 0.8.2 released
         ================================
@@ -13,6 +13,7 @@
         Implement CTA instrument background (#1146)
         Add GModelSpectralSuperExpPlaw spectral model (#1147)
         Added normalize attribute to GModelSpatialDiffuseMap (#1134)
+        Take into account spatial model normalization in MC sampling (#1135)
 
 
 2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

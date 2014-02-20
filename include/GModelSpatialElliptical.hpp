@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialElliptical.hpp - Abstract elliptical spatial model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,6 +82,7 @@ public:
     // Implemented virtual base class methods
     virtual double eval(const GPhoton& photon) const;
     virtual double eval_gradients(const GPhoton& photon) const;
+    virtual double norm(const GSkyDir& dir, const double&  radius) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;
 
@@ -194,6 +195,24 @@ void GModelSpatialElliptical::posangle(const double& posangle)
 {
     m_posangle.value(posangle);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of elliptical source
+ *
+ * @return Normalization.
+ *
+ * Returns the normalization for an elliptical source within a circular
+ * region. The normalization is 1 if the elliptical source falls within
+ * the circle, 0 otherwise
+ ***************************************************************************/
+inline
+double GModelSpatialElliptical::norm(const GSkyDir& dir,
+                                     const double&  radius) const
+{
+    double norm = (dir.dist_deg(this->dir()) <= radius+theta_max()) ? 1.0 : 0.0;
+    return (norm);
 }
 
 #endif /* GMODELSPATIALELLIPTICAL_HPP */

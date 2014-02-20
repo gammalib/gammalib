@@ -72,6 +72,8 @@ public:
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime& time,
                                         GRan& ran) const;
+    virtual double                   norm(const GSkyDir& dir,
+                                          const double&  radius) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
@@ -98,6 +100,7 @@ protected:
     std::string         m_filename;   //!< Name of skymap
     std::vector<double> m_mc_cache;   //!< Monte Carlo cache
     bool                m_normalize;  //!< Normalize map (default: true)
+    double              m_norm;       //!< Map normalization
 };
 
 /***********************************************************************//**
@@ -198,6 +201,22 @@ inline
 bool GModelSpatialDiffuseMap::normalize(void) const
 {
     return (m_normalize);
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of diffuse map
+ *
+ * @return Normalization.
+ *
+ * Returns the normalization of a diffuse map. The normalization is given
+ * by the model value times the integrated flux in the sky map.
+ ***************************************************************************/
+inline
+double GModelSpatialDiffuseMap::norm(const GSkyDir& dir,
+                                     const double&  radius) const
+{
+    return (m_norm * value());
 }
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

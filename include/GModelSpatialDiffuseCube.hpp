@@ -77,6 +77,8 @@ public:
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
+    virtual double                    norm(const GSkyDir& dir,
+                                           const double&  radius) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -263,6 +265,21 @@ inline
 const GModelSpectralNodes& GModelSpatialDiffuseCube::spectrum(void) const
 {
     return (m_mc_spectrum);
+}
+
+/***********************************************************************//**
+ * @brief Return normalization of diffuse cube
+ *
+ * @return Normalization.
+ *
+ * Returns the normalization of a diffuse cube. The normalization is given
+ * by the model value.
+ ***************************************************************************/
+inline
+double GModelSpatialDiffuseCube::norm(const GSkyDir& dir,
+                                      const double&  radius) const
+{
+    return (value());
 }
 
 #endif /* GMODELSPATIALDIFFUSECUBE_HPP */

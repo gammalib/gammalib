@@ -792,8 +792,6 @@ void GModelSky::write(GXmlElement& xml) const
  * only the sky region will be simulated that is actually observed by the
  * telescope.
  *
- * @todo Check overlap of simulation cone for diffuse models to speed up
- *       computations.
  * @todo Implement unique model ID to assign as Monte Carlo ID
  ***************************************************************************/
 GPhotons GModelSky::mc(const double& area,
@@ -808,23 +806,11 @@ GPhotons GModelSky::mc(const double& area,
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Get point source pointer
-        GModelSpatialPointSource* ptsrc = dynamic_cast<GModelSpatialPointSource*>(m_spatial);
-
-        // Check if model will produce any photons in the specified
-        // simulation region. If the model is a point source we check if the
-        // source is located within the simulation cone. If the model is a
-        // diffuse source we check if the source overlaps with the simulation
-        // cone
-        bool use_model = true;
-        if (ptsrc != NULL) {
-            if (dir.dist_deg(ptsrc->dir()) > radius) {
-                use_model = false;
-            }
-        }
-        else {
-            //TODO (for the moment we always simulate!!!)
-        }
+        // Determine the spatial model normalization within the simulation
+        // cone and check whether the model will produce any photons in that
+        // cone.
+        double norm      = m_spatial->norm(dir, radius);
+        bool   use_model = (norm > 0.0) ? true : false;
 
         // Continue only if model overlaps with simulation region
         if (use_model) {
@@ -868,7 +854,7 @@ GPhotons GModelSky::mc(const double& area,
 
             // Derive expecting counting rate within simulation surface
             // (units: ph/s)
-            double rate = flux * area;
+            double rate = flux * area * norm;
 
             // Debug option: dump rate
             #if defined(G_DUMP_MC)

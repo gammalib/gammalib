@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,8 @@ public:
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
+    virtual double                    norm(const GSkyDir& dir,
+                                           const double&  radius) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
@@ -162,6 +164,24 @@ void GModelSpatialPointSource::dec(const double& dec)
 {
     m_dec.value(dec);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of point source
+ *
+ * @return Normalization.
+ *
+ * Returns the normalization for a point source within a circular region.
+ * The normalization is 1 if the point source falls within circle, 0 
+ * otherwise
+ ***************************************************************************/
+inline
+double GModelSpatialPointSource::norm(const GSkyDir& dir,
+                                      const double&  radius) const
+{
+    double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
+    return (norm);
 }
 
 #endif /* GMODELSPATIALPOINTSOURCE_HPP */
