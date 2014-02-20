@@ -258,7 +258,7 @@ class Test(GPythonTestSuite):
         
         # Create ON/OFF observations by filling all events found in
         # the observation container and computing the response
-        obs    = GObservations("../inst/cta/test/data/obs_unbinned.xml")
+        obs    = GObservations("../inst/cta/test/data/irf_unbinned.xml")
         onoffs = GCTAOnOffObservations()
         self.test_try("Test ON/OFF observation creation")
         try:
