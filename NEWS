@@ -145,6 +145,13 @@ a cube spanned by DETX, DETY and energy.
 The instrumental background is handled by the GCTAModelInstBackground class that
 derives from GModelData.
 
+load() and save() methods have been added to GCTAObservation that operate directly
+on GFits objects, so data have not be saved to disk for reloading. This is useful
+in streamlining ctselect (see #1149). A load() method has been implemented that
+recognizes automatically whether the file is an event list or a event cube, making
+load_unbinned() and load_binned() obsolete. These methods will be removed in the
+next major release.
+
 
 21. COMPTEL interface
 ---------------------
