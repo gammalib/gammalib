@@ -48,9 +48,6 @@ public:
                               const double& dety,
                               const bool&   etrue = false) const;
 
-    // Operators
-    GCTABackground3D& operator=(const GCTABackground3D& bgd);
-
     // Implemented pure virtual methods
     void                       clear(void);
     GCTABackground3D*          clone(void) const;

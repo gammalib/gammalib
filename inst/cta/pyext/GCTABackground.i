@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTABackground.hpp"
-//#include "GTools.hpp"
 %}
 
 
@@ -47,9 +46,6 @@ public:
                               const double& detx, 
                               const double& dety,
                               const bool&   etrue = false) const = 0;
-
-    // Operators
-    GCTABackground& operator=(const GCTABackground& bgd);
 
     // Pure virtual methods
     virtual void                       clear(void) = 0;
