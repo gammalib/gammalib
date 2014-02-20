@@ -80,7 +80,14 @@
                                                             " GObservation&)"
 #define G_NPRED_DIFFUSE               "GCTAResponse::npred_diffuse(GSource&,"\
                                                             " GObservation&)"
-#define G_READ           "GCTAResponse::read_performance_table(std::string&)"
+#define G_AEFF       "GCTAResponse::aeff(double&, double&, double&, double&,"\
+                                                                  " double&)"
+#define G_PSF         "GCTAResponse::psf(double&, double&, double&, double&,"\
+                                                                  " double&)"
+#define G_PSF_DELTA_MAX       "GCTAResponse::psf_delta_max(double&, double&,"\
+                                                " double&, double&, double&)"
+#define G_EDISP     "GCTAResponse::edisp(double&, double&, double&, double&,"\
+                                                                  " double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -1994,10 +2001,11 @@ GEbounds GCTAResponse::ebounds_src(const GEnergy& obsEnergy) const
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  * @return Effective area in units fo cm2.
  *
+ * @exception GException::invalid_value
+ *            No effective area information found.
+ *
  * Returns the effective area as function of the true photon position in the
  * camera system and the telescope pointing direction in the Earth system.
- *
- * If no effective area response is defined, 0.0 is returned.
  ***************************************************************************/
 double GCTAResponse::aeff(const double& theta,
                           const double& phi,
@@ -2005,10 +2013,16 @@ double GCTAResponse::aeff(const double& theta,
                           const double& azimuth,
                           const double& srcLogEng) const
 {
+    // Throw an exception if instrument response is not defined
+    if (m_aeff == NULL) {
+        std::string msg = "No effective area information found in response.\n"
+                          "Please make sure that the instrument response is"
+                          " properly defined.";
+        throw GException::invalid_value(G_AEFF, msg);
+    }
+
     // Get effective area
-    double aeff = (m_aeff != NULL)
-                  ? (*m_aeff)(srcLogEng, theta, phi, zenith, azimuth)
-                  : 0.0;
+    double aeff = (*m_aeff)(srcLogEng, theta, phi, zenith, azimuth);
 
     // Return effective area
     return aeff;
@@ -2026,11 +2040,12 @@ double GCTAResponse::aeff(const double& theta,
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  *
+ * @exception GException::invalid_value
+ *            No point spread function information found.
+ *
  * Returns the point spread function for a given offset angle as function
  * of the true photon position in the camera system and the telescope
  * pointing direction in the Earth system.
- *
- * If no point spread function is defined, 0.0 is returned.
  ***************************************************************************/
 double GCTAResponse::psf(const double& delta,
                          const double& theta,
@@ -2039,10 +2054,17 @@ double GCTAResponse::psf(const double& delta,
                          const double& azimuth,
                          const double& srcLogEng) const
 {
+    // Throw an exception if instrument response is not defined
+    if (m_psf == NULL) {
+        std::string msg = "No point spread function information found in"
+                          " response.\n"
+                          "Please make sure that the instrument response is"
+                          " properly defined.";
+        throw GException::invalid_value(G_PSF, msg);
+    }
+
     // Compute PSF
-    double psf = (m_psf != NULL)
-                 ? (*m_psf)(delta, srcLogEng, theta, phi, zenith, azimuth)
-                 : 0.0;
+    double psf = (*m_psf)(delta, srcLogEng, theta, phi, zenith, azimuth);
 
     // Return PSF
     return psf;
@@ -2058,12 +2080,13 @@ double GCTAResponse::psf(const double& delta,
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  *
+ * @exception GException::invalid_value
+ *            No point spread function information found.
+ *
  * This method returns the maximum angular separation between true and
  * measured photon directions for which the PSF is non zero as function
  * of the true photon position in the camera system and the telescope
  * pointing direction in the Earth system.
- *
- * If no point spread function is defined, 0.0 is returned.
  ***************************************************************************/
 double GCTAResponse::psf_delta_max(const double& theta,
                                    const double& phi,
@@ -2071,10 +2094,17 @@ double GCTAResponse::psf_delta_max(const double& theta,
                                    const double& azimuth,
                                    const double& srcLogEng) const
 {
+    // Throw an exception if instrument response is not defined
+    if (m_psf == NULL) {
+        std::string msg = "No point spread function information found in"
+                          " response.\n"
+                          "Please make sure that the instrument response is"
+                          " properly defined.";
+        throw GException::invalid_value(G_PSF_DELTA_MAX, msg);
+    }
+
     // Compute PSF
-    double delta_max = (m_psf != NULL)
-                 ? m_psf->delta_max(srcLogEng, theta, phi, zenith, azimuth)
-                 : 0.0;
+    double delta_max = m_psf->delta_max(srcLogEng, theta, phi, zenith, azimuth);
 
     // Return PSF
     return delta_max;
@@ -2098,21 +2128,22 @@ double GCTAResponse::edisp(const GEnergy& obsEng,
                            const double&  azimuth,
                            const double&  srcLogEng) const
 {
-    // Initialise energy dispersion
-    double edisp = 0.0;
+    // Throw an exception if instrument response is not defined
+    if (m_edisp == NULL) {
+        std::string msg = "No energy dispersion information found in"
+                          " response.\n"
+                          "Please make sure that the instrument response is"
+                          " properly defined.";
+        throw GException::invalid_value(G_EDISP, msg);
+    }
 
-    // If energy dispersion is available then compute PDF
-    if (m_edisp != NULL) {
+    // Compute log10 energy in TeV and linear energy in MeV
+    double obsLogEng = obsEng.log10TeV();
+    double energy    = obsEng.MeV();
 
-        // Compute log10 energy in TeV and linear energy in MeV
-        double obsLogEng = obsEng.log10TeV();
-        double energy    = obsEng.MeV();
-
-        // Compute energy dispersion
-        edisp = (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth) /
-                (gammalib::ln10 * energy);
-
-    } // endif: had energy dispersion
+    // Compute energy dispersion
+    double edisp = (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth) /
+                   (gammalib::ln10 * energy);
 
     // Return energy dispersion
     return edisp;
