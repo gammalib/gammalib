@@ -739,6 +739,32 @@ void TestGModel::test_diffuse_map(void)
         test_try_failure(e);
     }
 
+    // Initialize photon direction for testing
+    GSkyDir dir;
+    GEnergy energy;
+    GTime   time;
+    dir.radec_deg(201.68111, -42.68742);
+    GPhoton photon(dir, energy, time);
+
+    // Test normalized map
+    GModelSpatialDiffuseMap map_norm(m_map_file, 3.0, true);
+    test_assert(map_norm.normalize(),"Model should be normalized.");
+    test_value(map_norm.eval(photon), 13069.603989, 1e-6, "Unexpected skymap intensity.");
+    GXmlElement element;
+    map_norm.write(element);
+    map_norm.read(element);
+    test_assert(map_norm.normalize(),"Model should be normalized.");
+    test_value(map_norm.eval(photon), 13069.603989, 1e-6, "Unexpected skymap intensity.");
+
+    // Test non-normalized map
+    GModelSpatialDiffuseMap map_nonnorm(m_map_file, 3.0, false);
+    test_assert(!map_nonnorm.normalize(),"Model should not be normalized.");
+    test_value(map_nonnorm.eval(photon), 13069.6002755, 1e-6, "Unexpected skymap intensity.");
+    GXmlElement element2;
+    map_nonnorm.write(element2);
+    map_nonnorm.read(element2);
+    test_assert(!map_nonnorm.normalize(),"Model should not be normalized.");
+
     // Exit test
     return;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseConst.i - Spatial isotropic model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,6 +53,8 @@ public:
     virtual GSkyDir                    mc(const GEnergy& energy,
                                           const GTime& time,
                                           GRan& ran) const;
+    virtual double                     norm(const GSkyDir& dir,
+                                            const double&  radius) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
 

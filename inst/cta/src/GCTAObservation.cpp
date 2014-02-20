@@ -286,23 +286,32 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
- *       <parameter name="EffectiveArea"       file="..."/>
- *       <parameter name="PointSpreadFunction" file="..."/>
- *       <parameter name="EnergyDispersion"    file="..."/>
- *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for an unbinned observation and
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsMap" file="..."/>
+ *     </observation>
+ *
+ * for a binned observation. In addition, the calibration database and
+ * response name can be specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="EventList"   file="..."/>
+ *       <parameter name="Calibration" database="..." response="..."/>
+ *     </observation>
+ *
+ * If even more control is required over the response, individual file names
+ * can be specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="EventList"           file="..."/>
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
  *       <parameter name="Background"          file="..."/>
  *     </observation>
- *
- * for a binned observation.
  *
  * @todo Still supports old ARF, PSF and RMF parameter names.
  ***************************************************************************/
@@ -317,14 +326,14 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
 
-    // Verify that XML element has exactly 5 parameters
-    if (xml.elements() != 5 || npars != 5) {
+    // Verify that XML element has at least 1 parameter
+    if (xml.elements() < 1 || npars < 1) {
         throw GException::xml_invalid_parnum(G_READ, xml,
-              "CTA observation requires exactly 5 parameters.");
+              "CTA observation requires at least 1 parameter.");
     }
 
     // Extract parameters
-    int npar[] = {0, 0, 0, 0, 0};
+    int npar[] = {0, 0, 0, 0, 0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
@@ -362,18 +371,40 @@ void GCTAObservation::read(const GXmlElement& xml)
             npar[0]++;
         }
 
+        // Handle Calibration
+        else if (par->attribute("name") == "Calibration") {
+
+            // Read database and response
+            m_caldb   = par->attribute("database");
+            m_rspname = par->attribute("response");
+
+            // Set response
+            GCaldb caldb;
+            if (gammalib::dir_exists(m_caldb)) {
+                caldb.rootdir(m_caldb);
+            }
+            else {
+                caldb.open("cta", m_caldb);
+            }
+            m_response.caldb(caldb);
+            m_response.load(m_rspname);
+
+            // Increment parameter counter
+            npar[1]++;
+        }
+
         // Handle effective area
         else if ((par->attribute("name") == "EffectiveArea") ||
                  (par->attribute("name") == "ARF")) {
 
             // Get filename
-            std::string filename = par->attribute("file");
+            m_aeffname = par->attribute("file");
 
             // If filename is not empty then load effective area
-            if (gammalib::strip_whitespace(filename).length() > 0) {
+            if (!gammalib::strip_whitespace(m_aeffname).empty()) {
 
                 // Load effective area
-                m_response.load_aeff(filename);
+                m_response.load_aeff(m_aeffname);
 
                 // Optional attributes
                 double thetacut = 0.0;
@@ -415,7 +446,7 @@ void GCTAObservation::read(const GXmlElement& xml)
             } // endif: effective area filename was valid
 
             // Increase number of parameters
-            npar[1]++;
+            npar[2]++;
         }
 
         // Handle PSF
@@ -423,15 +454,15 @@ void GCTAObservation::read(const GXmlElement& xml)
                  (par->attribute("name") == "PSF")) {
 
             // Get filename
-            std::string filename = par->attribute("file");
+            m_psfname = par->attribute("file");
 
             // If filename is not empty then load point spread function
-            if (gammalib::strip_whitespace(filename).length() > 0) {
-                m_response.load_psf(filename);
+            if (!gammalib::strip_whitespace(m_psfname).empty()) {
+                m_response.load_psf(m_psfname);
             }
 
             // Increase number of parameters
-            npar[2]++;
+            npar[3]++;
         }
 
 
@@ -440,40 +471,38 @@ void GCTAObservation::read(const GXmlElement& xml)
                  (par->attribute("name") == "RMF")) {
 
             // Get filename
-            std::string filename = par->attribute("file");
+            m_edispname = par->attribute("file");
 
             // If filename is not empty then load energy dispersion
-            if (gammalib::strip_whitespace(filename).length() > 0) {
-                m_response.load_edisp(filename);
-            }
-
-            // Increase number of parameters
-            npar[3]++;
-        }
-
-        // Handle background model
-        else if (par->attribute("name") == "Background") {
-
-            // Get filename
-            std::string filename = par->attribute("file");
-
-            // If filename is not empty then load background model
-            if (gammalib::strip_whitespace(filename).length() > 0) {
-                m_response.load_background(filename);
+            if (!gammalib::strip_whitespace(m_edispname).empty()) {
+                m_response.load_edisp(m_edispname);
             }
 
             // Increase number of parameters
             npar[4]++;
         }
 
+        // Handle background model
+        else if (par->attribute("name") == "Background") {
+
+            // Get filename
+            m_bgdname = par->attribute("file");
+
+            // If filename is not empty then load background model
+            if (!gammalib::strip_whitespace(m_bgdname).empty()) {
+                m_response.load_background(m_bgdname);
+            }
+
+            // Increase number of parameters
+            npar[5]++;
+        }
+
     } // endfor: looped over all parameters
 
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
+    // Verify that all required parameters were found
+    if (npar[0] != 1) {
         throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"EventList\" or \"CountsMap\" and \"EffectiveArea\""
-              ", \"PointSpreadFunction\", \"EnergyDispersion\" and"
-              " \"Background\" parameters.");
+              "Require \"EventList\" or \"CountsMap\" parameters.");
     }
 
     // If we have an ARF then remove thetacut if necessary
@@ -506,23 +535,32 @@ void GCTAObservation::read(const GXmlElement& xml)
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
- *       <parameter name="EffectiveArea"       file="..."/>
- *       <parameter name="PointSpreadFunction" file="..."/>
- *       <parameter name="EnergyDispersion"    file="..."/>
- *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
  * for an unbinned observation and
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsMap" file="..."/>
+ *     </observation>
+ *
+ * for a binned observation. In addition, if the calibration database and
+ * response name had been specified, the following output is written
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="EventList"   file="..."/>
+ *       <parameter name="Calibration" database="..." response="..."/>
+ *     </observation>
+ *
+ * If even more control was required over the response and individual file
+ * names were specified, the following output is written
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="EventList"           file="..."/>
  *       <parameter name="EffectiveArea"       file="..."/>
  *       <parameter name="PointSpreadFunction" file="..."/>
  *       <parameter name="EnergyDispersion"    file="..."/>
  *       <parameter name="Background"          file="..."/>
  *     </observation>
- *
- * for a binned observation.
  *
  * @todo We should create a special exception that informs that there is
  *       neither a valid CTA event list nor a valid CTA counts map in this
@@ -540,7 +578,7 @@ void GCTAObservation::write(GXmlElement& xml) const
     // Set event list flag
     bool is_list = (list != NULL);
 
-    // If XML element has 0 nodes then append 5 parameter nodes
+    // If XML element has 0 nodes then required parameter nodes
     if (xml.elements() == 0) {
         if (is_list) {
             xml.append(GXmlElement("parameter name=\"EventList\""));
@@ -548,21 +586,35 @@ void GCTAObservation::write(GXmlElement& xml) const
         else {
             xml.append(GXmlElement("parameter name=\"CountsMap\""));
         }
-        xml.append(GXmlElement("parameter name=\"EffectiveArea\""));
-        xml.append(GXmlElement("parameter name=\"PointSpreadFunction\""));
-        xml.append(GXmlElement("parameter name=\"EnergyDispersion\""));
-        xml.append(GXmlElement("parameter name=\"Background\""));
+        if (!m_caldb.empty() || !m_rspname.empty()) {
+            xml.append(GXmlElement("parameter name=\"Calibration\""));
+        }
+        if (!m_aeffname.empty()) {
+            xml.append(GXmlElement("parameter name=\"EffectiveArea\""));
+        }
+        if (!m_psfname.empty()) {
+            xml.append(GXmlElement("parameter name=\"PointSpreadFunction\""));
+        }
+        if (!m_edispname.empty()) {
+            xml.append(GXmlElement("parameter name=\"EnergyDispersion\""));
+        }
+        if (!m_bgdname.empty()) {
+            xml.append(GXmlElement("parameter name=\"Background\""));
+        }
     }
 
-    // Verify that XML element has exactly 5 parameters
-    if (xml.elements() != 5 || xml.elements("parameter") != 5) {
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
+    // Verify that XML element has at least 1 parameter
+    if (xml.elements() < 1 || npars < 1) {
         throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "CTA observation requires exactly 5 parameters.");
+              "CTA observation requires at least 1 parameter.");
     }
 
     // Set or update parameter attributes
-    int npar[] = {0, 0, 0, 0, 0};
-    for (int i = 0; i < 5; ++i) {
+    int npar[] = {0, 0, 0, 0, 0, 0};
+    for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
         GXmlElement* par = xml.element("parameter", i);
@@ -579,20 +631,23 @@ void GCTAObservation::write(GXmlElement& xml) const
             npar[0]++;
         }
 
+        // Handle Calibration
+        if (par->attribute("name") == "Calibration") {
+            par->attribute("database", m_caldb);
+            par->attribute("response", m_rspname);
+            npar[1]++;
+        }
+
         // Handle effective area
         else if (par->attribute("name") == "EffectiveArea") {
 
             // Initialise attributes
-            std::string filename = "";
-            double      thetacut = 0.0;
-            double      scale    = 1.0;
-            double      sigma    = 0.0;
+            double thetacut = 0.0;
+            double scale    = 1.0;
+            double sigma    = 0.0;
 
             // Continue only if area is valid
             if (m_response.aeff() != NULL) {
-
-                // Get filename
-                filename = m_response.aeff()->filename();
 
                 // Get optional ARF attributes
                 const GCTAAeffArf* arf =
@@ -613,7 +668,7 @@ void GCTAObservation::write(GXmlElement& xml) const
             } // endif: effective area was valid
 
             // Set attributes
-            par->attribute("file", filename);
+            par->attribute("file", m_aeffname);
             if (thetacut > 0.0) {
                 par->attribute("thetacut", gammalib::str(thetacut));
             }
@@ -623,47 +678,33 @@ void GCTAObservation::write(GXmlElement& xml) const
             if (sigma > 0.0) {
                 par->attribute("sigma", gammalib::str(sigma));
             }
-            npar[1]++;
+            npar[2]++;
         }
 
         // Handle PSF
         else if (par->attribute("name") == "PointSpreadFunction") {
-            std::string filename = "";
-            if (m_response.psf() != NULL) {
-                filename = m_response.psf()->filename();
-            }
-            par->attribute("file", filename);
-            npar[2]++;
+            par->attribute("file", m_psfname);
+            npar[3]++;
         }
 
         // Handle RMF
         else if (par->attribute("name") == "EnergyDispersion") {
-            std::string filename = "";
-            if (m_response.edisp() != NULL) {
-                filename = m_response.edisp()->filename();
-            }
-            par->attribute("file", filename);
-            npar[3]++;
+            par->attribute("file", m_edispname);
+            npar[4]++;
         }
 
         // Handle Background
         else if (par->attribute("name") == "Background") {
-            std::string filename = "";
-            if (m_response.background() != NULL) {
-                filename = m_response.background()->filename();
-            }
-            par->attribute("file", filename);
-            npar[4]++;
+            par->attribute("file", m_bgdname);
+            npar[5]++;
         }
 
     } // endfor: looped over all parameters
 
     // Verify that all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
+    if (npar[0] != 1) {
         throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"EventList\" or \"CountsMap\" and"
-              " \"PointSpreadFunction\", \"EnergyDispersion\""
-              " and \"Background\" parameters.");
+              "Require \"EventList\" or \"CountsMap\" parameters.");
     }
 
     // Return
@@ -707,6 +748,7 @@ std::string GCTAObservation::print(const GChatter& chatter) const
             // Append pointing
             result.append("\n"+pointing().print(reduced_chatter));
 
+            // Append response
             result.append("\n"+response().print(reduced_chatter));
 
             // Append events
@@ -962,7 +1004,12 @@ void GCTAObservation::init_members(void)
     // Initialise members
     m_instrument = "CTA";
     m_eventfile.clear();
-    m_bgdfile.clear();
+    m_caldb.clear();
+    m_rspname.clear();
+    m_aeffname.clear();
+    m_psfname.clear();
+    m_edispname.clear();
+    m_bgdname.clear();
     m_response.clear();
     m_pointing.clear();
     m_obs_id     = 0;
@@ -987,7 +1034,12 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     // Copy members
     m_instrument = obs.m_instrument;
     m_eventfile  = obs.m_eventfile;
-    m_bgdfile    = obs.m_bgdfile;
+    m_caldb      = obs.m_caldb;
+    m_rspname    = obs.m_rspname;
+    m_aeffname   = obs.m_aeffname;
+    m_psfname    = obs.m_psfname;
+    m_edispname  = obs.m_edispname;
+    m_bgdname    = obs.m_bgdname;
     m_response   = obs.m_response;
     m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;

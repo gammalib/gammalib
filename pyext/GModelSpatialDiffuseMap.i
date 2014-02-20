@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.i - Spatial map model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,10 +40,12 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseMap(void);
     explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
-    explicit GModelSpatialDiffuseMap(const std::string& filename,
-                                     const double&      value = 1.0);
-    explicit GModelSpatialDiffuseMap(const GSkymap& map,
-                                     const double&  value = 1.0);
+    GModelSpatialDiffuseMap(const std::string& filename,
+                            const double&      value = 1.0,
+                            const bool&        normalize = true);
+    GModelSpatialDiffuseMap(const GSkymap& map,
+                            const double&  value = 1.0,
+                            const bool&    normalize = true);
     GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
     virtual ~GModelSpatialDiffuseMap(void);
 
@@ -56,6 +58,8 @@ public:
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime& time,
                                         GRan& ran) const;
+    virtual double                   norm(const GSkyDir& dir,
+                                          const double&  radius) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
 
@@ -66,6 +70,7 @@ public:
     void               load(const std::string& filename);
     const GSkymap&     map(void) const;
     void               map(const GSkymap& map);
+    bool               normalize(void) const;
 };
 
 

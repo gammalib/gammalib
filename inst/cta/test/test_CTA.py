@@ -289,38 +289,23 @@ class Test(GPythonTestSuite):
         
         # Create ON/OFF observations by filling all events found in
         # the observation container and computing the response
-        obs    = GObservations("../inst/cta/test/data/obs_unbinned.xml")
+        obs    = GObservations("../inst/cta/test/data/irf_unbinned.xml")
         onoffs = GCTAOnOffObservations()
-        self.test_try("Test ON/OFF observation creation")
-        try:
-            for run in obs:
-                onoff = GCTAOnOffObservation(ereco, on, off)
-                onoff.fill(run)
-                onoff.compute_response(run, etrue)
-                onoffs.append(onoff)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to create ON/OFF observations.")
+        for run in obs:
+            onoff = GCTAOnOffObservation(ereco, on, off)
+            onoff.fill(run)
+            onoff.compute_response(run, etrue)
+            onoffs.append(onoff)
 
         # Save PHA, ARF and RMFs
-        self.test_try("Test ON/OFF observation PHA, ARF and RMF saving")
-        try:
-            for run in onoffs:
-                run.on_spec().save("onoff_pha_on.fits", True)
-                run.off_spec().save("onoff_pha_off.fits", True)
-                run.arf().save("onoff_arf.fits", True)
-                run.rmf().save("onoff_rmf.fits", True)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to save ON/OFF PHA, ARF and RMFs.")
+        for run in onoffs:
+            run.on_spec().save("onoff_pha_on.fits", True)
+            run.off_spec().save("onoff_pha_off.fits", True)
+            run.arf().save("onoff_arf.fits", True)
+            run.rmf().save("onoff_rmf.fits", True)
 
         # Save ON/OFF observations
-        self.test_try("Test ON/OFF observation saving")
-        try:
-            onoffs.save("onoff.xml")
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to save ON/OFF observations.")
+        onoffs.save("onoff.xml")
         
         # Return
         return

@@ -1,9 +1,9 @@
 <observation_list title="observation library">
   <observation name="Crab" id="000001" instrument="CTA">
     <parameter name="EventList"           file="$(PACKAGE_SOURCE)/inst/cta/test/data/crab_events.fits"/>
-    <parameter name="EffectiveArea"       file="$(PACKAGE_SOURCE)/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits"/>
-    <parameter name="PointSpreadFunction" file="$(PACKAGE_SOURCE)/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits"/>
-    <parameter name="EnergyDispersion"    file="$(PACKAGE_SOURCE)/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits"/>
-    <parameter name="Background"          file="$(PACKAGE_SOURCE)/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits"/>
+    <parameter name="EffectiveArea"       file="$(PACKAGE_SOURCE)/inst/cta/test/caldb/cta_dummy_irf.dat"/>
+    <parameter name="PointSpreadFunction" file="$(PACKAGE_SOURCE)/inst/cta/test/caldb/cta_dummy_irf.dat"/>
+    <parameter name="EnergyDispersion"    file="$(PACKAGE_SOURCE)/inst/cta/test/caldb/cta_dummy_irf.dat"/>
+    <parameter name="Background"          file="$(PACKAGE_SOURCE)/inst/cta/test/caldb/cta_dummy_irf.dat"/>
   </observation>
 </observation_list>

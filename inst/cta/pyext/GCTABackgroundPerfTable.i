@@ -57,7 +57,6 @@ public:
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
-    std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Methods
     int           size(void) const;

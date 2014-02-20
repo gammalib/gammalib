@@ -66,6 +66,8 @@ public:
     virtual GSkyDir                    mc(const GEnergy& energy,
                                           const GTime& time,
                                           GRan& ran) const;
+    virtual double                     norm(const GSkyDir& dir,
+                                            const double&  radius) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
     virtual std::string                print(const GChatter& chatter = NORMAL) const;
@@ -125,6 +127,22 @@ void GModelSpatialDiffuseConst::value(const double& value)
 {
     m_value.value(value);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of constant diffuse source
+ *
+ * @return Normalization.
+ *
+ * Returns the normalization of a constant diffuse source. The normalization
+ * is given by the model value.
+ ***************************************************************************/
+inline
+double GModelSpatialDiffuseConst::norm(const GSkyDir& dir,
+                                       const double&  radius) const
+{
+    return (value());
 }
 
 #endif /* GMODELSPATIALDIFFUSECONST_HPP */

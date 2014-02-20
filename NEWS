@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-17 February 2014
+20 February 2014
 
 
 1. Introduction
@@ -54,6 +54,16 @@ memory. This property is useful for Fermi/LAT analysis.
 
 Implement GModelSpectralSuperExpPlaw class to model a super exponentially
 cut off power law spectral functions.
+
+Added normalize attribute to GModelSpatialDiffuseMap that allows control
+over the internal normalization of the map. By default, the map is normalized,
+but by specifying normalize="0" the normalization can be switched off.
+
+A norm() method has been added to the abstract GModelSpatial interface that
+returns the model normalization within a circular region. This is used in the
+GModelSky::mc method to correctly reflect the normalization specified in the
+XML file. The method is also used to flag sources outside the simulation
+cone (applies so for the point sources, radial source and elliptical sources).
 
 
 9. Numerics module
@@ -138,6 +148,13 @@ a cube spanned by DETX, DETY and energy.
 
 The instrumental background is handled by the GCTAModelInstBackground class that
 derives from GModelData.
+
+load() and save() methods have been added to GCTAObservation that operate directly
+on GFits objects, so data have not be saved to disk for reloading. This is useful
+in streamlining ctselect (see #1149). A load() method has been implemented that
+recognizes automatically whether the file is an event list or a event cube, making
+load_unbinned() and load_binned() obsolete. These methods will be removed in the
+next major release.
 
 
 21. COMPTEL interface

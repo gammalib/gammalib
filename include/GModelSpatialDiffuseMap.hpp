@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatialDiffuseMap.hpp - Spatial map model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,10 +51,12 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseMap(void);
     explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
-    explicit GModelSpatialDiffuseMap(const std::string& filename,
-                                     const double&      value = 1.0);
-    explicit GModelSpatialDiffuseMap(const GSkymap& map,
-                                     const double&  value = 1.0);
+    GModelSpatialDiffuseMap(const std::string& filename,
+                            const double&      value = 1.0,
+                            const bool&        normalize = true);
+    GModelSpatialDiffuseMap(const GSkymap& map,
+                            const double&  value = 1.0,
+                            const bool&    normalize = true);
     GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
     virtual ~GModelSpatialDiffuseMap(void);
 
@@ -70,6 +72,8 @@ public:
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime& time,
                                         GRan& ran) const;
+    virtual double                   norm(const GSkyDir& dir,
+                                          const double&  radius) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(const GChatter& chatter = NORMAL) const;
@@ -81,6 +85,7 @@ public:
     void               load(const std::string& filename);
     const GSkymap&     map(void) const;
     void               map(const GSkymap& map);
+    bool               normalize(void) const;
 
 protected:
     // Protected methods
@@ -90,10 +95,12 @@ protected:
     void prepare_map(void);
 
     // Protected members
-    GModelPar           m_value;        //!< Value
-    GSkymap             m_map;          //!< Skymap
-    std::string         m_filename;     //!< Name of skymap
-    std::vector<double> m_mc_cache;     //!< Monte Carlo cache
+    GModelPar           m_value;      //!< Value
+    GSkymap             m_map;        //!< Skymap
+    std::string         m_filename;   //!< Name of skymap
+    std::vector<double> m_mc_cache;   //!< Monte Carlo cache
+    bool                m_normalize;  //!< Normalize map (default: true)
+    double              m_norm;       //!< Map normalization
 };
 
 /***********************************************************************//**
@@ -180,6 +187,36 @@ void GModelSpatialDiffuseMap::map(const GSkymap& map)
     m_map = map;
     prepare_map();
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization flag
+ *
+ * @return True is the map has been normalized, false otherwise.
+ *
+ * Signals whether a map has been normalized or not.
+ ***************************************************************************/
+inline
+bool GModelSpatialDiffuseMap::normalize(void) const
+{
+    return (m_normalize);
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of diffuse map
+ *
+ * @return Normalization.
+ *
+ * Returns the normalization of a diffuse map. The normalization is given
+ * by the model value times the integrated flux in the sky map.
+ ***************************************************************************/
+inline
+double GModelSpatialDiffuseMap::norm(const GSkyDir& dir,
+                                     const double&  radius) const
+{
+    return (m_norm * value());
 }
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

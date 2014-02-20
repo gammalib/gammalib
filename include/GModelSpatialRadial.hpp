@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadial.hpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,6 +80,7 @@ public:
     // Implemented pure virtual base class methods
     virtual double eval(const GPhoton& photon) const;
     virtual double eval_gradients(const GPhoton& photon) const;
+    virtual double norm(const GSkyDir& dir, const double&  radius) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;
 
@@ -158,6 +159,24 @@ void GModelSpatialRadial::dec(const double& dec)
 {
     m_dec.value(dec);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of radial source
+ *
+ * @return Normalization.
+ *
+ * Returns the normalization for a radial source within a circular region.
+ * The normalization is 1 if the radial source falls within the circle, 0
+ * otherwise
+ ***************************************************************************/
+inline
+double GModelSpatialRadial::norm(const GSkyDir& dir,
+                                 const double&  radius) const
+{
+    double norm = (dir.dist_deg(this->dir()) <= radius+theta_max()) ? 1.0 : 0.0;
+    return (norm);
 }
 
 #endif /* GMODELSPATIALRADIAL_HPP */

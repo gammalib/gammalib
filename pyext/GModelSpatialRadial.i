@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialRadial.i - Abstract radial spatial model base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,7 @@ public:
     // Implemented virtual base class methods
     virtual double eval(const GPhoton& photon) const;
     virtual double eval_gradients(const GPhoton& photon) const;
+    virtual double norm(const GSkyDir& dir, const double&  radius) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;
 

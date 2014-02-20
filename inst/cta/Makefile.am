@@ -87,6 +87,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTALib.hpp
 
 # Calibration files to distribute
+caldb_pinx = caldb/caldb.indx
 caldb_perf = caldb/cta_dummy_irf.dat
 caldb_indx = caldb/data/cta/e/caldb.indx
 caldb_irf1 = caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits
@@ -98,8 +99,10 @@ libcta_la_SOURCES = $(sources)
 libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
 
 # Distribute calibration database files
-EXTRA_DIST     = $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)
-caldbperfdir   = $(datadir)/caldb/data/cta/dummy
+EXTRA_DIST     = $(caldb_pinx) $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)
+caldbpinxdir   = $(datadir)/caldb/data/cta/dummy
+caldbpinx_DATA = $(caldb_pinx)
+caldbperfdir   = $(datadir)/caldb/data/cta/dummy/bcf
 caldbperf_DATA = $(caldb_perf)
 caldbindxdir   = $(datadir)/caldb/data/cta/e
 caldbindx_DATA = $(caldb_indx)
