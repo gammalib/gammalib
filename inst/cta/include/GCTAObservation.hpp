@@ -109,6 +109,12 @@ protected:
     // Protected members
     std::string  m_instrument;   //!< Instrument name
     std::string  m_eventfile;    //!< Event filename
+    std::string  m_caldb;        //!< Calibration database name
+    std::string  m_rspname;      //!< Response name
+    std::string  m_aeffname;     //!< Effective area filename
+    std::string  m_psfname;      //!< PSF filename
+    std::string  m_edispname;    //!< Energy dispersion filename
+    std::string  m_bgdname;      //!< Background filename
     GCTAResponse m_response;     //!< Instrument response functions
     GCTAPointing m_pointing;     //!< Pointing direction
     int          m_obs_id;       //!< Observation ID
