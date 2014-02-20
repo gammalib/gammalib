@@ -336,8 +336,11 @@ void GCTAObservation::read(const GXmlElement& xml)
             // Read eventlist file name
             std::string filename = par->attribute("file");
 
-            // Load unbinned observation (sets also m_evenfile member)
-            load_unbinned(filename);
+            // Load unbinned observation
+            load(filename);
+
+            // Store event filename
+            m_eventfile = filename;
 
             // Increment parameter counter
             npar[0]++;
@@ -349,8 +352,11 @@ void GCTAObservation::read(const GXmlElement& xml)
             // Read countsmap file name
             std::string filename = par->attribute("file");
 
-            // Load binned observation (sets also m_evenfile member)
-            load_binned(filename);
+            // Load binned observation
+            load(filename);
+
+            // Store event filename
+            m_eventfile = filename;
 
             // Increment parameter counter
             npar[0]++;
@@ -718,9 +724,89 @@ std::string GCTAObservation::print(const GChatter& chatter) const
 
 
 /***********************************************************************//**
+ * @brief Load data from FITS file
+ *
+ * @param[in] filename FITS file name.
+ ***************************************************************************/
+void GCTAObservation::load(const std::string& filename)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Load data
+    load(fits);
+
+    // Close FITS file
+    fits.close();
+
+    // Store event filename
+    m_eventfile = filename;
+
+    // Return
+    return;
+}
+    
+
+/***********************************************************************//**
+ * @brief Load data from FITS object
+ *
+ * @param[in] fits FITS object.
+ ***************************************************************************/
+void GCTAObservation::load(const GFits& fits)
+{
+    // Delete any existing event container (do not call clear() as we do not
+    // want to delete the response function)
+    if (m_events != NULL) delete m_events;
+    m_events = NULL;
+
+    // If FITS file contains an EVENTS extension we have an unbinned
+    // observation ...
+    if (fits.contains("EVENTS")) {
+
+        // Allocate event list
+        GCTAEventList* events = new GCTAEventList;
+
+        // Assign event list as the observation's event container
+        m_events = events;
+
+        // Read event list
+        events->read(fits);
+
+        // Read observation attributes from EVENTS extension
+        const GFitsHDU& hdu = *fits.at("EVENTS");
+        read_attributes(hdu);
+
+    }
+
+    // ... otherwise we have a binned observation
+    else {
+
+        // Allocate event cube
+        GCTAEventCube* events = new GCTAEventCube;
+
+        // Assign event cube as the observation's event container
+        m_events = events;
+
+        // Read event cube
+        events->read(fits);
+
+        // Read observation attributes from primary extension
+        const GFitsHDU& hdu = *fits.at(0);
+        read_attributes(hdu);
+
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load data for unbinned analysis
  *
  * @param[in] filename Event FITS file name.
+ *
+ * @todo Obsolete method, remove in next release!!!
  ***************************************************************************/
 void GCTAObservation::load_unbinned(const std::string& filename)
 {
@@ -760,6 +846,8 @@ void GCTAObservation::load_unbinned(const std::string& filename)
  * @brief Load data for binned analysis
  *
  * @param[in] filename Counts map FITS file name.
+ *
+ * @todo Obsolete method, remove in next release!!!
  ***************************************************************************/
 void GCTAObservation::load_binned(const std::string& filename)
 {
@@ -806,6 +894,24 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
     // Create FITS file
     GFits fits;
 
+    // Save data into FITS file
+    save(fits);
+
+    // Save FITS file
+    fits.saveto(filename, clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save CTA observation into FITS object.
+ *
+ * @param[in] fits FITS object.
+ ***************************************************************************/
+void GCTAObservation::save(GFits& fits) const
+{
     // Get pointers on event list
     GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
     GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(m_events);
@@ -836,9 +942,6 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
         write_attributes(hdu);
 
     } // endelse: observation contained an event cube
-
-    // Save FITS file
-    fits.saveto(filename, clobber);
 
     // Return
     return;

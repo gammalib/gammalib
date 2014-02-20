@@ -739,7 +739,7 @@ void TestGCTAModel::test_modelbg_construct_fits(void)
 
         // Load CTA event list
         GCTAObservation obs ;
-        obs.load_unbinned(cta_events);
+        obs.load(cta_events);
 
         // Load background model
         GCTAModelBackground bck(obs, cta_modbck_fit, spectrum);
@@ -838,7 +838,7 @@ void TestGCTAObservation::test_unbinned_obs(void)
     // Load unbinned CTA observation
     test_try("Load unbinned CTA observation");
     try {
-        run.load_unbinned(cta_events);
+        run.load(cta_events);
         run.response(cta_irf, GCaldb(cta_caldb));
         test_try_success();
     }
@@ -899,7 +899,7 @@ void TestGCTAObservation::test_binned_obs(void)
     // Load binned CTA observation
     test_try("Load unbinned CTA observation");
     try {
-        run.load_binned(cta_cntmap);
+        run.load(cta_cntmap);
         run.response(cta_irf, GCaldb(cta_caldb));
         test_try_success();
     }
@@ -936,7 +936,7 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
     // Load unbinned CTA observation
     test_try("Load unbinned CTA observation");
     try {
-        run.load_unbinned(cta_events);
+        run.load(cta_events);
         run.response(cta_irf, GCaldb(cta_caldb));
         obs.append(run);
         test_try_success();
@@ -998,7 +998,7 @@ void TestGCTAOptimize::test_binned_optimizer(void)
     // Load binned CTA observation
     test_try("Load binned CTA observation");
     try {
-        run.load_binned(cta_cntmap);
+        run.load(cta_cntmap);
         run.response(cta_irf, GCaldb(cta_caldb));
         obs.append(run);
         test_try_success();
