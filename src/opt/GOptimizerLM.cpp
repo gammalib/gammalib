@@ -253,7 +253,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // Optionally write initial iteration into logger
         if (m_logger != NULL) {
-            (*m_logger)("*Iteration %3d: -logL=%.3f, Lambda=%.1e",
+            (*m_logger)(">Iteration %3d: -logL=%.3f, Lambda=%.1e",
                         0, m_value, m_lambda);   
         }
         #if defined(G_DEBUG_OPT)
@@ -308,7 +308,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                     stalled = " (stalled)";
                 }
                 else {
-                    status = "*";
+                    status = ">";
                 }
                 std::string parname = "";
                 if (grad_imax != -1) {
