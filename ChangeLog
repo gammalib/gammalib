@@ -1,4 +1,4 @@
-2014-02-20  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix Version 0.8.2 released
         ================================
@@ -15,6 +15,7 @@
         Added normalize attribute to GModelSpatialDiffuseMap (#1134)
         Take into account spatial model normalization in MC sampling (#1135)
         Add load() and save() methods to GCATObservation (#1149)
+        Correct LAT PSF computation for sources outside event cube
 
 
 2014-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

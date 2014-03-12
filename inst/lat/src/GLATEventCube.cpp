@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventCube.cpp
- * @brief Fermi/LAT event cube class definition
+ * @brief Fermi/LAT event cube class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -583,47 +583,55 @@ GSkymap* GLATEventCube::diffrsp(const int& index) const
 double GLATEventCube::maxrad(const GSkyDir& srcDir) const
 {
     // Initialise radius
-    double radius = 180.0;
+    double radius = 0.0;
 
-    // Move along upper edge in longitude
-    int iy = 0;
-    for (int ix = 0; ix < nx(); ++ix) {
-        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
-        if (distance < radius) {
-            radius = distance;
-        }
-    }
+    // Continue only if sky direction is within sky map
+    if (m_map.contains(srcDir)) {
 
-    // Move along lower edge in longitude
-    iy = ny()-1;
-    for (int ix = 0; ix < nx(); ++ix) {
-        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
-        if (distance < radius) {
-            radius = distance;
-        }
-    }
+        // Set to largest possible radius
+        radius = 180.0;
 
-    // Move along left edge in latitude
-    int ix = 0;
-    for (int iy = 0; iy < ny(); ++iy) {
-        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
-        if (distance < radius) {
-            radius = distance;
+        // Move along upper edge in longitude
+        int iy = 0;
+        for (int ix = 0; ix < nx(); ++ix) {
+            GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+            double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
+            if (distance < radius) {
+                radius = distance;
+            }
         }
-    }
 
-    // Move along right edge in latitude
-    ix = nx()-1;
-    for (int iy = 0; iy < ny(); ++iy) {
-        GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
-        if (distance < radius) {
-            radius = distance;
+        // Move along lower edge in longitude
+        iy = ny()-1;
+        for (int ix = 0; ix < nx(); ++ix) {
+            GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+            double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
+            if (distance < radius) {
+                radius = distance;
+            }
         }
-    }
+
+        // Move along left edge in latitude
+        int ix = 0;
+        for (int iy = 0; iy < ny(); ++iy) {
+            GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+            double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
+            if (distance < radius) {
+                radius = distance;
+            }
+        }
+
+        // Move along right edge in latitude
+        ix = nx()-1;
+        for (int iy = 0; iy < ny(); ++iy) {
+            GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
+            double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
+            if (distance < radius) {
+                radius = distance;
+            }
+        }
+    
+    } // endif: sky direction within sky map
 
     // Return radius
     return radius;

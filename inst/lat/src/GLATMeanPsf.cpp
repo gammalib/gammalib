@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,8 +47,9 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_SIGNAL_NEGATIVE_MEAN_PSF 1     //!< Signal negative mean PSF value
-#define G_DEBUG_INTEGRAL 0               //!< Debug mean PSF integration
+#define G_SIGNAL_NEGATIVE_MEAN_PSF     //!< Signal negative mean PSF value
+//#define G_DEBUG_INTEGRAL               //!< Debug mean PSF integration
+//#define G_DEBUG_MAP_CORRECTIONS        //!< Debug map corrections
 
 /* __ Constants __________________________________________________________ */
 
@@ -233,7 +234,7 @@ double GLATMeanPsf::operator() (const double& offset, const double& logE)
                 m_wgt4 * m_psf[m_inx4] * fac_right;
 
         // Optionally check for negative values
-        #if G_SIGNAL_NEGATIVE_MEAN_PSF
+        #if defined(G_SIGNAL_NEGATIVE_MEAN_PSF)
         if (value < 0.0) {
             std::cout << "GLATMeanPsf::operator()(offset=" << offset;
             std::cout << ", logE=" << logE << ") = " << value << std::endl;
@@ -466,7 +467,7 @@ double GLATMeanPsf::psf(const double& offset, const double& logE)
                 m_wgt4 * m_psf[m_inx4] * fac_right;
 
         // Optionally check for negative values
-        #if G_SIGNAL_NEGATIVE_MEAN_PSF
+        #if defined(G_SIGNAL_NEGATIVE_MEAN_PSF)
         if (value < 0.0) {
             std::cout << "GLATMeanPsf::psf(offset=" << offset;
             std::cout << ", logE=" << logE << ") = " << value << std::endl;
@@ -703,6 +704,9 @@ void GLATMeanPsf::set_offsets(void)
  * The map corrections are mainly important at high energies where the
  * PSF size can become comparable to the pixel size.
  *
+ * See SourceMap::getMapCorrections for the original code in the Fermi/LAT
+ * ScienceTools.
+ *
  * @todo We can also implement a method for event atoms, yet it is not clear
  *       whether we really need this.
  ***************************************************************************/
@@ -719,6 +723,10 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
 
         // Get maximum PSF radius
         double radius = cube->maxrad(m_dir);
+        #if defined(G_DEBUG_MAP_CORRECTIONS)
+        std::cout << "GLATMeanPsf::set_map_corrections:";
+        std::cout << " radius=" << radius << std::endl;
+        #endif
         if (radius > 0.0) {
 
             // Initialise sum over pixels
@@ -814,7 +822,7 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
                                (theta_max - theta_min);
 
             // Debug option: Dump integral computation results
-            #if G_DEBUG_INTEGRAL
+            #if defined(G_DEBUG_INTEGRAL)
             std::cout << "offsetmax=" << offsetmax;
             std::cout << " offset.left=" << m_offset.inx_left();
             std::cout << " offset.right=" << m_offset.inx_right();
@@ -834,7 +842,7 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
                                          m_energy.wgt_right() * int_right);
 
     // Debug option: Dump integral computation results
-    #if G_DEBUG_INTEGRAL
+    #if defined(G_DEBUG_INTEGRAL)
     std::cout << " integral=" << integral << std::endl;
     #endif
 
