@@ -253,7 +253,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // Optionally write initial iteration into logger
         if (m_logger != NULL) {
-            (*m_logger)("*Iteration %3d: logL=-%.3f, Lambda=%.1e",
+            (*m_logger)("*Iteration %3d: -logL=%.3f, Lambda=%.1e",
                         0, m_value, m_lambda);   
         }
         #if defined(G_DEBUG_OPT)
@@ -315,7 +315,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                     parname = " [" + pars[grad_imax]->name() + ":" +
                               gammalib::str(grad_imax) + "]";
                 }
-                (*m_logger)("%sIteration %3d: logL=-%.3f, Lambda=%.1e,"
+                (*m_logger)("%sIteration %3d: -logL=%.3f, Lambda=%.1e,"
                             " delta=%.3f, max(|grad|)=%f%s%s",
                             status.c_str(), m_iter, m_value, lambda_old,
                             m_delta, grad_max,
