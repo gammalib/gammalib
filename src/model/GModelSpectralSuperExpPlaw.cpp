@@ -253,7 +253,8 @@ GModelSpectralSuperExpPlaw* GModelSpectralSuperExpPlaw::clone(void) const
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index1}
- *    \exp \left( \frac{-E}{\tt m\_ecut}^{\tt m_index2} \right)
+ *    \exp \left( - \left(\frac{-E}{\tt m\_ecut} \right)^{\tt m_index2}
+ *         \right)
  * \f]
  *
  * where
@@ -306,7 +307,8 @@ double GModelSpectralSuperExpPlaw::eval(const GEnergy& srcEng,
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index1}
- *    \exp \left( \frac{-E}{\tt m\_ecut}^{\tt m\_index2} \right)
+ *    \exp \left( - \left(\frac{-E}{\tt m\_ecut} \right)^{\tt m_index2}
+ *         \right)
  * \f]
  *
  * where
@@ -331,12 +333,14 @@ double GModelSpectralSuperExpPlaw::eval(const GEnergy& srcEng,
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_ecut}} =
- *      S_{\rm E}(E | t) \, \left( \frac{E}{{\tt m\_ecut}^{\tt m\_index2}} \right) \, \left({\frac{\tt m\_index2}}{\tt m\_ecut}\right)
+ *      S_{\rm E}(E | t) \, \left( \frac{E}{{\tt m\_ecut}^{\tt m\_index2}} \right) \,
+ *      \left({\frac{\tt m\_index2}}{\tt m\_ecut}\right)
  * \f]
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index2}} =
- *      - S_{\rm E}(E | t) \, \ln \left(\frac{E}{{\tt m\_ecut}\right)\, \left(\frac{E}{{\tt m\_ecut}^{\tt m\_index2}} \right)
+ *      -S_{\rm E}(E | t) \, \ln \left(\frac{E}{{\tt m\_ecut}\right)\, 
+ *        \left(\frac{E}{{\tt m\_ecut}^{\tt m\_index2}} \right)
  * \f]
  *
  * \f[
@@ -360,17 +364,22 @@ double GModelSpectralSuperExpPlaw::eval_gradients(const GEnergy& srcEng,
 
     // Compute partial derivatives with respect to the parameter factor
     // values. The partial derivatives with respect to the parameter
-    // values are obtained by division by the scale factor.
+    // values are obtained by multiplication with the scale factor.
     double g_norm  = (m_norm.is_free())
-                     ? m_norm.scale() * m_last_power : 0.0;
+            ? m_norm.scale() * m_last_power
+            : 0.0;
     double g_index1 = (m_index1.is_free())
-                     ? value * m_index1.scale() * std::log(m_last_e_norm) : 0.0;
+            ? value * m_index1.scale() * std::log(m_last_e_norm)
+            : 0.0;
     double g_ecut  = (m_ecut.is_free())
-                     ? value * m_last_index2 * m_last_exponent / m_ecut.factor_value() : 0.0;
+            ? value * m_last_index2 * m_last_exponent / m_ecut.factor_value()
+            : 0.0;
     double g_pivot = (m_pivot.is_free())
-                     ? -value * m_last_index1 / m_pivot.factor_value() : 0.0;
+            ? -value * m_last_index1 / m_pivot.factor_value()
+            : 0.0;
     double g_index2 = (m_index2.is_free())
-                      ? - value * m_index2.scale() * std::log(m_last_e_cut) * m_last_exponent : 0.0;
+            ? -value * m_index2.scale() * std::log(m_last_e_cut) * m_last_exponent
+            : 0.0;
 
     // Set gradients
     m_norm.factor_gradient(g_norm);
@@ -861,13 +870,13 @@ void GModelSpectralSuperExpPlaw::init_members(void)
 
     // Initialise eval cache
     m_last_energy.clear();
-    m_last_index1  = 1.0e30;
-    m_last_ecut   = 1.0e30;
-    m_last_pivot  = 1.0e30;
-    m_last_index2 = 1.0e30;
-    m_last_e_norm = 0.0;
-    m_last_e_cut  = 0.0;
-    m_last_power  = 0.0;
+    m_last_index1   = 1.0e30;
+    m_last_ecut     = 1.0e30;
+    m_last_pivot    = 1.0e30;
+    m_last_index2   = 1.0e30;
+    m_last_e_norm   = 0.0;
+    m_last_e_cut    = 0.0;
+    m_last_power    = 0.0;
     m_last_exponent = 0.0;
 
     // Initialise MC cache
@@ -890,10 +899,10 @@ void GModelSpectralSuperExpPlaw::init_members(void)
 void GModelSpectralSuperExpPlaw::copy_members(const GModelSpectralSuperExpPlaw& model)
 {
     // Copy members
-    m_norm  = model.m_norm;
+    m_norm   = model.m_norm;
     m_index1 = model.m_index1;
-    m_ecut  = model.m_ecut;
-    m_pivot = model.m_pivot;
+    m_ecut   = model.m_ecut;
+    m_pivot  = model.m_pivot;
     m_index2 = model.m_index2;
 
     // Set parameter pointer(s)
@@ -905,14 +914,14 @@ void GModelSpectralSuperExpPlaw::copy_members(const GModelSpectralSuperExpPlaw& 
     m_pars.push_back(&m_index2);
 
     // Copy eval cache
-    m_last_energy = model.m_last_energy;
-    m_last_index1  = model.m_last_index1;
-    m_last_ecut   = model.m_last_ecut;
-    m_last_pivot  = model.m_last_pivot;
-    m_last_index1  = model.m_last_index1;
-    m_last_e_norm = model.m_last_e_norm;
-    m_last_e_cut  = model.m_last_e_cut;
-    m_last_power  = model.m_last_power;
+    m_last_energy   = model.m_last_energy;
+    m_last_index1   = model.m_last_index1;
+    m_last_ecut     = model.m_last_ecut;
+    m_last_pivot    = model.m_last_pivot;
+    m_last_index2   = model.m_last_index2;
+    m_last_e_norm   = model.m_last_e_norm;
+    m_last_e_cut    = model.m_last_e_cut;
+    m_last_power    = model.m_last_power;
     m_last_exponent = model.m_last_exponent;
 
     // Copy MC cache
@@ -949,8 +958,8 @@ void GModelSpectralSuperExpPlaw::update_eval_cache(const GEnergy& energy) const
     // Get parameter values (takes 3 multiplications which are difficult
     // to avoid)
     double index1 = m_index1.value();
-    double ecut  = m_ecut.value();
-    double pivot = m_pivot.value();
+    double ecut   = m_ecut.value();
+    double pivot  = m_pivot.value();
     double index2 = m_index2.value();
     
     // If the energy or one of the parameters index1, index2, cut-off or pivot
@@ -992,7 +1001,7 @@ void GModelSpectralSuperExpPlaw::update_eval_cache(const GEnergy& energy) const
  * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
 void GModelSpectralSuperExpPlaw::update_mc_cache(const GEnergy& emin,
-                                            const GEnergy& emax) const
+                                                 const GEnergy& emax) const
 
 {
     // Case A: Index is not -1
