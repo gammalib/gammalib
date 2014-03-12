@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-20 February 2014
+12 March 2014
 
 
 1. Introduction
@@ -129,6 +129,11 @@ that led to differences between Fermi/LAT ScienceTools and GammaLib results.
 The former code applied in fact the front energy scaling to the back PSF. This
 has now been fixed and checked with a test dataset. GammaLib results are now
 very close to Fermi/LAT ScienceTools results.
+
+Another bug in the computation of the mean PSF for sources falling outside the
+event cube have been fixed. The GLATEventCube::maxrad method now returns zero
+if a source lies outside the event cube. PSF normalization for event cubes is
+not only performed for sources within the event cube.
 
 
 20. CTA interface
