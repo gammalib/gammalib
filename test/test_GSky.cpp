@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1014,28 +1014,30 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
         
 }
 
+/***************************************************************************
+ * @brief Test GHorizDir class
+ ***************************************************************************/
 void TestGSky::test_GHorizDir(void){
-    
+
+    // Empty horizontal direction
     GHorizDir nulldir;
-        
+
+    // Set position
     GHorizDir altaz;
-    double testalt = 45.0;
-    double testaz = 180.0;
-    altaz.altaz_deg( testalt, testaz );
+    double testalt =  45.0;
+    double testaz  = 180.0;
+    altaz.altaz_deg(testalt, testaz);
 
-
+    // Retrieve position
     double newalt = altaz.alt_deg();
-    double newaz = altaz.az_deg();
-    
-    // std::cout << altaz << std::endl;
-    // std::cout << newalt << "," << testalt << std::endl;
-    // std::cout << newaz << "," << testaz << std::endl;
+    double newaz  = altaz.az_deg();
 
-    test_value( newalt, testalt,1e-10,"ALT" );
-    test_value( newaz, testaz,1e-10,"AZ" );
-    test_value( altaz.zenith_deg(), 90-testalt,"ZENITH" );
+    // Test position
+    test_value(newalt, testalt, 1e-10, "Altitude" );
+    test_value(newaz,  testaz,  1e-10, "Azimuth" );
+    test_value(altaz.zenith_deg(), 90.0-testalt, 1e-10, "Zenith angle");
 
-
+    // Return
     return;
 }          
           
