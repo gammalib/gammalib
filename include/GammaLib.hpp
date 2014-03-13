@@ -136,6 +136,7 @@
 
 /* __ Skymap handling ____________________________________________________ */
 #include "GSkyDir.hpp"
+#include "GHorizDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GSkymap.hpp"
 #include "GSkyRegions.hpp"

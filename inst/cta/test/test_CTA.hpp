@@ -123,4 +123,27 @@ public:
     void                      test_binned_optimizer(void);
 };
 
+/***********************************************************************//**
+ * @class TestGCTAPointing
+ *
+ * @brief Test suite for CTA pointing class testing
+ *
+ * This class defines a unit test suite for the CTA response class.
+ ***************************************************************************/
+class TestGCTAPointing : public GTestSuite {
+public:
+
+    // Constructors and destructors
+    TestGCTAPointing(void) : GTestSuite() {}
+    virtual ~TestGCTAPointing(void) {}
+
+    // Methods
+    virtual void              set(void);
+    virtual TestGCTAPointing* clone(void) const;
+    void                      test_load_table(void);
+    void                      test_interpolate_altaz(void);
+};
+
+
+
 #endif /* TEST_CTA_HPP */

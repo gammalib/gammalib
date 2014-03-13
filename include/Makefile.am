@@ -77,6 +77,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GTestSuites.hpp \
                      GTestCase.hpp \
                      GSkyDir.hpp \
+                     GHorizDir.hpp \
                      GSkyPixel.hpp \
                      GSkymap.hpp \
                      GSkyRegion.hpp \

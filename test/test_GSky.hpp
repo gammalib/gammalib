@@ -25,7 +25,6 @@
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 
-
 /***********************************************************************//**
  * @class TestGSky
  *
@@ -50,6 +49,7 @@ public:
     void              test_GSkyRegions_io(void);
     void              test_GSkyRegionCircle_construct(void);
     void              test_GSkyRegionCircle_logic(void);
+    void              test_GHorizDir(void);
 
 // Private methods
 private:

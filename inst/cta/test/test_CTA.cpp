@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include "GCTALib.hpp"
 #include "GTools.hpp"
+#include "GNodeArray.hpp"
 #include "test_CTA.hpp"
 
 /* __ Namespaces _________________________________________________________ */
@@ -41,21 +42,22 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir        = PACKAGE_SOURCE"/inst/cta/test/data";
-const std::string cta_caldb      = PACKAGE_SOURCE"/inst/cta/caldb";
-const std::string cta_irf        = "cta_dummy_irf";
-const std::string cta_events     = datadir+"/crab_events.fits.gz";
-const std::string cta_cntmap     = datadir+"/crab_cntmap.fits.gz";
-const std::string cta_bin_xml    = datadir+"/obs_binned.xml";
-const std::string cta_unbin_xml  = datadir+"/obs_unbinned.xml";
-const std::string cta_model_xml  = datadir+"/crab.xml";
-const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
-const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
-const std::string cta_instbg_xml = datadir+"/cta_model_inst_bgd.xml";
-const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
-const std::string cta_irf_king   = "irf_file.fits";
+const std::string datadir         = PACKAGE_SOURCE"/inst/cta/test/data";
+const std::string cta_caldb       = PACKAGE_SOURCE"/inst/cta/caldb";
+const std::string cta_irf         = "cta_dummy_irf";
+const std::string cta_events      = datadir+"/crab_events.fits.gz";
+const std::string cta_cntmap      = datadir+"/crab_cntmap.fits.gz";
+const std::string cta_bin_xml     = datadir+"/obs_binned.xml";
+const std::string cta_unbin_xml   = datadir+"/obs_unbinned.xml";
+const std::string cta_model_xml   = datadir+"/crab.xml";
+const std::string cta_rsp_xml     = datadir+"/rsp_models.xml";
+const std::string cta_modbck_xml  = datadir+"/cta_modelbg.xml";
+const std::string cta_instbg_xml  = datadir+"/cta_model_inst_bgd.xml";
+const std::string cta_caldb_king  = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
+const std::string cta_irf_king    = "irf_file.fits";
 const std::string cta_edisp_rmf   = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
-const std::string cta_modbck_fit = datadir+"/bg_test.fits";
+const std::string cta_modbck_fit  = datadir+"/bg_test.fits";
+const std::string cta_point_table = datadir+"/crab_pointing.fits.gz";
 
 
 /***********************************************************************//**
@@ -179,6 +181,87 @@ TestGCTAOptimize* TestGCTAOptimize::clone(void) const
 {
     // Clone test suite
     return new TestGCTAOptimize(*this);
+}
+
+
+
+
+/***********************************************************************//**
+ * @brief Set CTA pointing test methods
+ ***************************************************************************/
+void TestGCTAPointing::set(void)
+{
+    // Set test name
+    name("GCTAPointing");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAPointing::test_load_table), 
+           "Test load pointing from table");
+
+    append(static_cast<pfunction>(&TestGCTAPointing::test_interpolate_altaz),
+           "Test alt/az interpolation given a time");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAPointing* TestGCTAPointing::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAPointing(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Test ability to load a CTA pointing table
+ ***************************************************************************/
+void TestGCTAPointing::test_load_table(void)
+{
+    GCTAPointing pnt;
+    pnt.load_pointing_table(cta_point_table);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test interpolation of alt/az pointing dir as a function of time
+ ***************************************************************************/
+void TestGCTAPointing::test_interpolate_altaz(void)
+{
+
+    GCTAObservation run;
+
+    GCTAPointing pnt;
+    pnt.load_pointing_table( cta_point_table );
+
+    // Test an out-of bounds time
+    test_try("Test an out-of bounds time");
+    try {
+        GTime time(155470378.7, "sec"); 
+        GHorizDir dir = pnt.dir_horiz(time);
+        test_try_failure();
+    }
+    catch (GException::out_of_range &exc) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Get a time that is somewhere in the run:
+    GTime time(155470378.7, "sec"); 
+    GHorizDir dir = pnt.dir_horiz( time );
+
+    // Return
+    return;
 }
 
 
@@ -1067,15 +1150,17 @@ int main(void)
     bool success = true;
 
     // Create test suites and append them to the container
-    TestGCTAResponse    rsp;
-    TestGCTAModel       model;
-    TestGCTAOptimize    opt;
-    TestGCTAObservation obs;
+    TestGCTAResponse        rsp;
+    TestGCTAModel           model;
+    TestGCTAOptimize        opt;
+    TestGCTAObservation     obs;
+    TestGCTAPointing        pnt;
     testsuites.append(rsp);
     if (has_data) {
     	testsuites.append(model);
-        testsuites.append(obs);
         testsuites.append(opt);
+        testsuites.append(obs);
+        testsuites.append(pnt);
     }
 
     // Run the testsuites

@@ -32,6 +32,8 @@
 #include "GSkyDir.hpp"
 #include "GTime.hpp"
 #include "GMatrix.hpp"
+#include "GHorizDir.hpp"
+#include "GNodeArray.hpp"
 #include "GCTAInstDir.hpp"
 
 
@@ -72,6 +74,10 @@ public:
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;
+    const GHorizDir dir_horiz( const GTime &time ) const;
+
+
+    void           load_pointing_table(std::string filename);
 
 protected:
     // Protected methods
@@ -80,10 +86,20 @@ protected:
     void free_members(void);
     void update(void) const;
 
+
+
     // Protected members
     GSkyDir         m_dir;        //!< Pointing direction in sky coordinates
     double          m_zenith;     //!< Pointing zenith angle
     double          m_azimuth;    //!< Pointing azimuth angle
+
+
+    bool                m_has_table; //!< table is loaded
+    GNodeArray          m_table_nodes;
+    std::vector<double> m_table_az; //!< table of azimuths (rad)
+    std::vector<double> m_table_alt; //!< table of altitudes (rad)
+    GTime               m_table_tmin; //!< min time bound in table
+    GTime               m_table_tmax; //!<max time bound in table
 
     // Cached members
     mutable bool    m_has_cache;  //!< Has transformation cache

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          sky.i - Sky module                             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2014 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,7 @@
 
 /* __ Skymap handling ____________________________________________________ */
 %include "GSkyDir.i"
+%include "GHorizDir.i"
 %include "GSkyPixel.i"
 %include "GSkymap.i"
 %include "GSkyRegions.i"
