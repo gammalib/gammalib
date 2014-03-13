@@ -257,7 +257,7 @@ void TestGCTAPointing::test_interpolate_altaz(void)
     }
 
     // Get a time that is somewhere in the run:
-    GTime time(155470378.7, "sec"); 
+    GTime time(-128526000.0, "sec"); 
     GHorizDir dir = pnt.dir_horiz( time );
 
     // Return

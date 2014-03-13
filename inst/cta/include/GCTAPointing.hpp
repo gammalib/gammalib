@@ -90,8 +90,6 @@ protected:
     void free_members(void);
     void update(void) const;
 
-
-
     // Protected members
     GSkyDir             m_dir;         //!< Pointing direction in sky coordinates
     double              m_zenith;      //!< Pointing zenith angle
