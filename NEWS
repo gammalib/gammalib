@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-12 March 2014
+13 March 2014
 
 
 1. Introduction
@@ -160,6 +160,9 @@ in streamlining ctselect (see #1149). A load() method has been implemented that
 recognizes automatically whether the file is an event list or a event cube, making
 load_unbinned() and load_binned() obsolete. These methods will be removed in the
 next major release.
+
+The GCTAPointing class now also supports pointing tables, which provide the altitude
+and azimuth on the sky as function of time.
 
 
 21. COMPTEL interface

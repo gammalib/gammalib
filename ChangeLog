@@ -1,9 +1,10 @@
-2014-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-03-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
 
         Add energy dispersion to CTA module
+        Add pointing table support to CTA module
 
 
 2014-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
