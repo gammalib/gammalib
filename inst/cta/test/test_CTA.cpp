@@ -224,7 +224,7 @@ TestGCTAPointing* TestGCTAPointing::clone(void) const
 void TestGCTAPointing::test_load_table(void)
 {
     GCTAPointing pnt;
-    pnt.load_pointing_table(cta_point_table);
+    pnt.load(cta_point_table);
 
     // Return
     return;
@@ -240,7 +240,7 @@ void TestGCTAPointing::test_interpolate_altaz(void)
     GCTAObservation run;
 
     GCTAPointing pnt;
-    pnt.load_pointing_table( cta_point_table );
+    pnt.load(cta_point_table);
 
     // Test an out-of bounds time
     test_try("Test an out-of bounds time");

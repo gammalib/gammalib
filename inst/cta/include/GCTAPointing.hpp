@@ -31,9 +31,11 @@
 #include <string>
 #include "GSkyDir.hpp"
 #include "GTime.hpp"
+#include "GTimeReference.hpp"
 #include "GMatrix.hpp"
 #include "GHorizDir.hpp"
 #include "GNodeArray.hpp"
+#include "GFitsTable.hpp"
 #include "GCTAInstDir.hpp"
 
 
@@ -55,6 +57,8 @@ public:
     // Constructors and destructors
     GCTAPointing(void);
     explicit GCTAPointing(const GSkyDir& dir);
+    GCTAPointing(const std::string& filename,
+                 const std::string& extname = "POINTING");
     GCTAPointing(const GCTAPointing& pnt);
     virtual ~GCTAPointing(void);
 
@@ -62,22 +66,22 @@ public:
     virtual GCTAPointing& operator=(const GCTAPointing& pnt);
 
     // Implemented pure virtual methods
-    virtual void           clear(void);
-    virtual GCTAPointing*  clone(void) const;
-    virtual const GSkyDir& dir(void) const;
-    virtual std::string    print(const GChatter& chatter = NORMAL) const;
+    virtual void          clear(void);
+    virtual GCTAPointing* clone(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    const GSkyDir& dir(void) const;
     void           dir(const GSkyDir& dir);
     GCTAInstDir    instdir(const GSkyDir& skydir) const;
     GSkyDir        skydir(const GCTAInstDir& instdir) const;
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;
-    const GHorizDir dir_horiz( const GTime &time ) const;
-
-
-    void           load_pointing_table(std::string filename);
+    GHorizDir      dir_horiz(const GTime& time) const;
+    void           load(const std::string& filename,
+                        const std::string& extname = "POINTING");
+    void           read(const GFitsTable& table);
 
 protected:
     // Protected methods
@@ -89,17 +93,16 @@ protected:
 
 
     // Protected members
-    GSkyDir         m_dir;        //!< Pointing direction in sky coordinates
-    double          m_zenith;     //!< Pointing zenith angle
-    double          m_azimuth;    //!< Pointing azimuth angle
-
-
-    bool                m_has_table; //!< table is loaded
-    GNodeArray          m_table_nodes;
-    std::vector<double> m_table_az; //!< table of azimuths (rad)
-    std::vector<double> m_table_alt; //!< table of altitudes (rad)
-    GTime               m_table_tmin; //!< min time bound in table
-    GTime               m_table_tmax; //!<max time bound in table
+    GSkyDir             m_dir;         //!< Pointing direction in sky coordinates
+    double              m_zenith;      //!< Pointing zenith angle
+    double              m_azimuth;     //!< Pointing azimuth angle
+    bool                m_has_table;   //!< Table is loaded
+    GNodeArray          m_table_nodes; //!< Pointing nodes
+    std::vector<double> m_table_az;    //!< Table of azimuths (rad)
+    std::vector<double> m_table_alt;   //!< Table of altitudes (rad)
+    GTime               m_table_tmin;  //!< Min time bound in table
+    GTime               m_table_tmax;  //!< Max time bound in table
+    GTimeReference      m_reference;   //!< Time reference
 
     // Cached members
     mutable bool    m_has_cache;  //!< Has transformation cache

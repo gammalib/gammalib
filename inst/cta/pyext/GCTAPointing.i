@@ -39,21 +39,27 @@ public:
     // Constructors and destructors
     GCTAPointing(void);
     explicit GCTAPointing(const GSkyDir& dir);
+    GCTAPointing(const std::string& filename,
+                 const std::string& extname = "POINTING");
     GCTAPointing(const GCTAPointing& pnt);
     virtual ~GCTAPointing(void);
 
     // Implemented pure virtual methods
     virtual void           clear(void);
     virtual GCTAPointing*  clone(void) const;
-    virtual const GSkyDir& dir(void) const;
 
     // Other methods
+    const GSkyDir& dir(void) const;
     void           dir(const GSkyDir& dir);
     GCTAInstDir    instdir(const GSkyDir& skydir) const;
     GSkyDir        skydir(const GCTAInstDir& instdir) const;
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;
+    GHorizDir      dir_horiz(const GTime& time) const;
+    void           load(const std::string& filename,
+                        const std::string& extname = "POINTING");
+    void           read(const GFitsTable& table);
 };
 
 
