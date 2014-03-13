@@ -459,8 +459,8 @@ void GCTAPointing::read(const GFitsTable& table)
         
         // Append to lookup table
         m_table_nodes.append(time.secs());
-        m_table_az[i]  = az->real(i)  * gammalib::deg2rad;
-        m_table_alt[i] = alt->real(i) * gammalib::deg2rad;
+        m_table_az.push_back(az->real(i)  * gammalib::deg2rad);
+        m_table_alt.push_back(alt->real(i) * gammalib::deg2rad);
 
         // Set minimum and maximum time
         if (i == 0) {
