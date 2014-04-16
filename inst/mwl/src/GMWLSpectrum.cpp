@@ -708,45 +708,14 @@ void GMWLSpectrum::read_fits(const GFitsTable& table)
  * @param[in] energy Energy value.
  * @param[in] unit Unit of value.
  *
- * @exception GMWLException::invalid_unit
- *            Invalid unit string encountered
- *
  * Converts an energy value into a GEnergy object based on the specified
  * units. The following units are supported (case insensitive):
  * erg, keV, MeV, GeV, and TeV.
  ***************************************************************************/
 GEnergy GMWLSpectrum::conv_energy(const double& energy, const std::string& unit)
 {
-    // Initialise energy
-    GEnergy result;
-
-    // Convert unit string to upper base without any leading/trailing
-    // whitespace
-    std::string str_unit = gammalib::strip_whitespace(gammalib::toupper(unit));
-
-    // High-energy units
-    if (str_unit == "KEV") {
-        result.keV(energy);
-    }
-    else if (str_unit == "MEV") {
-        result.MeV(energy);
-    }
-    else if (str_unit == "GEV") {
-        result.GeV(energy);
-    }
-    else if (str_unit == "TEV") {
-        result.TeV(energy);
-    }
-
-    // Other units
-    else if (str_unit == "ERG") {
-        result.erg(energy);
-    }
-    
-    // ... otherwise throw exception
-    else {
-        throw GMWLException::invalid_unit(G_CONV_ENERGY, unit);
-    }
+    // Convert energy
+    GEnergy result(energy, unit);
 
     // Return energy
     return result;
@@ -778,14 +747,17 @@ double GMWLSpectrum::conv_flux(const GEnergy& energy, const double& flux,
     std::string str_unit = gammalib::strip_whitespace(gammalib::toupper(unit));
 
     // High-energy units
-    if (str_unit == "PH/CM2/S/MEV" || str_unit == "PH/S/CM2/MEV")
+    if (str_unit == "PH/CM2/S/MEV" || str_unit == "PH/S/CM2/MEV") {
         result = flux;
-    else if (str_unit == "ERG/CM2/S" || str_unit == "ERG/S/CM2")
+    }
+    else if (str_unit == "ERG/CM2/S" || str_unit == "ERG/S/CM2") {
         result = (gammalib::erg2MeV*flux) / (energy.MeV()*energy.MeV());
+    }
 
     // ... otherwise throw exception
-    else
+    else {
         throw GMWLException::invalid_unit(G_CONV_FLUX, unit);
+    }
 
     // Return energy
     return result;

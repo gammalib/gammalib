@@ -158,7 +158,7 @@ GEnergy& GEnergy::operator=(const GEnergy& eng)
  * @brief Unit set operator
  *
  * @param[in] eng Energy.
- * @param[in] unit Energy unit (one of erg(s), keV, MeV, GeV, TeV).
+ * @param[in] unit Energy unit (one of erg(s), keV, MeV, GeV, TeV, Angstrom).
  *
  * @exception GException::invalid_argument
  *            Invalid energy unit specified.
@@ -169,7 +169,7 @@ GEnergy& GEnergy::operator=(const GEnergy& eng)
 void GEnergy::operator()(const double& eng, const std::string& unit)
 { 
     // Set energy according to unit string
-    std::string eunit = gammalib::tolower(unit);
+    std::string eunit = gammalib::strip_whitespace(gammalib::tolower(unit));
     if (eunit == "erg" || eunit == "ergs") {
         this->erg(eng);
     }
@@ -184,6 +184,9 @@ void GEnergy::operator()(const double& eng, const std::string& unit)
     }
     else if (eunit == "tev") {
         this->TeV(eng);
+    }
+    else if (eunit == "angstrom") {
+        this->MeV(0.012417281/eng);
     }
     else {
         throw GException::invalid_argument(G_OPERATOR1, unit,
