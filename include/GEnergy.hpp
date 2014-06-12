@@ -87,6 +87,7 @@ public:
     double      log10MeV(void) const;
     double      log10GeV(void) const;
     double      log10TeV(void) const;
+    double      log10(const std::string& unit) const;
     void        erg(const double& eng);
     void        keV(const double& eng);
     void        MeV(const double& eng);

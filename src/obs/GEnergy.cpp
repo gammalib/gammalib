@@ -40,7 +40,8 @@
 #define G_CONSTRUCT                 "GEnergy::GEnergy(double&, std::string&)"
 #define G_OPERATOR1              "GEnergy::operator()(double&, std::string&)"
 #define G_OPERATOR2                       "GEnergy::operator()(std::string&)"
-#define G_LOG10                       "GEnergy::log10(double&, std::string&)"
+#define G_LOG10_GET                            "GEnergy::log10(std::string&)"
+#define G_LOG10_SET                   "GEnergy::log10(double&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -432,6 +433,48 @@ double GEnergy::log10TeV(void) const
 
 
 /***********************************************************************//**
+ * @brief Set log10 of energy with unit specification
+ *
+ * @param[in] unit Unit of log10 of energy.
+ * @return eng log10 of energy.
+ *
+ * @exception GException::invalid_argument
+ *            Unit argument is not valid.
+ ***************************************************************************/
+double GEnergy::log10(const std::string& unit) const
+{
+    // Initialise result
+    double logE = 0.0;
+
+    // Set energy according to unit string
+    std::string eunit = gammalib::tolower(unit);
+    if (eunit == "erg" || eunit == "ergs") {
+        logE = this->log10erg();
+    }
+    else if (eunit == "kev") {
+        logE = this->log10keV();
+    }
+    else if (eunit == "mev") {
+        logE = this->log10MeV();
+    }
+    else if (eunit == "gev") {
+        logE = this->log10GeV();
+    }
+    else if (eunit == "tev") {
+        logE = this->log10TeV();
+    }
+    else {
+        throw GException::invalid_argument(G_LOG10_GET, unit,
+              "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
+              " \"GeV\", or \"TeV\" (case insensitive).");
+    }
+    
+    // Return
+    return logE;
+}
+
+
+/***********************************************************************//**
  * @brief Set energy in erg
  *
  * @param[in] eng Energy in erg.
@@ -606,6 +649,9 @@ void GEnergy::log10TeV(const double& eng)
  *
  * @param[in] eng log10 of energy.
  * @param[in] unit Unit of log10 of energy.
+ *
+ * @exception GException::invalid_argument
+ *            Unit argument is not valid.
  ***************************************************************************/
 void GEnergy::log10(const double& eng, const std::string& unit)
 {
@@ -627,7 +673,7 @@ void GEnergy::log10(const double& eng, const std::string& unit)
         this->log10TeV(eng);
     }
     else {
-        throw GException::invalid_argument(G_LOG10, unit,
+        throw GException::invalid_argument(G_LOG10_SET, unit,
               "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
               " \"GeV\", or \"TeV\" (case insensitive).");
     }
