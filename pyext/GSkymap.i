@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSkymap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -126,6 +126,10 @@ public:
                      const int&         nmaps = 1);
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
+
+    // Operators
+    GSkymap& operator+=(const GSkymap& map);
+    GSkymap& operator-=(const GSkymap& map);
 
     // Methods
     void                  clear(void);

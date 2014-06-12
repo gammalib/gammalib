@@ -59,6 +59,7 @@ void TestGSky::set(void){
     append(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
     append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
     append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap),"Test GSkymap");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
@@ -828,6 +829,55 @@ void TestGSky::test_GSkymap_wcs_io(void)
 
 
 /***************************************************************************
+ * @brief GSkymap
+ ***************************************************************************/
+void TestGSky::test_GSkymap(void)
+{
+    // Define several maps for comparison
+    GSkymap map_src("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);
+    GSkymap map_dst("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
+
+    // Fill map pixels
+    double total_src = 0.0;
+    for (int pix = 0; pix < map_src.npix(); ++pix) {
+        map_src(pix) = pix+1;
+        total_src   += map_src(pix);
+    }
+
+    // Add pixels to destination map
+    map_dst += map_src;
+
+    // Check total in destination map. Note that the total in the destination
+    // map should be 100 times the total in the source maps as the operator
+    // is expected to perform strict bi-linear interpolation
+    double total_dst = 0.0;
+    for (int pix = 0; pix < map_dst.npix(); ++pix) {
+        total_dst   += map_dst(pix);
+    }
+    total_dst /= 100.0;
+	test_value(total_dst, total_src, 1.0e-3, "Test operator+");
+
+    // Subtract pixels from destination map
+    map_dst -= map_src;
+
+    // Check total in destination map. Note that the total in the destination
+    // map should be zero.
+    total_dst = 0.0;
+    for (int pix = 0; pix < map_dst.npix(); ++pix) {
+        total_dst   += map_dst(pix);
+    }
+	test_value(total_dst, 0.0, 1.0e-3, "Test operator+");
+
+    // Save maps
+    map_src.save("test_map_src.fits", true);
+    map_dst.save("test_map_dst.fits", true);
+
+    // Exit test
+    return;
+}
+
+
+/***************************************************************************
  * @brief GSkyRegionCircle_construct
  ***************************************************************************/
 void TestGSky::test_GSkyRegionCircle_construct(void)
@@ -1049,18 +1099,18 @@ int main(void)
 {
     GTestSuites testsuites("GSky");
            
-    bool was_successful=true;
+    bool was_successful = true;
             
-    //Create a test suite
+    // Create a test suite
     TestGSky test;
             
-     //Append to the container
+    // Append to the container
     testsuites.append(test);
 
-    //Run
+    // Run
     was_successful=testsuites.run();
 
-    //save xml report
+    // Save xml report
     testsuites.save("reports/GSky.xml");
 
     // Return

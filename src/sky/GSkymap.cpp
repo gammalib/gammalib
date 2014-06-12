@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkymap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,8 @@
                                                        " std::string&, int&)"
 #define G_CONSTRUCT_MAP        "GSkymap::GSkymap(std::string&, std::string&,"\
                       " double&, double&, double& double&, int&, int&, int&)"
+#define G_OP_UNARY_ADD                        "GSkymap::operator+=(GSkymap&)"
+#define G_OP_UNARY_SUB                        "GSkymap::operator-=(GSkymap&)"
 #define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
 #define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
 #define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
@@ -282,6 +284,108 @@ GSkymap& GSkymap::operator=(const GSkymap& map)
     } // endif: object was not identical
 
     // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Addition operator
+ *
+ * @param[in] map Sky map.
+ * @return Sky map.
+ *
+ * @exception GException::invalid_value
+ *            Mismatch between number of maps in skymap object.
+ *
+ * Adds the content of @p map to the skymap. The operator only works on sky
+ * maps with an identical number of layers. The content is added by
+ * bi-linearily interpolating the values in the source sky map, allowing thus
+ * for a reprojection of sky map values.
+ *
+ * @todo The method is not optimized for speed as the transformation is done
+ * for each layer separately. A private method should be introduced that
+ * does the transformation, allowing the to loop more effectively over the
+ * layers.
+ ***************************************************************************/
+GSkymap& GSkymap::operator+=(const GSkymap& map)
+{
+    // Check if number of layers are identical
+    if (map.nmaps() != nmaps()) {
+        std::string msg = "Mismatch of number of maps in skymap object"
+                          " ("+gammalib::str(nmaps())+" maps in destination"
+                          " map, "+gammalib::str(map.nmaps())+" in source"
+                          " map.";
+        throw GException::invalid_value(G_OP_UNARY_ADD, msg);
+    }
+
+    // Loop over all pixels of sky map
+    for (int index = 0; index < npix(); ++index) {
+
+        // Get sky direction of actual pixel
+        GSkyDir dir = inx2dir(index);
+
+        // Loop over all layers
+        for (int layer = 0; layer < nmaps(); ++layer) {
+        
+            // Add value
+            (*this)(index, layer) += map(dir, layer);
+
+        } // endfor: looped over all layers
+        
+    } // endfor: looped over all pixels
+
+    // Return present sky map
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Subtraction operator
+ *
+ * @param[in] map Sky map.
+ * @return Sky map.
+ *
+ * @exception GException::invalid_value
+ *            Mismatch between number of maps in skymap object.
+ *
+ * Subtracts the content of @p map from the skymap. The operator only works
+ * on sky maps with an identical number of layers. The content is subtracted
+ * by bi-linearily interpolating the values in the source sky map, allowing
+ * thus for a reprojection of sky map values.
+ *
+ * @todo The method is not optimized for speed as the transformation is done
+ * for each layer separately. A private method should be introduced that
+ * does the transformation, allowing the to loop more effectively over the
+ * layers.
+ ***************************************************************************/
+GSkymap& GSkymap::operator-=(const GSkymap& map)
+{
+    // Check if number of layers are identical
+    if (map.nmaps() != nmaps()) {
+        std::string msg = "Mismatch of number of maps in skymap object"
+                          " ("+gammalib::str(nmaps())+" maps in destination"
+                          " map, "+gammalib::str(map.nmaps())+" in source"
+                          " map.";
+        throw GException::invalid_value(G_OP_UNARY_SUB, msg);
+    }
+
+    // Loop over all pixels of sky map
+    for (int index = 0; index < npix(); ++index) {
+
+        // Get sky direction of actual pixel
+        GSkyDir dir = inx2dir(index);
+
+        // Loop over all layers
+        for (int layer = 0; layer < nmaps(); ++layer) {
+        
+            // Subtract value
+            (*this)(index, layer) -= map(dir, layer);
+
+        } // endfor: looped over all layers
+        
+    } // endfor: looped over all pixels
+
+    // Return present sky map
     return *this;
 }
 

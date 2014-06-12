@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.hpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@ public:
     void              test_GSkymap_healpix_io(void);
     void              test_GSkymap_wcs_construct(void);
     void              test_GSkymap_wcs_io(void);
+    void              test_GSkymap(void);
     void              test_GSkyRegions_io(void);
     void              test_GSkyRegionCircle_construct(void);
     void              test_GSkyRegionCircle_logic(void);

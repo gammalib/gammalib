@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkymap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,6 +100,8 @@ public:
 
     // Operators
     GSkymap&      operator=(const GSkymap& map);
+    GSkymap&      operator+=(const GSkymap& map);
+    GSkymap&      operator-=(const GSkymap& map);
     double&       operator()(const int& index, const int& map = 0);
     const double& operator()(const int& index, const int& map = 0) const;
     double&       operator()(const GSkyPixel& pixel, const int& map = 0);
