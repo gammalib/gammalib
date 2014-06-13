@@ -832,7 +832,7 @@ void TestGCTAModel::test_model_irf_bgd(void)
     // Test void constuctor
     test_try("Test void constuctor");
     try {
-        GCTAModelInstBackground model;
+        GCTAModelIrfBackground model;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -845,7 +845,7 @@ void TestGCTAModel::test_model_irf_bgd(void)
         GXml xml(cta_irf_bgd_xml);
         const GXmlElement& lib = *xml.element("source_library", 0);
         const GXmlElement& src = *lib.element("source", 0);
-        GCTAModelInstBackground model(src);
+        GCTAModelIrfBackground model(src);
         test_value(model["Prefactor"].value(), 1.0);
         test_value(model["Index"].value(), 0.0);
         test_value(model["PivotEnergy"].value(), 1.0e6);
@@ -860,7 +860,7 @@ void TestGCTAModel::test_model_irf_bgd(void)
     test_try("Test spectral constuctor");
     try {
         GModelSpectralPlaw plaw(1.0, 0.0, GEnergy(1.0, "TeV"));
-        GCTAModelInstBackground model(plaw);
+        GCTAModelIrfBackground model(plaw);
         test_value(model["Prefactor"].value(), 1.0);
         test_value(model["Index"].value(), 0.0);
         test_value(model["PivotEnergy"].value(), 1.0e6);
