@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <source_library title="source library">
-  <source name="CTABackgroundModel" type="CTABackground" instrument="CTA">
+  <source name="CTABackgroundModel" type="CTACubeBackground" instrument="CTA">
     <spectrum type="PowerLaw">
        <parameter name="Prefactor" scale="1.0"  value="1.0"  min="1e-10" max="1e3"    free="1"/>
        <parameter name="Index"     scale="1.0"  value="-2.5" min="-5.0"  max="+5.0"   free="1"/>
