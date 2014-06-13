@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-12 June 2014
+13 June 2014
 
 
 1. Introduction
@@ -13,7 +13,9 @@ changes made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-None
+The following classes have been renamed:
+* GCTAModelBackground => GCTAModelCubeBackground
+* GCTAModelInstBackground => GCTAModelIrfBackground
 
 
 3. Configuration
@@ -166,6 +168,10 @@ next major release.
 
 The GCTAPointing class now also supports pointing tables, which provide the altitude
 and azimuth on the sky as function of time.
+
+The type of the GCTAModelCubeBackground class has been set to GCTACubeBackground,
+the type of the GCTAModelIrfBackground class to GCTAIrfBackground. XML files need
+to be adapted accordingly.
 
 
 21. COMPTEL interface
