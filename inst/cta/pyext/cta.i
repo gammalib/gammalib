@@ -89,7 +89,7 @@
 %include "GCTABackgroundPerfTable.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
-%include "GCTAModelBackground.i"
+%include "GCTAModelCubeBackground.i"
 %include "GCTAModelInstBackground.i"
 %include "GCTAModelRadial.i"
 %include "GCTAModelRadialRegistry.i"

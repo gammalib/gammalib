@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GCTAModelBackground.cpp - Generic CTA background model class      *
+ *       GCTAModelCubeBackground.cpp - CTA cube background model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelBackground.cpp
- * @brief Generic CTA background model class implementation
+ * @file GCTAModelCubeBackground.cpp
+ * @brief CTA cube background model class implementation
  * @author Michael Mayer
  */
 
@@ -37,7 +37,7 @@
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GIntegral.hpp"
-#include "GCTAModelBackground.hpp"
+#include "GCTAModelCubeBackground.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
@@ -52,21 +52,21 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GCTAModelBackground g_cta_model_background_seed;
+const GCTAModelCubeBackground g_cta_model_background_seed;
 const GModelRegistry      g_cta_model_background_registry(&g_cta_model_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET_SPATIAL   "GCTAModelBackground::set_spatial(GCTAObservation&, "\
+#define G_SET_SPATIAL "GCTAModelCubeBackground::set_spatial(GCTAObservation&, "\
                                             "std::string&, int&, int&, int&)"
-#define G_EVAL            "GCTAModelBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS       "GCTAModelBackground::eval_gradients(GEvent&,"\
+#define G_EVAL        "GCTAModelCubeBackground::eval(GEvent&, GObservation&)"
+#define G_EVAL_GRADIENTS   "GCTAModelCubeBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
-#define G_NPRED                "GCTAModelBackground::npred(GEnergy&, GTime&,"\
+#define G_NPRED            "GCTAModelCubeBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_MC                  "GCTAModelBackground::mc(GObservation&, GRan&)"
-#define G_XML_SPATIAL        "GCTAModelBackground::xml_spatial(GXmlElement&)"
-#define G_XML_SPECTRAL      "GCTAModelBackground::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL      "GCTAModelBackground::xml_temporal(GXmlElement&)"
+#define G_MC              "GCTAModelCubeBackground::mc(GObservation&, GRan&)"
+#define G_XML_SPATIAL    "GCTAModelCubeBackground::xml_spatial(GXmlElement&)"
+#define G_XML_SPECTRAL  "GCTAModelCubeBackground::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL  "GCTAModelCubeBackground::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -88,9 +88,9 @@ const GModelRegistry      g_cta_model_background_registry(&g_cta_model_backgroun
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Constructs an empty CTA background model.
+ * Constructs an empty CTA cube background model.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(void) : GModelData()
+GCTAModelCubeBackground::GCTAModelCubeBackground(void) : GModelData()
 {
     // Initialise members
     init_members();
@@ -106,10 +106,10 @@ GCTAModelBackground::GCTAModelBackground(void) : GModelData()
  * @param[in] xml XML element.
  *
  * Constructs a CTA background model from the information that is found in a
- * XML element. Please refer to the method GCTAModelBackground::read to learn
- * more about the information that is expected in the XML element.
+ * XML element. Please refer to the method GCTAModelCubeBackground::read to
+ * learn more about the information that is expected in the XML element.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(const GXmlElement& xml) :
+GCTAModelCubeBackground::GCTAModelCubeBackground(const GXmlElement& xml) :
                      GModelData(xml)
 {
     // Initialise members
@@ -137,9 +137,9 @@ GCTAModelBackground::GCTAModelBackground(const GXmlElement& xml) :
  * Please refer to the classes GModelSpatial and GModelSpectral to learn
  * more about the definition of the spatial and spectral components.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(const GModelSpatial&  spatial,
-                                         const GModelSpectral& spectral) :
-                     GModelData()
+GCTAModelCubeBackground::GCTAModelCubeBackground(const GModelSpatial&  spatial,
+                                                 const GModelSpectral& spectral) :
+                         GModelData()
 {
     // Initialise members
     init_members();
@@ -169,8 +169,8 @@ GCTAModelBackground::GCTAModelBackground(const GModelSpatial&  spatial,
  * existing model. Note that the copy is a deep copy, so the original object
  * can be destroyed after the copy without any loss of information.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
-                     GModelData(model)
+GCTAModelCubeBackground::GCTAModelCubeBackground(const GCTAModelCubeBackground& model) :
+                         GModelData(model)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -200,13 +200,13 @@ GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
  * Please refer to the classes GModelSpatial and GModelSpectral to learn
  * more about the definition of the spatial and spectral components.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs,
-                                         const std::string&     filename,
-                                         const GModelSpectral&  spectral,
-                                         const int&             nx_sky,
-                                         const int&             ny_sky,
-                                         const int&             n_energy) :
-                     GModelData()
+GCTAModelCubeBackground::GCTAModelCubeBackground(const GCTAObservation& obs,
+                                                 const std::string&     filename,
+                                                 const GModelSpectral&  spectral,
+                                                 const int&             nx_sky,
+                                                 const int&             ny_sky,
+                                                 const int&             n_energy) :
+                         GModelData()
 {
     // Initialise private members for clean destruction
 	init_members();
@@ -235,7 +235,7 @@ GCTAModelBackground::GCTAModelBackground(const GCTAObservation& obs,
  *
  * Destroys a CTA background model.
  ***************************************************************************/
-GCTAModelBackground::~GCTAModelBackground(void)
+GCTAModelCubeBackground::~GCTAModelCubeBackground(void)
 {
     // Free members
     free_members();
@@ -261,7 +261,7 @@ GCTAModelBackground::~GCTAModelBackground(void)
  * original object can be destroyed after the assignment without any loss of
  * information.
  ***************************************************************************/
-GCTAModelBackground& GCTAModelBackground::operator=(const GCTAModelBackground& model)
+GCTAModelCubeBackground& GCTAModelCubeBackground::operator=(const GCTAModelCubeBackground& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -297,7 +297,7 @@ GCTAModelBackground& GCTAModelBackground::operator=(const GCTAModelBackground& m
  * Resets the object to a clean initial state. All information that resided
  * in the object will be lost.
  ***************************************************************************/
-void GCTAModelBackground::clear(void)
+void GCTAModelCubeBackground::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -322,9 +322,9 @@ void GCTAModelBackground::clear(void)
  * information, so the original object can be destroyed after cloning without
  * any loss of information.
  ***************************************************************************/
-GCTAModelBackground* GCTAModelBackground::clone(void) const
+GCTAModelCubeBackground* GCTAModelCubeBackground::clone(void) const
 {
-    return new GCTAModelBackground(*this);
+    return new GCTAModelCubeBackground(*this);
 }
 
 
@@ -346,8 +346,8 @@ GCTAModelBackground* GCTAModelBackground::clone(void) const
  * @todo Add bookkeeping of last value and evaluate only if argument 
  *       changed
  ***************************************************************************/
-double GCTAModelBackground::eval(const GEvent& event,
-                                 const GObservation& obs) const
+double GCTAModelCubeBackground::eval(const GEvent& event,
+                                     const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
@@ -408,8 +408,8 @@ double GCTAModelBackground::eval(const GEvent& event,
  * @todo Add bookkeeping of last value and evaluate only if argument 
  *       changed
  ***************************************************************************/
-double GCTAModelBackground::eval_gradients(const GEvent& event,
-                                           const GObservation& obs) const
+double GCTAModelCubeBackground::eval_gradients(const GEvent& event,
+                                               const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
@@ -495,9 +495,9 @@ double GCTAModelBackground::eval_gradients(const GEvent& event,
  * event time. This method also applies a deadtime correction factor, so that
  * the normalization of the model is a real rate (counts/exposure time).
  ***************************************************************************/
-double GCTAModelBackground::npred(const GEnergy&      obsEng,
-                                  const GTime&        obsTime,
-                                  const GObservation& obs) const
+double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
+                                      const GTime&        obsTime,
+                                      const GObservation& obs) const
 {
     // Initialise result
     double npred     = 0.0;
@@ -517,7 +517,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 				npred     = m_npred_values[i];
 				has_npred = true;
 				#if defined(G_DEBUG_NPRED)
-				std::cout << "GCTAModelBackground::npred:";
+				std::cout << "GCTAModelCubeBackground::npred:";
 				std::cout << " cache=" << i;
 				std::cout << " npred=" << npred << std::endl;
 				#endif
@@ -582,13 +582,13 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
             #endif
 
 			// Setup integration function
-			GCTAModelBackground::npred_roi_kern_theta integrand(spatial(),
-                                                                obsEng,
-                                                                obsTime,
-                                                                rot,
-                                                                roi_radius,
-                                                                roi_distance,
-                                                                omega0);
+			GCTAModelCubeBackground::npred_roi_kern_theta integrand(spatial(),
+                                                                    obsEng,
+                                                                    obsTime,
+                                                                    rot,
+                                                                    roi_radius,
+                                                                    roi_distance,
+                                                                    omega0);
 
 			// Setup integrator
 			GIntegral integral(&integrand);
@@ -617,7 +617,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 	        // Debug: Check for NaN
 	        #if defined(G_NAN_CHECK)
 	        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-	            std::cout << "*** ERROR: GCTAModelBackground::npred:";
+	            std::cout << "*** ERROR: GCTAModelCubeBackground::npred:";
 	            std::cout << " NaN/Inf encountered";
 	            std::cout << " (npred=" << npred;
 	            std::cout << ", roi_radius=" << roi_radius;
@@ -663,7 +663,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
  * taking into account temporal deadtime variations. For this purpose, the
  * method makes use of the time dependent GObservation::deadc method.
  ***************************************************************************/
-GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
+GCTAEventList* GCTAModelCubeBackground::mc(const GObservation& obs, GRan& ran) const
 {
     // Initialise new event list
     GCTAEventList* list = new GCTAEventList;
@@ -734,7 +734,7 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
 
             // Debug option: dump rate
             #if defined(G_DUMP_MC)
-            std::cout << "GCTAModelBackground::mc(\"" << name() << "\": ";
+            std::cout << "GCTAModelCubeBackground::mc(\"" << name() << "\": ";
             std::cout << "rate=" << rate << " cts/s)" << std::endl;
             #endif
 
@@ -837,7 +837,7 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
  * necessarily linked, hence there is no general way to pass this information
  * directly.
  ***************************************************************************/
-void GCTAModelBackground::read(const GXmlElement& xml)
+void GCTAModelCubeBackground::read(const GXmlElement& xml)
 {
     // Clear model
     clear();
@@ -910,7 +910,7 @@ void GCTAModelBackground::read(const GXmlElement& xml)
  *
  * @todo Document method.
  ***************************************************************************/
-void GCTAModelBackground::write(GXmlElement& xml) const
+void GCTAModelCubeBackground::write(GXmlElement& xml) const
 {
     // Initialise pointer on source
     GXmlElement* src = NULL;
@@ -977,7 +977,7 @@ void GCTAModelBackground::write(GXmlElement& xml) const
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
  ***************************************************************************/
-std::string GCTAModelBackground::print(const GChatter& chatter) const
+std::string GCTAModelCubeBackground::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -986,7 +986,7 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTAModelBackground ===");
+        result.append("=== GCTAModelCubeBackground ===");
 
         // Determine number of parameters per type
         int n_spatial  = (spatial()  != NULL) ? spatial()->size()  : 0;
@@ -1066,11 +1066,11 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
  * @todo We do not really need a CTA observation, we only need the pointing
  *       direction.
  ***************************************************************************/
-void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
-                                      const std::string&     filename,
-                                      const int&             nx_sky,
-                                      const int&             ny_sky,
-                                      const int&             n_energy)
+void GCTAModelCubeBackground::set_spatial(const GCTAObservation& obs,
+                                          const std::string&     filename,
+                                          const int&             nx_sky,
+                                          const int&             ny_sky,
+                                          const int&             n_energy)
 {
     // Free any existing spatial model
     if (m_spatial  != NULL) delete m_spatial;
@@ -1237,7 +1237,7 @@ void GCTAModelBackground::set_spatial(const GCTAObservation& obs,
  *
  * @todo Document method.
  ***************************************************************************/
-void GCTAModelBackground::init_members(void)
+void GCTAModelCubeBackground::init_members(void)
 {
     // Initialise members
     m_spatial  = NULL;
@@ -1262,7 +1262,7 @@ void GCTAModelBackground::init_members(void)
  *
  * @todo Document method.
  ***************************************************************************/
-void GCTAModelBackground::copy_members(const GCTAModelBackground& model)
+void GCTAModelCubeBackground::copy_members(const GCTAModelCubeBackground& model)
 {
     // Copy cache
     m_npred_names    = model.m_npred_names;
@@ -1288,7 +1288,7 @@ void GCTAModelBackground::copy_members(const GCTAModelBackground& model)
  *
  * @todo Document method.
  ***************************************************************************/
-void GCTAModelBackground::free_members(void)
+void GCTAModelCubeBackground::free_members(void)
 {
 	m_npred_names.clear();
 	m_npred_energies.clear();
@@ -1316,7 +1316,7 @@ void GCTAModelBackground::free_members(void)
  * Set pointers to all model parameters. The pointers are stored in a vector
  * that is member of the GModelData base class.
  ***************************************************************************/
-void GCTAModelBackground::set_pointers(void)
+void GCTAModelCubeBackground::set_pointers(void)
 {
     // Clear parameters
     m_pars.clear();
@@ -1358,7 +1358,7 @@ void GCTAModelBackground::set_pointers(void)
  * Returns 'true' if models has a spatial, a spectral and a temporal
  * component. Otherwise returns 'false'.
  ***************************************************************************/
-bool GCTAModelBackground::valid_model(void) const
+bool GCTAModelCubeBackground::valid_model(void) const
 {
     // Set result
     bool result = ((spatial()  != NULL) &&
@@ -1380,7 +1380,7 @@ bool GCTAModelBackground::valid_model(void) const
  *
  * Returns pointer to a spatial model that is defined in an XML element.
  ***************************************************************************/
-GModelSpatial* GCTAModelBackground::xml_spatial(const GXmlElement& spatial) const
+GModelSpatial* GCTAModelCubeBackground::xml_spatial(const GXmlElement& spatial) const
 {
     // Get spatial model type
     std::string type = spatial.attribute("type");
@@ -1414,7 +1414,7 @@ GModelSpatial* GCTAModelBackground::xml_spatial(const GXmlElement& spatial) cons
  *
  * Returns pointer to a spectral model that is defined in an XML element.
  ***************************************************************************/
-GModelSpectral* GCTAModelBackground::xml_spectral(const GXmlElement& spectral) const
+GModelSpectral* GCTAModelCubeBackground::xml_spectral(const GXmlElement& spectral) const
 {
     // Get spectral model type
     std::string type = spectral.attribute("type");
@@ -1448,7 +1448,7 @@ GModelSpectral* GCTAModelBackground::xml_spectral(const GXmlElement& spectral) c
  *
  * Returns pointer to a temporal model that is defined in an XML element.
  ***************************************************************************/
-GModelTemporal* GCTAModelBackground::xml_temporal(const GXmlElement& temporal) const
+GModelTemporal* GCTAModelCubeBackground::xml_temporal(const GXmlElement& temporal) const
 {
     // Get temporal model type
     std::string type = temporal.attribute("type");
@@ -1492,7 +1492,7 @@ GModelTemporal* GCTAModelBackground::xml_temporal(const GXmlElement& temporal) c
  * is limited to an arc around the vector connecting the model centre to
  * the ROI centre. This limitation assures proper converges properly.
  ***************************************************************************/
-double GCTAModelBackground::npred_roi_kern_theta::eval(const double& theta)
+double GCTAModelCubeBackground::npred_roi_kern_theta::eval(const double& theta)
 {
     // Initialise value
     double value = 0.0;
@@ -1521,12 +1521,12 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(const double& theta)
 		   double phi_max = m_omega0 + dphi;
 
 			// Setup phi integration kernel
-            GCTAModelBackground::npred_roi_kern_phi integrand(m_model,
-												              m_obsEng,
-												              m_obsTime,
-												              m_rot,
-												              theta,
-												              sin_theta);
+            GCTAModelCubeBackground::npred_roi_kern_phi integrand(m_model,
+												                  m_obsEng,
+												                  m_obsTime,
+												                  m_rot,
+												                  theta,
+												                  sin_theta);
 
 			// Integrate over phi
 			GIntegral integral(&integrand);
@@ -1536,7 +1536,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(const double& theta)
 			// Debug: Check for NaN
 			#if defined(G_NAN_CHECK)
 			if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-				std::cout << "*** ERROR: GCTAModelBackground::npred_roi_kern_theta::eval";
+				std::cout << "*** ERROR: GCTAModelCubeBackground::npred_roi_kern_theta::eval";
 				std::cout << "(theta=" << theta << "):";
 				std::cout << " NaN/Inf encountered";
 				std::cout << " (value=" << value;
@@ -1569,7 +1569,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(const double& theta)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double GCTAModelBackground::npred_roi_kern_phi::eval(const double& phi)
+double GCTAModelCubeBackground::npred_roi_kern_phi::eval(const double& phi)
 {
     // Initialise value
     double value = 0.0;
@@ -1595,7 +1595,7 @@ double GCTAModelBackground::npred_roi_kern_phi::eval(const double& phi)
 	// Debug: Check for NaN
 	#if defined(G_NAN_CHECK)
 	if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-		std::cout << "*** ERROR: GCTAModelBackground::npred_roi_kern_phi::eval";
+		std::cout << "*** ERROR: GCTAModelCubeBackground::npred_roi_kern_phi::eval";
 		std::cout << "(phi=" << phi << "):";
 		std::cout << " NaN/Inf encountered";
 		std::cout << " (value=" << value;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GCTAModelBackground - generic CTA background model class          *
+ *        GCTAModelCubeBackground - CTA cube background model class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,52 +19,52 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelBackground.i
- * @brief CTA background model class interface definition
+ * @file GCTAModelCubeBackground.i
+ * @brief CTA cube background model class interface definition
  * @author Michael Mayer
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTAModelBackground.hpp"
+#include "GCTAModelCubeBackground.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
-* @class GCTAModelBackground
+* @class GCTAModelCubeBackground
 *
-* @brief CTA background model class
+* @brief CTA cube background model class
 ***************************************************************************/
-class GCTAModelBackground : public GModelData {
-    public:
+class GCTAModelCubeBackground : public GModelData {
+public:
     // Constructors and destructors
-    GCTAModelBackground(void);
-    explicit GCTAModelBackground(const GXmlElement& xml);
-    GCTAModelBackground(const GModelSpatial& spatial,
-                        const GModelSpectral& spectral);
-    GCTAModelBackground(const GCTAModelBackground& model);
-    GCTAModelBackground(const GCTAObservation& obs,
-                        const std::string&     filename,
-                        const GModelSpectral&  spectral,
-                        const int&             nx_sky   = 0,
-                        const int&             ny_sky   = 0,
-                        const int&             n_energy = 0);
-    virtual ~GCTAModelBackground(void);
+    GCTAModelCubeBackground(void);
+    explicit GCTAModelCubeBackground(const GXmlElement& xml);
+    GCTAModelCubeBackground(const GModelSpatial& spatial,
+                            const GModelSpectral& spectral);
+    GCTAModelCubeBackground(const GCTAModelCubeBackground& model);
+    GCTAModelCubeBackground(const GCTAObservation& obs,
+                            const std::string&     filename,
+                            const GModelSpectral&  spectral,
+                            const int&             nx_sky   = 0,
+                            const int&             ny_sky   = 0,
+                            const int&             n_energy = 0);
+    virtual ~GCTAModelCubeBackground(void);
     
     // Implemented pure virtual methods
-    virtual void                       clear(void);
-    virtual GCTAModelBackground* clone(void) const;
-    virtual std::string                type(void) const;
-    virtual bool                       is_constant(void) const;
-    virtual double                     eval(const GEvent& event,
-                                            const GObservation& obs) const;
-    virtual double                     eval_gradients(const GEvent& event,
-                                                      const GObservation& obs) const;
-    virtual double                     npred(const GEnergy& obsEng, const GTime& obsTime,
-                                             const GObservation& obs) const;
-    virtual GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
-    virtual void                       read(const GXmlElement& xml);
-    virtual void                       write(GXmlElement& xml) const;
+    virtual void                     clear(void);
+    virtual GCTAModelCubeBackground* clone(void) const;
+    virtual std::string              type(void) const;
+    virtual bool                     is_constant(void) const;
+    virtual double                   eval(const GEvent& event,
+                                          const GObservation& obs) const;
+    virtual double                   eval_gradients(const GEvent& event,
+                                                    const GObservation& obs) const;
+    virtual double                   npred(const GEnergy& obsEng, const GTime& obsTime,
+                                           const GObservation& obs) const;
+    virtual GCTAEventList*           mc(const GObservation& obs, GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
     
     // Other methods
     GModelSpatial*  spatial(void) const;
@@ -73,7 +73,7 @@ class GCTAModelBackground : public GModelData {
 };
 
 /***********************************************************************//**
-* @brief GCTAModelBackground class extension
+* @brief GCTAModelCubeBackground class extension
 ***************************************************************************/
-%extend GCTAModelBackground {
+%extend GCTAModelCubeBackground {
 };
