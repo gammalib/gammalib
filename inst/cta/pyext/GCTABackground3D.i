@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTABackground3D.i
- * @brief CTA background model base class definition
+ * @brief CTA 3D background class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GCTABackground3D
  *
- * @brief Abstract base class for the CTA background model
+ * @brief CTA 3D background class
  ***************************************************************************/
 class GCTABackground3D : public GCTABackground {
 public:
@@ -59,7 +59,11 @@ public:
     const GModelSpectralNodes& spectrum(void) const;
 
     // Methods
-    void read(const GFits& file);
+    void   read(const GFits& file);
+    double mc_spatial_resolution(void) const;
+    double mc_spectral_resolution(void) const;
+    void   mc_spatial_resolution(const double& binsize);
+    void   mc_spectral_resolution(const double& binsize);
 };
 
 

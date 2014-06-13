@@ -71,22 +71,41 @@ public:
     std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Methods
-    void read(const GFits& file);
+    void   read(const GFits& file);
+    double mc_spatial_resolution(void) const;
+    double mc_spectral_resolution(void) const;
+    void   mc_spatial_resolution(const double& binsize);
+    void   mc_spectral_resolution(const double& binsize);
     
 private:
     // Methods
     void init_members(void);
     void copy_members(const GCTABackground3D& bgd);
     void free_members(void);
-    void init_mc_cache(const int& table = 1) const;
+    void init_mc_cache(const bool& etrue = false) const;
 
     // Members
-    std::string         m_filename;    //!< Name of background response file
-    GCTAResponseTable   m_background;  //!< Background response table
+    std::string       m_filename;    //!< Name of background response file
+    GCTAResponseTable m_background;  //!< Background response table
+    double            m_mc_max_bin;  //!< Maximum spatial binsize for MC
+    double            m_mc_max_logE; //!< Maximum log energy binsize for MC
 
     // Monte Carlo cache
     mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
     mutable GModelSpectralNodes m_mc_spectrum; //!< Response cube spectrum
+    mutable int                 m_mc_nx;       //!< DETX pixels for MC
+    mutable int                 m_mc_ny;       //!< DETY pixels for MC
+    mutable int                 m_mc_npix;     //!< DETX*DETY pixels for MC
+    mutable int                 m_mc_nmaps;    //!< Number of maps for MC
+    mutable double              m_mc_detx_min; //!< DETX minimum
+    mutable double              m_mc_detx_max; //!< DETX maximum
+    mutable double              m_mc_detx_bin; //!< DETX binsize for MC
+    mutable double              m_mc_dety_min; //!< DETY minimum
+    mutable double              m_mc_dety_max; //!< DETY maximum
+    mutable double              m_mc_dety_bin; //!< DETY binsize for MC
+    mutable double              m_mc_logE_min; //!< log10 energy minimum (TeV)
+    mutable double              m_mc_logE_max; //!< log10 energy maximum (TeV)
+    mutable double              m_mc_logE_bin; //!< log10 energy binsize (TeV)
 };
 
 
@@ -117,6 +136,58 @@ const GModelSpectralNodes& GCTABackground3D::spectrum(void) const
         init_mc_cache();
     }
     return (m_mc_spectrum);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum spatial binsize for Monte Carlo simulations
+ *
+ * @return Returns maximum spatial binsize for Monte Carlo simulations.
+ ***************************************************************************/
+inline
+double GCTABackground3D::mc_spatial_resolution(void) const
+{
+    // Return maximum binsize
+    return m_mc_max_bin;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum spatial binsize for Monte Carlo simulations
+ *
+ * @param[in] binsize Maximum spatial binsize for Monte Carlo simulations.
+ ***************************************************************************/
+inline
+void GCTABackground3D::mc_spatial_resolution(const double& binsize)
+{
+    m_mc_max_bin = binsize;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum spectral binsize for Monte Carlo simulations
+ *
+ * @return Returns maximum spectral binsize for Monte Carlo simulations.
+ ***************************************************************************/
+inline
+double GCTABackground3D::mc_spectral_resolution(void) const
+{
+    // Return maximum binsize
+    return m_mc_max_logE;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum spectral binsize for Monte Carlo simulations
+ *
+ * @param[in] binsize Maximum spectral binsize for Monte Carlo simulations.
+ ***************************************************************************/
+inline
+void GCTABackground3D::mc_spectral_resolution(const double& binsize)
+{
+    m_mc_max_logE = binsize;
+    return;
 }
 
 #endif /* GCTABACKGROUND3D_HPP */

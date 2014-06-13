@@ -354,10 +354,6 @@ void GCTABackground3D::read(const GFits& fits)
     // Set energy axis to logarithmic scale
     m_background.axis_log10(2);
 
-    // Convert background
-    //m_background.scale(0, 1.0e4);
-    //m_background.scale(1, 1.0e4);
-
     // Return
     return;
 }
@@ -383,29 +379,26 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
     // Allocate instrument direction
     GCTAInstDir dir;
 
-    // Determine number of cube pixels and maps
-    int n_detx = m_background.axis(0);
-    int n_dety = m_background.axis(1);
-    int npix   = n_detx * n_dety;
-    int nmaps  = m_background.axis(2);
-
     // Continue only if there are cube pixels and maps
-    if (npix > 0 && nmaps > 0) {
+    if (m_mc_npix > 0 && m_mc_nmaps > 0) {
 
         // Determine the map that corresponds best to the specified energy.
         // This is not 100% clean, as ideally some map interpolation should
         // be done to the exact energy specified. However, as long as the map
         // does not change drastically with energy, taking the closest map
-        // seems to be fine.
-        int index = -1;
-        for (int i = 0; i < nmaps; ++i) {
-            if ((energy(m_background.axis_lo_unit(2)) >= m_background.axis_lo(2,i)) &&
-                (energy(m_background.axis_hi_unit(2)) <= m_background.axis_hi(2,i))) {
-                index = i;
-                break;
-            }
+        // seems to be fine. And recall that we rebin in energy anyways if
+        // the input binning is too coarse.
+        double logE  = energy.log10TeV();
+        int    index = -1;
+        if (logE == m_mc_logE_min) {
+            index = 0;
+        } else if (logE == m_mc_logE_max) {
+            index = m_mc_nmaps-1;
         }
-        if (index == -1) {
+        else {
+            index = int((logE - m_mc_logE_min) / m_mc_logE_bin);
+        }
+        if (index < 0 || index >= m_mc_nmaps) {
             std::string msg = "The specified energy "+energy.print()+" does"
                               " not fall in any of the energy boundaries of"
                               " the background response cube.\n"
@@ -423,9 +416,9 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
 
         // Get pixel index according to random number. We use a bi-section
         // method to find the corresponding response cube pixel
-        int offset = index * (npix+1);
+        int offset = index * (m_mc_npix+1);
         int low    = offset;
-        int high   = offset + npix;
+        int high   = offset + m_mc_npix;
         while ((high - low) > 1) {
             int mid = (low+high) / 2;
             if (u < m_mc_cache[mid]) {
@@ -438,18 +431,12 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
 
         // Get pixel indices in x and y
         int pixel = low - offset;
-        int idetx = pixel % n_detx;
-        int idety = pixel / n_detx;
+        int idetx = pixel % m_mc_nx;
+        int idety = pixel / m_mc_nx;
 
-        // Get minimum and binsize for the pixel
-        double xbin_min = m_background.axis_lo(0,idetx);
-        double xbin_bin = m_background.axis_hi(0,idetx) - xbin_min;
-        double ybin_min = m_background.axis_lo(1,idety);
-        double ybin_bin = m_background.axis_hi(1,idety) - ybin_min;
-
-        // Randomize detx and dety
-        double detx = xbin_min + xbin_bin * ran.uniform();
-        double dety = ybin_min + ybin_bin * ran.uniform();
+        // Get randomized detx and dety
+        double detx = m_mc_detx_min + (idetx + ran.uniform()) * m_mc_detx_bin;
+        double dety = m_mc_dety_min + (idety + ran.uniform()) * m_mc_dety_bin;
 
         // Set instrument direction (in radians)
         dir.detx(detx * gammalib::deg2rad);
@@ -488,7 +475,6 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
         double emin = m_background.axis_lo(2,0);
         double emax = m_background.axis_hi(2,m_background.axis(2)-1);
 
-
         // Append header
         result.append("=== GCTABackground3D ===");
 
@@ -504,8 +490,12 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
         result.append(gammalib::str(detx_min)+" - "+gammalib::str(detx_max)+" deg");
         result.append("\n"+gammalib::parformat("DETX range"));
         result.append(gammalib::str(dety_min)+" - "+gammalib::str(dety_max)+" deg");
-        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Maximum bin size for MC"));
+        result.append(gammalib::str(m_mc_max_bin)+" deg");
+        result.append("\n"+gammalib::parformat("Maximum logE step for MC"));
+        result.append(gammalib::str(m_mc_max_logE)+"^10 TeV");
 
     } // endif: chatter was not silent
 
@@ -528,10 +518,22 @@ void GCTABackground3D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_background.clear();
+    m_mc_max_bin  = 0.05;  //!< Spatial binning not worse than 0.05 deg
+    m_mc_max_logE = 0.02;  //!< Spectral binning not worse than 0.02^10 TeV
 
     // Initialise MC cache
     m_mc_cache.clear();
     m_mc_spectrum.clear();
+    m_mc_nx       = 0;
+    m_mc_ny       = 0;
+    m_mc_npix     = 0;
+    m_mc_nmaps    = 0;
+    m_mc_detx_min = 0.0;
+    m_mc_detx_max = 0.0;
+    m_mc_detx_bin = 0.0;
+    m_mc_dety_min = 0.0;
+    m_mc_dety_max = 0.0;
+    m_mc_dety_bin = 0.0;
 
     // Return
     return;
@@ -546,12 +548,24 @@ void GCTABackground3D::init_members(void)
 void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
 {
     // Copy members
-    m_filename   = bgd.m_filename;
-    m_background = bgd.m_background;
+    m_filename    = bgd.m_filename;
+    m_background  = bgd.m_background;
+    m_mc_max_bin  = bgd.m_mc_max_bin;
+    m_mc_max_logE = bgd.m_mc_max_logE;
 
     // Copy MC cache
     m_mc_cache    = bgd.m_mc_cache;
     m_mc_spectrum = bgd.m_mc_spectrum;
+    m_mc_nx       = bgd.m_mc_nx;
+    m_mc_ny       = bgd.m_mc_ny;
+    m_mc_npix     = bgd.m_mc_npix;
+    m_mc_nmaps    = bgd.m_mc_nmaps;
+    m_mc_detx_min = bgd.m_mc_detx_min;
+    m_mc_detx_max = bgd.m_mc_detx_max;
+    m_mc_detx_bin = bgd.m_mc_detx_bin;
+    m_mc_dety_min = bgd.m_mc_dety_min;
+    m_mc_dety_max = bgd.m_mc_dety_max;
+    m_mc_dety_bin = bgd.m_mc_dety_bin;
 
     // Return
     return;
@@ -571,47 +585,84 @@ void GCTABackground3D::free_members(void)
 /***********************************************************************//**
  * @brief Initialise Monte Carlo cache
  *
+ * @param[in] etrue Use true energy flag (true=yes, false=no)
+ *
+ * Initialises the cache for Monte Carlo sampling. The method uses the
+ * members m_mc_max_bin and m_mc_max_logE to enforce an internal rebinning
+ * in case that the provided background model information is coarsely
+ * pixelised. This rebinning is needed to assure coherence between Monte
+ * Carlo simulated data and the model.
+ * 
  * @todo Verify assumption made about the solid angles of the response table
  *       elements.
- * @todo Add optional sampling on a finer spatial grid.
  ***************************************************************************/
-void GCTABackground3D::init_mc_cache(const int& table) const
+void GCTABackground3D::init_mc_cache(const bool& etrue) const
 {
     // Initialise cache
     m_mc_cache.clear();
     m_mc_spectrum.clear();
 
-    // Determine number of cube pixels and maps
-    int npix  = m_background.axis(0) * m_background.axis(1);
-    int nmaps = m_background.axis(2);
+    // Determine number of response cube pixels and maps
+    m_mc_nx    = m_background.axis(0);
+    m_mc_ny    = m_background.axis(1);
+    m_mc_nmaps = m_background.axis(2);
 
-    // Compute DETX boundaries and width in deg
-    double detx_min = m_background.axis_lo(0,0);
-    double detx_max = m_background.axis_hi(0,m_background.axis(0)-1);
-    double detx_bin = (detx_max - detx_min) / m_background.axis(0);
+    // Compute DETX boundaries and binsize in deg. If DETX binsize is too
+    // coarse then request a finer sampling
+    m_mc_detx_min = m_background.axis_lo(0,0);
+    m_mc_detx_max = m_background.axis_hi(0,m_mc_nx-1);
+    m_mc_detx_bin = (m_mc_detx_max - m_mc_detx_min) / m_mc_nx;
+    if (m_mc_detx_bin > m_mc_max_bin) {
+        m_mc_nx       = int((m_mc_detx_max - m_mc_detx_min) / m_mc_max_bin + 1.0);
+        m_mc_detx_bin = (m_mc_detx_max - m_mc_detx_min) / m_mc_nx;
+    }
 
-    // Compute DETY boundaries and width in deg
-    double dety_min = m_background.axis_lo(1,0);
-    double dety_max = m_background.axis_hi(1,m_background.axis(1)-1);
-    double dety_bin = (dety_max - dety_min) / m_background.axis(1);
+    // Compute DETY boundaries and binsize in deg. If DETY binsize is too
+    // coarse then request a finer sampling
+    m_mc_dety_min = m_background.axis_lo(1,0);
+    m_mc_dety_max = m_background.axis_hi(1,m_mc_ny-1);
+    m_mc_dety_bin = (m_mc_dety_max - m_mc_dety_min) / m_mc_ny;
+    if (m_mc_dety_bin > m_mc_max_bin) {
+        m_mc_ny       = int((m_mc_dety_max - m_mc_dety_min) / m_mc_max_bin + 1.0);
+        m_mc_dety_bin = (m_mc_dety_max - m_mc_dety_min) / m_mc_ny;
+    }
+
+    // Compute energy sampling. If energy sampling is too coarse then
+    // request a finer sampling
+    GEnergy emin(m_background.axis_lo(2,0), m_background.axis_lo_unit(2));
+    GEnergy emax(m_background.axis_hi(2,m_mc_nmaps-1), m_background.axis_hi_unit(2));
+    m_mc_logE_min = emin.log10TeV();
+    m_mc_logE_max = emax.log10TeV();
+    m_mc_logE_bin = (m_mc_logE_max - m_mc_logE_min) / m_mc_nmaps;
+    if (m_mc_logE_bin > m_mc_max_logE) {
+        m_mc_nmaps    = int((m_mc_logE_max - m_mc_logE_min) / m_mc_max_logE + 1.0);
+        m_mc_logE_bin = (m_mc_logE_max - m_mc_logE_min) / m_mc_nmaps;
+    }
+
+    // Determine number of MC cube pixels
+    m_mc_npix = m_mc_nx * m_mc_ny;
 
     // Determine solid angle of pixel (we assume here simply that we have
     // square pixels of identical solid angle; it needs to be checked whether
     // this is a valid assumption)
-    double solidangle = detx_bin * gammalib::deg2rad *
-                        dety_bin * gammalib::deg2rad;
+    double solidangle = m_mc_detx_bin * gammalib::deg2rad *
+                        m_mc_dety_bin * gammalib::deg2rad;
 
     // Continue only if there are pixels and maps
-    if (npix > 0 && nmaps > 0) {
+    if (m_mc_npix > 0 && m_mc_nmaps > 0) {
 
         // Reserve space for all pixels in cache
-        m_mc_cache.reserve((npix+1)*nmaps);
+        m_mc_cache.reserve((m_mc_npix+1)*m_mc_nmaps);
 
         // Loop over all maps
-        for (int i = 0; i < nmaps; ++i) {
+        for (int i = 0; i < m_mc_nmaps; ++i) {
 
             // Compute pixel offset
-            int offset = i * (npix+1);
+            int offset = i * (m_mc_npix+1);
+
+            // Get logE
+            //double logE = m_background.nodes(2)[i];
+            double logE = m_mc_logE_min + (i+0.5) * m_mc_logE_bin;
 
             // Set first cache value to 0
             m_mc_cache.push_back(0.0);
@@ -620,32 +671,36 @@ void GCTABackground3D::init_mc_cache(const int& table) const
             // total flux in response table for normalization. Negative
             // pixels are excluded from the cumulative map.
             double total_rate = 0.0;
-        	for (int k = 0, element = i*npix; k < npix; ++k, ++element) {
-
-                // Determine background rate
-                double rate = m_background(table, element) * solidangle;
-                if (rate > 0.0) {
-                    total_rate += rate;
+            double xmin       = m_mc_detx_min * gammalib::deg2rad;
+            double xbin       = m_mc_detx_bin * gammalib::deg2rad;
+            double ymin       = m_mc_dety_min * gammalib::deg2rad;
+            double ybin       = m_mc_dety_bin * gammalib::deg2rad;
+            double detx       = xmin + 0.5 * xbin;
+            for (int ix = 0; ix < m_mc_nx; ++ix, detx += xbin) {
+                double dety = ymin + 0.5 * ybin;
+                for (int iy = 0; iy < m_mc_ny; ++iy, dety += ybin) {
+                    double rate = (*this)(logE, detx, dety, etrue) * solidangle;
+                    if (rate > 0.0) {
+                        total_rate += rate;
+                    }
+                    m_mc_cache.push_back(total_rate); // units: events/s/MeV
                 }
-
-                // Push back flux
-                m_mc_cache.push_back(total_rate); // units: events/s/MeV
-        	}
+            }
 
             // Normalize cumulative pixel fluxes so that the values in the
             // cache run from 0 to 1
             if (total_rate > 0.0) {
-        		for (int k = 0, element = offset; k < npix; ++k, ++element) {
+        		for (int k = 0, element = offset; k < m_mc_npix; ++k, ++element) {
         			m_mc_cache[element] /= total_rate;
         		}
         	}
 
             // Make sure that last pixel in the cache is >1
-            m_mc_cache[npix+offset] = 1.0001;
+            m_mc_cache[m_mc_npix+offset] = 1.0001;
 
             // Set energy value (unit independent)
             GEnergy energy;
-            energy.log10(m_background.nodes(2)[i], m_background.axis_lo_unit(2));
+            energy.log10(logE, m_background.axis_lo_unit(2));
                 
             // Only append node if rate > 0
             if (total_rate > 0.0) {
