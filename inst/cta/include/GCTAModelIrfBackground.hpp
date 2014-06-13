@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GCTAModelInstBackground.hpp - CTA instrument background model class   *
+ *       GCTAModelIrfBackground.hpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelInstBackground.hpp
- * @brief CTA instrument background model class definition
+ * @file GCTAModelIrfBackground.hpp
+ * @brief CTA IRF background model class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCTAMODELINSTBACKGROUND_HPP
-#define GCTAMODELINSTBACKGROUND_HPP
+#ifndef GCTAMODELIRFBACKGROUND_HPP
+#define GCTAMODELIRFBACKGROUND_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -40,39 +40,39 @@
 
 
 /***********************************************************************//**
- * @class GCTAModelInstBackground
+ * @class GCTAModelIrfBackground
  *
- * @brief CTA instrument background model class
+ * @brief CTA IRF background model class
  ***************************************************************************/
-class GCTAModelInstBackground : public GModelData {
+class GCTAModelIrfBackground : public GModelData {
 
 public:
     // Constructors and destructors
-    GCTAModelInstBackground(void);
-    explicit GCTAModelInstBackground(const GXmlElement& xml);
-    explicit GCTAModelInstBackground(const GModelSpectral& spectral);
-    GCTAModelInstBackground(const GCTAModelInstBackground& bgd);
-    virtual ~GCTAModelInstBackground(void);
+    GCTAModelIrfBackground(void);
+    explicit GCTAModelIrfBackground(const GXmlElement& xml);
+    explicit GCTAModelIrfBackground(const GModelSpectral& spectral);
+    GCTAModelIrfBackground(const GCTAModelIrfBackground& bgd);
+    virtual ~GCTAModelIrfBackground(void);
 
     // Operators
-    GCTAModelInstBackground& operator=(const GCTAModelInstBackground& bgd);
+    GCTAModelIrfBackground& operator=(const GCTAModelIrfBackground& bgd);
 
     // Implemented pure virtual methods
-    virtual void                     clear(void);
-    virtual GCTAModelInstBackground* clone(void) const;
-    virtual std::string              type(void) const;
-    virtual bool                     is_constant(void) const;
-    virtual double                   eval(const GEvent& event,
+    virtual void                    clear(void);
+    virtual GCTAModelIrfBackground* clone(void) const;
+    virtual std::string             type(void) const;
+    virtual bool                    is_constant(void) const;
+    virtual double                  eval(const GEvent& event,
+                                         const GObservation& obs) const;
+    virtual double                  eval_gradients(const GEvent& event,
+                                                   const GObservation& obs) const;
+    virtual double                  npred(const GEnergy& obsEng,
+                                          const GTime& obsTime,
                                           const GObservation& obs) const;
-    virtual double                   eval_gradients(const GEvent& event,
-                                                    const GObservation& obs) const;
-    virtual double                   npred(const GEnergy& obsEng,
-                                           const GTime& obsTime,
-                                           const GObservation& obs) const;
-    virtual GCTAEventList*           mc(const GObservation& obs, GRan& ran) const;
-    virtual void                     read(const GXmlElement& xml);
-    virtual void                     write(GXmlElement& xml) const;
-    virtual std::string              print(const GChatter& chatter = NORMAL) const;
+    virtual GCTAEventList*          mc(const GObservation& obs, GRan& ran) const;
+    virtual void                    read(const GXmlElement& xml);
+    virtual void                    write(GXmlElement& xml) const;
+    virtual std::string             print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GModelSpectral* spectral(void) const;
@@ -81,7 +81,7 @@ public:
 private:
     // Methods
     void            init_members(void);
-    void            copy_members(const GCTAModelInstBackground& bgd);
+    void            copy_members(const GCTAModelIrfBackground& bgd);
     void            free_members(void);
     void            set_pointers(void);
     bool            valid_model(void) const;
@@ -137,9 +137,9 @@ private:
  * Returns the type of the data model.
  ***************************************************************************/
 inline
-std::string GCTAModelInstBackground::type(void) const
+std::string GCTAModelIrfBackground::type(void) const
 {
-    return ("CTAInstBackground");
+    return ("CTAIrfBackground");
 }
 
 
@@ -152,7 +152,7 @@ std::string GCTAModelInstBackground::type(void) const
  * model is a model that has a temporal component of type "Constant".
  ***************************************************************************/
 inline
-bool GCTAModelInstBackground::is_constant(void) const
+bool GCTAModelIrfBackground::is_constant(void) const
 {
     return (m_temporal != NULL && m_temporal->type() == "Constant");
 }
@@ -168,7 +168,7 @@ bool GCTAModelInstBackground::is_constant(void) const
  * returned if the sky model has no spectral model component.
  ***************************************************************************/
 inline
-GModelSpectral* GCTAModelInstBackground::spectral(void) const
+GModelSpectral* GCTAModelIrfBackground::spectral(void) const
 {
     return (m_spectral);
 }
@@ -184,9 +184,9 @@ GModelSpectral* GCTAModelInstBackground::spectral(void) const
  * returned if the sky model has no temporal model component.
  ***************************************************************************/
 inline
-GModelTemporal* GCTAModelInstBackground::temporal(void) const
+GModelTemporal* GCTAModelIrfBackground::temporal(void) const
 {
     return (m_temporal);
 }
 
-#endif /* GCTAMODELINSTBACKGROUND_HPP */
+#endif /* GCTAMODELIRFBACKGROUND_HPP */

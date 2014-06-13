@@ -76,9 +76,8 @@ public:
     // Methods
     virtual void           set(void);
     virtual TestGCTAModel* clone(void) const;
-    void                   test_modelbg_npred_xml(void);
-    void                   test_modelbg_construct_fits(void);
-    void                   test_model_inst_bgd(void);
+    void                   test_model_cube_bgd(void);
+    void                   test_model_irf_bgd(void);
 };
 
 

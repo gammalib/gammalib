@@ -90,7 +90,7 @@
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
 %include "GCTAModelCubeBackground.i"
-%include "GCTAModelInstBackground.i"
+%include "GCTAModelIrfBackground.i"
 %include "GCTAModelRadial.i"
 %include "GCTAModelRadialRegistry.i"
 %include "GCTAModelRadialGauss.i"

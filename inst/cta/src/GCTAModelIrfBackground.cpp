@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GCTAModelInstBackground.cpp - CTA instrument background model class   *
+ *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelInstBackground.cpp
- * @brief CTA instrument background model class implementation
+ * @file GCTAModelIrfBackground.cpp
+ * @brief CTA IRF background model class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -36,24 +36,24 @@
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GModelSpectralNodes.hpp"
-#include "GCTAModelInstBackground.hpp"
+#include "GCTAModelIrfBackground.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTABackground.hpp"
 
 /* __ Globals ____________________________________________________________ */
-const GCTAModelInstBackground g_cta_inst_background_seed;
-const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_background_seed);
+const GCTAModelIrfBackground g_cta_inst_background_seed;
+const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL        "GCTAModelInstBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS   "GCTAModelInstBackground::eval_gradients(GEvent&,"\
+#define G_EVAL         "GCTAModelIrfBackground::eval(GEvent&, GObservation&)"
+#define G_EVAL_GRADIENTS    "GCTAModelIrfBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
-#define G_NPRED            "GCTAModelInstBackground::npred(GEnergy&, GTime&,"\
+#define G_NPRED             "GCTAModelIrfBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_MC              "GCTAModelInstBackground::mc(GObservation&, GRan&)"
-#define G_XML_SPECTRAL  "GCTAModelInstBackground::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL  "GCTAModelInstBackground::xml_temporal(GXmlElement&)"
+#define G_MC               "GCTAModelIrfBackground::mc(GObservation&, GRan&)"
+#define G_XML_SPECTRAL   "GCTAModelIrfBackground::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL   "GCTAModelIrfBackground::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -78,7 +78,7 @@ const double g_cta_inst_background_npred_phi_eps   = 1.0e-4;
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAModelInstBackground::GCTAModelInstBackground(void) : GModelData()
+GCTAModelIrfBackground::GCTAModelIrfBackground(void) : GModelData()
 {
     // Initialise class members
     init_members();
@@ -117,8 +117,8 @@ GCTAModelInstBackground::GCTAModelInstBackground(void) : GModelData()
  *
  * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
-GCTAModelInstBackground::GCTAModelInstBackground(const GXmlElement& xml) :
-                         GModelData(xml)
+GCTAModelIrfBackground::GCTAModelIrfBackground(const GXmlElement& xml) :
+                        GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -144,8 +144,8 @@ GCTAModelInstBackground::GCTAModelInstBackground(const GXmlElement& xml) :
  * Please refer to the classe GModelSpectral to learn more about the
  * definition of the spectral components.
  ***************************************************************************/
-GCTAModelInstBackground::GCTAModelInstBackground(const GModelSpectral& spectral) :
-                         GModelData()
+GCTAModelIrfBackground::GCTAModelIrfBackground(const GModelSpectral& spectral) :
+                        GModelData()
 {
     // Initialise members
     init_members();
@@ -170,8 +170,8 @@ GCTAModelInstBackground::GCTAModelInstBackground(const GModelSpectral& spectral)
  *
  * @param[in] bgd CTA instrument background model.
  ***************************************************************************/
-GCTAModelInstBackground::GCTAModelInstBackground(const GCTAModelInstBackground& bgd) :
-                         GModelData(bgd)
+GCTAModelIrfBackground::GCTAModelIrfBackground(const GCTAModelIrfBackground& bgd) :
+                        GModelData(bgd)
 {
     // Initialise class members
     init_members();
@@ -187,7 +187,7 @@ GCTAModelInstBackground::GCTAModelInstBackground(const GCTAModelInstBackground& 
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAModelInstBackground::~GCTAModelInstBackground(void)
+GCTAModelIrfBackground::~GCTAModelIrfBackground(void)
 {
     // Free members
     free_members();
@@ -209,7 +209,7 @@ GCTAModelInstBackground::~GCTAModelInstBackground(void)
  * @param[in] bgd CTA instrument background model.
  * @return CTA instrument background model.
  ***************************************************************************/
-GCTAModelInstBackground& GCTAModelInstBackground::operator=(const GCTAModelInstBackground& bgd)
+GCTAModelIrfBackground& GCTAModelIrfBackground::operator=(const GCTAModelIrfBackground& bgd)
 {
     // Execute only if object is not identical
     if (this != &bgd) {
@@ -245,7 +245,7 @@ GCTAModelInstBackground& GCTAModelInstBackground::operator=(const GCTAModelInstB
  * This method properly resets the CTA instrument background model to an
  * initial state.
  ***************************************************************************/
-void GCTAModelInstBackground::clear(void)
+void GCTAModelIrfBackground::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -265,9 +265,9 @@ void GCTAModelInstBackground::clear(void)
  *
  * @return Pointer to deep copy of CTA instrument background model.
  ***************************************************************************/
-GCTAModelInstBackground* GCTAModelInstBackground::clone(void) const
+GCTAModelIrfBackground* GCTAModelIrfBackground::clone(void) const
 {
-    return new GCTAModelInstBackground(*this);
+    return new GCTAModelIrfBackground(*this);
 }
 
 
@@ -283,8 +283,8 @@ GCTAModelInstBackground* GCTAModelInstBackground::clone(void) const
  *
  * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
  ***************************************************************************/
-double GCTAModelInstBackground::eval(const GEvent& event,
-                                     const GObservation& obs) const
+double GCTAModelIrfBackground::eval(const GEvent& event,
+                                    const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -343,8 +343,8 @@ double GCTAModelInstBackground::eval(const GEvent& event,
  *
  * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
  ***************************************************************************/
-double GCTAModelInstBackground::eval_gradients(const GEvent& event,
-                                               const GObservation& obs) const
+double GCTAModelIrfBackground::eval_gradients(const GEvent& event,
+                                              const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -428,9 +428,9 @@ double GCTAModelInstBackground::eval_gradients(const GEvent& event,
  * correction factor, so that the normalization of the model is a real rate
  * (counts/MeV/s).
  ***************************************************************************/
-double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
-                                      const GTime&        obsTime,
-                                      const GObservation& obs) const
+double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
+                                     const GTime&        obsTime,
+                                     const GObservation& obs) const
 {
     // Initialise result
     double npred     = 0.0;
@@ -450,7 +450,7 @@ double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
 				npred     = m_npred_values[i];
 				has_npred = true;
 				#if defined(G_DEBUG_NPRED)
-				std::cout << "GCTAModelInstBackground::npred:";
+				std::cout << "GCTAModelIrfBackground::npred:";
 				std::cout << " cache=" << i;
 				std::cout << " npred=" << npred << std::endl;
 				#endif
@@ -501,7 +501,7 @@ double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
             double logE = obsEng.log10TeV();
 
 			// Setup integration function
-			GCTAModelInstBackground::npred_roi_kern_theta integrand(bgd, logE);
+			GCTAModelIrfBackground::npred_roi_kern_theta integrand(bgd, logE);
 
 			// Setup integrator
 			GIntegral integral(&integrand);
@@ -521,7 +521,7 @@ double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
 	        // Debug: Check for NaN
 	        #if defined(G_NAN_CHECK)
 	        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-                std::string origin  = "GCTAModelInstBackground::npred";
+                std::string origin  = "GCTAModelIrfBackground::npred";
                 std::string message = " NaN/Inf encountered (npred=" +
                                       gammalib::str(npred) + ", roi_radius=" +
                                       gammalib::str(roi_radius) + ")";
@@ -570,7 +570,7 @@ double GCTAModelInstBackground::npred(const GEnergy&      obsEng,
  * For each event in the returned event list, the sky direction, the nominal
  * coordinates (DETX and DETY), the energy and the time will be set.
  ***************************************************************************/
-GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) const
+GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) const
 {
     // Initialise new event list
     GCTAEventList* list = new GCTAEventList;
@@ -637,7 +637,7 @@ GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) c
 
             // Debug option: dump rate
             #if defined(G_DUMP_MC)
-            std::cout << "GCTAModelInstBackground::mc(\"" << name() << "\": ";
+            std::cout << "GCTAModelIrfBackground::mc(\"" << name() << "\": ";
             std::cout << "rate=" << rate << " cts/s)" << std::endl;
             #endif
 
@@ -765,7 +765,7 @@ GCTAEventList* GCTAModelInstBackground::mc(const GObservation& obs, GRan& ran) c
  *
  * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
-void GCTAModelInstBackground::read(const GXmlElement& xml)
+void GCTAModelIrfBackground::read(const GXmlElement& xml)
 {
     // Clear model
     clear();
@@ -835,7 +835,7 @@ void GCTAModelInstBackground::read(const GXmlElement& xml)
  *
  * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
-void GCTAModelInstBackground::write(GXmlElement& xml) const
+void GCTAModelIrfBackground::write(GXmlElement& xml) const
 {
     // Initialise pointer on source
     GXmlElement* src = NULL;
@@ -902,7 +902,7 @@ void GCTAModelInstBackground::write(GXmlElement& xml) const
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing CTA instrument background model information.
  ***************************************************************************/
-std::string GCTAModelInstBackground::print(const GChatter& chatter) const
+std::string GCTAModelIrfBackground::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -911,7 +911,7 @@ std::string GCTAModelInstBackground::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTAModelInstBackground ===");
+        result.append("=== GCTAModelIrfBackground ===");
 
         // Determine number of parameters per type
         int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
@@ -962,7 +962,7 @@ std::string GCTAModelInstBackground::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAModelInstBackground::init_members(void)
+void GCTAModelIrfBackground::init_members(void)
 {
     // Initialise members
     m_spectral = NULL;
@@ -984,7 +984,7 @@ void GCTAModelInstBackground::init_members(void)
  *
  * @param[in] bgd CTA background model.
  ***************************************************************************/
-void GCTAModelInstBackground::copy_members(const GCTAModelInstBackground& bgd)
+void GCTAModelIrfBackground::copy_members(const GCTAModelIrfBackground& bgd)
 {
     // Copy cache
     m_npred_names    = bgd.m_npred_names;
@@ -1007,7 +1007,7 @@ void GCTAModelInstBackground::copy_members(const GCTAModelInstBackground& bgd)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAModelInstBackground::free_members(void)
+void GCTAModelIrfBackground::free_members(void)
 {
     // Free memory
     if (m_spectral != NULL) delete m_spectral;
@@ -1028,7 +1028,7 @@ void GCTAModelInstBackground::free_members(void)
  * Set pointers to all model parameters. The pointers are stored in a vector
  * that is member of the GModelData base class.
  ***************************************************************************/
-void GCTAModelInstBackground::set_pointers(void)
+void GCTAModelIrfBackground::set_pointers(void)
 {
     // Clear parameters
     m_pars.clear();
@@ -1064,7 +1064,7 @@ void GCTAModelInstBackground::set_pointers(void)
  * Returns 'true' if models has a spectral and a temporal component.
  * Otherwise returns 'false'.
  ***************************************************************************/
-bool GCTAModelInstBackground::valid_model(void) const
+bool GCTAModelIrfBackground::valid_model(void) const
 {
     // Set result
     bool result = ((spectral() != NULL) && (temporal() != NULL));
@@ -1084,7 +1084,7 @@ bool GCTAModelInstBackground::valid_model(void) const
  *
  * Returns pointer to a spectral model that is defined in an XML element.
  ***************************************************************************/
-GModelSpectral* GCTAModelInstBackground::xml_spectral(const GXmlElement& spectral) const
+GModelSpectral* GCTAModelIrfBackground::xml_spectral(const GXmlElement& spectral) const
 {
     // Get spectral model type
     std::string type = spectral.attribute("type");
@@ -1118,7 +1118,7 @@ GModelSpectral* GCTAModelInstBackground::xml_spectral(const GXmlElement& spectra
  *
  * Returns pointer to a temporal model that is defined in an XML element.
  ***************************************************************************/
-GModelTemporal* GCTAModelInstBackground::xml_temporal(const GXmlElement& temporal) const
+GModelTemporal* GCTAModelIrfBackground::xml_temporal(const GXmlElement& temporal) const
 {
     // Get temporal model type
     std::string type = temporal.attribute("type");
@@ -1158,7 +1158,7 @@ GModelTemporal* GCTAModelInstBackground::xml_temporal(const GXmlElement& tempora
  * where \f$B(\theta,\phi | E, t)\f$ is the background model for a specific
  * observed energy \f$E\f$ and time \f$t\f$.
  ***************************************************************************/
-double GCTAModelInstBackground::npred_roi_kern_theta::eval(const double& theta)
+double GCTAModelIrfBackground::npred_roi_kern_theta::eval(const double& theta)
 {
     // Initialise value
     double value = 0.0;
@@ -1167,7 +1167,7 @@ double GCTAModelInstBackground::npred_roi_kern_theta::eval(const double& theta)
     if (theta > 0.0) {
 
         // Setup phi integration kernel
-        GCTAModelInstBackground::npred_roi_kern_phi integrand(m_bgd,
+        GCTAModelIrfBackground::npred_roi_kern_phi integrand(m_bgd,
                                                               m_logE,
                                                               theta);
 
@@ -1179,7 +1179,7 @@ double GCTAModelInstBackground::npred_roi_kern_theta::eval(const double& theta)
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
         if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-            std::string origin  = "GCTAModelInstBackground::npred_roi_kern_theta::eval"
+            std::string origin  = "GCTAModelIrfBackground::npred_roi_kern_theta::eval"
                                   "(" + gammalib::str(theta) + ")";
             std::string message = " NaN/Inf encountered (value=" +
                                   gammalib::str(value) + ")";
@@ -1212,7 +1212,7 @@ double GCTAModelInstBackground::npred_roi_kern_theta::eval(const double& theta)
  *
  * @todo Verify correct orientation of detx and dety with respect to phi
  ***************************************************************************/
-double GCTAModelInstBackground::npred_roi_kern_phi::eval(const double& phi)
+double GCTAModelIrfBackground::npred_roi_kern_phi::eval(const double& phi)
 {
 	// Compute detx and dety
     double detx(0.0);
@@ -1228,7 +1228,7 @@ double GCTAModelInstBackground::npred_roi_kern_phi::eval(const double& phi)
 	// Debug: Check for NaN
 	#if defined(G_NAN_CHECK)
 	if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::string origin  = "GCTAModelInstBackground::npred_roi_kern_phi::eval"
+        std::string origin  = "GCTAModelIrfBackground::npred_roi_kern_phi::eval"
                               "(" + gammalib::str(phi) + ")";
         std::string message = " NaN/Inf encountered (value=" +
                               gammalib::str(value) + ", detx=" +

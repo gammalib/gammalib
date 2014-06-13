@@ -1,5 +1,5 @@
 /***************************************************************************
- *    GCTAModelInstBackground.i - CTA instrument background model class    *
+ *        GCTAModelIrfBackground.i - CTA IRF background model class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,45 +19,45 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAModelInstBackground.i
- * @brief CTA instrument background model class definition
+ * @file GCTAModelIrfBackground.i
+ * @brief CTA IRF background model class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTAModelInstBackground.hpp"
+#include "GCTAModelIrfBackground.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTAModelInstBackground
+ * @class GCTAModelIrfBackground
  *
- * @brief CTA instrument background model class
+ * @brief CTA IRF background model class
  ***************************************************************************/
-class GCTAModelInstBackground : public GModelData {
+class GCTAModelIrfBackground : public GModelData {
 public:
     // Constructors and destructors
-    GCTAModelInstBackground(void);
-    explicit GCTAModelInstBackground(const GXmlElement& xml);
-    explicit GCTAModelInstBackground(const GModelSpectral& spectral);
-    GCTAModelInstBackground(const GCTAModelInstBackground& bgd);
-    virtual ~GCTAModelInstBackground(void);
+    GCTAModelIrfBackground(void);
+    explicit GCTAModelIrfBackground(const GXmlElement& xml);
+    explicit GCTAModelIrfBackground(const GModelSpectral& spectral);
+    GCTAModelIrfBackground(const GCTAModelIrfBackground& bgd);
+    virtual ~GCTAModelIrfBackground(void);
 
     // Implemented pure virtual methods
-    virtual void                     clear(void);
-    virtual GCTAModelInstBackground* clone(void) const;
-    virtual std::string              type(void) const;
-    virtual bool                     is_constant(void) const;
-    virtual double                   eval(const GEvent& event,
+    virtual void                    clear(void);
+    virtual GCTAModelIrfBackground* clone(void) const;
+    virtual std::string             type(void) const;
+    virtual bool                    is_constant(void) const;
+    virtual double                  eval(const GEvent& event,
+                                         const GObservation& obs) const;
+    virtual double                  eval_gradients(const GEvent& event,
+                                                   const GObservation& obs) const;
+    virtual double                  npred(const GEnergy& obsEng,
+                                          const GTime& obsTime,
                                           const GObservation& obs) const;
-    virtual double                   eval_gradients(const GEvent& event,
-                                                    const GObservation& obs) const;
-    virtual double                   npred(const GEnergy& obsEng,
-                                           const GTime& obsTime,
-                                           const GObservation& obs) const;
-    virtual GCTAEventList*           mc(const GObservation& obs, GRan& ran) const;
-    virtual void                     read(const GXmlElement& xml);
-    virtual void                     write(GXmlElement& xml) const;
+    virtual GCTAEventList*          mc(const GObservation& obs, GRan& ran) const;
+    virtual void                    read(const GXmlElement& xml);
+    virtual void                    write(GXmlElement& xml) const;
 
     // Other methods
     GModelSpectral* spectral(void) const;
@@ -65,10 +65,10 @@ public:
 };
 
 /***********************************************************************//**
-* @brief GCTAModelInstBackground class extension
+* @brief GCTAModelIrfBackground class extension
 ***************************************************************************/
-%extend GCTAModelInstBackground {
-    GCTAModelInstBackground copy() {
+%extend GCTAModelIrfBackground {
+    GCTAModelIrfBackground copy() {
         return (*self);
     }
 };

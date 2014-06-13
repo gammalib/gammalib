@@ -42,22 +42,22 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir         = PACKAGE_SOURCE"/inst/cta/test/data";
-const std::string cta_caldb       = PACKAGE_SOURCE"/inst/cta/caldb";
-const std::string cta_irf         = "cta_dummy_irf";
-const std::string cta_events      = datadir+"/crab_events.fits.gz";
-const std::string cta_cntmap      = datadir+"/crab_cntmap.fits.gz";
-const std::string cta_bin_xml     = datadir+"/obs_binned.xml";
-const std::string cta_unbin_xml   = datadir+"/obs_unbinned.xml";
-const std::string cta_model_xml   = datadir+"/crab.xml";
-const std::string cta_rsp_xml     = datadir+"/rsp_models.xml";
-const std::string cta_modbck_xml  = datadir+"/cta_modelbg.xml";
-const std::string cta_instbg_xml  = datadir+"/cta_model_inst_bgd.xml";
-const std::string cta_caldb_king  = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
-const std::string cta_irf_king    = "irf_file.fits";
-const std::string cta_edisp_rmf   = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
-const std::string cta_modbck_fit  = datadir+"/bg_test.fits";
-const std::string cta_point_table = datadir+"/crab_pointing.fits.gz";
+const std::string datadir          = PACKAGE_SOURCE"/inst/cta/test/data";
+const std::string cta_caldb        = PACKAGE_SOURCE"/inst/cta/caldb";
+const std::string cta_irf          = "cta_dummy_irf";
+const std::string cta_events       = datadir+"/crab_events.fits.gz";
+const std::string cta_cntmap       = datadir+"/crab_cntmap.fits.gz";
+const std::string cta_bin_xml      = datadir+"/obs_binned.xml";
+const std::string cta_unbin_xml    = datadir+"/obs_unbinned.xml";
+const std::string cta_model_xml    = datadir+"/crab.xml";
+const std::string cta_rsp_xml      = datadir+"/rsp_models.xml";
+const std::string cta_cube_bgd_xml = datadir+"/cta_model_cube_bgd.xml";
+const std::string cta_irf_bgd_xml  = datadir+"/cta_model_irf_bgd.xml";
+const std::string cta_caldb_king   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
+const std::string cta_irf_king     = "irf_file.fits";
+const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
+const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
+const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
 
 
 /***********************************************************************//**
@@ -105,9 +105,8 @@ void TestGCTAModel::set(void)
     name("Test CTA models");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModel::test_modelbg_npred_xml), "Test background spatial constructor using xml model file");
-    append(static_cast<pfunction>(&TestGCTAModel::test_modelbg_construct_fits), "Test background spatial constructor using fits file in instrument coords");
-    append(static_cast<pfunction>(&TestGCTAModel::test_model_inst_bgd), "Test instrumental background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_cube_bgd), "Test CTA cube background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_irf_bgd), "Test CTA IRF background model");
 
     // Return
     return;
@@ -729,19 +728,38 @@ void TestGCTAResponse::test_response(void)
 
 
 /***********************************************************************//**
- * @brief Test CTA background Npred computation
+ * @brief Test CTA cube background
  ***************************************************************************/
-void TestGCTAModel::test_modelbg_npred_xml(void)
+void TestGCTAModel::test_model_cube_bgd(void)
 {
+    // Test CTA background constuctor
+    test_try("Test CTA background constuctor");
+    try {
+        // Setup spectral model
+        GEnergy energy(1.2, "TeV");
+        GModelSpectralPlaw spectrum(1.0, -1.5, energy);
+
+        // Load CTA event list
+        GCTAObservation obs ;
+        obs.load(cta_events);
+
+        // Load background model
+        GCTAModelCubeBackground bck(obs, cta_modbck_fit, spectrum);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Set reference value (~0.393469 result of a 2D Gaussian integrated 
     // within one sigma)
     const double ref = 1.0 - 1.0 / std::sqrt(std::exp(1.0));
 
     // Load models for Npred computation
-    GModels models(cta_modbck_xml);
+    GModels models(cta_cube_bgd_xml);
 
-    // Get the CTABackgroundModel
-    const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>(models[0]);
+    // Get the GCTAModelCubeBackground
+    const GCTAModelCubeBackground* bck = dynamic_cast<const GCTAModelCubeBackground*>(models[0]);
 
     // Get the spectral and spatial components
     const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
@@ -805,42 +823,11 @@ void TestGCTAModel::test_modelbg_npred_xml(void)
 	return;
 }
 
-/***********************************************************************//**
- * @brief Test CTA Model Background Instrument Coordinate Constructor
- *
- * Tests the 2nd constructor of GCTAModelBackground that gets its background
- * information from an input fits file.
- ***************************************************************************/
-void TestGCTAModel::test_modelbg_construct_fits(void)
-{
-    // Test CTA background constuctor
-    test_try("Test CTA background constuctor");
-    try {
-        // Setup spectral model
-        GEnergy energy(1.2, "TeV");
-        GModelSpectralPlaw spectrum(1.0, -1.5, energy);
-
-        // Load CTA event list
-        GCTAObservation obs ;
-        obs.load(cta_events);
-
-        // Load background model
-        GCTAModelBackground bck(obs, cta_modbck_fit, spectrum);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Return
-    return;
-}
-
 
 /***********************************************************************//**
- * @brief Test CTA instrumental background model
+ * @brief Test CTA IRF background model
  ***************************************************************************/
-void TestGCTAModel::test_model_inst_bgd(void)
+void TestGCTAModel::test_model_irf_bgd(void)
 {
     // Test void constuctor
     test_try("Test void constuctor");
@@ -855,7 +842,7 @@ void TestGCTAModel::test_model_inst_bgd(void)
     // Test XML constuctor
     test_try("Test XML constuctor");
     try {
-        GXml xml(cta_instbg_xml);
+        GXml xml(cta_irf_bgd_xml);
         const GXmlElement& lib = *xml.element("source_library", 0);
         const GXmlElement& src = *lib.element("source", 0);
         GCTAModelInstBackground model(src);
@@ -885,7 +872,7 @@ void TestGCTAModel::test_model_inst_bgd(void)
     }
 
     // Test XML loading of instrumental background
-    GModels models(cta_instbg_xml);
+    GModels models(cta_irf_bgd_xml);
     GModel* model = models["My model"];
     test_value((*model)["Prefactor"].value(), 1.0);
     test_value((*model)["Index"].value(), 0.0);
