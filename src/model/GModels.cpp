@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.cpp - Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,7 @@
 #include "GModels.hpp"
 #include "GModel.hpp"
 #include "GModelRegistry.hpp"
+#include "GObservation.hpp"
 #include "GXml.hpp"
 #include "GXmlElement.hpp"
 
@@ -853,6 +854,7 @@ GOptimizerPars GModels::pars(void)
  * @param[in] obs Observation.
  *
  * Evaluates the sum of all models for the specified event and observation.
+ * Only valid models are considered in this evaluation.
  ***************************************************************************/
 double GModels::eval(const GEvent& event, const GObservation& obs) const
 {
@@ -861,7 +863,9 @@ double GModels::eval(const GEvent& event, const GObservation& obs) const
 
     // Evaluate function for all models
     for (int i = 0; i < size(); ++i) {
-        value += m_models[i]->eval(event, obs);
+        if (m_models[i]->is_valid(obs.instrument(), obs.id())) {
+            value += m_models[i]->eval(event, obs);
+        }    
     }
 
     // Return
