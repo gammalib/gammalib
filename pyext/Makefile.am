@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile for gammalib Python extension module                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2012 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2014 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -79,7 +79,7 @@ endif
 CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 
 # Set SWIG compile command
-SWIGCOMPILE = $(SWIG) -c++ -python -Wall
+SWIGCOMPILE = $(SWIG) -c++ -python -Wall -DSWIG_PYTHON_LEGACY_BOOL
 
 # Things we want to do when 'make' is invoked.
 all-local: build
