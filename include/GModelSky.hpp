@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModelSky.hpp - Sky model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -200,7 +200,7 @@ protected:
                    const GEvent&       event,
                    const GTime&        srcTime,
                    const GObservation& obs,
-                   bool grad) :
+                   const bool&         grad) :
                    m_parent(parent),
                    m_event(event),
                    m_srcTime(srcTime),
@@ -212,7 +212,7 @@ protected:
         const GEvent&       m_event;   //!< Reference to event
         const GTime&        m_srcTime; //!< Reference to true time
         const GObservation& m_obs;     //!< Reference to observation
-        bool&               m_grad;    //!< Reference to gradient flag
+        const bool&         m_grad;    //!< Reference to gradient flag
     };
 
     // Protected data members
