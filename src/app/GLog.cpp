@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.cpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -779,7 +779,7 @@ void GLog::append(std::string arg)
     // If the buffer is empty and at the beginning of a line or if the last
     // charater is a \n, prepend a prefix at the beginning of the string to
     // be inserted.
-    if (m_buffer.size() == 0 && m_linestart ||
+    if ((m_buffer.size() == 0 && m_linestart) ||
         m_buffer[m_buffer.size()-1] == '\n') {
 
         // Prepend prefix
