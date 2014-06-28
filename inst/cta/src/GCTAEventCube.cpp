@@ -119,6 +119,23 @@ GCTAEventCube::GCTAEventCube(const GCTAEventCube& cube) : GEventCube(cube)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] cube Event cube.
+ ***************************************************************************/
+GCTAEventCube::GCTAEventCube(const GEventCube& cube) : GEventCube(cube)
+{
+    // Initialise members
+    init_members();
+	// Change pointer type
+    GCTAEventCube* ctacube = dynamic_cast<GCTAEventCube*>(cube.clone()); 
+    // Copy members
+    copy_members(*ctacube);
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Destructor

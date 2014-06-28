@@ -56,6 +56,7 @@ public:
     GCTAEventCube(void);
     GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
+    GCTAEventCube(const GEventCube &cube);
     virtual ~GCTAEventCube(void);
 
     // Operators

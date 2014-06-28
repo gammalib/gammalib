@@ -132,6 +132,25 @@ GCTAObservation::GCTAObservation(const GCTAObservation& obs) : GObservation(obs)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] obs observation.
+ *
+ * Creates CTA observation by copying an existing base-class observation. 
+ * A temperary alternative of dynamic_cast in Python  
+ ***************************************************************************/
+GCTAObservation::GCTAObservation(const GObservation& obs) : GObservation(obs)
+{
+    // Initialise members
+    init_members();
+    GCTAObservation* ctaobs = dynamic_cast<GCTAObservation*>(obs.clone()); 
+    // Copy members
+    copy_members(*ctaobs);
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Destructor
