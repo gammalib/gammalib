@@ -78,6 +78,8 @@
  ***************************************************************************/
 class GSkymap : public GBase {
 
+	friend GSkymap sqrt(const GSkymap& map);
+
 public:
     // Constructors and destructors
     GSkymap(void);
@@ -102,6 +104,8 @@ public:
     GSkymap&      operator=(const GSkymap& map);
     GSkymap&      operator+=(const GSkymap& map);
     GSkymap&      operator-=(const GSkymap& map);
+    GSkymap&      operator/=(const GSkymap& map);
+    GSkymap&      operator*=(const GSkymap& map);
     double&       operator()(const int& index, const int& map = 0);
     const double& operator()(const int& index, const int& map = 0) const;
     double&       operator()(const GSkyPixel& pixel, const int& map = 0);
