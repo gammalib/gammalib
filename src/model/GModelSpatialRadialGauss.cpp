@@ -337,7 +337,7 @@ GSkyDir GModelSpatialRadialGauss::mc(const GEnergy& energy,
 double GModelSpatialRadialGauss::theta_max(void) const
 {
     // Return value
-    return (sigma() * gammalib::deg2rad * 1.7941227);
+    return (sigma() * gammalib::deg2rad * 5.0);
 }
 
 
