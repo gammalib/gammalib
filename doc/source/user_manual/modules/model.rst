@@ -17,38 +17,38 @@ module and their relations.
    Model module
 
 The central C++ class of the model module is the abstract base class
-``GModel`` which defines a model component. Model compnents are combined
-using the ``GModels`` container C++ class.
+:doxy:`GModel` which defines a model component. Model compnents are combined
+using the :doxy:`GModels` container C++ class.
 
 
 Evaluating models for observations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Models are evaluated by observations using the ``GObservation::model`` 
+Models are evaluated by observations using the ``GObservation::model``
 method. The ``GObservation::npred`` provides the number of predicted 
 events by all models within the relevant dataspace for a given observation.
 
 :ref:`fig_calltree_model` shows the call tree of the 
-``GObservation::model`` (left) and ``GObservation::npred`` (right) 
+``GObservation::model()`` (left) and ``GObservation::npred`` (right) 
 methods. The top section shows the abstract methods, the bottom section 
-shows the methods that are called for ``GModelSky`` models, i.e. models of 
+shows the methods that are called for :doxy:`GModelSky` models, i.e. models of 
 celestial sources that are folded by the instrument response.
 
 For model evaluation, the ``GObservation::model`` method loops over all 
-models in the ``GModels`` container and calls the 
-``GModel::eval_gradients`` method of each model. For ``GModelSky`` models, 
+models in the :doxy:`GModels` container and calls the 
+:doxy:`GModel::eval_gradients` method of each model. For :doxy:`GModelSky` models, 
 this invokes an integration over true time, true energy and all possible 
 true photon arrival directions that may result in the observed event 
-direction. The latter computation is performed by the abstract ``GResponse::irf`` 
+direction. The latter computation is performed by the abstract :doxy:`GResponse::irf` 
 method that needs to be implemented for each instrument.
 
 The ``GObservation::npred`` method performs an integration over observed 
 time, observed energy and observed arrival direction. The two former are 
 performed by the ``GObservation::npred_temp`` and 
-``GObservation::npred_spec`` methods within the ``GObservation`` class, 
-the spatial integral is done within the ``GModel`` class by invoking the 
-``GModel::npred`` method. For ``GModelSky`` models, the integral is 
-performed by the abstract ``GResponse::npred`` method that needs to be 
+``GObservation::npred_spec`` methods within the :doxy:`GObservation` class, 
+the spatial integral is done within the :doxy:`GModel` class by invoking the 
+``GModel::npred`` method. For :doxy:`GModelSky` models, the integral is 
+performed by the abstract :doxy:`GResponse::npred` method that needs to be 
 implemented for each instrument.
 
 .. _fig_calltree_model:
@@ -65,7 +65,7 @@ Spectral models
 Constant
 ^^^^^^^^
 
-The ``GModelSpectralConst`` class implements the constant function
+The :doxy:`GModelSpectralConst` class implements the constant function
 
 .. math::
     \frac{dN}{dE} = N_0
@@ -86,7 +86,7 @@ The XML format for specifying a constant is:
 Power law
 ^^^^^^^^^
 
-The ``GModelSpectralPlaw`` class implements the power law function
+The :doxy:`GModelSpectralPlaw` class implements the power law function
 
 .. math::
     \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma}
@@ -107,7 +107,7 @@ The XML format for specifying a power law is:
     <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
-An alternative power law function is defined by the ``GModelSpectralPlaw2``
+An alternative power law function is defined by the :doxy:`GModelSpectralPlaw2`
 class that uses the integral flux as parameter rather than the Prefactor:
 
 .. math::
@@ -142,7 +142,7 @@ the errors if one is using the PowerLaw form.
 Exponentially cut-off power law
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``GModelSpectralExpPlaw`` class implements the exponentially cut-off power law function
+The :doxy:`GModelSpectralExpPlaw` class implements the exponentially cut-off power law function
 
 .. math::
     \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma}
@@ -170,7 +170,7 @@ The XML format for specifying an exponentially cut-off power law is:
 Broken power law
 ^^^^^^^^^^^^^^^^
 
-The ``GModelSpectralBrokenPlaw`` class implements the broken power law function
+The :doxy:`GModelSpectralBrokenPlaw` class implements the broken power law function
 
 .. math::
 
@@ -203,7 +203,7 @@ The XML format for specifying a broken power law is:
 Gaussian
 ^^^^^^^^
 
-The ``GModelSpectralGauss`` class implements the gaussian function
+The :doxy:`GModelSpectralGauss` class implements the gaussian function
 
 .. math::
     \frac{dN}{dE} = \frac{N_0}{\sqrt{2\pi}\sigma}
@@ -255,7 +255,7 @@ function is arbitrary).
 Log parabola
 ^^^^^^^^^^^^
 
-The ``GModelSpectralLogParabola`` class implements the log parabola function
+The :doxy:`GModelSpectralLogParabola` class implements the log parabola function
 
 .. math::
     \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma+\eta \ln(E/E_0)}
@@ -304,7 +304,7 @@ differential flux values. The energy units are assumed to be MeV and the
 flux values are assumed to 
 :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`
 (the only exception being a model for which the spatial component is
-a constant diffuse model ``GModelSpatialDiffuseConst``; in this case,
+a constant diffuse model :doxy:`GModelSpatialDiffuseConst`; in this case,
 the units are 
 :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1} {\rm sr}^{-1}`).
 The sole parameter is a multiplicative normalization:

@@ -393,7 +393,7 @@ non-accessible class members need then to be declared ``mutable`` to avoid
 compiler errors. Alternatively, the ``const_cast`` declaration can be used
 to allow member modifications within a ``const`` method.
 
-As example we show here part of the definition of ``GModelSpectralPlaw2``:
+As example we show here part of the definition of :doxy:`GModelSpectralPlaw2`:
 
 .. code-block:: cpp
 
@@ -426,7 +426,7 @@ As example we show here part of the definition of ``GModelSpectralPlaw2``:
         mutable double  m_last_g_index;    //!< Last spectral index gradient
 
 This class has an internal cache for precomputation, which is
-potentially updated when ``eval`` is called. Here the corresponding code:
+potentially updated when :doxy:`GModelSpectralPlaw2::eval` is called. Here the corresponding code:
 
 .. code-block:: cpp
 
@@ -459,7 +459,7 @@ protect references from changes by the method, **arguments passed by
 reference should always be declared const**. Pointers should only be
 used as arguments if ``NULL`` should be a possible argument value. Also
 pointers should always be declared ``const``. Here an example based on the
-definition of ``GObservation``:
+definition of :doxy:`GObservation`:
 
 .. code-block:: cpp
 
@@ -490,7 +490,7 @@ code slicing if the method is used for object assignment.** Unless we
 explicitly want to modify a class member through the method call, the
 returned pointer should be declared ``const``.
 
-Here an example based on the definition of ``GObservation``:
+Here an example based on the definition of :doxy:`GObservation`:
 
 .. code-block:: cpp
 
@@ -504,13 +504,13 @@ Here an example based on the definition of ``GObservation``:
         GEvents*    m_events;       //!< Pointer to event container
     };
 
-The ``ontime()`` method does return a ``double`` by value as the ``ontime`` property
+The :doxy:`GObservation::ontime` method does return a ``double`` by value as the ``ontime`` property
 is not stored explicitly in the class (hence no reference can be
-returned to it). On the other hand, the ``statistics()`` method returns by
+returned to it). On the other hand, the ``statistics`` method returns by
 reference as the ``statistics`` property is stored as a data member (hence a
 reference can be returned). Although we could have returned a reference
 to the event container, this would lead to code slicing. Therefore, the
-``events()`` method returns a pointer. All returned references or pointers
+``events`` method returns a pointer. All returned references or pointers
 are declared ``const`` to prevent modification of class members.
 
 .. _sec_containers:
@@ -593,7 +593,7 @@ interface), each class should have a ``print()`` method:
     std::string print(const GChatter& chatter = NORMAL) const;
 
 In case that the class derives from one of the standard interface classes 
-``GBase``, ``GContainer`` and ``GRegistry``,
+:doxy:`GBase`, :doxy:`GContainer` and :doxy:`GRegistry`,
 the output stream and logging operators are automatically implemented on
 the level of the base class. 
 In all other cases, the developer needs to implement these operators on the 
@@ -620,7 +620,7 @@ Exceptions
 ^^^^^^^^^^
 
 Exceptions are largely used in GammaLib to handle the occurrence of
-unexpected events. GammaLib exceptions are implemented by the ``GException``
+unexpected events. GammaLib exceptions are implemented by the :doxy:`GException`
 class. For each new exception type, a new exception subclass is added.
 
 Each exception returns the method name in which the exception occurs and
@@ -657,6 +657,6 @@ Extension       Method         Usage
 ``__len__``     ``size``       Container size
 =============== ============== =====
 
-While ``__str__`` and ``__len__`` are implemented in the ``GContainer``
+While ``__str__`` and ``__len__`` are implemented in the :doxy:`GContainer`
 base class, ``__getitem__`` and ``__setitem__`` need to be implemented
 as class extensions in the SWIG file (see :ref:`sec_python`).

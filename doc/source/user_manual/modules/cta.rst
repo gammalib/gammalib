@@ -26,58 +26,58 @@ module and their relations.
    CTA module
 
 Two types of observations are implemented so far:
-``GCTAObservation`` that derives from ``GObservation`` and that
+:doxy:`GCTAObservation` that derives from :doxy:`GObservation` and that
 describes either a binned or unbinned data set, and
-``GCTAOnOffObservation`` that describes an On-Off observation
+:doxy:`GCTAOnOffObservation` that describes an On-Off observation
 used in classical Cherenkov Telescope data analysis.
 Binned or unbinned observations are collected in the
-``GObservations`` container class, while the On-Off observations
-are collected in a specific ``GCTAOnOffObservations`` container
-class (note that the ``GCTAOnOffObservations`` container may vanish
-in the future when ``GCTAOnOffObservation`` objects will also be
-collected by the ``GObservations`` container class).
+:doxy:`GObservations` container class, while the On-Off observations
+are collected in a specific :doxy:`GCTAOnOffObservations` container
+class (note that the :doxy:`GCTAOnOffObservations` container may vanish
+in the future when :doxy:`GCTAOnOffObservation` objects will also be
+collected by the :doxy:`GObservations` container class).
 
 The data of binned observations are stored by the
-``GCTAEventCube`` class. The ``GCTAEventCube`` class holds the
+:doxy:`GCTAEventCube` class. The :doxy:`GCTAEventCube` class holds the
 binned event data in form of a sky map, implemented by the
-``GSkymap`` class. The sky coordinates of all sky map pixels
+:doxy:`GSkymap` class. The sky coordinates of all sky map pixels
 are stored in an array of CTA instrument directions, implemented
-by the ``GCTAInstDir`` class which holds a single ``GSkyDir``
+by the :doxy:`GCTAInstDir` class which holds a single :doxy:`GSkyDir`
 object. The mean energies of the event cube
-are stored in an array of ``GEnergy`` objects, and the mean
-time is stored by a ``GTime`` object. The ``GCTAEventCube`` class
+are stored in an array of :doxy:`GEnergy` objects, and the mean
+time is stored by a :doxy:`GTime` object. The :doxy:`GCTAEventCube` class
 holds in fact only a single event bin, implemented by the
-``GCTAEventBin`` class. When the event bin is accessed using
-the ``GCTAEventCube::operator[]`` operator, the operator updates
-references to the event cube data so that the ``GCTAEventBin``
+:doxy:`GCTAEventBin` class. When the event bin is accessed using
+the :doxy:`GCTAEventCube::operator[]` operator, the operator updates
+references to the event cube data so that the :doxy:`GCTAEventBin`
 object represents the selected event bin. This allows a memory-efficient
 storage of event bin information (without storing for example the
 instrument direction or the energy for each bin), while preserving
 the abstract data model where an event cube of abstract type
-``GEventCube`` is composed of event bins of abstract type 
-``GEventBin`` (see :ref:`sec_obs`).
+:doxy:`GEventCube` is composed of event bins of abstract type 
+:doxy:`GEventBin` (see :ref:`sec_obs`).
 
-The data of unbinned observations are stored by the ``GCTAEventList``
-class. The ``GCTAEventList`` class is a container of ``GCTAEventAtom``
+The data of unbinned observations are stored by the :doxy:`GCTAEventList`
+class. The :doxy:`GCTAEventList` class is a container of :doxy:`GCTAEventAtom`
 objects that represent individual events. Each event is composed of
-a ``GCTAInstDir`` object, a ``GEnergy`` object and a ``GTime`` object.
+a :doxy:`GCTAInstDir` object, a :doxy:`GEnergy` object and a :doxy:`GTime` object.
 The region of interest covered by an event list is described by the
-``GCTARoi`` class that derives from the abstract ``GRoi`` class.
+:doxy:`GCTARoi` class that derives from the abstract :doxy:`GRoi` class.
 
-In addition to the event, each ``GCTAObservation`` holds a
-pointing object, implemented by the ``GCTAPointing`` class, and
-a response object, implemented by the ``GCTAResponse`` class.
-The ``GCTAPointing`` class holds a single sky direction of type
-``GSkyDir`` to describe the fixed pointing direction of the
-observation. The ``GCTAResponse`` class provides the instrument
+In addition to the event, each :doxy:`GCTAObservation` holds a
+pointing object, implemented by the :doxy:`GCTAPointing` class, and
+a response object, implemented by the :doxy:`GCTAResponse` class.
+The :doxy:`GCTAPointing` class holds a single sky direction of type
+:doxy:`GSkyDir` to describe the fixed pointing direction of the
+observation. The :doxy:`GCTAResponse` class provides the instrument
 response factorised in an effective area term, a point spread
 function term and an energy dispersion term 
 (see :ref:`sec_cta_response` for details on the response
 implementation).
 
 Models of the instrumental background are provided by the
-``GCTAModelBackground`` and ``GCTAModelRadialAcceptance``
-classes that derive from the abstract ``GModelData`` base
+:doxy:`GCTAModelCubeBackground` and :doxy:`GCTAModelRadialAcceptance`
+classes that derive from the abstract :doxy:`GModelData` base
 class
 (see :ref:`sec_cta_background` for details on the background
 model implementation).
@@ -149,7 +149,7 @@ Modelling CTA background
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The generic class for modelling the CTA background is the 
-``GCTAModelBackground`` class. This class derives from the ``GModelData``
+:doxy:`GCTAModelCubeBackground` class. This class derives from the :doxy:`GModelData`
 base class and provides a description of the background count rate as
 function of reconstructued sky direction, measured energy and event trigger
 time.
@@ -227,7 +227,7 @@ Handling the instrument response
 Overview
 ^^^^^^^^
 
-The CTA specific instrument response is described by the ``CTAResponse``
+The CTA specific instrument response is described by the :doxy:`GCTAResponse`
 class (see :ref:`sec_response` for a general description of response
 handling in GammaLib). The CTA response is factorised into 
 the effective area :math:`A_{\rm eff}(d, p, E, t)` (units :math:`cm^2`),
@@ -247,7 +247,7 @@ Effective area
 ^^^^^^^^^^^^^^
 
 The :math:`A_{\rm eff}(d, p, E, t)` term is described by the abstract
-``GCTAAeff`` base class. The effective area is determined using
+:doxy:`GCTAAeff` base class. The effective area is determined using
 the:
  
 .. code-block:: cpp
@@ -268,20 +268,20 @@ photon with respect to the camera pointing,
 camera pointing.
 
 The effective area response is implemented by one of the classes
-``GCTAAeffPerfTable``, ``GCTAAeffArf`` and ``GCTAAeff2D`` that
+:doxy:`GCTAAeffPerfTable`, :doxy:`GCTAAeffArf` and :doxy:`GCTAAeff2D` that
 implement the different response formats that are currently used in
 the CTA project. Dependent on the specified response file, the
-method ``GCTAResponse::load_aeff`` allocates the appropriate response
-class. ``GCTAAeff2D`` is allocated if the response file is a FITS file
-containing an extension named ``EFFECTIVE AREA``; ``GCTAAeffArf`` is
+method :doxy:`GCTAResponse::load_aeff` allocates the appropriate response
+class. :doxy:`GCTAAeff2D` is allocated if the response file is a FITS file
+containing an extension named ``EFFECTIVE AREA``; :doxy:`GCTAAeffArf` is
 allocated if an extension named ``SPECRESP`` is found; otherwise, 
-``GCTAAeffPerfTable`` is allocated.
+:doxy:`GCTAAeffPerfTable` is allocated.
 
 
 GCTAAeffPerfTable
 """""""""""""""""
 
-``GCTAAeffPerfTable`` reads the effective area information from an ASCII
+:doxy:`GCTAAeffPerfTable` reads the effective area information from an ASCII
 file that has been defined by the CTA Monte Carlo workpackage
 (see :ref:`sec_cta_perftable`). This file provides the full effective detection
 area in units of :math:`m^2` after the background cut as function of
@@ -300,7 +300,7 @@ distribution follows a Gaussian distribution in offset angle squared:
 
 where :math:`\sigma` characterises the size of the field of view. The
 :math:`\sigma` parameter is set and retrieved using the 
-``GCTAAeffPerfTable::sigma`` methods. When response information is
+:doxy:`GCTAAeffPerfTable::sigma` methods. When response information is
 specified by an XML file (see :ref:`sec_cta_xml`), the :math:`\sigma`
 parameter can be set using the optional ``sigma`` attribute.
 If the :math:`\sigma` parameter is not explicitly set,
@@ -310,21 +310,21 @@ If the :math:`\sigma` parameter is not explicitly set,
 GCTAAeffArf
 """""""""""
 
-``GCTAAeffArf`` extracts the effective area information from a XSPEC
+:doxy:`GCTAAeffArf` extracts the effective area information from a XSPEC
 compatible ancilliary response file (ARF). The ARF contains the effective
 area for a specific angular (or theta) cut. It should be noted that the 
-``GCTAAeffArf`` class has been introduced as a work around for digesting
+:doxy:`GCTAAeffArf` class has been introduced as a work around for digesting
 the ARF response provided for the 1st CTA Data Challenge (1DC). It is not
 intended to use this class any longer in the future.
 
 To recover the full effective detection area, the value of the theta cut
 as well as the form of the point spread function needs to be known. When 
-an ARF file is loaded using the ``GCTAAeffArf::load`` method, the ARF 
+an ARF file is loaded using the :doxy:`GCTAAeffArf::load` method, the ARF 
 values are read and stored as they are encountered in the ARF file. To 
 recover the full effective detection area the theta cut value has to be 
-specified using the ``GCTAAeffArf::thetacut`` method, and the 
-``GCTAAeffArf::remove_thetacut`` method needs to be called to rescale the ARF 
-values. Note that ``GCTAAeffArf::remove_thetacut`` shall only be called
+specified using the :doxy:`GCTAAeffArf::thetacut` method, and the 
+:doxy:`GCTAAeffArf::remove_thetacut` method needs to be called to rescale the ARF 
+values. Note that :doxy:`GCTAAeffArf::remove_thetacut` shall only be called
 once after reading the ARF, as every call of the method will modify the 
 effective area values by multiplying it with a scaling factor.
 The scaling factor required to recover the full effective area
@@ -342,7 +342,7 @@ the inverse of this fraction:
 An alternative way of selecting the events is to adopt an energy dependent
 theta cut so that the selection always contains a fixed fraction of the 
 events. This type of cut can be accomodated by specifying a scaling factor
-using the ``GCTAAeffArf::scale`` method prior to loading the ARF data. For
+using the :doxy:`GCTAAeffArf::scale` method prior to loading the ARF data. For
 example, if the containment fraction was fixed to 80%, a scaling of 1.25
 should be applied to recover the full effective detection area.
 When response information is specified by an XML file (see :ref:`sec_cta_xml`),
@@ -355,7 +355,7 @@ position, and hence for a specific off-axis angle with respect to the
 camera centre. By default, the same effective area values are thus applied 
 to all off-axis angles :math:`\theta`.
 An off-axis dependence may however be introduced by supplying a positive
-value for the :math:`\sigma` parameter using the ``GCTAAeffArf::sigma`` 
+value for the :math:`\sigma` parameter using the :doxy:`GCTAAeffArf::sigma` 
 method, or by adding the ``sigma`` attribute to the ``EffectiveArea``
 parameter in the XML file. In that case, equation :eq:`cta_aeff_offset`
 is used for the off-axis dependence, with the supplied ARF values being
@@ -365,7 +365,7 @@ taken as the on-axis values.
 GCTAAeff2D
 """"""""""
 
-``GCTAAeff2D`` reads the full effective area as function of energies
+:doxy:`GCTAAeff2D` reads the full effective area as function of energies
 and off-axis angle from a FITS table. The FITS table is expected to be
 in the :ref:`sec_cta_rsptable` format. From this two-dimensional table,
 the effective area values are determine by bi-linear interpolation in
@@ -417,7 +417,7 @@ Below an example of a CTA performance table::
 Response table
 ^^^^^^^^^^^^^^
 
-The CTA response table class ``GCTAResponseTable`` provides a generic 
+The CTA response table class :doxy:`GCTAResponseTable` provides a generic 
 handle for multi-dimensional response information. It is based on the 
 response format used for storing response information for the
 *Fermi*/LAT telescope. In this format, all information is stored in

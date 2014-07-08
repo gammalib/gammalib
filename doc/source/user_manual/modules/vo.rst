@@ -7,7 +7,7 @@ Overview
 ~~~~~~~~
 
 The VO module provides classes that interface GammaLib to the Virtual 
-Observatory infrastructure. So far the module contains ``GVOClient``
+Observatory infrastructure. So far the module contains :doxy:`GVOClient`
 as only class, which implements a client for the Virtual Observatory.
 
 :ref:`fig_uml_vo` present an overview over the C++ classes of the VO
