@@ -554,7 +554,8 @@ void GModel::init_members(void)
     m_scales.clear();
     m_ids.clear();
     m_pars.clear();
-
+    m_ts = 0.0;
+    
     // Return
     return;
 }
@@ -573,6 +574,7 @@ void GModel::copy_members(const GModel& model)
     m_scales      = model.m_scales;
     m_ids         = model.m_ids;
     m_pars        = model.m_pars;
+    m_ts          = model.m_ts;
 
     // Return
     return;

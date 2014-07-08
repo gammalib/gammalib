@@ -133,6 +133,8 @@ public:
     bool                has_par(const std::string& name) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
+    const double        ts(void) const;
+    void                ts(const double ts);
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
     GModelPar           scale(const std::string& instrument) const;
@@ -157,6 +159,7 @@ protected:
     std::vector<GModelPar>   m_scales;       //!< Model instrument scale factors
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
+    double                   m_ts;           //!< Test Statistic of the Model
 };
 
 
@@ -233,5 +236,35 @@ void GModel::name(const std::string& name)
     m_name = name;
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Return TS value
+ *
+ * @return TS value.
+ *
+ * Returns the TS value.
+ ***************************************************************************/
+inline
+const double GModel::ts(void) const
+{
+    return m_ts;
+}
+
+
+/***********************************************************************//**
+ * @brief Set TS value
+ *
+ * @param[in] TS value.
+ *
+ * Set the TS value.
+ ***************************************************************************/
+inline
+void GModel::ts(const double ts)
+{
+    m_ts = ts;
+    return;
+}
+
 
 #endif /* GMODEL_HPP */
