@@ -1,4 +1,4 @@
-2014-06-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-07-08  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -6,6 +6,7 @@
         Add energy dispersion to CTA module
         Add pointing table support to CTA module
         Add += and -= operators to GSkymap
+        Add event filtering for binned analysis
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
 

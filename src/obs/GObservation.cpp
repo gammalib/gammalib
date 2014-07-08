@@ -916,13 +916,14 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
 
     // Initialise statistics
     #if defined(G_OPT_DEBUG)
-    int    n_bins        = 0;
-    int    n_used        = 0;
-    int    n_small_model = 0;
-    int    n_zero_data   = 0;
-    double sum_data      = 0.0;
-    double sum_model     = 0.0;
-    double init_value    = value;
+    int    n_bins         = 0;
+    int    n_used         = 0;
+    int    n_small_model  = 0;
+    int    n_zero_data    = 0;
+    int    n_exclude_data = 0;
+    double sum_data       = 0.0;
+    double sum_model      = 0.0;
+    double init_value     = value;
     #endif
 
     // Get number of parameters
@@ -947,6 +948,14 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
 
         // Get number of counts in bin
         double data = bin->counts();
+
+        // Skip bin if data is negative (filtering flag)
+        if (data < 0) {
+            #if defined(G_OPT_DEBUG)
+            n_exclude_data++;
+            #endif
+            continue;
+        }
 
         // Get model and derivative
         double model = this->model(models, *bin, &wrk_grad);
@@ -1066,6 +1075,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
     #if defined(G_OPT_DEBUG)
     std::cout << "Number of bins: " << n_bins << std::endl;
     std::cout << "Number of bins used for computation: " << n_used << std::endl;
+    std::cout << "Number of bins excluded from data: " << n_exclude_data << std::endl;
     std::cout << "Number of bins excluded due to small model: " << n_small_model << std::endl;
     std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
     std::cout << "Sum of data: " << sum_data << std::endl;
@@ -1127,6 +1137,11 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
 
         // Get number of counts in bin
         double data = bin->counts();
+
+        // Skip bin if data is negative (filtering flag)
+        if (data < 0) {
+            continue;
+        }
 
         // Get statistical uncertainty
         double sigma = bin->error();
