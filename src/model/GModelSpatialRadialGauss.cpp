@@ -254,10 +254,7 @@ double GModelSpatialRadialGauss::eval(const double&  theta,
     double sigma2    = sigma_rad * sigma_rad;
     double theta2    = theta   * theta;
     double value     = std::exp(-0.5 * theta2 / sigma2) /
-                       (gammalib::twopi * sigma2) / 0.8;
-    if ( theta > theta_max() ) {
-    	value = 0.0;
-    }
+                       (gammalib::twopi * sigma2);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -337,7 +334,7 @@ GSkyDir GModelSpatialRadialGauss::mc(const GEnergy& energy,
 double GModelSpatialRadialGauss::theta_max(void) const
 {
     // Return value
-    return (sigma() * gammalib::deg2rad * 1.7941227);
+    return (sigma() * gammalib::deg2rad * 5.0);
 }
 
 
