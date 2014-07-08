@@ -172,7 +172,7 @@ The class definition is structured in several sections:
 - Definition of protected methods
 - Definition of protected members
 
-Note tha most classes will derive from the abstract interface class
+Note that most classes will derive from the abstract interface class
 :doxy:`GBase` which imposes the implementation of the :doxy:`GBase::clear`, the
 :doxy`GBase::clone` and the :doxy:`GBase::print` methods.
 
