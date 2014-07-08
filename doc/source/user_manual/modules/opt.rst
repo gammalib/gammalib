@@ -7,14 +7,14 @@ Overview
 ~~~~~~~~
 
 The optimizer module provides classes for function optimization.
-The abstract ``GOptimizerFunction`` base class defines the interface
-for the function that should be optimized. The ``GOptimizerPar``
-class defines a parameter of the function, and the ``GOptimizerPars``
+The abstract :doxy:`GOptimizerFunction` base class defines the interface
+for the function that should be optimized. The :doxy:`GOptimizerPar`
+class defines a parameter of the function, and the :doxy:`GOptimizerPars`
 container class collects all function parameters. The optimizer
-is represented by the abstract ``GOptimizer`` base class. So far,
+is represented by the abstract :doxy:`GOptimizer` base class. So far,
 the only optimizer algorithm implemented in GammaLib is the
 Levenberg-Marquardt algorithm, implemented by the class
-``GOptimizerLM``.
+:doxy:`GOptimizerLM`.
 
 
 :ref:`fig_uml_opt` presents an overview over the C++ classes of
@@ -27,10 +27,10 @@ the optimizer module and their relations.
 
    Optimizer module
 
-The model parameter class ``GModelPar``, as a specific implementation
-of the optimizer parameter class, derives from ``GOptimizerPar``.
+The model parameter class :doxy:`GModelPar`, as a specific implementation
+of the optimizer parameter class, derives from :doxy:`GOptimizerPar`.
 One implementation of an optimizer function is the
-``GObservations::likelihood`` class that is used for maximum
+:doxy:`GObservations::likelihood` class that is used for maximum
 likelihood fitting within GammaLib.
 
 
@@ -43,7 +43,7 @@ the form :math:`f(x)=ax^2+bx+c` can be determined using the optimizer.
 The source code is in ``examples/cpp/optimize/optimize.cpp``.
 
 First, the function to be optimized has to be implemented as a class derived from
-``GOptimizerFunction``:
+:doxy:`GOptimizerFunction`:
 
 .. literalinclude:: ../../../../examples/cpp/optimize/optimize.cpp
    :language: cpp

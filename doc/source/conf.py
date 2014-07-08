@@ -25,7 +25,14 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.mathjax']
+try:
+    import sphinxcontrib.doxylink
+    extensions = ['sphinx.ext.mathjax', 'sphinxcontrib.doxylink']
+except:
+    print('WARNING: Python package `sphinxcontrib.doxylink` not found.\n'
+          'WARNING: Please install it to get fully-functional Sphinx docs.\n'
+          'WARNING: https://pypi.python.org/pypi/sphinxcontrib-doxylink\n')
+    extensions = ['sphinx.ext.mathjax']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -240,3 +247,9 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+# Define connection to Doxygen API docs
+# http://pythonhosted.org/sphinxcontrib-doxylink/index.html#confval-doxylink
+doxylink = {
+        'doxy' : ('doc/html/doxygen/GammaLib.tag', 'doxygen/'),
+}

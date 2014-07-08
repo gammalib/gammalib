@@ -21,25 +21,25 @@ is based on the cfitsio library for file access. The C++ classes of the
 module implement a logical representation of the FITS file in memory that
 can be handled independently of the file representation on disk.
 
-The central class of the FITS module is the ``GFits`` class that represents
+The central class of the FITS module is the :doxy:`GFits` class that represents
 a FITS file. The class is a container for classes derived from the abstract
-``GFitsHDU`` base class which represents a FITS extension (also called 
+:doxy:`GFitsHDU` base class which represents a FITS extension (also called 
 Header-Data Unit, HDU). Each extension is composed of one header,
-implemented by the ``GFitsHeader`` class and one data unit.
+implemented by the :doxy:`GFitsHeader` class and one data unit.
 The header is composed of cards representing the meta-data of the fits
-file. The cards are implemented by the ``GFitsHeaderCard`` class.
+file. The cards are implemented by the :doxy:`GFitsHeaderCard` class.
 The data unit is either an image, represented by the abstract
-``GFitsImage`` base class, or a table, represented by the abstract
-``GFitsTable`` base class. The image can be stored in various data
+:doxy:`GFitsImage` base class, or a table, represented by the abstract
+:doxy:`GFitsTable` base class. The image can be stored in various data
 types, each of which is implemented by a specific class derived from
-``GFitsImage``. The table can be either an ASCII table,
-implemented by the ``GFitsASCIITable`` class or a binary table,
-implemented by the ``GFitsBinTable`` class.
+:doxy:`GFitsImage`. The table can be either an ASCII table,
+implemented by the :doxy:`GFitsAsciiTable` class or a binary table,
+implemented by the :doxy:`GFitsBinTable` class.
 Each table is comprised of columns, represented by the abstract
-``GFitsTableCol`` base class. This class is the same for ASCII and binary
+:doxy:`GFitsTableCol` base class. This class is the same for ASCII and binary
 tables. Similar to images, table column data can be stored in a variety
 of data types, each of which is implemented by a specific class derived
-from ``GFitsTableCol``.
+from :doxy:`GFitsTableCol`.
 
 
 Creating a FITS file
@@ -109,7 +109,7 @@ Alternatively, one could have written::
 Here, the FITS file on disk is created in line 1. The (optional) ``true``
 argument specifies that the FITS file should be created if it does not
 yet exist. By default, this argument is set to ``false``, and an exception
-is raised when creating the ``GFits`` object. If a file exists already,
+is raised when creating the :doxy:`GFits` object. If a file exists already,
 line 1 will in fact open the file, and lines 2-17 will add an image and
 a table *in addition* to the image and table that exists already in the
 file. Line 1 is in fact identical to:
@@ -119,16 +119,16 @@ file. Line 1 is in fact identical to:
     GFits fits;
     fits.open("my_fits_file.fits", true);
 
-hence it creates an instance of the ``GFits`` object and then opens the
+hence it creates an instance of the :doxy:`GFits` object and then opens the
 file ``my_fits_file.fits``. Line 18 then saves the FITS file taking into
 account the modifications that have been made. Note that only at this point
-the modifications will be written to disk. The ``save`` method does not
+the modifications will be written to disk. The :doxy:`GFits::save` method does not
 take any filename as it saves a file that has been opened before. It takes
 however the (optional) clobber flag that specifies whether a file should
-be overwritten or not (as for the ``saveto`` method this flag is set to 
+be overwritten or not (as for the :doxy:`GFits::saveto` method this flag is set to 
 ``false`` by default).
 
-Note that one can also combine file opening with the ``saveto`` method
+Note that one can also combine file opening with the :doxy:`GFits::saveto` method
 to create a copy of the FITS file. Specifying::
 
     1  GFits fits("my_fits_file.fits", true);

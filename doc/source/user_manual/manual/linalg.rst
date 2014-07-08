@@ -7,7 +7,7 @@ Vectors
 General
 ^^^^^^^
 
-The ``GVector`` class implements a vector as a one-dimensional array of
+The :doxy:`GVector` class implements a vector as a one-dimensional array of
 successive double precision floating point values. You may allocate
 an empty vector using
 
@@ -45,7 +45,7 @@ vectors with 1, 2 or 3 elements:
      GVector vector(1.0, 2.0);         // Allocates vector [1.0, 2.0]
      GVector vector(1.0, 2.0, 3.0);    // Allocates vector [1.0, 2.0, 3.0]
 
-You can access vector elements using the ``[]`` operator:
+You can access vector elements using the :doxy:`GVector::operator[]` operator:
 
 .. code-block:: cpp
 
@@ -57,8 +57,8 @@ You can access vector elements using the ``[]`` operator:
        std::cout << vector[i] << std::endl;   // Dump all elements, one by row
      }
 
-Note that the ``[]`` operator does not check the validity of the element 
-index. If index checking is needed, use the ``at()`` method:
+Note that the :doxy:`GVector::operator[]` operator does not check the validity of the element 
+index. If index checking is needed, use the :doxy:`GVector::at` method:
 
 
 .. code-block:: cpp
@@ -71,7 +71,7 @@ index. If index checking is needed, use the ``at()`` method:
        std::cout << vector.at(i) << std::endl;   // Dump all elements, one by row
      }
 
-The ``at()`` method will throw an ``GException::out_of_range`` exception 
+The :doxy:`GVector::at` method will throw an :doxy:`GException::out_of_range` exception 
 in case that the specified index is not valid.
 
 You may also dump the content of a vector using
@@ -91,7 +91,7 @@ Vector arithmetics
 ^^^^^^^^^^^^^^^^^^
 
 You can handle vectors pretty much the same way you handle floating point 
-variables. ``GVector`` supports various arithmetic operations:
+variables. :doxy:`GVector` supports various arithmetic operations:
 
 .. code-block:: cpp
 
@@ -123,7 +123,7 @@ the usual formula
 (where :math:`N` is the number of vector elements).
 It is obvious that the dot product, as well as vector addition and 
 subtraction, require vectors of identical dimensions. If vectors are not 
-identical, an ``GException::vector_mismatch`` exception will be thrown:
+identical, an :doxy:`GException::vector_mismatch` exception will be thrown:
 
 .. code-block:: cpp
 
@@ -160,8 +160,8 @@ Finally, you can use the comparison operators
      int unequal = (a != b);     // True if at least one elements unequal
 
 to compare all elements of a vector. If all elements are
-identical, the ``==`` operator returns ``true``, otherwise ``false``.
-If at least one element differs, the ``!=`` operator returns ``true``, 
+identical, the :doxy:`GVector::operator==` operator returns ``true``, otherwise ``false``.
+If at least one element differs, the :doxy:`GVector::operator!=` operator returns ``true``, 
 if all elements are identical it returns ``false``.
 
 In addition to the operators, you can apply the following mathematical
@@ -209,15 +209,15 @@ A matrix is a two-dimensional array of double precision floating point
 values, arranged in rows and columns. Three matrix storage classes are 
 implemented in GammaLib:
 
-- ``GMatrix`` which explicitly stores all elements of a matrix
+- :doxy:`GMatrix` which explicitly stores all elements of a matrix
 
-- ``GMatrixSymmetric`` which implements a symmetric matrix and only stores 
+- :doxy:`GMatrixSymmetric` which implements a symmetric matrix and only stores 
   the lower-left triangle of matrix elements
 
-- ``GMatrixSparse`` which implements a sparse matrix and only stores the 
+- :doxy:`GMatrixSparse` which implements a sparse matrix and only stores the 
   non-zero elements of a matrix
 
-All matrix classes derive from the abstract ``GMatrixBase`` class.
+All matrix classes derive from the abstract :doxy:`GMatrixBase` class.
 
 
 .. _sec_matrix_storage:
@@ -228,7 +228,7 @@ Matrix storage classes
 In the most general case, the rows and columns of a matrix are stored in
 a continuous array of :math:`{\tt rows} \times {\tt columns}` memory
 locations. This storage type is referred to as a *full matrix*, and is
-implemented by the class ``GMatrix``. Operations on full matrixes are in
+implemented by the class :doxy:`GMatrix`. Operations on full matrixes are in
 general relatively fast, but memory requirements may be important to
 hold all the elements. In general matrixes are stored column-wise
 (or in column-major format). For example, the matrix ::
@@ -244,8 +244,8 @@ is stored in memory as ::
 Many physical or mathematical problems treat with a subclass of matrixes
 that is symmetric, i.e. for which the element :math:`(row,col)` is identical to
 the element :math:`(col,row)`. In this case, the duplicated elements need not to
-be stored. The class ``GMatrixSymmetric`` implements such a storage type.
-``GMatrixSymmetric`` stores the lower-left triangle of the matrix in 
+be stored. The class :doxy:`GMatrixSymmetric` implements such a storage type.
+:doxy:`GMatrixSymmetric` stores the lower-left triangle of the matrix in 
 column-major format. For illustration, the matrix ::
 
         1  2  3  4
@@ -267,7 +267,7 @@ are considerably reduced. This goes however at the expense of matrix
 element access, which has become now more complex. In particular,
 filling efficiently a sparse matrix is a non-trivial problem (see
 :ref:`sec_matrix_filling`). Sparse matrix storage is implemented by
-the ``GMatrixSparse`` class. A ``GMatrixSparse`` object contains
+the :doxy:`GMatrixSparse` class. A :doxy:`GMatrixSparse` object contains
 three one-dimensional arrays to store the matrix elements: a double type
 array that contains in continuous column-major order all non-zero
 elements, an int type array that contains for each non-zero element the
@@ -294,7 +294,7 @@ Bytes used to store the matrix is
 takes 8 Bytes, an int type value takes 4 Bytes). For realistic large
 systems, however, the gain in memory space can be dramatical.
 
-The usage of the ``GMatrix``, ``GMatrixSymmetric`` and ``GMatrixSparse``
+The usage of the :doxy:`GMatrix`, :doxy:`GMatrixSymmetric` and :doxy:`GMatrixSparse`
 classes is analoguous in that they implement basically all functions and 
 methods in an identical way. So from the semantics the user has not to worry 
 about the storage class. However, matrix element access speeds are not
@@ -440,8 +440,8 @@ Conversion from one storage type to another is performed using
 .. code-block:: cpp
 
      B = A.convert_to_full();               // Converts A -> GMatrix
-     B = A.convert_to_sym();                // Converts A -> GSymMatrix
-     B = A.convert_to_sparse();             // Converts A -> GSparseMatrix
+     B = A.convert_to_sym();                // Converts A -> GMatrixSymmetric
+     B = A.convert_to_sparse();             // Converts A -> GMatrixSparse
 
 Note that ``convert_to_sym()`` can only be applied to a matrix that is
 indeed symmetric.
@@ -491,8 +491,8 @@ matrix using
      GMatrix B = A.extract_lower_triangle();   // B holds lower triangle
      GMatrix B = A.extract_upper_triangle();   // B holds upper triangle
 
-This method is implemented for storage classes ``GMatrix`` and
-``GMatrixSymmetric``.
+This method is implemented for storage classes :doxy:`GMatrix` and
+:doxy:`GMatrixSymmetric`.
 
 
 
@@ -523,7 +523,7 @@ decomposition. Since the Cholesky decomposition can be performed inplace
 (i.e. without the allocation of additional memory to hold the result),
 the matrix replacement is most memory economic. In case that the
 original matrix should be kept, one may either copy it before into
-another ``GMatrix`` object or use the function
+another :doxy:`GMatrix` object or use the function
 
 .. code-block:: cpp
 
@@ -562,13 +562,13 @@ The only exception that does not work is
 
 .. code-block:: cpp
 
-     GSparseMatrix A(10,10);
+     GMatrixSparse A(10,10);
      A(0,0) = A(1,1) = A(2,2) = 1.0;        // WRONG: Cannot assign multiple at once
 
 In this case the value ``1.0`` is only assigned to the last element, i.e.
 ``A(2,2)``, the other elements will remain ``0``. This feature has to do with
 the way how the compiler translates the code and how  implements sparse
-matrix filling. ``GSparseMatrix`` provides a pointer for a new element to be
+matrix filling. :doxy:`GMatrixSparse` provides a pointer for a new element to be
 filled. Since there is only one such *fill pointer*, only one element
 can be filled at once in a statement. **So it is strongly advised to
 avoid multiple matrix element assignment in a single row.** Better write
@@ -576,7 +576,7 @@ the above code like
 
 .. code-block:: cpp
 
-     GSparseMatrix A;
+     GMatrixSparse A;
      A(0,0) = 1.0;
      A(1,1) = 1.0;
      A(2,2) = 1.0;
@@ -586,13 +586,13 @@ This way, element assignment works fine.
 Inverting a sparse matrix produces in general a full matrix, so the
 inversion function should be used with caution. Note that a full matrix
 that is stored in sparse format takes roughly twice the memory than a
-normal ``GMatrix`` object. If nevertheless the inverse of a sparse matrix
+normal :doxy:`GMatrix` object. If nevertheless the inverse of a sparse matrix
 should be examined, it is recommended to perform the analysis
 column-wise
 
 .. code-block:: cpp
 
-     GSparseMatrix A(rows,cols);            // Allocate sparse matrix
+     GMatrixSparse A(rows,cols);            // Allocate sparse matrix
      GVector       unit(rows);              // Allocate vector
      ...
      A.cholesky_decompose();                // Factorise matrix
@@ -626,9 +626,9 @@ operator
 may be mandatory. In principle, if a new element is inserted into a
 matrix a new memory cell has to be allocated for this element, and other
 elements may be moved. Memory allocation is quite time consuming, and to
-reduce the overhead, ``GSparseMatrix`` can be configured to allocate memory
+reduce the overhead, :doxy:`GMatrixSparse` can be configured to allocate memory
 in bunches. By default, each time more matrix memory is needed,
-``GSparseMatrix`` allocates 512 cells at once (or 6144 Bytes since each
+:doxy:`GMatrixSparse` allocates 512 cells at once (or 6144 Bytes since each
 element requires a double and a int storage location). If this amount of
 memory is not adequat one may change this value by using
 
@@ -655,7 +655,7 @@ than filling individual values.
 Still, if the matrix is big (i.e. several thousands of rows and
 columns), filling individual columns may still be slow. To speed-up
 dynamical matrix filling, an internal fill-stack has been implemented in
-``GSparseMatrix``. Instead of inserting values column-by-column, the columns
+:doxy:`GMatrixSparse`. Instead of inserting values column-by-column, the columns
 are stored in a stack and filled into the matrix once the stack is full.
 This reduces the number of dynamic memory allocations to let the matrix
 grow as it is built. By default, the internal stack is disabled. The
@@ -710,7 +710,7 @@ columns, it is better to perform them before adding. The code
 would be far more efficient.
 
 A avoidable overhead occurs for the case that the column to be added is
-sparse. The vector may contain many zeros, and ``GSparseMatrix`` has to
+sparse. The vector may contain many zeros, and :doxy:`GMatrixSparse` has to
 filter them out. If the sparsity of the column is known, this overhead
 can be avoided by directly passing a compressed array to ``add_col``:
 

@@ -24,60 +24,60 @@ instrument is in a given stable configuration that can be characterized
 by a single specific response function. Each gamma-ray observation is
 composed of events, a response function and a pointing.
 
-Observations are collected in the C++ container class ``GObservations``
-which is composed of a list of ``GObservation`` elements (the list is of
-arbitrary length; an empty list is a valid state of the ``GObservations``
-class). The observation container is furthermore composed of a ``GModels``
+Observations are collected in the C++ container class :doxy:`GObservations`
+which is composed of a list of :doxy:`GObservation` elements (the list is of
+arbitrary length; an empty list is a valid state of the :doxy:`GObservations`
+class). The observation container is furthermore composed of a :doxy:`GModels`
 model container class that holds a list of models used to describe the
 event distributions of the observations (see :ref:`sec_model`). The
-``GObservations`` class presents the central element of all scientific data
+:doxy:`GObservations` class presents the central element of all scientific data
 analyses, as it combines all data and all models in a single entity.
 
-Instrument specific implementations of ``GObservation`` objects are
-registered in the C++ registry class ``GObservationRegistry`` which
+Instrument specific implementations of :doxy:`GObservation` objects are
+registered in the C++ registry class :doxy:`GObservationRegistry` which
 statically collects one instance of each instrument-specific observation
 class that is available in GammaLib (see :ref:`sec_registry` for a general
 description of registry classes).
 
 The instrument response for a given observation is defined by the
-abstract base class ``GResponse``. This class is composed of the C++ class
-``GCaldb`` which implements the calibration data base that is required to
+abstract base class :doxy:`GResponse`. This class is composed of the C++ class
+:doxy:`GCaldb` which implements the calibration data base that is required to
 compute the response function for a given instrument and observation.
-``GCaldb`` supports the HEASARC CALDB format
+:doxy:`GCaldb` supports the HEASARC CALDB format
 (http://heasarc.nasa.gov/docs/heasarc/caldb/), but is sufficiently
 general to support also other formats (see :ref:`sec_caldb` to learn
 how to setup and to use a calibration database).
 
 The pointing for a given observation is defined by the abstract base
-class ``GPointing``. This class is composed of the C++ class ``GSkyDir`` which
+class :doxy:`GPointing`. This class is composed of the C++ class :doxy:`GSkyDir` which
 implements a sky direction, which is a position on the celestial sphere
-(``GSkyDir`` returns the position in equatorial and galactic coordinates).
+(:doxy:`GSkyDir` returns the position in equatorial and galactic coordinates).
 Note that the pointing needs not to be fixed during the observation but
 may evolve with time. In this case, the sky direction returned by
-``GPointing`` will explicitly depend on time.
+:doxy:`GPointing` will explicitly depend on time.
 
 The events for a given observation are defined by the abstract base
-class ``GEvents``. This class is composed of the C++ classes ``GGti`` and
-``GEbounds``. ``GGti`` implements so called *Good Time Intervals*, which defines
+class :doxy:`GEvents`. This class is composed of the C++ classes :doxy:`GGti` and
+:doxy:`GEbounds`. :doxy:`GGti` implements so called *Good Time Intervals*, which defines
 the time period(s) during which the data were taken (see :ref:`sec_time`).
-``GEbounds`` implements so called *Energy Boundaries*, which
+:doxy:`GEbounds` implements so called *Energy Boundaries*, which
 define the energy intervals that are covered by the data (see 
 :ref:`sec_energy`).
 
-``GEvents`` is also a container for the individual events, implemented by the
-abstract ``GEvent`` base class. 
+:doxy:`GEvents` is also a container for the individual events, implemented by the
+abstract :doxy:`GEvent` base class. 
 GammaLib distinguishes two types of events: event
 atoms, which are individual events, and event bins, which are
 collections of events with similar properties. Event atoms are
-implemented by the abstract base class ```GEventAtom``, while event bins are
-implemented by the abstract base class ``GEventBin``. Both classes derive
-from the abstract ``GEvent`` base class.
+implemented by the abstract base class :doxy:`GEventAtom`, while event bins are
+implemented by the abstract base class :doxy:`GEventBin`. Both classes derive
+from the abstract :doxy:`GEvent` base class.
 
 Each event type has it's own container class, which derives from the
-abstract ``GEvents`` base class. Event atoms are collected by the abstract
-``GEventList`` base class, while event bins are collected by the abstract
-``GEventCube`` base class. The ``GEventList`` class contains an instance of the
-abstract ``GRoi`` base class.
+abstract :doxy:`GEvents` base class. Event atoms are collected by the abstract
+:doxy:`GEventList` base class, while event bins are collected by the abstract
+:doxy:`GEventCube` base class. The :doxy:`GEventList` class contains an instance of the
+abstract :doxy:`GRoi` base class.
 
 .. _sec_obsxml:
 
@@ -106,8 +106,8 @@ class will be allocated upon reading the XML file. For a given instrument,
 observation identifiers must be unique.
 
 The specific format of the XML file for a given instrument is defined by the
-relevant instrument specific ``GObservation`` class. For example, a CTA
-observation implemented by the ``GCTAObservation`` class is described by:
+relevant instrument specific :doxy:`GObservation` class. For example, a CTA
+observation implemented by the :doxy:`GCTAObservation` class is described by:
 
 .. code-block:: xml
 
@@ -141,14 +141,14 @@ constructor:
 
     GObservations obs("my_observations.xml");
 
-Alternatively, the ``GObservations::load`` method can be used:
+Alternatively, the :doxy:`GObservations::load` method can be used:
 
 .. code-block:: cpp
 
     GObservations obs;
     obs.load("my_observations.xml");
 
-The ``GObservations::read`` method enables loading the observation from an 
+The :doxy:`GObservations::read` method enables loading the observation from an 
 already opened XML file:
  
 .. code-block:: cpp
@@ -176,33 +176,33 @@ Handling the instrument response
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The instrument response to incoming gamma-rays is described by the abstract
-``GResponse`` class from which an instrument specific implemention needs to
+:doxy:`GResponse` class from which an instrument specific implemention needs to
 be derived.
 The general instrument response function
 :math:`R(p', E', t' | d, p, E, t)`
-is provided by the ``GResponse::irf(GEvent&, GPhoton&, GObservation&)`` method.
+is provided by the :doxy:`GResponse::irf(GEvent&, GPhoton&, GObservation&)` method.
 :math:`R` is defined as the effective detection area per time, energy and solid 
 angle (in units of :math:`cm^2 s^{-1} MeV^{-1} sr^{-1}`) for measuring an event
 at position :math:`p'` with an energy of :math:`E'` at time :math:`t'` if the
 photon arrives from direction :math:`p` with energy :math:`E` at time 
 :math:`t` on the instrument that is pointed towards :math:`d`.
 The measured event quantities :math:`p'`, :math:`E'` and :math:`t'` are
-combined in the abstract ``GEvent`` class from which an instrument specific
+combined in the abstract :doxy:`GEvent` class from which an instrument specific
 implementation needs to be derived.
 The photon characteristics :math:`p`, :math:`E` and :math:`t` are combined in the
-``GPhoton`` class.
+:doxy:`GPhoton` class.
 
 The photon arrival direction :math:`p` is expressed by a coordinate on
 the celestial sphere, for example Right Ascension and Declination, implemented
-by the ``GSkyDir`` class.
+by the :doxy:`GSkyDir` class.
 For imaging instruments, the measured event position :math:`p'` is
 likely also a coordinate on the celestial sphere, while for non-imaging
 instruments (such as coded masks or Compton telescopes), :math:`p'`
 will be typically the pixel number of the detector that measured the event.
 The definition of :math:`p'` needs to be implemented for each instrument
-as a derived class from the abstract ``GInstDir`` class.
-Energies (:math:`E'` and :math:`E`) are implemented by the ``GEnergy`` class,
-times (:math:`t'` and :math:`t`) are represented by the ``GTime`` class.
+as a derived class from the abstract :doxy:`GInstDir` class.
+Energies (:math:`E'` and :math:`E`) are implemented by the :doxy:`GEnergy` class,
+times (:math:`t'` and :math:`t`) are represented by the :doxy:`GTime` class.
 
 Assuming that the photon intensity received from a gamma-ray source is described
 by the source model :math:`S(p, E, t)`
@@ -232,26 +232,26 @@ The integration over sky positions :math:`p`, expressed as a zenith angle
     \sin \theta \, {\rm d}\theta \, {\rm d}\phi
     :label: pirf
 
-which is provided by the ``GResponse::irf(GEvent&, GSource&, GObservation&)``
+which is provided by the :doxy:`GResponse::irf(GEvent&, GSource&, GObservation&)`
 method. Note that in contrast to the method described above, this method
-takes the ``GSource`` class instead of the ``GPhoton`` class as argument.
-``GSource`` differs from ``GPhoton`` in that the photon arrival direction
-:math:`p` is replaced by the spatial component ``GModelSpatial`` of a source
+takes the :doxy:`GSource` class instead of the :doxy:`GPhoton` class as argument.
+:doxy:`GSource` differs from :doxy:`GPhoton` in that the photon arrival direction
+:math:`p` is replaced by the spatial component :doxy:`GModelSpatial` of a source
 model.
-Equation :eq:`pirf` is used by the ``GModelSky::eval`` and
-``GModelSky::eval_gradients`` methods for computation of the instrument
+Equation :eq:`pirf` is used by the :doxy:`GModelSky::eval` and
+:doxy:`GModelSky::eval_gradients` methods for computation of the instrument
 response to a source model (see :ref:`fig_calltree_model`). 
 
 Dependent on the source model type (point source, radial source, elliptical
-source or diffuse source), ``GResponse::irf(GEvent&, GSource&, GObservation&)``
+source or diffuse source), :doxy:`GResponse::irf(GEvent&, GSource&, GObservation&)`
 calls the methods ``GResponse::irf_ptsrc``, ``GResponse::irf_radial``,
 ``GResponse::irf_elliptical`` or ``GResponse::irf_diffuse``. All these methods
-have a default implementation in ``GResponse``, thus formally the methods do
+have a default implementation in :doxy:`GResponse`, thus formally the methods do
 not need to be implemented in the derived class.
 However, except for ``GResponse::irf_ptsrc``, the code for the methods has not
 been written so far, hence if an instrument should support models others
 than the point source model, the respective methods need to be implemented in
-the instrument specific implementation of the ``GResponse`` class.
+the instrument specific implementation of the :doxy:`GResponse` class.
 
 A maximum likelihood analysis of the data generally needs the computation of the
 predicted number of events within the selection region for each source model.
@@ -277,31 +277,31 @@ Here, the event selection region is defined by a Region of Interest
 defines the selected energies :math:`E'`, and Good Time Intervals
 (:math:`\rm GTI`) that the define the selected time intervals.
 The definition of the Region of Interest is instrument specific and needs
-to be implemented by a class derived from the abstract ``GRoi`` class.
-Energy boundaries are specified by the ``GEbounds`` class, time intervals
-by the ``GGti`` class.
+to be implemented by a class derived from the abstract :doxy:`GRoi` class.
+Energy boundaries are specified by the :doxy:`GEbounds` class, time intervals
+by the :doxy:`GGti` class.
 
-The integration over the Region of Interest
+The integration over the region of interest
 
 .. math::
     N_{\rm ROI} = \int_{\rm ROI} (p', E', t'| d) \, {\rm d}p'
 
-is provided by the ``GResponse::npred(GSource&, GObservation&)`` method.
+is provided by the :doxy:`GResponse::npred(GSource&, GObservation&)` method.
 Dependent on the source model type (point source, radial source, elliptical
-source or diffuse source), ``GResponse::npred(GSource&, GObservation&)``
+source or diffuse source), :doxy:`GResponse::npred(GSource&, GObservation&)`
 calls the methods ``GResponse::npred_ptsrc``, ``GResponse::npred_radial``,
 ``GResponse::npred_elliptical`` or ``GResponse::npred_diffuse``.
-All these methods have a default implementation in ``GResponse``, which
-all make use of the pure virtual ``GResponse::npred(GPhoton&, GObservation&)``
+All these methods have a default implementation in :doxy:`GResponse`, which
+all make use of the pure virtual :doxy:`GResponse::npred(GPhoton&, GObservation&)`
 method that needs to be implemented by the instrument specific derived
 class.
-See :ref:`fig_calltree_model` to see how the ``GResponse::npred`` method is
+See :ref:`fig_calltree_model` to see how the :doxy:`GResponse::npred` method is
 used in response computations of source models.
 
 A final word about deadtime corrections.
 Deadtime corrections need to be taken into account at the level of the instrument
 specific response classes.
-Deadtime corrections can be determined using the ``GObservation::deadc`` method,
+Deadtime corrections can be determined using the :doxy:`GObservation::deadc` method,
 which provides the time dependent deadtime correction factor.
 
 .. _sec_caldb:
