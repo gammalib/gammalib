@@ -481,13 +481,15 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
         // Loop over all layers
         for (int layer = 0; layer < nmaps(); ++layer) {
 
-        	if (map(dir,layer) == 0.0)
-        	{
-        		std::string msg = "Trying to divide by zero."
-        		                          " map entries have to be strictly non-zero for division";
-        		throw GException::invalid_value(G_OP_UNARY_DIV, msg);
-        	}
-            // Subtract value
+            // Check for zero value
+            if (map(dir,layer) == 0.0) {
+                std::string msg = "Trying to divide by zero."
+                                  " Map entries have to be strictly non-zero"
+                                  " for division";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
+            
+            // Divide value
             (*this)(index, layer) /= map(dir, layer);
 
         } // endfor: looped over all layers
@@ -1907,29 +1909,28 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
 GSkymap sqrt(const GSkymap& map)
 {
     // Initialise result vector
-	GSkymap result(map);
+    GSkymap result(map);
 
     // Loop over all maps
     for (int i = 0; i < map.nmaps(); ++i) {
 
-    	// Loop over all bins
-    	for (int j = 0; j < map.npix(); ++j) {
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
 
-    		// Get the content from the bin
-    		double content = map(j,i);
+            // Get the content from the bin
+            double content = map(j,i);
 
-    		// Check if content is not negative
-    		if (content < 0.0) {
+            // Check if content is not negative
+            if (content < 0.0) {
+                std::string msg = "Negative value envountered."
+                                  " Cannot take the sqrt from a negative value";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
 
-    			std::string msg = "Negative value envountered. "
-    			        		           " Cannot take the sqrt from a negative value";
-    			throw GException::invalid_value(G_OP_UNARY_DIV, msg);
-    		}
+            // Set content of the result map
+            result(j,i) = std::sqrt(content);
 
-    		// Set content of the result map
-    		result(j,i) = std::sqrt(content);
-
-    	} // endfor: Loop over all bins
+        } // endfor: Loop over all bins
 
     } // endfor: Loop over all maps
 
