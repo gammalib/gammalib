@@ -58,9 +58,9 @@ public:
     ~GApplication(void);
 
     // Operators
-    GApplication& operator=(const GApplication& app);
-    GApplicationPar&         operator[](const std::string& name);
-    const GApplicationPar&   operator[](const std::string& name) const;
+    GApplication&          operator=(const GApplication& app);
+    GApplicationPar&       operator[](const std::string& name);
+    const GApplicationPar& operator[](const std::string& name) const;
 
     // Methods
     void               clear(void);
@@ -103,7 +103,7 @@ protected:
     std::vector<std::string> m_args;       //!< Command line arguments
     std::time_t              m_tstart;     //!< Calendar start time of execution
     std::clock_t             m_cstart;     //!< Clock start time of execution
-    GApplicationPars                    m_pars;       //!< Application parameters
+    GApplicationPars         m_pars;       //!< Application parameters
 };
 
 
@@ -189,6 +189,9 @@ const std::string& GApplication::par_filename(void) const
 inline
 const std::string& GApplication::log_filename(void) const
 {
+    // Set logfile name from parameters (in case it has changed)
+    const_cast<GApplication*>((this))->set_log_filename();
+
     // Return
     return (m_logfile);
 }

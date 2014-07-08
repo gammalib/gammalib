@@ -295,7 +295,6 @@ void GApplication::logFileOpen(const bool& clobber)
         // Initialise the application logger
         log.open(log_filename(), clobber);
 
-
     }
 
     // Set logger chattiness

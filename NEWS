@@ -25,7 +25,10 @@ None
 
 4. Application module
 ---------------------
-None
+The logfile name is now always parsed in the parameter file before it is
+employed. This guarantees that a logfile parameter change is taken into
+account at any stage. This corrects a bug where the logfile name change
+was not taken into account when running tools under Python. 
 
 
 5. Base module

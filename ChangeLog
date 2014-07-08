@@ -9,6 +9,7 @@
         Add event filtering for binned analysis
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
+        Correctly take into account logfile name change in Python
 
 
 2014-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
