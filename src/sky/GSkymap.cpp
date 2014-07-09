@@ -481,12 +481,14 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
         // Loop over all layers
         for (int layer = 0; layer < nmaps(); ++layer) {
 
-        	if (map(dir,layer) == 0.0)
-        	{
-        		std::string msg = "Trying to divide by zero."
-        		                          " map entries have to be strictly non-zero for division";
-        		throw GException::invalid_value(G_OP_UNARY_DIV, msg);
-        	}
+            // Check for division by zero
+            if (map(dir,layer) == 0.0) {
+                std::string msg = "Trying to divide by zero."
+                                  " Map entries have to be strictly non-zero"
+                                  " for division";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
+            
             // Subtract value
             (*this)(index, layer) /= map(dir, layer);
 

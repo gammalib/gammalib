@@ -89,10 +89,10 @@ None
 
 12. Sky module
 --------------
-Addition and subtraction unary operators have been added to GSkymap that
-allow adding or subtracing skymaps. Values in the right-hand side skymap
-are bi-linearily interpolated, allowing for reprojection or rebinning of
-skymaps.
+Addition, subtraction, multiplication and division unary operators have
+been added to GSkymap that allow adding or subtracing skymaps. Values in
+the right-hand side skymap are bi-linearily interpolated, allowing for
+reprojection or rebinning of skymaps.
 
 
 13. Support module
