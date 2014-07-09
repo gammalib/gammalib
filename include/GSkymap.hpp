@@ -78,6 +78,8 @@
  ***************************************************************************/
 class GSkymap : public GBase {
 
+	friend GSkymap sqrt(const GSkymap& map);
+
 public:
     // Constructors and destructors
     GSkymap(void);

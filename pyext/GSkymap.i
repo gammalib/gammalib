@@ -196,4 +196,7 @@ public:
     GSkymap copy() {
         return (*self);
     }
+    GSkymap sqrt() {
+        return sqrt(*self);
+    }
 };
