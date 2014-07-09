@@ -133,8 +133,8 @@ public:
     bool                has_par(const std::string& name) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
-    const double        ts(void) const;
-    void                ts(const double ts);
+    const double&       ts(void) const;
+    void                ts(const double& ts);
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
     GModelPar           scale(const std::string& instrument) const;
@@ -246,7 +246,7 @@ void GModel::name(const std::string& name)
  * Returns the TS value.
  ***************************************************************************/
 inline
-const double GModel::ts(void) const
+const double& GModel::ts(void) const
 {
     return m_ts;
 }
@@ -260,7 +260,7 @@ const double GModel::ts(void) const
  * Set the TS value.
  ***************************************************************************/
 inline
-void GModel::ts(const double ts)
+void GModel::ts(const double& ts)
 {
     m_ts = ts;
     return;

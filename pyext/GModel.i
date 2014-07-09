@@ -66,8 +66,8 @@ public:
     void                name(const std::string& name);
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
-    const double        ts(void) const;
-    void                ts(const double ts);
+    const double&       ts(void) const;
+    void                ts(const double& ts);
     GModelPar           scale(const std::string& instrument) const;
     void                scale(const GModelPar& par);
     std::string         ids(void) const;
