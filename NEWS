@@ -73,7 +73,10 @@ cone (applies so for the point sources, radial source and elliptical sources).
 
 9. Numerics module
 ------------------
-None
+Status information is now tracked using a message string in GIntegral. The
+message string is accessible using the message() method. If the string was
+set, the isvalid() method will return false. Otherwise, if no warning or
+error occured, the isvalid() method returns true.
 
 
 10. Observation module

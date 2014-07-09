@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GIntegral.hpp - Integration class                     *
+ *                    GIntegral.i - Integration class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,20 +48,22 @@ public:
     virtual ~GIntegral(void);
 
     // Methods
-    void             clear(void);
-    GIntegral*       clone(void) const;
-    void             max_iter(const int& max_iter);
-    void             eps(const double& eps);
-    void             silent(const bool& silent);
-    const int&       iter(void) const;
-    const int&       max_iter(void) const;
-    const double&    eps(void) const;
-    const bool&      silent(void) const;
-    void             kernel(GFunction* kernel);
-    const GFunction* kernel(void) const;
-    double           romb(const double& a, const double& b, const int& k = 5);
-    double           trapzd(const double& a, const double& b, const int& n = 1,
-                            double result = 0.0);
+    void               clear(void);
+    GIntegral*         clone(void) const;
+    void               max_iter(const int& max_iter);
+    void               eps(const double& eps);
+    void               silent(const bool& silent);
+    const int&         iter(void) const;
+    const int&         max_iter(void) const;
+    const double&      eps(void) const;
+    const bool&        silent(void) const;
+    const bool&        isvalid(void) const;
+    const std::string& message(void) const;
+    void               kernel(GFunction* kernel);
+    const GFunction*   kernel(void) const;
+    double             romb(const double& a, const double& b, const int& k = 5);
+    double             trapzd(const double& a, const double& b, const int& n = 1,
+                              double result = 0.0);
 };
 
 

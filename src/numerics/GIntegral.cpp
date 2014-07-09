@@ -197,8 +197,9 @@ GIntegral* GIntegral::clone(void) const
  ***************************************************************************/
 double GIntegral::romb(const double& a, const double& b, const int& k)
 {
-    // Initialise result
+    // Initialise result and status
     double result = 0.0;
+    m_isvalid     = true;
     
     // Continue only if integration range is valid
     if (b > a) {
@@ -225,11 +226,13 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
             if (is_notanumber(s[m_iter]) || is_infinite(s[m_iter])) {
-                std::cout << "*** ERROR: GIntegral::romb";
-                std::cout << "(a=" << a << ", b=" << b << ", k=" << k << "):";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (s[" << m_iter << "]=" << s[m_iter] << ")";
-                std::cout << std::endl;
+                m_message = "*** ERROR: GIntegral::romb"
+                            "(a="+gammalib::str(a)+", b="+gammalib::str(b)+""
+                            ", k="+gammalib::str(k)+"): NaN/Inf encountered"
+                            " (s["+gammalib::str(m_iter)+"]="
+                            ""+gammalib::str(s[m_iter])+")";
+                std::cout << m_message << std::endl;
+                m_isvalid = false;
             }
             #endif
 
@@ -252,22 +255,23 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
         delete [] s;
         delete [] h;
 
-        // Dump warning
-        if (!m_silent) {
-            if (!converged) {
+        // Set status and optionally dump warning
+        if (!converged) {
+            m_isvalid = false;
+            m_message = "Integration uncertainty "+
+                        gammalib::str(std::abs(dss))+
+                        " exceeds tolerance of "+
+                        gammalib::str(m_eps * std::abs(ss))+
+                        " after "+gammalib::str(m_iter)+
+                        " iterations. Result "+
+                        gammalib::str(ss)+
+                        " is inaccurate.";
+            if (!m_silent) {
                 std::string origin = "GIntegral::romb("+
                                      gammalib::str(a)+", "+
                                      gammalib::str(b)+", "+
                                      gammalib::str(k)+")";
-                std::string msg = "Integration uncertainty "+
-                                  gammalib::str(std::abs(dss))+
-                                  " exceeds tolerance of "+
-                                  gammalib::str(m_eps * std::abs(ss))+
-                                  " after "+gammalib::str(m_iter)+
-                                  " iterations. Result "+
-                                  gammalib::str(ss)+
-                                  " is inaccurate.";
-                gammalib::warning(origin, msg);
+                gammalib::warning(origin, m_message);
             }
         }
     
@@ -325,14 +329,15 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
 
             // Verify that step level is valid
             if (it == 0) {
-                std::string msg = "Invalid step level "+gammalib::str(it)+
-                                  " encountered for"
-                                  " a="+gammalib::str(a)+
-                                  ", b="+gammalib::str(b)+
-                                  ", n="+gammalib::str(n)+
-                                  ", result="+gammalib::str(result)+
-                                  ". Looks like n is too large.";
-                gammalib::warning(G_TRAPZD, msg);
+                m_isvalid = false;
+                m_message = "Invalid step level "+gammalib::str(it)+
+                            " encountered for"
+                            " a="+gammalib::str(a)+
+                            ", b="+gammalib::str(b)+
+                            ", n="+gammalib::str(n)+
+                            ", result="+gammalib::str(result)+
+                            ". Looks like n is too large.";
+                gammalib::warning(G_TRAPZD, m_message);
             }
 
             // Set step size
@@ -341,14 +346,15 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
 
             // Verify that step is >0
             if (del == 0) {
-                std::string msg = "Invalid step size "+gammalib::str(del)+
-                                  " encountered for"
-                                  " a="+gammalib::str(a)+
-                                  ", b="+gammalib::str(b)+
-                                  ", n="+gammalib::str(n)+
-                                  ", result="+gammalib::str(result)+
-                                  ". Step is too small to make sense.";
-                gammalib::warning(G_TRAPZD, msg);
+                m_isvalid = false;
+                m_message = "Invalid step size "+gammalib::str(del)+
+                            " encountered for"
+                            " a="+gammalib::str(a)+
+                            ", b="+gammalib::str(b)+
+                            ", n="+gammalib::str(n)+
+                            ", result="+gammalib::str(result)+
+                            ". Step is too small to make sense.";
+                gammalib::warning(G_TRAPZD, m_message);
             }
 
             // Sum up values
@@ -395,8 +401,20 @@ std::string GIntegral::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Relative precision"));
         result.append(gammalib::str(eps()));
-        result.append("\n"+gammalib::parformat("Max. number of iterations"));
+        result.append("\n"+gammalib::parformat("Iterations"));
+        result.append(gammalib::str(iter()));
+        result.append(" (maximum: ");
         result.append(gammalib::str(max_iter()));
+        result.append(")");
+
+        // Append status information
+        result.append("\n"+gammalib::parformat("Status"));
+        if (isvalid()) {
+            result.append("Result accurate.");
+        }
+        else {
+            result.append(message());
+        }
         if (silent()) {
             result.append("\n"+gammalib::parformat("Warnings")+"suppressed");
         }
@@ -428,6 +446,8 @@ void GIntegral::init_members(void)
     m_eps       = 1.0e-6;
     m_max_iter  = 20;
     m_iter      = 0;
+    m_isvalid   = true;
+    m_message.clear();
     m_silent    = false;
 
     // Return
@@ -447,6 +467,8 @@ void GIntegral::copy_members(const GIntegral& integral)
     m_eps      = integral.m_eps;
     m_max_iter = integral.m_max_iter;
     m_iter     = integral.m_iter;
+    m_isvalid  = integral.m_isvalid;
+    m_message  = integral.m_message;
     m_silent   = integral.m_silent;
 
     // Return
@@ -518,10 +540,11 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double* dy)
             double w   = c[i+1] - d[i];
             double den = ho - hp;
             if (den == 0.0) {
-                std::string msg = "Invalid step size "+gammalib::str(den)+
-                                  " encountered. Two values in xa array are"
-                                  " identical.";
-                gammalib::warning(G_POLINT, msg);
+                m_isvalid = false;
+                m_message = "Invalid step size "+gammalib::str(den)+
+                            " encountered. Two values in xa array are"
+                            " identical.";
+                gammalib::warning(G_POLINT, m_message);
             }
             den  = w/den;
             d[i] = hp*den;

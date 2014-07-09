@@ -7,6 +7,7 @@
         Add pointing table support to CTA module
         Add event filtering for binned analysis
         Add +=, -=, *= and /= operators to GSkymap
+        Add integration status tracking to GIntegral
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
         Correctly take into account logfile name change in Python
