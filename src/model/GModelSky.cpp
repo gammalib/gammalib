@@ -665,6 +665,9 @@ void GModelSky::read(const GXmlElement& xml)
     // Set model name
     name(xml.attribute("name"));
 
+    // Set model TS
+    ts(gammalib::todouble(xml.attribute("ts")));
+
     // Set instruments
     instruments(xml.attribute("instrument"));
 
@@ -735,6 +738,7 @@ void GModelSky::write(GXmlElement& xml) const
     // Set model attributes
     src->attribute("name", name());
     src->attribute("type", type());
+    src->attribute("ts", gammalib::str(ts(), 8));
     std::string instruments = this->instruments();
     if (instruments.length() > 0) {
         src->attribute("instrument", instruments);
