@@ -44,6 +44,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_INTEGRAL                             //!< Debug integration
 
 /* __ Constants __________________________________________________________ */
 
@@ -826,6 +827,14 @@ double cta_irf_diffuse_kern_theta::eval(const double& theta)
             GIntegral integral(&integrand);
             integral.eps(1.0e-2);
             irf = integral.romb(0.0, gammalib::twopi) * psf * sin_theta;
+            #if defined(G_DEBUG_INTEGRAL)
+            if (!integral.isvalid()) {
+                std::cout << "cta_irf_diffuse_kern_theta(theta=";
+                std::cout << theta*gammalib::rad2deg << " deg) psf=";
+                std::cout << psf << ":" << std::endl;
+                std::cout << integral.print() << std::endl;
+            }
+            #endif
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
@@ -995,6 +1004,13 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
         GIntegral integral(&integrand);
         integral.eps(1.0e-5);
         npred = integral.romb(0.0, gammalib::twopi) * sin_theta;
+        #if defined(G_DEBUG_INTEGRAL)
+        if (!integral.isvalid()) {
+            std::cout << "cta_npred_diffuse_kern_theta(theta=";
+            std::cout << theta*gammalib::rad2deg << " deg):" << std::endl;
+            std::cout << integral.print() << std::endl;
+        }
+        #endif
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
