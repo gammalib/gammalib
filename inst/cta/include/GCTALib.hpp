@@ -67,6 +67,8 @@
 #include "GCTAModelRadialPolynom.hpp"
 #include "GCTAModelRadialProfile.hpp"
 #include "GCTAModelRadialAcceptance.hpp"
+#include "GCTAMeanPsf.hpp"
+#include "GCTAExposure.hpp"
 
 /* __ CTA specific definitions ___________________________________________ */
 #define G_CTA_MJDREF 51544.5                 //!< Reference of CTA time frame

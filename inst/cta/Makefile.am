@@ -45,7 +45,9 @@ sources = src/GCTASupport.cpp \
           src/GCTAModelRadialGauss.cpp \
           src/GCTAModelRadialPolynom.cpp \
           src/GCTAModelRadialProfile.cpp \
-          src/GCTAModelRadialAcceptance.cpp
+          src/GCTAModelRadialAcceptance.cpp \
+	  src/GCTAMeanPsf.cpp \
+	  src/GCTAExposure.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
@@ -84,7 +86,9 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAModelRadialPolynom.hpp \
                      include/GCTAModelRadialProfile.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
-                     include/GCTALib.hpp
+                     include/GCTALib.hpp \
+	 	     include/GCTAMeanPsf.hpp \
+		     include/GCTAExposure.hpp
 
 # Calibration files to distribute
 caldb_pinx = caldb/caldb.indx
