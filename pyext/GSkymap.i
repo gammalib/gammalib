@@ -130,6 +130,8 @@ public:
     // Operators
     GSkymap& operator+=(const GSkymap& map);
     GSkymap& operator-=(const GSkymap& map);
+    GSkymap& operator*=(const GSkymap& map);
+    GSkymap& operator/=(const GSkymap& map);
 
     // Methods
     void                  clear(void);
