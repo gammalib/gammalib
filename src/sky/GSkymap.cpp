@@ -1893,3 +1893,48 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
     // Return HDU
     return hdu;
 }
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Computes square root of skymap elements
+ *
+ * @param[in] map Skymap.
+ * @return Skymap containing the square root of every element.
+ ***************************************************************************/
+GSkymap sqrt(const GSkymap& map)
+{
+    // Initialise result vector
+    GSkymap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+    		// Check if content is not negative
+    		if (content < 0.0) {
+                std::string msg = "Negative value envountered."
+                                  " Cannot take the sqrt from a negative value";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
+
+            // Set content of the result map
+            result(j,i) = std::sqrt(content);
+
+        } // endfor: Loop over all bins
+
+    } // endfor: Loop over all maps
+
+    // Return vector
+    return result;
+}
