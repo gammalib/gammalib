@@ -79,6 +79,7 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
 
     // Return
     return;
@@ -712,6 +713,53 @@ void TestGCTAResponse::test_response_expcube(void)
     obs.append(obs_cta);
     cube.fill(obs);
     cube.save("test_cta_expcube_two.fits", true);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test PSF cube handling
+ ***************************************************************************/
+void TestGCTAResponse::test_response_psfcube(void)
+{
+    // Test PSF cube constructors
+    test_try("CTA PSF cube void constructor");
+    try {
+        GCTAMeanPsf cube;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("CTA PSF cube map constructor");
+    try {
+        GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTAMeanPsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test set method
+    GCTAObservation obs_cta;
+    obs_cta.load(cta_cntmap);
+    obs_cta.response(cta_irf, GCaldb(cta_caldb));
+    GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTAMeanPsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+    cube.set(obs_cta);
+    cube.save("test_cta_psfcube_one.fits", true);
+
+    // Test fill method
+    GObservations obs;
+    obs_cta.id("000001");
+    obs.append(obs_cta);
+    obs_cta.id("000002");
+    obs.append(obs_cta);
+    cube.fill(obs);
+    cube.save("test_cta_psfcube_two.fits", true);
 
     // Return
     return;

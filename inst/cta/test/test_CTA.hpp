@@ -57,6 +57,7 @@ public:
     void                      test_response_irf_diffuse(void);
     void                      test_response_npred_diffuse(void);
     void                      test_response_expcube(void);
+    void                      test_response_psfcube(void);
     void 					  test_energy_integration(GCTAResponse rsp);
 };
 

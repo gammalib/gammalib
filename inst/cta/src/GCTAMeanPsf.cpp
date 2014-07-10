@@ -98,6 +98,10 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
  *
  * Constructs a mean PSF cube by computing the mean PSF from all CTA
  * observations found in the observation container.
+ *
+ * @todo Think about the way how the delta node array is computed. The PSF
+ * should be more finely sampled when being close to the peak. For the
+ * moment a simple linear sampling is used.
  ***************************************************************************/
 GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
                          const std::string&   coords,
@@ -120,8 +124,8 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
     // Set delta node array
     m_deltas.clear();
     for (int i = 0; i < ndbins; ++i) {
-        double binsize = (dmax*dmax)/double(ndbins);
-        double delta   = std::sqrt(binsize*(double(i)+0.5));
+        double binsize = dmax / double(ndbins);
+        double delta   = binsize * (double(i)+0.5);
         m_deltas.append(delta);
     }
 
@@ -359,11 +363,11 @@ void GCTAMeanPsf::fill(const GObservations& obs)
 
 
 /***********************************************************************//**
- * @brief Write CTA PSF cube into FITS file.
+ * @brief Write CTA PSF cube into FITS object.
  *
  * @param[in] fits FITS file.
  *
- * @todo Write also delta binning information
+ * Write the CTA PSF cube into a FITS object.
  ***************************************************************************/
 void GCTAMeanPsf::write(GFits& fits) const
 {
@@ -375,6 +379,9 @@ void GCTAMeanPsf::write(GFits& fits) const
 
     // Write delta nodes
     m_deltas.write(fits, "DELTAS");
+
+    // Set the nodes unit to "deg"
+    (*fits.table("DELTAS"))["Value"]->unit("deg");
 
     // Return
     return;
@@ -403,8 +410,6 @@ void GCTAMeanPsf::load(const std::string& filename)
  * @param[in] clobber Overwrite existing file? (true=yes)
  *
  * Save the PSF cube into a FITS file.
- *
- * @todo Implement method
  ***************************************************************************/
 void GCTAMeanPsf::save(const std::string& filename, const bool& clobber) const
 {
