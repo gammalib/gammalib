@@ -83,7 +83,6 @@ GCTAExposure::GCTAExposure(const GCTAExposure& cube)
 /***********************************************************************//**
  * @brief Exposure cube constructor
  *
- * @param[in] obs     Observation container.
  * @param[in] wcs     World Coordinate System.
  * @param[in] coords  Coordinate System (CEL or GAL).
  * @param[in] x       X coordinate of sky map centre (deg).
@@ -94,11 +93,10 @@ GCTAExposure::GCTAExposure(const GCTAExposure& cube)
  * @param[in] ny      Number of pixels in y direction.
  * @param[in] ebounds Energy boundaries.
  *
- * Constructs an exposure cube by computing the total exposure from all
- * CTA observations found in the observation container.
+ * Constructs an exposure cube by specifying the sky map grid and the energy
+ * boundaries.
  ***************************************************************************/
-GCTAExposure::GCTAExposure(const GObservations& obs,
-                           const std::string&   wcs,
+GCTAExposure::GCTAExposure(const std::string&   wcs,
                            const std::string&   coords,
                            const double&        x,
                            const double&        y,
@@ -117,9 +115,6 @@ GCTAExposure::GCTAExposure(const GObservations& obs,
     // Create sky map
     m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
 
-    // Fill the exposure cube
-    fill(obs);
-    
     // Return
     return;
 }
@@ -210,6 +205,9 @@ GCTAExposure* GCTAExposure::clone(void) const
  * @brief Set exposure cube from one CTA observation
  *
  * @param[in] obs CTA observation.
+ *
+ * Set the exposure cube from a single CTA observations. The cube pixel
+ * values are computed as product of the effective area and the livetime.
  ***************************************************************************/
 void GCTAExposure::set(const GCTAObservation& obs)
 {
@@ -219,28 +217,28 @@ void GCTAExposure::set(const GCTAObservation& obs)
     // Get references on CTA response and pointing direction
     const GCTAResponse& rsp = obs.response();
     const GSkyDir&      pnt = obs.pointing().dir();
+
+    // Loop over all pixels in sky map
+    for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+        // Compute theta angle with respect to pointing direction
+        // in radians
+        GSkyDir dir     = m_cube.inx2dir(pixel);
+        double  theta   = pnt.dist(dir);
     
-    // Loop over all exposure cube energy bins
-    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+        // Loop over all exposure cube energy bins
+        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-        // Get logE/TeV
-        double logE = m_ebounds.emean(iebin).log10TeV();
-
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-
-            // Compute theta angle with respect to pointing direction
-            // in radians
-            GSkyDir dir     = m_cube.inx2dir(pixel);
-            double  theta   = pnt.dist(dir);
+            // Get logE/TeV
+            double logE = m_ebounds.elogmean(iebin).log10TeV();
 
             // Set exposure cube (effective area * lifetime)
             m_cube(pixel, iebin) = rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                    obs.livetime();
+                                   obs.livetime();
 
-        } // endfor: looped over all pixels
+        } // endfor: looped over energy bins
 
-    } // endfor: looped over energy bins
+    } // endfor: looped over all pixels
 
     // Return
     return;
@@ -251,6 +249,10 @@ void GCTAExposure::set(const GCTAObservation& obs)
  * @brief Fill exposure cube from observation container
  *
  * @param[in] obs Observation container.
+ *
+ * Set the exposure cube by summing the exposure for all CTA observations in
+ * an observation container. The cube pixel values are computed as the sum
+ * over the products of the effective area and the livetime.
  ***************************************************************************/
 void GCTAExposure::fill(const GObservations& obs)
 {
@@ -267,28 +269,28 @@ void GCTAExposure::fill(const GObservations& obs)
             // Get references on CTA response and pointing direction
             const GCTAResponse& rsp = cta->response();
             const GSkyDir&      pnt = cta->pointing().dir();
+
+            // Loop over all pixels in sky map
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+                // Compute theta angle with respect to pointing direction
+                // in radians
+                GSkyDir dir     = m_cube.inx2dir(pixel);
+                double  theta   = pnt.dist(dir);
     
-            // Loop over all exposure cube energy bins
-            for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                // Loop over all exposure cube energy bins
+                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-                // Get logE/TeV
-                double logE = m_ebounds.emean(iebin).log10TeV();
-
-                // Loop over all pixels in sky map
-                for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-
-                    // Compute theta angle with respect to pointing direction
-                    // in radians
-                    GSkyDir dir     = m_cube.inx2dir(pixel);
-                    double  theta   = pnt.dist(dir);
+                    // Get logE/TeV
+                    double logE = m_ebounds.elogmean(iebin).log10TeV();
 
                     // Add to exposure cube (effective area * lifetime)
                     m_cube(pixel, iebin) += rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
                                             cta->livetime();
 
-                } // endfor: looped over all pixels
+                } // endfor: looped over energy bins
 
-            } // endfor: looped over energy bins
+            } // endfor: looped over all pixels
     
         } // endif: observation was a CTA observation
 

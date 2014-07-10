@@ -45,8 +45,7 @@ public:
     // Constructors and destructors
     GCTAExposure(void);
     GCTAExposure(const GCTAExposure& cube);
-    GCTAExposure(const GObservations& obs,
-                 const std::string&   wcs,
+    GCTAExposure(const std::string&   wcs,
                  const std::string&   coords,
                  const double&        x,
                  const double&        y,
@@ -66,7 +65,8 @@ public:
     const GEbounds& ebounds(void) const;
     void            write(GFits& file) const;
     void            load(const std::string& filename);
-    void            save(const std::string& filename, const bool& clobber) const;
+    void            save(const std::string& filename,
+                         const bool& clobber = false) const;
 };
 
 /***********************************************************************//**
