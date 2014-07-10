@@ -1,4 +1,4 @@
-2014-07-08  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-07-10  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -8,6 +8,7 @@
         Add event filtering for binned analysis
         Add +=, -=, *= and /= operators to GSkymap
         Add integration status tracking to GIntegral
+        Add GCTAExposure and GCTAMeanPsf classes
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
         Correctly take into account logfile name change in Python

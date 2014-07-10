@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-8 July 2014
+10 July 2014
 
 
 1. Introduction
@@ -181,6 +181,12 @@ and azimuth on the sky as function of time.
 The type of the GCTAModelCubeBackground class has been set to GCTACubeBackground,
 the type of the GCTAModelIrfBackground class to GCTAIrfBackground. XML files need
 to be adapted accordingly.
+
+For cube-style analysis, the GCTAExposure and GCTAMeanPsf classes have been added.
+GCTAExposure represents the summed exposure for a list of CTA observations
+(computed as the sum of effective area times livetime), GCTAMeanPsf represents
+the average PSF, computed by weighing the PSF of each observation by the respective
+exposure. 
 
 
 21. COMPTEL interface
