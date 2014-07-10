@@ -199,7 +199,10 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
 {
     // Initialise result and status
     double result = 0.0;
-    m_isvalid     = true;
+
+    // Initialise integration status information
+    m_isvalid = true;
+    m_calls   = 0;
     
     // Continue only if integration range is valid
     if (b > a) {
@@ -260,7 +263,7 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
             m_isvalid = false;
             m_message = "Integration uncertainty "+
                         gammalib::str(std::abs(dss))+
-                        " exceeds tolerance of "+
+                        " exceeds absolute tolerance of "+
                         gammalib::str(m_eps * std::abs(ss))+
                         " after "+gammalib::str(m_iter)+
                         " iterations. Result "+
@@ -312,6 +315,7 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
             // Evaluate integrand at boundaries
             double y_a = m_kernel->eval(a);
             double y_b = m_kernel->eval(b);
+            m_calls += 2;
             
             // Compute result
             result = 0.5*(b-a)*(y_a + y_b);
@@ -364,6 +368,7 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
                 
                 // Evaluate integrand
                 double y = m_kernel->eval(x);
+                m_calls++;
 
                 // Add integrand
                 sum += y;
@@ -401,6 +406,8 @@ std::string GIntegral::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Relative precision"));
         result.append(gammalib::str(eps()));
+        result.append("\n"+gammalib::parformat("Function calls"));
+        result.append(gammalib::str(calls()));
         result.append("\n"+gammalib::parformat("Iterations"));
         result.append(gammalib::str(iter()));
         result.append(" (maximum: ");
@@ -449,6 +456,7 @@ void GIntegral::init_members(void)
     m_isvalid   = true;
     m_message.clear();
     m_silent    = false;
+    m_calls     = 0;
 
     // Return
     return;
@@ -470,6 +478,7 @@ void GIntegral::copy_members(const GIntegral& integral)
     m_isvalid  = integral.m_isvalid;
     m_message  = integral.m_message;
     m_silent   = integral.m_silent;
+    m_calls    = integral.m_calls;
 
     // Return
     return;

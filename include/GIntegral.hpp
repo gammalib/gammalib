@@ -61,6 +61,7 @@ public:
     void               eps(const double& eps);
     void               silent(const bool& silent);
     const int&         iter(void) const;
+    const int&         calls(void) const;
     const int&         max_iter(void) const;
     const double&      eps(void) const;
     const bool&        silent(void) const;
@@ -81,13 +82,14 @@ protected:
     double polint(double* xa, double* ya, int n, double x, double *dy);
 
     // Protected data area
-    GFunction*  m_kernel;       //!< Pointer to function kernel
-    double      m_eps;          //!< Integration precision
-    int         m_max_iter;     //!< Maximum number of iterations
-    int         m_iter;         //!< Number of iterations used
-    bool        m_isvalid;      //!< Integration status code (0=okay)
-    std::string m_message;      //!< Status message
-    bool        m_silent;       //!< Suppress integration warnings
+    GFunction*  m_kernel;    //!< Pointer to function kernel
+    double      m_eps;       //!< Requested relative integration precision
+    int         m_max_iter;  //!< Maximum number of iterations
+    int         m_iter;      //!< Number of iterations used
+    int         m_calls;     //!< Number of function calls used
+    bool        m_isvalid;   //!< Integration result valid (true=yes)
+    std::string m_message;   //!< Status message (if result is invalid)
+    bool        m_silent;    //!< Suppress integration warnings in console
 };
 
 
@@ -129,9 +131,9 @@ const int& GIntegral::max_iter(void) const
 
 
 /***********************************************************************//**
- * @brief Set precision
+ * @brief Set relative precision
  *
- * @param[in] eps Precision.
+ * @param[in] eps Relative precision.
  ***************************************************************************/
 inline
 void GIntegral::eps(const double& eps)
@@ -142,14 +144,26 @@ void GIntegral::eps(const double& eps)
 
 
 /***********************************************************************//**
- * @brief Get precision
+ * @brief Get relative precision
  *
- * @return Precision.
+ * @return Relative precision.
  ***************************************************************************/
 inline
 const double& GIntegral::eps(void) const
 {
     return m_eps;
+}
+
+
+/***********************************************************************//**
+ * @brief Get number of function calls
+ *
+ * @return Number of function calls.
+ ***************************************************************************/
+inline
+const int& GIntegral::calls(void) const
+{
+    return m_calls;
 }
 
 
