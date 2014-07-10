@@ -248,7 +248,7 @@ void GCTAMeanPsf::set(const GCTAObservation& obs)
         for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
             // Get logE/TeV
-            double logE = m_ebounds.emean(iebin).log10TeV();
+            double logE = m_ebounds.elogmean(iebin).log10TeV();
 
             // Loop over delta values
             for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
@@ -307,7 +307,7 @@ void GCTAMeanPsf::fill(const GObservations& obs)
                 for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
 
                     // Get logE/TeV
-                    double logE = m_ebounds.emean(iebin).log10TeV();
+                    double logE = m_ebounds.elogmean(iebin).log10TeV();
 
                     // Compute exposure weight
                     double weight = rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *

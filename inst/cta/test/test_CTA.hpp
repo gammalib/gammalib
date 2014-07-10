@@ -47,16 +47,17 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGCTAResponse* clone(void) const;
+    void                      test_response(void);
     void                      test_response_aeff(void);
     void                      test_response_psf(void);
     void                      test_response_psf_king(void);
     void                      test_response_npsf(void);
     void                      test_response_edisp(void);
-    void 					  test_energy_integration(GCTAResponse rsp);
     void                      test_response_edispRMF(void);
     void                      test_response_irf_diffuse(void);
     void                      test_response_npred_diffuse(void);
-    void                      test_response(void);
+    void                      test_response_expcube(void);
+    void 					  test_energy_integration(GCTAResponse rsp);
 };
 
 
