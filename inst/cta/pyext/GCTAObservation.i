@@ -40,7 +40,6 @@ public:
     GCTAObservation(void);
     explicit GCTAObservation(const std::string& instrument);
     GCTAObservation(const GCTAObservation& obs);
-    GCTAObservation(const GObservation& obs);
     virtual ~GCTAObservation(void);
 
     // Implemented pure virtual base class methods

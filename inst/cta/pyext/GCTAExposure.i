@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAMeanPsf.hpp - CTA mean point spread function class       *
+ *                 GCTAExposure.i - CTA exposure cube class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Chia-Chun Lu                                     *
  * ----------------------------------------------------------------------- *
@@ -19,59 +19,58 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAMeanPsf.hpp
- * @brief CTA point spread function base class definition
+ * @file GCTAExposure.hpp
+ * @brief CTA exposure cube class definition
  * @author Chia-Chun Lu
  */
 
 %{
 /* __ Includes ___________________________________________________________ */
-#include "GCTAMeanPsf.hpp"
+#include "GCTAExposure.hpp"
 #include "GTools.hpp"
 %}
 
+
 /***********************************************************************//**
- * @class GCTAMeanPsf
+ * @class GCTAExposure
  *
- * @brief Abstract base class for the CTA point spread function
+ * @brief CTA exposure cube class
  *
- * This class implements the abstract base class for the CTA point spread
- * function.
+ * This class implements a CTA exposure cube which provides the average
+ * exposure for binned analysis as function of sky position and log10
+ * energy.
  ***************************************************************************/
-class GCTAMeanPsf : public GBase {
-
-public:
-   
+class GCTAExposure : public GBase {
+public:   
     // Constructors and destructors
-    GCTAMeanPsf(void);
-    GCTAMeanPsf(const GCTAMeanPsf& psf);
-    GCTAMeanPsf(const GObservations& obs, 
-		const double& x, const double& y, 
-		const double& dx, const double& dy,
-		const int& nx, const int& ny,
-		const double& emin, const double& emax, const int& nebins,
-		const double& min, const double& max, 
-		const int& nbins);
-    virtual ~GCTAMeanPsf(void);
-
-    // Operators
-    GCTAMeanPsf& operator=(const GCTAMeanPsf& psf);
+    GCTAExposure(void);
+    GCTAExposure(const GCTAExposure& cube);
+    GCTAExposure(const GObservations& obs,
+                 const std::string&   wcs,
+                 const std::string&   coords,
+                 const double&        x,
+                 const double&        y,
+                 const double&        dx,
+                 const double&        dy,
+                 const int&           nx,
+                 const int&           ny,
+                 const GEbounds&      ebounds);
+    virtual ~GCTAExposure(void);
 
     // Methods
-    void         clear(void);
-    GCTAMeanPsf* clone(void) const;
-    void         load(const std::string& filename);
-    void         write(GFits& file) const;
-    void         save(const std::string& filename,
-		      const bool& clobber) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;   
-    const GSkymap& map(void) const;
+    void            clear(void);
+    GCTAExposure*   clone(void) const;
+    void            set(const GCTAObservation& obs);
+    void            fill(const GObservations& obs);
+    const GSkymap&  cube(void) const;
     const GEbounds& ebounds(void) const;
-    const GNodeArray& deltas(void) const;
+    void            write(GFits& file) const;
+    void            load(const std::string& filename);
+    void            save(const std::string& filename, const bool& clobber) const;
 };
 
 /***********************************************************************//**
- * @brief GCTAMeanPsf class extension
+ * @brief GCTAExposure class extension
  ***************************************************************************/
-%extend GCTAMeanPsf {
+%extend GCTAExposure {
 };

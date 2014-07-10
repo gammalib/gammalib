@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAMeanPsf.cpp - CTA mean point spread function class       *
+ *       GCTAMeanPsf.cpp - CTA mean point spread function cube class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Chia-Chun Lu                                     *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAMeanPsf.cpp
- * @brief CTA mean point spread function class implementation
+ * @brief CTA mean point spread function class cube implementation
  * @author Chia-Chun Lu
  */
 
@@ -30,8 +30,9 @@
 #endif
 #include "GCTAMeanPsf.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAExposure.hpp"
 #include "GMath.hpp"
-using namespace gammalib;
+
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
@@ -65,74 +66,82 @@ GCTAMeanPsf::GCTAMeanPsf(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] psf Point spread function.
+ * @param[in] cube Point spread function.
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& psfcube)
+GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(psfcube);
+    copy_members(cube);
 
     // Return
     return;
 }
 
+
 /***********************************************************************//**
- * @brief constructor taking definitions of 4D bins.
+ * @brief Mean PSF cube constructor
  *
- * @param[in] obs observation container.
- * @param[in] x   sky coordinate.
- * @param[in] y   sky coordinate.
- * @param[in] dx  pixel size.
- * @param[in] dy  pixel size.
- * @param[in] nx  number of x pixels.
- * @param[in] ny  number of y pixels.
- * @param[in] emin minimum energy.
- * @param[in] emax maximum energy.
- * @param[in] nebins number of energy bins.
- * @param[in] min minimum delta.
- * @param[in] max maximum delta.
- * @param[in] nbins number of delta bins.
+ * @param[in] obs     Observation container.
+ * @param[in] wcs     World Coordinate System.
+ * @param[in] coords  Coordinate System (CEL or GAL).
+ * @param[in] x       X coordinate of sky map centre (deg).
+ * @param[in] y       Y coordinate of sky map centre (deg).
+ * @param[in] dx      Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy      Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx      Number of pixels in x direction.
+ * @param[in] ny      Number of pixels in y direction.
+ * @param[in] ebounds Energy boundaries.
+ * @param[in] dmin    Minimum delta (deg).
+ * @param[in] dmax    Maximum delta (deg.
+ * @param[in] ndbins  Number of delta bins.
  *
- * This constructor resample a Psf function and saves it as a 4D skymap.
- * The index of the map is 
- * The bin size is decided evenly in delta^2 space.
+ * Constructs a mean PSF cube by computing the mean PSF from all CTA
+ * observations found in the observation container.
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(const GObservations& obs, 
-			 const double& x, const double& y, 
-			 const double& dx, const double& dy,
-			 const int& nx, const int& ny,
-			 const double& emin, const double& emax, const int& nebins,
-			 const double& min, const double& max, const int& nbins)
+GCTAMeanPsf::GCTAMeanPsf(const GObservations& obs,
+                         const std::string&   wcs,
+                         const std::string&   coords,
+                         const double&        x,
+                         const double&        y,
+                         const double&        dx,
+                         const double&        dy,
+                         const int&           nx,
+                         const int&           ny,
+                         const GEbounds&      ebounds,
+                         const double&        dmin,
+                         const double&        dmax,
+                         const int&           ndbins)
 {
     // Initialise class members
     init_members();
-    m_obs = obs;
-    m_nbins = nbins;
-    m_nebins = nebins;
-    m_cube = GSkymap("CAR", "CEL", x, y, dx, dy,
-		     nx, ny, nebins*nbins);
-    // Initialise energy bounds
-    GEnergy gemin = GEnergy(emin, "TeV");
-    GEnergy gemax = GEnergy(emax, "TeV");
-    m_ebounds = GEbounds(nebins, gemin, gemax, true);
 
-    // Initialise delta node array
-    std::vector<double> deltas;
-    for (int i = 0 ; i < nbins; i++){
-      double binsize = (max*max - min*min)/nbins;
-      double delta = std::sqrt(binsize*0.5*i + min*min);
-      deltas.push_back(delta);
+    // Store energy boundaries
+    m_ebounds = ebounds;
+
+    // Set delta node array
+    m_deltas.clear();
+    for (int i = 0; i < nbins; ++i) {
+        double binsize = (max*max - min*min)/nbins;
+        double delta   = std::sqrt(binsize*0.5*i + min*min);
+        m_deltas.append(delta);
     }
-    m_deltas = GNodeArray(deltas);
 
-    //
-    set_psfcube();
+    // Compute number of sky maps
+    int nmaps = m_ebounds.size() * m_deltas.size();
+    
+    // Create sky map
+    m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
+
+    // Fill the PSF cube
+    fill(obs);
+
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Destructor
@@ -156,13 +165,13 @@ GCTAMeanPsf::~GCTAMeanPsf(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] psf Point spread function.
- * @return Point spread function.
+ * @param[in] psf Mean PSF cube.
+ * @return Mean PSF cube.
  ***************************************************************************/
-GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& psf)
+GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
 {
     // Execute only if object is not identical
-    if (this != &psf) {
+    if (this != &cube) {
 
         // Free members
         free_members();
@@ -171,7 +180,7 @@ GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& psf)
         init_members();
 
         // Copy members
-        copy_members(psf);
+        copy_members(cube);
 
     } // endif: object was not identical
 
@@ -179,44 +188,12 @@ GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& psf)
     return *this;
 }
 
-/***********************************************************************//**
- * @brief Set the psf skymap
- * This function takes the psf response function given in the observation xml
- * to produce a 4D psf cube.
- ***************************************************************************/
-void GCTAMeanPsf::set_psfcube(void)
-{
-  for (int i = 0 ; i< m_obs.size(); i++){
-    GCTAObservation *obs = dynamic_cast<GCTAObservation*>(m_obs[i]);
-    GCTAResponse rsp = obs->response();
-    GSkyDir pnt = obs->pointing().dir();
-    for (int ie = 0 ; ie < m_nebins ; ie++){
-      for (int pix = 0 ; pix < m_cube.npix() ; pix++){
-	for (int idelta = 0 ; idelta < m_nbins ; idelta++){
-	  GSkyDir dir = m_cube.inx2dir(pix);
-	  double logeng = m_ebounds.emean(ie).log10TeV();
-	  double theta = pnt.dist(dir); // radian
-	  double delta = m_deltas[idelta]*deg2rad; // radian
-	  int inx = idelta + ie * m_nbins;
-	  m_cube(pix,inx) = rsp.psf(delta, theta, 
-				    0.0, 0.0, 0.0, 
-				    logeng);
-	}
-      }
-    }
-    save("test.fits",true);
-  }
-}
 
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
-
-
-
-
 
 /***********************************************************************//**
  * @brief Clear instance
@@ -225,12 +202,10 @@ void GCTAMeanPsf::set_psfcube(void)
  ***************************************************************************/
 void GCTAMeanPsf::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
-    //this->GCTAMeanPsf::free_members();
 
     // Initialise members
-    // this->GCTAMeanPsf::init_members();
     init_members();
 
     // Return
@@ -239,9 +214,162 @@ void GCTAMeanPsf::clear(void)
 
 
 /***********************************************************************//**
- * @brief Write CTA event cube into FITS file.
+ * @brief Clone instance
+ *
+ * @return Deep copy of mean PSF instance.
+ ***************************************************************************/
+GCTAMeanPsf* GCTAMeanPsf::clone(void) const
+{
+    return new GCTAMeanPsf(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set PSF cube from one CTA observation
+ *
+ * @param[in] obs CTA observation.
+ ***************************************************************************/
+void GCTAMeanPsf::set(const GCTAObservation& obs)
+{
+    // Clear PSF cube
+    clear_cube();
+
+    // Get references on CTA response and pointing direction
+    const GCTAResponse& rsp = obs.response();
+    const GSkyDir&      pnt = obs.pointing().dir();
+
+    // Loop over all pixels in sky map
+    for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+        // Compute theta angle with respect to pointing direction
+        // in radians
+        GSkyDir dir     = m_cube.inx2dir(pixel);
+        double  theta   = pnt.dist(dir);
+    
+        // Loop over all exposure cube energy bins
+        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+
+            // Get logE/TeV
+            double logE = m_ebounds.emean(iebin).log10TeV();
+
+            // Loop over delta values
+            for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+
+                // Compute delta in radians
+                double delta = m_deltas[idelta] * gammalib::deg2rad;
+
+                // Set map index
+                int imap = offset(idelta, iebin);
+                
+                // Set PSF cube
+                m_cube(pixel, imap) = rsp.psf(delta, theta, 0.0, 0.0, 0.0, logE);
+
+            } // endfor: looped over delta bins
+        } // endfor: looped over energy bins
+    } // endfor: looped over all pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fill PSF cube from observation container
+ *
+ * @param[in] obs Observation container.
+ ***************************************************************************/
+void GCTAMeanPsf::fill(const GObservations& obs)
+{
+    // Clear PSF cube
+    clear_cube();
+
+    // Initialise skymap for exposure weight accumulation
+    GSkymap exposure(m_cube);
+
+    // Loop over all observations in container
+    for (int i = 0; i < obs.size(); ++i) {
+
+        // Get observation and continue only if it is a CTA observation
+        const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(m_obs[i]);
+        if (cta != NULL) {
+
+            // Get references on CTA response and pointing direction
+            const GCTAResponse& rsp = cta.response();
+            const GSkyDir&      pnt = cta.pointing().dir();
+
+            // Loop over all pixels in sky map
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+                // Compute theta angle with respect to pointing direction
+                // in radians
+                GSkyDir dir   = m_cube.inx2dir(pixel);
+                double  theta = pnt.dist(dir);
+    
+                // Loop over all energy bins
+                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+
+                    // Get logE/TeV
+                    double logE = m_ebounds.emean(iebin).log10TeV();
+
+                    // Compute exposure weight
+                    double weight = rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                    cta->livetime();
+
+                    // Accumulate weights
+                    exposure(pixel, iebin) += weight;
+
+                    // Loop over delta values
+                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+
+                        // Compute delta in radians
+                        double delta = m_deltas[idelta] * gammalib::deg2rad;
+
+                        // Set map index
+                        int imap = offset(idelta, iebin);
+                
+                        // Add on PSF cube
+                        m_cube(pixel, imap) +=
+                           rsp.psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+
+                    } // endfor: looped over delta bins
+
+                } // endfor: looped over energy bins
+
+            } // endfor: looped over all pixels
+
+        } // endif: observation was a CTA observation
+
+    } // endfor: looped over observations
+
+    // Compute mean PSF cube by dividing though the weights
+    for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+            if (exposure(pixel, iebin) > 0.0) {
+                double norm = 1.0 / exposure(pixel, iebin);
+                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                    int imap = offset(idelta, iebin);
+                    m_cube(pixel, imap) *= norm;
+                }
+            }
+            else {
+                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                    m_cube(pixel, imap) = 0.0;
+                }
+            }
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA PSF cube into FITS file.
  *
  * @param[in] fits FITS file.
+ *
+ * @todo Write also delta binning information
  ***************************************************************************/
 void GCTAMeanPsf::write(GFits& fits) const
 {
@@ -256,41 +384,37 @@ void GCTAMeanPsf::write(GFits& fits) const
 }
 
 
-
-
 /***********************************************************************//**
- * @brief Clone instance
- *
- * @return Deep copy of point spread function instance.
- ***************************************************************************/
-GCTAMeanPsf* GCTAMeanPsf::clone(void) const
-{
-    return new GCTAMeanPsf(*this);
-}
-
-/***********************************************************************//**
- * @brief Load point spread function from performance table
+ * @brief Load PSF cube from FITS file
  *
  * @param[in] filename Performance table file name.
  *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
+ * Loads the PSF cube from a FITS file into the object.
  *
- * This method loads the point spread function information from a PSF
- * response table.
+ * @todo Implement method
  ***************************************************************************/
 void GCTAMeanPsf::load(const std::string& filename)
 {
     return;
 }
 
-void GCTAMeanPsf::save(const std::string& filename,
-		       const bool& clobber) const
+
+/***********************************************************************//**
+ * @brief Save PSF cube into FITS file
+ *
+ * @param[in] filename PSF cube FITS file name.
+ * @param[in] clobber Overwrite existing file? (true=yes)
+ *
+ * Save the PSF cube into a FITS file.
+ *
+ * @todo Implement method
+ ***************************************************************************/
+void GCTAMeanPsf::save(const std::string& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
 
-    // Write event cube
+    // Write PSF cube
     write(fits);
 
     // Save FITS file
@@ -300,16 +424,30 @@ void GCTAMeanPsf::save(const std::string& filename,
 
 
 /***********************************************************************//**
- * @brief Print point spread function information
+ * @brief Print PSF cube information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing point spread function information.
+ * @return String containing PSF cube information.
+ *
+ * @todo Add content
  ***************************************************************************/
 std::string GCTAMeanPsf::print(const GChatter& chatter) const
 {
+    // Initialise result string
     std::string result;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTAMeanPsf ===");
+
+    } // endif: chatter was not silent
+
+    // Return result
     return result;
 }
+
 
 /*==========================================================================
  =                                                                         =
@@ -323,12 +461,9 @@ std::string GCTAMeanPsf::print(const GChatter& chatter) const
 void GCTAMeanPsf::init_members(void)
 {
     // Initialise members
-    m_obs.clear();
     m_cube.clear();
     m_ebounds.clear();
     m_deltas.clear();
-    m_nbins = 0;
-    m_nebins = 0;
    
     // Return
     return;
@@ -338,17 +473,14 @@ void GCTAMeanPsf::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] psfcube psf cube
+ * @param[in] cube PSF cube.
  ***************************************************************************/
 void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
 {
-    // Initialise members
-    m_obs = cube.m_obs;
-    m_cube = cube.m_cube;
+    // Copy members
+    m_cube    = cube.m_cube;
     m_ebounds = cube.m_ebounds;
-    m_deltas = cube.m_deltas;
-    m_nbins = m_nbins;
-    m_nebins = m_nebins;
+    m_deltas  = cube.m_deltas;
 
     // Return
     return;
@@ -359,6 +491,29 @@ void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
  ***************************************************************************/
 void GCTAMeanPsf::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clear all pixels in the PSF cube
+ ***************************************************************************/
+void GCTAMeanPsf::clear_cube(void)
+{
+    // Loop over all maps
+    for (int imap = 0; imap < m_cube.nmaps(); ++imap) {
+
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Reset cube value to zero
+            m_cube(pixel, imap) = 0.0;
+
+        } // endfor: looped over all pixels
+
+    } // endfor: looped over maps
+
     // Return
     return;
 }

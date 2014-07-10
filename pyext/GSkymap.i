@@ -115,7 +115,7 @@ public:
                      const int&         nside,
                      const std::string& order,
                      const int&         nmaps = 1);
-    explicit GSkymap(const std::string& proj,
+    explicit GSkymap(const std::string& wcs,
                      const std::string& coords,
                      const double&      x,
                      const double&      y,

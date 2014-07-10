@@ -35,13 +35,16 @@
 #include "GObservations.hpp"
 #include "GNodeArray.hpp"
 
+
 /***********************************************************************//**
  * @class GCTAMeanPsf
  *
  * @brief class for the CTA point spread function
  *
- * This class implements class for the CTA point spread
- * function.
+ * This class implements a mean CTA point spread function which provides the
+ * average point spread function for binned analysis as function of sky
+ * position, log10 energy and delta angle between true and measured photon
+ * direction.
  ***************************************************************************/
 class GCTAMeanPsf : public GBase {
 
@@ -49,45 +52,53 @@ public:
    
     // Constructors and destructors
     GCTAMeanPsf(void);
-    GCTAMeanPsf(const GCTAMeanPsf& psf);
-    GCTAMeanPsf(const GObservations& obs, 
-		const double& x, const double& y, 
-		const double& dx, const double& dy,
-		const int& nx, const int& ny,
-		const double& emin, const double& emax, const int& nebins,
-		const double& min, const double& max, const int& nbins);
+    GCTAMeanPsf(const GCTAMeanPsf& cube);
+    GCTAMeanPsf(const GObservations& obs,
+                const std::string&   wcs,
+                const std::string&   coords,
+                const double&        x,
+                const double&        y,
+                const double&        dx,
+                const double&        dy,
+                const int&           nx,
+                const int&           ny,
+                const GEbounds&      ebounds,
+                const double&        dmin,
+                const double&        dmax,
+                const int&           ndbins);
     virtual ~GCTAMeanPsf(void);
 
     // Operators
-    GCTAMeanPsf& operator=(const GCTAMeanPsf& psf);
+    GCTAMeanPsf& operator=(const GCTAMeanPsf& cube);
 
     // Methods
-    void         clear(void);
-    GCTAMeanPsf* clone(void) const;
-    void         load(const std::string& filename);
-    void         write(GFits& file) const;
-    void         save(const std::string& filename, 
-		      const bool& clobber) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
-    const GSkymap& map(void) const;
-    const GEbounds& ebounds(void) const;
+    void              clear(void);
+    GCTAMeanPsf*      clone(void) const;
+    void              set(const GCTAObservation& obs);
+    void              fill(const GObservations& obs);
+    const GSkymap&    map(void) const;
+    const GEbounds&   ebounds(void) const;
     const GNodeArray& deltas(void) const;
+    void              write(GFits& file) const;
+    void              load(const std::string& filename);
+    void              save(const std::string& filename, const bool& clobber) const;
+    std::string       print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Methods
     void init_members(void);
-    void copy_members(const GCTAMeanPsf& psf);
+    void copy_members(const GCTAMeanPsf& cube);
     void free_members(void);
-    void set_psfcube(void);
+    void clear_cube(void);
+    int  offset(const int& idelta, const int& iebin) const;
+    
     // Data
-    GObservations m_obs; //!< Observation container
-    int m_nbins; //!< number of delta bins
-    int m_nebins; //!< number of energy bins
-    GSkymap m_cube; //!< Average PSF cube
-    GEbounds m_ebounds;  //!< Energy bounds for the PSF cube
-    GNodeArray m_deltas; //!< delta bins for the PSF cube
-   
+    GSkymap    m_cube;     //!< PSF cube
+    GEbounds   m_ebounds;  //!< Energy bounds for the PSF cube
+    GNodeArray m_deltas;   //!< Delta bins for the PSF cube
 };
+
+
 /***********************************************************************//**
  * @brief Return psf cube sky map
  *
@@ -119,12 +130,23 @@ const GEbounds& GCTAMeanPsf::ebounds(void) const
  * @brief Return deltas nodes
  *
  * @return deltas
- *
  ***************************************************************************/
 inline
 const GNodeArray& GCTAMeanPsf::deltas(void) const
 {
     return (m_deltas);
+}
+
+
+/***********************************************************************//**
+ * @brief Return map offset
+ *
+ * @return Map offset.
+ ***************************************************************************/
+inline
+int GCTAMeanPsf::offset(const int& idelta, const int& iebin) const
+{
+    return (idelta + iebin*m_ebounds.size());
 }
 
 #endif /* GCTAMEANPSF_HPP */

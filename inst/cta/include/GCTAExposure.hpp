@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAExposure.hpp - CTA mean point spread function class       *
+ *                GCTAExposure.hpp - CTA exposure cube class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Chia-Chun Lu                                     *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAExposure.hpp
- * @brief CTA mean point spread function class definition
+ * @brief CTA exposure cube class definition
  * @author Chia-Chun Lu
  */
 
@@ -35,13 +35,15 @@
 #include "GObservations.hpp"
 #include "GNodeArray.hpp"
 
+
 /***********************************************************************//**
  * @class GCTAExposure
  *
- * @brief Class of CTA exposure cube
+ * @brief CTA exposure cube class
  *
- * This class implements the CTA exposure cube
- *
+ * This class implements a CTA exposure cube which provides the average
+ * exposure for binned analysis as function of sky position and log10
+ * energy.
  ***************************************************************************/
 class GCTAExposure : public GBase {
 
@@ -49,54 +51,57 @@ public:
    
     // Constructors and destructors
     GCTAExposure(void);
-    GCTAExposure(const GCTAExposure& exp);
-    GCTAExposure(const GObservations& obs, 
-		const double& x, const double& y, 
-		const double& dx, const double& dy,
-		const int& nx, const int& ny,
-		const double& emin, const double& emax, const int& nebins);
+    GCTAExposure(const GCTAExposure& cube);
+    GCTAExposure(const GObservations& obs,
+                 const std::string&   wcs,
+                 const std::string&   coords,
+                 const double&        x,
+                 const double&        y,
+                 const double&        dx,
+                 const double&        dy,
+                 const int&           nx,
+                 const int&           ny,
+                 const GEbounds&      ebounds);
     virtual ~GCTAExposure(void);
 
     // Operators
     GCTAExposure& operator=(const GCTAExposure& exp);
 
     // Methods
-    void         clear(void);
-    GCTAExposure* clone(void) const;
-    void         load(const std::string& filename);
-    void         write(GFits& file) const;
-    void         save(const std::string& filename, 
-		      const bool& clobber) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
-    const GSkymap& map(void) const;
+    void            clear(void);
+    GCTAExposure*   clone(void) const;
+    void            set(const GCTAObservation& obs);
+    void            fill(const GObservations& obs);
+    const GSkymap&  cube(void) const;
     const GEbounds& ebounds(void) const;
+    void            write(GFits& file) const;
+    void            load(const std::string& filename);
+    void            save(const std::string& filename, const bool& clobber) const;
+    std::string     print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Methods
     void init_members(void);
     void copy_members(const GCTAExposure& exp);
     void free_members(void);
-    void set_expcube(void);
+    void clear_cube(void);
 
     // Data
-    GObservations m_obs; //!< Observation container
-    int m_nbins; //!< number of delta bins
-    int m_nebins; //!< number of energy bins
-    GSkymap m_cube; //!< Average Exposure cube
+    GSkymap  m_cube;     //!< Average Exposure cube
     GEbounds m_ebounds;  //!< Energy bounds for the Exposure cube
-   
 };
+
+
 /***********************************************************************//**
- * @brief Return Exposure cube sky map
+ * @brief Return exposure cube
  *
- * @return Exposure cube sky map.
+ * @return Exposure cube.
  *
- * The GCTAExposure represents the Exposure cube as a sky map. This methods
- * returns the sky map that is stored internally by GCTAExposure as Exposure
- * cube.
+ * Returns the GSkymap object that is used to store the exposure cube
+ * information.
  ***************************************************************************/
 inline
-const GSkymap& GCTAExposure::map(void) const
+const GSkymap& GCTAExposure::cube(void) const
 {
     return (m_cube);
 }
@@ -104,15 +109,12 @@ const GSkymap& GCTAExposure::map(void) const
 /***********************************************************************//**
  * @brief Return energy boundaries
  *
- * @return Energy boundaris
- *
+ * @return Energy boundaries
  ***************************************************************************/
 inline
 const GEbounds& GCTAExposure::ebounds(void) const
 {
     return (m_ebounds);
 }
-
-
 
 #endif /* GCTAEXPOSURE_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAExposure.cpp - CTA mean point spread function class       *
+ *                GCTAExposure.cpp - CTA exposure cube class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Chia-Chun Lu                                     *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAExposure.cpp
- * @brief CTA mean point spread function class implementation
+ * @brief CTA exposure cube class implementation
  * @author Chia-Chun Lu
  */
 
@@ -31,7 +31,7 @@
 #include "GCTAExposure.hpp"
 #include "GCTAObservation.hpp"
 #include "GMath.hpp"
-using namespace gammalib;
+
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
@@ -65,60 +65,65 @@ GCTAExposure::GCTAExposure(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] exp Point spread function.
+ * @param[in] cube Exposure cube.
  ***************************************************************************/
-GCTAExposure::GCTAExposure(const GCTAExposure& expcube)
+GCTAExposure::GCTAExposure(const GCTAExposure& cube)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(expcube);
+    copy_members(cube);
 
     // Return
     return;
 }
 
+
 /***********************************************************************//**
- * @brief constructor taking definitions of 3D bins.
+ * @brief Exposure cube constructor
  *
- * @param[in] obs observation container.
- * @param[in] x   sky coordinate.
- * @param[in] y   sky coordinate.
- * @param[in] dx  pixel size.
- * @param[in] dy  pixel size.
- * @param[in] nx  number of x pixels.
- * @param[in] ny  number of y pixels.
- * @param[in] emin minimum energy.
- * @param[in] emax maximum energy.
- * @param[in] nebins number of energy bins.
+ * @param[in] obs     Observation container.
+ * @param[in] wcs     World Coordinate System.
+ * @param[in] coords  Coordinate System (CEL or GAL).
+ * @param[in] x       X coordinate of sky map centre (deg).
+ * @param[in] y       Y coordinate of sky map centre (deg).
+ * @param[in] dx      Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy      Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx      Number of pixels in x direction.
+ * @param[in] ny      Number of pixels in y direction.
+ * @param[in] ebounds Energy boundaries.
  *
- * This constructor resample an effective area talbe and saves it as a 3D cube.
- * The index of the map is 
- * The bin size is decided evenly in delta^2 space.
+ * Constructs an exposure cube by computing the total exposure from all
+ * CTA observations found in the observation container.
  ***************************************************************************/
-GCTAExposure::GCTAExposure(const GObservations& obs, 
-			 const double& x, const double& y, 
-			 const double& dx, const double& dy,
-			 const int& nx, const int& ny,
-			 const double& emin, const double& emax, const int& nebins)
+GCTAExposure::GCTAExposure(const GObservations& obs,
+                           const std::string&   wcs,
+                           const std::string&   coords,
+                           const double&        x,
+                           const double&        y,
+                           const double&        dx,
+                           const double&        dy,
+                           const int&           nx,
+                           const int&           ny,
+                           const GEbounds&      ebounds)
 {
     // Initialise class members
     init_members();
-    m_obs = obs;
-    m_nebins = nebins;
-    m_cube = GSkymap("CAR", "CEL", x, y, dx, dy,
-		     nx, ny, nebins);
-    // Initialise energy bounds
-    GEnergy gemin = GEnergy(emin, "TeV");
-    GEnergy gemax = GEnergy(emax, "TeV");
-    m_ebounds = GEbounds(nebins, gemin, gemax, true);
 
-    //
-    set_expcube();
+    // Store energy boundaries
+    m_ebounds = ebounds;
+    
+    // Create sky map
+    m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
+
+    // Fill the exposure cube
+    fill(obs);
+    
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Destructor
@@ -142,13 +147,13 @@ GCTAExposure::~GCTAExposure(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] exp exposure cube
+ * @param[in] cube exposure cube
  * @return Exposure cube.
  ***************************************************************************/
-GCTAExposure& GCTAExposure::operator= (const GCTAExposure& expcube)
+GCTAExposure& GCTAExposure::operator= (const GCTAExposure& cube)
 {
     // Execute only if object is not identical
-    if (this != &expcube) {
+    if (this != &cube) {
 
         // Free members
         free_members();
@@ -157,7 +162,7 @@ GCTAExposure& GCTAExposure::operator= (const GCTAExposure& expcube)
         init_members();
 
         // Copy members
-        copy_members(expcube);
+        copy_members(cube);
 
     } // endif: object was not identical
 
@@ -165,40 +170,12 @@ GCTAExposure& GCTAExposure::operator= (const GCTAExposure& expcube)
     return *this;
 }
 
-/***********************************************************************//**
- * @brief Set the Exposure cube
- * This function takes the effective area table given in the observation xml
- * to produce a 4D Exposure cube.
- ***************************************************************************/
-void GCTAExposure::set_expcube(void)
-{
-  for (int i = 0 ; i< m_obs.size(); i++){
-    GCTAObservation *obs = dynamic_cast<GCTAObservation*>(m_obs[i]);
-    GCTAResponse rsp = obs->response();
-    GSkyDir pnt = obs->pointing().dir();
-    for (int ie = 0 ; ie < m_nebins ; ie++){
-      for (int pix = 0 ; pix < m_cube.npix() ; pix++){
-	  GSkyDir dir = m_cube.inx2dir(pix);
-	  double logeng = m_ebounds.emean(ie).log10TeV();
-	  double theta = pnt.dist(dir); // radian
-	  m_cube(pix,ie) = rsp.aeff(theta, 
-				    0.0, 0.0, 0.0, 
-				    logeng);
-	}
-      }
-    save("expcube.fits",true);
-  }
-}
 
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
-
-
-
-
 
 /***********************************************************************//**
  * @brief Clear instance
@@ -207,12 +184,10 @@ void GCTAExposure::set_expcube(void)
  ***************************************************************************/
 void GCTAExposure::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
-    //this->GCTAExposure::free_members();
 
     // Initialise members
-    // this->GCTAExposure::init_members();
     init_members();
 
     // Return
@@ -221,7 +196,111 @@ void GCTAExposure::clear(void)
 
 
 /***********************************************************************//**
- * @brief Write CTA event cube into FITS file.
+ * @brief Clone exposure cube
+ *
+ * @return Deep copy of exposure cube instance.
+ ***************************************************************************/
+GCTAExposure* GCTAExposure::clone(void) const
+{
+    return new GCTAExposure(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set exposure cube from one CTA observation
+ *
+ * @param[in] obs CTA observation.
+ ***************************************************************************/
+void GCTAExposure::set(const GCTAObservation& obs)
+{
+    // Clear exposure cube
+    clear_cube();
+
+    // Get references on CTA response and pointing direction
+    const GCTAResponse& rsp = obs.response();
+    const GSkyDir&      pnt = obs.pointing().dir();
+    
+    // Loop over all exposure cube energy bins
+    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+
+        // Get logE/TeV
+        double logE = m_ebounds.emean(iebin).log10TeV();
+
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Compute theta angle with respect to pointing direction
+            // in radians
+            GSkyDir dir     = m_cube.inx2dir(pixel);
+            double  theta   = pnt.dist(dir);
+
+            // Set exposure cube (effective area * lifetime)
+            m_cube(pixel, iebin) = rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                    obs.livetime();
+
+        } // endfor: looped over all pixels
+
+    } // endfor: looped over energy bins
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fill exposure cube from observation container
+ *
+ * @param[in] obs Observation container.
+ ***************************************************************************/
+void GCTAExposure::fill(const GObservations& obs)
+{
+    // Clear exposure cube
+    clear_cube();
+
+    // Loop over all observations in container
+    for (int i = 0; i < obs.size(); ++i) {
+
+        // Get observation and continue only if it is a CTA observation
+        const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(m_obs[i]);
+        if (cta != NULL) {
+
+            // Get references on CTA response and pointing direction
+            const GCTAResponse& rsp = cta->response();
+            const GSkyDir&      pnt = cta->pointing().dir();
+    
+            // Loop over all exposure cube energy bins
+            for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+
+                // Get logE/TeV
+                double logE = m_ebounds.emean(iebin).log10TeV();
+
+                // Loop over all pixels in sky map
+                for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+                    // Compute theta angle with respect to pointing direction
+                    // in radians
+                    GSkyDir dir     = m_cube.inx2dir(pixel);
+                    double  theta   = pnt.dist(dir);
+
+                    // Add to exposure cube (effective area * lifetime)
+                    m_cube(pixel, iebin) += rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                            cta->livetime();
+
+                } // endfor: looped over all pixels
+
+            } // endfor: looped over energy bins
+    
+        } // endif: observation was a CTA observation
+
+    } // endfor: looped over observations
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA exposure cube into FITS object.
  *
  * @param[in] fits FITS file.
  ***************************************************************************/
@@ -238,60 +317,73 @@ void GCTAExposure::write(GFits& fits) const
 }
 
 
-
-
 /***********************************************************************//**
- * @brief Clone instance
- *
- * @return Deep copy of point spread function instance.
- ***************************************************************************/
-GCTAExposure* GCTAExposure::clone(void) const
-{
-    return new GCTAExposure(*this);
-}
-
-/***********************************************************************//**
- * @brief Load point spread function from performance table
+ * @brief Load exposure cube from FITS file
  *
  * @param[in] filename Performance table file name.
  *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
+ * Loads the exposure cube from a FITS file into the object.
  *
- * This method loads the point spread function information from an effective
- * area response table.
+ * @todo Implement method
  ***************************************************************************/
 void GCTAExposure::load(const std::string& filename)
 {
+    // Return
     return;
 }
 
-void GCTAExposure::save(const std::string& filename,
-		       const bool& clobber) const
+
+/***********************************************************************//**
+ * @brief Save exposure cube into FITS file
+ *
+ * @param[in] filename Exposure cube FITS file name.
+ * @param[in] clobber Overwrite existing file? (true=yes)
+ *
+ * Save the exposure cube into a FITS file.
+ *
+ * @todo Implement method
+ ***************************************************************************/
+void GCTAExposure::save(const std::string& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
 
-    // Write event cube
+    // Write exposure cube
     write(fits);
 
     // Save FITS file
     fits.saveto(filename, clobber);
+
+    // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Print point spread function information
+ * @brief Print exposure cube information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing point spread function information.
+ * @return String containing exposure cube information.
+ *
+ * @todo Add content
  ***************************************************************************/
 std::string GCTAExposure::print(const GChatter& chatter) const
 {
+    // Initialise result string
     std::string result;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTAExposure ===");
+
+    } // endif: chatter was not silent
+
+    // Return result
     return result;
 }
+
 
 /*==========================================================================
  =                                                                         =
@@ -305,10 +397,8 @@ std::string GCTAExposure::print(const GChatter& chatter) const
 void GCTAExposure::init_members(void)
 {
     // Initialise members
-    m_obs.clear();
     m_cube.clear();
     m_ebounds.clear();
-    m_nebins = 0;
    
     // Return
     return;
@@ -318,15 +408,13 @@ void GCTAExposure::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] expcube Exposure cube
+ * @param[in] cube Exposure cube
  ***************************************************************************/
 void GCTAExposure::copy_members(const GCTAExposure& cube)
 {
     // Initialise members
-    m_obs = cube.m_obs;
-    m_cube = cube.m_cube;
+    m_cube    = cube.m_cube;
     m_ebounds = cube.m_ebounds;
-    m_nebins = m_nebins;
 
     // Return
     return;
@@ -337,6 +425,29 @@ void GCTAExposure::copy_members(const GCTAExposure& cube)
  ***************************************************************************/
 void GCTAExposure::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clear all pixels in the exposure cube
+ ***************************************************************************/
+void GCTAExposure::clear_cube(void)
+{
+    // Loop over all exposure cube energy bins
+    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Reset cube value to zero
+            m_cube(pixel, iebin) = 0.0;
+
+        } // endfor: looped over all pixels
+
+    } // endfor: looped over energy bins
+
     // Return
     return;
 }

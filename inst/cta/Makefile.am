@@ -35,6 +35,8 @@ sources = src/GCTASupport.cpp \
           src/GCTABackground.cpp \
           src/GCTABackgroundPerfTable.cpp \
           src/GCTABackground3D.cpp \
+          src/GCTAExposure.cpp \
+          src/GCTAMeanPsf.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -45,9 +47,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAModelRadialGauss.cpp \
           src/GCTAModelRadialPolynom.cpp \
           src/GCTAModelRadialProfile.cpp \
-          src/GCTAModelRadialAcceptance.cpp \
-	  src/GCTAMeanPsf.cpp \
-	  src/GCTAExposure.cpp
+          src/GCTAModelRadialAcceptance.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
@@ -78,6 +78,8 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTABackground.hpp \
                      include/GCTABackgroundPerfTable.hpp \
                      include/GCTABackground3D.hpp \
+                     include/GCTAExposure.hpp \
+                     include/GCTAMeanPsf.hpp \
                      include/GCTAModelCubeBackground.hpp \
                      include/GCTAModelIrfBackground.hpp \
                      include/GCTAModelRadialRegistry.hpp \
@@ -86,9 +88,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAModelRadialPolynom.hpp \
                      include/GCTAModelRadialProfile.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
-                     include/GCTALib.hpp \
-	 	     include/GCTAMeanPsf.hpp \
-		     include/GCTAExposure.hpp
+                     include/GCTALib.hpp
 
 # Calibration files to distribute
 caldb_pinx = caldb/caldb.indx

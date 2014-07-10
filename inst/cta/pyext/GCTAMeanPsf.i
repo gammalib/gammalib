@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAMeanPsf.hpp - CTA mean point spread function class       *
+ *         GCTAMeanPsf.i - CTA mean point spread function cube class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Chia-Chun Lu                                     *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAMeanPsf.hpp
- * @brief CTA point spread function base class definition
+ * @brief CCTA point spread function cube class definition
  * @author Chia-Chun Lu
  */
 
@@ -30,13 +30,16 @@
 #include "GTools.hpp"
 %}
 
+
 /***********************************************************************//**
  * @class GCTAMeanPsf
  *
- * @brief Abstract base class for the CTA point spread function
+ * @brief class for the CTA point spread function
  *
- * This class implements the abstract base class for the CTA point spread
- * function.
+ * This class implements a mean CTA point spread function which provides the
+ * average point spread function for binned analysis as function of sky
+ * position, log10 energy and delta angle between true and measured photon
+ * direction.
  ***************************************************************************/
 class GCTAMeanPsf : public GBase {
 
@@ -44,31 +47,35 @@ public:
    
     // Constructors and destructors
     GCTAMeanPsf(void);
-    GCTAMeanPsf(const GCTAMeanPsf& psf);
-    GCTAMeanPsf(const GObservations& obs, 
-		const double& x, const double& y, 
-		const double& dx, const double& dy,
-		const int& nx, const int& ny,
-		const double& emin, const double& emax, const int& nebins,
-		const double& min, const double& max, 
-		const int& nbins);
+    GCTAMeanPsf(const GCTAMeanPsf& cube);
+    GCTAMeanPsf(const GObservations& obs,
+                const std::string&   wcs,
+                const std::string&   coords,
+                const double&        x,
+                const double&        y,
+                const double&        dx,
+                const double&        dy,
+                const int&           nx,
+                const int&           ny,
+                const GEbounds&      ebounds,
+                const double&        dmin,
+                const double&        dmax,
+                const int&           ndbins);
     virtual ~GCTAMeanPsf(void);
 
-    // Operators
-    GCTAMeanPsf& operator=(const GCTAMeanPsf& psf);
-
     // Methods
-    void         clear(void);
-    GCTAMeanPsf* clone(void) const;
-    void         load(const std::string& filename);
-    void         write(GFits& file) const;
-    void         save(const std::string& filename,
-		      const bool& clobber) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;   
-    const GSkymap& map(void) const;
-    const GEbounds& ebounds(void) const;
+    void              clear(void);
+    GCTAMeanPsf*      clone(void) const;
+    void              set(const GCTAObservation& obs);
+    void              fill(const GObservations& obs);
+    const GSkymap&    map(void) const;
+    const GEbounds&   ebounds(void) const;
     const GNodeArray& deltas(void) const;
+    void              write(GFits& file) const;
+    void              load(const std::string& filename);
+    void              save(const std::string& filename, const bool& clobber) const;
 };
+
 
 /***********************************************************************//**
  * @brief GCTAMeanPsf class extension
