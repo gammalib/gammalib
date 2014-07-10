@@ -73,7 +73,7 @@ public:
     void           extend(const GEnergies& energies);
     void           load(const std::string& filename,
                         const std::string& extname = "ENERGIES");
-    void           save(const std::string& filename, const bool& clobber,
+    void           save(const std::string& filename, const bool& clobber = false,
                         const std::string& extname = "ENERGIES") const;
     void           read(const GFitsTable& table);
     void           write(GFits& file,

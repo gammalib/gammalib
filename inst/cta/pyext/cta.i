@@ -97,6 +97,6 @@
 %include "GCTAModelRadialPolynom.i"
 %include "GCTAModelRadialProfile.i"
 %include "GCTAModelRadialAcceptance.i"
-
-
+%include "GCTAMeanPsf.i"
+%include "GCTAExposure.i"
 
