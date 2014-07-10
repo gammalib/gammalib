@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAMeanPsf.hpp - CTA mean point spread function class       *
+ *            GCTAMeanPsf.hpp - CTA point spread function cube class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Chia-Chun Lu                                     *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAMeanPsf.hpp
- * @brief CTA mean point spread function class definition
+ * @brief CTA point spread function cube class definition
  * @author Chia-Chun Lu
  */
 
@@ -33,6 +33,7 @@
 #include "GFits.hpp"
 #include "GSkymap.hpp"
 #include "GObservations.hpp"
+#include "GCTAObservation.hpp"
 #include "GNodeArray.hpp"
 
 
@@ -63,7 +64,6 @@ public:
                 const int&           nx,
                 const int&           ny,
                 const GEbounds&      ebounds,
-                const double&        dmin,
                 const double&        dmax,
                 const int&           ndbins);
     virtual ~GCTAMeanPsf(void);

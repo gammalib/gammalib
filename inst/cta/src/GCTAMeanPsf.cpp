@@ -94,7 +94,6 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
  * @param[in] nx      Number of pixels in x direction.
  * @param[in] ny      Number of pixels in y direction.
  * @param[in] ebounds Energy boundaries.
- * @param[in] dmin    Minimum delta (deg).
  * @param[in] dmax    Maximum delta (deg.
  * @param[in] ndbins  Number of delta bins.
  *
@@ -111,7 +110,6 @@ GCTAMeanPsf::GCTAMeanPsf(const GObservations& obs,
                          const int&           nx,
                          const int&           ny,
                          const GEbounds&      ebounds,
-                         const double&        dmin,
                          const double&        dmax,
                          const int&           ndbins)
 {
@@ -123,9 +121,9 @@ GCTAMeanPsf::GCTAMeanPsf(const GObservations& obs,
 
     // Set delta node array
     m_deltas.clear();
-    for (int i = 0; i < nbins; ++i) {
-        double binsize = (max*max - min*min)/nbins;
-        double delta   = std::sqrt(binsize*0.5*i + min*min);
+    for (int i = 0; i < ndbins; ++i) {
+        double binsize = (dmax*dmax)/double(ndbins);
+        double delta   = std::sqrt(binsize*(double(i)+0.5));
         m_deltas.append(delta);
     }
 
@@ -290,12 +288,12 @@ void GCTAMeanPsf::fill(const GObservations& obs)
     for (int i = 0; i < obs.size(); ++i) {
 
         // Get observation and continue only if it is a CTA observation
-        const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(m_obs[i]);
+        const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(obs[i]);
         if (cta != NULL) {
 
             // Get references on CTA response and pointing direction
-            const GCTAResponse& rsp = cta.response();
-            const GSkyDir&      pnt = cta.pointing().dir();
+            const GCTAResponse& rsp = cta->response();
+            const GSkyDir&      pnt = cta->pointing().dir();
 
             // Loop over all pixels in sky map
             for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
@@ -353,6 +351,7 @@ void GCTAMeanPsf::fill(const GObservations& obs)
             }
             else {
                 for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                    int imap = offset(idelta, iebin);
                     m_cube(pixel, imap) = 0.0;
                 }
             }
@@ -378,6 +377,9 @@ void GCTAMeanPsf::write(GFits& fits) const
 
     // Write energy boundaries
     m_ebounds.write(fits);
+
+    // Write delta nodes
+    m_deltas.write(fits, "DELTAS");
 
     // Return
     return;
@@ -419,6 +421,8 @@ void GCTAMeanPsf::save(const std::string& filename, const bool& clobber) const
 
     // Save FITS file
     fits.saveto(filename, clobber);
+
+    // Return
     return;
 }
 

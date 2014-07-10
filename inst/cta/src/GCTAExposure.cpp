@@ -261,7 +261,7 @@ void GCTAExposure::fill(const GObservations& obs)
     for (int i = 0; i < obs.size(); ++i) {
 
         // Get observation and continue only if it is a CTA observation
-        const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(m_obs[i]);
+        const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(obs[i]);
         if (cta != NULL) {
 
             // Get references on CTA response and pointing direction

@@ -58,7 +58,6 @@ public:
                 const int&           nx,
                 const int&           ny,
                 const GEbounds&      ebounds,
-                const double&        dmin,
                 const double&        dmax,
                 const int&           ndbins);
     virtual ~GCTAMeanPsf(void);

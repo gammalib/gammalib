@@ -33,7 +33,7 @@
 #include "GFits.hpp"
 #include "GSkymap.hpp"
 #include "GObservations.hpp"
-#include "GNodeArray.hpp"
+#include "GCTAObservation.hpp"
 
 
 /***********************************************************************//**
