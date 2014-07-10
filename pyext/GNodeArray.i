@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GNodeArray.i - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,13 @@ public:
     const int&    inx_right(void) const;
     const double& wgt_left(void) const;
     const double& wgt_right(void) const;
+    void          load(const std::string& filename,
+                       const std::string& extname = "NODES");
+    void          save(const std::string& filename, const bool& clobber,
+                       const std::string& extname = "NODES") const;
+    void          read(const GFitsTable& table);
+    void          write(GFits& file,
+                        const std::string& extname = "NODES") const;
 };
 
 
