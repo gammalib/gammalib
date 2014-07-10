@@ -67,7 +67,7 @@ public:
     const double& wgt_right(void) const;
     void          load(const std::string& filename,
                        const std::string& extname = "NODES");
-    void          save(const std::string& filename, const bool& clobber,
+    void          save(const std::string& filename, const bool& clobber = false,
                        const std::string& extname = "NODES") const;
     void          read(const GFitsTable& table);
     void          write(GFits& file,
