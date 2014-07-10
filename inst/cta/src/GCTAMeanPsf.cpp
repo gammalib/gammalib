@@ -84,7 +84,6 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
 /***********************************************************************//**
  * @brief Mean PSF cube constructor
  *
- * @param[in] obs     Observation container.
  * @param[in] wcs     World Coordinate System.
  * @param[in] coords  Coordinate System (CEL or GAL).
  * @param[in] x       X coordinate of sky map centre (deg).
@@ -100,8 +99,7 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
  * Constructs a mean PSF cube by computing the mean PSF from all CTA
  * observations found in the observation container.
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(const GObservations& obs,
-                         const std::string&   wcs,
+GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
                          const std::string&   coords,
                          const double&        x,
                          const double&        y,
@@ -132,9 +130,6 @@ GCTAMeanPsf::GCTAMeanPsf(const GObservations& obs,
     
     // Create sky map
     m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
-
-    // Fill the PSF cube
-    fill(obs);
 
     // Return
     return;
