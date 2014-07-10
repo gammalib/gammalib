@@ -1577,7 +1577,7 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2) const
  *
  * @param[in] arg1 Argument for first axis.
  * @param[in] arg2 Argument for second axis.
- * @param[in] arg3 Argument for second axis.
+ * @param[in] arg3 Argument for third axis.
  *
  * Updates the 3D interpolation cache. The interpolation cache is composed
  * of four indices and weights that define 4 data values of the 2D table
