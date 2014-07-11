@@ -60,7 +60,10 @@ public:
                 const double&        dmax,
                 const int&           ndbins);
     virtual ~GCTAMeanPsf(void);
-
+    // Interpolation operator
+    double            operator()(const GSkyDir& dir, 
+				 const double & delta,
+				 const GEnergy& energy) const;
     // Methods
     void              clear(void);
     GCTAMeanPsf*      clone(void) const;
@@ -69,6 +72,8 @@ public:
     const GSkymap&    map(void) const;
     const GEbounds&   ebounds(void) const;
     const GNodeArray& deltas(void) const;
+    const GNodeArray& emeans(void) const;
+    int               offset(const int& idelta, const int& iebin) const;
     void              write(GFits& file) const;
     void              load(const std::string& filename);
     void              save(const std::string& filename, const bool& clobber) const;

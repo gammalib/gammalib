@@ -65,7 +65,7 @@ public:
 
     // Operators
     GCTAExposure& operator=(const GCTAExposure& exp);
-
+    double        operator()(const GSkyDir& dir, const GEnergy& energy) const;
     // Methods
     void            clear(void);
     GCTAExposure*   clone(void) const;
@@ -85,10 +85,20 @@ protected:
     void copy_members(const GCTAExposure& exp);
     void free_members(void);
     void clear_cube(void);
+    void update(const double& logeng) const;
+    void set_eng_axis(void);
 
     // Data
     GSkymap  m_cube;     //!< Average Exposure cube
     GEbounds m_ebounds;  //!< Energy bounds for the Exposure cube
+    GNodeArray m_emeans;  //!< Mean energy for the Exposure cube
+
+private:
+    // Response table computation cache for 1D access
+    mutable int    m_inx_left;        //!< Index of left node
+    mutable int    m_inx_right;       //!< Index of right node
+    mutable double m_wgt_left;        //!< Weight of left node
+    mutable double m_wgt_right;       //!< Weight of right node
 };
 
 
