@@ -9,19 +9,19 @@ Overview
 The support module contains a number of functions and classes that are 
 needed to support core functionnalities of GammaLib. An overview of the 
 functions and C++ classes present in this module is given in 
-:ref:`fig_uml_support`. The ``GCsv`` class supports handling of column 
-separated value tables. The ``GExceptionHandler`` class implements an
+:ref:`fig_uml_support`. The :doxy:`GCsv` class supports handling of column 
+separated value tables. The :doxy:`GExceptionHandler` class implements an
 exception handler that is used through GammaLib for exception handling.
-The ``GException`` class derives from this handler, and implements a
+The :doxy:`GException` class derives from this handler, and implements a
 number of sub-classes that are actually thrown in exceptions. The
-``GNodeArray`` implements methods for linear interpolation between node
+:doxy:`GNodeArray` implements methods for linear interpolation between node
 values. This is the central interpolation class that is used in GammaLib.
-The ``GRan`` class implements a random number generator that is widely used
-for Monte Carlo simulations. The ``GTools`` module is not a class, but a
+The :doxy:`GRan` class implements a random number generator that is widely used
+for Monte Carlo simulations. The :doxy:`GTools.hpp` module is not a class, but a
 collection of constants and functions that is widely used in GammaLib.
-The abstract ``GUrl`` base class represents a unified location for some
-information that is independent of the media. The classes ``GUrlFile``
-and ``GUrlString`` are derived from ``GUrl`` and implement a file storage 
+The abstract :doxy:`GUrl` base class represents a unified location for some
+information that is independent of the media. The classes :doxy:`GUrlFile`
+and :doxy:`GUrlString` are derived from :doxy:`GUrl` and implement a file storage 
 and a string storage, respectively. As most of the classes are unrelated,
 they will be described individually in the following sections.
 
@@ -36,7 +36,7 @@ they will be described individually in the following sections.
 Column Separated Value tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``GCsv`` class handles column separated value tables. Column separated 
+The :doxy:`GCsv` class handles column separated value tables. Column separated 
 value tables are ASCII files representing a table, where individual table
 columns a separated by a specific character (for example a whitespace or a 
 comma).
@@ -47,7 +47,7 @@ Exception handling
 
 GammaLib uses C++ exceptions to handle any kind of errors or unexpected
 values that are encountered. Here an example of how an exception is thrown 
-in the ``GModels::at`` method:
+in the :doxy:`GModels::at` method:
 
 .. code-block:: cpp
    :linenos:
@@ -73,11 +73,11 @@ The method is implemented in lines 2-8. Before accessing a model in line
 Note that lower and upper boundary of the index value is systematically 
 checked in all GammaLib methods that perform index checking. If one of the 
 boundary conditions is violated, the ``throw`` statement is used to throw 
-an object of type ``GException::out_of_range``. The object is constructed 
+an object of type :doxy:`GException::out_of_range`. The object is constructed 
 by passing the method name (defined by ``G_AT``), a text string that 
 describes the parameter that is out of the valid range, the value of the 
 parameter, and the maximum number of elements that are expected in the 
-range. This specific instance of the ``GException::out_of_range`` class
+range. This specific instance of the :doxy:`GException::out_of_range` class
 assumes that the lower boundary of the valid range is 0, hence it does not 
 need to be specified explicitely as an argument.
 
@@ -87,34 +87,34 @@ limited set of standard exceptions. The first class of exceptions are
 logic exceptions, which are those that the client could in principle have 
 tested before calling the method. These comprise:
 
-==================== =====
-Logic exceptions     Usage
-==================== =====
-``invalid_value``    An invalid value has been encountered in the method.
-``invalid_argument`` One of the arguments passed to the method is invalid.
-``out_of_range``     An index is outside the expected range.
-``fits_error``       An error has occured in FITS file handling.
-==================== =====
+======================== =====
+Logic exceptions         Usage
+======================== =====
+:doxy:`invalid_value`    An invalid value has been encountered in the method.
+:doxy:`invalid_argument` One of the arguments passed to the method is invalid.
+:doxy:`out_of_range`     An index is outside the expected range.
+:doxy:`fits_error`       An error has occured in FITS file handling.
+======================== =====
 
 The second class of exceptions are runtime exceptions, which are those 
 that are not testable by the client. Typical runtime exceptions are 
 underflow or overflow errors. So far, only one runtime exception is 
 implemented in GammaLib:
 
-=========================== =====
-Runtime exceptions          Usage
-=========================== =====
-``feature_not_implemented`` The method has not been implemented.
-=========================== =====
+=============================== =====
+Runtime exceptions              Usage
+=============================== =====
+:doxy:`feature_not_implemented` The method has not been implemented.
+=============================== =====
 
 
 Linear interpolation
 ~~~~~~~~~~~~~~~~~~~~
 
-Linear interpolation is implemented in GammaLib through the ``GNodeArray`` 
+Linear interpolation is implemented in GammaLib through the :doxy:`GNodeArray` 
 class. This class contains a collection of nodes :math:`x_i` that may be
 used to describe a functional relation :math:`y_i=f(x_i)`. The following 
-code illustrates how the ``GNodeArray`` class is used
+code illustrates how the :doxy:`GNodeArray` class is used
 (see ``examples/cpp/interpolate/interpolate.cpp`` for the source code):
 
 .. code-block:: cpp
@@ -133,7 +133,7 @@ In line 1, the nodes :math:`x_i` at which the function values :math:`y_i`
 are given are declared, the actual function values :math:`y_i` are
 declared in line 2. In line 3, a node array is constructed from the
 node values. Note that the actual function values are not part of the
-node array, only the node values are in fact used by the ``GNodeArray``
+node array, only the node values are in fact used by the :doxy:`GNodeArray`
 class.
 
 In lines 4-8, the function is interpolated at a number of values in the
@@ -160,7 +160,7 @@ and :math:`i_{\rm right}=i_{\rm last}` (where :math:`i_{\rm last}` is the
 index of the last node, which is :math:`2` in the example above).
 The weights are set so that :math:`y` is extrapolated linearly.
 
-It is obvious that ``GNodeArray`` needs at least 2 node values to operate.
+It is obvious that :doxy:`GNodeArray` needs at least 2 node values to operate.
 
 
 Random number generation
@@ -187,8 +187,8 @@ different samples), you may specify the seed value upon construction:
     unsigned long long int seed = 123456; 
     GRan ran(seed);
 
-The ``uniform()`` method returns a random number between 0 and 1. The
-``exp()`` method returns a random number of the exponential law
+The :doxy:`GRan::uniform` method returns a random number between 0 and 1. The
+:doxy:`GRan::exp` method returns a random number of the exponential law
 
 .. math::
    p(x) = \lambda \exp( -\lambda x )
@@ -198,12 +198,12 @@ above, :math:`\lambda=3.7`. This method may be used to simulate the
 occurence time of an event, where :math:`\lambda` is the mean event rate.
 Convsersely, :math:`1/\lambda` is the mean waiting time between events.
 
-The ``poisson()`` method draws a random number from the Poisson 
+The :doxy:`GRan::poisson` method draws a random number from the Poisson 
 distribution. You mya use this method to simulate the number of events
 in case that a given mean number :math:`\lambda` of events is known.
 In line 3 above, :math:`\lambda=2.4`.
 
-The ``chisq2()`` method draws random numbers from the propability 
+The :doxy:`GRan::chisq2` method draws random numbers from the propability 
 distribution
 
 .. math::
@@ -217,7 +217,7 @@ symmetric 2D Gaussian probability distribution.
 Constants and utility functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``GTools.hpp`` header defines a number of constants and utility 
+The :doxy:`GTools.hpp` header defines a number of constants and utility 
 functions that are widely used in GammaLib.
 
 Constants
@@ -279,17 +279,17 @@ Function                       Description
 Media independent information handling
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To handle media independent data access, the ``GUrl`` base class has been 
+To handle media independent data access, the :doxy:`GUrl` base class has been 
 implemented that represent a media in an abstract way. The class has
 abstract ``open``, ``read``, ``write`` and ``close`` method to open
 a media, read from it or write to it, and to close the media. 
 
-Support is implemented so far for file and string media, but in the futur,
+Support is implemented so far for file and string media, but in the future,
 direct access to ressources over the internet may become possible.
-A file media is implemented by the ``GUrlFile`` class, while a string
-media is implemented by the ``GUrlString`` class.
+A file media is implemented by the :doxy:`GUrlFile` class, while a string
+media is implemented by the :doxy:`GUrlString` class.
 
-An example of a class making using of ``GUrl`` is the ``GXml`` class. Look
+An example of a class making using of :doxy:`GUrl` is the :doxy:`GXml` class. Look
 at the following code:
 
 .. code-block:: cpp
@@ -306,7 +306,7 @@ Line 1 declares a XML object and in line 2 we append a dummy element
 to it. In line 3 we now create a file named ``my_file.xml`` for which
 we allow write access. In line 4 we allocate a string media. We then
 write the XML object first into the file in line 5, and the in the string
-in line 6. This illustrates how the ``GUrl`` classes can be used to
+in line 6. This illustrates how the :doxy:`GUrl` classes can be used to
 redirect the same information to different media. Reading from different
 media is analoguous.
 

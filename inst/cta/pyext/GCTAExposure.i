@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GIntegral.i - Integration class                      *
+ *                 GCTAExposure.i - CTA exposure cube class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Chia-Chun Lu                                     *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,59 +19,58 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GIntegral.hpp
- * @brief Integration class Python interface definition
- * @author Juergen Knoedlseder
+ * @file GCTAExposure.hpp
+ * @brief CTA exposure cube class definition
+ * @author Chia-Chun Lu
  */
+
 %{
-/* Put headers and other declarations here that are needed for compilation */
-#include "GIntegral.hpp"
+/* __ Includes ___________________________________________________________ */
+#include "GCTAExposure.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GIntegral
+ * @class GCTAExposure
  *
- * @brief Integration class Python interface definition.
+ * @brief CTA exposure cube class
  *
- * This class allows to perform integration using various methods. The
- * integrand is implemented by a derived class of GIntegrand.
+ * This class implements a CTA exposure cube which provides the average
+ * exposure for binned analysis as function of sky position and log10
+ * energy.
  ***************************************************************************/
-class GIntegral : public GBase {
-public:
-
+class GCTAExposure : public GBase {
+public:   
     // Constructors and destructors
-    explicit GIntegral(void);
-    explicit GIntegral(GFunction* kernel);
-    GIntegral(const GIntegral& integral);
-    virtual ~GIntegral(void);
+    GCTAExposure(void);
+    GCTAExposure(const GCTAExposure& cube);
+    GCTAExposure(const std::string&   wcs,
+                 const std::string&   coords,
+                 const double&        x,
+                 const double&        y,
+                 const double&        dx,
+                 const double&        dy,
+                 const int&           nx,
+                 const int&           ny,
+                 const GEbounds&      ebounds);
+    virtual ~GCTAExposure(void);
 
     // Methods
-    void               clear(void);
-    GIntegral*         clone(void) const;
-    void               max_iter(const int& max_iter);
-    void               eps(const double& eps);
-    void               silent(const bool& silent);
-    const int&         iter(void) const;
-    const int&         max_iter(void) const;
-    const double&      eps(void) const;
-    const bool&        silent(void) const;
-    const bool&        isvalid(void) const;
-    const std::string& message(void) const;
-    void               kernel(GFunction* kernel);
-    const GFunction*   kernel(void) const;
-    double             romb(const double& a, const double& b, const int& k = 5);
-    double             trapzd(const double& a, const double& b, const int& n = 1,
-                              double result = 0.0);
+    void            clear(void);
+    GCTAExposure*   clone(void) const;
+    void            set(const GCTAObservation& obs);
+    void            fill(const GObservations& obs);
+    const GSkymap&  cube(void) const;
+    const GEbounds& ebounds(void) const;
+    void            write(GFits& file) const;
+    void            load(const std::string& filename);
+    void            save(const std::string& filename,
+                         const bool& clobber = false) const;
 };
 
-
 /***********************************************************************//**
- * @brief GIntegral class extension
+ * @brief GCTAExposure class extension
  ***************************************************************************/
-%extend GIntegral {
-    GIntegral copy() {
-        return (*self);
-    }
+%extend GCTAExposure {
 };

@@ -9,12 +9,12 @@ Overview
 This module contains classes and functions that are needed for numerical 
 computations within GammaLib. The module provides support for differentiation
 and integration of one-dimensional functions. The interface for the 
-one-dimensional functions is defined by the abstract ``GFunction`` base
-class, integration is performed using the ``GIntegral`` class, 
-differentiation is done using the ``GDerivative`` class. In addition,
+one-dimensional functions is defined by the abstract :doxy:`GFunction` base
+class, integration is performed using the :doxy:`GIntegral` class, 
+differentiation is done using the :doxy:`GDerivative` class. In addition,
 numerical constants and function that are extensively used throughout GammaLib
-are defined in the ``GMath.hpp`` header file. All constants and functions
-are declared in the ``gammalib`` namespace.
+are defined in the :doxy:`GMath.hpp` header file. All constants and functions
+are declared in the :doxy:`gammalib` namespace.
 
 
 Constants
@@ -98,9 +98,9 @@ source code):
     }
 
 The function that should be integrated or differentiated is defined in
-lines 1-8 as a class that derives from the abstract ``GFunction`` base
+lines 1-8 as a class that derives from the abstract :doxy:`GFunction` base
 class. The only method that needs to be implement in the derived class,
-here named ``function`` is the ``eval`` method that takes a const reference
+here named ``function`` is the :doxy:`GFunction::eval` method that takes a const reference
 to a double precision value as argument and that returns a double precision
 value, which is the function value evaluated at the argument. Parameters
 may be passed to the function upon construction, as illustrated by the
@@ -108,7 +108,7 @@ may be passed to the function upon construction, as illustrated by the
 
 The function is allocated in line 10 with a sigma parameter of 3. Line 11
 the prepares for the integration by allocating an integration object. The
-``GIntegral`` constructor takes a reference to the function as argument.
+:doxy:`GIntegral` constructor takes a reference to the function as argument.
 In line 12, the relative precision of the integration object is set to
 :math:`10^{-8}` (by default the precision is set to :math:`10^{-6}`).
 In line 13, the integration is done over the parameter interval
@@ -118,8 +118,8 @@ printed in line 14). Note that the Romberg method is used for integration
 by invoking the ``romb`` method. This is the only method that is so far
 available in GammaLib.
 
-Differentiating a function is similar. For this purpose, a ``GDerivative``
+Differentiating a function is similar. For this purpose, a :doxy:`GDerivative`
 object is created in line 15 with takes a reference to the function as
-argument. Using the ``value`` method, the derivative is computed in line
+argument. Using the :doxy:`GDerivative::value` method, the derivative is computed in line
 16 for a function argument of 0. As the Gaussian has a maximum there, the
 result will be 0.

@@ -18,17 +18,17 @@ module and their relations.
 
 The XML module provides classes that allow creation, writing and reading of
 files in the Extensible Markup Language (XML) format.
-The central class of the XML module is the abstract ``GXmlNode`` base
+The central class of the XML module is the abstract :doxy:`GXmlNode` base
 class which represent a node of the XML document. The essential property
-of ``GXmlNode`` is that it may contain a list of ``GXmlNode`` objects,
+of :doxy:`GXmlNode` is that it may contain a list of :doxy:`GXmlNode` objects,
 allowing creating a complex tree of data structures. Nodes in a XML
 document may be either elements, comments, some text of a processing
 instruction. These different node types are implemented by the
-``GXmlElement``, ``GXmlComment``, ``GXmlText`` and ``GXmlPI`` classes,
-respectively. A special node if the ``GXmlDocument`` node which provides
+:doxy:`GXmlElement`, :doxy:`GXmlComment`, :doxy:`GXmlText` and :doxy:`GXmlPI` classes,
+respectively. A special node if the :doxy:`GXmlDocument` node which provides
 the root node of a XML document. This node must exist only once in a XML
-tree. The XML file is implement by the ``GXml`` class which contains one
-instance of ``GXmlDocument``.
+tree. The XML file is implement by the :doxy:`GXml` class which contains one
+instance of :doxy:`GXmlDocument`.
 
 
 Creating a XML file
@@ -78,11 +78,11 @@ Below the content of the XML file that will be created by this code:
 
 In line 1 a XML object if allocated. In lines 2-6, one comment node, three
 element nodes and one processing instruction node are created. For the
-comment node, the comment text is provided in the ``GXmlComment``
+comment node, the comment text is provided in the :doxy:`GXmlComment`
 constructor. For the element nodes, the element tag as well as any
 attributes (separated by whitespace characters) are provided in the
-``GElement`` constructor. For the processing instruction node,
-the instruction including the brackets are provided in the ``GXmlPI``
+:doxy:`GXmlElement` constructor. For the processing instruction node,
+the instruction including the brackets are provided in the :doxy:`GXmlPI`
 constructor. In lines 7-8, two element nodes providing spatial
 parameters are appended to the ``spatial`` node. In lines 9-10, parameters
 are appended to the ``spectral`` node. And in line 11, a text node is
@@ -92,7 +92,7 @@ the XML file is saved in line 17.
 
 Note that in the above example the entire XML tree has been constructed
 before the nodes were appended to the document root. The reason behind
-this approach is that the ``append`` method creates deep copies of the
+this approach is that the :doxy:`GXml::append` method creates deep copies of the
 nodes provided in the argument, hence manipulation of the node once 
 appended requires to retrieve the pointers to the deep copies in the XML
 document. The following example illustrates how this can be done:
@@ -104,9 +104,9 @@ document. The following example illustrates how this can be done:
     xml.element("spatial", 0)->append(GXmlElement("parameter dec=\"22.0\""));
 
 The ``xml.element("spatial", 0)`` method returns a pointer to the first
-``GXmlElement`` node with tag ``spatial`` in the XML document. Now that
+:doxy:`GXmlElement` node with tag ``spatial`` in the XML document. Now that
 we have a pointer to the nodes, elements can be appended to the XML
-document using the ``append`` method.
+document using the :doxy:`GXml::append` method.
 
 Alternatively, one can also retrieve the node pointer when the node is 
 appended to the XML document:
@@ -117,6 +117,6 @@ appended to the XML document:
     node->append(GXmlElement("parameter ra=\"83.0\""));
     node->append(GXmlElement("parameter dec=\"22.0\""));
  
-The ``append`` method returns in fact the pointer to the deep copy of the
+The :doxy:`GXml::append` method returns in fact the pointer to the deep copy of the
 element that has been appended. This pointer can then be used to manipulate
 directly the nodes in the XML document.

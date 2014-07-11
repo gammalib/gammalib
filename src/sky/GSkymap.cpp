@@ -45,6 +45,8 @@
                       " double&, double&, double& double&, int&, int&, int&)"
 #define G_OP_UNARY_ADD                        "GSkymap::operator+=(GSkymap&)"
 #define G_OP_UNARY_SUB                        "GSkymap::operator-=(GSkymap&)"
+#define G_OP_UNARY_MUL                        "GSkymap::operator-=(GSkymap&)"
+#define G_OP_UNARY_DIV                        "GSkymap::operator-=(GSkymap&)"
 #define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
 #define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
 #define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
@@ -383,6 +385,115 @@ GSkymap& GSkymap::operator-=(const GSkymap& map)
 
         } // endfor: looped over all layers
         
+    } // endfor: looped over all pixels
+
+    // Return present sky map
+    return *this;
+}
+
+/***********************************************************************//**
+ * @brief Multiplication operator
+ *
+ * @param[in] map Sky map.
+ * @return Sky map.
+ *
+ * @exception GException::invalid_value
+ *            Mismatch between number of maps in skymap object.
+ *
+ * Multiplies the content of @p map from the skymap. The operator only works
+ * on sky maps with an identical number of layers. The content is multiplied
+ * by bi-linearily interpolating the values in the source sky map, allowing
+ * thus for a reprojection of sky map values.
+ *
+ * @todo The method is not optimized for speed as the transformation is done
+ * for each layer separately. A private method should be introduced that
+ * does the transformation, allowing to loop more effectively over the
+ * layers.
+ ***************************************************************************/
+GSkymap& GSkymap::operator*=(const GSkymap& map)
+{
+    // Check if number of layers are identical
+    if (map.nmaps() != nmaps()) {
+        std::string msg = "Mismatch of number of maps in skymap object"
+                          " ("+gammalib::str(nmaps())+" maps in destination"
+                          " map, "+gammalib::str(map.nmaps())+" in source"
+                          " map.";
+        throw GException::invalid_value(G_OP_UNARY_MUL, msg);
+    }
+
+    // Loop over all pixels of sky map
+    for (int index = 0; index < npix(); ++index) {
+
+        // Get sky direction of actual pixel
+        GSkyDir dir = inx2dir(index);
+
+        // Loop over all layers
+        for (int layer = 0; layer < nmaps(); ++layer) {
+
+            // Subtract value
+            (*this)(index, layer) *= map(dir, layer);
+
+        } // endfor: looped over all layers
+
+    } // endfor: looped over all pixels
+
+    // Return present sky map
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Division operator
+ *
+ * @param[in] map Sky map.
+ * @return Sky map.
+ *
+ * @exception GException::invalid_value
+ *            Mismatch between number of maps in skymap object.
+ *
+ * Divides the content of @p map from the skymap. The operator only works
+ * on sky maps with an identical number of layers. The content is divided
+ * by bi-linearily interpolating the values in the source sky map, allowing
+ * thus for a reprojection of sky map values.
+ *
+ * @todo The method is not optimized for speed as the transformation is done
+ * for each layer separately. A private method should be introduced that
+ * does the transformation, allowing to loop more effectively over the
+ * layers.
+ ***************************************************************************/
+GSkymap& GSkymap::operator/=(const GSkymap& map)
+{
+    // Check if number of layers are identical
+    if (map.nmaps() != nmaps()) {
+        std::string msg = "Mismatch of number of maps in skymap object"
+                          " ("+gammalib::str(nmaps())+" maps in destination"
+                          " map, "+gammalib::str(map.nmaps())+" in source"
+                          " map.";
+        throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+    }
+
+    // Loop over all pixels of sky map
+    for (int index = 0; index < npix(); ++index) {
+
+        // Get sky direction of actual pixel
+        GSkyDir dir = inx2dir(index);
+
+        // Loop over all layers
+        for (int layer = 0; layer < nmaps(); ++layer) {
+
+            // Check for division by zero
+            if (map(dir,layer) == 0.0) {
+                std::string msg = "Trying to divide by zero."
+                                  " Map entries have to be strictly non-zero"
+                                  " for division";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
+            
+            // Subtract value
+            (*this)(index, layer) /= map(dir, layer);
+
+        } // endfor: looped over all layers
+
     } // endfor: looped over all pixels
 
     // Return present sky map
@@ -1781,4 +1892,49 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
 
     // Return HDU
     return hdu;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Computes square root of skymap elements
+ *
+ * @param[in] map Skymap.
+ * @return Skymap containing the square root of every element.
+ ***************************************************************************/
+GSkymap sqrt(const GSkymap& map)
+{
+    // Initialise result vector
+    GSkymap result(map);
+
+    // Loop over all maps
+    for (int i = 0; i < map.nmaps(); ++i) {
+
+        // Loop over all bins
+        for (int j = 0; j < map.npix(); ++j) {
+
+            // Get the content from the bin
+            double content = map(j,i);
+
+    		// Check if content is not negative
+    		if (content < 0.0) {
+                std::string msg = "Negative value envountered."
+                                  " Cannot take the sqrt from a negative value";
+                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
+            }
+
+            // Set content of the result map
+            result(j,i) = std::sqrt(content);
+
+        } // endfor: Loop over all bins
+
+    } // endfor: Loop over all maps
+
+    // Return vector
+    return result;
 }

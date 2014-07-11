@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-13 June 2014
+10 July 2014
 
 
 1. Introduction
@@ -25,7 +25,10 @@ None
 
 4. Application module
 ---------------------
-None
+The logfile name is now always parsed in the parameter file before it is
+employed. This guarantees that a logfile parameter change is taken into
+account at any stage. This corrects a bug where the logfile name change
+was not taken into account when running tools under Python. 
 
 
 5. Base module
@@ -70,7 +73,10 @@ cone (applies so for the point sources, radial source and elliptical sources).
 
 9. Numerics module
 ------------------
-None
+Status information is now tracked using a message string in GIntegral. The
+message string is accessible using the message() method. If the string was
+set, the isvalid() method will return false. Otherwise, if no warning or
+error occured, the isvalid() method returns true.
 
 
 10. Observation module
@@ -81,6 +87,9 @@ The integration precision in GObservation::npred_spec has been increased
 to 1e-8 to cope with strongly fluctuating file functions (as they appear
 for CTA background models). See bug #1142 for more information.
 
+The binned likelihood functions now implement data filtering. All event
+bins with negative values will be excluded from the likelihood computation.
+
 
 11. Optimization module
 -----------------------
@@ -89,10 +98,10 @@ None
 
 12. Sky module
 --------------
-Addition and subtraction unary operators have been added to GSkymap that
-allow adding or subtracing skymaps. Values in the right-hand side skymap
-are bi-linearily interpolated, allowing for reprojection or rebinning of
-skymaps.
+Addition, subtraction, multiplication and division unary operators have
+been added to GSkymap that allow adding or subtracing skymaps. Values in
+the right-hand side skymap are bi-linearily interpolated, allowing for
+reprojection or rebinning of skymaps.
 
 
 13. Support module
@@ -172,6 +181,12 @@ and azimuth on the sky as function of time.
 The type of the GCTAModelCubeBackground class has been set to GCTACubeBackground,
 the type of the GCTAModelIrfBackground class to GCTAIrfBackground. XML files need
 to be adapted accordingly.
+
+For cube-style analysis, the GCTAExposure and GCTAMeanPsf classes have been added.
+GCTAExposure represents the summed exposure for a list of CTA observations
+(computed as the sum of effective area times livetime), GCTAMeanPsf represents
+the average PSF, computed by weighing the PSF of each observation by the respective
+exposure. 
 
 
 21. COMPTEL interface

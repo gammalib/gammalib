@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GIntegral.hpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,21 +55,24 @@ public:
     GIntegral& operator=(const GIntegral& integral);
 
     // Methods
-    void             clear(void);
-    GIntegral*       clone(void) const;
-    void             max_iter(const int& max_iter);
-    void             eps(const double& eps);
-    void             silent(const bool& silent);
-    const int&       iter(void) const;
-    const int&       max_iter(void) const;
-    const double&    eps(void) const;
-    const bool&      silent(void) const;
-    void             kernel(GFunction* kernel);
-    const GFunction* kernel(void) const;
-    double           romb(const double& a, const double& b, const int& k = 5);
-    double           trapzd(const double& a, const double& b, const int& n = 1,
-                            double result = 0.0);
-    std::string      print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GIntegral*         clone(void) const;
+    void               max_iter(const int& max_iter);
+    void               eps(const double& eps);
+    void               silent(const bool& silent);
+    const int&         iter(void) const;
+    const int&         calls(void) const;
+    const int&         max_iter(void) const;
+    const double&      eps(void) const;
+    const bool&        silent(void) const;
+    const bool&        isvalid(void) const;
+    const std::string& message(void) const;
+    void               kernel(GFunction* kernel);
+    const GFunction*   kernel(void) const;
+    double             romb(const double& a, const double& b, const int& k = 5);
+    double             trapzd(const double& a, const double& b, const int& n = 1,
+                              double result = 0.0);
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -79,11 +82,14 @@ protected:
     double polint(double* xa, double* ya, int n, double x, double *dy);
 
     // Protected data area
-    GFunction* m_kernel;       //!< Pointer to function kernel
-    double     m_eps;          //!< Integration precision
-    int        m_max_iter;     //!< Maximum number of iterations
-    int        m_iter;         //!< Number of iterations used
-    bool       m_silent;       //!< Suppress integration warnings
+    GFunction*  m_kernel;    //!< Pointer to function kernel
+    double      m_eps;       //!< Requested relative integration precision
+    int         m_max_iter;  //!< Maximum number of iterations
+    int         m_iter;      //!< Number of iterations used
+    int         m_calls;     //!< Number of function calls used
+    bool        m_isvalid;   //!< Integration result valid (true=yes)
+    std::string m_message;   //!< Status message (if result is invalid)
+    bool        m_silent;    //!< Suppress integration warnings in console
 };
 
 
@@ -125,9 +131,9 @@ const int& GIntegral::max_iter(void) const
 
 
 /***********************************************************************//**
- * @brief Set precision
+ * @brief Set relative precision
  *
- * @param[in] eps Precision.
+ * @param[in] eps Relative precision.
  ***************************************************************************/
 inline
 void GIntegral::eps(const double& eps)
@@ -138,14 +144,26 @@ void GIntegral::eps(const double& eps)
 
 
 /***********************************************************************//**
- * @brief Get precision
+ * @brief Get relative precision
  *
- * @return Precision.
+ * @return Relative precision.
  ***************************************************************************/
 inline
 const double& GIntegral::eps(void) const
 {
     return m_eps;
+}
+
+
+/***********************************************************************//**
+ * @brief Get number of function calls
+ *
+ * @return Number of function calls.
+ ***************************************************************************/
+inline
+const int& GIntegral::calls(void) const
+{
+    return m_calls;
 }
 
 
@@ -198,6 +216,30 @@ inline
 const GFunction* GIntegral::kernel(void) const
 {
     return m_kernel;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if integration result is valid
+ *
+ * @return True is integration result is valid.
+ ***************************************************************************/
+inline
+const bool& GIntegral::isvalid(void) const
+{
+    return m_isvalid;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integration status message
+ *
+ * @return Integration status message.
+ ***************************************************************************/
+inline
+const std::string& GIntegral::message(void) const
+{
+    return m_message;
 }
 
 #endif /* GINTEGRAL_HPP */

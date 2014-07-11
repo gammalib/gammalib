@@ -7,12 +7,12 @@ Overview
 ~~~~~~~~
 
 The linear algebra module provides classes for vector and matrix 
-manipulation. The ``GVector`` class implements a double precision
-floating point vector, the classes ``GMatrix``, ``GMatrixSymmetric``
-and ``GMatrixSparse`` implement a matrix of double precision
+manipulation. The :doxy:`GVector` class implements a double precision
+floating point vector, the classes :doxy:`GMatrix`, :doxy:`GMatrixSymmetric`
+and :doxy:`GMatrixSparse` implement a matrix of double precision
 floating point values for a generic matrix, a symmetric matrix and
 a sparse matrix, respectively. All matrix classes derive from the
-abstract ``GMatrixBase`` base class that provides common functionalities
+abstract :doxy:`GMatrixBase` base class that provides common functionalities
 to all matrix classes.
 
 :ref:`fig_uml_linalg` presents an overview over the C++ classes of
@@ -25,8 +25,8 @@ the linear algebra module and their relations.
 
    Linear algebra module
 
-The classes ``GSparseNumeric`` and ``GSparseSymbolic`` are classes
-that are used by ``GMatrixSparse`` but these classes are not
+The classes :doxy:`GSparseNumeric` and :doxy:`GSparseSymbolic` are classes
+that are used by :doxy:`GMatrixSparse` but these classes are not
 exposed to the outside world (i.e. the class definitions are not
 part of the GammaLib interface).
 
@@ -36,12 +36,12 @@ Matrix Storage classes
 
 Three matrix storage classes are implemented:
 
-* ``GMatrix`` implements a plain matrix storage class which stores
+* :doxy:`GMatrix` implements a plain matrix storage class which stores
   all elements of the matrix in memory;
-* ``GMatrixSymmetric`` implements a symmetric matrix storage class
+* :doxy:`GMatrixSymmetric` implements a symmetric matrix storage class
   which stores only a triangle of matrix elements, imposing thus
   strict matrix symmetry;
-* ``GMatrixSparse`` implements a sparse matrix storage class which
+* :doxy:`GMatrixSparse` implements a sparse matrix storage class which
   stores only non-zero matrix elements in a column-wise organisation.
 
 Storage class conversion constructors exist for all three classes

@@ -115,7 +115,7 @@ public:
                      const int&         nside,
                      const std::string& order,
                      const int&         nmaps = 1);
-    explicit GSkymap(const std::string& proj,
+    explicit GSkymap(const std::string& wcs,
                      const std::string& coords,
                      const double&      x,
                      const double&      y,
@@ -130,6 +130,8 @@ public:
     // Operators
     GSkymap& operator+=(const GSkymap& map);
     GSkymap& operator-=(const GSkymap& map);
+    GSkymap& operator*=(const GSkymap& map);
+    GSkymap& operator/=(const GSkymap& map);
 
     // Methods
     void                  clear(void);
@@ -193,5 +195,8 @@ public:
     */
     GSkymap copy() {
         return (*self);
+    }
+    GSkymap sqrt() {
+        return sqrt(*self);
     }
 };
