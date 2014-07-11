@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-10 July 2014
+11 July 2014
 
 
 1. Introduction
@@ -69,6 +69,10 @@ returns the model normalization within a circular region. This is used in the
 GModelSky::mc method to correctly reflect the normalization specified in the
 XML file. The method is also used to flag sources outside the simulation
 cone (applies so for the point sources, radial source and elliptical sources).
+
+The TS attribute has been added to GModel to store the Test Statistics value
+after model fitting. The ts() methods can be used to read and write the value.
+GModelSky will write the TS value into the XML file and read it if it's there.
 
 
 9. Numerics module
