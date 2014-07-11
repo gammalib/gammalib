@@ -111,7 +111,10 @@ GCTAExposure::GCTAExposure(const std::string&   wcs,
 
     // Store energy boundaries
     m_ebounds = ebounds;
-    
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
     // Create sky map
     m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
 
@@ -165,6 +168,23 @@ GCTAExposure& GCTAExposure::operator= (const GCTAExposure& cube)
     return *this;
 }
 
+double GCTAExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
+{ 
+    // Pixel index for the given sky direction
+    int pixel = m_cube.dir2inx(dir);
+
+    double logeng = energy.log10TeV();
+
+    // Set indices and weighting factors for interpolation
+    update(logeng);
+
+    // Perform 1D interpolation
+    double result = m_wgt_left * m_cube(pixel, m_inx_left) 
+                    + m_wgt_right * m_cube(pixel, m_inx_right);
+
+    // Return result
+    return result;
+}
 
 /*==========================================================================
  =                                                                         =
@@ -449,6 +469,71 @@ void GCTAExposure::clear_cube(void)
         } // endfor: looped over all pixels
 
     } // endfor: looped over energy bins
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Update 1D cache
+ *
+ * @param[in] log energy.
+ *
+ * Updates the 1D interpolation cache. The interpolation cache is composed
+ * of two indices and weights that define 2 data values of the 2D skymap
+ * that are used for linear interpolation.
+ *
+ * @todo Write down formula
+ *
+ * @todo Makes GNodeArray::set_value method const and use mutable members
+ ***************************************************************************/
+void GCTAExposure::update(const double& logeng) const
+{
+    // Set value for node array
+    m_emeans.set_value(logeng);
+
+    // Set indices and weighting factors for interpolation
+    m_inx_left  = m_emeans.inx_left();
+    m_inx_right = m_emeans.inx_right();
+    m_wgt_left  = m_emeans.wgt_left();
+    m_wgt_right = m_emeans.wgt_right();
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Set nodes for a logarithmic (base 10) energy axis
+ *
+ *
+ * Set axis nodes so that each node is the logarithmic mean of the lower and
+ * upper energy boundary, i.e.
+ * \f[ n_i = \log \sqrt{{\rm LO}_i \times {\rm HI}_i} \f]
+ * where
+ * \f$n_i\f$ is node \f$i\f$,
+ * \f${\rm LO}_i\f$ is the lower bin boundary for bin \f$i\f$, and
+ * \f${\rm HI}_i\f$ is the upper bin boundary for bin \f$i\f$.
+ *
+ * @todo Check that none of the axis boundaries is non-positive.
+ ***************************************************************************/
+void GCTAExposure::set_eng_axis(void)
+{
+    // Get number of bins
+    int bins = m_ebounds.size();
+
+    // Allocate node values
+    std::vector<double> axis_nodes(bins);
+
+    // Compute nodes
+    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+     
+        // Get logE/TeV
+        axis_nodes[iebin] = m_ebounds.elogmean(iebin).log10TeV(); 
+
+    }  // endfor: looped over energy bins
+
+    // Set node array
+    m_emeans = GNodeArray(axis_nodes);
 
     // Return
     return;

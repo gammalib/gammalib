@@ -69,7 +69,9 @@ public:
 
     // Operators
     GCTAMeanPsf& operator=(const GCTAMeanPsf& cube);
-
+    double       operator()(const GSkyDir& dir, 
+			    const double & delta,
+			    const GEnergy& energy) const;
     // Methods
     void              clear(void);
     GCTAMeanPsf*      clone(void) const;
@@ -78,6 +80,8 @@ public:
     const GSkymap&    map(void) const;
     const GEbounds&   ebounds(void) const;
     const GNodeArray& deltas(void) const;
+    const GNodeArray& emeans(void) const;
+    int               offset(const int& idelta, const int& iebin) const;
     void              write(GFits& file) const;
     void              load(const std::string& filename);
     void              save(const std::string& filename, const bool& clobber) const;
@@ -89,12 +93,26 @@ protected:
     void copy_members(const GCTAMeanPsf& cube);
     void free_members(void);
     void clear_cube(void);
-    int  offset(const int& idelta, const int& iebin) const;
+    void update(const double& delta, const double& logeng) const;
+    void set_eng_axis(void);
     
     // Data
     GSkymap    m_cube;     //!< PSF cube
     GEbounds   m_ebounds;  //!< Energy bounds for the PSF cube
-    GNodeArray m_deltas;   //!< Delta bins for the PSF cube
+    GNodeArray m_emeans;   //!< Mean log10TeV energy for the Exposure cube
+    GNodeArray m_deltas;   //!< Delta bins (deg) for the PSF cube
+
+private:
+    // Response table computation cache for 2D access
+    mutable int    m_inx1;            //!< Index of upper left node
+    mutable int    m_inx2;            //!< Index of lower left node
+    mutable int    m_inx3;            //!< Index of upper right node
+    mutable int    m_inx4;            //!< Index of lower right node
+    mutable double m_wgt1;            //!< Weight of upper left node
+    mutable double m_wgt2;            //!< Weight of lower left node
+    mutable double m_wgt3;            //!< Weight of upper right node
+    mutable double m_wgt4;            //!< Weight of lower right node
+
 };
 
 
@@ -136,6 +154,16 @@ const GNodeArray& GCTAMeanPsf::deltas(void) const
     return (m_deltas);
 }
 
+/***********************************************************************//**
+ * @brief Return Mean log10 energy nodes
+ *
+ * @return emeans
+ ***************************************************************************/
+inline
+const GNodeArray& GCTAMeanPsf::emeans(void) const
+{
+    return (m_emeans);
+}
 
 /***********************************************************************//**
  * @brief Return map offset
@@ -145,7 +173,7 @@ const GNodeArray& GCTAMeanPsf::deltas(void) const
 inline
 int GCTAMeanPsf::offset(const int& idelta, const int& iebin) const
 {
-    return (idelta + iebin*m_ebounds.size());
+    return (idelta + iebin*m_deltas.size());
 }
 
 #endif /* GCTAMEANPSF_HPP */

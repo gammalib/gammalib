@@ -55,7 +55,9 @@ public:
                  const int&           ny,
                  const GEbounds&      ebounds);
     virtual ~GCTAExposure(void);
-
+    
+    // Interpolation Operator
+    double          operator()(const GSkyDir& dir, const GEnergy& energy) const;
     // Methods
     void            clear(void);
     GCTAExposure*   clone(void) const;

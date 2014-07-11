@@ -93,7 +93,7 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
  * @param[in] nx      Number of pixels in x direction.
  * @param[in] ny      Number of pixels in y direction.
  * @param[in] ebounds Energy boundaries.
- * @param[in] dmax    Maximum delta (deg.
+ * @param[in] dmax    Maximum delta (deg).
  * @param[in] ndbins  Number of delta bins.
  *
  * Constructs a mean PSF cube by computing the mean PSF from all CTA
@@ -120,6 +120,9 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
 
     // Store energy boundaries
     m_ebounds = ebounds;
+
+    // Set energy node array
+    set_eng_axis();
 
     // Set delta node array
     m_deltas.clear();
@@ -184,6 +187,41 @@ GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
     // Return this object
     return *this;
 }
+
+/***********************************************************************//**
+ * @brief Return point spread function (in units of sr^-1)
+ *
+ * @param[in] dir Coordinate of the true photon position.
+ * @param[in] delta Angular separation between true and measured photon
+ *            directions (rad).
+ * @param[in] energy Energy of the true photon.
+ * @return point spread function (in units of sr^-1)
+ *
+ * Returns the point spread function for a given angular separation in units
+ * of sr^-1 for a given energy and coordinate.
+ ***************************************************************************/
+double GCTAMeanPsf::operator()(const GSkyDir& dir, 
+			       const double & delta,
+			       const GEnergy& energy) const
+{
+    // Pixel index for the given sky direction
+    //int pixel = m_cube.dir2inx(dir);
+
+    double logeng = energy.log10TeV();
+
+    // Set indices and weighting factors for interpolation
+    update(delta, logeng);
+
+    // Perform 2D interpolation
+    double result = m_wgt1 * m_cube(dir, m_inx1) +
+                    m_wgt2 * m_cube(dir, m_inx2) +
+                    m_wgt3 * m_cube(dir, m_inx3) +
+                    m_wgt4 * m_cube(dir, m_inx4);
+
+    // Return result
+    return result;
+}
+
 
 
 /*==========================================================================
@@ -517,6 +555,74 @@ void GCTAMeanPsf::clear_cube(void)
         } // endfor: looped over all pixels
 
     } // endfor: looped over maps
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Set nodes for a logarithmic (base 10) energy axis
+ *
+ *
+ * Set axis nodes so that each node is the logarithmic mean of the lower and
+ * upper energy boundary, i.e.
+ * \f[ n_i = \log \sqrt{{\rm LO}_i \times {\rm HI}_i} \f]
+ * where
+ * \f$n_i\f$ is node \f$i\f$,
+ * \f${\rm LO}_i\f$ is the lower bin boundary for bin \f$i\f$, and
+ * \f${\rm HI}_i\f$ is the upper bin boundary for bin \f$i\f$.
+ *
+ * @todo Check that none of the axis boundaries is non-positive.
+ ***************************************************************************/
+void GCTAMeanPsf::set_eng_axis(void)
+{
+    // Get number of bins
+    int bins = m_ebounds.size();
+
+    // Allocate node values
+    std::vector<double> axis_nodes(bins);
+
+    // Compute nodes
+    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+     
+        // Get logE/TeV
+        axis_nodes[iebin] = m_ebounds.elogmean(iebin).log10TeV(); 
+
+    }  // endfor: looped over energy bins
+
+    // Set node array
+    m_emeans = GNodeArray(axis_nodes);
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Update PSF parameter cache
+ *
+ * @param[in] delta Angular separation between true and measured photon
+ *            directions (rad).
+ * @param[in] logeng Log10 true photon energy (TeV). 
+ *
+ * This method updates the PSF parameter cache.
+ ***************************************************************************/
+void GCTAMeanPsf::update(const double& delta, const double& logeng) const
+{
+    // Set value for node array
+    m_deltas.set_value(delta*gammalib::rad2deg);
+    m_emeans.set_value(logeng);
+   
+    // Set indices for bi-linear interpolation
+    m_inx1 = offset( m_deltas.inx_left(), m_emeans.inx_left() );
+    m_inx2 = offset( m_deltas.inx_left(), m_emeans.inx_right() );
+    m_inx3 = offset( m_deltas.inx_right(), m_emeans.inx_left() );
+    m_inx4 = offset( m_deltas.inx_right(), m_emeans.inx_right() );
+
+    // Set weighting factors for bi-linear interpolation
+    m_wgt1 = m_deltas.wgt_left()  * m_emeans.wgt_left();
+    m_wgt2 = m_deltas.wgt_left()  * m_emeans.wgt_right();
+    m_wgt3 = m_deltas.wgt_right() * m_emeans.wgt_left();
+    m_wgt4 = m_deltas.wgt_right() * m_emeans.wgt_right();
 
     // Return
     return;
