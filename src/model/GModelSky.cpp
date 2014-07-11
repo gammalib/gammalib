@@ -747,7 +747,6 @@ void GModelSky::write(GXmlElement& xml) const
     if (identifiers.length() > 0) {
         src->attribute("id", identifiers);
     }
-    if (ts() > 0.0) {
 
     // Write spectral model
     if (spectral() != NULL) {
