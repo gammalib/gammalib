@@ -70,8 +70,9 @@ public:
     // Operators
     GCTAMeanPsf& operator=(const GCTAMeanPsf& cube);
     double       operator()(const GSkyDir& dir, 
-			    const double & delta,
-			    const GEnergy& energy) const;
+                            const double&  delta,
+                            const GEnergy& energy) const;
+
     // Methods
     void              clear(void);
     GCTAMeanPsf*      clone(void) const;
@@ -80,8 +81,9 @@ public:
     const GSkymap&    map(void) const;
     const GEbounds&   ebounds(void) const;
     const GNodeArray& deltas(void) const;
-    const GNodeArray& emeans(void) const;
+    const GNodeArray& elogmeans(void) const;
     int               offset(const int& idelta, const int& iebin) const;
+    void              read(const GFits& fits);
     void              write(GFits& file) const;
     void              load(const std::string& filename);
     void              save(const std::string& filename, const bool& clobber) const;
@@ -93,14 +95,14 @@ protected:
     void copy_members(const GCTAMeanPsf& cube);
     void free_members(void);
     void clear_cube(void);
-    void update(const double& delta, const double& logeng) const;
+    void update(const double& delta, const double& logE) const;
     void set_eng_axis(void);
     
     // Data
-    GSkymap    m_cube;     //!< PSF cube
-    GEbounds   m_ebounds;  //!< Energy bounds for the PSF cube
-    GNodeArray m_emeans;   //!< Mean log10TeV energy for the Exposure cube
-    GNodeArray m_deltas;   //!< Delta bins (deg) for the PSF cube
+    GSkymap    m_cube;      //!< PSF cube
+    GEbounds   m_ebounds;   //!< Energy bounds for the PSF cube
+    GNodeArray m_elogmeans; //!< Mean log10TeV energy for the PSF cube
+    GNodeArray m_deltas;    //!< Delta bins (deg) for the PSF cube
 
 private:
     // Response table computation cache for 2D access
@@ -135,7 +137,6 @@ const GSkymap& GCTAMeanPsf::map(void) const
  * @brief Return energy boundaries
  *
  * @return Energy boundaris
- *
  ***************************************************************************/
 inline
 const GEbounds& GCTAMeanPsf::ebounds(void) const
@@ -144,9 +145,9 @@ const GEbounds& GCTAMeanPsf::ebounds(void) const
 }
 
 /***********************************************************************//**
- * @brief Return deltas nodes
+ * @brief Return offset angles between true and measured photon direction
  *
- * @return deltas
+ * @return Offset angles between true and measured photon direction
  ***************************************************************************/
 inline
 const GNodeArray& GCTAMeanPsf::deltas(void) const
@@ -155,14 +156,14 @@ const GNodeArray& GCTAMeanPsf::deltas(void) const
 }
 
 /***********************************************************************//**
- * @brief Return Mean log10 energy nodes
+ * @brief Return arithmetic mean of log10 energies
  *
- * @return emeans
+ * @return Arithmetic mean of log10 energies.
  ***************************************************************************/
 inline
-const GNodeArray& GCTAMeanPsf::emeans(void) const
+const GNodeArray& GCTAMeanPsf::elogmeans(void) const
 {
-    return (m_emeans);
+    return (m_elogmeans);
 }
 
 /***********************************************************************//**

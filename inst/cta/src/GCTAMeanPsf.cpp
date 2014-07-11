@@ -188,6 +188,7 @@ GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
     return *this;
 }
 
+
 /***********************************************************************//**
  * @brief Return point spread function (in units of sr^-1)
  *
@@ -201,27 +202,21 @@ GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
  * of sr^-1 for a given energy and coordinate.
  ***************************************************************************/
 double GCTAMeanPsf::operator()(const GSkyDir& dir, 
-			       const double & delta,
-			       const GEnergy& energy) const
+                               const double&  delta,
+                               const GEnergy& energy) const
 {
-    // Pixel index for the given sky direction
-    //int pixel = m_cube.dir2inx(dir);
+    // Update indices and weighting factors for interpolation
+    update(delta, energy.log10TeV());
 
-    double logeng = energy.log10TeV();
+    // Perform bi-linear interpolation
+    double psf = m_wgt1 * m_cube(dir, m_inx1) +
+                 m_wgt2 * m_cube(dir, m_inx2) +
+                 m_wgt3 * m_cube(dir, m_inx3) +
+                 m_wgt4 * m_cube(dir, m_inx4);
 
-    // Set indices and weighting factors for interpolation
-    update(delta, logeng);
-
-    // Perform 2D interpolation
-    double result = m_wgt1 * m_cube(dir, m_inx1) +
-                    m_wgt2 * m_cube(dir, m_inx2) +
-                    m_wgt3 * m_cube(dir, m_inx3) +
-                    m_wgt4 * m_cube(dir, m_inx4);
-
-    // Return result
-    return result;
+    // Return PSF
+    return psf;
 }
-
 
 
 /*==========================================================================
@@ -401,9 +396,43 @@ void GCTAMeanPsf::fill(const GObservations& obs)
 
 
 /***********************************************************************//**
+ * @brief Read PSF cube from FITS object
+ *
+ * @param[in] fits FITS object.
+ *
+ * Read the PSF cube from a FITS object.
+ ***************************************************************************/
+void GCTAMeanPsf::read(const GFits& fits)
+{
+    // Clear object
+    clear();
+
+    // Get HDUs
+    const GFitsImage& hdu_psfcube  = *fits.image("Primary");
+    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
+    const GFitsTable& hdu_deltas  = *fits.table("DELTAS");
+
+    // Read cube
+    m_cube.read(hdu_psfcube);
+
+    // Read energy boundaries
+    m_ebounds.read(hdu_ebounds);
+
+    // Read delta nodes
+    m_deltas.read(hdu_deltas);
+
+    // Set energy node array
+    set_eng_axis();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Write CTA PSF cube into FITS object.
  *
- * @param[in] fits FITS file.
+ * @param[in] fits FITS object.
  *
  * Write the CTA PSF cube into a FITS object.
  ***************************************************************************/
@@ -432,11 +461,19 @@ void GCTAMeanPsf::write(GFits& fits) const
  * @param[in] filename Performance table file name.
  *
  * Loads the PSF cube from a FITS file into the object.
- *
- * @todo Implement method
  ***************************************************************************/
 void GCTAMeanPsf::load(const std::string& filename)
 {
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read PSF cube
+    read(fits);
+
+    // Close FITS file
+    fits.close();
+
+    // Return
     return;
 }
 
@@ -505,6 +542,7 @@ void GCTAMeanPsf::init_members(void)
     // Initialise members
     m_cube.clear();
     m_ebounds.clear();
+    m_elogmeans.clear();
     m_deltas.clear();
    
     // Return
@@ -520,9 +558,10 @@ void GCTAMeanPsf::init_members(void)
 void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
 {
     // Copy members
-    m_cube    = cube.m_cube;
-    m_ebounds = cube.m_ebounds;
-    m_deltas  = cube.m_deltas;
+    m_cube      = cube.m_cube;
+    m_ebounds   = cube.m_ebounds;
+    m_elogmeans = cube.m_elogmeans;
+    m_deltas    = cube.m_deltas;
 
     // Return
     return;
@@ -579,50 +618,48 @@ void GCTAMeanPsf::set_eng_axis(void)
     // Get number of bins
     int bins = m_ebounds.size();
 
-    // Allocate node values
-    std::vector<double> axis_nodes(bins);
+    // Clear nodes
+    m_elogmeans.clear();
 
     // Compute nodes
     for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
      
-        // Get logE/TeV
-        axis_nodes[iebin] = m_ebounds.elogmean(iebin).log10TeV(); 
+        // Append logE/TeV
+        m_elogmeans.append(m_ebounds.elogmean(iebin).log10TeV());
 
     }  // endfor: looped over energy bins
-
-    // Set node array
-    m_emeans = GNodeArray(axis_nodes);
 
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Update PSF parameter cache
  *
  * @param[in] delta Angular separation between true and measured photon
  *            directions (rad).
- * @param[in] logeng Log10 true photon energy (TeV). 
+ * @param[in] logE Log10 true photon energy (TeV). 
  *
  * This method updates the PSF parameter cache.
  ***************************************************************************/
-void GCTAMeanPsf::update(const double& delta, const double& logeng) const
+void GCTAMeanPsf::update(const double& delta, const double& logE) const
 {
-    // Set value for node array
+    // Set node array interpolation values
     m_deltas.set_value(delta*gammalib::rad2deg);
-    m_emeans.set_value(logeng);
+    m_elogmeans.set_value(logE);
    
     // Set indices for bi-linear interpolation
-    m_inx1 = offset( m_deltas.inx_left(), m_emeans.inx_left() );
-    m_inx2 = offset( m_deltas.inx_left(), m_emeans.inx_right() );
-    m_inx3 = offset( m_deltas.inx_right(), m_emeans.inx_left() );
-    m_inx4 = offset( m_deltas.inx_right(), m_emeans.inx_right() );
+    m_inx1 = offset(m_deltas.inx_left(),  m_elogmeans.inx_left());
+    m_inx2 = offset(m_deltas.inx_left(),  m_elogmeans.inx_right());
+    m_inx3 = offset(m_deltas.inx_right(), m_elogmeans.inx_left());
+    m_inx4 = offset(m_deltas.inx_right(), m_elogmeans.inx_right());
 
     // Set weighting factors for bi-linear interpolation
-    m_wgt1 = m_deltas.wgt_left()  * m_emeans.wgt_left();
-    m_wgt2 = m_deltas.wgt_left()  * m_emeans.wgt_right();
-    m_wgt3 = m_deltas.wgt_right() * m_emeans.wgt_left();
-    m_wgt4 = m_deltas.wgt_right() * m_emeans.wgt_right();
+    m_wgt1 = m_deltas.wgt_left()  * m_elogmeans.wgt_left();
+    m_wgt2 = m_deltas.wgt_left()  * m_elogmeans.wgt_right();
+    m_wgt3 = m_deltas.wgt_right() * m_elogmeans.wgt_left();
+    m_wgt4 = m_deltas.wgt_right() * m_elogmeans.wgt_right();
 
     // Return
     return;
