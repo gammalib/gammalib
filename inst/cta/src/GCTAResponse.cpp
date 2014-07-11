@@ -2131,7 +2131,7 @@ double GCTAResponse::psf_delta_max(const double& theta,
 /***********************************************************************//**
  * @brief Return energy dispersion (in units or MeV^-1)
  *
- * @param[in] obsLogEng Measured event energy.
+ * @param[in] obsEng Measured event energy.
  * @param[in] theta Radial offset angle in camera (radians).
  * @param[in] phi Polar angle in camera (radians).
  * @param[in] zenith Zenith angle of telescope pointing (radians).

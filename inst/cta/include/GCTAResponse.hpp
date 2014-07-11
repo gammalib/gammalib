@@ -389,7 +389,7 @@ const GCTABackground* GCTAResponse::background(void) const
 /***********************************************************************//**
  * @brief Set pointer to background model
  *
- * @param[in] edisp Pointer to background model.
+ * @param[in] background Pointer to background model.
  ***************************************************************************/
 inline
 void GCTAResponse::background(GCTABackground* background)

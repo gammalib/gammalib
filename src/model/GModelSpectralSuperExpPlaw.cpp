@@ -334,19 +334,19 @@ double GModelSpectralSuperExpPlaw::eval(const GEnergy& srcEng,
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_ecut}} =
  *      S_{\rm E}(E | t) \, \left( \frac{E}{{\tt m\_ecut}^{\tt m\_index2}} \right) \,
- *      \left({\frac{\tt m\_index2}}{\tt m\_ecut}\right)
+ *      \left(\frac{\tt m\_index2}{\tt m\_ecut}\right)
  * \f]
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index2}} =
- *      -S_{\rm E}(E | t) \, \ln \left(\frac{E}{{\tt m\_ecut}\right)\, 
+ *      -S_{\rm E}(E | t) \, \ln \left(\frac{E}{\tt m\_ecut}\right)\, 
  *        \left(\frac{E}{{\tt m\_ecut}^{\tt m\_index2}} \right)
  * \f]
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_pivot}} =
  *      -S_{\rm E}(E | t) \,
- *      \left( \frac{{\tt m\_index}}{{\tt m\_pivot}} \right)
+ *      \left( \frac{\tt m\_index}{\tt m\_pivot} \right)
  * \f]
  *
  * @todo The method expects that pivot!=0 and ecut!=0. Otherwise Inf or NaN

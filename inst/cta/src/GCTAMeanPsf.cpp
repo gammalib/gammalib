@@ -165,7 +165,7 @@ GCTAMeanPsf::~GCTAMeanPsf(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] psf Mean PSF cube.
+ * @param[in] cube Mean PSF cube.
  * @return Mean PSF cube.
  ***************************************************************************/
 GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
