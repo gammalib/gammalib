@@ -111,7 +111,10 @@ GCTAExposure::GCTAExposure(const std::string&   wcs,
 
     // Store energy boundaries
     m_ebounds = ebounds;
-    
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
     // Create sky map
     m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
 
@@ -163,6 +166,27 @@ GCTAExposure& GCTAExposure::operator= (const GCTAExposure& cube)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Return exposure (in units of cm2 s)
+ *
+ * @param[in] dir Coordinate of the true photon position.
+ * @param[in] energy Energy of the true photon.
+ * @return Exposure (in units of cm2 s)
+ ***************************************************************************/
+double GCTAExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
+{ 
+    // Set indices and weighting factors for interpolation
+    update(energy.log10TeV());
+
+    // Perform interpolation
+    double exposure = m_wgt_left  * m_cube(dir, m_inx_left) +
+                      m_wgt_right * m_cube(dir, m_inx_right);
+
+    // Return exposure
+    return exposure;
 }
 
 
@@ -302,6 +326,36 @@ void GCTAExposure::fill(const GObservations& obs)
 
 
 /***********************************************************************//**
+ * @brief Read exposure cube from FITS object
+ *
+ * @param[in] fits FITS object.
+ *
+ * Read the exposure cube from a FITS object.
+ ***************************************************************************/
+void GCTAExposure::read(const GFits& fits)
+{
+    // Clear object
+    clear();
+
+    // Get HDUs
+    const GFitsImage& hdu_expcube = *fits.image("Primary");
+    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
+
+    // Read cube
+    m_cube.read(hdu_expcube);
+
+    // Read energy boundaries
+    m_ebounds.read(hdu_ebounds);
+
+    // Set energy node array
+    set_eng_axis();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Write CTA exposure cube into FITS object.
  *
  * @param[in] fits FITS file.
@@ -325,11 +379,18 @@ void GCTAExposure::write(GFits& fits) const
  * @param[in] filename Performance table file name.
  *
  * Loads the exposure cube from a FITS file into the object.
- *
- * @todo Implement method
  ***************************************************************************/
 void GCTAExposure::load(const std::string& filename)
 {
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read PSF cube
+    read(fits);
+
+    // Close FITS file
+    fits.close();
+
     // Return
     return;
 }
@@ -449,6 +510,68 @@ void GCTAExposure::clear_cube(void)
         } // endfor: looped over all pixels
 
     } // endfor: looped over energy bins
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update 1D cache
+ *
+ * @param[in] logE Log10 energy in TeV.
+ *
+ * Updates the 1D interpolation cache. The interpolation cache is composed
+ * of two indices and weights that define 2 data values of the 2D skymap
+ * that are used for linear interpolation.
+ *
+ * @todo Write down formula
+ ***************************************************************************/
+void GCTAExposure::update(const double& logE) const
+{
+    // Set value for node array
+    m_elogmeans.set_value(logE);
+
+    // Set indices and weighting factors for interpolation
+    m_inx_left  = m_elogmeans.inx_left();
+    m_inx_right = m_elogmeans.inx_right();
+    m_wgt_left  = m_elogmeans.wgt_left();
+    m_wgt_right = m_elogmeans.wgt_right();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set nodes for a logarithmic (base 10) energy axis
+ *
+ *
+ * Set axis nodes so that each node is the logarithmic mean of the lower and
+ * upper energy boundary, i.e.
+ * \f[ n_i = \log \sqrt{{\rm LO}_i \times {\rm HI}_i} \f]
+ * where
+ * \f$n_i\f$ is node \f$i\f$,
+ * \f${\rm LO}_i\f$ is the lower bin boundary for bin \f$i\f$, and
+ * \f${\rm HI}_i\f$ is the upper bin boundary for bin \f$i\f$.
+ *
+ * @todo Check that none of the axis boundaries is non-positive.
+ ***************************************************************************/
+void GCTAExposure::set_eng_axis(void)
+{
+    // Get number of bins
+    int bins = m_ebounds.size();
+
+    // Clear node array
+    m_elogmeans.clear();
+
+    // Compute nodes
+    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+     
+        // Get logE/TeV
+        m_elogmeans.append(m_ebounds.elogmean(iebin).log10TeV()); 
+
+    }  // endfor: looped over energy bins
 
     // Return
     return;

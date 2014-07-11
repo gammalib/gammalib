@@ -55,18 +55,23 @@ public:
                  const int&           ny,
                  const GEbounds&      ebounds);
     virtual ~GCTAExposure(void);
+    
+    // Interpolation Operator
+    double operator()(const GSkyDir& dir, const GEnergy& energy) const;
 
     // Methods
-    void            clear(void);
-    GCTAExposure*   clone(void) const;
-    void            set(const GCTAObservation& obs);
-    void            fill(const GObservations& obs);
-    const GSkymap&  cube(void) const;
-    const GEbounds& ebounds(void) const;
-    void            write(GFits& file) const;
-    void            load(const std::string& filename);
-    void            save(const std::string& filename,
-                         const bool& clobber = false) const;
+    void              clear(void);
+    GCTAExposure*     clone(void) const;
+    void              set(const GCTAObservation& obs);
+    void              fill(const GObservations& obs);
+    const GSkymap&    cube(void) const;
+    const GEbounds&   ebounds(void) const;
+    const GNodeArray& elogmeans(void) const;
+    void              read(const GFits& fits);
+    void              write(GFits& file) const;
+    void              load(const std::string& filename);
+    void              save(const std::string& filename,
+                           const bool& clobber = false) const;
 };
 
 /***********************************************************************//**

@@ -93,7 +93,7 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
  * @param[in] nx      Number of pixels in x direction.
  * @param[in] ny      Number of pixels in y direction.
  * @param[in] ebounds Energy boundaries.
- * @param[in] dmax    Maximum delta (deg.
+ * @param[in] dmax    Maximum delta (deg).
  * @param[in] ndbins  Number of delta bins.
  *
  * Constructs a mean PSF cube by computing the mean PSF from all CTA
@@ -120,6 +120,9 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
 
     // Store energy boundaries
     m_ebounds = ebounds;
+
+    // Set energy node array
+    set_eng_axis();
 
     // Set delta node array
     m_deltas.clear();
@@ -183,6 +186,36 @@ GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
 
     // Return this object
     return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Return point spread function (in units of sr^-1)
+ *
+ * @param[in] dir Coordinate of the true photon position.
+ * @param[in] delta Angular separation between true and measured photon
+ *            directions (rad).
+ * @param[in] energy Energy of the true photon.
+ * @return point spread function (in units of sr^-1)
+ *
+ * Returns the point spread function for a given angular separation in units
+ * of sr^-1 for a given energy and coordinate.
+ ***************************************************************************/
+double GCTAMeanPsf::operator()(const GSkyDir& dir, 
+                               const double&  delta,
+                               const GEnergy& energy) const
+{
+    // Update indices and weighting factors for interpolation
+    update(delta, energy.log10TeV());
+
+    // Perform bi-linear interpolation
+    double psf = m_wgt1 * m_cube(dir, m_inx1) +
+                 m_wgt2 * m_cube(dir, m_inx2) +
+                 m_wgt3 * m_cube(dir, m_inx3) +
+                 m_wgt4 * m_cube(dir, m_inx4);
+
+    // Return PSF
+    return psf;
 }
 
 
@@ -363,9 +396,43 @@ void GCTAMeanPsf::fill(const GObservations& obs)
 
 
 /***********************************************************************//**
+ * @brief Read PSF cube from FITS object
+ *
+ * @param[in] fits FITS object.
+ *
+ * Read the PSF cube from a FITS object.
+ ***************************************************************************/
+void GCTAMeanPsf::read(const GFits& fits)
+{
+    // Clear object
+    clear();
+
+    // Get HDUs
+    const GFitsImage& hdu_psfcube  = *fits.image("Primary");
+    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
+    const GFitsTable& hdu_deltas  = *fits.table("DELTAS");
+
+    // Read cube
+    m_cube.read(hdu_psfcube);
+
+    // Read energy boundaries
+    m_ebounds.read(hdu_ebounds);
+
+    // Read delta nodes
+    m_deltas.read(hdu_deltas);
+
+    // Set energy node array
+    set_eng_axis();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Write CTA PSF cube into FITS object.
  *
- * @param[in] fits FITS file.
+ * @param[in] fits FITS object.
  *
  * Write the CTA PSF cube into a FITS object.
  ***************************************************************************/
@@ -394,11 +461,19 @@ void GCTAMeanPsf::write(GFits& fits) const
  * @param[in] filename Performance table file name.
  *
  * Loads the PSF cube from a FITS file into the object.
- *
- * @todo Implement method
  ***************************************************************************/
 void GCTAMeanPsf::load(const std::string& filename)
 {
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read PSF cube
+    read(fits);
+
+    // Close FITS file
+    fits.close();
+
+    // Return
     return;
 }
 
@@ -467,6 +542,7 @@ void GCTAMeanPsf::init_members(void)
     // Initialise members
     m_cube.clear();
     m_ebounds.clear();
+    m_elogmeans.clear();
     m_deltas.clear();
    
     // Return
@@ -482,9 +558,10 @@ void GCTAMeanPsf::init_members(void)
 void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
 {
     // Copy members
-    m_cube    = cube.m_cube;
-    m_ebounds = cube.m_ebounds;
-    m_deltas  = cube.m_deltas;
+    m_cube      = cube.m_cube;
+    m_ebounds   = cube.m_ebounds;
+    m_elogmeans = cube.m_elogmeans;
+    m_deltas    = cube.m_deltas;
 
     // Return
     return;
@@ -517,6 +594,72 @@ void GCTAMeanPsf::clear_cube(void)
         } // endfor: looped over all pixels
 
     } // endfor: looped over maps
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Set nodes for a logarithmic (base 10) energy axis
+ *
+ *
+ * Set axis nodes so that each node is the logarithmic mean of the lower and
+ * upper energy boundary, i.e.
+ * \f[ n_i = \log \sqrt{{\rm LO}_i \times {\rm HI}_i} \f]
+ * where
+ * \f$n_i\f$ is node \f$i\f$,
+ * \f${\rm LO}_i\f$ is the lower bin boundary for bin \f$i\f$, and
+ * \f${\rm HI}_i\f$ is the upper bin boundary for bin \f$i\f$.
+ *
+ * @todo Check that none of the axis boundaries is non-positive.
+ ***************************************************************************/
+void GCTAMeanPsf::set_eng_axis(void)
+{
+    // Get number of bins
+    int bins = m_ebounds.size();
+
+    // Clear nodes
+    m_elogmeans.clear();
+
+    // Compute nodes
+    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+     
+        // Append logE/TeV
+        m_elogmeans.append(m_ebounds.elogmean(iebin).log10TeV());
+
+    }  // endfor: looped over energy bins
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update PSF parameter cache
+ *
+ * @param[in] delta Angular separation between true and measured photon
+ *            directions (rad).
+ * @param[in] logE Log10 true photon energy (TeV). 
+ *
+ * This method updates the PSF parameter cache.
+ ***************************************************************************/
+void GCTAMeanPsf::update(const double& delta, const double& logE) const
+{
+    // Set node array interpolation values
+    m_deltas.set_value(delta*gammalib::rad2deg);
+    m_elogmeans.set_value(logE);
+   
+    // Set indices for bi-linear interpolation
+    m_inx1 = offset(m_deltas.inx_left(),  m_elogmeans.inx_left());
+    m_inx2 = offset(m_deltas.inx_left(),  m_elogmeans.inx_right());
+    m_inx3 = offset(m_deltas.inx_right(), m_elogmeans.inx_left());
+    m_inx4 = offset(m_deltas.inx_right(), m_elogmeans.inx_right());
+
+    // Set weighting factors for bi-linear interpolation
+    m_wgt1 = m_deltas.wgt_left()  * m_elogmeans.wgt_left();
+    m_wgt2 = m_deltas.wgt_left()  * m_elogmeans.wgt_right();
+    m_wgt3 = m_deltas.wgt_right() * m_elogmeans.wgt_left();
+    m_wgt4 = m_deltas.wgt_right() * m_elogmeans.wgt_right();
 
     // Return
     return;
