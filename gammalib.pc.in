@@ -11,5 +11,5 @@ Requires:
 Requires.private: @CFITSIO@
 Conflicts: 
 Cflags: -I${includedir}/gammalib
-Libs: -L${libdir} -lgamma 
+Libs: -L${libdir} -lgamma @OPENMP_CXXFLAGS@
 Libs.private: @LIBS_CFITSIO@ @LIBS_READLINE@
