@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-11 July 2014
+12 July 2014
 
 
 1. Introduction
@@ -191,6 +191,11 @@ GCTAExposure represents the summed exposure for a list of CTA observations
 (computed as the sum of effective area times livetime), GCTAMeanPsf represents
 the average PSF, computed by weighing the PSF of each observation by the respective
 exposure. 
+
+GCTAEventList was storing the m_detx and m_dety members in degrees upon load, while
+the class expects to hold these values in radians. Unit conversion has now been
+added to the reader and writers, so that DETX and DETY are in degrees in the file
+while they are in radians internally in GammaLib, and specifically in GCTAInstDir.
 
 
 21. COMPTEL interface
