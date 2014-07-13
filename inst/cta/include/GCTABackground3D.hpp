@@ -68,8 +68,12 @@ public:
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
+    GCTAResponseTable          rsp_table(void) const;
+    void                       write(GFitsBinTable& hdu) const;
+    void                       save(const std::string& filename,
+				    const bool& clobber) const;
     std::string                print(const GChatter& chatter = NORMAL) const;
-
+   
     // Methods
     void   read(const GFits& file);
     double mc_spatial_resolution(void) const;
@@ -121,6 +125,17 @@ std::string GCTABackground3D::filename(void) const
     return m_filename;
 }
 
+/***********************************************************************//**
+ * @brief Return response table
+ *
+ * @return Returns response table
+ ***************************************************************************/
+inline
+GCTAResponseTable GCTABackground3D::rsp_table(void) const
+{
+    // Return filename
+    return m_background;
+}
 
 /***********************************************************************//**
  * @brief Get response cube spectrum

@@ -88,7 +88,7 @@ public:
     void               read(const GFitsTable& hdu);
     void               write(GFitsTable& hdu) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
-
+    
 private:
     // Methods
     void init_members(void);

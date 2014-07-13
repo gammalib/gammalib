@@ -31,7 +31,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
-#include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -325,6 +325,30 @@ void GCTABackground3D::load(const std::string& filename)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Save background table into FITS file
+ *
+ * @param[in] filename background table FITS file name.
+ * @param[in] clobber Overwrite existing file? (true=yes)
+ *
+ * Save the background table into a FITS file.
+ ***************************************************************************/
+void GCTABackground3D::save(const std::string& filename, const bool& clobber) const
+{
+    // Create empty FITS file
+    GFits fits;
+    GFitsBinTable hdu;
+    // Write background table
+    m_background.write(hdu);
+   
+    // Save FITS file
+    fits.append(hdu);
+    fits.saveto(filename, clobber);
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Read background from FITS file
@@ -358,6 +382,19 @@ void GCTABackground3D::read(const GFits& fits)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Write CTA background table into FITS object.
+ *
+ * @param[in] fits FITS file.
+ ***************************************************************************/
+void GCTABackground3D::write(GFitsBinTable& hdu) const
+{
+    // Write cube
+    m_background.write(hdu);
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Returns MC instrument direction

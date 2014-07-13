@@ -35,6 +35,8 @@
 #include "GFitsTableFloatCol.hpp"
 #include "GCTAException.hpp"
 #include "GCTAResponseTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR1                  "GCTAResponseTable::operator()(double&)"
@@ -92,6 +94,64 @@ GCTAResponseTable::GCTAResponseTable(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Add a new axis
+ * 
+ * @param[in] length Length of the axis.
+ * @param[in] name Name of the axis. 
+ * @param[in] unit Unit of the axis.
+ *
+ * Add a new axis to the response table.
+ ***************************************************************************/
+GCTAResponseTable::add_axis(int length, std::string name, std::string unit)
+{
+    // Add a new axis 
+    std::vector<double> axis(length,0);
+  
+    m_colname_lo.push_back(name);
+    m_colname_hi.push_back(name);
+    m_axis_lo.push_back(axis);
+    m_axis_hi.push_back(axis);
+    m_units_lo.push_back(unit);
+    m_units_hi.push_back(unit);
+
+    m_naxes = m_naxes + 1;
+
+    // Compute the cube size
+    m_nelements = axis(0);
+    for (int i = 1; i < axes(); ++i) {
+        m_nelements *= axis(i);
+    }
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Add a new parameter column
+ * 
+ * @param[in] name Name of the column. 
+ * @param[in] unit Unit of the column.
+ *
+ * Add a new parameter column to the response table. The number of elements in 
+ * the column is the product of the length of all axes. Values of elements should
+ * be set my access operators.
+ * @todo: Throw an exception message when m_nelement is zero.
+ ***************************************************************************/
+GCTAResponseTable::add_par(std::string name, std::string unit)
+{
+   
+    // Add a new parameter column
+    m_colname_par.push_back(name);
+    m_units_par.push_back(unit);
+    std::vector<double> par(m_nelements);
+    m_pars.push_back(par)
+
+    m_npars = m_npars + 1;
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -1013,10 +1073,55 @@ void GCTAResponseTable::read(const GFitsTable& table)
  *
  * @param[in] table Response table.
  *
- * @todo Implement method
+ * @todo Write write method for multi-rwo tables
  ***************************************************************************/
-void GCTAResponseTable::write(GFitsTable& table) const
+void GCTAResponseTable::write(GFitsTable& hdu) const
 {
+   
+    // Loop through axis
+    for ( int iaxis = 0; iaxis < m_naxes; ++iaxis)
+      {
+
+	GFitsTableDoubleCol col_lo = GFitsTableDoubleCol(m_colname_lo[iaxis], 
+				     1, m_axis_lo[iaxis].size());
+	GFitsTableDoubleCol col_hi = GFitsTableDoubleCol(m_colname_hi[iaxis], 
+				     1, m_axis_hi[iaxis].size());
+	// Loop through elements in this axis column
+	for (int ielm = 0; ielm < m_axis_lo[iaxis].size() ; ++ielm)
+	  {
+
+	    col_lo(0,ielm) = m_axis_lo[iaxis][ielm];
+	    col_hi(0,ielm) = m_axis_hi[iaxis][ielm];
+
+	  }
+
+	col_lo.unit(m_units_lo[iaxis]);
+	col_hi.unit(m_units_hi[iaxis]);
+	hdu.append(col_lo);
+	hdu.append(col_hi);
+
+      }
+
+    for ( int ipar = 0; ipar < m_npars; ++ipar)
+      {
+
+	GFitsTableDoubleCol col_par = GFitsTableDoubleCol(m_colname_par[ipar], 
+							  1, m_pars[ipar].size());
+	// Loop through elements in this parameter column
+	for (int ielm = 0; ielm < m_axis_lo[ipar].size() ; ++ielm)
+	  {
+
+	    col_par(0,ielm) = m_pars[ipar][ielm];
+
+	  }
+
+	col_par.unit(m_units_par[ipar]);
+	hdu.append(col_par);
+
+      }
+
+    hdu.extname("BACKGROUND");
+    
     // Return
     return;
 }
