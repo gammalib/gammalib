@@ -1,4 +1,4 @@
-/***************************************************************************
+1/***************************************************************************
  *             GCTAResponseTable.cpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
@@ -1159,7 +1159,7 @@ void GCTAResponseTable::write(GFitsTable& hdu) const
 	GFitsTableDoubleCol col_par = GFitsTableDoubleCol(m_colname_par[ipar], 
 							  1, m_pars[ipar].size());
 	// Loop through elements in this parameter column
-	for (int ielm = 0; ielm < m_axis_lo[ipar].size() ; ++ielm)
+	for (int ielm = 0; ielm < m_pars[ipar].size() ; ++ielm)
 	  {
 
 	    col_par(0,ielm) = m_pars[ipar][ielm];
