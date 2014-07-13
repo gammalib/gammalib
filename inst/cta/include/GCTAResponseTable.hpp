@@ -80,6 +80,8 @@ public:
     void               axis_linear(const int& index);
     void               axis_log10(const int& index);
     void               axis_radians(const int& index);
+    std::string        axis_lo_name(const int& index) const;
+    std::string        axis_hi_name(const int& index) const;
     std::string        axis_lo_unit(const int& index) const;
     std::string        axis_hi_unit(const int& index) const;
     std::string        unit(const int& index) const;
@@ -88,7 +90,12 @@ public:
     void               read(const GFitsTable& hdu);
     void               write(GFitsTable& hdu) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
-    
+    void               add_axis(std::vector<double> axis_lo, 
+				std::vector<double> axis_hi,
+				std::string name_lo, std::string name_hi,
+				std::string unit);    
+    void               add_par(std::string name, std::string unit);
+
 private:
     // Methods
     void init_members(void);

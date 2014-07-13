@@ -97,21 +97,24 @@ GCTAResponseTable::GCTAResponseTable(void)
 /***********************************************************************//**
  * @brief Add a new axis
  * 
- * @param[in] length Length of the axis.
+ * @param[in] axis_lo lower boundaries of the axis.
+ * @param[in] axis_hi upper boundaries of the axis. 
  * @param[in] name Name of the axis. 
  * @param[in] unit Unit of the axis.
  *
  * Add a new axis to the response table.
+ * todo: Throw an exception when the length of axis_lo and axis_hi are different.
  ***************************************************************************/
-GCTAResponseTable::add_axis(int length, std::string name, std::string unit)
+void GCTAResponseTable::add_axis(std::vector<double> axis_lo, 
+				 std::vector<double> axis_hi,
+				 std::string name_lo, std::string name_hi,
+				 std::string unit)
 {
-    // Add a new axis 
-    std::vector<double> axis(length,0);
-  
-    m_colname_lo.push_back(name);
-    m_colname_hi.push_back(name);
-    m_axis_lo.push_back(axis);
-    m_axis_hi.push_back(axis);
+    // Add a new axis  
+    m_colname_lo.push_back(name_lo);
+    m_colname_hi.push_back(name_hi);
+    m_axis_lo.push_back(axis_lo);
+    m_axis_hi.push_back(axis_hi);
     m_units_lo.push_back(unit);
     m_units_hi.push_back(unit);
 
@@ -138,14 +141,14 @@ GCTAResponseTable::add_axis(int length, std::string name, std::string unit)
  * be set my access operators.
  * @todo: Throw an exception message when m_nelement is zero.
  ***************************************************************************/
-GCTAResponseTable::add_par(std::string name, std::string unit)
+void GCTAResponseTable::add_par(std::string name, std::string unit)
 {
    
     // Add a new parameter column
     m_colname_par.push_back(name);
     m_units_par.push_back(unit);
     std::vector<double> par(m_nelements);
-    m_pars.push_back(par)
+    m_pars.push_back(par);
 
     m_npars = m_npars + 1;
 
@@ -662,6 +665,54 @@ void GCTAResponseTable::clear(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Return axis lower boundary name
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return name of lower boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the name of the lower boundary for the specified axis.
+ ***************************************************************************/
+std::string GCTAResponseTable::axis_lo_name(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_colname_lo[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return axis upper boundary name
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return name of upper boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the name of the upper boundary for the specified axis.
+ ***************************************************************************/
+std::string GCTAResponseTable::axis_hi_name(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_colname_hi[index]);
+}
 
 /***********************************************************************//**
  * @brief Clone instance
@@ -1073,7 +1124,7 @@ void GCTAResponseTable::read(const GFitsTable& table)
  *
  * @param[in] table Response table.
  *
- * @todo Write write method for multi-rwo tables
+ * @todo Write write method for multi-rwo tables.
  ***************************************************************************/
 void GCTAResponseTable::write(GFitsTable& hdu) const
 {
@@ -1120,8 +1171,6 @@ void GCTAResponseTable::write(GFitsTable& hdu) const
 
       }
 
-    hdu.extname("BACKGROUND");
-    
     // Return
     return;
 }

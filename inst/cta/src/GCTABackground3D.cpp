@@ -332,12 +332,22 @@ void GCTABackground3D::load(const std::string& filename)
  * @param[in] clobber Overwrite existing file? (true=yes)
  *
  * Save the background table into a FITS file.
+ * @todo Add necessary keywords.
  ***************************************************************************/
 void GCTABackground3D::save(const std::string& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
     GFitsBinTable hdu;
+    hdu.extname("BACKGROUND");
+    // Set additional keywords
+    // hdu.card("HDUCLAS1","RESPONSE", "");
+    //   hdu.card("HDUCLAS2","BGD", "");
+    //   hdu.card("CDEC0001","CTA background", "");
+    //  hdu.card("TDIM7","(14,14,15)", "");
+    // hdu.card("TDIM8","(14,14,15)", "");
+    //   hdu.card("TELESCOP", "CTA", "");
+    //    hdu.card("INSTRUME", "CTA", "");
     // Write background table
     m_background.write(hdu);
    
