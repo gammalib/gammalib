@@ -301,66 +301,6 @@ GCTABackground3D* GCTABackground3D::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load background from FITS file
- *
- * @param[in] filename FITS file.
- *
- * This method loads the background information from a FITS file.
- ***************************************************************************/
-void GCTABackground3D::load(const std::string& filename)
-{
-    // Open FITS file
-    GFits fits(filename);
-
-    // Read background from file
-    read(fits);
-
-    // Close FITS file
-    fits.close();
-
-    // Store filename
-    m_filename = filename;
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Save background table into FITS file
- *
- * @param[in] filename background table FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
- *
- * Save the background table into a FITS file.
- * @todo Add necessary keywords.
- ***************************************************************************/
-void GCTABackground3D::save(const std::string& filename, const bool& clobber) const
-{
-    // Create empty FITS file
-    GFits fits;
-    GFitsBinTable hdu;
-    hdu.extname("BACKGROUND");
-    // Set additional keywords
-    // hdu.card("HDUCLAS1","RESPONSE", "");
-    //   hdu.card("HDUCLAS2","BGD", "");
-    //   hdu.card("CDEC0001","CTA background", "");
-    //  hdu.card("TDIM7","(14,14,15)", "");
-    // hdu.card("TDIM8","(14,14,15)", "");
-    //   hdu.card("TELESCOP", "CTA", "");
-    //    hdu.card("INSTRUME", "CTA", "");
-    // Write background table
-    m_background.write(hdu);
-   
-    // Save FITS file
-    fits.append(hdu);
-    fits.saveto(filename, clobber);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Read background from FITS file
  *
  * @param[in] fits FITS file pointer.
@@ -393,18 +333,83 @@ void GCTABackground3D::read(const GFits& fits)
 }
 
 /***********************************************************************//**
- * @brief Write CTA background table into FITS object.
+ * @brief Write CTA background table into FITS binary table object.
  *
- * @param[in] fits FITS file.
+ * @param[in] hdu FITS binary table.
+ *
+ * @todo Add necessary keywords.
  ***************************************************************************/
 void GCTABackground3D::write(GFitsBinTable& hdu) const
 {
-    // Write cube
+    // Write background table
     m_background.write(hdu);
+
+    // Set additional keywords
+    // hdu.card("HDUCLAS1","RESPONSE", "");
+    //   hdu.card("HDUCLAS2","BGD", "");
+    //   hdu.card("CDEC0001","CTA background", "");
+    //  hdu.card("TDIM7","(14,14,15)", "");
+    // hdu.card("TDIM8","(14,14,15)", "");
+    //   hdu.card("TELESCOP", "CTA", "");
+    //    hdu.card("INSTRUME", "CTA", "");
 
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Load background from FITS file
+ *
+ * @param[in] filename FITS file.
+ *
+ * This method loads the background information from a FITS file.
+ ***************************************************************************/
+void GCTABackground3D::load(const std::string& filename)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read background from file
+    read(fits);
+
+    // Close FITS file
+    fits.close();
+
+    // Store filename
+    m_filename = filename;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save background table into FITS file
+ *
+ * @param[in] filename background table FITS file name.
+ * @param[in] clobber Overwrite existing file? (true=yes)
+ *
+ * Save the background table into a FITS file.
+ ***************************************************************************/
+void GCTABackground3D::save(const std::string& filename, const bool& clobber) const
+{
+    // Create binary table
+    GFitsBinTable table;
+    table.extname("BACKGROUND");
+
+    // Write the background table
+    write(table);
+
+    // Create FITS file, append table, and write into the file
+    GFits fits;
+    fits.append(table);
+    fits.saveto(filename, clobber);
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Returns MC instrument direction
@@ -581,6 +586,9 @@ void GCTABackground3D::init_members(void)
     m_mc_dety_min = 0.0;
     m_mc_dety_max = 0.0;
     m_mc_dety_bin = 0.0;
+    m_mc_logE_min = 0.0;
+    m_mc_logE_max = 0.0;
+    m_mc_logE_bin = 0.0;
 
     // Return
     return;
@@ -613,6 +621,9 @@ void GCTABackground3D::copy_members(const GCTABackground3D& bgd)
     m_mc_dety_min = bgd.m_mc_dety_min;
     m_mc_dety_max = bgd.m_mc_dety_max;
     m_mc_dety_bin = bgd.m_mc_dety_bin;
+    m_mc_logE_min = bgd.m_mc_logE_min;
+    m_mc_logE_max = bgd.m_mc_logE_max;
+    m_mc_logE_bin = bgd.m_mc_logE_bin;
 
     // Return
     return;

@@ -241,17 +241,17 @@ void GCTAObservation::response(const GResponse& rsp)
     m_response = *ctarsp;
 
     // Copy filenames of response functions
-    if (m_response.aeff()){
-      m_aeffname = m_response.aeff()->filename();
+    if (m_response.aeff() != NULL){
+        m_aeffname = m_response.aeff()->filename();
     }
-    if (m_response.psf()){
-      m_psfname = m_response.psf()->filename();
+    if (m_response.psf() != NULL){
+        m_psfname = m_response.psf()->filename();
     }
-    if (m_response.edisp()){
-      m_edispname = m_response.edisp()->filename();
+    if (m_response.edisp() != NULL){
+        m_edispname = m_response.edisp()->filename();
     }
-    if (m_response.background()){
-      m_bgdname = m_response.background()->filename();
+    if (m_response.background() != NULL){
+        m_bgdname = m_response.background()->filename();
     }
 
     // Return

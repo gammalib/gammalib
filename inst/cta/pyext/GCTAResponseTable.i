@@ -39,8 +39,8 @@
  * @brief Tuple to index conversion to provide pixel access.
  *
  * The following function provides conversion between a Python tuple and
- * an integer array. This allows CTAResponseTable pixel access via tuples, such as in
- * a[3,5,10] = 10.0 or c = a[2,9].
+ * an integer array. This allows CTAResponseTable pixel access via tuples,
+ * such as in a[3,5,10] = 10.0 or c = a[2,9].
  ***************************************************************************/
 %{
 static int rsp_table_tuple(PyObject *input, int *ptr) {
@@ -119,6 +119,17 @@ public:
     explicit GCTAResponseTable(const GFitsTable& hdu);
     virtual ~GCTAResponseTable(void);
 
+    // Operators
+    std::vector<double> operator()(const double& arg) const;
+    std::vector<double> operator()(const double& arg1, const double& arg2) const;
+    std::vector<double> operator()(const double& arg1, const double& arg2,
+                                   const double& arg3) const;
+    double              operator()(const int& index, const double& arg) const;
+    double              operator()(const int& index, const double& arg1,
+                                   const double& arg2) const;
+    double              operator()(const int& index, const double& arg1,
+                                   const double& arg2, const double& arg3) const;
+
     // Methods
     void               clear(void);
     GCTAResponseTable* clone(void) const;
@@ -126,30 +137,27 @@ public:
     const int&         elements(void) const;
     const int&         axes(void) const;
     int                axis(const int& index) const;
-    double             axis_lo(const int& index, const int& bin) const;
-    double             axis_hi(const int& index, const int& bin) const;
+    const double&      axis_lo(const int& index, const int& bin) const;
+    const double&      axis_hi(const int& index, const int& bin) const;
+    const std::string& axis_lo_name(const int& index) const;
+    const std::string& axis_hi_name(const int& index) const;
+    const std::string& axis_lo_unit(const int& index) const;
+    const std::string& axis_hi_unit(const int& index) const;
     void               axis_linear(const int& index);
     void               axis_log10(const int& index);
     void               axis_radians(const int& index);
-    std::string        axis_lo_name(const int& index) const;
-    std::string        axis_hi_name(const int& index) const;
-    std::string        axis_lo_unit(const int& index) const;
-    std::string        axis_hi_unit(const int& index) const;
-    std::string        unit(const int& index) const;
+    const std::string& unit(const int& index) const;
+    void               append_axis(const std::vector<double>& axis_lo, 
+                                   const std::vector<double>& axis_hi,
+                                   const std::string&         name,
+                                   const std::string&         unit);    
+    void               append_parameter(const std::string& name,
+                                        const std::string& unit);
     const GNodeArray&  nodes(const int& index) const;
     void               scale(const int& index, const double& scale);
     void               read(const GFitsTable& hdu);
     void               write(GFitsTable& hdu) const;
-    void               add_axis(std::vector<double> axis_lo, 
-				std::vector<double> axis_hi,
-				std::string name_lo, std::string name_hi,
-				std::string unit);    
-    void               add_par(std::string name, std::string unit);
 };
-
-
-
-
 
 
 /***********************************************************************//**

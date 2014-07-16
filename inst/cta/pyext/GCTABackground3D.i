@@ -57,16 +57,13 @@ public:
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
-    GCTAResponseTable          rsp_table(void) const;
+
+    // Methods
+    const GCTAResponseTable&   table(void) const;
+    void                       read(const GFits& file);
     void                       write(GFitsBinTable& hdu) const;
     void                       save(const std::string& filename,
-				    const bool& clobber) const;
-    // Methods
-    void   read(const GFits& file);
-    double mc_spatial_resolution(void) const;
-    double mc_spectral_resolution(void) const;
-    void   mc_spatial_resolution(const double& binsize);
-    void   mc_spectral_resolution(const double& binsize);
+                                    const bool& clobber = false) const;
 };
 
 
@@ -76,15 +73,5 @@ public:
 %extend GCTABackground3D {
     GCTABackground3D copy() {
         return (*self);
-    }
-    GCTABackground3D(GCTABackground* cube) {
-        GCTABackground3D* ptr = dynamic_cast<GCTABackground3D*>(cube);
-        if (ptr != NULL) {
-            return (ptr->clone());
-        }
-        else {
-            throw GException::bad_type("GCTABackground3D(GCTABackground*)",
-                                       "GCTABackground not of type GCTABackground3D");
-        }
     }
 };

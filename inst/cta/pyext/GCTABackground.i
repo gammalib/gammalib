@@ -29,6 +29,20 @@
 %}
 
 
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GCTABackground* {
+    if (dynamic_cast<GCTABackground3D*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTABackground3D, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTABackgroundPerfTable*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTABackgroundPerfTable, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTABackground, 0 |  0 );
+    }
+}
+
+
 /***********************************************************************//**
  * @class GCTABackground
  *

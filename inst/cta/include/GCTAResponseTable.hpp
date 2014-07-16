@@ -75,26 +75,27 @@ public:
     const int&         elements(void) const;
     const int&         axes(void) const;
     int                axis(const int& index) const;
-    double             axis_lo(const int& index, const int& bin) const;
-    double             axis_hi(const int& index, const int& bin) const;
+    const double&      axis_lo(const int& index, const int& bin) const;
+    const double&      axis_hi(const int& index, const int& bin) const;
+    const std::string& axis_lo_name(const int& index) const;
+    const std::string& axis_hi_name(const int& index) const;
+    const std::string& axis_lo_unit(const int& index) const;
+    const std::string& axis_hi_unit(const int& index) const;
     void               axis_linear(const int& index);
     void               axis_log10(const int& index);
     void               axis_radians(const int& index);
-    std::string        axis_lo_name(const int& index) const;
-    std::string        axis_hi_name(const int& index) const;
-    std::string        axis_lo_unit(const int& index) const;
-    std::string        axis_hi_unit(const int& index) const;
-    std::string        unit(const int& index) const;
+    const std::string& unit(const int& index) const;
+    void               append_axis(const std::vector<double>& axis_lo, 
+                                   const std::vector<double>& axis_hi,
+                                   const std::string&         name,
+                                   const std::string&         unit);    
+    void               append_parameter(const std::string& name,
+                                        const std::string& unit);
     const GNodeArray&  nodes(const int& index) const;
     void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable& hdu);
-    void               write(GFitsTable& hdu) const;
+    void               read(const GFitsTable& table);
+    void               write(GFitsTable& table) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
-    void               add_axis(std::vector<double> axis_lo, 
-				std::vector<double> axis_hi,
-				std::string name_lo, std::string name_hi,
-				std::string unit);    
-    void               add_par(std::string name, std::string unit);
 
 private:
     // Methods

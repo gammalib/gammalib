@@ -34,6 +34,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
+class GFitsBinTable;
 
 
 /***********************************************************************//**
@@ -68,18 +69,14 @@ public:
                                   const GTime& time,
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
-    GCTAResponseTable          rsp_table(void) const;
-    void                       write(GFitsBinTable& hdu) const;
-    void                       save(const std::string& filename,
-				    const bool& clobber) const;
     std::string                print(const GChatter& chatter = NORMAL) const;
    
     // Methods
-    void   read(const GFits& file);
-    double mc_spatial_resolution(void) const;
-    double mc_spectral_resolution(void) const;
-    void   mc_spatial_resolution(const double& binsize);
-    void   mc_spectral_resolution(const double& binsize);
+    const GCTAResponseTable&   table(void) const;
+    void                       read(const GFits& file);
+    void                       write(GFitsBinTable& hdu) const;
+    void                       save(const std::string& filename,
+                                    const bool& clobber = false) const;
     
 private:
     // Methods
@@ -125,17 +122,6 @@ std::string GCTABackground3D::filename(void) const
     return m_filename;
 }
 
-/***********************************************************************//**
- * @brief Return response table
- *
- * @return Returns response table
- ***************************************************************************/
-inline
-GCTAResponseTable GCTABackground3D::rsp_table(void) const
-{
-    // Return filename
-    return m_background;
-}
 
 /***********************************************************************//**
  * @brief Get response cube spectrum
@@ -155,54 +141,14 @@ const GModelSpectralNodes& GCTABackground3D::spectrum(void) const
 
 
 /***********************************************************************//**
- * @brief Return maximum spatial binsize for Monte Carlo simulations
+ * @brief Return response table
  *
- * @return Returns maximum spatial binsize for Monte Carlo simulations.
+ * @return Response table.
  ***************************************************************************/
 inline
-double GCTABackground3D::mc_spatial_resolution(void) const
+const GCTAResponseTable& GCTABackground3D::table(void) const
 {
-    // Return maximum binsize
-    return m_mc_max_bin;
-}
-
-
-/***********************************************************************//**
- * @brief Set maximum spatial binsize for Monte Carlo simulations
- *
- * @param[in] binsize Maximum spatial binsize for Monte Carlo simulations.
- ***************************************************************************/
-inline
-void GCTABackground3D::mc_spatial_resolution(const double& binsize)
-{
-    m_mc_max_bin = binsize;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return maximum spectral binsize for Monte Carlo simulations
- *
- * @return Returns maximum spectral binsize for Monte Carlo simulations.
- ***************************************************************************/
-inline
-double GCTABackground3D::mc_spectral_resolution(void) const
-{
-    // Return maximum binsize
-    return m_mc_max_logE;
-}
-
-
-/***********************************************************************//**
- * @brief Set maximum spectral binsize for Monte Carlo simulations
- *
- * @param[in] binsize Maximum spectral binsize for Monte Carlo simulations.
- ***************************************************************************/
-inline
-void GCTABackground3D::mc_spectral_resolution(const double& binsize)
-{
-    m_mc_max_logE = binsize;
-    return;
+    return m_background;
 }
 
 #endif /* GCTABACKGROUND3D_HPP */

@@ -94,67 +94,6 @@ GCTAResponseTable::GCTAResponseTable(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Add a new axis
- * 
- * @param[in] axis_lo lower boundaries of the axis.
- * @param[in] axis_hi upper boundaries of the axis. 
- * @param[in] name Name of the axis. 
- * @param[in] unit Unit of the axis.
- *
- * Add a new axis to the response table.
- * todo: Throw an exception when the length of axis_lo and axis_hi are different.
- ***************************************************************************/
-void GCTAResponseTable::add_axis(std::vector<double> axis_lo, 
-				 std::vector<double> axis_hi,
-				 std::string name_lo, std::string name_hi,
-				 std::string unit)
-{
-    // Add a new axis  
-    m_colname_lo.push_back(name_lo);
-    m_colname_hi.push_back(name_hi);
-    m_axis_lo.push_back(axis_lo);
-    m_axis_hi.push_back(axis_hi);
-    m_units_lo.push_back(unit);
-    m_units_hi.push_back(unit);
-
-    m_naxes = m_naxes + 1;
-
-    // Compute the cube size
-    m_nelements = axis(0);
-    for (int i = 1; i < axes(); ++i) {
-        m_nelements *= axis(i);
-    }
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Add a new parameter column
- * 
- * @param[in] name Name of the column. 
- * @param[in] unit Unit of the column.
- *
- * Add a new parameter column to the response table. The number of elements in 
- * the column is the product of the length of all axes. Values of elements should
- * be set my access operators.
- * @todo: Throw an exception message when m_nelement is zero.
- ***************************************************************************/
-void GCTAResponseTable::add_par(std::string name, std::string unit)
-{
-   
-    // Add a new parameter column
-    m_colname_par.push_back(name);
-    m_units_par.push_back(unit);
-    std::vector<double> par(m_nelements);
-    m_pars.push_back(par);
-
-    m_npars = m_npars + 1;
-
-    // Return
-    return;
-}
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -665,54 +604,6 @@ void GCTAResponseTable::clear(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Return axis lower boundary name
- *
- * @param[in] index Axis index [0,...,axes()-1].
- * @return name of lower boundary.
- *
- * @exception GException::out_of_range
- *            Axis index out of range.
- *
- * Returns the name of the lower boundary for the specified axis.
- ***************************************************************************/
-std::string GCTAResponseTable::axis_lo_name(const int& index) const
-{
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
-    }
-    #endif
-
-    // Return units
-    return (m_colname_lo[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Return axis upper boundary name
- *
- * @param[in] index Axis index [0,...,axes()-1].
- * @return name of upper boundary.
- *
- * @exception GException::out_of_range
- *            Axis index out of range.
- *
- * Returns the name of the upper boundary for the specified axis.
- ***************************************************************************/
-std::string GCTAResponseTable::axis_hi_name(const int& index) const
-{
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
-    }
-    #endif
-
-    // Return units
-    return (m_colname_hi[index]);
-}
 
 /***********************************************************************//**
  * @brief Clone instance
@@ -755,81 +646,6 @@ int GCTAResponseTable::axis(const int& index) const
 
 
 /***********************************************************************//**
- * @brief Return axis lower boundary unit
- *
- * @param[in] index Axis index [0,...,axes()-1].
- * @return Unit of lower boundary.
- *
- * @exception GException::out_of_range
- *            Axis index out of range.
- *
- * Returns the unit of the lower boundary for the specified axis.
- ***************************************************************************/
-std::string GCTAResponseTable::axis_lo_unit(const int& index) const
-{
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
-    }
-    #endif
-
-    // Return units
-    return (m_units_lo[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Return axis upper boundary unit
- *
- * @param[in] index Axis index [0,...,axes()-1].
- * @return Unit of upper boundary.
- *
- * @exception GException::out_of_range
- *            Axis index out of range.
- *
- * Returns the unit of the upper boundary for the specified axis.
- ***************************************************************************/
-std::string GCTAResponseTable::axis_hi_unit(const int& index) const
-{
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
-    }
-    #endif
-
-    // Return units
-    return (m_units_hi[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Return parameter unit
- *
- * @param[in] index Parameter index [0,...,size()-1].
- * @return Unit of parameter.
- *
- * @exception GException::out_of_range
- *            Axis index out of range.
- *
- * Returns the unit of the parameter for the specified index.
- ***************************************************************************/
-std::string GCTAResponseTable::unit(const int& index) const
-{
-    // Optionally check if the index is valid
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_UNIT, index, size()-1);
-    }
-    #endif
-
-    // Return units
-    return (m_units_par[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Return lower bin boundary for bin in axis
  *
  * @param[in] index Axis index [0,...,axes()-1].
@@ -841,7 +657,7 @@ std::string GCTAResponseTable::unit(const int& index) const
  *
  * Returns the lower boundary for a given bin of a given axis.
  ***************************************************************************/
-double GCTAResponseTable::axis_lo(const int& index, const int& bin) const
+const double& GCTAResponseTable::axis_lo(const int& index, const int& bin) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
@@ -869,7 +685,7 @@ double GCTAResponseTable::axis_lo(const int& index, const int& bin) const
  *
  * Returns the upper boundary for a given bin of a given axis.
  ***************************************************************************/
-double GCTAResponseTable::axis_hi(const int& index, const int& bin) const
+const double& GCTAResponseTable::axis_hi(const int& index, const int& bin) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
@@ -882,6 +698,106 @@ double GCTAResponseTable::axis_hi(const int& index, const int& bin) const
 
     // Return bin boundary
     return (m_axis_hi[index][bin]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return lower bin boundary name for axis
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return Name of lower bin boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the name of the lower boundary for the specified axis.
+ ***************************************************************************/
+const std::string& GCTAResponseTable::axis_lo_name(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_colname_lo[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return upper bin boundary name for axis
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return Name of upper bin boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the name of the upper boundary for the specified axis.
+ ***************************************************************************/
+const std::string& GCTAResponseTable::axis_hi_name(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_colname_hi[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return lower bin boundary unit for axis
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return Unit of lower bin boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the unit of the lower boundary for the specified axis.
+ ***************************************************************************/
+const std::string& GCTAResponseTable::axis_lo_unit(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_units_lo[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return upper bin boundary unit for axis
+ *
+ * @param[in] index Axis index [0,...,axes()-1].
+ * @return Unit of upper bin boundary.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the unit of the upper boundary for the specified axis.
+ ***************************************************************************/
+const std::string& GCTAResponseTable::axis_hi_unit(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_units_hi[index]);
 }
 
 
@@ -1022,6 +938,108 @@ void GCTAResponseTable::axis_radians(const int& index)
 
 
 /***********************************************************************//**
+ * @brief Return parameter unit
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Unit of parameter.
+ *
+ * @exception GException::out_of_range
+ *            Axis index out of range.
+ *
+ * Returns the unit of the parameter for the specified index.
+ ***************************************************************************/
+const std::string& GCTAResponseTable::unit(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_UNIT, index, size()-1);
+    }
+    #endif
+
+    // Return units
+    return (m_units_par[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Append an axis to the response table
+ * 
+ * @param[in] axis_lo Lower axis boundaries.
+ * @param[in] axis_hi Upper axis boundaries. 
+ * @param[in] name Axis name. 
+ * @param[in] unit Axis unit.
+ *
+ * Append an axis to the response table.
+ *
+ * @todo Throw an exception when the length of axis_lo and axis_hi are
+ * different.
+ ***************************************************************************/
+void GCTAResponseTable::append_axis(const std::vector<double>& axis_lo, 
+                                    const std::vector<double>& axis_hi,
+                                    const std::string&         name,
+                                    const std::string&         unit)
+{
+    // Set axis names
+    std::string name_lo = name + "_LO";
+    std::string name_hi = name + "_HI";
+
+    // Append axis  
+    m_colname_lo.push_back(name_lo);
+    m_colname_hi.push_back(name_hi);
+    m_axis_lo.push_back(axis_lo);
+    m_axis_hi.push_back(axis_hi);
+    m_units_lo.push_back(unit);
+    m_units_hi.push_back(unit);
+
+    // Increment number of axes
+    m_naxes++;
+
+    // Compute the cube size
+    m_nelements = axis(0);
+    for (int i = 1; i < axes(); ++i) {
+        m_nelements *= axis(i);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append parameter to response table
+ * 
+ * @param[in] name Parameter name. 
+ * @param[in] unit Parameter unit.
+ *
+ * Append a parameter to the response table. The number of elements in  the
+ * column is the product of the length of all axes. All elements are set to
+ * zero by default.
+ *
+ * @todo Throw an exception message when m_nelement is zero.
+ ***************************************************************************/
+void GCTAResponseTable::append_parameter(const std::string& name,
+                                         const std::string& unit)
+{
+    // Append parameter column name and unit
+    m_colname_par.push_back(name);
+    m_units_par.push_back(unit);
+    
+    // Initialise empty parameter column
+    std::vector<double> parameter(m_nelements, 0.0);
+    
+    // Append column
+    m_pars.push_back(parameter);
+
+    // Increment number of parameter columns
+    m_npars++;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return axis nodes
  *
  * @param[in] index Axis index [0,...,axes()-1].
@@ -1080,7 +1098,7 @@ void GCTAResponseTable::scale(const int& index, const double& scale)
 /***********************************************************************//**
  * @brief Read response table from FITS table HDU
  *
- * @param[in] table Response table.
+ * @param[in] table FITS table.
  *
  * Reads CTA response table information from a FITS table. The FITS table
  * is expected to have a single row, and axes and parameter information are
@@ -1120,56 +1138,53 @@ void GCTAResponseTable::read(const GFitsTable& table)
 
 
 /***********************************************************************//**
- * @brief Write response table into FITS table
+ * @brief Write response table into FITS table HDU
  *
- * @param[in] table Response table.
- *
- * @todo Write write method for multi-rwo tables.
+ * @param[in] table FITS table.
  ***************************************************************************/
-void GCTAResponseTable::write(GFitsTable& hdu) const
+void GCTAResponseTable::write(GFitsTable& table) const
 {
-   
-    // Loop through axis
-    for ( int iaxis = 0; iaxis < m_naxes; ++iaxis)
-      {
+    // Loop over all response table axes
+    for (int iaxis = 0; iaxis < m_naxes; ++iaxis) {
 
-	GFitsTableDoubleCol col_lo = GFitsTableDoubleCol(m_colname_lo[iaxis], 
-				     1, m_axis_lo[iaxis].size());
-	GFitsTableDoubleCol col_hi = GFitsTableDoubleCol(m_colname_hi[iaxis], 
-				     1, m_axis_hi[iaxis].size());
-	// Loop through elements in this axis column
-	for (int ielm = 0; ielm < m_axis_lo[iaxis].size() ; ++ielm)
-	  {
+        // Create axis columns
+        GFitsTableDoubleCol col_lo(m_colname_lo[iaxis], 1, m_axis_lo[iaxis].size());
+        GFitsTableDoubleCol col_hi(m_colname_hi[iaxis], 1, m_axis_hi[iaxis].size());
 
-	    col_lo(0,ielm) = m_axis_lo[iaxis][ielm];
-	    col_hi(0,ielm) = m_axis_hi[iaxis][ielm];
+        // Loop through all elements in this axis column
+        for (int i = 0; i < m_axis_lo[iaxis].size(); ++i) {
+            col_lo(0,i) = m_axis_lo[iaxis][i];
+            col_hi(0,i) = m_axis_hi[iaxis][i];
+        }
 
-	  }
+        // Set column units
+        col_lo.unit(m_units_lo[iaxis]);
+        col_hi.unit(m_units_hi[iaxis]);
 
-	col_lo.unit(m_units_lo[iaxis]);
-	col_hi.unit(m_units_hi[iaxis]);
-	hdu.append(col_lo);
-	hdu.append(col_hi);
+        // Append column to FITS table
+        table.append(col_lo);
+        table.append(col_hi);
 
-      }
+    } // endif: looped over all axes in response table
 
-    for ( int ipar = 0; ipar < m_npars; ++ipar)
-      {
+    // Loop over all parameters in the response table
+    for (int ipar = 0; ipar < m_npars; ++ipar) {
 
-	GFitsTableDoubleCol col_par = GFitsTableDoubleCol(m_colname_par[ipar], 
-							  1, m_pars[ipar].size());
-	// Loop through elements in this parameter column
-	for (int ielm = 0; ielm < m_pars[ipar].size() ; ++ielm)
-	  {
+        // Create parameter column
+        GFitsTableDoubleCol col_par(m_colname_par[ipar], 1, m_pars[ipar].size());
+        
+        // Loop through elements in this parameter column
+        for (int i = 0; i < m_pars[ipar].size() ; ++i) {
+            col_par(0,i) = m_pars[ipar][i];
+        }
 
-	    col_par(0,ielm) = m_pars[ipar][ielm];
+        // Set column unit
+        col_par.unit(m_units_par[ipar]);
 
-	  }
+        // Append column to table
+        table.append(col_par);
 
-	col_par.unit(m_units_par[ipar]);
-	hdu.append(col_par);
-
-      }
+    } // endfor: looped over all axes in response table
 
     // Return
     return;
