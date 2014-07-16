@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-12 July 2014
+16 July 2014
 
 
 1. Introduction
@@ -196,6 +196,10 @@ GCTAEventList was storing the m_detx and m_dety members in degrees upon load, wh
 the class expects to hold these values in radians. Unit conversion has now been
 added to the reader and writers, so that DETX and DETY are in degrees in the file
 while they are in radians internally in GammaLib, and specifically in GCTAInstDir.
+
+Manipulation methods have been added to GCTAResponseTable that allow building a
+response table from scratch. These include appending of axes and parameters, as
+well as accessing axis boundaries.
 
 
 21. COMPTEL interface

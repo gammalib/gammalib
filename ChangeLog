@@ -1,4 +1,4 @@
-2014-07-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-07-16  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -10,6 +10,7 @@
         Add integration status tracking to GIntegral
         Add GCTAExposure and GCTAMeanPsf classes
         Add ts attribute to GModel and use it in GModelSky models
+        Add manipulation methods to GCTAResponseTable
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
         Correctly take into account logfile name change in Python
