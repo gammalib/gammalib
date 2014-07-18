@@ -51,6 +51,9 @@ class GCaldb;
  ***************************************************************************/
 class GCTAObservation : public GObservation {
 
+    // Friends
+    friend class GCTAModelCubeBackground;
+
 public:
     // Constructors and destructors
     GCTAObservation(void);
@@ -110,11 +113,14 @@ protected:
     GCTAResponse m_response;     //!< Instrument response functions
     GCTAPointing m_pointing;     //!< Pointing direction
     int          m_obs_id;       //!< Observation ID
-    double       m_ontime;       //!< Ontime
-    double       m_livetime;     //!< Livetime
-    double       m_deadc;        //!< Deadtime correction
-    double       m_ra_obj;       //!< Right Ascension of object
-    double       m_dec_obj;      //!< Declination of object
+    double       m_ontime;       //!< Ontime (seconds)
+    double       m_livetime;     //!< Livetime (seconds)
+    double       m_deadc;        //!< Deadtime correction (livetime/ontime)
+    double       m_ra_obj;       //!< Right Ascension of object (degrees)
+    double       m_dec_obj;      //!< Declination of object (degrees)
+
+    // Special protected member for GCTAModelCubeBackground friend
+    std::string  m_bgdfile;      //!< Background filename
 };
 
 

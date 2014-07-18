@@ -2770,7 +2770,7 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_eps         = rsp.m_eps;
     m_apply_edisp = rsp.m_apply_edisp;
 
-    // Cope response filenames
+    // Copy response filenames
     m_xml_caldb      = rsp.m_xml_caldb;
     m_xml_rspname    = rsp.m_xml_rspname;
     m_xml_aeff       = rsp.m_xml_aeff;

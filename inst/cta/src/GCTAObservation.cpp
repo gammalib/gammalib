@@ -332,6 +332,14 @@ void GCTAObservation::read(const GXmlElement& xml)
             npar[0]++;
         }
 
+        // Read Background filename (needed by GCTAModelCubeBackground)
+        else if (par->attribute("name") == "Background") {
+
+            // Read background file name
+            m_bgdfile = par->attribute("file");
+
+        }
+
     } // endfor: looped over observation parameters
 
     // Verify that all required parameters were found
@@ -652,6 +660,7 @@ void GCTAObservation::init_members(void)
     // Initialise members
     m_instrument = "CTA";
     m_eventfile.clear();
+    m_bgdfile.clear();
     m_response.clear();
     m_pointing.clear();
     m_obs_id     = 0;
@@ -676,6 +685,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     // Copy members
     m_instrument = obs.m_instrument;
     m_eventfile  = obs.m_eventfile;
+    m_bgdfile    = obs.m_bgdfile;
     m_response   = obs.m_response;
     m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;

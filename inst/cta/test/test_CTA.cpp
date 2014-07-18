@@ -1118,7 +1118,6 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
 
     // Load models from XML file
     obs.models(cta_model_xml);
-std::cout << obs << std::endl;
 
     // Perform LM optimization
     double fit_results[] = {83.6331, 0,
@@ -1151,8 +1150,6 @@ std::cout << obs << std::endl;
     catch (std::exception &e) {
         test_try_failure(e);
     }
-std::cout << obs << std::endl;
-std::cout << obs.models() << std::endl;
 
     // Exit test
     return;

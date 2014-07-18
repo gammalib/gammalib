@@ -863,7 +863,7 @@ void GCTAModelCubeBackground::read(const GXmlElement& xml)
         obs.id(xml.attribute("id"));
 
         // Set spatial model
-        set_spatial(obs, obs.bgdfile());
+        set_spatial(obs, obs.m_bgdfile);
 
         // Set spectral model
         m_spectral = xml_spectral(*spectral);
