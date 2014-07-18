@@ -77,8 +77,6 @@ public:
     // Other methods
     void                load(const std::string& filename);
     void                load(const GFits& fits);
-    void                load_unbinned(const std::string& filename);
-    void                load_binned(const std::string& filename);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
     void                save(GFits& fits) const;
@@ -97,8 +95,6 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
-    void                bgdfile(const std::string& filename);
-    const std::string&  bgdfile(void) const;
 
 protected:
     // Protected methods
@@ -111,12 +107,6 @@ protected:
     // Protected members
     std::string  m_instrument;   //!< Instrument name
     std::string  m_eventfile;    //!< Event filename
-    std::string  m_caldb;        //!< Calibration database name
-    std::string  m_rspname;      //!< Response name
-    std::string  m_aeffname;     //!< Effective area filename
-    std::string  m_psfname;      //!< PSF filename
-    std::string  m_edispname;    //!< Energy dispersion filename
-    std::string  m_bgdname;      //!< Background filename
     GCTAResponse m_response;     //!< Instrument response functions
     GCTAPointing m_pointing;     //!< Pointing direction
     int          m_obs_id;       //!< Observation ID
@@ -353,31 +343,6 @@ inline
 const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
-}
-
-
-/***********************************************************************//**
- * @brief Set background file name
- *
- * @param[in] filename Background file name.
- ***************************************************************************/
-inline
-void GCTAObservation::bgdfile(const std::string& filename)
-{
-    m_bgdname = filename;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return background file name
- *
- * @return Background file name.
- ***************************************************************************/
-inline
-const std::string& GCTAObservation::bgdfile(void) const
-{
-    return m_bgdname;
 }
 
 #endif /* GCTAOBSERVATION_HPP */

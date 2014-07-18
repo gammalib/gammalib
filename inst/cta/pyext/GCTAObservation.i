@@ -57,8 +57,6 @@ public:
     // Other methods
     void                load(const std::string& filename);
     void                load(const GFits& fits);
-    void                load_unbinned(const std::string& filename);
-    void                load_binned(const std::string& filename);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
     void                save(GFits& fits) const;

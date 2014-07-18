@@ -981,3 +981,39 @@ void gammalib::warning(const std::string& origin,
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Return pointer to parameter with given name in XML element
+ *
+ * @param[in] xml XML element.
+ * @param[in] name Parameter name.
+ *
+ * Returns pointer to parameter with given name in XML element. If the
+ * parameter does not exist it is added.
+ ***************************************************************************/
+GXmlElement* gammalib::parameter(GXmlElement& xml, const std::string& name)
+{
+    // Initialize XML element pointer
+    GXmlElement* par = NULL;
+
+    // Signal that name has not been found
+    bool found = false;
+
+    // Search for parameter with given name
+    for (int i = 0; i < xml.elements("parameter"); ++i) {
+        par = xml.element("parameter", i);
+        if (par->attribute("name") == name) {
+            found = true;
+            break;
+        }
+    }
+
+    // If not found, add it now
+    if (!found) {
+        par = static_cast<GXmlElement*>(xml.append(GXmlElement("parameter name=\""+name+"\"")));
+    }
+
+    // Return
+    return par;
+}

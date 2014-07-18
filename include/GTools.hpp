@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cfloat>
 #include "GEnergy.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
@@ -99,6 +100,8 @@ namespace gammalib {
                                       const std::string& substring);
     void                     warning(const std::string& origin,
                                      const std::string& message);
+    GXmlElement*             parameter(GXmlElement& xml,
+                                       const std::string& name);
 }
 
 /***********************************************************************//**

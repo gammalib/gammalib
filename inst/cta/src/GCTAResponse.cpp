@@ -539,6 +539,301 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
 
 /***********************************************************************//**
+ * @brief Read response from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * Reads information for a CTA observation from an XML element. The
+ * calibration database and response name can be specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="Calibration" database="..." response="..."/>
+ *     </observation>
+ *
+ * If even more control is required over the response, individual file names
+ * can be specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
+ *     </observation>
+ *
+ * @todo Still supports old ARF, PSF and RMF parameter names.
+ ***************************************************************************/
+void GCTAResponse::read(const GXmlElement& xml)
+{
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
+    // Extract parameters
+    for (int i = 0; i < npars; ++i) {
+
+        // Get parameter element
+        const GXmlElement* par = xml.element("parameter", i);
+
+        // Handle Calibration
+        if (par->attribute("name") == "Calibration") {
+
+            // Read database and response
+            m_xml_caldb   = gammalib::strip_whitespace(par->attribute("database"));
+            m_xml_rspname = gammalib::strip_whitespace(par->attribute("response"));
+
+            // Set response
+            GCaldb caldb;
+            if (gammalib::dir_exists(m_xml_caldb)) {
+                caldb.rootdir(m_xml_caldb);
+            }
+            else {
+                caldb.open("cta", m_xml_caldb);
+            }
+            this->caldb(caldb);
+            load(m_xml_rspname);
+        }
+
+        // Handle effective area
+        else if ((par->attribute("name") == "EffectiveArea") ||
+                 (par->attribute("name") == "ARF")) {
+
+            // Get filename
+            m_xml_aeff = gammalib::strip_whitespace(par->attribute("file"));
+
+            // If filename is not empty then load effective area
+            if (!m_xml_aeff.empty()) {
+
+                // Load effective area
+                load_aeff(m_xml_aeff);
+
+                // Optional attributes
+                double thetacut = 0.0;
+                double scale    = 1.0;
+                double sigma    = 0.0;
+
+                // Optionally extract thetacut (0.0 if no thetacut)
+                std::string s_thetacut = par->attribute("thetacut");
+                if (s_thetacut.length() > 0) {
+                    thetacut = gammalib::todouble(s_thetacut);
+                }
+
+                // Optionally extract scale factor (1.0 if no scale)
+                std::string s_scale = par->attribute("scale");
+                if (s_scale.length() > 0) {
+                    scale = gammalib::todouble(s_scale);
+                }
+
+                // Optionally extract sigma (0.0 if no sigma)
+                std::string s_sigma = par->attribute("sigma");
+                if (s_sigma.length() > 0) {
+                    sigma = gammalib::todouble(s_sigma);
+                }
+
+                // If we have an ARF then set attributes
+                GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(aeff()));
+                if (arf != NULL) {
+                    arf->thetacut(thetacut);
+                    arf->scale(scale);
+                    arf->sigma(sigma);
+                }
+
+                // If we have a performance table then set attributes
+                GCTAAeffPerfTable* perf = const_cast<GCTAAeffPerfTable*>(dynamic_cast<const GCTAAeffPerfTable*>(aeff()));
+                if (perf != NULL) {
+                    perf->sigma(sigma);
+                }
+
+            } // endif: effective area filename was valid
+
+        }
+
+        // Handle PSF
+        else if ((par->attribute("name") == "PointSpreadFunction") ||
+                 (par->attribute("name") == "PSF")) {
+
+            // Get filename
+            m_xml_psf = gammalib::strip_whitespace(par->attribute("file"));
+
+            // If filename is not empty then load point spread function
+            if (!m_xml_psf.empty()) {
+                load_psf(m_xml_psf);
+            }
+
+        }
+
+
+        // Handle RMF
+        else if ((par->attribute("name") == "EnergyDispersion") ||
+                 (par->attribute("name") == "RMF")) {
+
+            // Get filename
+            m_xml_edisp = gammalib::strip_whitespace(par->attribute("file"));
+
+            // If filename is not empty then load energy dispersion
+            if (!m_xml_edisp.empty()) {
+                load_edisp(m_xml_edisp);
+            }
+
+        }
+
+        // Handle background model
+        else if (par->attribute("name") == "Background") {
+
+            // Get filename
+            m_xml_background = gammalib::strip_whitespace(par->attribute("file"));
+
+            // If filename is not empty then load background model
+            if (!m_xml_background.empty()) {
+                load_background(m_xml_background);
+            }
+
+        }
+
+    } // endfor: looped over all parameters
+
+    // If we have an ARF then remove thetacut if necessary
+    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(aeff()));
+    if (arf != NULL) {
+        if (arf->thetacut() > 0.0) {
+            arf->remove_thetacut(*this);
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write response information into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * Writes information for a CTA response into an XML element. If the
+ * calibration database and response name had been specified, the following
+ * output is written
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="Calibration" database="..." response="..."/>
+ *     </observation>
+ *
+ * If even more control was required over the response and individual file
+ * names were specified, the following output is written
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
+ *     </observation>
+ ***************************************************************************/
+void GCTAResponse::write(GXmlElement& xml) const
+{
+    // Determine number of existing parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
+    // If we have a calibration database and response name, then set
+    // the information ...
+    if (!m_xml_caldb.empty() || !m_xml_rspname.empty()) {
+        GXmlElement* par = gammalib::parameter(xml, "Calibration");
+        par->attribute("database", m_xml_caldb);
+        par->attribute("response", m_xml_rspname);
+    }
+
+    // ... otherwise add response components if they exist
+    else {
+
+        // Add effective area if it exists
+        if (aeff() != NULL) {
+            if (!(m_xml_aeff.empty())) {
+
+                // Get pointer to effective area
+                GXmlElement* par = gammalib::parameter(xml, "EffectiveArea");
+
+                // Initialise attributes
+                double thetacut = 0.0;
+                double scale    = 1.0;
+                double sigma    = 0.0;
+
+                // Get optional ARF attributes
+                const GCTAAeffArf* arf = dynamic_cast<const GCTAAeffArf*>(aeff());
+                if (arf != NULL) {
+                    thetacut = arf->thetacut();
+                    scale    = arf->scale();
+                    sigma    = arf->sigma();
+                }
+
+                // Get optional performance table attributes
+                const GCTAAeffPerfTable* perf = dynamic_cast<const GCTAAeffPerfTable*>(aeff());
+                if (perf != NULL) {
+                    sigma = perf->sigma();
+                }
+
+                // Set attributes
+                par->attribute("file", m_xml_aeff);
+                if (thetacut > 0.0) {
+                    par->attribute("thetacut", gammalib::str(thetacut));
+                }
+                if (scale != 1.0) {
+                    par->attribute("scale", gammalib::str(scale));
+                }
+                if (sigma > 0.0) {
+                    par->attribute("sigma", gammalib::str(sigma));
+                }
+
+            }
+        }
+
+        // Add PSF if it exists
+        if (psf() != NULL) {
+            if (!(m_xml_psf.empty())) {
+
+                // Get pointer to PSD
+                GXmlElement* par = gammalib::parameter(xml, "PointSpreadFunction");
+
+                // Write PSF filename
+                par->attribute("file", m_xml_psf);
+
+            }
+        }
+
+        // Add Edisp if it exists
+        if (edisp() != NULL) {
+            if (!(m_xml_edisp.empty())) {
+
+                // Get pointer to energy dispersion
+                GXmlElement* par = gammalib::parameter(xml, "EnergyDispersion");
+
+                // Write Edisp filename
+                par->attribute("file", m_xml_edisp);
+                
+            }
+        }
+
+        // Add background if it exists
+        if (background() != NULL) {
+            if (!(m_xml_background.empty())) {
+
+                // Get pointer to energy dispersion
+                GXmlElement* par = gammalib::parameter(xml, "Background");
+
+                // Write background filename
+                par->attribute("file", m_xml_background);
+
+            }
+        }
+
+    } // endelse: response components added
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load CTA response
  *
  * @param[in] rspname CTA response name.
@@ -2443,6 +2738,14 @@ void GCTAResponse::init_members(void)
     m_background  = NULL;
     m_apply_edisp = false;  //!< Switched off by default
 
+    // XML response filenames
+    m_xml_caldb.clear();
+    m_xml_rspname.clear();
+    m_xml_aeff.clear();
+    m_xml_psf.clear();
+    m_xml_edisp.clear();
+    m_xml_background.clear();
+
     // Initialise Npred cache
     m_npred_names.clear();
     m_npred_energies.clear();
@@ -2466,6 +2769,14 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_rspname     = rsp.m_rspname;
     m_eps         = rsp.m_eps;
     m_apply_edisp = rsp.m_apply_edisp;
+
+    // Cope response filenames
+    m_xml_caldb      = rsp.m_xml_caldb;
+    m_xml_rspname    = rsp.m_xml_rspname;
+    m_xml_aeff       = rsp.m_xml_aeff;
+    m_xml_psf        = rsp.m_xml_psf;
+    m_xml_edisp      = rsp.m_xml_edisp;
+    m_xml_background = rsp.m_xml_background;
 
     // Copy cache
     m_npred_names    = rsp.m_npred_names;

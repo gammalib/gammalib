@@ -108,6 +108,8 @@ public:
                              const GObservation& obs, GRan& ran) const;
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
+    void                  read(const GXmlElement& xml);
+    void                  write(GXmlElement& xml) const;
     void                  load(const std::string& rspname);
     void                  eps(const double& eps);
     const double&         eps(void) const;
@@ -176,14 +178,22 @@ private:
     std::string            irf_filename(const std::string& filename) const;
 
     // Private data members
-    GCaldb          m_caldb;       //!< Calibration database
-    std::string     m_rspname;     //!< Name of the instrument response
-    double          m_eps;         //!< Integration precision
-    GCTAAeff*       m_aeff;        //!< Effective area
-    GCTAPsf*        m_psf;         //!< Point spread function
-    GCTAEdisp*      m_edisp;       //!< Energy dispersion
-    GCTABackground* m_background;  //!< Energy dispersion
-    mutable bool    m_apply_edisp; //!< Apply energy dispersion
+    GCaldb          m_caldb;          //!< Calibration database
+    std::string     m_rspname;        //!< Name of the instrument response
+    double          m_eps;            //!< Integration precision
+    GCTAAeff*       m_aeff;           //!< Effective area
+    GCTAPsf*        m_psf;            //!< Point spread function
+    GCTAEdisp*      m_edisp;          //!< Energy dispersion
+    GCTABackground* m_background;     //!< Energy dispersion
+    mutable bool    m_apply_edisp;    //!< Apply energy dispersion
+
+    // XML response filename
+    std::string     m_xml_caldb;      //!< Calibration database string in XML file
+    std::string     m_xml_rspname;    //!< Response name in XML file
+    std::string     m_xml_aeff;       //!< Aeff file name in XML file
+    std::string     m_xml_psf;        //!< PSF file name in XML file
+    std::string     m_xml_edisp;      //!< Edisp file name in XML file
+    std::string     m_xml_background; //!< Background file name in XML file
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
