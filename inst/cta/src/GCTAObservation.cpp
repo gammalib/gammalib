@@ -263,7 +263,7 @@ const GCTAResponse* GCTAObservation::response(void) const
     // Throw an exception if the response pointer is not valid
     if (m_response == NULL) {
         std::string msg = "No valid response function found in CTA"
-                          " observation.\n" + print();
+                          " observation.\n";
         throw GException::invalid_value(G_RESPONSE_GET, msg);
     }
 
@@ -588,8 +588,12 @@ std::string GCTAObservation::print(const GChatter& chatter) const
             result.append("\n"+pointing().print(reduced_chatter));
 
             // Append response
-            if (response() != NULL) {
-                result.append("\n"+response()->print(reduced_chatter));
+            if (m_response != NULL) {
+                result.append("\n"+m_response->print(reduced_chatter));
+            }
+            else {
+                result.append("\n"+gammalib::parformat("Response function"));
+                result.append("undefined");
             }
 
             // Append events
