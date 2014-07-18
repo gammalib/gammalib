@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeffArf.cpp - CTA ARF effective area class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,7 @@
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAAeffArf.hpp"
-#include "GCTAResponse.hpp"
+#include "GCTAResponseIrf.hpp"
 #include "GCTAResponse_helpers.hpp"
 #include "GCTAException.hpp"
 
@@ -362,7 +362,7 @@ void GCTAAeffArf::read(const GFitsTable& hdu)
  * method should only be called once directly after loading all response
  * components.
  ***************************************************************************/
-void GCTAAeffArf::remove_thetacut(const GCTAResponse& rsp)
+void GCTAAeffArf::remove_thetacut(const GCTAResponseIrf& rsp)
 {
     // Continue only if thetacut value has been set
     if (m_thetacut > 0.0) {
