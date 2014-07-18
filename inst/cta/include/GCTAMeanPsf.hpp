@@ -82,6 +82,7 @@ public:
     const GEbounds&   ebounds(void) const;
     const GNodeArray& deltas(void) const;
     const GNodeArray& elogmeans(void) const;
+    double            delta_max(void) const;
     int               offset(const int& idelta, const int& iebin) const;
     void              read(const GFits& fits);
     void              write(GFits& file) const;
@@ -99,21 +100,21 @@ protected:
     void set_eng_axis(void);
     
     // Data
-    GSkymap    m_cube;      //!< PSF cube
-    GEbounds   m_ebounds;   //!< Energy bounds for the PSF cube
-    GNodeArray m_elogmeans; //!< Mean log10TeV energy for the PSF cube
-    GNodeArray m_deltas;    //!< Delta bins (deg) for the PSF cube
+    GSkymap    m_cube;       //!< PSF cube
+    GEbounds   m_ebounds;    //!< Energy bounds for the PSF cube
+    GNodeArray m_elogmeans;  //!< Mean log10TeV energy for the PSF cube
+    GNodeArray m_deltas;     //!< Delta bins (deg) for the PSF cube
 
 private:
     // Response table computation cache for 2D access
-    mutable int    m_inx1;            //!< Index of upper left node
-    mutable int    m_inx2;            //!< Index of lower left node
-    mutable int    m_inx3;            //!< Index of upper right node
-    mutable int    m_inx4;            //!< Index of lower right node
-    mutable double m_wgt1;            //!< Weight of upper left node
-    mutable double m_wgt2;            //!< Weight of lower left node
-    mutable double m_wgt3;            //!< Weight of upper right node
-    mutable double m_wgt4;            //!< Weight of lower right node
+    mutable int    m_inx1;   //!< Index of upper left node
+    mutable int    m_inx2;   //!< Index of lower left node
+    mutable int    m_inx3;   //!< Index of upper right node
+    mutable int    m_inx4;   //!< Index of lower right node
+    mutable double m_wgt1;   //!< Weight of upper left node
+    mutable double m_wgt2;   //!< Weight of lower left node
+    mutable double m_wgt3;   //!< Weight of upper right node
+    mutable double m_wgt4;   //!< Weight of lower right node
 
 };
 
@@ -133,6 +134,7 @@ const GSkymap& GCTAMeanPsf::map(void) const
     return (m_cube);
 }
 
+
 /***********************************************************************//**
  * @brief Return energy boundaries
  *
@@ -143,6 +145,7 @@ const GEbounds& GCTAMeanPsf::ebounds(void) const
 {
     return (m_ebounds);
 }
+
 
 /***********************************************************************//**
  * @brief Return offset angles between true and measured photon direction
@@ -155,6 +158,23 @@ const GNodeArray& GCTAMeanPsf::deltas(void) const
     return (m_deltas);
 }
 
+
+/***********************************************************************//**
+ * @brief Return maximum delta value in radians
+ *
+ * @return Maximum delta value (radians).
+ ***************************************************************************/
+inline
+double GCTAMeanPsf::delta_max(void) const
+{
+    // Get maximum delta value
+    double delta_max = (m_deltas.size() > 0) ? m_deltas[m_deltas.size()-1] : 0.0;
+    
+    // Return
+    return delta_max;
+}
+
+
 /***********************************************************************//**
  * @brief Return arithmetic mean of log10 energies
  *
@@ -165,6 +185,7 @@ const GNodeArray& GCTAMeanPsf::elogmeans(void) const
 {
     return (m_elogmeans);
 }
+
 
 /***********************************************************************//**
  * @brief Return map offset

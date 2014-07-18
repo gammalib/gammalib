@@ -214,6 +214,11 @@ double GCTAMeanPsf::operator()(const GSkyDir& dir,
                  m_wgt3 * m_cube(dir, m_inx3) +
                  m_wgt4 * m_cube(dir, m_inx4);
 
+    // Make sure that PSF does not become negative
+    if (psf < 0.0) {
+        psf = 0.0;
+    }
+
     // Return PSF
     return psf;
 }

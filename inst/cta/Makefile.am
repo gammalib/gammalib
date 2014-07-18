@@ -35,6 +35,7 @@ sources = src/GCTASupport.cpp \
           src/GCTABackground.cpp \
           src/GCTABackgroundPerfTable.cpp \
           src/GCTABackground3D.cpp \
+          src/GCTACubeResponse.cpp \
           src/GCTAExposure.cpp \
           src/GCTAMeanPsf.cpp \
           src/GCTAInstDir.cpp \
@@ -78,6 +79,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTABackground.hpp \
                      include/GCTABackgroundPerfTable.hpp \
                      include/GCTABackground3D.hpp \
+                     include/GCTACubeResponse.hpp \
                      include/GCTAExposure.hpp \
                      include/GCTAMeanPsf.hpp \
                      include/GCTAModelCubeBackground.hpp \

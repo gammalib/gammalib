@@ -185,6 +185,11 @@ double GCTAExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
     double exposure = m_wgt_left  * m_cube(dir, m_inx_left) +
                       m_wgt_right * m_cube(dir, m_inx_right);
 
+    // Make sure that exposure does not become negative
+    if (exposure < 0.0) {
+        exposure = 0.0;
+    }
+
     // Return exposure
     return exposure;
 }
