@@ -164,18 +164,10 @@ public:
 
 private:
     // Private methods
-    void                   init_members(void);
-    void                   copy_members(const GCTAResponseIrf& rsp);
-    void                   free_members(void);
-    const GCTAObservation& retrieve_obs(const std::string& origin,
-                                        const GObservation& obs) const;
-    const GCTAPointing&    retrieve_pnt(const std::string& origin,
-                                        const GObservation& obs) const;
-    const GCTARoi&         retrieve_roi(const std::string& origin,
-                                        const GObservation& obs) const;
-    const GCTAInstDir&     retrieve_dir(const std::string& origin,
-                                        const GEvent&      event) const;
-    std::string            irf_filename(const std::string& filename) const;
+    void        init_members(void);
+    void        copy_members(const GCTAResponseIrf& rsp);
+    void        free_members(void);
+    std::string irf_filename(const std::string& filename) const;
 
     // Private data members
     GCaldb          m_caldb;          //!< Calibration database

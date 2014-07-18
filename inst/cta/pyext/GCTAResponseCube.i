@@ -39,6 +39,7 @@ public:
     // Constructors and destructors
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
+    GCTAResponseCube(const GCTAExposure& exposure, const GCTAMeanPsf& psf);
     virtual ~GCTAResponseCube(void);
 
     // Implement pure virtual base class methods

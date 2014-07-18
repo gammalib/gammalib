@@ -54,6 +54,7 @@ public:
     // Constructors and destructors
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
+    GCTAResponseCube(const GCTAExposure& exposure, const GCTAMeanPsf& psf);
     virtual ~GCTAResponseCube(void);
 
     // Operators
@@ -81,13 +82,9 @@ public:
 
 private:
     // Private methods
-    void                   init_members(void);
-    void                   copy_members(const GCTAResponseCube& rsp);
-    void                   free_members(void);
-    const GCTAObservation& retrieve_obs(const std::string& origin,
-                                        const GObservation& obs) const;
-    const GCTAInstDir&     retrieve_dir(const std::string& origin,
-                                        const GEvent&      event) const;
+    void init_members(void);
+    void copy_members(const GCTAResponseCube& rsp);
+    void free_members(void);
 
     // Private data members
     GCTAExposure m_exposure;    //!< Exposure cube

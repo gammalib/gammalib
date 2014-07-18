@@ -82,13 +82,39 @@ GCTAResponseCube::GCTAResponseCube(void) : GCTAResponse()
  * Constructs CTA cube-style response by making a deep copy of an existing
  * object.
  **************************************************************************/
-GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) : GCTAResponse(rsp)
+GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) :
+                  GCTAResponse(rsp)
 {
     // Initialise members
     init_members();
 
     // Copy members
     copy_members(rsp);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Response constructor
+ *
+ * @param[in] exposure CTA exposure.
+ * @param[in] psf CTA mean point spread function.
+ *
+ * Constructs CTA cube-style response from a CTA exposure and a mean point
+ * spread function.
+ **************************************************************************/
+GCTAResponseCube::GCTAResponseCube(const GCTAExposure& exposure,
+                                   const GCTAMeanPsf&  psf) :
+                  GCTAResponse()
+{
+    // Initialise members
+    init_members();
+
+    // Set members
+    m_exposure = exposure;
+    m_psf      = psf;
 
     // Return
     return;
@@ -469,64 +495,4 @@ void GCTAResponseCube::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Retrieve CTA observation from generic observation
- *
- * @param[in] origin Method asking for pointer retrieval.
- * @param[in] obs Generic observation.
- *
- * @exception GException::invalid_argument
- *            Observation @p obs is not a CTA observations.
- *
- * Dynamically casts generic observation into a CTA observation. If the
- * generic observation is not a CTA observation, an exception is thrown.
- ***************************************************************************/
-const GCTAObservation& GCTAResponseCube::retrieve_obs(const std::string& origin,
-                                                      const GObservation& obs) const
-{
-    // Get pointer on CTA observation
-    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-
-    // If pointer is not valid then throw an exception
-    if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n"
-                          "Please specify a CTA observation when calling"
-                          " this method.";
-        throw GException::invalid_argument(origin, msg);
-    }
-
-    // Return reference
-    return *cta;
-}
-
-
-/***********************************************************************//**
- * @brief Retrieve CTA instrument direction from generic event
- *
- * @param[in] origin Method asking for pointer retrieval.
- * @param[in] event Generic event.
- *
- * @exception GException::invalid_argument
- *            @p event does not contain a CTA instrument direction.
- *
- * Extract CTA Instrument Direction from an event.
- ***************************************************************************/
-const GCTAInstDir& GCTAResponseCube::retrieve_dir(const std::string& origin,
-                                                  const GEvent&      event) const
-{
-    // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-
-    // If pointer is not valid then throw an exception
-    if (dir == NULL) {
-        std::string msg = "Specified event is not a CTA event.\n"
-                          "Please specify a CTA event when calling this method.";
-        throw GException::invalid_argument(origin, msg);
-    }
-
-    // Return reference
-    return *dir;
 }
