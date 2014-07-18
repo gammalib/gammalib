@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GCTACubeResponse.hpp - CTA cube-style response function class      *
+ *      GCTAResponseCube.hpp - CTA cube-style response function class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTACubeResponse.hpp
+ * @file GCTAResponseCube.hpp
  * @brief CTA cube-style response function class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCTACUBERESPONSE_HPP
-#define GCTACUBERESPONSE_HPP
+#ifndef GCTARESPONSECUBE_HPP
+#define GCTARESPONSECUBE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -44,24 +44,24 @@ class GCTAInstDir;
 
 
 /***********************************************************************//**
- * @class GCTACubeResponse
+ * @class GCTAResponseCube
  *
  * @brief CTA cube-style response function class
  ***************************************************************************/
-class GCTACubeResponse : public GResponse {
+class GCTAResponseCube : public GResponse {
 
 public:
     // Constructors and destructors
-    GCTACubeResponse(void);
-    GCTACubeResponse(const GCTACubeResponse& rsp);
-    virtual ~GCTACubeResponse(void);
+    GCTAResponseCube(void);
+    GCTAResponseCube(const GCTAResponseCube& rsp);
+    virtual ~GCTAResponseCube(void);
 
     // Operators
-    virtual GCTACubeResponse& operator=(const GCTACubeResponse & rsp);
+    virtual GCTAResponseCube& operator=(const GCTAResponseCube & rsp);
 
     // Implement pure virtual base class methods
     virtual void              clear(void);
-    virtual GCTACubeResponse* clone(void) const;
+    virtual GCTAResponseCube* clone(void) const;
     virtual bool              use_edisp(void) const;
     virtual bool              use_tdisp(void) const;
     virtual bool              apply_edisp(void) const;
@@ -82,7 +82,7 @@ public:
 private:
     // Private methods
     void                   init_members(void);
-    void                   copy_members(const GCTACubeResponse& rsp);
+    void                   copy_members(const GCTAResponseCube& rsp);
     void                   free_members(void);
     const GCTAObservation& retrieve_obs(const std::string& origin,
                                         const GObservation& obs) const;
@@ -105,7 +105,7 @@ private:
  * information is available.
  ***************************************************************************/
 inline
-bool GCTACubeResponse::use_edisp(void) const
+bool GCTAResponseCube::use_edisp(void) const
 {
     return false;
 }
@@ -117,7 +117,7 @@ bool GCTACubeResponse::use_edisp(void) const
  * @return True if energy dispersion should be applied
  ***************************************************************************/
 inline
-bool GCTACubeResponse::apply_edisp(void) const
+bool GCTAResponseCube::apply_edisp(void) const
 {
     return false;
 }
@@ -128,7 +128,7 @@ bool GCTACubeResponse::apply_edisp(void) const
  * @param[in] apply_edisp Set true if energy dispersion should be applied
  ***************************************************************************/
 inline
-void GCTACubeResponse::apply_edisp(const bool& apply_edisp) const
+void GCTAResponseCube::apply_edisp(const bool& apply_edisp) const
 {
     return;
 }
@@ -140,7 +140,7 @@ void GCTACubeResponse::apply_edisp(const bool& apply_edisp) const
  * @return False.
  ***************************************************************************/
 inline
-bool GCTACubeResponse::use_tdisp(void) const
+bool GCTAResponseCube::use_tdisp(void) const
 {
     return false;
 }
@@ -152,7 +152,7 @@ bool GCTACubeResponse::use_tdisp(void) const
  * @return Reference to exposure cube.
  ***************************************************************************/
 inline
-const GCTAExposure& GCTACubeResponse::exposure(void) const
+const GCTAExposure& GCTAResponseCube::exposure(void) const
 {
     return m_exposure;
 }
@@ -164,7 +164,7 @@ const GCTAExposure& GCTACubeResponse::exposure(void) const
  * @param[in] exposure Exposure cube.
  ***************************************************************************/
 inline
-void GCTACubeResponse::exposure(const GCTAExposure& exposure)
+void GCTAResponseCube::exposure(const GCTAExposure& exposure)
 {
     m_exposure = exposure;
     return;
@@ -177,7 +177,7 @@ void GCTACubeResponse::exposure(const GCTAExposure& exposure)
  * @return Reference to point spread function cube.
  ***************************************************************************/
 inline
-const GCTAMeanPsf& GCTACubeResponse::psf(void) const
+const GCTAMeanPsf& GCTAResponseCube::psf(void) const
 {
     return m_psf;
 }
@@ -189,10 +189,10 @@ const GCTAMeanPsf& GCTACubeResponse::psf(void) const
  * @param[in] psf Pointer to point spread function cube.
  ***************************************************************************/
 inline
-void GCTACubeResponse::psf(const GCTAMeanPsf& psf)
+void GCTAResponseCube::psf(const GCTAMeanPsf& psf)
 {
     m_psf = psf;
     return;
 }
 
-#endif /* GCTACUBERESPONSE_HPP */
+#endif /* GCTARESPONSECUBE_HPP */

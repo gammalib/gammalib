@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GCTACubeResponse.cpp - CTA cube-style response function class      *
+ *      GCTAResponseCube.cpp - CTA cube-style response function class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTACubeResponse.cpp
+ * @file GCTAResponseCube.cpp
  * @brief CTA cube-style response function class implementation
  * @author Juergen Knoedlseder
  */
@@ -31,7 +31,7 @@
 #include <cmath>
 #include <string>
 #include "GTools.hpp"
-#include "GCTACubeResponse.hpp"
+#include "GCTAResponseCube.hpp"
 #include "GPhoton.hpp"
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
@@ -41,8 +41,8 @@
 #include "GCTAInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_IRF        "GCTACubeResponse::irf(GEvent&, GPhoton& GObservation&)"
-#define G_NPRED_DIFFUSE    "GCTACubeResponse::npred(GPhoton&, GObservation&)"
+#define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
+#define G_NPRED_DIFFUSE    "GCTAResponseCube::npred(GPhoton&, GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -64,7 +64,7 @@
  *
  * Constructs void CTA response.
  ***************************************************************************/
-GCTACubeResponse::GCTACubeResponse(void) : GResponse()
+GCTAResponseCube::GCTAResponseCube(void) : GResponse()
 {
     // Initialise members
     init_members();
@@ -82,7 +82,7 @@ GCTACubeResponse::GCTACubeResponse(void) : GResponse()
  * Constructs CTA cube-style response by making a deep copy of an existing
  * object.
  **************************************************************************/
-GCTACubeResponse::GCTACubeResponse(const GCTACubeResponse& rsp) : GResponse(rsp)
+GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) : GResponse(rsp)
 {
     // Initialise members
     init_members();
@@ -100,7 +100,7 @@ GCTACubeResponse::GCTACubeResponse(const GCTACubeResponse& rsp) : GResponse(rsp)
  *
  * Destroys instance of CTA response object.
  ***************************************************************************/
-GCTACubeResponse::~GCTACubeResponse(void)
+GCTAResponseCube::~GCTAResponseCube(void)
 {
     // Free members
     free_members();
@@ -127,7 +127,7 @@ GCTACubeResponse::~GCTACubeResponse(void)
  * which the assignment has been performed can be destroyed after this
  * operation without any loss of information.
  ***************************************************************************/
-GCTACubeResponse& GCTACubeResponse::operator=(const GCTACubeResponse& rsp)
+GCTAResponseCube& GCTAResponseCube::operator=(const GCTAResponseCube& rsp)
 {
     // Execute only if object is not identical
     if (this != &rsp) {
@@ -163,7 +163,7 @@ GCTACubeResponse& GCTACubeResponse::operator=(const GCTACubeResponse& rsp)
  * Clears CTA response object by resetting all members to an initial state.
  * Any information that was present in the object before will be lost.
  ***************************************************************************/
-void GCTACubeResponse::clear(void)
+void GCTAResponseCube::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -185,9 +185,9 @@ void GCTACubeResponse::clear(void)
  *
  * Creates a clone (deep copy) of a CTA response object.
  ***************************************************************************/
-GCTACubeResponse* GCTACubeResponse::clone(void) const
+GCTAResponseCube* GCTAResponseCube::clone(void) const
 {
-    return new GCTACubeResponse(*this);
+    return new GCTAResponseCube(*this);
 }
 
 
@@ -198,7 +198,7 @@ GCTACubeResponse* GCTACubeResponse::clone(void) const
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  ***************************************************************************/
-double GCTACubeResponse::irf(const GEvent&       event,
+double GCTAResponseCube::irf(const GEvent&       event,
                              const GPhoton&      photon,
                              const GObservation& obs) const
 {
@@ -251,7 +251,7 @@ double GCTACubeResponse::irf(const GEvent&       event,
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCTACubeResponse::irf:";
+        std::cout << "*** ERROR: GCTAResponseCube::irf:";
         std::cout << " NaN/Inf encountered";
         std::cout << " irf=" << irf;
         std::cout << std::endl;
@@ -272,7 +272,7 @@ double GCTACubeResponse::irf(const GEvent&       event,
  * @exception GException::feature_not_implemented
  *            Method not implemented.
  ***************************************************************************/
-double GCTACubeResponse::npred(const GPhoton&      photon,
+double GCTAResponseCube::npred(const GPhoton&      photon,
                                const GObservation& obs) const
 {
     // Feature not yet implemented
@@ -296,7 +296,7 @@ double GCTACubeResponse::npred(const GPhoton&      photon,
  * to load the response from these paths.
  ***************************************************************************/
 /*
-void GCTACubeResponse::load(const std::string& rspname)
+void GCTAResponseCube::load(const std::string& rspname)
 {
     // Clear instance but conserve calibration database
     GCaldb caldb = m_caldb;
@@ -358,7 +358,7 @@ void GCTACubeResponse::load(const std::string& rspname)
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing CTA response information.
  ***************************************************************************/
-std::string GCTACubeResponse::print(const GChatter& chatter) const
+std::string GCTAResponseCube::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -367,7 +367,7 @@ std::string GCTACubeResponse::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTACubeResponse ===");
+        result.append("=== GCTAResponseCube ===");
 
         // Append exposure cube information
         result.append("\n"+m_exposure.print(chatter));
@@ -405,7 +405,7 @@ std::string GCTACubeResponse::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTACubeResponse::init_members(void)
+void GCTAResponseCube::init_members(void)
 {
     // Initialise members
     m_exposure.clear();
@@ -421,7 +421,7 @@ void GCTACubeResponse::init_members(void)
  *
  * @param[in] rsp Response to be copied
  ***************************************************************************/
-void GCTACubeResponse::copy_members(const GCTACubeResponse& rsp)
+void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
 {
     // Copy members
     m_exposure = rsp.m_exposure;
@@ -435,7 +435,7 @@ void GCTACubeResponse::copy_members(const GCTACubeResponse& rsp)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTACubeResponse::free_members(void)
+void GCTAResponseCube::free_members(void)
 {
     // Return
     return;
@@ -454,7 +454,7 @@ void GCTACubeResponse::free_members(void)
  * Dynamically casts generic observation into a CTA observation. If the
  * generic observation is not a CTA observation, an exception is thrown.
  ***************************************************************************/
-const GCTAObservation& GCTACubeResponse::retrieve_obs(const std::string& origin,
+const GCTAObservation& GCTAResponseCube::retrieve_obs(const std::string& origin,
                                                       const GObservation& obs) const
 {
     // Get pointer on CTA observation
@@ -484,7 +484,7 @@ const GCTAObservation& GCTACubeResponse::retrieve_obs(const std::string& origin,
  *
  * Extract CTA Instrument Direction from an event.
  ***************************************************************************/
-const GCTAInstDir& GCTACubeResponse::retrieve_dir(const std::string& origin,
+const GCTAInstDir& GCTAResponseCube::retrieve_dir(const std::string& origin,
                                                   const GEvent&      event) const
 {
     // Get pointer on CTA instrument direction
