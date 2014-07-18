@@ -72,6 +72,7 @@
 %include "GCTAPointing.i"
 %include "GCTAResponse.i"
 %include "GCTAResponseIrf.i"
+%include "GCTAResponseCube.i"
 %include "GCTAResponseTable.i"
 %include "GCTAAeff.i"
 %include "GCTAAeffPerfTable.i"
