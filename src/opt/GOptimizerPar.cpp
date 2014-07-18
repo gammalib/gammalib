@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GOptimizerPar.cpp - Optimizer parameter class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -646,7 +646,7 @@ std::string GOptimizerPar::print(const GChatter& chatter) const
 
         // For free parameters, append statistical uncertainty
         if (m_free) {
-            result.append(" +/- "+gammalib::str(std::abs(error())));
+            result.append(" +/- "+gammalib::str(error()));
         }
 
         // Append parameter limites if they exist

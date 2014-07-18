@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GOptimizerPar.hpp - Optimizer parameter class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cmath>
 #include "GBase.hpp"
 #include "GXmlElement.hpp"
 
@@ -196,12 +197,14 @@ double GOptimizerPar::value(void) const
  * @return Parameter error.
  *
  * Returns the parameter error. The parameter error is computed by
- * multiplying the error factor by the scale factor.
+ * multiplying the error factor by the scale factor. By definition, the error
+ * is a positive number, hence the method returns the absolute value of the
+ * internally computed error.
  ***************************************************************************/
 inline
 double GOptimizerPar::error(void) const
 {
-    return (m_factor_error * m_scale);
+    return std::abs(m_factor_error * m_scale);
 }
 
 
