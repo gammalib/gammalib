@@ -428,11 +428,6 @@ void GCTAObservation::read(const GXmlElement& xml)
 
     } // endfor: looped over all parameters
     
-    // If response type could not be determine, use type 1 (GCTAResponseIrf)
-    if (response_type == 0) {
-        response_type = 1;
-    }
-
     // Allocate response
     switch (response_type) {
         case 1:
@@ -548,65 +543,6 @@ void GCTAObservation::write(GXmlElement& xml) const
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Print CTA observation information
- *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing observation information.
- ***************************************************************************/
-std::string GCTAObservation::print(const GChatter& chatter) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Continue only if chatter is not silent
-    if (chatter != SILENT) {
-
-        // Append header
-        result.append("=== GCTAObservation ===");
-
-        // Append information
-        result.append("\n"+gammalib::parformat("Name")+name());
-        result.append("\n"+gammalib::parformat("Identifier")+id());
-        result.append("\n"+gammalib::parformat("Instrument")+instrument());
-        result.append("\n"+gammalib::parformat("Statistics")+statistics());
-        result.append("\n"+gammalib::parformat("Ontime"));
-        result.append(gammalib::str(ontime())+" s");
-        result.append("\n"+gammalib::parformat("Livetime"));
-        result.append(gammalib::str(livetime())+" s");
-        result.append("\n"+gammalib::parformat("Deadtime correction"));
-        result.append(gammalib::str(m_deadc));
-
-        // Append detailed information
-        GChatter reduced_chatter = gammalib::reduce(chatter);
-        if (reduced_chatter > SILENT) {
-
-            // Append pointing
-            result.append("\n"+pointing().print(reduced_chatter));
-
-            // Append response
-            if (m_response != NULL) {
-                result.append("\n"+m_response->print(reduced_chatter));
-            }
-            else {
-                result.append("\n"+gammalib::parformat("Response function"));
-                result.append("undefined");
-            }
-
-            // Append events
-            if (m_events != NULL) {
-                result.append("\n"+m_events->print(reduced_chatter));
-            }
-        
-        } // endif: appended detailed information
-
-    } // endif: chatter was not silent
-
-    // Return result
-    return result;
 }
 
 
@@ -750,6 +686,65 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print CTA observation information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing observation information.
+ ***************************************************************************/
+std::string GCTAObservation::print(const GChatter& chatter) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTAObservation ===");
+
+        // Append information
+        result.append("\n"+gammalib::parformat("Name")+name());
+        result.append("\n"+gammalib::parformat("Identifier")+id());
+        result.append("\n"+gammalib::parformat("Instrument")+instrument());
+        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(ontime())+" s");
+        result.append("\n"+gammalib::parformat("Livetime"));
+        result.append(gammalib::str(livetime())+" s");
+        result.append("\n"+gammalib::parformat("Deadtime correction"));
+        result.append(gammalib::str(m_deadc));
+
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
+
+            // Append pointing
+            result.append("\n"+pointing().print(reduced_chatter));
+
+            // Append response
+            if (m_response != NULL) {
+                result.append("\n"+m_response->print(reduced_chatter));
+            }
+            else {
+                result.append("\n"+gammalib::parformat("Response function"));
+                result.append("undefined");
+            }
+
+            // Append events
+            if (m_events != NULL) {
+                result.append("\n"+m_events->print(reduced_chatter));
+            }
+        
+        } // endif: appended detailed information
+
+    } // endif: chatter was not silent
+
+    // Return result
+    return result;
 }
 
 

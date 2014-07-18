@@ -185,7 +185,7 @@ double GCTAObservation::deadc(const GTime& time) const
 inline
 bool GCTAObservation::hasresponse(void) const
 {
-    return (m_response != NULL);
+    return ((m_response != NULL) && (m_response->isvalid()));
 }
 
 
