@@ -303,7 +303,7 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     m_energy.clear();
 
     // Get pointers on response, livetime cube and energy boundaries
-    const GLATResponse& rsp = obs.response();
+    const GLATResponse* rsp = obs.response();
 
     // Get pointer on livetime cube
     const GLATLtCube* ltcube = obs.ltcube();
@@ -350,8 +350,8 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
 
         // Compute exposure by looping over the responses
         double exposure = 0.0;
-        for (int i = 0; i < rsp.size(); ++i) {
-            exposure += (*ltcube)(dir, energy[ieng], *rsp.aeff(i));
+        for (int i = 0; i < rsp->size(); ++i) {
+            exposure += (*ltcube)(dir, energy[ieng], *rsp->aeff(i));
         }
 
         // Set exposure
@@ -362,9 +362,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
 
             // Compute point spread function by looping over the responses
             double psf = 0.0;
-            for (int i = 0; i < rsp.size(); ++i) {
+            for (int i = 0; i < rsp->size(); ++i) {
                 psf += (*ltcube)(dir, energy[ieng], m_offset[ioffset],
-                                 *rsp.psf(i), *rsp.aeff(i));
+                                 *rsp->psf(i), *rsp->aeff(i));
             }
 
             // Normalize PSF by exposure and clip when exposure drops to 0

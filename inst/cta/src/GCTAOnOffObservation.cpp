@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GCTAOnOffObservation.hpp"
+#include "GCTAResponseIrf.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -499,7 +500,8 @@ void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
  *
  * @param[in] obs CTA observation.
  *
- * @todo Implement GCTAResponse::npred usage.
+ * @todo Implement GCTAResponseIrf::npred usage.
+ * @todo Throw an exception if appropriate response is not found.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 {
@@ -516,27 +518,29 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
     int nreco = ereco.size();
     if (nreco > 0) {
     
-        // Get CTA response pointer. Throw an exception if no response is
-        // found
-        const GCTAResponse& response = obs.response();
+        // Get CTA response pointer
+        const GCTAResponseIrf* response = dynamic_cast<const GCTAResponseIrf*>(obs.response());
+        if (response != NULL) {
 
-        // Initialize ARF
-        m_arf = GArf(ereco);
+            // Initialize ARF
+            m_arf = GArf(ereco);
 
-        // Loop over reconstructed energies
-        for (int i = 0; i < nreco; ++i) {
+            // Loop over reconstructed energies
+            for (int i = 0; i < nreco; ++i) {
         
-            // Get mean energy of bin
-            double logenergy = ereco.elogmean(i).log10TeV();
+                // Get mean energy of bin
+                double logenergy = ereco.elogmean(i).log10TeV();
 
-            // Set specresp value
-            m_arf[i] = response.aeff(theta,
-                                     phi,
-                                     zenith,
-                                     azimuth,
-                                     logenergy);
+                // Set specresp value
+                m_arf[i] = response->aeff(theta,
+                                          phi,
+                                          zenith,
+                                          azimuth,
+                                          logenergy);
         
-        } // endfor: looped over reconstructed energies
+            } // endfor: looped over reconstructed energies
+        
+        } // endif: we found an appropriate response
         
 	} // endif: there were energy bins
 
@@ -550,6 +554,8 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
  *
  * @param[in] obs CTA observation.
  * @param[in] etrue True energy boundaries.
+ *
+ * @todo Throw an exception if appropriate response is not found.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                        const GEbounds&        etrue)
@@ -569,32 +575,38 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
     if (ntrue > 0 && nreco > 0) {
     
         // Get CTA response pointer
-        const GCTAResponse& response = obs.response();
+        const GCTAResponseIrf* response = dynamic_cast<const GCTAResponseIrf*>(obs.response());
+        if (response != NULL) {
 
-        // Initialize RMF
-        m_rmf = GRmf(etrue, ereco);
+            // Initialize RMF
+            m_rmf = GRmf(etrue, ereco);
 
-        // Loop over reconstructed energy
-        for (int ireco = 0; ireco < nreco; ++ireco) {
+            // Loop over reconstructed energy
+            for (int ireco = 0; ireco < nreco; ++ireco) {
 
-            // Compute reconstructed energy
-            //double eng_reco = ereco.elogmean(ireco).log10TeV();
+                // Compute reconstructed energy
+                //double eng_reco = ereco.elogmean(ireco).log10TeV();
 
-            // Loop over true energy
-            for (int itrue = 0; itrue < ntrue; ++itrue) {
+                // Loop over true energy
+                for (int itrue = 0; itrue < ntrue; ++itrue) {
                 
-                // Compute true energy
-                double eng_true = etrue.elogmean(itrue).log10TeV();
+                    // Compute true energy
+                    double eng_true = etrue.elogmean(itrue).log10TeV();
 
-                // Set RMF value
-                m_rmf(itrue, ireco) = response.edisp(ereco.elogmean(ireco),
-                                                     theta,
-                                                     phi,
-                                                     zenith,
-                                                     azimuth,
-                                                     eng_true);
-            } // endfor: looped over true energy
-        } // endfor: looped over reconstructed energy
+                    // Set RMF value
+                    m_rmf(itrue, ireco) = response->edisp(ereco.elogmean(ireco),
+                                                          theta,
+                                                          phi,
+                                                          zenith,
+                                                          azimuth,
+                                                          eng_true);
+                } // endfor: looped over true energy
+
+            } // endfor: looped over reconstructed energy
+
+        } // endif: we found an appropriate response
+
+
     } // endif: there were energy bins
 
 	// Return

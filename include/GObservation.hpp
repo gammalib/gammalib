@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,13 +48,17 @@
  * This class provides an abstract interface for an observation. The
  * observation collects information about the instrument, holds the measured
  * events, and provides information about the analysis definition.
+ *
+ * The response() method returns a pointer to the response function. The
+ * derived classes have to make sure that this method never returns NULL.
+ *
  * The method model() returns the probability for an event to be measured
  * with a given instrument direction, a given energy and at a given time,
  * given a source model and an instrument pointing direction.
  * The method npred() returns the total number of expected events within the
  * analysis region for a given source model and a given instrument pointing
  * direction.
- * The methods a defined as virtual and can be overloaded by derived classes
+ * The methods are defined as virtual and can be overloaded by derived classes
  * that implement instrument specific observations in order to optimize the
  * execution speed for data analysis.
  ***************************************************************************/
@@ -73,7 +77,7 @@ public:
     virtual void             clear(void) = 0;
     virtual GObservation*    clone(void) const = 0;
     virtual void             response(const GResponse& rsp) = 0;
-    virtual const GResponse& response(void) const = 0;
+    virtual const GResponse* response(void) const = 0;
     virtual std::string      instrument(void) const = 0;
     virtual double           ontime(void) const = 0;
     virtual double           livetime(void) const = 0;

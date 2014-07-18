@@ -271,11 +271,11 @@ void TestGCTAPointing::test_interpolate_altaz(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response(void)
 {
-    // Test CTA response loading
-    test_try("Test CTA response loading");
+    // Test CTA IRF response loading
+    test_try("Test CTA IRF response loading");
     try {
         // Load response
-        GCTAResponse rsp;
+        GCTAResponseIrf rsp;
         rsp.caldb(GCaldb(cta_caldb));
         rsp.load(cta_irf);
         test_try_success();
@@ -295,7 +295,7 @@ void TestGCTAResponse::test_response(void)
 void TestGCTAResponse::test_response_aeff(void)
 {
     // Load response
-    GCTAResponse rsp;
+    GCTAResponseIrf rsp;
     rsp.caldb(GCaldb(cta_caldb));
     rsp.load(cta_irf);
 
@@ -327,7 +327,7 @@ void TestGCTAResponse::test_response_aeff(void)
 void TestGCTAResponse::test_response_psf(void)
 {
     // Load response
-    GCTAResponse rsp;
+    GCTAResponseIrf rsp;
     rsp.caldb(GCaldb(cta_caldb));
     rsp.load(cta_irf);
 
@@ -364,7 +364,7 @@ void TestGCTAResponse::test_response_psf(void)
 void TestGCTAResponse::test_response_psf_king(void)
 {
     // Load response
-    GCTAResponse rsp;
+    GCTAResponseIrf rsp;
     rsp.caldb(GCaldb(cta_caldb_king));
     rsp.load(cta_irf_king);
 
@@ -397,7 +397,7 @@ void TestGCTAResponse::test_response_psf_king(void)
 void TestGCTAResponse::test_response_npsf(void)
 {
     // Setup CTA response
-    GCTAResponse rsp;
+    GCTAResponseIrf rsp;
     rsp.caldb(GCaldb(cta_caldb));
     rsp.load(cta_irf);
 
@@ -452,7 +452,7 @@ void TestGCTAResponse::test_response_npsf(void)
 void TestGCTAResponse::test_response_edisp(void)
 {
     // Load response
-	GCTAResponse rsp;
+	GCTAResponseIrf rsp;
 
 	test_energy_integration(rsp);
 
@@ -467,7 +467,7 @@ void TestGCTAResponse::test_response_edisp(void)
 void TestGCTAResponse::test_response_edispRMF(void)
 {
     // Load response
-    GCTAResponse rsp;
+    GCTAResponseIrf rsp;
     rsp.caldb(GCaldb(cta_caldb));
 
     // Test Energy Dispersion
@@ -769,7 +769,7 @@ void TestGCTAResponse::test_response_psfcube(void)
 /***********************************************************************//**
  * @brief Utility function for energy dispersion tests
  ***************************************************************************/
-void TestGCTAResponse::test_energy_integration(GCTAResponse rsp) {
+void TestGCTAResponse::test_energy_integration(GCTAResponseIrf rsp) {
 
 	// Load response
     rsp.caldb(GCaldb(cta_caldb));

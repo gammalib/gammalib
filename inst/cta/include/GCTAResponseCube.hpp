@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GResponse.hpp"
+#include "GCTAResponse.hpp"
 #include "GCTAExposure.hpp"
 #include "GCTAMeanPsf.hpp"
 
@@ -48,7 +48,7 @@ class GCTAInstDir;
  *
  * @brief CTA cube-style response function class
  ***************************************************************************/
-class GCTAResponseCube : public GResponse {
+class GCTAResponseCube : public GCTAResponse {
 
 public:
     // Constructors and destructors
@@ -71,6 +71,8 @@ public:
                                   const GObservation& obs) const;
     virtual double            npred(const GPhoton&      photon,
                                     const GObservation& obs) const;
+    virtual void              read(const GXmlElement& xml);
+    virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods

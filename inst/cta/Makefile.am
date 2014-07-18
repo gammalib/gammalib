@@ -18,6 +18,8 @@ sources = src/GCTASupport.cpp \
           src/GCTAEventCube.cpp \
           src/GCTAEventBin.cpp \
           src/GCTAResponse.cpp \
+          src/GCTAResponseIrf.cpp \
+          src/GCTAResponseCube.cpp \
           src/GCTAResponse_helpers.cpp \
           src/GCTAResponseTable.cpp \
           src/GCTAAeff.cpp \
@@ -35,7 +37,6 @@ sources = src/GCTASupport.cpp \
           src/GCTABackground.cpp \
           src/GCTABackgroundPerfTable.cpp \
           src/GCTABackground3D.cpp \
-          src/GCTACubeResponse.cpp \
           src/GCTAExposure.cpp \
           src/GCTAMeanPsf.cpp \
           src/GCTAInstDir.cpp \
@@ -63,6 +64,8 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAInstDir.hpp \
                      include/GCTARoi.hpp \
                      include/GCTAResponse.hpp \
+                     include/GCTAResponseIrf.hpp \
+                     include/GCTAResponseCube.hpp \
                      include/GCTAResponseTable.hpp \
                      include/GCTAAeff.hpp \
                      include/GCTAAeffPerfTable.hpp \
@@ -79,7 +82,6 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTABackground.hpp \
                      include/GCTABackgroundPerfTable.hpp \
                      include/GCTABackground3D.hpp \
-                     include/GCTACubeResponse.hpp \
                      include/GCTAExposure.hpp \
                      include/GCTAMeanPsf.hpp \
                      include/GCTAModelCubeBackground.hpp \

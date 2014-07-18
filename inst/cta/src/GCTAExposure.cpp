@@ -30,6 +30,7 @@
 #endif
 #include "GCTAExposure.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAResponseIrf.hpp"
 #include "GMath.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -237,6 +238,8 @@ GCTAExposure* GCTAExposure::clone(void) const
  *
  * Set the exposure cube from a single CTA observations. The cube pixel
  * values are computed as product of the effective area and the livetime.
+ *
+ * @todo: Throw an exception if response is not valid
  ***************************************************************************/
 void GCTAExposure::set(const GCTAObservation& obs)
 {
@@ -244,30 +247,35 @@ void GCTAExposure::set(const GCTAObservation& obs)
     clear_cube();
 
     // Get references on CTA response and pointing direction
-    const GCTAResponse& rsp = obs.response();
-    const GSkyDir&      pnt = obs.pointing().dir();
+    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
+    const GSkyDir&         pnt = obs.pointing().dir();
 
-    // Loop over all pixels in sky map
-    for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+    // Continue only if response is valid
+    if (rsp != NULL) {
 
-        // Compute theta angle with respect to pointing direction
-        // in radians
-        GSkyDir dir     = m_cube.inx2dir(pixel);
-        double  theta   = pnt.dist(dir);
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Compute theta angle with respect to pointing direction
+            // in radians
+            GSkyDir dir     = m_cube.inx2dir(pixel);
+            double  theta   = pnt.dist(dir);
     
-        // Loop over all exposure cube energy bins
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+            // Loop over all exposure cube energy bins
+            for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-            // Get logE/TeV
-            double logE = m_ebounds.elogmean(iebin).log10TeV();
+                // Get logE/TeV
+                double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-            // Set exposure cube (effective area * lifetime)
-            m_cube(pixel, iebin) = rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                   obs.livetime();
+                // Set exposure cube (effective area * lifetime)
+                m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                       obs.livetime();
 
-        } // endfor: looped over energy bins
+            } // endfor: looped over energy bins
 
-    } // endfor: looped over all pixels
+        } // endfor: looped over all pixels
+    
+    } // endif: response was valid
 
     // Return
     return;
@@ -296,30 +304,35 @@ void GCTAExposure::fill(const GObservations& obs)
         if (cta != NULL) {
 
             // Get references on CTA response and pointing direction
-            const GCTAResponse& rsp = cta->response();
-            const GSkyDir&      pnt = cta->pointing().dir();
+            const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+            const GSkyDir&         pnt = cta->pointing().dir();
 
-            // Loop over all pixels in sky map
-            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+            // Continue only if response is valid
+            if (rsp != NULL) {
+            
+                // Loop over all pixels in sky map
+                for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
 
-                // Compute theta angle with respect to pointing direction
-                // in radians
-                GSkyDir dir     = m_cube.inx2dir(pixel);
-                double  theta   = pnt.dist(dir);
+                    // Compute theta angle with respect to pointing direction
+                    // in radians
+                    GSkyDir dir     = m_cube.inx2dir(pixel);
+                    double  theta   = pnt.dist(dir);
     
-                // Loop over all exposure cube energy bins
-                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                    // Loop over all exposure cube energy bins
+                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-                    // Get logE/TeV
-                    double logE = m_ebounds.elogmean(iebin).log10TeV();
+                        // Get logE/TeV
+                        double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                    // Add to exposure cube (effective area * lifetime)
-                    m_cube(pixel, iebin) += rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                            cta->livetime();
+                        // Add to exposure cube (effective area * lifetime)
+                        m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                                cta->livetime();
 
-                } // endfor: looped over energy bins
+                    } // endfor: looped over energy bins
 
-            } // endfor: looped over all pixels
+                } // endfor: looped over all pixels
+            
+            } // endif: response was valid
     
         } // endif: observation was a CTA observation
 

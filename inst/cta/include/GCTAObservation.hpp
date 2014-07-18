@@ -68,7 +68,7 @@ public:
     virtual void                clear(void);
     virtual GCTAObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
-    virtual const GCTAResponse& response(void) const;
+    virtual const GCTAResponse* response(void) const;
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
@@ -108,32 +108,20 @@ protected:
     void write_attributes(GFitsHDU& hdu) const;
 
     // Protected members
-    std::string  m_instrument;   //!< Instrument name
-    std::string  m_eventfile;    //!< Event filename
-    GCTAResponse m_response;     //!< Instrument response functions
-    GCTAPointing m_pointing;     //!< Pointing direction
-    int          m_obs_id;       //!< Observation ID
-    double       m_ontime;       //!< Ontime (seconds)
-    double       m_livetime;     //!< Livetime (seconds)
-    double       m_deadc;        //!< Deadtime correction (livetime/ontime)
-    double       m_ra_obj;       //!< Right Ascension of object (degrees)
-    double       m_dec_obj;      //!< Declination of object (degrees)
+    std::string   m_instrument;  //!< Instrument name
+    std::string   m_eventfile;   //!< Event filename
+    GCTAResponse* m_response;    //!< Pointer to instrument response functions
+    GCTAPointing  m_pointing;    //!< Pointing direction
+    int           m_obs_id;      //!< Observation ID
+    double        m_ontime;      //!< Ontime (seconds)
+    double        m_livetime;    //!< Livetime (seconds)
+    double        m_deadc;       //!< Deadtime correction (livetime/ontime)
+    double        m_ra_obj;      //!< Right Ascension of object (degrees)
+    double        m_dec_obj;     //!< Declination of object (degrees)
 
     // Special protected member for GCTAModelCubeBackground friend
     std::string  m_bgdfile;      //!< Background filename
 };
-
-
-/***********************************************************************//**
- * @brief Return CTA response function
- *
- * @return Response function.
- ***************************************************************************/
-inline
-const GCTAResponse& GCTAObservation::response(void) const
-{
-    return m_response;
-}
 
 
 /***********************************************************************//**

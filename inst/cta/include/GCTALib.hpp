@@ -43,6 +43,8 @@
 #include "GCTARoi.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
+#include "GCTAResponseIrf.hpp"
+#include "GCTAResponseCube.hpp"
 #include "GCTAResponseTable.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAAeff2D.hpp"

@@ -59,7 +59,7 @@ public:
     virtual void                clear(void);
     virtual GLATObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
-    virtual const GLATResponse& response(void) const;
+    virtual const GLATResponse* response(void) const;
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
@@ -102,10 +102,10 @@ protected:
  * @return Fermi/LAT response function
  ***************************************************************************/
 inline
-const GLATResponse& GLATObservation::response(void) const
+const GLATResponse* GLATObservation::response(void) const
 {
     // Return response pointer
-    return m_response;
+    return &m_response;
 }
 
 

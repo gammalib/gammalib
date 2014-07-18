@@ -45,7 +45,7 @@ public:
     virtual void                clear(void);
     virtual GLATObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
-    virtual const GLATResponse& response(void) const;
+    virtual const GLATResponse* response(void) const;
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;

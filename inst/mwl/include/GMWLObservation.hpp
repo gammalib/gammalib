@@ -61,7 +61,7 @@ public:
     virtual void                clear(void);
     virtual GMWLObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
-    virtual const GMWLResponse& response(void) const;
+    virtual const GMWLResponse* response(void) const;
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
@@ -102,9 +102,9 @@ protected:
  * @return Response.
  ***************************************************************************/
 inline
-const GMWLResponse& GMWLObservation::response(void) const
+const GMWLResponse* GMWLObservation::response(void) const
 {
-    return m_response;
+    return &m_response;
 }
 
 

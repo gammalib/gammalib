@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeffArf.i - CTA ARF effective area class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,7 +67,7 @@ public:
     void          scale(const double& scale);
     const double& scale(void) const;
     void          read(const GFitsTable& hdu);
-    void          remove_thetacut(const GCTAResponse& rsp);
+    void          remove_thetacut(const GCTAResponseIrf& rsp);
 };
 
 

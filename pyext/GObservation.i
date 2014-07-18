@@ -62,7 +62,7 @@ public:
     virtual void             clear(void) = 0;
     virtual GObservation*    clone(void) const = 0;
     virtual void             response(const GResponse& rsp) = 0;
-    virtual const GResponse& response(void) const = 0;
+    virtual const GResponse* response(void) const = 0;
     virtual std::string      instrument(void) const = 0;
     virtual double           ontime(void) const = 0;
     virtual double           livetime(void) const = 0;

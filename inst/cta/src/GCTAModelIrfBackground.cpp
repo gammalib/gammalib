@@ -38,7 +38,7 @@
 #include "GModelSpectralNodes.hpp"
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAObservation.hpp"
-#include "GCTAResponse.hpp"
+#include "GCTAResponseIrf.hpp"
 #include "GCTABackground.hpp"
 
 /* __ Globals ____________________________________________________________ */
@@ -294,8 +294,16 @@ double GCTAModelIrfBackground::eval(const GEvent& event,
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
+    // Get pointer on CTA IRF response
+    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+    if (rsp == NULL) {
+        std::string msg = "Specified observation does not contain an IRF response.\n" +
+                          obs.print();
+        throw GException::invalid_argument(G_EVAL, msg);
+    }
+
     // Retrieve pointer to CTA background
-    const GCTABackground* bgd = cta->response().background();
+    const GCTABackground* bgd = rsp->background();
     if (bgd == NULL) {
         std::string msg = "Specified observation contains no background"
                           " information.\n" + obs.print();
@@ -351,22 +359,30 @@ double GCTAModelIrfBackground::eval_gradients(const GEvent& event,
     if (cta == NULL) {
         std::string msg = "Specified observation is not a CTA observation.\n" +
                           obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
+    }
+
+    // Get pointer on CTA IRF response
+    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+    if (rsp == NULL) {
+        std::string msg = "Specified observation does not contain an"
+                          " IRF response.\n" + obs.print();
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
     // Retrieve pointer to CTA background
-    const GCTABackground* bgd = cta->response().background();
+    const GCTABackground* bgd = rsp->background();
     if (bgd == NULL) {
         std::string msg = "Specified observation contains no background"
                           " information.\n" + obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
     // Extract CTA instrument direction from event
     const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
         std::string msg = "No CTA instrument direction found in event.";
-        throw GException::invalid_argument(G_EVAL, msg);
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
     // Set DETX and DETY in instrument direction
@@ -475,8 +491,16 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
                 throw GException::invalid_argument(G_NPRED, msg);
             }
 
+            // Get pointer on CTA IRF response
+            const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+            if (rsp == NULL) {
+                std::string msg = "Specified observation does not contain"
+                                  " an IRF response.\n" + obs.print();
+                throw GException::invalid_argument(G_NPRED, msg);
+            }
+            
             // Retrieve pointer to CTA background
-            const GCTABackground* bgd = cta->response().background();
+            const GCTABackground* bgd = rsp->background();
             if (bgd == NULL) {
                 std::string msg = "Specified observation contains no background"
                                   " information.\n" + obs.print();
@@ -586,12 +610,19 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
             throw GException::invalid_argument(G_MC, msg);
         }
 
+        // Get pointer on CTA IRF response
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+        if (rsp == NULL) {
+            std::string msg = "Specified observation does not contain"
+                              " an IRF response.\n" + obs.print();
+            throw GException::invalid_argument(G_MC, msg);
+        }
+
         // Retrieve CTA response and pointing
-        const GCTAResponse& rsp = cta->response();
         const GCTAPointing& pnt = cta->pointing();
         
         // Get pointer to CTA background
-        const GCTABackground* bgd = rsp.background();
+        const GCTABackground* bgd = rsp->background();
         if (bgd == NULL) {
             std::string msg = "Specified observation contains no background"
                               " information.\n" + obs.print();

@@ -32,7 +32,7 @@
 #include <string>
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GResponse.hpp"
+#include "GCTAResponse.hpp"
 #include "GCaldb.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -59,7 +59,7 @@ class GCTABackground;
  *
  * @brief CTA instrument response function class
  ***************************************************************************/
-class GCTAResponseIrf : public GResponse {
+class GCTAResponseIrf : public GCTAResponse {
 
 public:
     // Constructors and destructors
@@ -76,13 +76,13 @@ public:
     virtual GCTAResponseIrf* clone(void) const;
     virtual bool             use_edisp(void) const;
     virtual bool             use_tdisp(void) const;
-    virtual bool             apply_edisp(void) const;
-    virtual void             apply_edisp(const bool& apply_edisp) const;
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
                                  const GObservation& obs) const;
     virtual double           npred(const GPhoton&      photon,
                                    const GObservation& obs) const;
+    virtual void             read(const GXmlElement& xml);
+    virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(const GChatter& chatter = NORMAL) const;
 
     // Overload virtual base class methods
@@ -104,12 +104,12 @@ public:
     virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
+    bool                  apply_edisp(void) const;
+    void                  apply_edisp(const bool& apply_edisp) const;
     GCTAEventAtom*        mc(const double& area, const GPhoton& photon,
                              const GObservation& obs, GRan& ran) const;
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
-    void                  read(const GXmlElement& xml);
-    void                  write(GXmlElement& xml) const;
     void                  load(const std::string& rspname);
     void                  eps(const double& eps);
     const double&         eps(void) const;

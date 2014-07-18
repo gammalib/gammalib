@@ -122,7 +122,7 @@
  *
  * Constructs void CTA response.
  ***************************************************************************/
-GCTAResponseIrf::GCTAResponseIrf(void) : GResponse()
+GCTAResponseIrf::GCTAResponseIrf(void) : GCTAResponse()
 {
     // Initialise members
     init_members();
@@ -139,7 +139,7 @@ GCTAResponseIrf::GCTAResponseIrf(void) : GResponse()
  *
  * Constructs CTA response by making a deep copy of an existing object.
  **************************************************************************/
-GCTAResponseIrf::GCTAResponseIrf(const GCTAResponseIrf& rsp) : GResponse(rsp)
+GCTAResponseIrf::GCTAResponseIrf(const GCTAResponseIrf& rsp) : GCTAResponse(rsp)
 {
     // Initialise members
     init_members();
@@ -163,7 +163,7 @@ GCTAResponseIrf::GCTAResponseIrf(const GCTAResponseIrf& rsp) : GResponse(rsp)
  * or a filename (see GCTAResponseIrf::load for more information).
  ***************************************************************************/
 GCTAResponseIrf::GCTAResponseIrf(const std::string& rspname,
-                                 const GCaldb& caldb) : GResponse()
+                                 const GCaldb& caldb) : GCTAResponse()
 {
     // Initialise members
     init_members();
@@ -217,7 +217,7 @@ GCTAResponseIrf& GCTAResponseIrf::operator=(const GCTAResponseIrf& rsp)
     if (this != &rsp) {
 
         // Copy base class members
-        this->GResponse::operator=(rsp);
+        this->GCTAResponse::operator=(rsp);
 
         // Free members
         free_members();
@@ -251,10 +251,12 @@ void GCTAResponseIrf::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GCTAResponse::free_members();
     this->GResponse::free_members();
 
     // Initialise members
     this->GResponse::init_members();
+    this->GCTAResponse::init_members();
     init_members();
 
     // Return

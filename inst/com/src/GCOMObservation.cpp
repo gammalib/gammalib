@@ -535,7 +535,7 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append("\n"+m_pointing.print(gammalib::reduce(chatter)));
 
         // Append response
-        result.append("\n"+response().print(gammalib::reduce(chatter)));
+        result.append("\n"+response()->print(gammalib::reduce(chatter)));
 
         // Append events
         if (m_events != NULL) {

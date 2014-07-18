@@ -30,6 +30,7 @@
 #endif
 #include "GCTAMeanPsf.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAResponseIrf.hpp"
 #include "GCTAExposure.hpp"
 #include "GMath.hpp"
 
@@ -270,38 +271,45 @@ void GCTAMeanPsf::set(const GCTAObservation& obs)
     clear_cube();
 
     // Get references on CTA response and pointing direction
-    const GCTAResponse& rsp = obs.response();
-    const GSkyDir&      pnt = obs.pointing().dir();
+    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
+    const GSkyDir&         pnt = obs.pointing().dir();
 
-    // Loop over all pixels in sky map
-    for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+    // Continue only if response is valid
+    if (rsp != NULL) {
 
-        // Compute theta angle with respect to pointing direction
-        // in radians
-        GSkyDir dir     = m_cube.inx2dir(pixel);
-        double  theta   = pnt.dist(dir);
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Compute theta angle with respect to pointing direction
+            // in radians
+            GSkyDir dir     = m_cube.inx2dir(pixel);
+            double  theta   = pnt.dist(dir);
     
-        // Loop over all exposure cube energy bins
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+            // Loop over all exposure cube energy bins
+            for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-            // Get logE/TeV
-            double logE = m_ebounds.elogmean(iebin).log10TeV();
+                // Get logE/TeV
+                double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-            // Loop over delta values
-            for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                // Loop over delta values
+                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-                // Compute delta in radians
-                double delta = m_deltas[idelta] * gammalib::deg2rad;
+                    // Compute delta in radians
+                    double delta = m_deltas[idelta] * gammalib::deg2rad;
 
-                // Set map index
-                int imap = offset(idelta, iebin);
+                    // Set map index
+                    int imap = offset(idelta, iebin);
                 
-                // Set PSF cube
-                m_cube(pixel, imap) = rsp.psf(delta, theta, 0.0, 0.0, 0.0, logE);
+                    // Set PSF cube
+                    m_cube(pixel, imap) = rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE);
 
-            } // endfor: looped over delta bins
-        } // endfor: looped over energy bins
-    } // endfor: looped over all pixels
+                } // endfor: looped over delta bins
+
+            } // endfor: looped over energy bins
+
+        } // endfor: looped over all pixels
+
+    } // endif: response was valid
 
     // Return
     return;
@@ -329,48 +337,53 @@ void GCTAMeanPsf::fill(const GObservations& obs)
         if (cta != NULL) {
 
             // Get references on CTA response and pointing direction
-            const GCTAResponse& rsp = cta->response();
-            const GSkyDir&      pnt = cta->pointing().dir();
+            const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+            const GSkyDir&         pnt = cta->pointing().dir();
 
-            // Loop over all pixels in sky map
-            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+            // Continue only if response is valid
+            if (rsp != NULL) {
 
-                // Compute theta angle with respect to pointing direction
-                // in radians
-                GSkyDir dir   = m_cube.inx2dir(pixel);
-                double  theta = pnt.dist(dir);
+                // Loop over all pixels in sky map
+                for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+                    // Compute theta angle with respect to pointing direction
+                    // in radians
+                    GSkyDir dir   = m_cube.inx2dir(pixel);
+                    double  theta = pnt.dist(dir);
     
-                // Loop over all energy bins
-                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+                    // Loop over all energy bins
+                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
 
-                    // Get logE/TeV
-                    double logE = m_ebounds.elogmean(iebin).log10TeV();
+                        // Get logE/TeV
+                        double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                    // Compute exposure weight
-                    double weight = rsp.aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                    cta->livetime();
+                        // Compute exposure weight
+                        double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                        cta->livetime();
 
-                    // Accumulate weights
-                    exposure(pixel, iebin) += weight;
+                        // Accumulate weights
+                        exposure(pixel, iebin) += weight;
 
-                    // Loop over delta values
-                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                        // Loop over delta values
+                        for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-                        // Compute delta in radians
-                        double delta = m_deltas[idelta] * gammalib::deg2rad;
+                            // Compute delta in radians
+                            double delta = m_deltas[idelta] * gammalib::deg2rad;
 
-                        // Set map index
-                        int imap = offset(idelta, iebin);
+                            // Set map index
+                            int imap = offset(idelta, iebin);
                 
-                        // Add on PSF cube
-                        m_cube(pixel, imap) +=
-                           rsp.psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+                            // Add on PSF cube
+                            m_cube(pixel, imap) +=
+                                rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
 
-                    } // endfor: looped over delta bins
+                        } // endfor: looped over delta bins
 
-                } // endfor: looped over energy bins
+                    } // endfor: looped over energy bins
 
-            } // endfor: looped over all pixels
+                } // endfor: looped over all pixels
+
+            } // endif: response was valid
 
         } // endif: observation was a CTA observation
 

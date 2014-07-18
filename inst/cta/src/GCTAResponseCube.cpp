@@ -64,7 +64,7 @@
  *
  * Constructs void CTA response.
  ***************************************************************************/
-GCTAResponseCube::GCTAResponseCube(void) : GResponse()
+GCTAResponseCube::GCTAResponseCube(void) : GCTAResponse()
 {
     // Initialise members
     init_members();
@@ -82,7 +82,7 @@ GCTAResponseCube::GCTAResponseCube(void) : GResponse()
  * Constructs CTA cube-style response by making a deep copy of an existing
  * object.
  **************************************************************************/
-GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) : GResponse(rsp)
+GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) : GCTAResponse(rsp)
 {
     // Initialise members
     init_members();
@@ -133,7 +133,7 @@ GCTAResponseCube& GCTAResponseCube::operator=(const GCTAResponseCube& rsp)
     if (this != &rsp) {
 
         // Copy base class members
-        this->GResponse::operator=(rsp);
+        this->GCTAResponse::operator=(rsp);
 
         // Free members
         free_members();
@@ -167,10 +167,12 @@ void GCTAResponseCube::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GCTAResponse::free_members();
     this->GResponse::free_members();
 
     // Initialise members
     this->GResponse::init_members();
+    this->GCTAResponse::init_members();
     init_members();
 
     // Return
@@ -281,6 +283,34 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
 
     // Return Npred
     return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Read response
+ *
+ * @param[in] xml XML element.
+ *
+ * @todo: Implement method
+ ***************************************************************************/
+void GCTAResponseCube::read(const GXmlElement& xml)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write response
+ *
+ * @param[in] xml XML element.
+ *
+ * @todo: Implement method
+ ***************************************************************************/
+void GCTAResponseCube::write(GXmlElement& xml) const
+{
+    // Return
+    return;
 }
 
 

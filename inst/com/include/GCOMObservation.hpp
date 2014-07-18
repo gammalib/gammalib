@@ -64,7 +64,7 @@ public:
     virtual void                clear(void);
     virtual GCOMObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
-    virtual const GCOMResponse& response(void) const;
+    virtual const GCOMResponse* response(void) const;
     virtual std::string         instrument(void) const { return m_instrument; }
     virtual double              ontime(void) const { return m_ontime; }
     virtual double              livetime(void) const { return m_livetime; }
@@ -128,10 +128,10 @@ protected:
  * @return Response function.
  ***************************************************************************/
 inline
-const GCOMResponse& GCOMObservation::response(void) const
+const GCOMResponse* GCOMObservation::response(void) const
 {
     // Return response pointer
-    return m_response;
+    return &m_response;
 }
 
 #endif /* GCOMOBSERVATION_HPP */

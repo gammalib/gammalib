@@ -303,7 +303,7 @@ double GObservation::model(const GModels& models, const GEvent& event,
                 // is used, don't compute model gradients as we cannot
                 // use them. This is somehow a kluge, but makes the
                 // code faster
-                if (response().use_edisp()) {
+                if (response()->use_edisp()) {
                     model += mptr->eval(event, *this);
                 }
                 else {
@@ -455,7 +455,7 @@ double GObservation::model_grad(const GModel& model,
         // as we have not implemented code that integrates the gradients
         // over the energy dispersion. Here it's simpler to just use
         // numerical gradients.
-        if (par.has_grad() && !response().use_edisp()) {
+        if (par.has_grad() && !response()->use_edisp()) {
             grad = par.factor_gradient();
         }
 
@@ -1422,9 +1422,9 @@ double GObservation::npred_spec(const GModel& model,
 
     // If model is sky model and observation uses energy dispersion then
     // add margin
-    if (dynamic_cast<const GModelSky*>(&model) != NULL && response().use_edisp()) {
-        e_min = response().ebounds_src(e_min).emin();
-        e_max = response().ebounds_src(e_max).emax();
+    if (dynamic_cast<const GModelSky*>(&model) != NULL && response()->use_edisp()) {
+        e_min = response()->ebounds_src(e_min).emin();
+        e_max = response()->ebounds_src(e_max).emax();
     }
 
     // Get energy interval in MeV

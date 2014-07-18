@@ -563,7 +563,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
     if (valid_model()) {
 
         // Get response function
-        const GResponse& rsp = obs.response();
+        const GResponse* rsp = obs.response();
 
         // Here we make the simplifying approximations
         // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
@@ -576,7 +576,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
         GSource source(this->name(), m_spatial, srcEng, srcTime);
 
         // Compute response components
-        double npred_spatial  = rsp.npred(source, obs);
+        double npred_spatial  = rsp->npred(source, obs);
         double npred_spectral = spectral()->eval(srcEng, srcTime);
         double npred_temporal = temporal()->eval(srcTime);
 
@@ -1300,10 +1300,10 @@ double GModelSky::integrate_time(const GEvent& event,
     double value = 0.0;
 
     // Get response function
-    const GResponse& rsp = obs.response();
+    const GResponse* rsp = obs.response();
 
     // Determine if time integration is needed
-    bool integrate = rsp.use_tdisp();
+    bool integrate = rsp->use_tdisp();
 
     // Case A: Integration
     if (integrate) {
@@ -1369,16 +1369,16 @@ double GModelSky::integrate_energy(const GEvent& event,
     double value = 0.0;
 
     // Get response function
-    const GResponse& rsp = obs.response();
+    const GResponse* rsp = obs.response();
 
     // Determine if energy integration is needed
-    bool integrate = rsp.use_edisp();
+    bool integrate = rsp->use_edisp();
 
     // Case A: Integration
     if (integrate) {
     
         // Retrieve true energy boundaries
-        GEbounds ebounds = rsp.ebounds_src(event.energy());
+        GEbounds ebounds = rsp->ebounds_src(event.energy());
     
         // Loop over all boundaries
         for (int i = 0; i < ebounds.size(); ++i) {
@@ -1468,14 +1468,14 @@ double GModelSky::integrate_dir(const GEvent&       event,
     if (m_spatial != NULL) {
 
         // Get response function
-        const GResponse& rsp = obs.response();
+        const GResponse* rsp = obs.response();
 
         // Set source
         GSource source(this->name(), m_spatial, srcEng, srcTime);
         
         // Get IRF value. This method returns the spatial component of the
         // source model.
-        double irf = rsp.irf(event, source, obs);
+        double irf = rsp->irf(event, source, obs);
 
         // If required, apply instrument specific model scaling
         if (!m_scales.empty()) {

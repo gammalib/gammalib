@@ -34,7 +34,7 @@
  *
  * @brief CTA instrument response function class
  ***************************************************************************/
-class GCTAResponseIrf : public GResponse {
+class GCTAResponseIrf : public GCTAResponse {
 public:
     // Constructors and destructors
     GCTAResponseIrf(void);
@@ -47,13 +47,13 @@ public:
     virtual GCTAResponseIrf* clone(void) const;
     virtual bool             use_edisp(void) const;
     virtual bool             use_tdisp(void) const;
-    virtual bool             apply_edisp(void) const;
-    virtual void             apply_edisp(const bool& apply_edisp) const;
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
                                  const GObservation& obs) const;
     virtual double           npred(const GPhoton&      photon,
                                    const GObservation& obs) const;
+    virtual void             read(const GXmlElement& xml);
+    virtual void             write(GXmlElement& xml) const;
 
     // Overload virtual base class methods
     virtual double   irf_radial(const GEvent&       event,
@@ -74,6 +74,8 @@ public:
     virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
+    bool                  apply_edisp(void) const;
+    void                  apply_edisp(const bool& apply_edisp) const;
     GCTAEventAtom*        mc(const double& area, const GPhoton& photon,
                              const GObservation& obs, GRan& ran) const;
     void                  caldb(const GCaldb& caldb);

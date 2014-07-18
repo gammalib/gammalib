@@ -228,12 +228,12 @@ class Test(GPythonTestSuite):
         self.test_value(edisp(1.001, 1.0, 0.0), 18.0463571212, 1.0e-6)
 
         # Load response
-        self.test_try("Test GCTAResponse file constructor")
+        self.test_try("Test GCTAResponseIrf file constructor")
         try:
-            rsp = GCTAResponse("cta_dummy_irf", GCaldb("../inst/cta/test/caldb"))
+            rsp = GCTAResponseIrf("cta_dummy_irf", GCaldb("../inst/cta/test/caldb"))
             self.test_try_success()
         except:
-            self.test_try_failure("Unable to allocate GCTAResponse from file.")
+            self.test_try_failure("Unable to allocate GCTAResponseIrf from file.")
 
         # Test nedisp computations
         dir  = GSkyDir()

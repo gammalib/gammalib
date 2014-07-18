@@ -35,6 +35,8 @@
 #include "GIntegral.hpp"
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAResponseIrf.hpp"
+#include "GCTAResponseCube.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTARoi.hpp"
@@ -50,7 +52,8 @@ const GObservationRegistry g_obs_magic_registry(&g_obs_magic_seed);
 const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_RESPONSE                    "GCTAObservation::response(GResponse&)"
+#define G_RESPONSE_SET                "GCTAObservation::response(GResponse&)"
+#define G_RESPONSE_GET            "GCTAResponse* GCTAObservation::response()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
 
@@ -216,7 +219,7 @@ GCTAObservation* GCTAObservation::clone(void) const
  *
  * @param[in] rsp Response function.
  *
- * @exception GCTAException::bad_response_type
+ * @exception GException::invalid_value
  *            Specified response in not of type GCTAResponse.
  *
  * Sets the response function for the observation. The argument has to be of
@@ -224,17 +227,48 @@ GCTAObservation* GCTAObservation::clone(void) const
  ***************************************************************************/
 void GCTAObservation::response(const GResponse& rsp)
 {
+    // Free response
+    if (m_response != NULL) delete m_response;
+    m_response = NULL;
+
     // Get pointer on CTA response
-    const GCTAResponse* ctarsp = dynamic_cast<const GCTAResponse*>(&rsp);
-    if (ctarsp == NULL) {
-        throw GCTAException::bad_response_type(G_RESPONSE);
+    const GCTAResponse* cta = dynamic_cast<const GCTAResponse*>(&rsp);
+    if (cta == NULL) {
+        std::string msg = "Specified response function is not a CTA "
+                          "response function.\n" + rsp.print();
+        throw GException::invalid_value(G_RESPONSE_SET, msg);
     }
 
-    // Copy response function
-    m_response = *ctarsp;
+    // Clone response function
+    m_response = cta->clone();
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to CTA response function
+ *
+ * @return Pointer to CTA response function.
+ *
+ * @exception GException::invalid_value
+ *            No valid response found in CTA observation.
+ *
+ * Returns a pointer to the CTA response function. The pointer returned is
+ * never NULL.
+ ***************************************************************************/
+const GCTAResponse* GCTAObservation::response(void) const
+{
+    // Throw an exception if the response pointer is not valid
+    if (m_response == NULL) {
+        std::string msg = "No valid response function found in CTA"
+                          " observation.\n" + print();
+        throw GException::invalid_value(G_RESPONSE_GET, msg);
+    }
+
+    // Return pointer
+    return m_response;
 }
 
 
@@ -250,14 +284,21 @@ void GCTAObservation::response(const GResponse& rsp)
  ***************************************************************************/
 void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
 {
-    // Clear response function
-    m_response.clear();
+    // Free response
+    if (m_response != NULL) delete m_response;
+    m_response = NULL;
+
+    // Allocate fresh response function
+    GCTAResponseIrf* rsp = new GCTAResponseIrf;
 
     // Set calibration database
-    m_response.caldb(caldb);
+    rsp->caldb(caldb);
 
     // Load instrument response function
-    m_response.load(rspname);
+    rsp->load(rspname);
+
+    // Store pointer
+    m_response = rsp;
 
     // Return
     return;
@@ -348,8 +389,66 @@ void GCTAObservation::read(const GXmlElement& xml)
               "Require \"EventList\" or \"CountsMap\" parameters.");
     }
 
+    // Determine response type as function of the information that is
+    // provided in the XML file. The response type is determined from the
+    // parameter names. An exception is thrown if the response type cannot
+    // be unambigously determined
+    int response_type = 0;
+    for (int i = 0; i < npars; ++i) {
+
+        // Get parameter element
+        const GXmlElement* par = xml.element("parameter", i);
+
+        // Check for response type 1 (GCTAResponseIrf)
+        if ((par->attribute("name") == "EffectiveArea") ||
+            (par->attribute("name") == "ARF") ||
+            (par->attribute("name") == "PointSpreadFunction") ||
+            (par->attribute("name") == "PSF") ||
+            (par->attribute("name") == "EnergyDispersion") ||
+            (par->attribute("name") == "RMF") ||
+            (par->attribute("name") == "Background")) {
+            if (response_type == 2) {
+                throw GException::xml_invalid_parnames(G_READ, xml,
+                      "Incompatible parameter names encountered in the "
+                      "response definition of a CTA observation.\n");
+            }
+            response_type = 1;
+        }
+        
+        // Check for response type 2 (GCTAResponseCube)
+        else if ((par->attribute("name") == "ExposureCube") ||
+                 (par->attribute("name") == "PsfCube")) {
+            if (response_type == 1) {
+                throw GException::xml_invalid_parnames(G_READ, xml,
+                      "Incompatible parameter names encountered in the "
+                      "response definition of a CTA observation.\n");
+            }
+            response_type = 2;
+        }
+
+    } // endfor: looped over all parameters
+    
+    // If response type could not be determine, use type 1 (GCTAResponseIrf)
+    if (response_type == 0) {
+        response_type = 1;
+    }
+
+    // Allocate response
+    switch (response_type) {
+        case 1:
+            m_response = new GCTAResponseIrf;
+            break;
+        case 2:
+            m_response = new GCTAResponseCube;
+            break;
+        default:
+            break;
+    }
+
     // Extract response information
-    m_response.read(xml); 
+    if (m_response != NULL) {
+        m_response->read(xml);
+    }
 
     // Return
     return;
@@ -443,7 +542,9 @@ void GCTAObservation::write(GXmlElement& xml) const
     }
 
     // Write response information
-    m_response.write(xml); 
+    if (m_response != NULL) {
+        m_response->write(xml);
+    }
 
     // Return
     return;
@@ -487,7 +588,9 @@ std::string GCTAObservation::print(const GChatter& chatter) const
             result.append("\n"+pointing().print(reduced_chatter));
 
             // Append response
-            result.append("\n"+response().print(reduced_chatter));
+            if (response() != NULL) {
+                result.append("\n"+response()->print(reduced_chatter));
+            }
 
             // Append events
             if (m_events != NULL) {
@@ -661,7 +764,7 @@ void GCTAObservation::init_members(void)
     m_instrument = "CTA";
     m_eventfile.clear();
     m_bgdfile.clear();
-    m_response.clear();
+    m_response = NULL;
     m_pointing.clear();
     m_obs_id     = 0;
     m_ontime     = 0.0;
@@ -686,7 +789,6 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_instrument = obs.m_instrument;
     m_eventfile  = obs.m_eventfile;
     m_bgdfile    = obs.m_bgdfile;
-    m_response   = obs.m_response;
     m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
     m_ontime     = obs.m_ontime;
@@ -694,6 +796,9 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_deadc      = obs.m_deadc;
     m_ra_obj     = obs.m_ra_obj;
     m_dec_obj    = obs.m_dec_obj;
+
+    // Clone members
+    m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
 
     // Return
     return;
@@ -705,6 +810,12 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
  ***************************************************************************/
 void GCTAObservation::free_members(void)
 {
+    // Free memory
+    if (m_response != NULL) delete m_response;
+
+    // Initialise pointers
+    m_response = NULL;
+
     // Return
     return;
 }
