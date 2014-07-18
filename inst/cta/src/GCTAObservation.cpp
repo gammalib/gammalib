@@ -607,35 +607,11 @@ std::string GCTAObservation::print(const GChatter& chatter) const
 
 
 /***********************************************************************//**
- * @brief Load data from FITS file
- *
- * @param[in] filename FITS file name.
- ***************************************************************************/
-void GCTAObservation::load(const std::string& filename)
-{
-    // Open FITS file
-    GFits fits(filename);
-
-    // Load data
-    load(fits);
-
-    // Close FITS file
-    fits.close();
-
-    // Store event filename
-    m_eventfile = filename;
-
-    // Return
-    return;
-}
-    
-
-/***********************************************************************//**
- * @brief Load data from FITS object
+ * @brief Read data from FITS object
  *
  * @param[in] fits FITS object.
  ***************************************************************************/
-void GCTAObservation::load(const GFits& fits)
+void GCTAObservation::read(const GFits& fits)
 {
     // Delete any existing event container (do not call clear() as we do not
     // want to delete the response function)
@@ -685,33 +661,11 @@ void GCTAObservation::load(const GFits& fits)
 
 
 /***********************************************************************//**
- * @brief Save CTA observation into FITS file.
- *
- * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
- ***************************************************************************/
-void GCTAObservation::save(const std::string& filename, const bool& clobber) const
-{
-    // Create FITS file
-    GFits fits;
-
-    // Save data into FITS file
-    save(fits);
-
-    // Save FITS file
-    fits.saveto(filename, clobber);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Save CTA observation into FITS object.
+ * @brief Write CTA observation into FITS object.
  *
  * @param[in] fits FITS object.
  ***************************************************************************/
-void GCTAObservation::save(GFits& fits) const
+void GCTAObservation::write(GFits& fits) const
 {
     // Get pointers on event list
     GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
@@ -743,6 +697,52 @@ void GCTAObservation::save(GFits& fits) const
         write_attributes(hdu);
 
     } // endelse: observation contained an event cube
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load data from FITS file
+ *
+ * @param[in] filename FITS file name.
+ ***************************************************************************/
+void GCTAObservation::load(const std::string& filename)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read data
+    read(fits);
+
+    // Close FITS file
+    fits.close();
+
+    // Store event filename
+    m_eventfile = filename;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save CTA observation into FITS file.
+ *
+ * @param[in] filename FITS filename.
+ * @param[in] clobber Overwrite existing FITS file (default=false).
+ ***************************************************************************/
+void GCTAObservation::save(const std::string& filename, const bool& clobber) const
+{
+    // Create FITS file
+    GFits fits;
+
+    // Write data into FITS file
+    write(fits);
+
+    // Save FITS file
+    fits.saveto(filename, clobber);
 
     // Return
     return;

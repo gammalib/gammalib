@@ -64,8 +64,6 @@ public:
     virtual GCTAResponseCube* clone(void) const;
     virtual bool              use_edisp(void) const;
     virtual bool              use_tdisp(void) const;
-    virtual bool              apply_edisp(void) const;
-    virtual void              apply_edisp(const bool& apply_edisp) const;
     virtual double            irf(const GEvent&       event,
                                   const GPhoton&      photon,
                                   const GObservation& obs) const;
@@ -110,29 +108,6 @@ inline
 bool GCTAResponseCube::use_edisp(void) const
 {
     return false;
-}
-
-
-/***********************************************************************//**
- * @brief Signal if energy dispersion should be applied
- *
- * @return True if energy dispersion should be applied
- ***************************************************************************/
-inline
-bool GCTAResponseCube::apply_edisp(void) const
-{
-    return false;
-}
-
-/***********************************************************************//**
- * @brief Signal if energy dispersion should be applied
- *
- * @param[in] apply_edisp Set true if energy dispersion should be applied
- ***************************************************************************/
-inline
-void GCTAResponseCube::apply_edisp(const bool& apply_edisp) const
-{
-    return;
 }
 
 

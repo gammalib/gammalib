@@ -78,11 +78,11 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void                read(const GFits& fits);
+    void                write(GFits& fits) const;
     void                load(const std::string& filename);
-    void                load(const GFits& fits);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
-    void                save(GFits& fits) const;
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
     void                pointing(const GCTAPointing& pointing);
