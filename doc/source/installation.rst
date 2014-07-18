@@ -5,8 +5,8 @@ Installation
 .. note ::
 
    These installation instructions apply to gammalib-00-04-10 and
-   later. gammalib-00-04-10 has been built, installed and tested
-   successfully on Debian, Ubuntu, Mandriva, OpenSUSE, Scientific Linux,
+   later. gammalib-00-04-10 has been built, installed and tested
+   successfully on Debian, Ubuntu, Mandriva, OpenSUSE, Scientific Linux,
    CentOS, gentoo, Mac OS X, FreeBSD, and OpenSolaris (using gcc), so
    hopefully it also installs on your distribution. In case you encounter
    problems, please post a report on the bug tracker or send an e-mail to the
@@ -109,7 +109,7 @@ GammaLib should be tested by typing::
 This will execute an extensive testing suite that should terminate with ::
 
    ===================
-   All 17 tests passed
+   All 20 tests passed
    ===================
 
 Eventually, loading the shared cfitsio and/or readline libraries may
@@ -131,7 +131,7 @@ Installing GammaLib
 
 Install GammaLib by typing ::
 
-   $ make install
+   $ make install
 
 at the operating system prompt.
 
@@ -157,27 +157,42 @@ If you use C shell or a variant then add the following to your
 Installing documentation
 ------------------------
 
-The GammaLib web pages are shipped together with the source code and
+The GammaLib documentation is shipped together with the source code and
 will be installed in the directory ``$(prefix)/share/doc/gammalib/html``,
 where ``$(prefix)`` is the installation base path, by default
-``/usr/local/gamma``.
+``/usr/local/gamma``. This comprises user documentation and code
+documentation.
 
-For developers, a more detailed documentation can be built from the
-source code using Doxygen. Doxygen will scan the source files for code
-annotations, and compiles a complete documentation of the implemented
-C++ classes in a set of www pages. In addition, it will create a set of
-man files that can be used by the man command. If you have not installed
-Doxygen on your machine, but you need the development documentation,
-please visit
-`http://dogygen.org <http://doxygen.org>`_
-to download and install the Doxygen package.
+To build the user documentation you need the Sphinx reStructuredText
+documentation generator installed
+(see `http://sphinx-doc.org/rest.html <http://sphinx-doc.org/rest.html>`_
+for more information).
+Code documentation is based on Doxygen, which also needs to be installed
+on your system
+(see `http://dogygen.org <http://doxygen.org>`_ to download and install
+the Doxygen package).
+Doxygen will scan the source files for code annotations, and compiles a
+complete documentation of the implemented C++ classes in a set of html
+pages. In addition, it will create a set of man files that can be used by
+the man command.
 
-Once Doxygen is install, type the following to build and to install the
-Doxygen documentation::
+To build and install all documentation, type the following::
+
+   $ ./configure
+   $ make doc
+   $ make install
+
+To build only user documentation, type::
+
+   $ ./configure
+   $ make sphinx
+   $ make install
+
+and to build only Doxygen documentation, type::
 
    $ ./configure
    $ make doxygen
-   $ make doxygen-install
+   $ make install
 
 The Doxygen documentation will be installed into
 ``$(prefix)/share/doc/gammalib/html/doxygen`` and can be browsed using a
@@ -191,6 +206,20 @@ and you should see the documentation for the GObservations C++ class.
 
 Known Problems
 --------------
+
+* cfitsio library not found
+   Occasionally it may happen that the cfitsio library is not found when
+   configuring GammaLib. This will result is lots of errors during the
+   unit tests. If you are sure that cfitsio is installed, but the path
+   where the library and the path where the fitsio.h reside are
+   non-standard, you may add the paths explicitly during configuration
+   using::
+
+      $ ./configure LDFLAGS='-L/path/to/cftsio/library' CPPFLAGS='-I/path/to/fitsio.h/header'
+
+   The same logic applies for finding the readline and ncurses libraries,
+   thought these libraries are not manadatory for getting the full
+   GammaLib functionnalities.
 
 * Python support
    GammaLib comes with Python wrappers so that all classes can be directly
@@ -206,12 +235,12 @@ Known Problems
    compile in the Python bindings. The configure script recognises this
    fact and adjust the build procedure accordingly, but you will not be
    able to use GammaLib from Python. So better install the Python
-   development package before installing GammaLib (see above).
+   development package before installing GammaLib (see above).
 
 * Solaris
-   Although GammaLib builds on Solaris using the Sun compiler, there are
+   Although GammaLib builds on Solaris using the Sun compiler, there are
    problems with global symbols in shared libraries and exception catching,
-   which prevents the FITS interface to work correctly. GammaLib has
+   which prevents the FITS interface to work correctly. GammaLib has
    however been built and tested successfully using the GNU compiler, and
    this is the only build method that is currently supported. Problems have
    also been encountered when compiling cfitsio versions more recent than
@@ -222,9 +251,9 @@ Known Problems
 * OpenSolaris
    On OpenSolaris, the same problems concerning the SunStudio compiler
    occur as for Solaris, and also here, the GNU compiler is the recommended
-   tool to build GammaLib. Also here, cfitsio version 3.250 is the
+   tool to build GammaLib. Also here, cfitsio version 3.250 is the
    recommended library as more recent version feature relocation
-   problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
+   problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
    2009.06. Make sure to create the symbolic links ::
 
       $ ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
@@ -232,6 +261,7 @@ Known Problems
 
    which are not there by default to avoid excess warnings during
    compilation.
+
 
 Getting Help
 ------------
