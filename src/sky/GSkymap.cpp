@@ -1349,12 +1349,14 @@ std::string GSkymap::print(const GChatter& chatter) const
         }
 
         // Append sky projection information
-        if (m_proj != NULL) {
-            result.append("\n"+m_proj->print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Sky projection"));
-            result.append("not defined");
+        if (gammalib::reduce(chatter) > SILENT) {
+            if (m_proj != NULL) {
+                result.append("\n"+m_proj->print(gammalib::reduce(chatter)));
+            }
+            else {
+                result.append("\n"+gammalib::parformat("Sky projection"));
+                result.append("not defined");
+            }
         }
 
     } // endif: chatter was not silent
