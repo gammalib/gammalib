@@ -43,6 +43,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
 #define G_NPRED_DIFFUSE    "GCTAResponseCube::npred(GPhoton&, GObservation&)"
+#define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -330,7 +331,6 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
  *     </observation>
  *
  ***************************************************************************/
-#define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 void GCTAResponseCube::read(const GXmlElement& xml)
 {
     // Determine number of parameter nodes in XML element
@@ -419,74 +419,6 @@ void GCTAResponseCube::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Load CTA response
- *
- * @param[in] rspname CTA response name.
- *
- * Loads the CTA response with specified name @p rspname. The method first
- * searchs for an appropriate response in the calibration database. If no
- * appropriate response is found, the method takes the database root path
- * and response name to build the full path to the response file, and tries
- * to load the response from these paths.
- ***************************************************************************/
-/*
-void GCTAResponseCube::load(const std::string& rspname)
-{
-    // Clear instance but conserve calibration database
-    GCaldb caldb = m_caldb;
-    clear();
-    m_caldb = caldb;
-
-    // First attempt reading the response using the GCaldb interface
-    std::string expr      = "NAME("+rspname+")";
-    std::string aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
-    std::string psfname   = m_caldb.filename("","","RPSF","","",expr);
-    std::string edispname = m_caldb.filename("","","EDISP","","",expr);
-    std::string bgdname   = m_caldb.filename("","","BGD","","",expr);
-
-    // If filenames are empty then build filenames from CALDB root path and
-    // response name
-    if (aeffname.length() < 1) {
-        aeffname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
-    }
-    if (psfname.length() < 1) {
-        psfname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
-    }
-    if (edispname.length() < 1) {
-        edispname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
-    }
-    if (bgdname.length() < 1) {
-        bgdname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
-    }
-
-    // Load effective area
-    load_aeff(aeffname);
-
-    // Load point spread function
-    load_psf(psfname);
-
-    // Load energy dispersion
-    load_edisp(edispname);
-
-    // Load background
-    load_background(bgdname);
-
-    // Remove theta cut
-    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
-    if (arf != NULL) {
-        arf->remove_thetacut(*this);
-    }
-
-    // Store response name
-    m_rspname = rspname;
-
-    // Return
-    return;
-}
-*/
-
-
-/***********************************************************************//**
  * @brief Print CTA response information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -502,6 +434,20 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
 
         // Append header
         result.append("=== GCTAResponseCube ===");
+
+        // Append response information
+        result.append("\n"+gammalib::parformat("Energy dispersion"));
+        if (use_edisp()) {
+            result.append("Used");
+        }
+        else {
+            if (apply_edisp()) {
+                result.append("Not available");
+            }
+            else {
+                result.append("Not used");
+            }
+        }
 
         // Append exposure cube information
         result.append("\n"+m_exposure.print(chatter));
@@ -544,6 +490,7 @@ void GCTAResponseCube::init_members(void)
     // Initialise members
     m_exposure.clear();
     m_psf.clear();
+    m_apply_edisp = false;
 
     // Return
     return;
@@ -558,8 +505,9 @@ void GCTAResponseCube::init_members(void)
 void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
 {
     // Copy members
-    m_exposure = rsp.m_exposure;
-    m_psf      = rsp.m_psf;
+    m_exposure    = rsp.m_exposure;
+    m_psf         = rsp.m_psf;
+    m_apply_edisp = rsp.m_apply_edisp;
 
     // Return
     return;

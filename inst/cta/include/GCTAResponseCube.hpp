@@ -63,8 +63,11 @@ public:
     // Implement pure virtual base class methods
     virtual void              clear(void);
     virtual GCTAResponseCube* clone(void) const;
+    virtual bool              isvalid(void) const;
     virtual bool              use_edisp(void) const;
     virtual bool              use_tdisp(void) const;
+    virtual bool              apply_edisp(void) const;
+    virtual void              apply_edisp(const bool& apply_edisp) const;
     virtual double            irf(const GEvent&       event,
                                   const GPhoton&      photon,
                                   const GObservation& obs) const;
@@ -89,7 +92,22 @@ private:
     // Private data members
     GCTAExposure m_exposure;    //!< Exposure cube
     GCTAMeanPsf  m_psf;         //!< Mean point spread function
+    mutable bool m_apply_edisp; //!< Apply energy dispersion
 };
+
+
+/***********************************************************************//**
+ * @brief Signal if response is valid
+ *
+ * @return True if response is valid
+ *
+ * @todo: To be implemented (check if GCTAExposure and GCTAMeanPsf is loaded)
+ ***************************************************************************/
+inline
+bool GCTAResponseCube::isvalid(void) const
+{
+    return (true);
+}
 
 
 /***********************************************************************//**
@@ -117,6 +135,30 @@ inline
 bool GCTAResponseCube::use_tdisp(void) const
 {
     return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if energy dispersion should be applied
+ *
+ * @return True if energy dispersion should be applied
+ ***************************************************************************/
+inline
+bool GCTAResponseCube::apply_edisp(void) const
+{
+    return m_apply_edisp;
+}
+
+/***********************************************************************//**
+ * @brief Signal if energy dispersion should be applied
+ *
+ * @param[in] apply_edisp Set true if energy dispersion should be applied
+ ***************************************************************************/
+inline
+void GCTAResponseCube::apply_edisp(const bool& apply_edisp) const
+{
+    m_apply_edisp = apply_edisp;
+    return;
 }
 
 

@@ -74,8 +74,11 @@ public:
     // Implement pure virtual base class methods
     virtual void             clear(void);
     virtual GCTAResponseIrf* clone(void) const;
+    virtual bool             isvalid(void) const;
     virtual bool             use_edisp(void) const;
     virtual bool             use_tdisp(void) const;
+    virtual bool             apply_edisp(void) const;
+    virtual void             apply_edisp(const bool& apply_edisp) const;
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
                                  const GObservation& obs) const;
@@ -104,8 +107,6 @@ public:
     virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
-    bool                  apply_edisp(void) const;
-    void                  apply_edisp(const bool& apply_edisp) const;
     GCTAEventAtom*        mc(const double& area, const GPhoton& photon,
                              const GObservation& obs, GRan& ran) const;
     void                  caldb(const GCaldb& caldb);
@@ -193,6 +194,18 @@ private:
     mutable std::vector<GTime>       m_npred_times;    //!< Model time
     mutable std::vector<double>      m_npred_values;   //!< Model values
 };
+
+
+/***********************************************************************//**
+ * @brief Signal if response is valid
+ *
+ * @return True if response is valid
+ ***************************************************************************/
+inline
+bool GCTAResponseIrf::isvalid(void) const
+{
+    return ((m_aeff != NULL) && (m_psf != NULL));
+}
 
 
 /***********************************************************************//**

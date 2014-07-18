@@ -21,6 +21,9 @@ The following classes have been renamed:
 The GObservation::response() method now returns a pointer to GResponse
 instead of a reference.
 
+The GCTAObservation::load(GFits&) and GCTAObservation::save(GFits&)
+methods have been remaned to read() and write().
+
 
 3. Configuration
 -----------------
