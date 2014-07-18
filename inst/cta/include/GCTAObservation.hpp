@@ -78,6 +78,7 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    bool                hasresponse(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits) const;
     void                load(const std::string& filename);
@@ -173,6 +174,18 @@ inline
 double GCTAObservation::deadc(const GTime& time) const
 {
     return m_deadc;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if CTA observation contains response information
+ *
+ * @return True if CTA observation contains response information.
+ ***************************************************************************/
+inline
+bool GCTAObservation::hasresponse(void) const
+{
+    return (m_response != NULL);
 }
 
 
