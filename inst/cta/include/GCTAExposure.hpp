@@ -68,19 +68,20 @@ public:
     double        operator()(const GSkyDir& dir, const GEnergy& energy) const;
 
     // Methods
-    void              clear(void);
-    GCTAExposure*     clone(void) const;
-    void              set(const GCTAObservation& obs);
-    void              fill(const GObservations& obs);
-    const GSkymap&    cube(void) const;
-    const GEbounds&   ebounds(void) const;
-    const GNodeArray& elogmeans(void) const;
-    void              read(const GFits& fits);
-    void              write(GFits& file) const;
-    void              load(const std::string& filename);
-    void              save(const std::string& filename,
-                           const bool& clobber = false) const;
-    std::string       print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GCTAExposure*      clone(void) const;
+    void               set(const GCTAObservation& obs);
+    void               fill(const GObservations& obs);
+    const GSkymap&     cube(void) const;
+    const GEbounds&    ebounds(void) const;
+    const GNodeArray&  elogmeans(void) const;
+    void               read(const GFits& fits);
+    void               write(GFits& file) const;
+    void               load(const std::string& filename);
+    void               save(const std::string& filename,
+                            const bool& clobber = false) const;
+    const std::string& filename(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Methods
@@ -92,16 +93,17 @@ protected:
     void set_eng_axis(void);
 
     // Data
-    GSkymap    m_cube;      //!< Average Exposure cube
-    GEbounds   m_ebounds;   //!< Energy bounds for the Exposure cube
-    GNodeArray m_elogmeans; //!< Mean energy for the Exposure cube
+    mutable std::string m_filename;  //!< Filename
+    GSkymap             m_cube;      //!< Average Exposure cube
+    GEbounds            m_ebounds;   //!< Energy bounds for the Exposure cube
+    GNodeArray          m_elogmeans; //!< Mean energy for the Exposure cube
 
 private:
     // Response table computation cache for 1D access
-    mutable int    m_inx_left;        //!< Index of left node
-    mutable int    m_inx_right;       //!< Index of right node
-    mutable double m_wgt_left;        //!< Weight of left node
-    mutable double m_wgt_right;       //!< Weight of right node
+    mutable int    m_inx_left;       //!< Index of left node
+    mutable int    m_inx_right;      //!< Index of right node
+    mutable double m_wgt_left;       //!< Weight of left node
+    mutable double m_wgt_right;      //!< Weight of right node
 };
 
 
@@ -119,6 +121,7 @@ const GSkymap& GCTAExposure::cube(void) const
     return (m_cube);
 }
 
+
 /***********************************************************************//**
  * @brief Return energy boundaries
  *
@@ -130,6 +133,7 @@ const GEbounds& GCTAExposure::ebounds(void) const
     return (m_ebounds);
 }
 
+
 /***********************************************************************//**
  * @brief Return arithmetic mean of log10 energies
  *
@@ -139,6 +143,21 @@ inline
 const GNodeArray& GCTAExposure::elogmeans(void) const
 {
     return (m_elogmeans);
+}
+
+
+/***********************************************************************//**
+ * @brief Return exposure cube filename
+ *
+ * @return Exposure cube filename.
+ *
+ * Returns the filename from which the exposure cube was loaded or into which
+ * the exposure cube has been saved.
+ ***************************************************************************/
+inline
+const std::string& GCTAExposure::filename(void) const
+{
+    return (m_filename);
 }
 
 #endif /* GCTAEXPOSURE_HPP */

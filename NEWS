@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-16 July 2014
+18 July 2014
 
 
 1. Introduction
@@ -16,6 +16,10 @@ changes made since the last release of GammaLib.
 The following classes have been renamed:
 * GCTAModelBackground => GCTAModelCubeBackground
 * GCTAModelInstBackground => GCTAModelIrfBackground
+* GCTAResponse => GCTAResponseIrf
+
+The GObservation::response() method now returns a pointer to GResponse
+instead of a reference.
 
 
 3. Configuration
@@ -97,7 +101,8 @@ bins with negative values will be excluded from the likelihood computation.
 
 11. Optimization module
 -----------------------
-None
+The GOptimizerPar::error() method now always returns a positive number (the
+absolute value of the internally stored error is returned).
 
 
 12. Sky module
@@ -200,6 +205,14 @@ while they are in radians internally in GammaLib, and specifically in GCTAInstDi
 Manipulation methods have been added to GCTAResponseTable that allow building a
 response table from scratch. These include appending of axes and parameters, as
 well as accessing axis boundaries.
+
+The CTA response classes have been refactored. GCTAResponse has been renamed to
+GCTAResponseIrf, and GCTAResponse is now an abstract base class from which
+GCTAResponseIrf derives. The class GCTAResponseCube, which also derives from
+GCTAResponse, has been added to handle cube-style analysis. GCTAResponseCube
+holds an exposure cube (GCTAExposure) and a PSF cube (GCTAMeanPsf) to describe
+the response. GCTAObservation has been modified to allocate either IRF-style or
+cube-style response, dependent on the information found in the XML file.
 
 
 21. COMPTEL interface

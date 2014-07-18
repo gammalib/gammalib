@@ -74,21 +74,22 @@ public:
                             const GEnergy& energy) const;
 
     // Methods
-    void              clear(void);
-    GCTAMeanPsf*      clone(void) const;
-    void              set(const GCTAObservation& obs);
-    void              fill(const GObservations& obs);
-    const GSkymap&    map(void) const;
-    const GEbounds&   ebounds(void) const;
-    const GNodeArray& deltas(void) const;
-    const GNodeArray& elogmeans(void) const;
-    double            delta_max(void) const;
-    int               offset(const int& idelta, const int& iebin) const;
-    void              read(const GFits& fits);
-    void              write(GFits& file) const;
-    void              load(const std::string& filename);
-    void              save(const std::string& filename, const bool& clobber) const;
-    std::string       print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GCTAMeanPsf*       clone(void) const;
+    void               set(const GCTAObservation& obs);
+    void               fill(const GObservations& obs);
+    const GSkymap&     map(void) const;
+    const GEbounds&    ebounds(void) const;
+    const GNodeArray&  deltas(void) const;
+    const GNodeArray&  elogmeans(void) const;
+    double             delta_max(void) const;
+    int                offset(const int& idelta, const int& iebin) const;
+    void               read(const GFits& fits);
+    void               write(GFits& file) const;
+    void               load(const std::string& filename);
+    void               save(const std::string& filename, const bool& clobber) const;
+    const std::string& filename(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Methods
@@ -100,22 +101,22 @@ protected:
     void set_eng_axis(void);
     
     // Data
-    GSkymap    m_cube;       //!< PSF cube
-    GEbounds   m_ebounds;    //!< Energy bounds for the PSF cube
-    GNodeArray m_elogmeans;  //!< Mean log10TeV energy for the PSF cube
-    GNodeArray m_deltas;     //!< Delta bins (deg) for the PSF cube
+    mutable std::string m_filename;   //!< Filename
+    GSkymap             m_cube;       //!< PSF cube
+    GEbounds            m_ebounds;    //!< Energy bounds for the PSF cube
+    GNodeArray          m_elogmeans;  //!< Mean log10TeV energy for the PSF cube
+    GNodeArray          m_deltas;     //!< Delta bins (deg) for the PSF cube
 
 private:
     // Response table computation cache for 2D access
-    mutable int    m_inx1;   //!< Index of upper left node
-    mutable int    m_inx2;   //!< Index of lower left node
-    mutable int    m_inx3;   //!< Index of upper right node
-    mutable int    m_inx4;   //!< Index of lower right node
-    mutable double m_wgt1;   //!< Weight of upper left node
-    mutable double m_wgt2;   //!< Weight of lower left node
-    mutable double m_wgt3;   //!< Weight of upper right node
-    mutable double m_wgt4;   //!< Weight of lower right node
-
+    mutable int    m_inx1;            //!< Index of upper left node
+    mutable int    m_inx2;            //!< Index of lower left node
+    mutable int    m_inx3;            //!< Index of upper right node
+    mutable int    m_inx4;            //!< Index of lower right node
+    mutable double m_wgt1;            //!< Weight of upper left node
+    mutable double m_wgt2;            //!< Weight of lower left node
+    mutable double m_wgt3;            //!< Weight of upper right node
+    mutable double m_wgt4;            //!< Weight of lower right node
 };
 
 
@@ -184,6 +185,21 @@ inline
 const GNodeArray& GCTAMeanPsf::elogmeans(void) const
 {
     return (m_elogmeans);
+}
+
+
+/***********************************************************************//**
+ * @brief Return exposure cube filename
+ *
+ * @return Exposure cube filename.
+ *
+ * Returns the filename from which the exposure cube was loaded or into which
+ * the exposure cube has been saved.
+ ***************************************************************************/
+inline
+const std::string& GCTAMeanPsf::filename(void) const
+{
+    return (m_filename);
 }
 
 

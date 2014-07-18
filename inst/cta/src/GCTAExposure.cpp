@@ -32,6 +32,7 @@
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GMath.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -409,6 +410,9 @@ void GCTAExposure::load(const std::string& filename)
     // Close FITS file
     fits.close();
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
@@ -435,6 +439,9 @@ void GCTAExposure::save(const std::string& filename, const bool& clobber) const
     // Save FITS file
     fits.saveto(filename, clobber);
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
@@ -459,6 +466,21 @@ std::string GCTAExposure::print(const GChatter& chatter) const
         // Append header
         result.append("=== GCTAExposure ===");
 
+        // Append information
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+
+        // Append energy intervals
+        if (m_ebounds.size() > 0) {
+            result.append("\n"+m_ebounds.print(chatter));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("Energy intervals") +
+                          "not defined");
+        }
+
+        // Append skymap definition
+        result.append("\n"+m_cube.print(chatter));
+
     } // endif: chatter was not silent
 
     // Return result
@@ -478,8 +500,16 @@ std::string GCTAExposure::print(const GChatter& chatter) const
 void GCTAExposure::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_cube.clear();
     m_ebounds.clear();
+    m_elogmeans.clear();
+
+    // Initialise cache
+    m_inx_left  = 0;
+    m_inx_right = 0;
+    m_wgt_left  = 0.0;
+    m_wgt_right = 0.0;
    
     // Return
     return;
@@ -493,9 +523,17 @@ void GCTAExposure::init_members(void)
  ***************************************************************************/
 void GCTAExposure::copy_members(const GCTAExposure& cube)
 {
-    // Initialise members
-    m_cube    = cube.m_cube;
-    m_ebounds = cube.m_ebounds;
+    // Copy members
+    m_filename  = cube.m_filename;
+    m_cube      = cube.m_cube;
+    m_ebounds   = cube.m_ebounds;
+    m_elogmeans = cube.m_elogmeans;
+
+    // Copy cache
+    m_inx_left  = cube.m_inx_left;
+    m_inx_right = cube.m_inx_right;
+    m_wgt_left  = cube.m_wgt_left;
+    m_wgt_right = cube.m_wgt_right;
 
     // Return
     return;
@@ -584,10 +622,10 @@ void GCTAExposure::set_eng_axis(void)
     m_elogmeans.clear();
 
     // Compute nodes
-    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+    for (int i = 0; i < m_ebounds.size(); ++i) {
      
         // Get logE/TeV
-        m_elogmeans.append(m_ebounds.elogmean(iebin).log10TeV()); 
+        m_elogmeans.append(m_ebounds.elogmean(i).log10TeV()); 
 
     }  // endfor: looped over energy bins
 

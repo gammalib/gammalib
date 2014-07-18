@@ -101,6 +101,7 @@ public:
     virtual TestGCTAObservation* clone(void) const;
     void                         test_unbinned_obs(void);
     void                         test_binned_obs(void);
+    void                         test_cube_obs(void);
 };
 
 
@@ -122,6 +123,7 @@ public:
     virtual TestGCTAOptimize* clone(void) const;
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
+    void                      test_cube_optimizer(void);
 };
 
 /***********************************************************************//**

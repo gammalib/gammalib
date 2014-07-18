@@ -47,6 +47,7 @@ const std::string cta_caldb        = PACKAGE_SOURCE"/inst/cta/caldb";
 const std::string cta_irf          = "cta_dummy_irf";
 const std::string cta_events       = datadir+"/crab_events.fits.gz";
 const std::string cta_cntmap       = datadir+"/crab_cntmap.fits.gz";
+const std::string cta_cube_xml     = datadir+"/obs_cube.xml";
 const std::string cta_bin_xml      = datadir+"/obs_binned.xml";
 const std::string cta_unbin_xml    = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml    = datadir+"/crab.xml";
@@ -138,6 +139,7 @@ void TestGCTAObservation::set(void)
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs), "Test unbinned observations");
     append(static_cast<pfunction>(&TestGCTAObservation::test_binned_obs), "Test binned observation");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_cube_obs), "Test cube-style observation");
 
     // Return
     return;
@@ -167,6 +169,7 @@ void TestGCTAOptimize::set(void)
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGCTAOptimize::test_unbinned_optimizer), "Test unbinned optimizer");
     append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer), "Test binned optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_cube_optimizer), "Test cube-style optimizer");
 
     // Return
     return;
@@ -271,6 +274,16 @@ void TestGCTAPointing::test_interpolate_altaz(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response(void)
 {
+    // Test CTA IRF response constructor
+    test_try("Test CTA IRF response constructor");
+    try {
+        GCTAResponseIrf rsp;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Test CTA IRF response loading
     test_try("Test CTA IRF response loading");
     try {
@@ -278,6 +291,26 @@ void TestGCTAResponse::test_response(void)
         GCTAResponseIrf rsp;
         rsp.caldb(GCaldb(cta_caldb));
         rsp.load(cta_irf);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test CTA cube response constructors
+    test_try("Test CTA cube response void constructor");
+    try {
+        GCTAResponseCube rsp;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Test CTA cube response constructor");
+    try {
+        GCTAExposure exposure;
+        GCTAMeanPsf psf;
+        GCTAResponseCube rsp(exposure, psf);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1038,8 +1071,8 @@ void TestGCTAObservation::test_unbinned_obs(void)
     }
     test_value(num, 4397, 1.0e-20, "Test event iterator");
 
-    // Test XML loading
-    test_try("Test XML loading");
+    // Test XML loading and saving
+    test_try("Test XML loading and saving");
     try {
         obs = GObservations(cta_unbin_xml);
         obs.save(file1);
@@ -1068,7 +1101,7 @@ void TestGCTAObservation::test_binned_obs(void)
     GCTAObservation run;
 
     // Load binned CTA observation
-    test_try("Load unbinned CTA observation");
+    test_try("Load binned CTA observation");
     try {
         run.load(cta_cntmap);
         run.response(cta_irf, GCaldb(cta_caldb));
@@ -1078,11 +1111,52 @@ void TestGCTAObservation::test_binned_obs(void)
         test_try_failure(e);
     }
 
-    // Test XML loading
-    test_try("Test XML loading");
+    // Test XML loading and saving
+    test_try("Test XML loading and saving");
     try {
         obs = GObservations(cta_bin_xml);
         obs.save(file1);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+ 
+}
+
+
+/***********************************************************************//**
+ * @brief Test cube-style observation handling
+ ***************************************************************************/
+void TestGCTAObservation::test_cube_obs(void)
+{
+    // Set filenames
+    const std::string filename = "test_cta_obs_cube.xml";
+
+    // Declare observations
+    GObservations   obs;
+    GCTAObservation run;
+
+    // Load cube-style CTA observation
+    test_try("Load cube-style CTA observation");
+    try {
+        run.load(cta_cntmap);
+        //run.response(cta_irf, GCaldb(cta_caldb));
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML loading and saving
+    test_try("Test XML loading and saving");
+    try {
+        obs = GObservations(cta_cube_xml);
+std::cout << obs << std::endl;
+        obs.save(filename);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1123,12 +1197,12 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.656246512e-16, 1.91458426e-17,
-                            -2.484100472, -0.02573396361,
+                            -2.484100472, 0.02573396361,
                             300000, 0,
                             1, 0,
                             2.993705325, 0.03572658413,
                             6.490832107e-05, 1.749021094e-06,
-                            -1.833584022, -0.01512223495,
+                            -1.833584022, 0.01512223495,
                             1000000, 0,
                             1, 0};
     test_try("Perform LM optimization");
@@ -1185,12 +1259,12 @@ void TestGCTAOptimize::test_binned_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.616410411e-16, 1.904730785e-17,
-                            -2.48178, -0.02580905077,
+                            -2.48178, 0.02580905077,
                             300000, 0,
                             1, 0,
                             2.93368, 0.06639644824,
                             6.550723074e-05, 1.945714239e-06,
-                            -1.833781187, -0.0160819,
+                            -1.833781187, 0.0160819,
                             1000000, 0,
                             1, 0};
     test_try("Perform LM optimization");
@@ -1206,6 +1280,55 @@ void TestGCTAOptimize::test_binned_optimizer(void)
                 std::string msg = "Verify optimization result for " + par.print();
                 test_value(par.value(), fit_results[j++], 5.0e-5, msg);
                 test_value(par.error(), fit_results[j++], 5.0e-5, msg);
+            }
+        }
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test cube optimizer
+ ***************************************************************************/
+void TestGCTAOptimize::test_cube_optimizer(void)
+{
+    // Load cube-style CTA observation
+    GObservations obs(cta_cube_xml);
+
+    // Load models from XML file
+    obs.models(cta_model_xml);
+
+    // Perform LM optimization
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.72212e-16, 2.01231e-17,
+                            -2.49253, 0.0262966,
+                            300000, 0,
+                            1, 0,
+                            2.87703, 0.0621603,
+                            6.68923e-05, 1.96972e-06,
+                            -1.84336, 0.0159896,
+                            1000000, 0,
+                            1, 0};
+    test_try("Perform LM optimization");
+    try {
+        GOptimizerLM opt;
+        opt.max_iter(100);
+        obs.optimize(opt);
+        test_try_success();
+        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+            const GModel* model = obs.models()[i];
+            for (int k = 0; k < model->size(); ++k) {
+                GModelPar par  = (*model)[k];
+                std::string msg = "Verify optimization result for " + par.print();
+                test_value(par.value(), fit_results[j++], 1.0e-4, msg);
+                test_value(par.error(), fit_results[j++], 1.0e-4, msg);
             }
         }
     }

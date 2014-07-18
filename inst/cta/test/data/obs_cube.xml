@@ -1,0 +1,7 @@
+<observation_list title="observation library">
+  <observation name="Crab" id="00001" instrument="CTA">
+    <parameter name="CountsMap"    file="$(PACKAGE_SOURCE)/inst/cta/test/data/crab_cntmap.fits"/>
+    <parameter name="ExposureCube" file="$(PACKAGE_SOURCE)/inst/cta/test/data/expcube.fits"/>
+    <parameter name="PsfCube"      file="$(PACKAGE_SOURCE)/inst/cta/test/data/psfcube.fits"/>
+  </observation>
+</observation_list>

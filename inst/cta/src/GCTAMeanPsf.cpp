@@ -33,6 +33,7 @@
 #include "GCTAResponseIrf.hpp"
 #include "GCTAExposure.hpp"
 #include "GMath.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -426,7 +427,7 @@ void GCTAMeanPsf::read(const GFits& fits)
     clear();
 
     // Get HDUs
-    const GFitsImage& hdu_psfcube  = *fits.image("Primary");
+    const GFitsImage& hdu_psfcube = *fits.image("Primary");
     const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
     const GFitsTable& hdu_deltas  = *fits.table("DELTAS");
 
@@ -491,6 +492,9 @@ void GCTAMeanPsf::load(const std::string& filename)
     // Close FITS file
     fits.close();
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
@@ -515,6 +519,9 @@ void GCTAMeanPsf::save(const std::string& filename, const bool& clobber) const
     // Save FITS file
     fits.saveto(filename, clobber);
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
@@ -525,8 +532,6 @@ void GCTAMeanPsf::save(const std::string& filename, const bool& clobber) const
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing PSF cube information.
- *
- * @todo Add content
  ***************************************************************************/
 std::string GCTAMeanPsf::print(const GChatter& chatter) const
 {
@@ -538,6 +543,37 @@ std::string GCTAMeanPsf::print(const GChatter& chatter) const
 
         // Append header
         result.append("=== GCTAMeanPsf ===");
+
+        // Append information
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+
+        // Append energy intervals
+        if (m_ebounds.size() > 0) {
+            result.append("\n"+m_ebounds.print(chatter));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("Energy intervals") +
+                          "not defined");
+        }
+
+        // Append number of delta bins
+        result.append("\n"+gammalib::parformat("Number of delta bins") +
+                      gammalib::str(m_deltas.size()));
+
+        // Append delta range
+        result.append("\n"+gammalib::parformat("Delta range"));
+        if (m_deltas.size() > 0) {
+            result.append(gammalib::str(m_deltas[0]));
+            result.append(" - ");
+            result.append(gammalib::str(m_deltas[m_deltas.size()-1]));
+            result.append(" deg");
+        }
+        else {
+            result.append("not defined");
+        }
+
+        // Append skymap definition
+        result.append("\n"+m_cube.print(chatter));
 
     } // endif: chatter was not silent
 
@@ -558,10 +594,21 @@ std::string GCTAMeanPsf::print(const GChatter& chatter) const
 void GCTAMeanPsf::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_cube.clear();
     m_ebounds.clear();
     m_elogmeans.clear();
     m_deltas.clear();
+
+    // Initialise cache
+    m_inx1 = 0;
+    m_inx2 = 0;
+    m_inx3 = 0;
+    m_inx4 = 0;
+    m_wgt1 = 0.0;
+    m_wgt2 = 0.0;
+    m_wgt3 = 0.0;
+    m_wgt4 = 0.0;
    
     // Return
     return;
@@ -576,10 +623,21 @@ void GCTAMeanPsf::init_members(void)
 void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
 {
     // Copy members
+    m_filename  = cube.m_filename;
     m_cube      = cube.m_cube;
     m_ebounds   = cube.m_ebounds;
     m_elogmeans = cube.m_elogmeans;
     m_deltas    = cube.m_deltas;
+
+    // Copy cache
+    m_inx1 = cube.m_inx1;
+    m_inx2 = cube.m_inx2;
+    m_inx3 = cube.m_inx3;
+    m_inx4 = cube.m_inx4;
+    m_wgt1 = cube.m_wgt1;
+    m_wgt2 = cube.m_wgt2;
+    m_wgt3 = cube.m_wgt3;
+    m_wgt4 = cube.m_wgt4;
 
     // Return
     return;
@@ -640,10 +698,10 @@ void GCTAMeanPsf::set_eng_axis(void)
     m_elogmeans.clear();
 
     // Compute nodes
-    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+    for (int i = 0; i < m_ebounds.size(); ++i) {
      
         // Append logE/TeV
-        m_elogmeans.append(m_ebounds.elogmean(iebin).log10TeV());
+        m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());
 
     }  // endfor: looped over energy bins
 

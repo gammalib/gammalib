@@ -317,10 +317,66 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
  *
  * @param[in] xml XML element.
  *
- * @todo: Implement method
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Reads information for a CTA observation from an XML element. The exposure
+ * and PSF cubes are specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="ExposureCube" file="..."/>
+ *       <parameter name="PsfCube"      file="..."/>
+ *     </observation>
+ *
  ***************************************************************************/
+#define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 void GCTAResponseCube::read(const GXmlElement& xml)
 {
+    // Determine number of parameter nodes in XML element
+    int npars = xml.elements("parameter");
+
+    // Extract parameters
+    int npar[] = {0,0};
+    for (int i = 0; i < npars; ++i) {
+
+        // Get parameter element
+        const GXmlElement* par = xml.element("parameter", i);
+
+        // Handle ExposureCube
+        if (par->attribute("name") == "ExposureCube") {
+
+            // Get filename
+            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
+
+            // Load exposure cube
+            m_exposure.load(filename);
+
+            // Increment parameter counter
+            npar[0]++;
+        }
+
+        // Handle PsfCube
+        else if (par->attribute("name") == "PsfCube") {
+
+            // Get filename
+            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
+
+            // Load PSF cube
+            m_psf.load(filename);
+
+            // Increment parameter counter
+            npar[1]++;
+        }
+
+    } // endfor: looped over observation parameters
+
+    // Verify that all required parameters were found
+    if (npar[0] != 1 || npar[1] != 1) {
+        throw GException::xml_invalid_parnames(G_READ, xml,
+              "Require \"ExposureCube\" and \"PsfCube\" parameters.");
+    }
+
     // Return
     return;
 }
@@ -331,10 +387,32 @@ void GCTAResponseCube::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @todo: Implement method
+ * Writes information for a CTA observation into an XML element. The exposure
+ * and PSF cubes are specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="ExposureCube" file="..."/>
+ *       <parameter name="PsfCube"      file="..."/>
+ *     </observation>
+ *
  ***************************************************************************/
 void GCTAResponseCube::write(GXmlElement& xml) const
 {
+    // Add exposure cube filename
+    std::string filename = gammalib::strip_whitespace(m_exposure.filename());
+    if (!(filename.empty())) {
+        GXmlElement* par = gammalib::parameter(xml, "ExposureCube");
+        par->attribute("file", filename);
+    }
+
+    // Add PSF cube filename
+    filename = gammalib::strip_whitespace(m_psf.filename());
+    if (!(filename.empty())) {
+        GXmlElement* par = gammalib::parameter(xml, "PsfCube");
+        par->attribute("file", filename);
+    }
+
     // Return
     return;
 }
