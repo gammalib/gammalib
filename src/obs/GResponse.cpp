@@ -162,9 +162,6 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  *
  * Returns the instrument response function for a given event, source and
  * observation.
- *
- * The method applies the deadtime correction, so that the response function
- * can be directly multiplied by the exposure time (also known as ontime).
  ***************************************************************************/
 double GResponse::irf(const GEvent&       event,
                       const GSource&      source,
