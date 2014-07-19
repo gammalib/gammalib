@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventBin.hpp - CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -79,6 +79,8 @@ public:
     const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
+    const int&     ipix(void) const;
+    const int&     ieng(void) const;
 
 protected:
     // Protected methods
@@ -87,6 +89,8 @@ protected:
     void free_members(void);
 
     // Protected members
+    int          m_ipix;        //!< Index in spatial map
+    int          m_ieng;        //!< Index of energy layer
     GEnergy*     m_energy;      //!< Pointer to bin energy
     GCTAInstDir* m_dir;         //!< Pointer to bin direction
     GTime*       m_time;        //!< Pointer to bin time
@@ -95,5 +99,35 @@ protected:
     GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
     double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
 };
+
+
+/***********************************************************************//**
+ * @brief Return the spatial pixel index
+ *
+ * @return Spatial pixel index.
+ *
+ * Returns the spatial index of the event bin in the event cube. If the event
+ * is not part of an event cube, -1 is returned.
+ ***************************************************************************/
+inline
+const int& GCTAEventBin::ipix(void) const
+{
+    return (m_ipix);
+}
+
+
+/***********************************************************************//**
+ * @brief Return the energy layer index
+ *
+ * @return Energy layer index.
+ *
+ * Returns the energy layer of the event bin in the event cube. If the event
+ * is not part of an event cube, -1 is returned.
+ ***************************************************************************/
+inline
+const int& GCTAEventBin::ieng(void) const
+{
+    return (m_ieng);
+}
 
 #endif /* GCTAEVENTBIN_HPP */
