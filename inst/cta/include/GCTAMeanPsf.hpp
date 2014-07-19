@@ -54,6 +54,7 @@ public:
     // Constructors and destructors
     GCTAMeanPsf(void);
     GCTAMeanPsf(const GCTAMeanPsf& cube);
+    explicit GCTAMeanPsf(const std::string& filename);
     GCTAMeanPsf(const std::string&   wcs,
                 const std::string&   coords,
                 const double&        x,

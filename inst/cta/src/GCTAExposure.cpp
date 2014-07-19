@@ -83,6 +83,27 @@ GCTAExposure::GCTAExposure(const GCTAExposure& cube)
 
 
 /***********************************************************************//**
+ * @brief File constructor
+ *
+ * @param[in] filename Exposure cube filename.
+ *
+ * Construct exposure cube by loading the information from an exposure cube
+ * file.
+ ***************************************************************************/
+GCTAExposure::GCTAExposure(const std::string& filename)
+{
+    // Initialise class members
+    init_members();
+
+    // Load exposure cube from file
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Exposure cube constructor
  *
  * @param[in] wcs     World Coordinate System.

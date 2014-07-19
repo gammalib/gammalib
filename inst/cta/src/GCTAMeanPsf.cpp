@@ -84,6 +84,26 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
 
 
 /***********************************************************************//**
+ * @brief File constructor
+ *
+ * @param[in] filename PSF cube filename.
+ *
+ * Construct PSF cube by loading the information from a PSF cube file.
+ ***************************************************************************/
+GCTAMeanPsf::GCTAMeanPsf(const std::string& filename)
+{
+    // Initialise class members
+    init_members();
+
+    // Load PSF cube from file
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Mean PSF cube constructor
  *
  * @param[in] wcs     World Coordinate System.
