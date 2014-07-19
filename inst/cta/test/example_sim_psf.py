@@ -119,8 +119,8 @@ if __name__ == '__main__':
     print("****************")
 
     # Load response
-    rsp = GCTAResponse("irf_file.fits",
-                       GCaldb("../caldb/data/cta/e/bcf/IFAE20120510_50h_King"))
+    rsp = GCTAResponseIrf("irf_file.fits",
+                          GCaldb("../caldb/data/cta/e/bcf/IFAE20120510_50h_King"))
 
     # Simulate PSF
     sim_psf(rsp, 1.0)
