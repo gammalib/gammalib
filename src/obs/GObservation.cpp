@@ -907,9 +907,9 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 double GObservation::likelihood_poisson_binned(const GModels& models,
-                                             GVector*       gradient,
-                                             GMatrixSparse* curvature,
-                                             double*        npred) const
+                                               GVector*       gradient,
+                                               GMatrixSparse* curvature,
+                                               double*        npred) const
 {
     // Initialise likelihood value
     double value = 0.0;
