@@ -138,7 +138,7 @@ private:
 inline
 double& GNodeArray::operator[](const int& index)
 {
-    m_need_setup = false;
+    m_need_setup = true;
     return (m_node[index]);
 }
 
@@ -155,7 +155,7 @@ double& GNodeArray::operator[](const int& index)
 inline
 const double& GNodeArray::operator[](const int& index) const
 {
-    m_need_setup = false;
+    m_need_setup = true;
     return (m_node[index]);
 }
 
