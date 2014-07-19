@@ -63,6 +63,8 @@
 #include "GCTABackground3D.hpp"
 #include "GCTAExposure.hpp"
 #include "GCTAMeanPsf.hpp"
+#include "GCTASourceCube.hpp"
+#include "GCTASourceCubePointSource.hpp"
 #include "GCTAModelCubeBackground.hpp"
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAModelRadial.hpp"
