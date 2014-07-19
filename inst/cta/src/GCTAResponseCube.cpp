@@ -32,6 +32,8 @@
 #include <string>
 #include "GTools.hpp"
 #include "GCTAResponseCube.hpp"
+#include "GCTASourceCubePointSource.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GPhoton.hpp"
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
@@ -39,15 +41,19 @@
 #include "GTime.hpp"
 #include "GObservation.hpp"
 #include "GCTAInstDir.hpp"
+#include "GCTAEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
+#define G_IRF_PTSRC          "GCTAResponseCube::irf_ptsrc(GEvent&, GSource&,"\
+                                                            " GObservation&)"
 #define G_NPRED_DIFFUSE    "GCTAResponseCube::npred(GPhoton&, GObservation&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_USE_CACHE                                 //!< Use response cache
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -293,6 +299,181 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
+ * @brief Return value of point source instrument response function
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Value of instrument response function for a point source.
+ *
+ * This method returns the value of the instrument response function for a
+ * point source. If the source is not a point source, the method returns 0.
+ ***************************************************************************/
+#if defined(G_USE_CACHE)
+double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
+                                   const GSource&      source,
+                                   const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to source cache. We first search the cache for a model
+    // with the source name. If no model was found we initialise a new
+    // cache entry for that model. Otherwise, we simply return the actual
+    // cache entry.
+    GCTASourceCubePointSource* cache(NULL);
+    int index = cache_index(source.name());
+    if (index == -1) {
+    
+        // No cache entry was found, thus allocate an initialise a new one
+        cache = new GCTASourceCubePointSource;
+        cache->set(source.name(), *source.model(), obs);
+        m_cache.push_back(cache);
+
+    } // endif: no cache entry was found
+    else {
+    
+        // Check that the cache entry is of the expected type
+        cache = dynamic_cast<GCTASourceCubePointSource*>(m_cache[index]);
+        if (cache == NULL) {
+            std::string msg = "Cached model \""+source.name()+"\" is not "
+                              "a point source model.";
+            throw GException::invalid_value(G_IRF_PTSRC, msg);
+        }
+        
+        // If the point source position has changed since the last call
+        // then update the response cache
+        const GModelSpatialPointSource* ptsrc = dynamic_cast<const GModelSpatialPointSource*>(source.model());
+        if (ptsrc == NULL) {
+            std::string msg = "Cached model \""+source.name()+"\" has not "
+                              "a point source spatial model.";
+            throw GException::invalid_value(G_IRF_PTSRC, msg);
+        }
+        if (ptsrc->dir() != cache->dir()) {
+            cache->set(source.name(), *source.model(), obs);
+        }
+
+    } // endelse: there was a cache entry for this model
+
+    // Get pointer on CTA event bin
+    const GCTAEventBin* bin = dynamic_cast<const GCTAEventBin*>(&event);
+    if (bin == NULL) {
+        std::string msg = "Event bin is not a CTA event bin.";
+        throw GException::invalid_value(G_IRF_PTSRC, msg);
+    }
+
+    // Determine angular separation between true and measured photon
+    // direction in radians
+    double delta = cache->delta(bin->ipix());
+    //double delta = bin->dir().dir().dist(cache->dir());
+
+    // Get maximum angular separation for PSF (in radians) and add 10%
+    // of margin
+    double delta_max = 1.1 * psf().delta_max();
+
+    // Compute only if we're sufficiently close to PSF
+    if (delta <= delta_max) {
+
+        // Get effective area
+        irf = cache->aeff(bin->ieng());
+
+        // Multiply-in PSF
+        if (irf > 0.0) {
+
+            // Get PSF component
+            //irf *= psf()(cache->dir(), delta, event.energy());
+            irf *= cache->psf(bin->ieng(), delta);
+
+        } // endif: Effective area was non-zero
+
+    } // endif: we were sufficiently close to PSF
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_ptsrc:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+#else
+double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
+                                   const GSource&      source,
+                                   const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to model source model
+    const GModelSpatialPointSource* ptsrc = dynamic_cast<const GModelSpatialPointSource*>(source.model());
+    if (ptsrc == NULL) {
+        std::string msg = "Model is not a spatial point source model.";
+        throw GException::invalid_value(G_IRF_PTSRC, msg);
+    }
+
+    // Get point source direction
+    GSkyDir srcDir = ptsrc->dir();
+
+    // Get pointer on CTA event bin
+    const GCTAEventBin* bin = dynamic_cast<const GCTAEventBin*>(&event);
+    if (bin == NULL) {
+        std::string msg = "Event bin is not a CTA event bin.";
+        throw GException::invalid_value(G_IRF_PTSRC, msg);
+    }
+
+    // Determine angular separation between true and measured photon
+    // direction in radians
+    double delta = bin->dir().dir().dist(srcDir);
+
+    // Get maximum angular separation for PSF (in radians) and add 10%
+    // of margin
+    double delta_max = 1.1 * psf().delta_max();
+
+    // Compute only if we're sufficiently close to PSF
+    if (delta <= delta_max) {
+
+        // Get exposure
+        irf = exposure()(srcDir, source.energy());
+
+        // Multiply-in PSF
+        if (irf > 0.0) {
+
+            // Get PSF component
+            irf *= psf()(srcDir, delta, source.energy());
+
+            // Divide by ontime as the binned likelihood function is
+            // later multiplying by ontime
+            irf /= obs.ontime();
+
+            // Apply deadtime correction
+            irf *= obs.deadc(source.time());
+
+        } // endif: exposure was non-zero
+
+    } // endif: we were sufficiently close to PSF
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_ptsrc:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+#endif
+
+
+/***********************************************************************//**
  * @brief Return spatial integral of point spread function
  *
  * @param[in] photon Incident photon.
@@ -492,6 +673,9 @@ void GCTAResponseCube::init_members(void)
     m_psf.clear();
     m_apply_edisp = false;
 
+    // Initialise cache
+    m_cache.clear();
+
     // Return
     return;
 }
@@ -509,6 +693,11 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
     m_psf         = rsp.m_psf;
     m_apply_edisp = rsp.m_apply_edisp;
 
+    // Copy cache
+    for (int i = 0; i < rsp.m_cache.size(); ++i) {
+        m_cache.push_back((rsp.m_cache[i]->clone()));
+    }
+
     // Return
     return;
 }
@@ -519,6 +708,41 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
  ***************************************************************************/
 void GCTAResponseCube::free_members(void)
 {
+    // Free cache
+    for (int i = 0; i < m_cache.size(); ++i) {
+        if (m_cache[i] != NULL) delete m_cache[i];
+        m_cache[i] = NULL;
+    }
+
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Determines the cache index for a given model name
+ *
+ * @param[in] name Model name.
+ * @return Cache index (-1 if model has not been found).
+ ***************************************************************************/
+int GCTAResponseCube::cache_index(const std::string& name) const
+{
+    // Initialise index
+    int index = -1;
+
+    // Continue only if there are models in cache
+    if (!m_cache.empty()) {
+
+         // Search for model name
+         for (int i = 0; i < m_cache.size(); ++i) {
+             if (m_cache[i]->name() == name) {
+                 index = i;
+                 break;
+             }
+         }
+
+    } // endif: there were models in cache
+
+    // Return index
+    return index;
 }

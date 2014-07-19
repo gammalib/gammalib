@@ -30,7 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GSkyDir.hpp"
 #include "GCTASourceCube.hpp"
+#include "GNodeArray.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -62,9 +64,16 @@ public:
     // Implemented pure virtual methods
     void                       clear(void);
     GCTASourceCubePointSource* clone(void) const;
-    void                       set(const GModelSpatial&  model,
-                                   const GObservation&   obs);
+    void                       set(const std::string&   name,
+                                   const GModelSpatial& model,
+                                   const GObservation&  obs);
     std::string                print(const GChatter& chatter = NORMAL) const;
+
+    // Other methods
+    double         aeff(const int& index) const;
+    double         delta(const int& index) const;
+    double         psf(const int& ieng, const double& delta) const;
+    const GSkyDir& dir(void) const;
 
 protected:
     // Protected methods
@@ -73,8 +82,58 @@ protected:
     void free_members(void);
 
     // Data members
-    std::vector<double> m_aeff;      //!< Effective area vector (exposure/ontime)
+    GSkyDir             m_dir;       //!< Source direction
+    std::vector<double> m_aeff;      //!< Deadtime corrected effective area (cm2)
     std::vector<double> m_delta_map; //!< Distance of bin from source (radians)
+    std::vector<double> m_psf;       //!< Point spread function
+    GNodeArray          m_deltas;    //!< Delta node array for PSF
 };
+
+
+/***********************************************************************//**
+ * @brief Return deadtime corrected effective area in cm2
+ *
+ * @param[in] index Energy index [0,...,m_aeff.size()-1]
+ * @return Deadtime corrected effective area (cm2).
+ *
+ * Returns the deadtime corrected effective area.
+ ***************************************************************************/
+inline
+double GCTASourceCubePointSource::aeff(const int& index) const
+{
+    double aeff = (index >= 0 && index < m_aeff.size()) ? m_aeff[index] : 0.0;
+    return (aeff);
+}
+
+
+/***********************************************************************//**
+ * @brief Return angular distance to source in radians
+ *
+ * @param[in] index Spatial index [0,...,m_delta_map.size()-1]
+ * @return Angular distance to source (radians).
+ *
+ * Returns the angular seperation between a event cube pixel with @p index
+ * and the source position. If the index is not within the valid range, 99.9
+ * is returned.
+ ***************************************************************************/
+inline
+double GCTASourceCubePointSource::delta(const int& index) const
+{
+    double delta = (index >= 0 && index < m_delta_map.size())
+                   ? m_delta_map[index] : 99.9;
+    return (delta);
+}
+
+
+/***********************************************************************//**
+ * @brief Return point source sky direction
+ *
+ * @return Point source sky direction.
+ ***************************************************************************/
+inline
+const GSkyDir& GCTASourceCubePointSource::dir(void) const
+{
+    return (m_dir);
+}
 
 #endif /* GCTASOURCECUBEPOINTSOURCE_HPP */

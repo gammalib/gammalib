@@ -18,8 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
+import gammalib
+import time
 
 
 # =================== #
@@ -27,16 +27,28 @@ from math import *
 # =================== #
 def binned_analysis(model, cntmap, irf, caldb):
     """
-    CTA binned analysis.
+    Perform binned maximum likelihood fitting of CTA data using GammaLib
+    classes. The function performs two fits, one with the full model and
+    one with the background model only, to evaluate the Test Statistics
+    value of the source component.
     """
+    # Dump header
+    print("")
+    print("+===============================================+")
+    print("| Binned maximum likelihood fitting of CTA data |")
+    print("+===============================================+")
+
+    # Get start CPU time
+    tstart = time.clock()
+
     # Allocate empty observation container
-    obs = GObservations()
+    obs = gammalib.GObservations()
 
     # Allocate empty CTA observation
-    cta_obs = GCTAObservation()
+    cta_obs = gammalib.GCTAObservation()
 
     # Load counts map into CTA observation
-    cta_obs.load_binned(cntmap)
+    cta_obs.load(cntmap)
 
     # Specify response for CTA observation
     cta_obs.response(irf, caldb)
@@ -48,7 +60,7 @@ def binned_analysis(model, cntmap, irf, caldb):
     obs.models(model)
 
     # Allocate Levenberg-Marquardt optimizer
-    opt = GOptimizerLM()
+    opt = gammalib.GOptimizerLM()
 
     # Optimize model parameters
     obs.optimize(opt)
@@ -67,7 +79,7 @@ def binned_analysis(model, cntmap, irf, caldb):
 
     # Create now a copy of the source model without background
     # only
-    background = GModels()
+    background = gammalib.GModels()
     for m in models:
         if m.name() == "Background":
             background.append(m)
@@ -88,7 +100,103 @@ def binned_analysis(model, cntmap, irf, caldb):
     print(opt)
 
     # Print TS
-    print(" Test statistics ...........:", ts)
+    print(" Test statistics ...........: %.3f" % ts)
+
+    # Get stop CPU time
+    tstop    = time.clock()
+    telapsed = tstop - tstart
+    print(" Elapsed time ..............: %.3f sec" % telapsed)
+
+    # Return models
+    return models
+
+
+# ======================= #
+# CTA cube-style analysis #
+# ======================= #
+def cube_analysis(model, cntmap, expcube, psfcube):
+    """
+    Perform cube-style maximum likelihood fitting of CTA data using GammaLib
+    classes. The function performs two fits, one with the full model and
+    one with the background model only, to evaluate the Test Statistics
+    value of the source component.
+    """
+    # Dump header
+    print("")
+    print("+===================================================+")
+    print("| Cube-style maximum likelihood fitting of CTA data |")
+    print("+===================================================+")
+
+    # Get start CPU time
+    tstart = time.clock()
+
+    # Allocate empty observation container
+    obs = gammalib.GObservations()
+
+    # Allocate empty CTA observation
+    cta_obs = gammalib.GCTAObservation()
+
+    # Load counts map into CTA observation
+    cta_obs.load(cntmap)
+
+    # Specify response for CTA observation
+    exposure = gammalib.GCTAExposure(expcube)
+    psf      = gammalib.GCTAMeanPsf(psfcube)
+    cta_obs.response(exposure, psf)
+
+    # Append CTA observation to observation container
+    obs.append(cta_obs)
+
+    # Load model to describe the data from XML file
+    obs.models(model)
+
+    # Allocate Levenberg-Marquardt optimizer
+    opt = gammalib.GOptimizerLM()
+
+    # Optimize model parameters
+    obs.optimize(opt)
+
+    # Get maximum likelihood value
+    logL = -(opt.value())
+
+    # Get a copy of the model fitting results. We want a copy
+    # here as the models are part of the observation container
+    # "obs", and the container goes out of scope once the function
+    # is left (and thus the models would also get out of scope)
+    models = obs.models().copy()
+
+    # Print optimizer results
+    print(opt)
+
+    # Create now a copy of the source model without background
+    # only
+    background = gammalib.GModels()
+    for m in models:
+        if m.name() == "Background":
+            background.append(m)
+
+    # Assign background model for fitting
+    obs.models(background)
+
+    # Optimize background parameters
+    obs.optimize(opt)
+
+    # Get maximum likelihood value of background
+    logL0 = -(opt.value())
+
+    # Compute TS
+    ts = 2.0 * (logL - logL0)
+
+    # Print optimizer results
+    print(opt)
+
+    # Print TS
+    print(" Test statistics ...........: %.3f" % ts)
+
+    # Get stop CPU time
+    tstop    = time.clock()
+    telapsed = tstop - tstart
+    print(" Elapsed time ..............: %.3f sec" % telapsed)
 
     # Return models
     return models
@@ -103,19 +211,24 @@ if __name__ == '__main__':
     """
     # Dump header
     print("")
-    print("*********************************************************")
-    print("* Perform binned maximum likelihood fitting of CTA data *")
-    print("*********************************************************")
+    print("**************************************************")
+    print("* Perform maximum likelihood fitting of CTA data *")
+    print("**************************************************")
     print("... please wait for a few seconds")
 
     # Set parameters
-    irf    = "cta_dummy_irf"
-    caldb  = "../caldb"
-    model  = "data/crab.xml"
-    cntmap = "data/crab_cntmap.fits"
+    irf     = "cta_dummy_irf"
+    caldb   = "../caldb"
+    model   = "data/crab.xml"
+    cntmap  = "data/crab_cntmap.fits"
+    expcube = "data/expcube.fits"
+    psfcube = "data/psfcube.fits"
 
     # Perform binned analysis
-    result = binned_analysis(model, cntmap, irf, GCaldb(caldb))
+    #results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
+
+    # Perform cube-style analysis
+    results_cube = cube_analysis(model, cntmap, expcube, psfcube)
 
     # Print model results
-    print(result)
+    #print(result)

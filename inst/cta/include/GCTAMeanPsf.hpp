@@ -173,7 +173,7 @@ double GCTAMeanPsf::delta_max(void) const
     double delta_max = (m_deltas.size() > 0) ? m_deltas[m_deltas.size()-1] : 0.0;
     
     // Return
-    return delta_max;
+    return (delta_max * gammalib::deg2rad);
 }
 
 

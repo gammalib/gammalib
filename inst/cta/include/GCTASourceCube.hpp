@@ -60,8 +60,9 @@ public:
     // Pure virtual methods
     virtual void               clear(void) = 0;
     virtual GCTASourceCube*    clone(void) const = 0;
-    virtual void               set(const GModelSpatial&  model,
-                                   const GObservation&   obs) = 0;
+    virtual void               set(const std::string&   name,
+                                   const GModelSpatial& model,
+                                   const GObservation&  obs) = 0;
     virtual std::string        print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods

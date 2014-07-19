@@ -179,8 +179,9 @@ GCTASourceCubePointSource* GCTASourceCubePointSource::clone(void) const
  * @param[in] model Spatial model.
  * @param[in] obs Observation.
  ***************************************************************************/
-void GCTASourceCubePointSource::set(const GModelSpatial&  model,
-                                    const GObservation&   obs)
+void GCTASourceCubePointSource::set(const std::string&   name,
+                                    const GModelSpatial& model,
+                                    const GObservation&  obs)
 {
     // Get pointer to model source model
     const GModelSpatialPointSource* ptsrc = dynamic_cast<const GModelSpatialPointSource*>(&model);
@@ -204,17 +205,20 @@ void GCTASourceCubePointSource::set(const GModelSpatial&  model,
     }
 
     // Get point source attributes
-    GSkyDir srcDir  = ptsrc->dir();
-    GTime   srcTime = cube->time();
+    m_name        = name;
+    m_dir         = ptsrc->dir();
+    GTime srcTime = cube->time();
 
-    // Clear source cube
-    m_name.clear();
-    m_aeff.clear();
-    m_delta_map.clear();
+    // Set PSF deltas in radians
+    m_deltas = rsp->psf().deltas();
+    for (int i = 0; i < m_deltas.size(); ++i) {
+        m_deltas[i] *= gammalib::deg2rad;
+    }
 
     // Initialise data members
     m_aeff.assign(cube->ebins(), 0.0);
     m_delta_map.assign(cube->npix(), 0.0);
+    m_psf.assign(cube->ebins()*m_deltas.size(), 0.0);
 
     // Compute deadtime corrected effective area
     for (int i = 0; i < cube->ebins(); ++i) {
@@ -223,7 +227,7 @@ void GCTASourceCubePointSource::set(const GModelSpatial&  model,
         const GEnergy& srcEng = cube->energy(i);
 
         // Get exposure
-        double aeff = rsp->exposure()(srcDir, srcEng);
+        double aeff = rsp->exposure()(m_dir, srcEng);
 
         // Divide by ontime as the binned likelihood function is later
         // multiplying by ontime
@@ -245,15 +249,60 @@ void GCTASourceCubePointSource::set(const GModelSpatial&  model,
 
         // Determine angular distance between point source direction and
         // cube pixel sky direction (radians)
-        double delta = srcDir.dist(obsDir);
+        double delta = m_dir.dist(obsDir);
 
         // Store angular distance in vector
         m_delta_map[i] = delta;
         
     } // endfor: looped over spatial cube pixels
 
+    // Compute point spread function
+    for (int i = 0, inx = 0; i < cube->ebins(); ++i) {
+
+        // Get source energy
+        const GEnergy& srcEng = cube->energy(i);
+
+        // Loop over delta bins
+        for (int k = 0; k < m_deltas.size(); ++k, ++inx) {
+
+            // Get PSF
+            m_psf[inx] = rsp->psf()(m_dir, m_deltas[k], srcEng);
+
+        } // endfor: looped over delta bins
+
+    } // endfor: looped over PSF
+
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set point source cube for a given observation
+ *
+ * @param[in] ieng Energy layer.
+ * @param[in] delta Distance between true and measured photon direction
+ *                  (radians).
+ ***************************************************************************/
+double GCTASourceCubePointSource::psf(const int& ieng, const double& delta) const
+{
+    // Set node array interpolation values
+    m_deltas.set_value(delta);
+
+    // Compute offset
+    int offset = ieng * m_deltas.size();
+
+    // Compute PSF by bi-linear interpolation
+    double psf = m_deltas.wgt_left()  * m_psf[offset+m_deltas.inx_left()] +
+                 m_deltas.wgt_right() * m_psf[offset+m_deltas.inx_right()];
+
+    // Reset negative PSF values
+    if (psf < 0.0) {
+        psf = 0.0;
+    }
+
+    // Return
+    return psf;
 }
 
 
@@ -294,8 +343,11 @@ std::string GCTASourceCubePointSource::print(const GChatter& chatter) const
 void GCTASourceCubePointSource::init_members(void)
 {
     // Initialise members
+    m_dir.clear();
     m_aeff.clear();
     m_delta_map.clear();
+    m_psf.clear();
+    m_deltas.clear();
    
     // Return
     return;
@@ -310,8 +362,11 @@ void GCTASourceCubePointSource::init_members(void)
 void GCTASourceCubePointSource::copy_members(const GCTASourceCubePointSource& cube)
 {
     // Copy members
+    m_dir       = cube.m_dir;
     m_aeff      = cube.m_aeff;
     m_delta_map = cube.m_delta_map;
+    m_psf       = cube.m_psf;
+    m_deltas    = cube.m_deltas;
 
     // Return
     return;
