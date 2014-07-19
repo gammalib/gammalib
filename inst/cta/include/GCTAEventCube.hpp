@@ -78,6 +78,8 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    const GTime&           time(void) const;
+    const GEnergy&         energy(const int& index) const;
     void                   map(const GSkymap& map);
     const GSkymap&         map(void) const;
     int                    nx(void) const;
@@ -171,6 +173,18 @@ inline
 int GCTAEventCube::ebins(void) const
 {
     return (m_map.nmaps());
+}
+
+
+/***********************************************************************//**
+ * @brief Return event cube mean time
+ *
+ * @return Event cube mean time.
+ ***************************************************************************/
+inline
+const GTime& GCTAEventCube::time(void) const
+{
+    return (m_time);
 }
 
 #endif /* GCTAEVENTCUBE_HPP */
