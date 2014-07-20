@@ -225,7 +225,7 @@ if __name__ == '__main__':
     psfcube = "data/psfcube.fits"
 
     # Perform binned analysis
-    #results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
+    results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
 
     # Perform cube-style analysis
     results_cube = cube_analysis(model, cntmap, expcube, psfcube)

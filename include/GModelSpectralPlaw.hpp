@@ -110,11 +110,17 @@ protected:
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;     //!< Last energy value
+    mutable double  m_last_norm;       //!< Last norm parameter
     mutable double  m_last_index;      //!< Last index parameter
     mutable double  m_last_pivot;      //!< Last pivot parameter
     mutable double  m_last_e_norm;     //!< Last E/Epivot value
     mutable double  m_last_log_e_norm; //!< Last ln(E/Epivot) value
     mutable double  m_last_power;      //!< Last power value
+    mutable double  m_last_value;      //!< Last function value
+    mutable double  m_last_g_norm;
+    mutable double  m_last_g_index;
+    mutable double  m_last_g_pivot;
+
     mutable double  m_mc_emin;         //!< Minimum energy
     mutable double  m_mc_emax;         //!< Maximum energy
     mutable double  m_mc_exponent;     //!< Exponent (index+1)
