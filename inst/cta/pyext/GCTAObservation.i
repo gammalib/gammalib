@@ -69,6 +69,7 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    bool                hasresponse(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits) const;
     void                load(const std::string& filename);
