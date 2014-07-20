@@ -966,6 +966,9 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
         m_aeff = new GCTAAeffPerfTable(filename);
     }
 
+    // Record Aeff file name
+    m_xml_aeff = filename;
+
     // Return
     return;
 }
@@ -1040,6 +1043,9 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
     catch (GException::fits_open_error &e) {
         m_psf = new GCTAPsfPerfTable(filename);
     }
+    
+    // Record PSF filename
+    m_xml_psf = filename;
 
     // Return
     return;
@@ -1084,6 +1090,9 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
         m_edisp = new GCTAEdispPerfTable(filename);
     }
 
+    // Record energy dispersion filename
+    m_xml_edisp = filename;
+
     // Return
     return;
 }
@@ -1109,6 +1118,9 @@ void GCTAResponseIrf::load_background(const std::string& filename)
         // Load background as performance table background
         m_background = new GCTABackgroundPerfTable(filename);
     }
+    
+    // Record background filename
+    m_xml_background = filename;
 
     // Return
     return;
