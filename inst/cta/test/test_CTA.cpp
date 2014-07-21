@@ -1155,7 +1155,6 @@ void TestGCTAObservation::test_cube_obs(void)
     test_try("Test XML loading and saving");
     try {
         obs = GObservations(cta_cube_xml);
-std::cout << obs << std::endl;
         obs.save(filename);
         test_try_success();
     }
