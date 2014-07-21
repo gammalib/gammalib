@@ -313,7 +313,7 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event,
 
     // Get instrument direction
     const GInstDir*    inst_dir = &(event.dir());
-    const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
+    const GCTAInstDir* cta_dir  = static_cast<const GCTAInstDir*>(inst_dir);
 
     // Compute offset angle (in degrees)
     double offset = cta_dir->dir().dist_deg(pnt.dir());
@@ -377,7 +377,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
 
     // Get instrument direction
     const GInstDir*    inst_dir = &(event.dir());
-    const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
+    const GCTAInstDir* cta_dir  = static_cast<const GCTAInstDir*>(inst_dir);
 
     // Compute offset angle (in degrees)
     double offset = cta_dir->dir().dist_deg(pnt.dir());
