@@ -54,6 +54,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 #define G_USE_CACHE                                 //!< Use response cache
+#define G_USE_STATIC_CAST                           //!< Use static cast
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -334,21 +335,29 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     else {
     
         // Check that the cache entry is of the expected type
+        #if defined(G_USE_STATIC_CAST)
+        cache = static_cast<GCTASourceCubePointSource*>(m_cache[index]);
+        #else
         cache = dynamic_cast<GCTASourceCubePointSource*>(m_cache[index]);
         if (cache == NULL) {
             std::string msg = "Cached model \""+source.name()+"\" is not "
                               "a point source model.";
             throw GException::invalid_value(G_IRF_PTSRC, msg);
         }
+        #endif
         
         // If the point source position has changed since the last call
         // then update the response cache
+        #if defined(G_USE_STATIC_CAST)
+        const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
+        #else
         const GModelSpatialPointSource* ptsrc = dynamic_cast<const GModelSpatialPointSource*>(source.model());
         if (ptsrc == NULL) {
             std::string msg = "Cached model \""+source.name()+"\" has not "
                               "a point source spatial model.";
             throw GException::invalid_value(G_IRF_PTSRC, msg);
         }
+        #endif
         if (ptsrc->dir() != cache->dir()) {
             cache->set(source.name(), *source.model(), obs);
         }
@@ -356,16 +365,19 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     } // endelse: there was a cache entry for this model
 
     // Get pointer on CTA event bin
+    #if defined(G_USE_STATIC_CAST)
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+    #else
     const GCTAEventBin* bin = dynamic_cast<const GCTAEventBin*>(&event);
     if (bin == NULL) {
         std::string msg = "Event bin is not a CTA event bin.";
         throw GException::invalid_value(G_IRF_PTSRC, msg);
     }
+    #endif
 
     // Determine angular separation between true and measured photon
     // direction in radians
     double delta = cache->delta(bin->ipix());
-    //double delta = bin->dir().dir().dist(cache->dir());
 
     // Get maximum angular separation for PSF (in radians) and add 10%
     // of margin
@@ -381,7 +393,6 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
         if (irf > 0.0) {
 
             // Get PSF component
-            //irf *= psf()(cache->dir(), delta, event.energy());
             irf *= cache->psf(bin->ieng(), delta);
 
         } // endif: Effective area was non-zero
