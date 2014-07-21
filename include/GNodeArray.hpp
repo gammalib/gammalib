@@ -133,7 +133,9 @@ private:
  * @return Node value.
  *
  * Returns a reference to the node with the specified @p index. No range
- * checking is performed on @p index.
+ * checking is performed on @p index. As this operator may change the
+ * values of the node array, the setup method needs to be called before
+ * doing the interpolation.
  ***************************************************************************/
 inline
 double& GNodeArray::operator[](const int& index)
@@ -155,7 +157,6 @@ double& GNodeArray::operator[](const int& index)
 inline
 const double& GNodeArray::operator[](const int& index) const
 {
-    m_need_setup = true;
     return (m_node[index]);
 }
 

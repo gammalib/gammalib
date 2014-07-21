@@ -550,6 +550,9 @@ double GNodeArray::interpolate(const double& value,
  * form (i.e. the nodes are equidistant), an analytic formula is used to
  * determine the boundary indices. If the nodes are not equidistant the
  * boundary indices are searched by bisection.
+ *
+ * Note that this method needs to be called after changing the node array
+ * to setup the corrected interpolation indices and weights.
  ***************************************************************************/
 void GNodeArray::set_value(const double& value) const
 {

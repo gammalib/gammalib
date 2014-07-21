@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -307,6 +307,24 @@ void TestGSupport::test_node_array(void)
     // Test non-linear interpolation
     double array_nonlin[] = {-1.3, 0.0, 1.7};
     test_node_array_interpolation(3, array_nonlin);
+
+    // Test node array change using access operator[]
+    GNodeArray nodes;
+    nodes.append(1.0);
+    nodes.append(2.0);
+    nodes.append(3.0);
+    nodes.set_value(2.5);
+    test_value(nodes.inx_left(), 1, "Expected node 1");
+    test_value(nodes.inx_right(), 2, "Expected node 2");
+    test_value(nodes.wgt_left(), 0.5, 1.0e-6, "Expected weight 0.5");
+    test_value(nodes.wgt_right(), 0.5, 1.0e-6, "Expected weight 0.5");
+    nodes[1] = 3.0;
+    nodes[2] = 4.0;
+    nodes.set_value(2.5);
+    test_value(nodes.inx_left(), 0, "Expected node 0");
+    test_value(nodes.inx_right(), 1, "Expected node 1");
+    test_value(nodes.wgt_left(), 0.25, 1.0e-6, "Expected weight 0.25");
+    test_value(nodes.wgt_right(), 0.75, 1.0e-6, "Expected weight 0.75");
 
     // Return
     return;
