@@ -48,7 +48,7 @@ const GModelSpectralRegistry g_spectral_plaw_registry(&g_spectral_plaw_seed);
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_EVAL_GRADIENT_CACHE
+//#define G_EVAL_GRADIENT_CACHE
 
 /* __ Debug definitions __________________________________________________ */
 
