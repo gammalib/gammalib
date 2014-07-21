@@ -71,11 +71,28 @@ public:
     virtual void                  write(GXmlElement& xml) const = 0;
     virtual std::string           print(const GChatter& chatter = NORMAL) const = 0;
 
+    // Implemented virtual base class methods
+    virtual GClassCode code(void) const;
+
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GModelSpatialDiffuse& model);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return class code
+ *
+ * @return GModelSpatialDiffuse.
+ *
+ * Returns the code GModelSpatialDiffuse of the class.
+ ***************************************************************************/
+inline
+GClassCode GModelSpatialDiffuse::code(void) const
+{
+    return GMODEL_SPATIAL_DIFFUSE;
+}
 
 #endif /* GMODELSPATIALDIFFUSE_HPP */

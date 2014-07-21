@@ -85,6 +85,7 @@ public:
     virtual void           clear(void) = 0;
     virtual GModelSpatial* clone(void) const = 0;
     virtual std::string    type(void) const = 0;
+    virtual GClassCode     code(void) const = 0;
     virtual double         eval(const GPhoton& photon) const = 0;
     virtual double         eval_gradients(const GPhoton& photon) const = 0;
     virtual GSkyDir        mc(const GEnergy& energy, const GTime& time,

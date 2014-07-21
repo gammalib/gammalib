@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GTypemaps.hpp - GammaLib typemaps                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 
-/* __ Enumerations _______________________________________________________ */
+/* __ Chatter level enumerations _________________________________________ */
 typedef enum {
     SILENT = 0,
     TERSE = 1,
@@ -37,6 +37,14 @@ typedef enum {
     EXPLICIT = 3,
     VERBOSE = 4
 } GChatter;
+
+/* __ Class code enumerations (used primarily to avoid dynamic casting) __ */
+typedef enum {
+    GMODEL_SPATIAL_POINT_SOURCE,
+    GMODEL_SPATIAL_RADIAL,
+    GMODEL_SPATIAL_ELLIPTICAL,
+    GMODEL_SPATIAL_DIFFUSE
+} GClassCode;
 
 /* __ Typemaps ___________________________________________________________ */
 

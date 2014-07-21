@@ -64,6 +64,7 @@ public:
     virtual void                      clear(void);
     virtual GModelSpatialPointSource* clone(void) const;
     virtual std::string               type(void) const;
+    virtual GClassCode                code(void) const;
     virtual double                    eval(const GPhoton& photon) const;
     virtual double                    eval_gradients(const GPhoton& photon) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
@@ -106,6 +107,20 @@ inline
 std::string GModelSpatialPointSource::type(void) const
 {
     return "SkyDirFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return class code
+ *
+ * @return GModelSpatialPointSource.
+ *
+ * Returns the code GModelSpatialPointSource of the class.
+ ***************************************************************************/
+inline
+GClassCode GModelSpatialPointSource::code(void) const
+{
+    return GMODEL_SPATIAL_POINT_SOURCE;
 }
 
 
