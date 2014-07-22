@@ -116,7 +116,7 @@ GCTAClassCode GCTASourceCubePointSource::code(void) const
 inline
 double GCTASourceCubePointSource::aeff(const int& index) const
 {
-    double aeff = (index >= 0 && index < m_aeff.size()) ? m_aeff[index] : 0.0;
+    double aeff = (index >= 0 && index < (int)m_aeff.size()) ? m_aeff[index] : 0.0;
     return (aeff);
 }
 
@@ -134,7 +134,7 @@ double GCTASourceCubePointSource::aeff(const int& index) const
 inline
 double GCTASourceCubePointSource::delta(const int& index) const
 {
-    double delta = (index >= 0 && index < m_delta_map.size())
+    double delta = (index >= 0 && index < (int)m_delta_map.size())
                    ? m_delta_map[index] : 99.9;
     return (delta);
 }
