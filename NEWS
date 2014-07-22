@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-18 July 2014
+22 July 2014
 
 
 1. Introduction
@@ -101,6 +101,15 @@ for CTA background models). See bug #1142 for more information.
 The binned likelihood functions now implement data filtering. All event
 bins with negative values will be excluded from the likelihood computation.
 
+The GObservation::model and GObservation::model_grad have been rearranged
+to reduce function call overhead. Some speed-up has been achieved.
+
+The GModelSpatial now implements class codes that allow fast branching in
+the response computations. This avoids dynamic type casting which can be
+quite time consuming (at least for methods that are called very often, such
+as the response methods). The class code enumerators are defined in
+GTypemaps.
+
 
 11. Optimization module
 -----------------------
@@ -118,7 +127,9 @@ reprojection or rebinning of skymaps.
 
 13. Support module
 ------------------
-None
+The GNodeArray non-const access operator[] now signals that an update of the
+internal pre-computation is needed, as this operator[] may change the node
+array values.
 
 
 14. XML module
@@ -216,6 +227,16 @@ GCTAResponse, has been added to handle cube-style analysis. GCTAResponseCube
 holds an exposure cube (GCTAExposure) and a PSF cube (GCTAMeanPsf) to describe
 the response. GCTAObservation has been modified to allocate either IRF-style or
 cube-style response, dependent on the information found in the XML file.
+
+The abstract GCTASourceCube class has been added to handle the pre-computation
+cache for cube-style analysis. A first implementation of this cache is provided
+by the GCTASourceCubePointSource class for point source analysis. The cache has
+been added to GCTAResponseCube who takes care of initializing and using the cache.
+
+A GCTATypemap header has been added to define CTA specific typemaps. This is
+actually used to define class codes for GCTASourceCube so that dynamic type
+casting can be avoided. Dynamic type casting is time consuming, and to speed-up
+response computation, using class codes is more efficient.
 
 
 21. COMPTEL interface

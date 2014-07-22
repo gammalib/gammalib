@@ -1,4 +1,4 @@
-2014-07-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-07-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -13,10 +13,13 @@
         Add manipulation methods to GCTAResponseTable
         Refactor CTA response class, add GCTAResponseCube class
         Implement CTA cube-style analysis
+        Optimize CTA binned and cube-style analysis 
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
         Correctly take into account logfile name change in Python
         Correctly use DETX/DETY in radians in GCTAInstDir
+        Introduce class codes to avoid dynamic type casting
+        Several bug corrections
 
 
 2014-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
