@@ -68,6 +68,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 /* __ Coding definitions _________________________________________________ */
 #define G_LN_ENERGY_INT   //!< ln(E) variable substitution for integration
 //#define G_GRAD_RIDDLER  //!< Use Riddler's method for computing derivatives
+#define G_TEST_CODE
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_OPT_DEBUG
@@ -312,8 +313,23 @@ double GObservation::model(const GModels& models, const GEvent& event,
 
                 // Optionally determine model gradients
                 if (gradient != NULL) {
-                    for (int k = 0; k < mptr->size(); ++k) {
-                        (*gradient)[igrad+k] = model_grad(*mptr, event, k);
+                    for (int ipar = 0; ipar < mptr->size(); ++ipar) {
+                        #if defined(G_TEST_CODE)
+                        const GModelPar& par = (*mptr)[ipar];
+                        if (par.is_free()) {
+                            if (par.has_grad() && !response()->use_edisp()) {
+                                (*gradient)[igrad+ipar] = par.factor_gradient();
+                            }
+                            else {
+                                (*gradient)[igrad+ipar] = model_grad(*mptr, par, ipar, event);
+                            }
+                        }
+                        else {
+                            (*gradient)[igrad+ipar] = 0.0;
+                        }
+                        #else
+                        (*gradient)[igrad+ipar] = model_grad(*mptr, par, ipar, event);
+                        #endif
                     }
                 }
 
@@ -437,15 +453,13 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
  *       Eventually, the higher level method should avoid going in a
  *       parameter domain that is not defined. 
  ***************************************************************************/
-double GObservation::model_grad(const GModel& model,
-                                const GEvent& event,
-                                const int&    ipar) const
+double GObservation::model_grad(const GModel&    model,
+                                const GModelPar& par,
+                                const int&       ipar,
+                                const GEvent&    event) const
 {
     // Initialise gradient
     double grad = 0.0;
-
-    // Get reference on model parameter to avoid repreated operator access
-    const GModelPar& par = model[ipar];
 
     // Compute gradient only if parameter is free
     if (par.is_free()) {
@@ -455,12 +469,15 @@ double GObservation::model_grad(const GModel& model,
         // as we have not implemented code that integrates the gradients
         // over the energy dispersion. Here it's simpler to just use
         // numerical gradients.
+        #if defined(G_TEST_CODE)
+        #else
         if (par.has_grad() && !response()->use_edisp()) {
             grad = par.factor_gradient();
         }
 
         // ... otherwise compute it numerically
         else {
+        #endif
 
             // Get non-const model pointer
             GModelPar* ptr = const_cast<GModelPar*>(&par);
@@ -479,7 +496,7 @@ double GObservation::model_grad(const GModel& model,
             #if !defined(G_GRAD_RIDDLER)
             const double step_size = 0.0002;
             double       dx        = step_size;
-            if (model[ipar].has_min()) {
+            if (par.has_min()) {
                 double dx_min = x - par.factor_min();
                 if (dx_min == 0.0) {
                     dx = step_size * x;
@@ -492,7 +509,7 @@ double GObservation::model_grad(const GModel& model,
                     dx = dx_min;
                 }
             }
-            if (model[ipar].has_max()) {
+            if (par.has_max()) {
                 double dx_max = par.factor_max() - x;
                 if (dx_max == 0.0) {
                     dx = step_size * x;
@@ -525,7 +542,10 @@ double GObservation::model_grad(const GModel& model,
             // Restore current model parameter
             *ptr = current;
 
+        #if defined(G_TEST_CODE)
+        #else
         } // endelse: computed gradient numerically
+        #endif
 
     } // endif: model parameter was free
 

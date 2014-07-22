@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GObservation.i - Abstract observation base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -79,18 +79,19 @@ public:
     const std::string& id(void) const;
     const GEvents*     events(void) const;
     const std::string& statistics(void) const;
-    virtual double    likelihood(const GModels& models,
-                                 GVector*       gradient,
-                                 GMatrixSparse* curvature,
-                                 double*        npred) const;
+    virtual double     likelihood(const GModels& models,
+                                  GVector*       gradient,
+                                  GMatrixSparse* curvature,
+                                  double*        npred) const;
     virtual double     model(const GModels& models,
                              const GEvent&  event,
                              GVector*       gradient = NULL) const;
     virtual double     npred(const GModels& models,
                              GVector*       gradient = NULL) const;
-    virtual double     model_grad(const GModel& model,
-                                  const GEvent& event,
-                                  const int&    ipar) const;
+    virtual double     model_grad(const GModel&    model,
+                                  const GModelPar& par,
+                                  const int&       ipar,
+                                  const GEvent&    event) const;
     virtual double     npred_grad(const GModel& model,
                                   const int&    ipar) const;
 };
