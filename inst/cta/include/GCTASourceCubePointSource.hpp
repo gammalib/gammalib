@@ -64,6 +64,7 @@ public:
     // Implemented pure virtual methods
     void                       clear(void);
     GCTASourceCubePointSource* clone(void) const;
+    virtual GCTAClassCode      code(void) const;
     void                       set(const std::string&   name,
                                    const GModelSpatial& model,
                                    const GObservation&  obs);
@@ -88,6 +89,20 @@ protected:
     std::vector<double> m_psf;       //!< Point spread function
     GNodeArray          m_deltas;    //!< Delta node array for PSF
 };
+
+
+/***********************************************************************//**
+ * @brief Return class type code
+ *
+ * @return GCTA_SOURCE_CUBE_POINT_SOURCE.
+ *
+ * Returns the class type code GCTA_SOURCE_CUBE_POINT_SOURCE.
+ ***************************************************************************/
+inline
+GCTAClassCode GCTASourceCubePointSource::code(void) const
+{
+    return (GCTA_SOURCE_CUBE_POINT_SOURCE);
+}
 
 
 /***********************************************************************//**

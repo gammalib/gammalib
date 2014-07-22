@@ -54,7 +54,6 @@
 
 /* __ Coding definitions _________________________________________________ */
 #define G_USE_CACHE                                 //!< Use response cache
-#define G_USE_STATIC_CAST                           //!< Use static cast
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -308,7 +307,10 @@ double GCTAResponseCube::irf(const GEvent&       event,
  * @return Value of instrument response function for a point source.
  *
  * This method returns the value of the instrument response function for a
- * point source. If the source is not a point source, the method returns 0.
+ * point source.
+ *
+ * The method assumes that source.model() is of type
+ * GModelSpatialPointSource.
  ***************************************************************************/
 #if defined(G_USE_CACHE)
 double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
@@ -335,29 +337,17 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     else {
     
         // Check that the cache entry is of the expected type
-        #if defined(G_USE_STATIC_CAST)
-        cache = static_cast<GCTASourceCubePointSource*>(m_cache[index]);
-        #else
-        cache = dynamic_cast<GCTASourceCubePointSource*>(m_cache[index]);
-        if (cache == NULL) {
+        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_POINT_SOURCE) {
             std::string msg = "Cached model \""+source.name()+"\" is not "
-                              "a point source model.";
+                              "a point source model. This method only applies "
+                              "to point source models.";
             throw GException::invalid_value(G_IRF_PTSRC, msg);
         }
-        #endif
+        cache = static_cast<GCTASourceCubePointSource*>(m_cache[index]);
         
         // If the point source position has changed since the last call
         // then update the response cache
-        #if defined(G_USE_STATIC_CAST)
         const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
-        #else
-        const GModelSpatialPointSource* ptsrc = dynamic_cast<const GModelSpatialPointSource*>(source.model());
-        if (ptsrc == NULL) {
-            std::string msg = "Cached model \""+source.name()+"\" has not "
-                              "a point source spatial model.";
-            throw GException::invalid_value(G_IRF_PTSRC, msg);
-        }
-        #endif
         if (ptsrc->dir() != cache->dir()) {
             cache->set(source.name(), *source.model(), obs);
         }
@@ -365,15 +355,14 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     } // endelse: there was a cache entry for this model
 
     // Get pointer on CTA event bin
-    #if defined(G_USE_STATIC_CAST)
-    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-    #else
-    const GCTAEventBin* bin = dynamic_cast<const GCTAEventBin*>(&event);
-    if (bin == NULL) {
-        std::string msg = "Event bin is not a CTA event bin.";
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
         throw GException::invalid_value(G_IRF_PTSRC, msg);
     }
-    #endif
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
 
     // Determine angular separation between true and measured photon
     // direction in radians
@@ -421,22 +410,21 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     double irf = 0.0;
 
     // Get pointer to model source model
-    const GModelSpatialPointSource* ptsrc = dynamic_cast<const GModelSpatialPointSource*>(source.model());
-    if (ptsrc == NULL) {
-        std::string msg = "Model is not a spatial point source model.";
-        throw GException::invalid_value(G_IRF_PTSRC, msg);
-    }
+    const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
 
     // Get point source direction
     GSkyDir srcDir = ptsrc->dir();
 
     // Get pointer on CTA event bin
-    const GCTAEventBin* bin = dynamic_cast<const GCTAEventBin*>(&event);
-    if (bin == NULL) {
-        std::string msg = "Event bin is not a CTA event bin.";
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
         throw GException::invalid_value(G_IRF_PTSRC, msg);
     }
-
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+    
     // Determine angular separation between true and measured photon
     // direction in radians
     double delta = bin->dir().dir().dist(srcDir);
