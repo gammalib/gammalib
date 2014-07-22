@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw.cpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,7 +48,6 @@ const GModelSpectralRegistry g_spectral_plaw_registry(&g_spectral_plaw_seed);
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-//#define G_EVAL_GRADIENT_CACHE
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -322,69 +321,6 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng,
  *
  * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
-#if defined(G_EVAL_GRADIENT_CACHE)
-double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
-                                          const GTime&   srcTime)
-{
-    // Get parameter values (takes 3 multiplications which are difficult
-    // to avoid)
-    double norm  = m_norm.value();
-    double index = m_index.value();
-    double pivot = m_pivot.value();
-
-    // If the energy or one of the parameters index or pivot energy has
-    // changed then recompute the cache
-    if ((m_last_energy != srcEng) ||
-        (m_last_norm   != norm)   ||
-        (m_last_index  != index)  ||
-        (m_last_pivot  != pivot)) {
-
-        // Store actual energy and parameter values
-        m_last_energy = srcEng;
-        m_last_norm   = norm;
-        m_last_index  = index;
-        m_last_pivot  = pivot;
-
-        // Compute and store value
-        double eng        = srcEng.MeV();
-        m_last_e_norm     = eng / m_last_pivot;
-        m_last_log_e_norm = std::log(m_last_e_norm);
-        m_last_power      = std::pow(m_last_e_norm, m_last_index);
-        m_last_value      = m_last_norm * m_last_power;
-
-        // Compute partial derivatives of the parameter values
-        m_last_g_norm = (m_norm.is_free())
-                         ? m_norm.scale() * m_last_power : 0.0;
-        m_last_g_index = (m_index.is_free())
-                         ? m_last_value * m_index.scale() * m_last_log_e_norm : 0.0;
-        m_last_g_pivot = (m_pivot.is_free())
-                         ? -m_last_value * m_last_index / m_pivot.factor_value() : 0.0;
-
-    } // endif: recomputation was required
-
-    // Set gradients
-    m_norm.factor_gradient(m_last_g_norm);
-    m_index.factor_gradient(m_last_g_index);
-    m_pivot.factor_gradient(m_last_g_pivot);
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(m_last_value) || gammalib::is_infinite(m_last_value)) {
-        std::cout << "*** ERROR: GModelSpectralPlaw::eval_gradients";
-        std::cout << "(srcEng=" << srcEng;
-        std::cout << ", srcTime=" << srcTime << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << m_last_value;
-        std::cout << ", e_norm=" << m_last_e_norm;
-        std::cout << ", power=" << m_last_power;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return
-    return m_last_value;
-}
-#else
 double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
                                           const GTime&   srcTime)
 {
@@ -427,7 +363,6 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
     // Return
     return value;
 }
-#endif
 
 
 /***********************************************************************//**
@@ -813,10 +748,6 @@ void GModelSpectralPlaw::init_members(void)
     m_last_e_norm     = 0.0;
     m_last_log_e_norm = 0.0;
     m_last_power      = 0.0;
-    m_last_value      = 0.0;
-    m_last_g_norm     = 0.0;
-    m_last_g_index    = 0.0;
-    m_last_g_pivot    = 0.0;
 
     // Initialise MC cache
     m_mc_emin       = 0.0;
@@ -856,10 +787,6 @@ void GModelSpectralPlaw::copy_members(const GModelSpectralPlaw& model)
     m_last_e_norm     = model.m_last_e_norm;
     m_last_log_e_norm = model.m_last_log_e_norm;
     m_last_power      = model.m_last_power;
-    m_last_value      = model.m_last_value;
-    m_last_g_norm     = model.m_last_g_norm;
-    m_last_g_index    = model.m_last_g_index;
-    m_last_g_pivot    = model.m_last_g_pivot;
 
     // Copy MC cache
     m_mc_emin       = model.m_mc_emin;
