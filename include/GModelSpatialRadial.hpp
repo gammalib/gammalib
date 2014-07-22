@@ -78,11 +78,12 @@ public:
     virtual std::string          print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented pure virtual base class methods
-    virtual double eval(const GPhoton& photon) const;
-    virtual double eval_gradients(const GPhoton& photon) const;
-    virtual double norm(const GSkyDir& dir, const double&  radius) const;
-    virtual void   read(const GXmlElement& xml);
-    virtual void   write(GXmlElement& xml) const;
+    virtual GClassCode code(void) const;
+    virtual double     eval(const GPhoton& photon) const;
+    virtual double     eval_gradients(const GPhoton& photon) const;
+    virtual double     norm(const GSkyDir& dir, const double&  radius) const;
+    virtual void       read(const GXmlElement& xml);
+    virtual void       write(GXmlElement& xml) const;
 
     // Other methods
     double  ra(void) const;
@@ -102,6 +103,20 @@ protected:
     GModelPar m_ra;    //!< Right Ascension (deg)
     GModelPar m_dec;   //!< Declination (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class code
+ *
+ * @return GModelSpatialRadial.
+ *
+ * Returns the code GModelSpatialRadial of the class.
+ ***************************************************************************/
+inline
+GClassCode GModelSpatialRadial::code(void) const
+{
+    return GMODEL_SPATIAL_RADIAL;
+}
 
 
 /***********************************************************************//**

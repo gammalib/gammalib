@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw.hpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -110,6 +110,7 @@ protected:
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;     //!< Last energy value
+    mutable double  m_last_norm;       //!< Last norm parameter
     mutable double  m_last_index;      //!< Last index parameter
     mutable double  m_last_pivot;      //!< Last pivot parameter
     mutable double  m_last_e_norm;     //!< Last E/Epivot value

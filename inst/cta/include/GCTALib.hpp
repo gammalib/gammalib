@@ -30,6 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 
+/* __ CTA typemaps _______________________________________________________ */
+#include "GCTATypemaps.hpp"
+
 /* __ CTA specific headers _______________________________________________ */
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
@@ -63,6 +66,8 @@
 #include "GCTABackground3D.hpp"
 #include "GCTAExposure.hpp"
 #include "GCTAMeanPsf.hpp"
+#include "GCTASourceCube.hpp"
+#include "GCTASourceCubePointSource.hpp"
 #include "GCTAModelCubeBackground.hpp"
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAModelRadial.hpp"

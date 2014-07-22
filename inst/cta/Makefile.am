@@ -39,6 +39,8 @@ sources = src/GCTASupport.cpp \
           src/GCTABackground3D.cpp \
           src/GCTAExposure.cpp \
           src/GCTAMeanPsf.cpp \
+          src/GCTASourceCube.cpp \
+          src/GCTASourceCubePointSource.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -52,7 +54,8 @@ sources = src/GCTASupport.cpp \
           src/GCTAModelRadialAcceptance.cpp
 
 # Define headers to be installed
-pkginclude_HEADERS = include/GCTAException.hpp \
+pkginclude_HEADERS = include/GCTATypemaps.hpp \
+                     include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
                      include/GCTAOnOffObservation.hpp \
                      include/GCTAOnOffObservations.hpp \
@@ -84,6 +87,8 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTABackground3D.hpp \
                      include/GCTAExposure.hpp \
                      include/GCTAMeanPsf.hpp \
+                     include/GCTASourceCube.hpp \
+                     include/GCTASourceCubePointSource.hpp \
                      include/GCTAModelCubeBackground.hpp \
                      include/GCTAModelIrfBackground.hpp \
                      include/GCTAModelRadialRegistry.hpp \

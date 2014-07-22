@@ -306,6 +306,33 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
 
 
 /***********************************************************************//**
+ * @brief Set CTA response function
+ *
+ * @param[in] expcube Exposure cube.
+ * @param[in] psf PSF cube.
+ *
+ * Sets the CTA response function fur cube-style analysis by specifying the
+ * exposure cube and the PSF cube.
+ ***************************************************************************/
+void GCTAObservation::response(const GCTAExposure& expcube,
+                               const GCTAMeanPsf&  psf)
+{
+    // Free response
+    if (m_response != NULL) delete m_response;
+    m_response = NULL;
+
+    // Allocate fresh response function
+    GCTAResponseCube* rsp = new GCTAResponseCube(expcube, psf);
+
+    // Store pointer
+    m_response = rsp;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Read observation from XML element
  *
  * @param[in] xml XML element.

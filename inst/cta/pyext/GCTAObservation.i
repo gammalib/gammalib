@@ -77,6 +77,8 @@ public:
                              const bool& clobber = false) const;
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
+    void                response(const GCTAExposure& expcube,
+                                 const GCTAMeanPsf&  psf);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     void                obs_id(const int& id);

@@ -61,8 +61,9 @@ public:
     virtual void            write(GXmlElement& xml) const = 0;
 
     // Methods
-    int  size(void) const;
-    void autoscale(void);
+    GModelPar& at(const int& index);
+    int        size(void) const;
+    void       autoscale(void);
 };
 
 

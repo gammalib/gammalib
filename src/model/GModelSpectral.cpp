@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectral.cpp - Abstract spectral model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,8 +32,8 @@
 #include "GModelSpectral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                          "GModelSpectral::operator[](int&)"
-#define G_ACCESS2                  "GModelSpectral::operator[](std::string&)"
+#define G_ACCESS                   "GModelSpectral::operator[](std::string&)"
+#define G_AT                            "GModelPar& GModelSpectral::at(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -102,8 +102,9 @@ GModelSpectral::~GModelSpectral(void)
  * @brief Assignment operator
  *
  * @param[in] model Spectral model.
+ * @return Spectral model.
  ***************************************************************************/
-GModelSpectral& GModelSpectral::operator= (const GModelSpectral& model)
+GModelSpectral& GModelSpectral::operator=(const GModelSpectral& model)
 { 
     // Execute only if object is not identical
     if (this != &model) {
@@ -125,48 +126,6 @@ GModelSpectral& GModelSpectral::operator= (const GModelSpectral& model)
 
 
 /***********************************************************************//**
- * @brief Returns model parameter
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-GModelPar& GModelSpectral::operator[](const int& index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    #endif
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns model parameter (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-const GModelPar& GModelSpectral::operator[](const int& index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    #endif
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Returns reference to model parameter
  *
  * @param[in] name Parameter name.
@@ -179,13 +138,15 @@ GModelPar& GModelSpectral::operator[](const std::string& name)
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS2, name);
+    if (index >= size()) {
+        throw GException::par_not_found(G_ACCESS, name);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -205,13 +166,15 @@ const GModelPar& GModelSpectral::operator[](const std::string& name) const
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS2, name);
+    if (index >= size()) {
+        throw GException::par_not_found(G_ACCESS, name);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -225,16 +188,48 @@ const GModelPar& GModelSpectral::operator[](const std::string& name) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return number of parameters
+ * @brief Returns model parameter
  *
- * @return Number of parameters in spectral model component.
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter.
  *
- * Returns the number of parameters in the spectral model component.
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ *
+ * Returns model parameter with @p index range checking.
  ***************************************************************************/
-int GModelSpectral::size(void) const
+GModelPar& GModelSpectral::at(const int& index)
 {
-    // Return number of parameters
-    return (m_pars.size());
+    // Compile option: raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
+    }
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ *
+ * Returns model parameter with @p index range checking.
+ ***************************************************************************/
+const GModelPar& GModelSpectral::at(const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
+    }
+
+    // Return reference
+    return *(m_pars[index]);
 }
 
 

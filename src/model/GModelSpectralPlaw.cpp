@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw.cpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -742,6 +742,7 @@ void GModelSpectralPlaw::init_members(void)
 
     // Initialise eval cache
     m_last_energy.clear();
+    m_last_norm       = 1.0e30;
     m_last_index      = 1.0e30;
     m_last_pivot      = 1.0e30;
     m_last_e_norm     = 0.0;
@@ -780,6 +781,7 @@ void GModelSpectralPlaw::copy_members(const GModelSpectralPlaw& model)
 
     // Copy eval cache
     m_last_energy     = model.m_last_energy;
+    m_last_norm       = model.m_last_norm;
     m_last_index      = model.m_last_index;
     m_last_pivot      = model.m_last_pivot;
     m_last_e_norm     = model.m_last_e_norm;

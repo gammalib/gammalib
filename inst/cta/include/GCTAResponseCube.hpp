@@ -29,9 +29,11 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GCTAResponse.hpp"
 #include "GCTAExposure.hpp"
 #include "GCTAMeanPsf.hpp"
+#include "GCTASourceCube.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -77,6 +79,11 @@ public:
     virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
+    // Overload base class methods
+    virtual double irf_ptsrc(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+
     // Other Methods
     const GCTAExposure&       exposure(void) const;
     void                      exposure(const GCTAExposure& exposure);
@@ -88,11 +95,15 @@ private:
     void init_members(void);
     void copy_members(const GCTAResponseCube& rsp);
     void free_members(void);
+    int  cache_index(const std::string& name) const;
 
     // Private data members
     GCTAExposure m_exposure;    //!< Exposure cube
     GCTAMeanPsf  m_psf;         //!< Mean point spread function
     mutable bool m_apply_edisp; //!< Apply energy dispersion
+
+    // Response cache
+    mutable std::vector<GCTASourceCube*> m_cache; //!< Response cache
 };
 
 

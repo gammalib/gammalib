@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventBin.cpp - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -440,6 +440,8 @@ std::string GCTAEventBin::print(const GChatter& chatter) const
 void GCTAEventBin::init_members(void)
 {
     // Initialise members
+    m_ipix       = -1;   //!< Not part of an event cube
+    m_ieng       = -1;   //!< Not part of an event cube
     m_energy     = NULL;
     m_dir        = NULL;
     m_time       = NULL;
@@ -461,6 +463,8 @@ void GCTAEventBin::init_members(void)
 void GCTAEventBin::copy_members(const GCTAEventBin& bin)
 {
     // Copy members
+    m_ipix       = bin.m_ipix;
+    m_ieng       = bin.m_ieng;
     m_energy     = bin.m_energy;
     m_dir        = bin.m_dir;
     m_time       = bin.m_time;

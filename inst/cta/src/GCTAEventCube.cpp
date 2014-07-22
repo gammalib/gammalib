@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GCTAEventCube::naxis(int)"
+#define G_ENERGY                                "GCTAEventCube::energy(int&)"
 #define G_SET_DIRECTIONS                    "GCTAEventCube::set_directions()"
 #define G_SET_ENERGIES                        "GCTAEventCube::set_energies()"
 #define G_SET_TIME                                "GCTAEventCube::set_time()"
@@ -454,6 +455,32 @@ void GCTAEventCube::map(const GSkymap& map)
 
 
 /***********************************************************************//**
+ * @brief Return energy of cube layer
+ *
+ * @param[in] index Event cube layer index [0,...,naxis(2)-1]
+ * @return Energy of event cube layer
+ *
+ * @exception GException::out_of_range
+ *            Layer index is out of range.
+ *
+ * Returns the energy of the event cube layer specified by @p index.
+ ***************************************************************************/
+const GEnergy& GCTAEventCube::energy(const int& index) const
+{
+    // Optionally check if the index is valid
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= naxis(2)) {
+        throw GException::out_of_range(G_ENERGY,
+              "CTA event cube energy axis", index, naxis(2));
+    }
+    #endif
+
+    // Return energy
+    return (m_energies[index]);
+}
+
+
+/***********************************************************************//**
  * @brief Print event cube information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -793,17 +820,17 @@ void GCTAEventCube::set_bin(const int& index)
         throw GCTAException::no_dirs(G_SET_BIN);
     }
 
-    // Get pixel and energy bin indices.
-    int ipix = index % npix();
-    int ieng = index / npix();
+    // Set pixel and energy bin indices.
+    m_bin.m_ipix = index % npix();
+    m_bin.m_ieng = index / npix();
 
     // Set pointers
     m_bin.m_counts     = const_cast<double*>(&(m_map.pixels()[index]));
-    m_bin.m_energy     = &(m_energies[ieng]);
+    m_bin.m_energy     = &(m_energies[m_bin.m_ieng]);
     m_bin.m_time       = &m_time;
-    m_bin.m_dir        = &(m_dirs[ipix]);
-    m_bin.m_solidangle = &(m_solidangle[ipix]);
-    m_bin.m_ewidth     = &(m_ewidth[ieng]);
+    m_bin.m_dir        = &(m_dirs[m_bin.m_ipix]);
+    m_bin.m_solidangle = &(m_solidangle[m_bin.m_ipix]);
+    m_bin.m_ewidth     = &(m_ewidth[m_bin.m_ieng]);
     m_bin.m_ontime     = &m_ontime;
 
     // Return

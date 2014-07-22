@@ -657,6 +657,11 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
  * interpolation of the neighbouring pixels. If the sky direction falls
  * outside the area covered by the skymap, a value of 0 is returned.
  *
+ * The method implements a computation cache that avoid recomputation of
+ * interpolation indices and weights in case that the same sky direction
+ * is requested several times. This speeds up use cases where skymap values
+ * for various map indices have to be returned for the same sky direction.
+ *
  * @todo The actual method only works on 2D images. It will fail for Healpix
  *       pixelisations.
  ***************************************************************************/
@@ -674,58 +679,89 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
     // Initialise intensity
     double intensity = 0.0;
 
-    // Determine sky pixel
-    GSkyPixel pixel = dir2pix(dir);
+    // If the sky direction is the same as during the last call, use the
+    // cached interpolation indices and weights for the computation ...
+    if (m_hascache && (dir == m_last_dir)) {
 
-    // Continue only if pixel is within the map
-    if (contains(pixel)) {
+        // Compute only if direction is contained
+        if (m_contained) {
 
-        // Set left indices for interpolation. The left index is comprised
-        // between 0 and npixels-2. By definition, the right index is then
-        // the left index + 1
-        int inx_x = int(pixel.x());
-        int inx_y = int(pixel.y());
-        if (inx_x < 0) {
-            inx_x = 0;
-        }
-        else if (inx_x > m_num_x-2) {
-            inx_x = m_num_x - 2;
-        }
-        if (inx_y < 0) {
-            inx_y = 0;
-        }
-        else if (inx_y > m_num_y-2) {
-            inx_y = m_num_y - 2;
-        }
+            // Compute map offset
+            int offset = m_num_pixels * map;
 
-        // Set weighting factors for interpolation
-        double wgt_x_right = (pixel.x() - inx_x);
-        double wgt_x_left  = 1.0 - wgt_x_right;
-        double wgt_y_right = (pixel.y() - inx_y);
-        double wgt_y_left  = 1.0 - wgt_y_right;
+            // Compute interpolated skymap value
+            intensity = m_wgt1 * m_pixels[m_inx1 + offset] +
+                        m_wgt2 * m_pixels[m_inx2 + offset] +
+                        m_wgt3 * m_pixels[m_inx3 + offset] +
+                        m_wgt4 * m_pixels[m_inx4 + offset];
 
-        // Compute skymap pixel indices for bi-linear interpolation
-        int inx1 = inx_x + inx_y * m_num_x;
-        int inx2 = inx1 + m_num_x;
-        int inx3 = inx1 + 1;
-        int inx4 = inx2 + 1;
+        } // endif: direction was contained in map
 
-        // Compute weighting factors for bi-linear interpolation
-        double wgt1 = wgt_x_left  * wgt_y_left;
-        double wgt2 = wgt_x_left  * wgt_y_right;
-        double wgt3 = wgt_x_right * wgt_y_left;
-        double wgt4 = wgt_x_right * wgt_y_right;
+    }
 
-        // Compute map offset
-        int offset = m_num_pixels * map;
+    // ... otherwise compute the interpolation indices and weights
+    else {
 
-        // Compute interpolated skymap value
-        intensity = wgt1 * m_pixels[inx1 + offset] +
-                    wgt2 * m_pixels[inx2 + offset] +
-                    wgt3 * m_pixels[inx3 + offset] +
-                    wgt4 * m_pixels[inx4 + offset];
+        // Determine sky pixel
+        GSkyPixel pixel = dir2pix(dir);
 
-    } // endif: pixel was within map
+        // Set containment flag and store actual sky direction as last
+        // direction
+        m_hascache  = true;
+        m_contained = contains(pixel);
+        m_last_dir  = dir;
+
+        // Continue only if pixel is within the map
+        if (m_contained) {
+
+            // Set left indices for interpolation. The left index is
+            // comprised between 0 and npixels-2. By definition, the
+            // right index is then the left index + 1
+            int inx_x = int(pixel.x());
+            int inx_y = int(pixel.y());
+            if (inx_x < 0) {
+                inx_x = 0;
+            }
+            else if (inx_x > m_num_x-2) {
+                inx_x = m_num_x - 2;
+            }
+            if (inx_y < 0) {
+                inx_y = 0;
+            }
+            else if (inx_y > m_num_y-2) {
+                inx_y = m_num_y - 2;
+            }
+
+            // Set weighting factors for interpolation
+            double wgt_x_right = (pixel.x() - inx_x);
+            double wgt_x_left  = 1.0 - wgt_x_right;
+            double wgt_y_right = (pixel.y() - inx_y);
+            double wgt_y_left  = 1.0 - wgt_y_right;
+
+            // Compute skymap pixel indices for bi-linear interpolation
+            m_inx1 = inx_x + inx_y * m_num_x;
+            m_inx2 = m_inx1 + m_num_x;
+            m_inx3 = m_inx1 + 1;
+            m_inx4 = m_inx2 + 1;
+
+            // Compute weighting factors for bi-linear interpolation
+            m_wgt1 = wgt_x_left  * wgt_y_left;
+            m_wgt2 = wgt_x_left  * wgt_y_right;
+            m_wgt3 = wgt_x_right * wgt_y_left;
+            m_wgt4 = wgt_x_right * wgt_y_right;
+
+            // Compute map offset
+            int offset = m_num_pixels * map;
+
+            // Compute interpolated skymap value
+            intensity = m_wgt1 * m_pixels[m_inx1 + offset] +
+                        m_wgt2 * m_pixels[m_inx2 + offset] +
+                        m_wgt3 * m_pixels[m_inx3 + offset] +
+                        m_wgt4 * m_pixels[m_inx4 + offset];
+
+        } // endif: pixel was within map
+
+    } // endelse: interpolation indices and weights were computed
 
     // Return intensity
     return intensity;
@@ -1385,6 +1421,19 @@ void GSkymap::init_members(void)
     m_proj       = NULL;
     m_pixels     = NULL;
 
+    // Initialise computation cache
+    m_hascache  = false;
+    m_contained = false;
+    m_last_dir.clear();
+    m_inx1 = 0;
+    m_inx2 = 0;
+    m_inx3 = 0;
+    m_inx4 = 0;
+    m_wgt1 = 0.0;
+    m_wgt2 = 0.0;
+    m_wgt3 = 0.0;
+    m_wgt4 = 0.0;
+
     // Return
     return;
 }
@@ -1426,6 +1475,19 @@ void GSkymap::copy_members(const GSkymap& map)
     m_num_maps   = map.m_num_maps;
     m_num_x      = map.m_num_x;
     m_num_y      = map.m_num_y;
+
+    // Copy computation cache
+    m_hascache  = map.m_hascache;
+    m_contained = map.m_contained;
+    m_last_dir  = map.m_last_dir;
+    m_inx1      = map.m_inx1;
+    m_inx2      = map.m_inx2;
+    m_inx3      = map.m_inx3;
+    m_inx4      = map.m_inx4;
+    m_wgt1      = map.m_wgt1;
+    m_wgt2      = map.m_wgt2;
+    m_wgt3      = map.m_wgt3;
+    m_wgt4      = map.m_wgt4;
 
     // Clone sky projection if it is valid
     if (map.m_proj != NULL) m_proj = map.m_proj->clone();

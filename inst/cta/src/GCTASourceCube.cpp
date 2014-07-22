@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelTemporal.cpp - Abstract temporal model base class         *
+ *        GCTASourceCube.cpp - Abstract CTA source cube base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelTemporal.cpp
- * @brief Abstract temporal model base class implementation
+ * @file GCTASourceCube.cpp
+ * @brief Abstract CTA source cube base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,12 +28,16 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
-#include "GModelTemporal.hpp"
+#include "GCTASourceCube.hpp"
+/*
+#include "GModelSpatial.hpp"
+#include "GObservation.hpp"
+#include "GModelSpatialPointSource.hpp"
+#include "GCTAEventCube.hpp"
+#include "GCTAResponseCube.hpp"
+*/
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                   "GModelTemporal::operator[](std::string&)"
-#define G_AT                            "GModelPar& GModelTemporal::at(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -41,21 +45,23 @@
 
 /* __ Debug definitions __________________________________________________ */
 
+/* __ Constants __________________________________________________________ */
+
 
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelTemporal::GModelTemporal(void)
+GCTASourceCube::GCTASourceCube(void)
 {
-    // Initialise members
+    // Initialise class members
     init_members();
-  
+
     // Return
     return;
 }
@@ -64,15 +70,15 @@ GModelTemporal::GModelTemporal(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Temporal model.
+ * @param[in] cube Source cube.
  ***************************************************************************/
-GModelTemporal::GModelTemporal(const GModelTemporal& model)
-{ 
-    // Initialise members
+GCTASourceCube::GCTASourceCube(const GCTASourceCube& cube)
+{
+    // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(model);
+    copy_members(cube);
 
     // Return
     return;
@@ -82,7 +88,7 @@ GModelTemporal::GModelTemporal(const GModelTemporal& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelTemporal::~GModelTemporal(void)
+GCTASourceCube::~GCTASourceCube(void)
 {
     // Free members
     free_members();
@@ -94,86 +100,34 @@ GModelTemporal::~GModelTemporal(void)
 
 /*==========================================================================
  =                                                                         =
- =                                Operators                                =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Temporal model.
- * @return Temporal model.
+ * @param[in] cube Source cube.
+ * @return Source cube.
  ***************************************************************************/
-GModelTemporal& GModelTemporal::operator=(const GModelTemporal& model)
-{ 
+GCTASourceCube& GCTASourceCube::operator=(const GCTASourceCube& cube)
+{
     // Execute only if object is not identical
-    if (this != &model) {
+    if (this != &cube) {
 
         // Free members
         free_members();
 
-        // Initialise members
+        // Initialise private members
         init_members();
 
         // Copy members
-        copy_members(model);
+        copy_members(cube);
 
     } // endif: object was not identical
-  
-    // Return
+
+    // Return this object
     return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to model parameter
- *
- * @param[in] name Parameter name.
- *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
- ***************************************************************************/
-GModelPar& GModelTemporal::operator[](const std::string& name)
-{
-    // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
-            break;
-    }
-
-    // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS, name);
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to model parameter (const version)
- *
- * @param[in] name Parameter name.
- *
- * @exception GException::par_not_found
- *            Parameter with specified name not found in container.
- ***************************************************************************/
-const GModelPar& GModelTemporal::operator[](const std::string& name) const
-{
-    // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
-            break;
-    }
-
-    // Throw exception if parameter name was not found
-    if (index >= size())
-        throw GException::par_not_found(G_ACCESS, name);
-
-    // Return reference
-    return *(m_pars[index]);
 }
 
 
@@ -183,85 +137,21 @@ const GModelPar& GModelTemporal::operator[](const std::string& name) const
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Returns model parameter
- *
- * @param[in] index Parameter index [0,...,size()-1].
- * @return Model parameter.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- *
- * Returns model parameter with @p index range checking.
- ***************************************************************************/
-GModelPar& GModelTemporal::at(const int& index)
-{
-    // Compile option: raise exception if index is out of range
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
-    }
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns model parameter (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- * @return Model parameter.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- *
- * Returns model parameter with @p index range checking.
- ***************************************************************************/
-const GModelPar& GModelTemporal::at(const int& index) const
-{
-    // Compile option: raise exception if index is out of range
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
-    }
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Autoscale parameters
- *
- * Sets the scale factors for all parameters so that the values are unity.
- ***************************************************************************/
-void GModelTemporal::autoscale(void)
-{
-    // Loop over all parameters
-    for (int i = 0; i < m_pars.size(); ++i) {
-        if (m_pars[i] != NULL) {
-            m_pars[i]->autoscale();
-        }
-    }
-
-    // Return
-    return;
-}
-
 
 /*==========================================================================
  =                                                                         =
- =                             Private methods                             =
+ =                            Private methods                              =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelTemporal::init_members(void)
+void GCTASourceCube::init_members(void)
 {
     // Initialise members
-    m_pars.clear();
-
+    m_name.clear();
+   
     // Return
     return;
 }
@@ -270,22 +160,21 @@ void GModelTemporal::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Temporal model.
+ * @param[in] cube Source cube.
  ***************************************************************************/
-void GModelTemporal::copy_members(const GModelTemporal& model)
+void GCTASourceCube::copy_members(const GCTASourceCube& cube)
 {
     // Copy members
-    m_pars = model.m_pars;
+    m_name = cube.m_name;
 
     // Return
     return;
 }
 
-
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelTemporal::free_members(void)
+void GCTASourceCube::free_members(void)
 {
     // Return
     return;

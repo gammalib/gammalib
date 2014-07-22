@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelTemporal.hpp - Abstract temporal model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,8 +76,10 @@ public:
     virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
-    int  size(void) const;
-    void autoscale(void);
+    GModelPar&       at(const int& index);
+    const GModelPar& at(const int& index) const;
+    int              size(void) const;
+    void             autoscale(void);
     
 protected:
     // Protected methods
@@ -88,5 +90,49 @@ protected:
     // Proteced members
     std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter.
+ *
+ * Returns model parameter without @p index range checking.
+ ***************************************************************************/
+inline
+GModelPar& GModelTemporal::operator[](const int& index)
+{
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter.
+ *
+ * Returns model parameter without @p index range checking.
+ ***************************************************************************/
+inline
+const GModelPar& GModelTemporal::operator[](const int& index) const
+{
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of parameters
+ *
+ * @return Number of parameters in temporal model component.
+ *
+ * Returns the number of parameters in the temporal model component.
+ ***************************************************************************/
+inline
+int GModelTemporal::size(void) const
+{
+    return (m_pars.size());
+}
 
 #endif /* GMODELTEMPORAL_HPP */

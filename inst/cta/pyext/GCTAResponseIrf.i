@@ -29,6 +29,62 @@
 %}
 
 
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GCTAAeff* {
+    if (dynamic_cast<GCTAAeff2D*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAAeff2D, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTAAeffArf*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAAeffArf, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTAAeffPerfTable*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAAeffPerfTable, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAAeff, 0 |  0 );
+    }
+}
+%typemap(out) GCTAPsf* {
+    if (dynamic_cast<GCTAPsf2D*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAPsf2D, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTAPsfKing*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAPsfKing, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTAPsfPerfTable*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAPsfPerfTable, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTAPsfVector*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAPsfVector, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAPsf, 0 |  0 );
+    }
+}
+%typemap(out) GCTAEdisp* {
+    if (dynamic_cast<GCTAEdispPerfTable*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAEdispPerfTable, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTAEdispRmf*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAEdispRmf, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAEdisp, 0 |  0 );
+    }
+}
+%typemap(out) GCTABackground* {
+    if (dynamic_cast<GCTABackground3D*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTABackground3D, 0 |  0 );
+    }
+    else if (dynamic_cast<GCTABackgroundPerfTable*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTABackgroundPerfTable, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTABackground, 0 |  0 );
+    }
+}
+
+
 /***********************************************************************//**
  * @class GCTAResponseIrf
  *

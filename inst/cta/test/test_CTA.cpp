@@ -1155,7 +1155,6 @@ void TestGCTAObservation::test_cube_obs(void)
     test_try("Test XML loading and saving");
     try {
         obs = GObservations(cta_cube_xml);
-std::cout << obs << std::endl;
         obs.save(filename);
         test_try_success();
     }
@@ -1308,12 +1307,12 @@ void TestGCTAOptimize::test_cube_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.72212e-16, 2.01231e-17,
-                            -2.49299, 0.0262966,
+                            -2.48412, 0.0258234,
                             300000, 0,
                             1, 0,
-                            2.87688, 0.0621603,
+                            2.93338, 0.0663668,
                             6.68923e-05, 1.96972e-06,
-                            -1.84336, 0.0159896,
+                            -1.83394, 0.0159896,
                             1000000, 0,
                             1, 0};
     test_try("Perform LM optimization");
