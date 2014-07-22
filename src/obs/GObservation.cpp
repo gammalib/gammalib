@@ -253,7 +253,7 @@ double GObservation::likelihood(const GModels& models,
  * @param[in] event Observed event.
  * @param[out] gradient Pointer to gradient vector (optional).
  *
- * @exception GException::gradient_par_mismatch
+ * @exception GException::invalid_value
  *            Dimension of gradient vector mismatches number of parameters.
  *
  * Implements generic model and gradient evaluation for an observation. The
@@ -269,24 +269,16 @@ double GObservation::likelihood(const GModels& models,
 double GObservation::model(const GModels& models, const GEvent& event,
                            GVector* gradient) const
 {
-    // Verify that gradient vector and models have the same dimension
-    #if defined(G_RANGE_CHECK)
-    if (gradient != NULL) {
-        if (models.npars() != gradient->size()) {
-            throw GException::gradient_par_mismatch(G_MODEL, 
-                                                    gradient->size(),
-                                                    models.npars());
-        }
-    }
-    #endif
-
-    // Initialise
-    double model = 0.0;    // Reset model value
-    int    igrad = 0;      // Reset gradient counter
-
+    // Initialise method variables
+    double model     = 0.0;    // Reset model value
+    int    igrad     = 0;      // Reset gradient counter
+    int    grad_size = 0;      // Reset gradient size
+    
     // If gradient is available then reset gradient vector elements to 0
+    // and determine vector size
     if (gradient != NULL) {
         (*gradient) = 0.0;
+        grad_size   = gradient->size();
     }
 
     // Loop over models
@@ -311,11 +303,33 @@ double GObservation::model(const GModels& models, const GEvent& event,
                     model += mptr->eval_gradients(event, *this);
                 }
 
-                // Optionally determine model gradients
+                // Optionally determine model gradients. If the model has a
+                // gradient then use it, unless we have energy dispersion.
+                // For energy dispersion, no gradients are available as we
+                // have not implemented code that integrates the gradients
+                // over the energy dispersion. Here it's simpler to just use
+                // numerical gradients.
                 if (gradient != NULL) {
                     for (int ipar = 0; ipar < mptr->size(); ++ipar) {
-                        #if defined(G_TEST_CODE)
+
+                        // Get reference to model parameter
                         const GModelPar& par = (*mptr)[ipar];
+
+                        // Make sure that we have a slot for the gradient
+                        #if defined(G_RANGE_CHECK)
+                        if (igrad >= grad_size) {
+                            std::string msg = "Vector has not enough elements "
+                                              "to store the model parameter "
+                                              "gradients. "+
+                                              gammalib::str(models.npars())+
+                                              " elements requested while vector "
+                                              "only contains "+
+                                              gammalib::str(gradient->size())+
+                                              " elements.";
+                            throw GException::invalid_value(G_MODEL, msg);
+                        }
+                        #endif
+
                         if (par.is_free()) {
                             if (par.has_grad() && !response()->use_edisp()) {
                                 (*gradient)[igrad+ipar] = par.factor_gradient();
@@ -327,9 +341,6 @@ double GObservation::model(const GModels& models, const GEvent& event,
                         else {
                             (*gradient)[igrad+ipar] = 0.0;
                         }
-                        #else
-                        (*gradient)[igrad+ipar] = model_grad(*mptr, par, ipar, event);
-                        #endif
                     }
                 }
 
@@ -464,88 +475,68 @@ double GObservation::model_grad(const GModel&    model,
     // Compute gradient only if parameter is free
     if (par.is_free()) {
 
-        // If model has a gradient then use it, unless we have energy
-        // dispersion. For energy dispersion, no gradients are available
-        // as we have not implemented code that integrates the gradients
-        // over the energy dispersion. Here it's simpler to just use
-        // numerical gradients.
-        #if defined(G_TEST_CODE)
-        #else
-        if (par.has_grad() && !response()->use_edisp()) {
-            grad = par.factor_gradient();
+        // Get non-const model pointer
+        GModelPar* ptr = const_cast<GModelPar*>(&par);
+
+        // Save current model parameter
+        GModelPar current = par;
+
+        // Get actual parameter value
+        double x = par.factor_value();
+
+        // Set fixed step size for computation of derivative.
+        // By default, the step size is fixed to 0.0002, but if this would
+        // violate a boundary, dx is reduced accordingly. In case that x
+        // is right on the boundary, x is displaced slightly from the
+        // boundary to allow evaluation of the derivative.
+        #if !defined(G_GRAD_RIDDLER)
+        const double step_size = 0.0002;
+        double       dx        = step_size;
+        if (par.has_min()) {
+            double dx_min = x - par.factor_min();
+            if (dx_min == 0.0) {
+                dx = step_size * x;
+                if (dx == 0.0) {
+                    dx = step_size;
+                }
+                x += dx; 
+            }
+            else if (dx_min < dx) {
+                dx = dx_min;
+            }
         }
-
-        // ... otherwise compute it numerically
-        else {
+        if (par.has_max()) {
+            double dx_max = par.factor_max() - x;
+            if (dx_max == 0.0) {
+                dx = step_size * x;
+                if (dx == 0.0) {
+                    dx = step_size;
+                }
+                x -= dx; 
+            }
+            else if (dx_max < dx) {
+                dx = dx_max;
+            }
+        }
         #endif
 
-            // Get non-const model pointer
-            GModelPar* ptr = const_cast<GModelPar*>(&par);
+        // Remove any boundaries to avoid limitations
+        ptr->remove_range();
 
-            // Save current model parameter
-            GModelPar current = par;
+        // Setup derivative function
+        GObservation::model_func function(this, model, event, ipar);
 
-            // Get actual parameter value
-            double x = par.factor_value();
-
-            // Set fixed step size for computation of derivative.
-            // By default, the step size is fixed to 0.0002, but if this would
-            // violate a boundary, dx is reduced accordingly. In case that x
-            // is right on the boundary, x is displaced slightly from the
-            // boundary to allow evaluation of the derivative.
-            #if !defined(G_GRAD_RIDDLER)
-            const double step_size = 0.0002;
-            double       dx        = step_size;
-            if (par.has_min()) {
-                double dx_min = x - par.factor_min();
-                if (dx_min == 0.0) {
-                    dx = step_size * x;
-                    if (dx == 0.0) {
-                        dx = step_size;
-                    }
-                    x += dx; 
-                }
-                else if (dx_min < dx) {
-                    dx = dx_min;
-                }
-            }
-            if (par.has_max()) {
-                double dx_max = par.factor_max() - x;
-                if (dx_max == 0.0) {
-                    dx = step_size * x;
-                    if (dx == 0.0) {
-                        dx = step_size;
-                    }
-                    x -= dx; 
-                }
-                else if (dx_max < dx) {
-                    dx = dx_max;
-                }
-            }
-            #endif
-
-            // Remove any boundaries to avoid limitations
-            ptr->remove_range();
-
-            // Setup derivative function
-            GObservation::model_func function(this, model, event, ipar);
-
-            // Get derivative. We use a fixed step size here that has been
-            // checked on spatial parameters of models
-            GDerivative derivative(&function);
-            #if defined(G_GRAD_RIDDLER)
-            grad = derivative.value(x);
-            #else
-            grad = derivative.difference(x, dx);
-            #endif
-
-            // Restore current model parameter
-            *ptr = current;
-
-        #if defined(G_TEST_CODE)
+        // Get derivative. We use a fixed step size here that has been
+        // checked on spatial parameters of models
+        GDerivative derivative(&function);
+        #if defined(G_GRAD_RIDDLER)
+        grad = derivative.value(x);
         #else
-        } // endelse: computed gradient numerically
+        grad = derivative.difference(x, dx);
         #endif
+
+        // Restore current model parameter
+        *ptr = current;
 
     } // endif: model parameter was free
 
