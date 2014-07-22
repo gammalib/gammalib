@@ -159,7 +159,8 @@ protected:
     std::vector<GModelPar>   m_scales;       //!< Model instrument scale factors
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
-    double                   m_ts;           //!< Test Statistic of the Model
+    bool                     m_has_ts;       //!< Signals if TS is available
+    double                   m_ts;           //!< Test Statistic of the model
 };
 
 
@@ -239,11 +240,13 @@ void GModel::name(const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Return TS value
+ * @brief Return Test Statistic value
  *
- * @return TS value.
+ * @return Test Statistic value.
  *
- * Returns the TS value.
+ * Returns the Test Statistic value. The Test Statistic value is twice the
+ * difference between the log-likelihood of the null hypothesis and the
+ * alternative hypothesis.
  ***************************************************************************/
 inline
 const double& GModel::ts(void) const
@@ -253,16 +256,19 @@ const double& GModel::ts(void) const
 
 
 /***********************************************************************//**
- * @brief Set TS value
+ * @brief Set Test Statistic value
  *
- * @param[in] TS value.
+ * @param[in] ts Test Statistic value.
  *
- * Set the TS value.
+ * Set the Test Statistic value. The Test Statistic value is twice the
+ * difference between the log-likelihood of the null hypothesis and the
+ * alternative hypothesis.
  ***************************************************************************/
 inline
 void GModel::ts(const double& ts)
 {
-    m_ts = ts;
+    m_ts     = ts;
+    m_has_ts = true; //!< Signals that TS is now available
     return;
 }
 

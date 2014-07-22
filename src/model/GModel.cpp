@@ -554,7 +554,8 @@ void GModel::init_members(void)
     m_scales.clear();
     m_ids.clear();
     m_pars.clear();
-    m_ts = 0.0;
+    m_ts     = 0.0;
+    m_has_ts = false;
     
     // Return
     return;
@@ -575,6 +576,7 @@ void GModel::copy_members(const GModel& model)
     m_ids         = model.m_ids;
     m_pars        = model.m_pars;
     m_ts          = model.m_ts;
+    m_has_ts      = model.m_has_ts;
 
     // Return
     return;
@@ -731,6 +733,12 @@ std::string GModel::print_attributes(void) const
     }
     else {
         result.append("all");
+    }
+
+    // Append Test Statistic
+    if (m_has_ts) {
+        result.append("\n"+gammalib::parformat("Test Statistic"));
+        result.append(gammalib::str(ts()));
     }
 
     // Append instrument scale factors

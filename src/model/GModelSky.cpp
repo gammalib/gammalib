@@ -618,7 +618,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
  * Reads the sky model from an XML element. The XML element is expected to
  * respect the following format:
  *
- *     <source name=".." type=".." instrument=".." id="..">
+ *     <source name=".." type=".." instrument=".." id=".." ts="..">
  *       <spectrum type="..">
  *         ..
  *       </spectrum>
@@ -630,7 +630,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
  * Optionally, the model may also contain scale parameters following the
  * format:
  *
- *     <source name=".." type=".." instrument=".." id="..">
+ *     <source name=".." type=".." instrument=".." id=".." ts="..">
  *       <spectrum type="..">
  *         ..
  *       </spectrum>
@@ -666,7 +666,10 @@ void GModelSky::read(const GXmlElement& xml)
     name(xml.attribute("name"));
 
     // Set model TS
-    ts(gammalib::todouble(xml.attribute("ts")));
+    std::string ts = xml.attribute("ts");
+    if (ts.length() > 0) {
+        this->ts(gammalib::todouble(ts));
+    }
 
     // Set instruments
     instruments(xml.attribute("instrument"));
@@ -696,7 +699,7 @@ void GModelSky::read(const GXmlElement& xml)
  * Writes the sky model into an XML source library. The format written to
  * the @p xml element is as follows:
  *
- *     <source name=".." type=".." instrument=".." id="..">
+ *     <source name=".." type=".." instrument=".." id=".." ts="..">
  *       <spectrum type="..">
  *         ..
  *       </spectrum>
@@ -738,7 +741,6 @@ void GModelSky::write(GXmlElement& xml) const
     // Set model attributes
     src->attribute("name", name());
     src->attribute("type", type());
-    src->attribute("ts", gammalib::str(ts(), 8));
     std::string instruments = this->instruments();
     if (instruments.length() > 0) {
         src->attribute("instrument", instruments);
@@ -746,6 +748,11 @@ void GModelSky::write(GXmlElement& xml) const
     std::string identifiers = ids();
     if (identifiers.length() > 0) {
         src->attribute("id", identifiers);
+    }
+
+    // If available, set TS attribute
+    if (m_has_ts) {
+        src->attribute("ts", gammalib::str(ts(), 3));
     }
 
     // Write spectral model
