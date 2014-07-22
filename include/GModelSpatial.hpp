@@ -97,8 +97,10 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
-    int  size(void) const;
-    void autoscale(void);
+    GModelPar&       at(const int& index);
+    const GModelPar& at(const int& index) const;
+    int              size(void) const;
+    void             autoscale(void);
 
 protected:
     // Protected methods
@@ -109,6 +111,36 @@ protected:
     // Proteced members
     std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter.
+ *
+ * Returns model parameter without @p index range checking.
+ ***************************************************************************/
+inline
+GModelPar& GModelSpatial::operator[](const int& index)
+{
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns model parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter.
+ *
+ * Returns model parameter without @p index range checking.
+ ***************************************************************************/
+inline
+const GModelPar& GModelSpatial::operator[](const int& index) const
+{
+    return *(m_pars[index]);
+}
 
 
 /***********************************************************************//**
