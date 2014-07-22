@@ -495,7 +495,7 @@ void GModel::ids(const std::string& ids)
  * is empty, the model applies to all identifiers.
  ***************************************************************************/
 bool GModel::is_valid(const std::string& instrument,
-                     const std::string& id) const
+                      const std::string& id) const
 {
     // Initialise validity
     bool valid = true;

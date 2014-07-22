@@ -142,7 +142,7 @@ public:
     std::string         ids(void) const;
     void                ids(const std::string& ids);
     bool                is_valid(const std::string& instruments,
-                                const std::string& ids) const;
+                                 const std::string& ids) const;
 
 protected:
     // Protected methods
