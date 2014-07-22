@@ -30,6 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 
+/* __ CTA typemaps _______________________________________________________ */
+#include "GCTATypemaps.hpp"
+
 /* __ CTA specific headers _______________________________________________ */
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"

@@ -54,7 +54,8 @@ sources = src/GCTASupport.cpp \
           src/GCTAModelRadialAcceptance.cpp
 
 # Define headers to be installed
-pkginclude_HEADERS = include/GCTAException.hpp \
+pkginclude_HEADERS = include/GCTATypemaps.hpp \
+                     include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
                      include/GCTAOnOffObservation.hpp \
                      include/GCTAOnOffObservations.hpp \
