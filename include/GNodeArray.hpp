@@ -155,7 +155,6 @@ double& GNodeArray::operator[](const int& index)
 inline
 const double& GNodeArray::operator[](const int& index) const
 {
-    m_need_setup = true;
     return (m_node[index]);
 }
 
