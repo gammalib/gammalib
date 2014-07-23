@@ -406,10 +406,10 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
  * is repeated. Dividing of sub-intervals is stopped when the difference
  * between subsequent intervals falls below the relative tolerance specified
  * by eps(). The maximum recursion depth is set by the max_iter() method.
- 
- std::abs(dss) <= m_eps * std::abs(ss)
-std::abs(S2 - S) <= 15.0 * m_eps * std::abs(S2))
- 
+ *
+ * I almost do not dare to confess, but the code has been taken from
+ * http://en.wikipedia.org/wiki/Adaptive_Simpson%27s_method
+ * It's really pretty simple ...
  ***************************************************************************/
 double GIntegral::adaptive_simpson(const double& a, const double& b) const
 {
@@ -674,7 +674,7 @@ double GIntegral::adaptive_simpson_aux(const double& a, const double& b,
     // Evaluate function at mid-points d and e
     double fd = m_kernel->eval(d);
     double fe = m_kernel->eval(e);
-    m_calls += 2;
+    m_calls  += 2;
     
     // Compute integral using Simpson's rule for the left and right interval
     double h12    = h / 12.0;
