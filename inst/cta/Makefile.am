@@ -41,6 +41,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAMeanPsf.cpp \
           src/GCTASourceCube.cpp \
           src/GCTASourceCubePointSource.cpp \
+          src/GCTASourceCubeDiffuse.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -89,6 +90,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAMeanPsf.hpp \
                      include/GCTASourceCube.hpp \
                      include/GCTASourceCubePointSource.hpp \
+                     include/GCTASourceCubeDiffuse.hpp \
                      include/GCTAModelCubeBackground.hpp \
                      include/GCTAModelIrfBackground.hpp \
                      include/GCTAModelRadialRegistry.hpp \

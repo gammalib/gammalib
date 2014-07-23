@@ -83,12 +83,15 @@ public:
     virtual double irf_ptsrc(const GEvent&       event,
                              const GSource&      source,
                              const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
 
     // Other Methods
-    const GCTAExposure&       exposure(void) const;
-    void                      exposure(const GCTAExposure& exposure);
-    const GCTAMeanPsf&        psf(void) const;
-    void                      psf(const GCTAMeanPsf& psf);
+    const GCTAExposure& exposure(void) const;
+    void                exposure(const GCTAExposure& exposure);
+    const GCTAMeanPsf&  psf(void) const;
+    void                psf(const GCTAMeanPsf& psf);
 
 private:
     // Private methods

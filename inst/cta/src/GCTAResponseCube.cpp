@@ -33,7 +33,9 @@
 #include "GTools.hpp"
 #include "GCTAResponseCube.hpp"
 #include "GCTASourceCubePointSource.hpp"
+#include "GCTASourceCubeDiffuse.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialDiffuse.hpp"
 #include "GPhoton.hpp"
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
@@ -47,7 +49,9 @@
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
 #define G_IRF_PTSRC          "GCTAResponseCube::irf_ptsrc(GEvent&, GSource&,"\
                                                             " GObservation&)"
-#define G_NPRED_DIFFUSE    "GCTAResponseCube::npred(GPhoton&, GObservation&)"
+#define G_IRF_DIFFUSE      "GCTAResponseCube::irf_diffuse(GEvent&, GSource&,"\
+                                                            " GObservation&)"
+#define G_NPRED            "GCTAResponseCube::npred(GPhoton&, GObservation&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -473,6 +477,81 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
 
 
 /***********************************************************************//**
+ * @brief Return value of diffuse source instrument response function
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Value of instrument response function for a diffuse source.
+ *
+ * This method returns the value of the instrument response function for a
+ * diffuse source.
+ *
+ * The method assumes that source.model() is of type GModelSpatialDiffuse.
+ ***************************************************************************/
+double GCTAResponseCube::irf_diffuse(const GEvent&       event,
+                                     const GSource&      source,
+                                     const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to source cache. We first search the cache for a model
+    // with the source name. If no model was found we initialise a new
+    // cache entry for that model. Otherwise, we simply return the actual
+    // cache entry.
+    GCTASourceCubeDiffuse* cache(NULL);
+    int index = cache_index(source.name());
+    if (index == -1) {
+    
+        // No cache entry was found, thus allocate an initialise a new one
+        cache = new GCTASourceCubeDiffuse;
+        cache->set(source.name(), *source.model(), obs);
+        m_cache.push_back(cache);
+
+    } // endif: no cache entry was found
+    else {
+    
+        // Check that the cache entry is of the expected type
+        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_DIFFUSE) {
+            std::string msg = "Cached model \""+source.name()+"\" is not "
+                              "a diffuse source model. This method only applies "
+                              "to diffuse source models.";
+            throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+        }
+        cache = static_cast<GCTASourceCubeDiffuse*>(m_cache[index]);
+        
+    } // endelse: there was a cache entry for this model
+
+    // Get pointer on CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+
+    // Determine IRF value
+    irf = cache->irf(bin->ipix(), bin->ieng());
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_diffuse:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
  * @brief Return spatial integral of point spread function
  *
  * @param[in] photon Incident photon.
@@ -485,8 +564,8 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
                                const GObservation& obs) const
 {
     // Feature not yet implemented
-    throw GException::feature_not_implemented(G_NPRED_DIFFUSE,
-          "Npred computation not implemented for cube-style analysis.");
+    throw GException::feature_not_implemented(G_NPRED,
+          "Npred computation not implemented for cube analysis.");
 
     // Return Npred
     return 0.0;
