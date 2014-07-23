@@ -49,7 +49,7 @@
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
 #define G_IRF_PTSRC          "GCTAResponseCube::irf_ptsrc(GEvent&, GSource&,"\
                                                             " GObservation&)"
-#define G_IRF_DIFFUSE      "GCTAResponseCube::irf_diffuse(GEvent&, GSource&,"\
+#define G_IRF_EXTENDED    "GCTAResponseCube::irf_extended(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_NPRED            "GCTAResponseCube::npred(GPhoton&, GObservation&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
@@ -57,7 +57,6 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_USE_CACHE                                 //!< Use response cache
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -303,6 +302,42 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
+ * @brief Return value of instrument response function
+ *
+ * @param[in] event Event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * Returns the instrument response function for a given event, source and
+ * observation.
+ ***************************************************************************/
+double GCTAResponseCube::irf(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const
+{
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Select IRF depending on the spatial model type
+    switch (source.model()->code()) {
+        case GMODEL_SPATIAL_POINT_SOURCE:
+            irf = irf_ptsrc(event, source, obs);
+            break;
+        case GMODEL_SPATIAL_RADIAL:
+        case GMODEL_SPATIAL_ELLIPTICAL:
+        case GMODEL_SPATIAL_DIFFUSE:
+            irf = irf_extended(event, source, obs);
+            break;
+        default:
+            break;
+    }
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
  * @brief Return value of point source instrument response function
  *
  * @param[in] event Observed event.
@@ -312,11 +347,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
  *
  * This method returns the value of the instrument response function for a
  * point source.
- *
- * The method assumes that source.model() is of type
- * GModelSpatialPointSource.
  ***************************************************************************/
-#if defined(G_USE_CACHE)
 double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
                                    const GSource&      source,
                                    const GObservation& obs) const
@@ -405,96 +436,41 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // Return IRF value
     return irf;
 }
-#else
-double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
-                                   const GSource&      source,
-                                   const GObservation& obs) const
+
+
+/***********************************************************************//**
+ * @brief Return value of extended source instrument response function
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Value of instrument response function for an extended source.
+ *
+ * This method returns the value of the instrument response function for an
+ * extended source. It uses a pre-computation cache to store the IRF for
+ * the spatial model component.
+ *
+ * The pre-computation cache is initialised if no cache has yet been
+ * allocated, or if at the beginning of a scan over the events, the model
+ * parameters have changed. The beginning of a scan is defined by an event
+ * bin index of 0.
+ ***************************************************************************/
+double GCTAResponseCube::irf_extended(const GEvent&       event,
+                                      const GSource&      source,
+                                      const GObservation& obs) const
 {
     // Initialise IRF
     double irf = 0.0;
 
-    // Get pointer to model source model
-    const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
-
-    // Get point source direction
-    GSkyDir srcDir = ptsrc->dir();
-
-    // Get pointer on CTA event bin
+    // Get pointer to CTA event bin
     if (!event.is_bin()) {
         std::string msg = "The current event is not a CTA event bin. "
                           "This method only works on binned CTA data. Please "
                           "make sure that a CTA observation containing binned "
                           "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_PTSRC, msg);
+        throw GException::invalid_value(G_IRF_EXTENDED, msg);
     }
     const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-    
-    // Determine angular separation between true and measured photon
-    // direction in radians
-    double delta = bin->dir().dir().dist(srcDir);
-
-    // Get maximum angular separation for PSF (in radians) and add 10%
-    // of margin
-    double delta_max = 1.1 * psf().delta_max();
-
-    // Compute only if we're sufficiently close to PSF
-    if (delta <= delta_max) {
-
-        // Get exposure
-        irf = exposure()(srcDir, source.energy());
-
-        // Multiply-in PSF
-        if (irf > 0.0) {
-
-            // Get PSF component
-            irf *= psf()(srcDir, delta, source.energy());
-
-            // Divide by ontime as the binned likelihood function is
-            // later multiplying by ontime
-            irf /= obs.ontime();
-
-            // Apply deadtime correction
-            irf *= obs.deadc(source.time());
-
-        } // endif: exposure was non-zero
-
-    } // endif: we were sufficiently close to PSF
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCTAResponseCube::irf_ptsrc:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " irf=" << irf;
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return IRF value
-    return irf;
-}
-#endif
-
-
-/***********************************************************************//**
- * @brief Return value of diffuse source instrument response function
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Value of instrument response function for a diffuse source.
- *
- * This method returns the value of the instrument response function for a
- * diffuse source.
- *
- * The method assumes that source.model() is of type GModelSpatialDiffuse.
- ***************************************************************************/
-double GCTAResponseCube::irf_diffuse(const GEvent&       event,
-                                     const GSource&      source,
-                                     const GObservation& obs) const
-{
-    // Initialise IRF
-    double irf = 0.0;
 
     // Get pointer to source cache. We first search the cache for a model
     // with the source name. If no model was found we initialise a new
@@ -504,7 +480,7 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     int index = cache_index(source.name());
     if (index == -1) {
     
-        // No cache entry was found, thus allocate an initialise a new one
+        // No cache entry was found, thus allocate and initialise a new one
         cache = new GCTASourceCubeDiffuse;
         cache->set(source.name(), *source.model(), obs);
         m_cache.push_back(cache);
@@ -513,25 +489,30 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     else {
     
         // Check that the cache entry is of the expected type
-        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_DIFFUSE) {
+        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_EXTENDED) {
             std::string msg = "Cached model \""+source.name()+"\" is not "
-                              "a diffuse source model. This method only applies "
-                              "to diffuse source models.";
-            throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+                              "an extended source model. This method only "
+                              "applies to extended source models.";
+            throw GException::invalid_value(G_IRF_EXTENDED, msg);
         }
         cache = static_cast<GCTASourceCubeDiffuse*>(m_cache[index]);
-        
-    } // endelse: there was a cache entry for this model
 
-    // Get pointer on CTA event bin
-    if (!event.is_bin()) {
-        std::string msg = "The current event is not a CTA event bin. "
-                          "This method only works on binned CTA data. Please "
-                          "make sure that a CTA observation containing binned "
-                          "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
-    }
-    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+        // If we have the first pixel and if the model parameters have
+        // changed since the last call,  then update the response cache
+        if (bin->ipix() == 0 && bin->ieng() == 0) {
+            bool changed = false;
+            for (int i = 0; i < source.model()->size(); ++i) {
+                if ((*source.model())[i].value() != cache->par(i)) {
+                    changed = true;
+                    break;
+                }
+            }
+            if (changed) {
+                cache->set(source.name(), *source.model(), obs);
+            }
+        }
+
+    } // endelse: there was a cache entry for this model
 
     // Determine IRF value
     irf = cache->irf(bin->ipix(), bin->ieng());

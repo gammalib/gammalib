@@ -80,12 +80,15 @@ public:
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
     // Overload base class methods
+    virtual double irf(const GEvent&       event,
+                       const GSource&      source,
+                       const GObservation& obs) const;
     virtual double irf_ptsrc(const GEvent&       event,
                              const GSource&      source,
                              const GObservation& obs) const;
-    virtual double irf_diffuse(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
+    virtual double irf_extended(const GEvent&       event,
+                                const GSource&      source,
+                                const GObservation& obs) const;
 
     // Other Methods
     const GCTAExposure& exposure(void) const;

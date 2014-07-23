@@ -45,7 +45,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_PSF_INTEGRATE               //!< Integrate map over PSF (default)
+//#define G_PSF_INTEGRATE               //!< Integrate map over PSF (default)
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -191,13 +191,6 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
                                 const GModelSpatial& model,
                                 const GObservation&  obs)
 {
-    // Get pointer to model source model
-    const GModelSpatialDiffuse* src = dynamic_cast<const GModelSpatialDiffuse*>(&model);
-    if (src == NULL) {
-        std::string msg = "Model is not a spatial diffuse source model.";
-        throw GException::invalid_value(G_SET, msg);
-    }
-
     // Get pointer on CTA event cube
     const GCTAEventCube* cube = dynamic_cast<const GCTAEventCube*>(obs.events());
     if (cube == NULL) {
@@ -213,8 +206,30 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
     }
 
     // Get diffuse source attributes
-    m_name        = name;
-    GTime obsTime = cube->time();
+    m_name          = name;
+    GTime   obsTime = cube->time();
+    GSkyDir centre;
+    double  theta_max = 99.0;
+
+    // Store spatial model parameter values
+    m_pars.clear();
+    for (int i = 0; i < model.size(); ++i) {
+        m_pars.push_back(model[i].value());
+    }
+
+    // Get attributes for radial or elliptical model
+    const GModelSpatialRadial* radial = dynamic_cast<const GModelSpatialRadial*>(&model);
+    if (radial != NULL) {
+        centre    = radial->dir();
+        theta_max = radial->theta_max();
+    }
+    else {
+        const GModelSpatialElliptical* elliptical = dynamic_cast<const GModelSpatialElliptical*>(&model);
+        if (radial != NULL) {
+            centre    = elliptical->dir();
+            theta_max = elliptical->theta_max();
+        }
+    }
 
     // Setup empty skymap
     m_cube = cube->map();
@@ -226,44 +241,68 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
         // Get cube pixel sky direction
         GSkyDir obsDir = cube->map().inx2dir(pixel);
 
-        // Loop over all energy bins
-        for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
+        // Compute distance to model centre in radians
+        double theta = centre.dist(obsDir);
+        if (theta <= theta_max) {
 
-            // Get cube layer energy
-            const GEnergy& obsEng = cube->energy(iebin);
+            // Loop over all energy bins
+            for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
 
-            // Determine deadtime corrected effective area. We assume here
-            // that the effective area does not vary significantly over the
-            // PSF and just compute it at the pixel centre. We furthermore
-            // assume no energy dispersion, and thus compute effective
-            // area using the observed energy.
-            double aeff = rsp->exposure()(obsDir, obsEng) *
-                          obs.deadc(obsTime) /
-                          obs.ontime();
+                // Get cube layer energy
+                const GEnergy& obsEng = cube->energy(iebin);
 
-            // Continue only if effective area is positive
-            if (aeff > 0.0) {
+                // Determine deadtime corrected effective area. We assume
+                // here that the effective area does not vary significantly
+                // over the PSF and just compute it at the pixel centre. We
+                // furthermore assume no energy dispersion, and thus compute
+                // effective area using the observed energy.
+                double aeff = rsp->exposure()(obsDir, obsEng) *
+                              obs.deadc(obsTime) /
+                              obs.ontime();
 
-                // Compute product of PSF and diffuse map, integrated over
-                // the relevant PSF area. We assume no energy dispersion and
-                // thus compute the product using the observed energy.
-                #if defined(G_PSF_INTEGRATE)
-                double psf = this->psf(rsp, src, obsDir, obsEng, obsTime);
-                #else
-                double psf = src->eval(GPhoton(obsDir, obsEng, obsTime));
-                #endif
+                // Continue only if effective area is positive
+                if (aeff > 0.0) {
 
-                // Set cube value
-                m_cube(pixel, iebin) = aeff * psf;
+                    // Compute product of PSF and diffuse map, integrated
+                    // over the relevant PSF area. We assume no energy
+                    // dispersion and thus compute the product using the
+                    // observed energy.
+                    #if defined(G_PSF_INTEGRATE)
+                    double psf = this->psf(rsp, &model, obsDir, obsEng, obsTime);
+                    #else
+                    double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
+                    #endif
 
-            } // endif: effective area was positive
+                    // Set cube value
+                    m_cube(pixel, iebin) = aeff * psf;
+
+                } // endif: effective area was positive
             
-        } // endfor: looped over all energy layers
+            } // endfor: looped over all energy layers
+        
+        } // endif: pixel was relevant
 
     } // endfor: looped over all spatial pixels
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter value
+ *
+ * @param[in] index Parameter index.
+ * @return Parameter value.
+ *
+ * Returns the parameter value for the specified parameter @p index..
+ ***************************************************************************/
+double GCTASourceCubeDiffuse::par(const int& index) const
+{
+    //TODO: Range checking
+    
+    // Return
+    return (m_pars[index]);
 }
 
 
@@ -292,11 +331,11 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
  * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
  * function.
  ***************************************************************************/
-double GCTASourceCubeDiffuse::psf(const GCTAResponseCube*     rsp,
-                                  const GModelSpatialDiffuse* model,
-                                  const GSkyDir&              obsDir,
-                                  const GEnergy&              srcEng,
-                                  const GTime&                srcTime) const
+double GCTASourceCubeDiffuse::psf(const GCTAResponseCube* rsp,
+                                  const GModelSpatial*    model,
+                                  const GSkyDir&          obsDir,
+                                  const GEnergy&          srcEng,
+                                  const GTime&            srcTime) const
 {
     // Initialise PSF
     double psf = 0.0;
@@ -496,6 +535,7 @@ void GCTASourceCubeDiffuse::init_members(void)
 {
     // Initialise members
     m_cube.clear();
+    m_pars.clear();
    
     // Return
     return;
@@ -511,6 +551,7 @@ void GCTASourceCubeDiffuse::copy_members(const GCTASourceCubeDiffuse& cube)
 {
     // Copy members
     m_cube = cube.m_cube;
+    m_pars = cube.m_pars;
 
     // Return
     return;
