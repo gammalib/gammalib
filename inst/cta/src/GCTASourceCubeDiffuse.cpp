@@ -38,6 +38,12 @@
 #include "GIntegral.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTAResponseCube.hpp"
+#include "GCTAResponse_helpers.hpp"
+
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET     "GCTASourceCubeDiffuse::set(GModelSpatial&, GObservation&)"
@@ -45,9 +51,10 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-//#define G_PSF_INTEGRATE               //!< Integrate map over PSF (default)
+#define G_PSF_INTEGRATE               //!< Integrate map over PSF (default)
 
 /* __ Debug definitions __________________________________________________ */
+#define G_DEBUG_SET
 
 /* __ Constants __________________________________________________________ */
 
@@ -191,6 +198,17 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
                                 const GModelSpatial& model,
                                 const GObservation&  obs)
 {
+    // Debug option: initialise statistics
+    #if defined(G_DEBUG_SET)
+    int n_pixels_computed = 0;
+    std::cout << "GCTASourceCubeDiffuse::set entred." << std::endl;
+    #ifdef _OPENMP
+    double t_start = omp_get_wtime();
+    #else
+    clock_t t_start = clock();
+    #endif
+    #endif
+
     // Get pointer on CTA event cube
     const GCTAEventCube* cube = dynamic_cast<const GCTAEventCube*>(obs.events());
     if (cube == NULL) {
@@ -245,7 +263,7 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
         double theta = centre.dist(obsDir);
         if (theta <= theta_max) {
 
-            // Loop over all energy bins
+            // Loop over all energy layers
             for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
 
                 // Get cube layer energy
@@ -279,10 +297,28 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
                 } // endif: effective area was positive
             
             } // endfor: looped over all energy layers
+
+            // Debug option: update statistics
+            #if defined(G_DEBUG_SET)
+            n_pixels_computed++;
+            #endif
         
         } // endif: pixel was relevant
 
     } // endfor: looped over all spatial pixels
+
+    // Debug option: show statistics
+    #if defined(G_DEBUG_SET)
+    #ifdef _OPENMP
+    double t_elapse = omp_get_wtime()-t_start;
+    #else
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
+    std::cout << "  Maximum theta ................: " << theta_max << " radians" << std::endl;
+    std::cout << "  Number of spatial pixels used : " << n_pixels_computed << std::endl;
+    std::cout << "  CPU usage ....................: " << t_elapse << " sec" << std::endl;
+    std::cout << "GCTASourceCubeDiffuse::set exit." << std::endl;
+    #endif
 
     // Return
     return;
@@ -356,144 +392,16 @@ double GCTASourceCubeDiffuse::psf(const GCTAResponseCube* rsp,
     // Setup integration kernel. We take here the observed photon arrival
     // direction as the true photon arrival direction because the PSF does
     // not vary significantly over a small region.
-    psf_kern_delta integrand(rsp, model, obsDir, srcEng, srcTime, rot);
+    cta_psf_kern_delta integrand(rsp, model, obsDir, srcEng, srcTime, rot,
+                                 1.0e-2, 5);
 
     // Integrate over PSF delta angle
     GIntegral integral(&integrand);
     integral.eps(1.0e-2);
-    psf = integral.romb(delta_min, delta_max);
+    psf = integral.romb(delta_min, delta_max, 5);
 
     // Return PSF
     return psf;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for PSF integration of diffuse model
- *
- * @param[in] delta PSF offset angle (radians).
- * @return Azimuthally integrated product between PSF and model.
- *
- * Computes the azimuthally integrated product of point spread function and
- * diffuse model intensity. As the PSF is azimuthally symmetric, it is
- * not included in the azimuthally integration, but just multiplied on the
- * azimuthally integrated map. The method returns thus
- *
- * \f[
- *    {\rm PSF}(\delta) \times
- *    \int_0^{2\pi} {\rm Map}(\delta, \phi) \sin \delta {\rm d}\phi
- * \f]
- *
- * where \f${\rm Map}(\delta, \phi)\f$ is the diffuse map in the coordinate
- * system of the point spread function, defined by the angle \f$\delta\f$
- * between the true and the measured photon direction and the azimuth angle
- * \f$\phi\f$ around the measured photon direction.
- *
- * The method adjust the azimuth integration precision as function of the PSF
- * offset angle \f$\delta\f$, with a higher precision required for regions
- * where the PSF value is larger, and lower precision required in the PSF
- * tails.
- *
- * @todo Perform a detailed study to adjust the integration precision
- *       evolution as function of @p delta argument.
- ***************************************************************************/
-double GCTASourceCubeDiffuse::psf_kern_delta::eval(const double& delta)
-{
-    // Get PSF for this delta
-    double value = m_rsp->psf()(m_srcDir, delta, m_srcEng);
-
-    // Initialize spatially integrated map value
-    double map = 0.0;
-
-    // If we're at the PSF peak the model is zero (due to the sin(delta)
-    // term. We thus only integrate for positive deltas, and of course only
-    // for positive PSF values.
-    if (value > 0.0 && delta > 0.0) {
-
-        // Compute sine and cosine of delta
-        double sin_delta = std::sin(delta);
-        double cos_delta = std::cos(delta);
-
-        // Setup kernel for azimuthal integration of the spatial map
-        psf_kern_phi integrand(m_model, m_srcEng, m_srcTime, m_rot,
-                               sin_delta, cos_delta);
-
-        // Set the requested integration precision. This goes from 1.0e-2
-        // for regions where the PSF is small to 1.0e-4 for regions where
-        // the PSF is high
-        //double eps = 1.0e-1 / (990.0 * value / m_psf_max + 10.0);
-        double eps = 1.0e-2;
-
-        // Azimuthally integrate spatial map
-        GIntegral integral(&integrand);
-        integral.eps(eps);
-        map = integral.romb(0.0, gammalib::twopi) * sin_delta;
-
-    }
-
-    // Multiply map with PSF value
-    value *= map;
-
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GCTASourceCubeDiffuse::psf_kern_delta::eval";
-        std::cout << "(delta=" << delta << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return kernel value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for map integration of diffuse model
- *
- * @param[in] phi Azimuth angle (radians).
- * @return Diffuse model value.
- *
- * Computes the value of the diffuse model at the position (delta,phi) given
- * in point spread function coordinates. The transformation from point
- * spread function coordinates into sky coordinates is done using a rotation
- * matrix that is pre-computed on entry.
- ***************************************************************************/
-double GCTASourceCubeDiffuse::psf_kern_phi::eval(const double& phi)
-{
-    // Compute sky direction vector in native coordinates
-    double  cos_phi = std::cos(phi);
-    double  sin_phi = std::sin(phi);
-    GVector native(-cos_phi*m_sin_delta, sin_phi*m_sin_delta, m_cos_delta);
-
-    // Rotate from native into celestial system
-    GVector cel = m_rot * native;
-
-    // Set sky direction
-    GSkyDir srcDir;
-    srcDir.celvector(cel);
-
-    // Set photon
-    GPhoton photon(srcDir, m_srcEng, m_srcTime);
-
-    // Compute map value this sky direction
-    double value = m_model->eval(photon); 
-
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GCTASourceCubeDiffuse::psf_kern_phi::eval";
-        std::cout << "(phi=" << phi << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return kernel value
-    return value;
 }
 
 

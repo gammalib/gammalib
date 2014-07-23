@@ -89,12 +89,19 @@ public:
     virtual double irf_extended(const GEvent&       event,
                                 const GSource&      source,
                                 const GObservation& obs) const;
+    virtual double irf_radial(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
 
     // Other Methods
     const GCTAExposure& exposure(void) const;
     void                exposure(const GCTAExposure& exposure);
     const GCTAMeanPsf&  psf(void) const;
     void                psf(const GCTAMeanPsf& psf);
+    double              psf_integral(const GModelSpatial* model,
+                                     const GSkyDir&       obsDir,
+                                     const GEnergy&       srcEng,
+                                     const GTime&         srcTime) const;
 
 private:
     // Private methods

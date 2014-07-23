@@ -32,6 +32,7 @@
 #include <string>
 #include "GTools.hpp"
 #include "GCTAResponseCube.hpp"
+#include "GCTAResponse_helpers.hpp"
 #include "GCTASourceCubePointSource.hpp"
 #include "GCTASourceCubeDiffuse.hpp"
 #include "GModelSpatialPointSource.hpp"
@@ -41,6 +42,7 @@
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GIntegral.hpp"
 #include "GObservation.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTAEventBin.hpp"
@@ -48,6 +50,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
 #define G_IRF_PTSRC          "GCTAResponseCube::irf_ptsrc(GEvent&, GSource&,"\
+                                                            " GObservation&)"
+#define G_IRF_RADIAL        "GCTAResponseCube::irf_radial(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_IRF_EXTENDED    "GCTAResponseCube::irf_extended(GEvent&, GSource&,"\
                                                             " GObservation&)"
@@ -324,6 +328,8 @@ double GCTAResponseCube::irf(const GEvent&       event,
             irf = irf_ptsrc(event, source, obs);
             break;
         case GMODEL_SPATIAL_RADIAL:
+            irf = irf_radial(event, source, obs);
+            break;
         case GMODEL_SPATIAL_ELLIPTICAL:
         case GMODEL_SPATIAL_DIFFUSE:
             irf = irf_extended(event, source, obs);
@@ -507,9 +513,12 @@ double GCTAResponseCube::irf_extended(const GEvent&       event,
                     break;
                 }
             }
+std::cout << "Check for a change? ";
             if (changed) {
+std::cout << "YES" << std::endl;
                 cache->set(source.name(), *source.model(), obs);
             }
+std::cout << std::endl;
         }
 
     } // endelse: there was a cache entry for this model
@@ -529,6 +538,137 @@ double GCTAResponseCube::irf_extended(const GEvent&       event,
 
     // Return IRF value
     return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of radial source instrument response function
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Value of instrument response function for a radial source.
+ *
+ * This method returns the value of the instrument response function for a
+ * radial source. Response values are computed on the fly..
+ ***************************************************************************/
+double GCTAResponseCube::irf_radial(const GEvent&       event,
+                                    const GSource&      source,
+                                    const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_RADIAL, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+
+    //TODO: To be removed when debugging is finished
+    if (bin->ipix() == 0 && bin->ieng() == 0) {
+std::cout << "Start cube" << std::endl;
+    }
+
+    // Get event attribute references
+    const GSkyDir& obsDir  = bin->dir().dir();
+    const GEnergy& obsEng  = bin->energy();
+    const GTime&   obsTime = bin->time();
+
+    // Get pointer to radial model
+    const GModelSpatialRadial* radial = static_cast<const GModelSpatialRadial*>(source.model());
+
+    // Continue only if we're sufficiently close to the model centre to get a
+    // non-zero response
+    if (radial->dir().dist(obsDir) <= radial->theta_max()) {
+
+        // Get deadtime corrected effective area
+        irf = exposure()(obsDir, obsEng) * obs.deadc(obsTime) / obs.ontime();
+
+        // Continue only if effective area is positive
+        if (irf > 0.0) {
+            irf *= psf_integral(radial, obsDir, obsEng, obsTime);
+        }
+        
+    } // endif: we were sufficiently close
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_radial:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrate PSF over spatial model
+ *
+ * @param[in] model Spatial model.
+ * @param[in] obsDir Observed event direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * Computes the integral
+ * 
+ * \f[
+ *    \int_0^{\delta_{\rm max}}
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta
+ *    {\rm d}\phi {\rm d}\delta
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is a spatial model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
+ * function.
+ ***************************************************************************/
+double GCTAResponseCube::psf_integral(const GModelSpatial* model,
+                                      const GSkyDir&       obsDir,
+                                      const GEnergy&       srcEng,
+                                      const GTime&         srcTime) const
+{
+    // Initialise value
+    double value = 0.0;
+
+    // Compute rotation matrix to convert from PSF centred coordinate system
+    // spanned by delta and phi into the reference frame of the observed
+    // arrival direction given in Right Ascension and Declination.
+    GMatrix ry;
+    GMatrix rz;
+    ry.eulery(obsDir.dec_deg() - 90.0);
+    rz.eulerz(-obsDir.ra_deg());
+    GMatrix rot = (ry * rz).transpose();
+
+    // Get offset angle integration interval in radians
+    double delta_min = 0.0;
+    double delta_max = 1.1 * psf().delta_max();
+
+    // Setup integration kernel. We take here the observed photon arrival
+    // direction as the true photon arrival direction because the PSF does
+    // not vary significantly over a small region.
+    cta_psf_kern_delta integrand(this, model, obsDir, srcEng, srcTime, rot,
+                                 1.0e-1, 3);
+
+    // Integrate over PSF delta angle
+    GIntegral integral(&integrand);
+    integral.eps(1.0e-1);
+    value = integral.romb(delta_min, delta_max, 4);
+
+    // Return PSF
+    return value;
 }
 
 

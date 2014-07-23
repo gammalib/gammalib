@@ -90,58 +90,6 @@ protected:
     void copy_members(const GCTASourceCubeDiffuse& cube);
     void free_members(void);
 
-    // PSF delta integration kernel
-    class psf_kern_delta : public GFunction {
-    public:
-        psf_kern_delta(const GCTAResponseCube* rsp,
-                       const GModelSpatial*    model,
-                       const GSkyDir&          srcDir,
-                       const GEnergy&          srcEng,
-                       const GTime&            srcTime,
-                       const GMatrix&          rot) :
-                       m_rsp(rsp),
-                       m_model(model),
-                       m_srcDir(srcDir),
-                       m_srcEng(srcEng),
-                       m_srcTime(srcTime),
-                       m_rot(rot),
-                       m_psf_max(rsp->psf()(srcDir, 0.0, srcEng)) { }
-        double eval(const double& delta);
-    protected:
-        const GCTAResponseCube* m_rsp;     //!< Response cube
-        const GModelSpatial*    m_model;   //!< Spatial model
-        const GSkyDir&          m_srcDir;  //!< True photon arrival direction
-        const GEnergy&          m_srcEng;  //!< True photon energy
-        const GTime&            m_srcTime; //!< True photon arrival time
-        const GMatrix&          m_rot;     //!< Rotation matrix
-        double                  m_psf_max; //!< Maximum PSF value
-    };
-
-    // PSF phi integration kernel
-    class psf_kern_phi : public GFunction {
-    public:
-        psf_kern_phi(const GModelSpatial* model,
-                     const GEnergy&       srcEng,
-                     const GTime&         srcTime,
-                     const GMatrix&       rot,
-                     const double&        sin_delta,
-                     const double&        cos_delta) :
-                     m_model(model),
-                     m_srcEng(srcEng),
-                     m_srcTime(srcTime),
-                     m_rot(rot),
-                     m_sin_delta(sin_delta),
-                     m_cos_delta(cos_delta) { }
-        double eval(const double& phi);
-    protected:
-        const GModelSpatial* m_model;     //!< Spatial model
-        const GEnergy&       m_srcEng;    //!< True photon energy
-        const GTime&         m_srcTime;   //!< True photon arrival time
-        const GMatrix&       m_rot;       //!< Rotation matrix
-        const double&        m_sin_delta; //!< sin(delta)
-        const double&        m_cos_delta; //!< cos(delta)
-    };
-
     // Data members
     GSkymap             m_cube;  //!< Diffuse map convolved with IRF
     std::vector<double> m_pars;  //!< Parameter values
