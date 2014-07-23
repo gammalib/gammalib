@@ -187,13 +187,14 @@ GIntegral* GIntegral::clone(void) const
  * @param[in] k Integration order (default: k=5)
  *
  * Returns the integral of the integrand from a to b. Integration is
- * performed by Romberg's method of order 2K, where e.g. K=2 in Simpson's
- * rule.
+ * performed by Romberg's method of order 2k, where
+ * k=1 is equivalent to the trapezoidal rule,
+ * k=2 is equivalent to Simpson's rule, and
+ * k=3 is equivalent to Boole's rule.
  * The number of iterations is limited by m_max_iter. m_eps specifies the
  * requested fractional accuracy. By default it is set to 1e-6.
  *
  * @todo Check that k is smaller than m_max_iter
- * @todo Make use of std::vector class
  ***************************************************************************/
 double GIntegral::romb(const double& a, const double& b, const int& k)
 {
