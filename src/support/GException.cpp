@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.cpp  -  exception handlers                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -154,7 +154,7 @@ GException::feature_not_implemented::feature_not_implemented(std::string origin,
     }
     m_message += " In case that you need this feature for your application"
                  " please submit a feature request on"
-                 " https://sourceforge.net/projects/gammalib/,"
+                 " https://cta-redmine.irap.omp.eu/projects/gammalib/,"
                  " join this error message and provide a detailed"
                  " description of your needs.";
 
