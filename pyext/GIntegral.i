@@ -36,7 +36,7 @@
  * @brief Integration class Python interface definition.
  *
  * This class allows to perform integration using various methods. The
- * integrand is implemented by a derived class of GIntegrand.
+ * integrand is implemented by a derived class of GFunction.
  ***************************************************************************/
 class GIntegral : public GBase {
 public:
@@ -54,16 +54,19 @@ public:
     void               eps(const double& eps);
     void               silent(const bool& silent);
     const int&         iter(void) const;
+    const int&         calls(void) const;
     const int&         max_iter(void) const;
     const double&      eps(void) const;
     const bool&        silent(void) const;
-    const bool&        isvalid(void) const;
+    const bool&        is_valid(void) const;
     const std::string& message(void) const;
     void               kernel(GFunction* kernel);
     const GFunction*   kernel(void) const;
     double             romb(const double& a, const double& b, const int& k = 5);
     double             trapzd(const double& a, const double& b, const int& n = 1,
                               double result = 0.0);
+    double             adaptive_simpson(const double& a, const double& b) const;
+    double             gauss_kronrod(const double& a, const double& b) const;
 };
 
 

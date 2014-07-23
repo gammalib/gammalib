@@ -39,7 +39,7 @@
  * @brief GIntegral class interface definition.
  *
  * This class allows to perform integration using various methods. The
- * integrand is implemented by a derived class of GIntegrand.
+ * integrand is implemented by a derived class of GFunction.
  ***************************************************************************/
 class GIntegral : public GBase {
 
@@ -73,6 +73,7 @@ public:
     double             trapzd(const double& a, const double& b, const int& n = 1,
                               double result = 0.0);
     double             adaptive_simpson(const double& a, const double& b) const;
+    double             gauss_kronrod(const double& a, const double& b) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -86,6 +87,9 @@ protected:
                                 const double& fa, const double& fb,
                                 const double& fc,
                                 const int& bottom) const;
+    double rescale_error(double err,
+                         const double& result_abs,
+                         const double& result_asc) const;
 
     // Protected data area
     GFunction*  m_kernel;    //!< Pointer to function kernel
@@ -94,10 +98,14 @@ protected:
     bool        m_silent;    //!< Suppress integration warnings in console
 
     // Integrator results
-    mutable int         m_iter;    //!< Number of iterations used
-    mutable int         m_calls;   //!< Number of function calls used
-    mutable bool        m_isvalid; //!< Integration result valid (true=yes)
-    mutable std::string m_message; //!< Status message (if result is invalid)
+    mutable int         m_iter;       //!< Number of iterations used
+    mutable int         m_calls;      //!< Number of function calls used
+    mutable bool        m_isvalid;    //!< Integration result valid (true=yes)
+    mutable bool        m_has_abserr; //!< Has absolute integration error
+    mutable bool        m_has_relerr; //!< Has relative integration error
+    mutable double      m_abserr;     //!< Absolute integration error
+    mutable double      m_relerr;     //!< Absolute integration error
+    mutable std::string m_message;    //!< Status message (if result is invalid)
 
 };
 

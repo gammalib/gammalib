@@ -70,6 +70,7 @@ public:
     void                   test_integral(void);
     void                   test_romberg_integration(void);
     void                   test_adaptive_simpson_integration(void);
+    void                   test_gauss_kronrod_integration(void);
 
 private:
     // Private members
