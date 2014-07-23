@@ -376,8 +376,10 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
     double result = 0.0;
 
     // Initialise integration status information
-    m_isvalid = true;
-    m_calls   = 0;
+    m_isvalid    = true;
+    m_calls      = 0;
+    m_has_abserr = false;
+    m_relerr     = false;
     
     // Continue only if integration range is valid
     if (b > a) {
@@ -418,8 +420,14 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
             if (m_iter >= k) {
                 ss = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
                 if (std::abs(dss) <= m_eps * std::abs(ss)) {
-                    converged = true;
-                    result    = ss;
+                    converged    = true;
+                    result       = ss;
+                    m_has_abserr = true;
+                    m_abserr     = std::abs(dss);
+                    if (std::abs(result) > 0) {
+                        m_has_relerr = true;
+                        m_relerr     = m_abserr / std::abs(result);
+                    }
                     break;
                 }
             }
@@ -588,9 +596,11 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
 double GIntegral::adaptive_simpson(const double& a, const double& b) const
 {
     // Initialise integration status information
-    m_isvalid = true;
-    m_calls   = 0;
-    m_iter    = m_max_iter;
+    m_isvalid    = true;
+    m_calls      = 0;
+    m_iter       = m_max_iter;
+    m_has_abserr = false;
+    m_relerr     = false;
 
     // Compute mid-point c
     double c = 0.5*(a + b);    //!< Mid-point of interval [a,b]
@@ -644,9 +654,11 @@ double GIntegral::adaptive_simpson(const double& a, const double& b) const
 double GIntegral::gauss_kronrod(const double& a, const double& b) const
 {
     // Initialise integration status information
-    m_isvalid = true;
-    m_iter    = 0;
-    m_calls   = 0;
+    m_isvalid    = true;
+    m_iter       = 0;
+    m_calls      = 0;
+    m_has_abserr = false;
+    m_relerr     = false;
 
     // Initialise integration result
     double result = 0.0;
