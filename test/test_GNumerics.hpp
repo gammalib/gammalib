@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GNumerics.hpp - test numerics modules              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class Gauss
  *
- * @brief Gaussian function.
+ * @brief Gaussian function
  ***************************************************************************/
 class Gauss : public GFunction {
 public:
@@ -51,18 +51,25 @@ protected:
     double m_sigma;
 };
 
+
+/***********************************************************************//**
+ * @class TestGNumerics
+ *
+ * @brief Test suite for numerical functions
+ ***************************************************************************/
 class TestGNumerics : public GTestSuite
 {
 public:
     // Constructors and destructors
     TestGNumerics(void) : GTestSuite(), m_sigma(1.0) { }
-    virtual ~TestGNumerics(void){ }
+    virtual ~TestGNumerics(void) { }
 
     // Methods
     virtual void           set(void);
     virtual TestGNumerics* clone(void) const;
     void                   test_integral(void);
     void                   test_romberg_integration(void);
+    void                   test_adaptive_simpson_integration(void);
 
 private:
     // Private members

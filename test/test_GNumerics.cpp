@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.cpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2014 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GNumerics.cpp
+ * @brief Unit tests implementation for numerics module
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -47,6 +52,9 @@ void TestGNumerics::set(void)
     // Append tests
     append(static_cast<pfunction>(&TestGNumerics::test_integral),"Test GIntegral");
     append(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),"Test Romberg integration");
+    append(static_cast<pfunction>(&TestGNumerics::test_adaptive_simpson_integration),"Test adaptive Simpson integration");
+
+    // Return
     return;
 }
 
@@ -64,7 +72,7 @@ TestGNumerics* TestGNumerics::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Test model parameter handling.
+ * @brief Test model parameter handling
  ***************************************************************************/
 void TestGNumerics::test_integral(void)
 {
@@ -72,31 +80,66 @@ void TestGNumerics::test_integral(void)
     Gauss     integrand(m_sigma);
     GIntegral integral(&integrand);
 
-
     // Exit test
     return;
 }
 
 /***********************************************************************//**
- * @brief Test Romberg integration.
+ * @brief Test Romberg integration
  ***************************************************************************/
 void TestGNumerics::test_romberg_integration(void)
 {
+    // Set-up integral
     Gauss     integrand(m_sigma);
     GIntegral integral(&integrand);
-    double    result = integral.romb(-10.0*m_sigma, 10.0*m_sigma);
+
+    // Integrate over the entire Gaussian
+    double result = integral.romb(-10.0*m_sigma, 10.0*m_sigma);
+std::cout << result << std::endl;
+std::cout << result-1.0 << std::endl;
+std::cout << integral << std::endl;
     test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+gammalib::str(result)+")");
 
+    // Test [-1sigma, 1sigma]
     result = integral.romb(-m_sigma, m_sigma);
     test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+gammalib::str((result-0.68268948130801355))+")");
 
+    // Test [0.0, 1sigma]
     result = integral.romb(0.0, m_sigma);
     test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+gammalib::str((result-0.3413447460687748))+")");
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Main test function.
+ * @brief Test adaptive Simpson integration
+ ***************************************************************************/
+void TestGNumerics::test_adaptive_simpson_integration(void)
+{
+    // Set-up integral
+    Gauss     integrand(m_sigma);
+    GIntegral integral(&integrand);
+
+    // Integrate over the entire Gaussian
+    double result = integral.adaptive_simpson(-10.0*m_sigma, 10.0*m_sigma);
+    test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+gammalib::str(result)+")");
+
+    // Test [-1sigma, 1sigma]
+    result = integral.adaptive_simpson(-m_sigma, m_sigma);
+    test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+gammalib::str((result-0.68268948130801355))+")");
+
+    // Test [0.0, 1sigma]
+    result = integral.adaptive_simpson(0.0, m_sigma);
+    test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+gammalib::str((result-0.3413447460687748))+")");
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Main test function
  ***************************************************************************/
 int main(void)
 {

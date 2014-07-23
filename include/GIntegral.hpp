@@ -65,13 +65,14 @@ public:
     const int&         max_iter(void) const;
     const double&      eps(void) const;
     const bool&        silent(void) const;
-    const bool&        isvalid(void) const;
+    const bool&        is_valid(void) const;
     const std::string& message(void) const;
     void               kernel(GFunction* kernel);
     const GFunction*   kernel(void) const;
     double             romb(const double& a, const double& b, const int& k = 5);
     double             trapzd(const double& a, const double& b, const int& n = 1,
                               double result = 0.0);
+    double             adaptive_simpson(const double& a, const double& b) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -80,16 +81,24 @@ protected:
     void   copy_members(const GIntegral& integral);
     void   free_members(void);
     double polint(double* xa, double* ya, int n, double x, double *dy);
+    double adaptive_simpson_aux(const double& a, const double& b,
+                                const double& eps, const double& S,
+                                const double& fa, const double& fb,
+                                const double& fc,
+                                const int& bottom) const;
 
     // Protected data area
     GFunction*  m_kernel;    //!< Pointer to function kernel
     double      m_eps;       //!< Requested relative integration precision
     int         m_max_iter;  //!< Maximum number of iterations
-    int         m_iter;      //!< Number of iterations used
-    int         m_calls;     //!< Number of function calls used
-    bool        m_isvalid;   //!< Integration result valid (true=yes)
-    std::string m_message;   //!< Status message (if result is invalid)
     bool        m_silent;    //!< Suppress integration warnings in console
+
+    // Integrator results
+    mutable int         m_iter;    //!< Number of iterations used
+    mutable int         m_calls;   //!< Number of function calls used
+    mutable bool        m_isvalid; //!< Integration result valid (true=yes)
+    mutable std::string m_message; //!< Status message (if result is invalid)
+
 };
 
 
@@ -225,7 +234,7 @@ const GFunction* GIntegral::kernel(void) const
  * @return True is integration result is valid.
  ***************************************************************************/
 inline
-const bool& GIntegral::isvalid(void) const
+const bool& GIntegral::is_valid(void) const
 {
     return m_isvalid;
 }

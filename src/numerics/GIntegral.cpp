@@ -388,6 +388,74 @@ double GIntegral::trapzd(const double& a, const double& b, const int& n,
 
 
 /***********************************************************************//**
+ * @brief Adaptive Simpson's integration
+ *
+ * @param[in] a Left integration boundary.
+ * @param[in] b Right integration boundary.
+ *
+ * Integrates the function using an adaptive Simpson's rule. The initial
+ * interval [a,b] is split into two sub-intervals [a,c] and [c,b] for which
+ * the integral is computed using
+ *
+ * \f[
+ *    \frac{b-a}{6} f(a) + 4f(c) + f(b)
+ * \f]
+ *
+ * where \f$c=(a+b)/2\f$ is the mid-point of interval [a,b]. Each
+ * sub-interval is then recursively divided into sub-interval and the process
+ * is repeated. Dividing of sub-intervals is stopped when the difference
+ * between subsequent intervals falls below the relative tolerance specified
+ * by eps(). The maximum recursion depth is set by the max_iter() method.
+ 
+ std::abs(dss) <= m_eps * std::abs(ss)
+std::abs(S2 - S) <= 15.0 * m_eps * std::abs(S2))
+ 
+ ***************************************************************************/
+double GIntegral::adaptive_simpson(const double& a, const double& b) const
+{
+    // Initialise integration status information
+    m_isvalid = true;
+    m_calls   = 0;
+    m_iter    = m_max_iter;
+
+    // Compute mid-point c
+    double c = 0.5*(a + b);    //!< Mid-point of interval [a,b]
+    double h = b - a;          //!< Length of interval [a,b]
+
+    // Evaluate function at boundaries and mid-point c
+    double fa = m_kernel->eval(a);
+    double fb = m_kernel->eval(b);
+    double fc = m_kernel->eval(c);
+    m_calls  += 3;
+    
+    // Compute integral using Simpson's rule
+    double S = (h/6.0) * (fa + 4.0*fc + fb);
+
+    // Call recursive auxiliary function
+    double value = adaptive_simpson_aux(a, b, m_eps, S, fa, fb, fc, m_max_iter);
+
+    // Deduce the number of iterations from the iteration counter
+    m_iter = m_max_iter - m_iter;
+
+    // If result is not valid, set and output status message
+    if (!m_isvalid) {
+        m_message = "Integration uncertainty exceeds relative tolerance "
+                    "of "+gammalib::str(m_eps)+" after "+gammalib::str(m_iter)+
+                    " iterations. Result "+gammalib::str(value)+" inaccurate.";
+        if (!m_silent) {
+            std::string origin = "GIntegral::adaptive_simpson("+
+                                 gammalib::str(a)+", "+
+                                 gammalib::str(b)+")";
+            gammalib::warning(origin, m_message);
+        }
+    }
+
+    // Return result
+    return value;
+}
+
+
+/***********************************************************************//**
  * @brief Print integral information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -417,7 +485,7 @@ std::string GIntegral::print(const GChatter& chatter) const
 
         // Append status information
         result.append("\n"+gammalib::parformat("Status"));
-        if (isvalid()) {
+        if (is_valid()) {
             result.append("Result accurate.");
         }
         else {
@@ -571,4 +639,71 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double* dy)
 
     // Return
     return y;
+}
+
+
+/***********************************************************************//**
+ * @brief Auxiliary function for adaptive Simpson's method.
+ *
+ * @param[in] a Left integration boundary.
+ * @param[in] b Right integration boundary.
+ * @param[in] S Integral of last computation.
+ * @param[in] fa Function value at left integration boundary.
+ * @param[in] fb Function value at right integration boundary.
+ * @param[in] fc Function value at mid-point of interval [a,b]
+ * @param[in] bottom Iteration counter (stop when 0)
+ *
+ * Implements a recursive auxiliary method for the adative_simpson()
+ * integrator.
+ ***************************************************************************/
+double GIntegral::adaptive_simpson_aux(const double& a, const double& b,
+                                       const double& eps, const double& S,
+                                       const double& fa, const double& fb,
+                                       const double& fc,
+                                       const int& bottom) const
+{
+    // Store the iteration counter
+    m_iter = bottom;
+
+    // Compute mid-point c bet
+    double c = 0.5*(a + b);    //!< Mid-point of interval [a,b]
+    double h = b - a;          //!< Length of interval [a,b]
+    double d = 0.5*(a + c);    //!< Mid-point of interval [a,c]
+    double e = 0.5*(c + b);    //!< Mid-point of interval [c,b]
+
+    // Evaluate function at mid-points d and e
+    double fd = m_kernel->eval(d);
+    double fe = m_kernel->eval(e);
+    m_calls += 2;
+    
+    // Compute integral using Simpson's rule for the left and right interval
+    double h12    = h / 12.0;
+    double Sleft  = h12 * (fa + 4.0*fd + fc);
+    double Sright = h12 * (fc + 4.0*fe + fb);
+    double S2     = Sleft + Sright;
+
+    // Allocate result
+    double value;
+ 
+    // If converged then compute the result ...
+//    if (std::abs(S2 - S) <= 15.0 * eps * std::abs(S2)) {
+    if (std::abs(S2 - S) <= 15.0 * m_eps * std::abs(S2)) {
+        value = S2 + (S2 - S)/15.0;
+    }
+    
+    // ... else if the maximum recursion depth was reached then compute the
+    // result and signal result invalidity
+    else if (bottom <= 0) {
+        value     = S2 + (S2 - S)/15.0;
+        m_isvalid = false;
+    }
+    
+    // ... otherwise call this method recursively
+    else {
+        value = adaptive_simpson_aux(a, c, 0.5*eps, Sleft,  fa, fc, fd, bottom-1) +
+                adaptive_simpson_aux(c, b, 0.5*eps, Sright, fc, fb, fe, bottom-1);
+    }
+
+    // Return result
+    return value;
 }
