@@ -291,6 +291,26 @@ GSkymap& GSkymap::operator=(const GSkymap& map)
 
 
 /***********************************************************************//**
+ * @brief Value setting operator
+ *
+ * @param[in] value Value.
+ * @return Sky map.
+ *
+ * Sets all pixels to the specified @p value.
+ ***************************************************************************/
+GSkymap& GSkymap::operator=(const double& value)
+{
+    // Loop over all pixels
+    for (int i = 0; i < m_num_pixels; ++i) {
+        m_pixels[i] = value;
+    }
+
+    // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
  * @brief Addition operator
  *
  * @param[in] map Sky map.

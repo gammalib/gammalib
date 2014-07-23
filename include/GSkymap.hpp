@@ -102,6 +102,7 @@ public:
 
     // Operators
     GSkymap&      operator=(const GSkymap& map);
+    GSkymap&      operator=(const double& value);
     GSkymap&      operator+=(const GSkymap& map);
     GSkymap&      operator-=(const GSkymap& map);
     GSkymap&      operator*=(const GSkymap& map);
