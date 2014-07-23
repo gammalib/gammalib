@@ -651,8 +651,6 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
     // Initialise integration result
     double result = 0.0;
     double error  = 0.0; 
-    //double resabs = 0.0; // Approximation to the integral of abs(f)
-    //double resasc = 0.0; // Approximation to the integral of abs(f-i/(b-a))
 
     // Allocate some arrays
     double fv1[5];
@@ -733,6 +731,10 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
         if (error < m_eps * std::abs(result)) {
             m_has_abserr = true;
             m_abserr     = error;
+            if (std::abs(result) > 0) {
+                m_has_relerr = true;
+                m_relerr     = error / std::abs(result);
+            }
             break;
         }
 
@@ -758,6 +760,10 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
         if (error < m_eps * std::abs(result)) {
             m_has_abserr = true;
             m_abserr     = error;
+            if (std::abs(result) > 0) {
+                m_has_relerr = true;
+                m_relerr     = error / std::abs(result);
+            }
             break;
         }
 
@@ -782,6 +788,10 @@ double GIntegral::gauss_kronrod(const double& a, const double& b) const
         if (error < m_eps * std::abs(result)) {
             m_has_abserr = true;
             m_abserr     = error;
+            if (std::abs(result) > 0) {
+                m_has_relerr = true;
+                m_relerr     = error / std::abs(result);
+            }
             break;
         }
 
