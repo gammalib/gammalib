@@ -73,6 +73,7 @@ public:
    
     // Methods
     const GCTAResponseTable&   table(void) const;
+    void                       table(GCTAResponseTable& table);
     void                       read(const GFits& file);
     void                       write(GFitsBinTable& hdu) const;
     void                       save(const std::string& filename,
@@ -149,6 +150,17 @@ inline
 const GCTAResponseTable& GCTABackground3D::table(void) const
 {
     return m_background;
+}
+
+/***********************************************************************//**
+ * @brief assign response table
+ * @param[in] table Response table. 
+ * 
+ ***************************************************************************/
+inline
+void GCTABackground3D::table(GCTAResponseTable& table)
+{
+     m_background = table;
 }
 
 #endif /* GCTABACKGROUND3D_HPP */
