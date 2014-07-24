@@ -731,7 +731,7 @@ void TestGCTAResponse::test_response_expcube(void)
 
     // Test set method
     GCTAObservation obs_cta;
-    obs_cta.load(cta_cntmap);
+    obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
     GEbounds     ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
     GCTAExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
@@ -778,7 +778,7 @@ void TestGCTAResponse::test_response_psfcube(void)
 
     // Test set method
     GCTAObservation obs_cta;
-    obs_cta.load(cta_cntmap);
+    obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
     GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
     GCTAMeanPsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
