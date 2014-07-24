@@ -1069,7 +1069,7 @@ void TestGCTAObservation::test_unbinned_obs(void)
     for (int i = 0; i < events->size(); ++i) {
         num++;
     }
-    test_value(num, 4397, 1.0e-20, "Test event iterator");
+    test_value(num, 4134, 1.0e-20, "Test event iterator");
 
     // Test XML loading and saving
     test_try("Test XML loading and saving");
@@ -1196,12 +1196,12 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.656246512e-16, 1.91458426e-17,
-                            -2.484100472, 0.02573396361,
+                            -2.49595, 0.0249533,
                             300000, 0,
                             1, 0,
-                            2.993705325, 0.03572658413,
+                            2.94185, 0.0379307,
                             6.490832107e-05, 1.749021094e-06,
-                            -1.833584022, 0.01512223495,
+                            -1.82866, 0.0155452,
                             1000000, 0,
                             1, 0};
     test_try("Perform LM optimization");
@@ -1258,12 +1258,12 @@ void TestGCTAOptimize::test_binned_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.616410411e-16, 1.904730785e-17,
-                            -2.48178, 0.02580905077,
+                            -2.49175, 0.0250639,
                             300000, 0,
                             1, 0,
-                            2.93368, 0.06639644824,
+                            2.95662, 0.0704027,
                             6.550723074e-05, 1.945714239e-06,
-                            -1.833781187, 0.0160819,
+                            -1.82084, 0.0163749,
                             1000000, 0,
                             1, 0};
     test_try("Perform LM optimization");
@@ -1307,12 +1307,12 @@ void TestGCTAOptimize::test_cube_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.72212e-16, 2.01231e-17,
-                            -2.48412, 0.0258234,
+                            -2.49252, 0.0250624,
                             300000, 0,
                             1, 0,
-                            2.93338, 0.0663668,
+                            2.95668, 0.0704068,
                             6.68923e-05, 1.96972e-06,
-                            -1.83394, 0.0159896,
+                            -1.82086, 0.0163749,
                             1000000, 0,
                             1, 0};
     test_try("Perform LM optimization");
