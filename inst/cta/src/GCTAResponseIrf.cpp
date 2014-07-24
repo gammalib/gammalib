@@ -1578,7 +1578,7 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
 
         // Integrate over zenith angle
         GIntegral integral(&integrand);
-        integral.eps(1.0e-5);
+        integral.eps(1.0e-2);
         irf = integral.romb(rho_min, rho_max);
 
         // Compile option: Check for NaN/Inf
