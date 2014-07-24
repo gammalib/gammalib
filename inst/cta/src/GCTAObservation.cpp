@@ -56,6 +56,8 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_RESPONSE_GET            "GCTAResponse* GCTAObservation::response()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
+#define G_LOAD           "GCTAObservation::load(std::string&, std::string&, "\
+                                                              "std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -103,6 +105,31 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
 
     // Set instrument
     m_instrument = instrument;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Stacked cube analysis constructor
+ *
+ * @param[in] cntcube Counts cube file name.
+ * @param[in] expcube Exposure cube file name.
+ * @param[in] psfcube Psf cube file name.
+ *
+ * Creates CTA observation from a counts cube, an exposure cube and a Psf
+ * cube.
+ ***************************************************************************/
+GCTAObservation::GCTAObservation(const std::string& cntcube,
+                                 const std::string& expcube,
+                                 const std::string& psfcube) : GObservation()
+{
+    // Initialise members
+    init_members();
+
+    // Load data
+    load(cntcube, expcube, psfcube);
 
     // Return
     return;
@@ -671,9 +698,11 @@ void GCTAObservation::write(GFits& fits) const
 
 
 /***********************************************************************//**
- * @brief Load data from FITS file
+ * @brief Load event list or counts cube from FITS file
  *
  * @param[in] filename FITS file name.
+ *
+ * Loads either an event list or a counts cube from a FITS file.
  ***************************************************************************/
 void GCTAObservation::load(const std::string& filename)
 {
@@ -689,6 +718,43 @@ void GCTAObservation::load(const std::string& filename)
     // Store event filename
     m_eventfile = filename;
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load stacked cube from FITS files
+ *
+ * @param[in] cntcube Counts cube file name.
+ * @param[in] expcube Exposure cube file name.
+ * @param[in] psfcube Psf cube file name.
+ *
+ * Loads a counts map, an exposure cube and a Psf cube for stacked cube
+ * analysis.
+ ***************************************************************************/
+void GCTAObservation::load(const std::string& cntcube,
+                           const std::string& expcube,
+                           const std::string& psfcube) {
+    // Load counts cube FITS file
+    load(cntcube);
+
+    // Check whether we have an event cube
+    if (dynamic_cast<const GCTAEventCube*>(events()) == NULL) {
+        std::string msg = "Specified file \""+cntcube+"\" is not a CTA "
+                          "counts cube. Please provide a counts cube.";
+        throw GException::invalid_argument(G_LOAD, msg);
+    }
+
+    // Load exposure cube
+    GCTAExposure exposure(expcube);
+
+    // Load Psf cube
+    GCTAMeanPsf psf(psfcube);
+
+    // Attach exposure and Psf cube as response
+    response(exposure, psf);
+ 
     // Return
     return;
 }

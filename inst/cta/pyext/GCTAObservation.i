@@ -53,6 +53,9 @@ public:
     // Constructors and destructors
     GCTAObservation(void);
     explicit GCTAObservation(const std::string& instrument);
+    GCTAObservation(const std::string& cntcube,
+                    const std::string& expcube,
+                    const std::string& psfcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -69,10 +72,13 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    bool                hasresponse(void) const;
+    bool                has_response(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits) const;
     void                load(const std::string& filename);
+    void                load(const std::string& cntcube,
+                             const std::string& expcube,
+                             const std::string& psfcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
     void                response(const std::string& rspname,

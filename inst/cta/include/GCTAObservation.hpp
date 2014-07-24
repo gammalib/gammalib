@@ -60,6 +60,9 @@ public:
     // Constructors and destructors
     GCTAObservation(void);
     explicit GCTAObservation(const std::string& instrument);
+    GCTAObservation(const std::string& cntcube,
+                    const std::string& expcube,
+                    const std::string& psfcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -80,10 +83,13 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    bool                hasresponse(void) const;
+    bool                has_response(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits) const;
     void                load(const std::string& filename);
+    void                load(const std::string& cntcube,
+                             const std::string& expcube,
+                             const std::string& psfcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
     void                response(const std::string& rspname,
@@ -187,7 +193,7 @@ double GCTAObservation::deadc(const GTime& time) const
  * @return True if CTA observation contains response information.
  ***************************************************************************/
 inline
-bool GCTAObservation::hasresponse(void) const
+bool GCTAObservation::has_response(void) const
 {
     return ((m_response != NULL) && (m_response->isvalid()));
 }
