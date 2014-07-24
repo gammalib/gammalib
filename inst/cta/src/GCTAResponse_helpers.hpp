@@ -1011,7 +1011,7 @@ public:
     double eval(const double& delta);
 protected:
     const GCTAResponseCube*    m_rsp;      //!< Response cube
-    const GModelSpatialRadial* m_model;    //!< Spatial model
+    const GModelSpatialRadial* m_model;    //!< Radial model
     const GSkyDir&             m_srcDir;   //!< True photon arrival direction
     const GEnergy&             m_srcEng;   //!< True photon energy
     const GTime&               m_srcTime;  //!< True photon arrival time
@@ -1037,11 +1037,78 @@ public:
                             m_cos_fact(cos_fact) { }
     double eval(const double& phi);
 protected:
-    const GModelSpatialRadial* m_model;     //!< Spatial model
+    const GModelSpatialRadial* m_model;     //!< Radial model
     const GEnergy&             m_srcEng;    //!< True photon energy
     const GTime&               m_srcTime;   //!< True photon arrival time
     const double&              m_sin_fact;  //!< sin(delta)*sin(zeta)
     const double&              m_cos_fact;  //!< cos(delta)*cos(zeta)
+};
+
+// PSF delta integration kernel for elliptical models
+class cta_psf_elliptical_kern_delta : public GFunction {
+public:
+    cta_psf_elliptical_kern_delta(const GCTAResponseCube*        rsp,
+                                  const GModelSpatialElliptical* model,
+                                  const GSkyDir&                 srcDir,
+                                  const GEnergy&                 srcEng,
+                                  const GTime&                   srcTime,
+                                  const double&                  sin_zeta,
+                                  const double&                  cos_zeta,
+                                  const double&                  omega,
+                                  const double&                  eps,
+                                  const int&                     order) :
+                                  m_rsp(rsp),
+                                  m_model(model),
+                                  m_srcDir(srcDir),
+                                  m_srcEng(srcEng),
+                                  m_srcTime(srcTime),
+                                  m_sin_zeta(sin_zeta),
+                                  m_cos_zeta(cos_zeta),
+                                  m_omega(omega),
+                                  m_eps(eps),
+                                  m_order (order),
+                                  m_psf_max(rsp->psf()(srcDir, 0.0, srcEng)) { }
+    double eval(const double& delta);
+protected:
+    const GCTAResponseCube*        m_rsp;       //!< Response cube
+    const GModelSpatialElliptical* m_model;     //!< Elliptical model
+    const GSkyDir&                 m_srcDir;    //!< True photon arrival direction
+    const GEnergy&                 m_srcEng;    //!< True photon energy
+    const GTime&                   m_srcTime;   //!< True photon arrival time
+    const double&                  m_sin_zeta;  //!< sin(zeta)
+    const double&                  m_cos_zeta;  //!< cos(zeta)
+    const double&                  m_omega;     //!< Position angle of photon w/r model
+    const double&                  m_eps;       //!< Integration precision
+    const int&                     m_order;     //!< Romberg order
+    double                         m_psf_max;   //!< Maximum PSF value
+};
+
+// PSF phi integration kernel for elliptical models
+class cta_psf_elliptical_kern_phi : public GFunction {
+public:
+    cta_psf_elliptical_kern_phi(const GModelSpatialElliptical* model,
+                                const GEnergy&                 srcEng,
+                                const GTime&                   srcTime,
+                                const double&                  omega,
+                                const double&                  sin_delta,
+                                const double&                  sin_fact,
+                                const double&                  cos_fact):
+                                m_model(model),
+                                m_srcEng(srcEng),
+                                m_srcTime(srcTime),
+                                m_omega(omega),
+                                m_sin_delta(sin_delta),
+                                m_sin_fact(sin_fact),
+                                m_cos_fact(cos_fact) { }
+    double eval(const double& phi);
+protected:
+    const GModelSpatialElliptical* m_model;     //!< Elliptical model
+    const GEnergy&                 m_srcEng;    //!< True photon energy
+    const GTime&                   m_srcTime;   //!< True photon arrival time
+    const double&                  m_omega;     //!< Position angle of photon w/r model
+    const double&                  m_sin_delta; //!< sin(delta)
+    const double&                  m_sin_fact;  //!< sin(delta)*sin(zeta)
+    const double&                  m_cos_fact;  //!< cos(delta)*cos(zeta)
 };
 
 #endif /* GCTARESPONSE_HELPERS_HPP */

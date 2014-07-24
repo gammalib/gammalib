@@ -504,7 +504,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
 
         // Integrate over phi
         GIntegral integral(&integrand);
-        integral.eps(m_rsp.eps());
+        integral.eps(1.0e-2);
         irf = integral.romb(omega_min, omega_max) * sin_rho;
 
         // Compile option: Check for NaN/Inf
@@ -1316,6 +1316,133 @@ double cta_psf_radial_kern_phi::eval(const double& phi)
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: cta_psf_radial_kern_phi::eval";
+        std::cout << "(phi=" << phi << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for PSF integration of elliptical model
+ *
+ * @param[in] delta PSF offset angle (radians).
+ * @return Azimuthally integrated product between PSF and elliptical model.
+ *
+ * Computes the azimuthally integrated product of point spread function and
+ * the elliptical model intensity. As the PSF is azimuthally symmetric, it is
+ * not included in the azimuthally integration, but just multiplied on the
+ * azimuthally integrated model. The method returns thus
+ *
+ * \f[
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta {\rm d}\phi
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is the elliptical model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ ***************************************************************************/
+double cta_psf_elliptical_kern_delta::eval(const double& delta)
+{
+    // Initialise value
+    double value = 0.0;
+
+    // If we're at the PSF peak the model is zero (due to the sin(delta)
+    // term. We thus only integrate for positive deltas.
+    if (delta > 0.0) {
+
+        // Get PSF for this delta
+        value = m_rsp->psf()(m_srcDir, delta, m_srcEng);
+
+        // Continue only if PSF is positive
+        if (value > 0.0) {
+
+            // Compute sin(delta), sin(delta)*sin(zeta), cos(delta)*cos(zeta)
+            double sin_delta = std::sin(delta);
+            double sin_fact  = sin_delta * m_sin_zeta;
+            double cos_fact  = std::cos(delta)* m_cos_zeta;
+
+            // Setup kernel for azimuthal integration of the elliptical model
+            cta_psf_elliptical_kern_phi integrand(m_model, m_srcEng, m_srcTime,
+                                                  m_omega,
+                                                  sin_delta, sin_fact, cos_fact);
+
+            // Azimuthally integrate model
+            GIntegral integral(&integrand);
+            integral.eps(m_eps);
+            value *= integral.romb(0.0, gammalib::twopi, m_order) * sin_delta;
+
+        } // endif: PSF value was positive
+
+    } // endif: delta was positive
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: cta_psf_elliptical_kern_delta::eval";
+        std::cout << "(delta=" << delta << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuthal elliptical model integration
+ *
+ * @param[in] phi Azimuth angle (radians).
+ * @return Radial model value.
+ *
+ * Computes the value of the elliptical model at the position \f$(\delta,\phi)\f$
+ * given in point spread function coordinates. The \f$\theta\f$ angle of the
+ * elliptical model is computed using
+ *
+ * \f[
+ *    \theta = \arccos \left( \cos \delta \cos \zeta +
+ *                            \sin \delta \sin \zeta \cos \phi \right)
+ * \f]
+ *
+ * where \f$\delta\f$ is the angle between true and measured photon
+ * direction, \f$\zeta\f$ is the angle between model centre and measured
+ * photon direction, and \f$\phi\f$ is the azimuth angle with respect to the
+ * measured photon direction, where \f$\phi=0\f$ corresponds to the 
+ * connecting line between model centre and measured photon direction.
+ *
+ * The position angle of the elliptical model is computed using
+ *
+ * \f[
+ *    {\rm posangle} = \arcsin \left( \frac{\sin \phi \sin \delta}
+ *                                         {\sin \theta} \right)
+ * \f]
+ ***************************************************************************/
+double cta_psf_elliptical_kern_phi::eval(const double& phi)
+{
+    // Compute radial model theta angle
+    double theta = std::acos(m_cos_fact + m_sin_fact * std::cos(phi));
+
+    // Compute radial model position angle
+    double posangle = std::asin((std::sin(phi) * m_sin_delta)/std::sin(theta)) +
+                      m_omega;
+
+    // Get radial model value
+    double value = m_model->eval(theta, posangle, m_srcEng, m_srcTime);
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: cta_psf_elliptical_kern_phi::eval";
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
