@@ -31,10 +31,13 @@
 #include "GCTAExposure.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
+#include "GCTAEventList.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SET                           "GCTAExposure::set(GCTAObservation&)"
+#define G_FILL                           "GCTAExposure::fill(GObservations&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -268,6 +271,17 @@ void GCTAExposure::set(const GCTAObservation& obs)
     // Clear exposure cube
     clear_cube();
 
+    // Extract region of interest from CTA observation
+    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
+    if (list == NULL) {
+        std::string msg = "CTA Observation does not contain an event "
+                          "list. Event list information is needed to "
+                          "retrieve the Region of Interest for each "
+                          "CTA observation.";
+        throw GException::invalid_value(G_SET, msg);
+    }
+    const GCTARoi& roi = list->roi();
+
     // Get references on CTA response and pointing direction
     const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
     const GSkyDir&         pnt = obs.pointing().dir();
@@ -278,22 +292,29 @@ void GCTAExposure::set(const GCTAObservation& obs)
         // Loop over all pixels in sky map
         for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
 
-            // Compute theta angle with respect to pointing direction
-            // in radians
-            GSkyDir dir     = m_cube.inx2dir(pixel);
-            double  theta   = pnt.dist(dir);
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
+            
+            // Continue only if pixel is within RoI
+            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+
+                // Compute theta angle with respect to pointing direction
+                // in radians
+                double theta = pnt.dist(dir);
     
-            // Loop over all exposure cube energy bins
-            for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                // Loop over all exposure cube energy bins
+                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-                // Get logE/TeV
-                double logE = m_ebounds.elogmean(iebin).log10TeV();
+                    // Get logE/TeV
+                    double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                // Set exposure cube (effective area * lifetime)
-                m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                       obs.livetime();
+                    // Set exposure cube (effective area * lifetime)
+                    m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                           obs.livetime();
 
-            } // endfor: looped over energy bins
+                } // endfor: looped over energy bins
+
+            } // endif: pixel was within RoI
 
         } // endfor: looped over all pixels
     
@@ -308,6 +329,9 @@ void GCTAExposure::set(const GCTAObservation& obs)
  * @brief Fill exposure cube from observation container
  *
  * @param[in] obs Observation container.
+ *
+ * @exception GException::invalid_value
+ *            No event list found in CTA observations.
  *
  * Set the exposure cube by summing the exposure for all CTA observations in
  * an observation container. The cube pixel values are computed as the sum
@@ -325,6 +349,17 @@ void GCTAExposure::fill(const GObservations& obs)
         const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(obs[i]);
         if (cta != NULL) {
 
+            // Extract region of interest from CTA observation
+            const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(cta->events());
+            if (list == NULL) {
+                std::string msg = "CTA Observation does not contain an event "
+                                  "list. Event list information is needed to "
+                                  "retrieve the Region of Interest for each "
+                                  "CTA observation.";
+                throw GException::invalid_value(G_FILL, msg);
+            }
+            const GCTARoi& roi = list->roi();
+
             // Get references on CTA response and pointing direction
             const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
             const GSkyDir&         pnt = cta->pointing().dir();
@@ -335,22 +370,29 @@ void GCTAExposure::fill(const GObservations& obs)
                 // Loop over all pixels in sky map
                 for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
 
-                    // Compute theta angle with respect to pointing direction
-                    // in radians
-                    GSkyDir dir     = m_cube.inx2dir(pixel);
-                    double  theta   = pnt.dist(dir);
+                    // Get pixel sky direction
+                    GSkyDir dir = m_cube.inx2dir(pixel);
+                    
+                    // Continue only if pixel is within RoI
+                    if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+
+                        // Compute theta angle with respect to pointing
+                        // direction in radians
+                        double theta = pnt.dist(dir);
     
-                    // Loop over all exposure cube energy bins
-                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                        // Loop over all exposure cube energy bins
+                        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-                        // Get logE/TeV
-                        double logE = m_ebounds.elogmean(iebin).log10TeV();
+                            // Get logE/TeV
+                            double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                        // Add to exposure cube (effective area * livetime)
-                        m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                                cta->livetime();
+                            // Add to exposure cube (effective area * livetime)
+                            m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                                    cta->livetime();
 
-                    } // endfor: looped over energy bins
+                        } // endfor: looped over energy bins
+
+                    } // endif: pixel within RoI
 
                 } // endfor: looped over all pixels
             
