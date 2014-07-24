@@ -86,29 +86,30 @@ public:
     virtual double irf_ptsrc(const GEvent&       event,
                              const GSource&      source,
                              const GObservation& obs) const;
-    virtual double irf_extended(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
     virtual double irf_radial(const GEvent&       event,
                               const GSource&      source,
                               const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
 
     // Other Methods
     const GCTAExposure& exposure(void) const;
     void                exposure(const GCTAExposure& exposure);
     const GCTAMeanPsf&  psf(void) const;
     void                psf(const GCTAMeanPsf& psf);
-    double              psf_integral(const GModelSpatial* model,
-                                     const GSkyDir&       obsDir,
-                                     const GEnergy&       srcEng,
-                                     const GTime&         srcTime) const;
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GCTAResponseCube& rsp);
-    void free_members(void);
-    int  cache_index(const std::string& name) const;
+    void   init_members(void);
+    void   copy_members(const GCTAResponseCube& rsp);
+    void   free_members(void);
+    int    cache_index(const std::string& name) const;
+    double psf_radial(const GModelSpatialRadial* model,
+                      const double&              zeta,
+                      const GSkyDir&             obsDir,
+                      const GEnergy&             srcEng,
+                      const GTime&               srcTime) const;
 
     // Private data members
     GCTAExposure m_exposure;    //!< Exposure cube

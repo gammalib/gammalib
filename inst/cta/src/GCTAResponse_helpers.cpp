@@ -1116,45 +1116,44 @@ double cta_npred_diffuse_kern_phi::eval(const double& phi)
  * system of the point spread function, defined by the angle \f$\delta\f$
  * between the true and the measured photon direction and the azimuth angle
  * \f$\phi\f$ around the measured photon direction.
- *
- * @todo Perform a detailed study to adjust the integration precision
- *       evolution as function of @p delta argument.
  ***************************************************************************/
-double cta_psf_kern_delta::eval(const double& delta)
+double cta_psf_diffuse_kern_delta::eval(const double& delta)
 {
-    // Get PSF for this delta
-    double value = m_rsp->psf()(m_srcDir, delta, m_srcEng);
-
-    // Initialize spatially integrated map value
-    double map = 0.0;
+    // Initialise value
+    double value = 0.0;
 
     // If we're at the PSF peak the model is zero (due to the sin(delta)
-    // term. We thus only integrate for positive deltas, and of course only
-    // for positive PSF values.
-    if (value > 0.0 && delta > 0.0) {
+    // term. We thus only integrate for positive deltas.
+    if (delta > 0.0) {
 
-        // Compute sine and cosine of delta
-        double sin_delta = std::sin(delta);
-        double cos_delta = std::cos(delta);
+        // Get PSF for this delta
+        value = m_rsp->psf()(m_srcDir, delta, m_srcEng);
 
-        // Setup kernel for azimuthal integration of the spatial model
-        cta_psf_kern_phi integrand(m_model, m_srcEng, m_srcTime, m_rot,
-                                   sin_delta, cos_delta);
+        // Continue only if PSF is positive
+        if (value > 0.0) {
 
-        // Azimuthally integrate model
-        GIntegral integral(&integrand);
-        integral.eps(m_eps);
-        map = integral.romb(0.0, gammalib::twopi, m_k) * sin_delta;
+            // Compute sine and cosine of delta
+            double sin_delta = std::sin(delta);
+            double cos_delta = std::cos(delta);
 
-    }
+            // Setup kernel for azimuthal integration of the diffuse model
+            cta_psf_diffuse_kern_phi integrand(m_model, m_srcEng, m_srcTime,
+                                               m_rot,
+                                               sin_delta, cos_delta);
 
-    // Multiply map with PSF value
-    value *= map;
+            // Azimuthally integrate model
+            GIntegral integral(&integrand);
+            integral.eps(m_eps);
+            value *= integral.romb(0.0, gammalib::twopi, m_order) * sin_delta;
+
+        } // endif: PSF value was positive
+
+    } // endif: delta was positive
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: cta_psf_kern_delta::eval";
+        std::cout << "*** ERROR: cta_psf_diffuse_kern_delta::eval";
         std::cout << "(delta=" << delta << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -1178,7 +1177,7 @@ double cta_psf_kern_delta::eval(const double& delta)
  * spread function coordinates into sky coordinates is done using a rotation
  * matrix that is pre-computed on entry.
  ***************************************************************************/
-double cta_psf_kern_phi::eval(const double& phi)
+double cta_psf_diffuse_kern_phi::eval(const double& phi)
 {
     // Compute sky direction vector in native coordinates
     double  cos_phi = std::cos(phi);
@@ -1201,7 +1200,122 @@ double cta_psf_kern_phi::eval(const double& phi)
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: cta_psf_kern_phi::eval";
+        std::cout << "*** ERROR: cta_psf_diffuse_kern_phi::eval";
+        std::cout << "(phi=" << phi << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for PSF integration of radial model
+ *
+ * @param[in] delta PSF offset angle (radians).
+ * @return Azimuthally integrated product between PSF and radial model.
+ *
+ * Computes the azimuthally integrated product of point spread function and
+ * the radial model intensity. As the PSF is azimuthally symmetric, it is
+ * not included in the azimuthally integration, but just multiplied on the
+ * azimuthally integrated model. The method returns thus
+ *
+ * \f[
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta {\rm d}\phi
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is the radial model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ ***************************************************************************/
+double cta_psf_radial_kern_delta::eval(const double& delta)
+{
+    // Initialise value
+    double value = 0.0;
+
+    // If we're at the PSF peak the model is zero (due to the sin(delta)
+    // term. We thus only integrate for positive deltas.
+    if (delta > 0.0) {
+
+        // Get PSF for this delta
+        value = m_rsp->psf()(m_srcDir, delta, m_srcEng);
+
+        // Continue only if PSF is positive
+        if (value > 0.0) {
+
+            // Compute sin(delta), sin(delta)*sin(zeta), cos(delta)*cos(zeta)
+            double sin_delta = std::sin(delta);
+            double sin_fact  = sin_delta * m_sin_zeta;
+            double cos_fact  = std::cos(delta)* m_cos_zeta;
+
+            // Setup kernel for azimuthal integration of the spatial model
+            cta_psf_radial_kern_phi integrand(m_model, m_srcEng, m_srcTime,
+                                              sin_fact, cos_fact);
+
+            // Azimuthally integrate model
+            GIntegral integral(&integrand);
+            integral.eps(m_eps);
+            value *= integral.romb(0.0, gammalib::twopi, m_order) * sin_delta;
+
+        } // endif: PSF value was positive
+
+    } // endif: delta was positive
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: cta_psf_radial_kern_delta::eval";
+        std::cout << "(delta=" << delta << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuthal radial model integration
+ *
+ * @param[in] phi Azimuth angle (radians).
+ * @return Radial model value.
+ *
+ * Computes the value of the radial model at the position \f$(\delta,\phi)\f$
+ * given in point spread function coordinates. The \f$\theta\f$ angle of the
+ * radial model is computed using
+ *
+ * \f[
+ *    \theta = \arccos \left( \cos \delta \cos \zeta +
+ *                            \sin \delta \sin \zeta \cos \phi
+ * \f]
+ *
+ * where \f$\delta\f$ is the angle between true and measured photon
+ * direction, \f$\zeta\f$ is the angle between model centre and measured
+ * photon direction, and \f$\phi\f$ is the azimuth angle with respect to the
+ * measured photon direction, where \f$\phi=0\f$ corresponds to the 
+ * connecting line between model centre and measured photon direction.
+ ***************************************************************************/
+double cta_psf_radial_kern_phi::eval(const double& phi)
+{
+    // Compute radial model theta angle
+    double theta = std::acos(m_cos_fact + m_sin_fact * std::cos(phi));
+
+    // Get radial model value
+    double value = m_model->eval(theta, m_srcEng, m_srcTime); 
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: cta_psf_radial_kern_phi::eval";
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;

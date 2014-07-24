@@ -53,7 +53,7 @@
                                                             " GObservation&)"
 #define G_IRF_RADIAL        "GCTAResponseCube::irf_radial(GEvent&, GSource&,"\
                                                             " GObservation&)"
-#define G_IRF_EXTENDED    "GCTAResponseCube::irf_extended(GEvent&, GSource&,"\
+#define G_IRF_DIFFUSE      "GCTAResponseCube::irf_diffuse(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_NPRED            "GCTAResponseCube::npred(GPhoton&, GObservation&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
@@ -331,8 +331,10 @@ double GCTAResponseCube::irf(const GEvent&       event,
             irf = irf_radial(event, source, obs);
             break;
         case GMODEL_SPATIAL_ELLIPTICAL:
+            irf = irf_elliptical(event, source, obs);
+            break;
         case GMODEL_SPATIAL_DIFFUSE:
-            irf = irf_extended(event, source, obs);
+            irf = irf_diffuse(event, source, obs);
             break;
         default:
             break;
@@ -361,39 +363,11 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // Initialise IRF
     double irf = 0.0;
 
-    // Get pointer to source cache. We first search the cache for a model
-    // with the source name. If no model was found we initialise a new
-    // cache entry for that model. Otherwise, we simply return the actual
-    // cache entry.
-    GCTASourceCubePointSource* cache(NULL);
-    int index = cache_index(source.name());
-    if (index == -1) {
-    
-        // No cache entry was found, thus allocate an initialise a new one
-        cache = new GCTASourceCubePointSource;
-        cache->set(source.name(), *source.model(), obs);
-        m_cache.push_back(cache);
+    // Get pointer to model source model
+    const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
 
-    } // endif: no cache entry was found
-    else {
-    
-        // Check that the cache entry is of the expected type
-        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_POINT_SOURCE) {
-            std::string msg = "Cached model \""+source.name()+"\" is not "
-                              "a point source model. This method only applies "
-                              "to point source models.";
-            throw GException::invalid_value(G_IRF_PTSRC, msg);
-        }
-        cache = static_cast<GCTASourceCubePointSource*>(m_cache[index]);
-        
-        // If the point source position has changed since the last call
-        // then update the response cache
-        const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
-        if (ptsrc->dir() != cache->dir()) {
-            cache->set(source.name(), *source.model(), obs);
-        }
-
-    } // endelse: there was a cache entry for this model
+    // Get point source direction
+    GSkyDir srcDir = ptsrc->dir();
 
     // Get pointer on CTA event bin
     if (!event.is_bin()) {
@@ -404,10 +378,10 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
         throw GException::invalid_value(G_IRF_PTSRC, msg);
     }
     const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-
+    
     // Determine angular separation between true and measured photon
     // direction in radians
-    double delta = cache->delta(bin->ipix());
+    double delta = bin->dir().dir().dist(srcDir);
 
     // Get maximum angular separation for PSF (in radians) and add 10%
     // of margin
@@ -416,16 +390,23 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // Compute only if we're sufficiently close to PSF
     if (delta <= delta_max) {
 
-        // Get effective area
-        irf = cache->aeff(bin->ieng());
+        // Get exposure
+        irf = exposure()(srcDir, source.energy());
 
         // Multiply-in PSF
         if (irf > 0.0) {
 
             // Get PSF component
-            irf *= cache->psf(bin->ieng(), delta);
+            irf *= psf()(srcDir, delta, source.energy());
 
-        } // endif: Effective area was non-zero
+            // Divide by ontime as the binned likelihood function is
+            // later multiplying by ontime
+            irf /= obs.ontime();
+
+            // Apply deadtime correction
+            irf *= obs.deadc(source.time());
+
+        } // endif: exposure was non-zero
 
     } // endif: we were sufficiently close to PSF
 
@@ -433,103 +414,6 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
         std::cout << "*** ERROR: GCTAResponseCube::irf_ptsrc:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " irf=" << irf;
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of extended source instrument response function
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Value of instrument response function for an extended source.
- *
- * This method returns the value of the instrument response function for an
- * extended source. It uses a pre-computation cache to store the IRF for
- * the spatial model component.
- *
- * The pre-computation cache is initialised if no cache has yet been
- * allocated, or if at the beginning of a scan over the events, the model
- * parameters have changed. The beginning of a scan is defined by an event
- * bin index of 0.
- ***************************************************************************/
-double GCTAResponseCube::irf_extended(const GEvent&       event,
-                                      const GSource&      source,
-                                      const GObservation& obs) const
-{
-    // Initialise IRF
-    double irf = 0.0;
-
-    // Get pointer to CTA event bin
-    if (!event.is_bin()) {
-        std::string msg = "The current event is not a CTA event bin. "
-                          "This method only works on binned CTA data. Please "
-                          "make sure that a CTA observation containing binned "
-                          "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_EXTENDED, msg);
-    }
-    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-
-    // Get pointer to source cache. We first search the cache for a model
-    // with the source name. If no model was found we initialise a new
-    // cache entry for that model. Otherwise, we simply return the actual
-    // cache entry.
-    GCTASourceCubeDiffuse* cache(NULL);
-    int index = cache_index(source.name());
-    if (index == -1) {
-    
-        // No cache entry was found, thus allocate and initialise a new one
-        cache = new GCTASourceCubeDiffuse;
-        cache->set(source.name(), *source.model(), obs);
-        m_cache.push_back(cache);
-
-    } // endif: no cache entry was found
-    else {
-    
-        // Check that the cache entry is of the expected type
-        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_EXTENDED) {
-            std::string msg = "Cached model \""+source.name()+"\" is not "
-                              "an extended source model. This method only "
-                              "applies to extended source models.";
-            throw GException::invalid_value(G_IRF_EXTENDED, msg);
-        }
-        cache = static_cast<GCTASourceCubeDiffuse*>(m_cache[index]);
-
-        // If we have the first pixel and if the model parameters have
-        // changed since the last call,  then update the response cache
-        if (bin->ipix() == 0 && bin->ieng() == 0) {
-            bool changed = false;
-            for (int i = 0; i < source.model()->size(); ++i) {
-                if ((*source.model())[i].value() != cache->par(i)) {
-                    changed = true;
-                    break;
-                }
-            }
-std::cout << "Check for a change? ";
-            if (changed) {
-std::cout << "YES" << std::endl;
-                cache->set(source.name(), *source.model(), obs);
-            }
-std::cout << std::endl;
-        }
-
-    } // endelse: there was a cache entry for this model
-
-    // Determine IRF value
-    irf = cache->irf(bin->ipix(), bin->ieng());
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCTAResponseCube::irf_diffuse:";
         std::cout << " NaN/Inf encountered";
         std::cout << " irf=" << irf;
         std::cout << std::endl;
@@ -569,11 +453,6 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     }
     const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
 
-    //TODO: To be removed when debugging is finished
-    if (bin->ipix() == 0 && bin->ieng() == 0) {
-std::cout << "Start cube" << std::endl;
-    }
-
     // Get event attribute references
     const GSkyDir& obsDir  = bin->dir().dir();
     const GEnergy& obsEng  = bin->energy();
@@ -582,16 +461,20 @@ std::cout << "Start cube" << std::endl;
     // Get pointer to radial model
     const GModelSpatialRadial* radial = static_cast<const GModelSpatialRadial*>(source.model());
 
+    // Compute angle between model centre and measured photon direction
+    // (radians)
+    double zeta = radial->dir().dist(obsDir);
+
     // Continue only if we're sufficiently close to the model centre to get a
     // non-zero response
-    if (radial->dir().dist(obsDir) <= radial->theta_max()) {
+    if (zeta <= radial->theta_max()+psf().delta_max()) {
 
         // Get deadtime corrected effective area
         irf = exposure()(obsDir, obsEng) * obs.deadc(obsTime) / obs.ontime();
 
         // Continue only if effective area is positive
         if (irf > 0.0) {
-            irf *= psf_integral(radial, obsDir, obsEng, obsTime);
+            irf *= psf_radial(radial, zeta, obsDir, obsEng, obsTime);
         }
         
     } // endif: we were sufficiently close
@@ -612,63 +495,81 @@ std::cout << "Start cube" << std::endl;
 
 
 /***********************************************************************//**
- * @brief Integrate PSF over spatial model
+ * @brief Return value of extended source instrument response function
  *
- * @param[in] model Spatial model.
- * @param[in] obsDir Observed event direction.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Value of instrument response function for an extended source.
  *
- * Computes the integral
- * 
- * \f[
- *    \int_0^{\delta_{\rm max}}
- *    {\rm PSF}(\delta) \times
- *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta
- *    {\rm d}\phi {\rm d}\delta
- * \f]
+ * This method returns the value of the instrument response function for an
+ * extended source. It uses a pre-computation cache to store the IRF for
+ * the spatial model component.
  *
- * where \f${\rm M}(\delta, \phi)\f$ is a spatial model in the coordinate
- * system of the point spread function, defined by the angle \f$\delta\f$
- * between the true and the measured photon direction and the azimuth angle
- * \f$\phi\f$ around the measured photon direction.
- * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
- * function.
+ * The pre-computation cache is initialised if no cache has yet been
+ * allocated, or if at the beginning of a scan over the events, the model
+ * parameters have changed. The beginning of a scan is defined by an event
+ * bin index of 0.
  ***************************************************************************/
-double GCTAResponseCube::psf_integral(const GModelSpatial* model,
-                                      const GSkyDir&       obsDir,
-                                      const GEnergy&       srcEng,
-                                      const GTime&         srcTime) const
+double GCTAResponseCube::irf_diffuse(const GEvent&       event,
+                                     const GSource&      source,
+                                     const GObservation& obs) const
 {
-    // Initialise value
-    double value = 0.0;
+    // Initialise IRF
+    double irf = 0.0;
 
-    // Compute rotation matrix to convert from PSF centred coordinate system
-    // spanned by delta and phi into the reference frame of the observed
-    // arrival direction given in Right Ascension and Declination.
-    GMatrix ry;
-    GMatrix rz;
-    ry.eulery(obsDir.dec_deg() - 90.0);
-    rz.eulerz(-obsDir.ra_deg());
-    GMatrix rot = (ry * rz).transpose();
+    // Get pointer to CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
 
-    // Get offset angle integration interval in radians
-    double delta_min = 0.0;
-    double delta_max = 1.1 * psf().delta_max();
+    // Get pointer to source cache. We first search the cache for a model
+    // with the source name. If no model was found we initialise a new
+    // cache entry for that model. Otherwise, we simply return the actual
+    // cache entry.
+    GCTASourceCubeDiffuse* cache(NULL);
+    int index = cache_index(source.name());
+    if (index == -1) {
+    
+        // No cache entry was found, thus allocate and initialise a new one
+        cache = new GCTASourceCubeDiffuse;
+        cache->set(source.name(), *source.model(), obs);
+        m_cache.push_back(cache);
 
-    // Setup integration kernel. We take here the observed photon arrival
-    // direction as the true photon arrival direction because the PSF does
-    // not vary significantly over a small region.
-    cta_psf_kern_delta integrand(this, model, obsDir, srcEng, srcTime, rot,
-                                 1.0e-1, 3);
+    } // endif: no cache entry was found
+    else {
+    
+        // Check that the cache entry is of the expected type
+        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_DIFFUSE) {
+            std::string msg = "Cached model \""+source.name()+"\" is not "
+                              "an extended source model. This method only "
+                              "applies to extended source models.";
+            throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+        }
+        cache = static_cast<GCTASourceCubeDiffuse*>(m_cache[index]);
 
-    // Integrate over PSF delta angle
-    GIntegral integral(&integrand);
-    integral.eps(1.0e-1);
-    value = integral.romb(delta_min, delta_max, 4);
+    } // endelse: there was a cache entry for this model
 
-    // Return PSF
-    return value;
+    // Determine IRF value
+    irf = cache->irf(bin->ipix(), bin->ieng());
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_diffuse:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
 }
 
 
@@ -944,4 +845,73 @@ int GCTAResponseCube::cache_index(const std::string& name) const
 
     // Return index
     return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrate PSF over radial model
+ *
+ * @param[in] model Radial model.
+ * @param[in] zeta Angle between model centre and measured photon direction
+ *                 (radians).
+ * @param[in] obsDir Observed event direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * Computes the integral
+ * 
+ * \f[
+ *    \int_0^{\delta_{\rm max}}
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta
+ *    {\rm d}\phi {\rm d}\delta
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is a radial model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
+ * function.
+ ***************************************************************************/
+double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
+                                    const double&              zeta,
+                                    const GSkyDir&             obsDir,
+                                    const GEnergy&             srcEng,
+                                    const GTime&               srcTime) const
+{
+    // Set integration precision and Romberg order. These values have been
+    // determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1291
+    const double eps_delta   = 1.0e-2;
+    const int    order_delta =      5;
+    const double eps_phi     = 1.0e-2;
+    const int    order_phi   =      5;
+
+    // Initialise value
+    double value = 0.0;
+
+    // Compute sin and cosine of angle between model centre and measured
+    // photon direction
+    double sin_zeta = std::sin(zeta);
+    double cos_zeta = std::cos(zeta);
+
+    // Get offset angle integration interval in radians
+    double delta_min = 0.0;
+    double delta_max = 1.1 * psf().delta_max();
+
+    // Setup integration kernel. We take here the observed photon arrival
+    // direction as the true photon arrival direction because the PSF does
+    // not vary significantly over a small region.
+    cta_psf_radial_kern_delta integrand(this, model, obsDir, srcEng, srcTime,
+                                 sin_zeta, cos_zeta,
+                                 eps_phi, order_phi);
+
+    // Integrate over PSF delta angle
+    GIntegral integral(&integrand);
+    integral.eps(eps_delta);
+    value = integral.romb(delta_min, delta_max, order_delta);
+
+    // Return PSF
+    return value;
 }

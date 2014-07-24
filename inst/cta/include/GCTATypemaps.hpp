@@ -32,7 +32,7 @@
 /* __ Class code enumerations (used primarily to avoid dynamic casting) __ */
 typedef enum {
     GCTA_SOURCE_CUBE_POINT_SOURCE,
-    GCTA_SOURCE_CUBE_EXTENDED
+    GCTA_SOURCE_CUBE_DIFFUSE
 } GCTAClassCode;
 
 /* __ Typemaps ___________________________________________________________ */

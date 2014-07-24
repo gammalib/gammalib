@@ -54,7 +54,7 @@
 #define G_PSF_INTEGRATE               //!< Integrate map over PSF (default)
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_SET
+//#define G_DEBUG_SET
 
 /* __ Constants __________________________________________________________ */
 
@@ -226,28 +226,6 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
     // Get diffuse source attributes
     m_name          = name;
     GTime   obsTime = cube->time();
-    GSkyDir centre;
-    double  theta_max = 99.0;
-
-    // Store spatial model parameter values
-    m_pars.clear();
-    for (int i = 0; i < model.size(); ++i) {
-        m_pars.push_back(model[i].value());
-    }
-
-    // Get attributes for radial or elliptical model
-    const GModelSpatialRadial* radial = dynamic_cast<const GModelSpatialRadial*>(&model);
-    if (radial != NULL) {
-        centre    = radial->dir();
-        theta_max = radial->theta_max();
-    }
-    else {
-        const GModelSpatialElliptical* elliptical = dynamic_cast<const GModelSpatialElliptical*>(&model);
-        if (radial != NULL) {
-            centre    = elliptical->dir();
-            theta_max = elliptical->theta_max();
-        }
-    }
 
     // Setup empty skymap
     m_cube = cube->map();
@@ -259,52 +237,46 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
         // Get cube pixel sky direction
         GSkyDir obsDir = cube->map().inx2dir(pixel);
 
-        // Compute distance to model centre in radians
-        double theta = centre.dist(obsDir);
-        if (theta <= theta_max) {
+        // Loop over all energy layers
+        for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
 
-            // Loop over all energy layers
-            for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
+            // Get cube layer energy
+            const GEnergy& obsEng = cube->energy(iebin);
 
-                // Get cube layer energy
-                const GEnergy& obsEng = cube->energy(iebin);
+            // Determine deadtime corrected effective area. We assume
+            // here that the effective area does not vary significantly
+            // over the PSF and just compute it at the pixel centre. We
+            // furthermore assume no energy dispersion, and thus compute
+            // effective area using the observed energy.
+            double aeff = rsp->exposure()(obsDir, obsEng) *
+                          obs.deadc(obsTime) /
+                          obs.ontime();
 
-                // Determine deadtime corrected effective area. We assume
-                // here that the effective area does not vary significantly
-                // over the PSF and just compute it at the pixel centre. We
-                // furthermore assume no energy dispersion, and thus compute
-                // effective area using the observed energy.
-                double aeff = rsp->exposure()(obsDir, obsEng) *
-                              obs.deadc(obsTime) /
-                              obs.ontime();
+            // Continue only if effective area is positive
+            if (aeff > 0.0) {
 
-                // Continue only if effective area is positive
-                if (aeff > 0.0) {
+                // Compute product of PSF and diffuse map, integrated
+                // over the relevant PSF area. We assume no energy
+                // dispersion and thus compute the product using the
+                // observed energy.
+                #if defined(G_PSF_INTEGRATE)
+                double psf = this->psf(rsp, &model, obsDir, obsEng, obsTime);
+                #else
+                double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
+                #endif
 
-                    // Compute product of PSF and diffuse map, integrated
-                    // over the relevant PSF area. We assume no energy
-                    // dispersion and thus compute the product using the
-                    // observed energy.
-                    #if defined(G_PSF_INTEGRATE)
-                    double psf = this->psf(rsp, &model, obsDir, obsEng, obsTime);
-                    #else
-                    double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
-                    #endif
+                // Set cube value
+                m_cube(pixel, iebin) = aeff * psf;
 
-                    // Set cube value
-                    m_cube(pixel, iebin) = aeff * psf;
-
-                } // endif: effective area was positive
-            
-            } // endfor: looped over all energy layers
-
-            // Debug option: update statistics
-            #if defined(G_DEBUG_SET)
-            n_pixels_computed++;
-            #endif
+            } // endif: effective area was positive
         
-        } // endif: pixel was relevant
+        } // endfor: looped over all energy layers
 
+        // Debug option: update statistics
+        #if defined(G_DEBUG_SET)
+        n_pixels_computed++;
+        #endif
+        
     } // endfor: looped over all spatial pixels
 
     // Debug option: show statistics
@@ -322,23 +294,6 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return parameter value
- *
- * @param[in] index Parameter index.
- * @return Parameter value.
- *
- * Returns the parameter value for the specified parameter @p index..
- ***************************************************************************/
-double GCTASourceCubeDiffuse::par(const int& index) const
-{
-    //TODO: Range checking
-    
-    // Return
-    return (m_pars[index]);
 }
 
 
@@ -373,6 +328,14 @@ double GCTASourceCubeDiffuse::psf(const GCTAResponseCube* rsp,
                                   const GEnergy&          srcEng,
                                   const GTime&            srcTime) const
 {
+    // Set integration precision and Romberg order. These values have been
+    // determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1291
+    const double eps_delta   = 1.0e-2;
+    const int    order_delta =      5;
+    const double eps_phi     = 1.0e-2;
+    const int    order_phi   =      5;
+
     // Initialise PSF
     double psf = 0.0;
 
@@ -392,13 +355,13 @@ double GCTASourceCubeDiffuse::psf(const GCTAResponseCube* rsp,
     // Setup integration kernel. We take here the observed photon arrival
     // direction as the true photon arrival direction because the PSF does
     // not vary significantly over a small region.
-    cta_psf_kern_delta integrand(rsp, model, obsDir, srcEng, srcTime, rot,
-                                 1.0e-2, 5);
+    cta_psf_diffuse_kern_delta integrand(rsp, model, obsDir, srcEng, srcTime,
+                                         rot, eps_phi, order_phi);
 
     // Integrate over PSF delta angle
     GIntegral integral(&integrand);
-    integral.eps(1.0e-2);
-    psf = integral.romb(delta_min, delta_max, 5);
+    integral.eps(eps_delta);
+    psf = integral.romb(delta_min, delta_max, order_delta);
 
     // Return PSF
     return psf;
@@ -443,7 +406,6 @@ void GCTASourceCubeDiffuse::init_members(void)
 {
     // Initialise members
     m_cube.clear();
-    m_pars.clear();
    
     // Return
     return;
@@ -459,7 +421,6 @@ void GCTASourceCubeDiffuse::copy_members(const GCTASourceCubeDiffuse& cube)
 {
     // Copy members
     m_cube = cube.m_cube;
-    m_pars = cube.m_pars;
 
     // Return
     return;

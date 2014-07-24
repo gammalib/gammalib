@@ -91,22 +91,21 @@ protected:
     void free_members(void);
 
     // Data members
-    GSkymap             m_cube;  //!< Diffuse map convolved with IRF
-    std::vector<double> m_pars;  //!< Parameter values
+    GSkymap m_cube;  //!< Diffuse map convolved with IRF
 };
 
 
 /***********************************************************************//**
  * @brief Return class type code
  *
- * @return GCTA_SOURCE_CUBE_EXTENDED.
+ * @return GCTA_SOURCE_CUBE_DIFFUSE.
  *
- * Returns the class type code GCTA_SOURCE_CUBE_EXTENDED.
+ * Returns the class type code GCTA_SOURCE_CUBE_DIFFUSE.
  ***************************************************************************/
 inline
 GCTAClassCode GCTASourceCubeDiffuse::code(void) const
 {
-    return (GCTA_SOURCE_CUBE_EXTENDED);
+    return (GCTA_SOURCE_CUBE_DIFFUSE);
 }
 
 
