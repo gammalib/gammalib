@@ -18,28 +18,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
+import gammalib
 
 
 # ====================== #
 # Set point source model #
 # ====================== #
-def ptsrc_model(ra=0.0, dec=0.0):
+def ptsrc_model(ra=83.6331, dec=22.0145):
     """
     Set shell model.
     """
     # Set shell centre
-    pos = GSkyDir()
+    pos = gammalib.GSkyDir()
     pos.radec_deg(ra, dec)
 
     # Set spatial model
-    spatial = GModelSpatialPointSource(pos)
+    spatial = gammalib.GModelSpatialPointSource(pos)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))
+    spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100.0, "MeV"))
 
     # Set sky model
-    model = GModelSky(spatial, spectral)
+    model = gammalib.GModelSky(spatial, spectral)
 
     # Return model
     return model
@@ -48,22 +48,22 @@ def ptsrc_model(ra=0.0, dec=0.0):
 # =============== #
 # Set shell model #
 # =============== #
-def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
+def shell_model(ra=83.6331, dec=22.0145, radius=0.3, width=0.1):
     """
     Set shell model.
     """
     # Set shell centre
-    centre = GSkyDir()
+    centre = gammalib.GSkyDir()
     centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelSpatialRadialShell(centre, radius, width, False)
+    radial = gammalib.GModelSpatialRadialShell(centre, radius, width, False)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))
+    spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100.0, "MeV"))
 
     # Set sky model
-    model = GModelSky(radial, spectral)
+    model = gammalib.GModelSky(radial, spectral)
 
     # Return model
     return model
@@ -72,22 +72,22 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
 # =============== #
 # Set disk model #
 # =============== #
-def disk_model(ra=359.6, dec=-0.2, radius=0.4):
+def disk_model(ra=83.6331, dec=22.0145, radius=0.4):
     """
     Set disk model.
     """
     # Set disk centre
-    centre = GSkyDir()
+    centre = gammalib.GSkyDir()
     centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelSpatialRadialDisk(centre, radius)
+    radial = gammalib.GModelSpatialRadialDisk(centre, radius)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))
+    spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100.0, "MeV"))
 
     # Set sky model
-    model = GModelSky(radial, spectral)
+    model = gammalib.GModelSky(radial, spectral)
 
     # Return model
     return model
@@ -96,22 +96,46 @@ def disk_model(ra=359.6, dec=-0.2, radius=0.4):
 # ================== #
 # Set Gaussian model #
 # ================== #
-def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
+def gauss_model(ra=83.6331, dec=22.0145, sigma=0.2):
     """
     Set Gaussian model.
     """
     # Set Gaussian centre
-    centre = GSkyDir()
+    centre = gammalib.GSkyDir()
     centre.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelSpatialRadialGauss(centre, sigma)
+    radial = gammalib.GModelSpatialRadialGauss(centre, sigma)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))
+    spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100.0, "MeV"))
 
     # Set sky model
-    model = GModelSky(radial, spectral)
+    model = gammalib.GModelSky(radial, spectral)
+
+    # Return model
+    return model
+
+
+# ========================= #
+# Set Elliptical Disk model #
+# ========================= #
+def elliptical_model(ra=83.6331, dec=22.0145, semimajor=1.0, semiminor=0.5, posangle=45):
+    """
+    Set Elliptical Disk model.
+    """
+    # Set centre
+    centre = gammalib.GSkyDir()
+    centre.radec_deg(ra, dec)
+
+    # Set elliptical model
+    elliptical = gammalib.GModelSpatialEllipticalDisk(centre, semimajor, semiminor, posangle)
+
+    # Set spectral model
+    spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100.0, "MeV"))
+
+    # Set sky model
+    model = gammalib.GModelSky(elliptical, spectral)
 
     # Return model
     return model
@@ -120,18 +144,18 @@ def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
 # ================= #
 # Set diffuse model #
 # ================= #
-def diffuse_model(file="../../../test/data/cena_lobes_parkes.fits"):
+def diffuse_model(file="data/radio_map.fits"):
     """
     Set Diffuse model.
     """
     # Set spatial model
-    spatial = GModelSpatialDiffuseMap(file)
+    spatial = gammalib.GModelSpatialDiffuseMap(file)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100.0, "MeV"))
+    spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100.0, "MeV"))
 
     # Set sky model
-    model = GModelSky(spatial, spectral)
+    model = gammalib.GModelSky(spatial, spectral)
 
     # Return model
     return model
@@ -140,33 +164,36 @@ def diffuse_model(file="../../../test/data/cena_lobes_parkes.fits"):
 # ========================== #
 # Set binned CTA observation #
 # ========================== #
-def observation(ra=0.0, dec=0.0, emin=0.1, emax=100.0,
+def observation(ra=83.6331, dec=22.0145, emin=0.1, emax=100.0,
                 binsz=0.02, npix=100, ebins=10,
                 duration=1800.0, deadc=0.95):
     """
     Set binned CTA observation.
     """
     # Allocate observation
-    obs = GCTAObservation()
+    obs = gammalib.GCTAObservation()
 
     # Set response
-    obs.response("cta_dummy_irf", GCaldb("../caldb"))
+    #obs.response("cta_dummy_irf", GCaldb("../caldb"))
+    exposure = gammalib.GCTAExposure("data/expcube.fits")
+    psf      = gammalib.GCTAMeanPsf("data/psfcube.fits")
+    obs.response(exposure, psf)
 
     # Set pointing
-    dir = GSkyDir()
-    pnt = GCTAPointing()
+    dir = gammalib.GSkyDir()
+    pnt = gammalib.GCTAPointing()
     dir.radec_deg(ra, dec)
     pnt.dir(dir)
     obs.pointing(pnt)
 
     # Set
-    ebounds = GEbounds(ebins, GEnergy(emin, "TeV"), GEnergy(emax, "TeV"))
-    gti     = GGti()
-    tmin    = GTime(0.0)
-    tmax    = GTime(duration)
+    ebounds = gammalib.GEbounds(ebins, gammalib.GEnergy(emin, "TeV"), gammalib.GEnergy(emax, "TeV"))
+    gti     = gammalib.GGti()
+    tmin    = gammalib.GTime(0.0)
+    tmax    = gammalib.GTime(duration)
     gti.append(tmin, tmax)
-    map     = GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
-    cube    = GCTAEventCube(map, ebounds, gti)
+    map     = gammalib.GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
+    cube    = gammalib.GCTAEventCube(map, ebounds, gti)
     obs.events(cube)
 
     # Set ontime, livetime, and deadtime correction factor
@@ -184,13 +211,10 @@ def observation(ra=0.0, dec=0.0, emin=0.1, emax=100.0,
 # ==================== #
 # Test IRF computation #
 # ==================== #
-def test_irf(model, ra=0.0, dec=0.0, npix=100, filename="cntmap.fits"):
+def test_irf(model, ra=83.6331, dec=22.0145, npix=100, filename="modmap.fits"):
     """
     Test IRF.
     """
-    # Print model
-    print model
-
     # Set CTA observation
     obs = observation(ra=ra, dec=dec, npix=npix)
 
@@ -202,6 +226,10 @@ def test_irf(model, ra=0.0, dec=0.0, npix=100, filename="cntmap.fits"):
     # Save observation
     obs.save(filename, True)
 
+    # Print observation and model
+    print(obs)
+    print(model)
+
     # Return
     return
 
@@ -209,7 +237,7 @@ def test_irf(model, ra=0.0, dec=0.0, npix=100, filename="cntmap.fits"):
 # ========================= #
 # Test gradient computation #
 # ========================= #
-def test_grad(model, ra=0.0, dec=0.0, filename="gradmap.fits", ipar=2):
+def test_grad(model, ra=83.6331, dec=22.0145, filename="gradmap.fits", ipar=2):
     """
     Test gradient computation.
     """
@@ -239,20 +267,21 @@ def test_grad(model, ra=0.0, dec=0.0, filename="gradmap.fits", ipar=2):
 #==========================#
 if __name__ == '__main__':
     """
-    Test diffuse models.
+    Test model computation.
     """
     # Dump header
     print("")
-    print("***********************")
-    print("* Test diffuse models *")
-    print("***********************")
+    print("*************************")
+    print("* Test model computation *")
+    print("**************************")
 
     # Test IRF
     # test_irf(ptsrc_model())
     # test_irf(shell_model())
     # test_irf(disk_model())
     # test_irf(gauss_model())
-    test_irf(diffuse_model(), ra=201.3651, dec=-43.0191, npix=200)
+    test_irf(elliptical_model())
+    # test_irf(diffuse_model(), ra=201.3651, dec=-43.0191, npix=200)
 
     # Test Gradient
     # test_grad(ptsrc_model(), ipar=3)

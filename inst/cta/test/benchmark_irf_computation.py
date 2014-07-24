@@ -128,11 +128,11 @@ if __name__ == '__main__':
     print("**************************************")
 
     # Set test
-    test = "point"
+    #test = "point"
     #test = "gauss"
     #test = "disk"
     #test = "shell"
-    #test = "ellipse"
+    test = "ellipse"
     #test = "diffuse"
 
     # Set response parameters
@@ -177,4 +177,4 @@ if __name__ == '__main__':
     binned_irf(model, cntmap, irf, gammalib.GCaldb(caldb), cntref)
 
     # Perform stacked computation
-    stacked_irf(model, cntmap, expcube, psfcube, cntref)
+    #stacked_irf(model, cntmap, expcube, psfcube, cntref)
