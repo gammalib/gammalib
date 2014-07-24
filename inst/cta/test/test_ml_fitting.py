@@ -237,8 +237,12 @@ if __name__ == '__main__':
     print("... please wait for a few seconds")
 
     # Set test
-    #test = "radio"
-    test = "gauss"
+    #test = "point"
+    #test = "gauss"
+    #test = "disk"
+    #test = "shell"
+    test = "ellipse"
+    #test = "diffuse"
 
     # Set parameters
     irf     = "cta_dummy_irf"
@@ -247,14 +251,36 @@ if __name__ == '__main__':
     psfcube = "data/psfcube.fits"
 
     # Set test dependent filenames
-    if test == "radio":
-        model  = "data/radio.xml"
-        events = "data/radio_events.fits"
-        cntmap = "data/radio_cntmap.fits"
+    if test == "point":
+        model  = "data/crab_ptsrc.xml"
+        events = "data/crab_events.fits"
+        cntmap = "data/crab_cntmap.fits"
+        cntref = 934.3 # +/- 3.1 (from ctobssim)
+    elif test == "disk":   
+        model  = "data/crab_disk.xml"
+        events = "data/crab_disk_events.fits"
+        cntmap = "data/crab_disk_cntmap.fits"
+        cntref = 933.6 # +/- 3.1 (from ctobssim)
     elif test == "gauss":   
         model  = "data/crab_gauss.xml"
         events = "data/crab_gauss_events.fits"
         cntmap = "data/crab_gauss_cntmap.fits"
+        cntref = 935.1 # +/- 3.1 (from ctobssim)
+    elif test == "shell":   
+        model  = "data/crab_shell.xml"
+        events = "data/crab_shell_events.fits"
+        cntmap = "data/crab_shell_cntmap.fits"
+        cntref = 933.5 # +/- 3.1 (from ctobssim)
+    elif test == "ellipse":   
+        model  = "data/crab_edisk.xml"
+        events = "data/crab_edisk_events.fits"
+        cntmap = "data/crab_edisk_cntmap.fits"
+        cntref = 845.9 # +/- 2.9 (from ctobssim)
+    elif test == "diffuse":
+        model  = "data/radio.xml"
+        events = "data/radio_events.fits"
+        cntmap = "data/radio_cntmap.fits"
+        cntref = 337.5 # +/- 1.8 (from ctobssim)
 
     # Perform unbinned analysis
     #results_unbinned = unbinned_analysis(model, events, irf, gammalib.GCaldb(caldb))
