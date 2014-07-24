@@ -346,7 +346,7 @@ void GCTAExposure::fill(const GObservations& obs)
                         // Get logE/TeV
                         double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                        // Add to exposure cube (effective area * lifetime)
+                        // Add to exposure cube (effective area * livetime)
                         m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
                                                 cta->livetime();
 

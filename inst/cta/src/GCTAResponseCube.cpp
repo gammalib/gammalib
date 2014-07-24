@@ -396,14 +396,13 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
         // Multiply-in PSF
         if (irf > 0.0) {
 
+            // Revover effective area from exposure
+            irf /= obs.livetime();
+
             // Get PSF component
             irf *= psf()(srcDir, delta, source.energy());
 
-            // Divide by ontime as the binned likelihood function is
-            // later multiplying by ontime
-            irf /= obs.ontime();
-
-            // Apply deadtime correction
+            // Perform deadtime correction
             irf *= obs.deadc(source.time());
 
         } // endif: exposure was non-zero
@@ -469,12 +468,14 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     // non-zero response
     if (zeta <= radial->theta_max()+psf().delta_max()) {
 
-        // Get deadtime corrected effective area
-        irf = exposure()(obsDir, obsEng) * obs.deadc(obsTime) / obs.ontime();
+        // Get exposure
+        irf = exposure()(obsDir, obsEng);
 
-        // Continue only if effective area is positive
+        // Continue only if exposure is positive
         if (irf > 0.0) {
+            irf /= obs.livetime(); //!< Revover effective area from exposure
             irf *= psf_radial(radial, zeta, obsDir, obsEng, obsTime);
+            irf *= obs.deadc(obsTime);
         }
         
     } // endif: we were sufficiently close

@@ -243,17 +243,17 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
             // Get cube layer energy
             const GEnergy& obsEng = cube->energy(iebin);
 
-            // Determine deadtime corrected effective area. We assume
-            // here that the effective area does not vary significantly
-            // over the PSF and just compute it at the pixel centre. We
-            // furthermore assume no energy dispersion, and thus compute
-            // effective area using the observed energy.
-            double aeff = rsp->exposure()(obsDir, obsEng) *
-                          obs.deadc(obsTime) /
-                          obs.ontime();
+            // Determine exposure. We assume here that the exposure does
+            // not vary significantly over the PSF and just compute it at
+            // the pixel centre. We furthermore assume no energy dispersion,
+            // and thus compute exposure using the observed energy.
+            double aeff = rsp->exposure()(obsDir, obsEng);
 
             // Continue only if effective area is positive
             if (aeff > 0.0) {
+
+                // Revover effective area from exposure
+                aeff /= obs.livetime();
 
                 // Compute product of PSF and diffuse map, integrated
                 // over the relevant PSF area. We assume no energy
@@ -266,7 +266,7 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
                 #endif
 
                 // Set cube value
-                m_cube(pixel, iebin) = aeff * psf;
+                m_cube(pixel, iebin) = aeff * psf * obs.deadc(obsTime);
 
             } // endif: effective area was positive
         
