@@ -36,6 +36,8 @@
 #include "GCTASourceCubePointSource.hpp"
 #include "GCTASourceCubeDiffuse.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialRadial.hpp"
+#include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GPhoton.hpp"
 #include "GEvent.hpp"
@@ -433,7 +435,7 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
  * @return Value of instrument response function for a radial source.
  *
  * This method returns the value of the instrument response function for a
- * radial source. Response values are computed on the fly..
+ * radial source. Response values are computed on the fly.
  ***************************************************************************/
 double GCTAResponseCube::irf_radial(const GEvent&       event,
                                     const GSource&      source,
@@ -458,15 +460,15 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     const GTime&   obsTime = bin->time();
 
     // Get pointer to radial model
-    const GModelSpatialRadial* radial = static_cast<const GModelSpatialRadial*>(source.model());
+    const GModelSpatialRadial* model = static_cast<const GModelSpatialRadial*>(source.model());
 
     // Compute angle between model centre and measured photon direction
     // (radians)
-    double zeta = radial->dir().dist(obsDir);
+    double zeta = model->dir().dist(obsDir);
 
     // Continue only if we're sufficiently close to the model centre to get a
     // non-zero response
-    if (zeta <= radial->theta_max()+psf().delta_max()) {
+    if (zeta <= model->theta_max()+psf().delta_max()) {
 
         // Get exposure
         irf = exposure()(obsDir, obsEng);
@@ -474,7 +476,7 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
         // Continue only if exposure is positive
         if (irf > 0.0) {
             irf /= obs.livetime(); //!< Revover effective area from exposure
-            irf *= psf_radial(radial, zeta, obsDir, obsEng, obsTime);
+            irf *= psf_radial(model, zeta, obsDir, obsEng, obsTime);
             irf *= obs.deadc(obsTime);
         }
         
@@ -484,6 +486,78 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
         std::cout << "*** ERROR: GCTAResponseCube::irf_radial:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of elliptical source instrument response function
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Value of instrument response function for an elliptical source.
+ *
+ * This method returns the value of the instrument response function for an
+ * elliptical source. Response values are computed on the fly.
+ ***************************************************************************/
+double GCTAResponseCube::irf_elliptical(const GEvent&       event,
+                                        const GSource&      source,
+                                        const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_RADIAL, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+
+    // Get event attribute references
+    const GSkyDir& obsDir  = bin->dir().dir();
+    const GEnergy& obsEng  = bin->energy();
+    const GTime&   obsTime = bin->time();
+
+    // Get pointer to elliptical model
+    const GModelSpatialElliptical* model = static_cast<const GModelSpatialElliptical*>(source.model());
+
+    // Compute angle between model centre and measured photon direction and
+    // position angle (radians)
+    double zeta  = model->dir().dist(obsDir);
+    double omega = model->dir().posang(obsDir);
+
+    // Continue only if we're sufficiently close to the model centre to get a
+    // non-zero response
+    if (zeta <= model->theta_max()+psf().delta_max()) {
+
+        // Get exposure
+        irf = exposure()(obsDir, obsEng);
+
+        // Continue only if exposure is positive
+        if (irf > 0.0) {
+            irf /= obs.livetime(); //!< Revover effective area from exposure
+            irf *= psf_elliptical(model, zeta, omega, obsDir, obsEng, obsTime);
+            irf *= obs.deadc(obsTime);
+        }
+        
+    } // endif: we were sufficiently close
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_elliptical:";
         std::cout << " NaN/Inf encountered";
         std::cout << " irf=" << irf;
         std::cout << std::endl;
@@ -907,6 +981,78 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     cta_psf_radial_kern_delta integrand(this, model, obsDir, srcEng, srcTime,
                                  sin_zeta, cos_zeta,
                                  eps_phi, order_phi);
+
+    // Integrate over PSF delta angle
+    GIntegral integral(&integrand);
+    integral.eps(eps_delta);
+    value = integral.romb(delta_min, delta_max, order_delta);
+
+    // Return PSF
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Integrate PSF over elliptical model
+ *
+ * @param[in] model Elliptical model.
+ * @param[in] zeta Angle between model centre and measured photon direction
+ *                 (radians).
+ * @param[in] omega Position angle of measured photon direction with
+ *                  respect to model centre (radians)
+ * @param[in] obsDir Observed event direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * Computes the integral
+ * 
+ * \f[
+ *    \int_0^{\delta_{\rm max}}
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta
+ *    {\rm d}\phi {\rm d}\delta
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is an elliptical model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
+ * function.
+ ***************************************************************************/
+double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
+                                        const double&                  zeta,
+                                        const double&                  omega,
+                                        const GSkyDir&                 obsDir,
+                                        const GEnergy&                 srcEng,
+                                        const GTime&                   srcTime) const
+{
+    // Set integration precision and Romberg order. These values have been
+    // determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1291
+    const double eps_delta   = 1.0e-2;
+    const int    order_delta =      5;
+    const double eps_phi     = 1.0e-2;
+    const int    order_phi   =      5;
+
+    // Initialise value
+    double value = 0.0;
+
+    // Compute sin and cosine of angle between model centre and measured
+    // photon direction
+    double sin_zeta = std::sin(zeta);
+    double cos_zeta = std::cos(zeta);
+
+    // Get offset angle integration interval in radians
+    double delta_min = 0.0;
+    double delta_max = 1.1 * psf().delta_max();
+
+    // Setup integration kernel. We take here the observed photon arrival
+    // direction as the true photon arrival direction because the PSF does
+    // not vary significantly over a small region.
+    cta_psf_elliptical_kern_delta integrand(this, model, obsDir, srcEng, srcTime,
+                                            sin_zeta, cos_zeta, omega,
+                                            eps_phi, order_phi);
 
     // Integrate over PSF delta angle
     GIntegral integral(&integrand);

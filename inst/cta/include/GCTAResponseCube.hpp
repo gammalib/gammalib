@@ -43,6 +43,8 @@ class GEvent;
 class GObservation;
 class GCTAObservation;
 class GCTAInstDir;
+class GModelSpatialRadial;
+class GModelSpatialElliptical;
 
 
 /***********************************************************************//**
@@ -89,6 +91,9 @@ public:
     virtual double irf_radial(const GEvent&       event,
                               const GSource&      source,
                               const GObservation& obs) const;
+    virtual double irf_elliptical(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const;
     virtual double irf_diffuse(const GEvent&       event,
                                const GSource&      source,
                                const GObservation& obs) const;
@@ -110,6 +115,12 @@ private:
                       const GSkyDir&             obsDir,
                       const GEnergy&             srcEng,
                       const GTime&               srcTime) const;
+    double psf_elliptical(const GModelSpatialElliptical* model,
+                          const double&                  zeta,
+                          const double&                  omega,
+                          const GSkyDir&                 obsDir,
+                          const GEnergy&                 srcEng,
+                          const GTime&                   srcTime) const;
 
     // Private data members
     GCTAExposure m_exposure;    //!< Exposure cube
