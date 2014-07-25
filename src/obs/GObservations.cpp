@@ -722,6 +722,24 @@ void GObservations::optimize(GOptimizer& opt)
 
 
 /***********************************************************************//**
+ * @brief Evaluate function
+ *
+ * Evaluates the likelihood funtion at the actual set of parameters.
+ ***************************************************************************/
+void GObservations::eval(void)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
+    // Compute log-likelihood
+    m_fct.eval(pars);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print observation list information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).

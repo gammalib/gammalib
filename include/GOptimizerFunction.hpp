@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GOptimizerFunction.hpp - Optimizer function abstract base class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,7 +60,7 @@ public:
 
     // Virtual methods
     virtual void           eval(const GOptimizerPars& pars) = 0;
-    virtual double         value(void) = 0;
+    virtual double         value(void) const = 0;
     virtual GVector*       gradient(void) = 0;
     virtual GMatrixSparse* curvature(void) = 0;
  

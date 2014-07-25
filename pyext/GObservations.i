@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.i - Observations container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,8 +64,9 @@ public:
     void           models(const std::string& filename);
     const GModels& models(void);
     void           optimize(GOptimizer& opt);
+    void           eval(void);
+    double         logL(void) const;
     double         npred(void) const;
-
 
     // Optimizer function access method
     const GObservations::likelihood& function(void) const;
@@ -81,14 +82,14 @@ public:
     ~likelihood(void);
 
     // Implemented pure virtual base class methods
-    double         value(void);
-    double         npred(void) const;
-    GVector*       gradient(void);
-    GMatrixSparse* curvature(void);
+    virtual void           eval(const GOptimizerPars& pars);
+    virtual double         value(void) const;
+    virtual GVector*       gradient(void);
+    virtual GMatrixSparse* curvature(void);
 
     // Other methods
-    void set(GObservations* obs);
-    void eval(const GOptimizerPars& pars);
+    void   set(GObservations* obs);
+    double npred(void) const;
 };
 %nestedworkaround GObservations::likelihood;
 %{

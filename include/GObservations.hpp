@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.hpp - Observation container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -124,6 +124,8 @@ public:
     void                models(const std::string& filename);
     const GModels&      models(void) const;
     void                optimize(GOptimizer& opt);
+    void                eval(void);
+    double              logL(void) const;
     double              npred(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
 
@@ -140,14 +142,14 @@ public:
         likelihood& operator=(const likelihood& fct);
 
         // Implemented pure virtual base class methods
-        double         value(void);
-        double         npred(void) const;
-        GVector*       gradient(void);
-        GMatrixSparse* curvature(void);
+        virtual void           eval(const GOptimizerPars& pars);
+        virtual double         value(void) const;
+        virtual GVector*       gradient(void);
+        virtual GMatrixSparse* curvature(void);
 
         // Other methods
-        void set(GObservations* obs);
-        void eval(const GOptimizerPars& pars);
+        void   set(GObservations* obs);
+        double npred(void) const;
 
     protected:
         // Protected methods
@@ -283,14 +285,29 @@ const GModels& GObservations::models(void) const
 
 
 /***********************************************************************//**
- * @brief Return total number of predicted events after model fitting
+ * @brief Return log-likelihood of models
  *
- * @return Total number of predicted events after model fitting.
+ * @return Log-likelihood of models.
  *
- * Returns the total number of events that is predicted by the models after
- * they have been fitted to the data. This number if computed following a
- * call of the optimize() method. If this method has never been called, the
- * npred() method returns 0.
+ * Returns the log-likelihood of models. This value if computed following a
+ * call of the optimize() or eval() methods. If optimize() or eval() have
+ * never been called, the method returns 0.
+ ***************************************************************************/
+inline
+double GObservations::logL(void) const
+{
+    return (m_fct.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return total number of predicted events in models
+ *
+ * @return Total number of predicted events in models.
+ *
+ * Returns the total number of events that is predicted by the models. This
+ * number if computed following a call of the optimize() or eval() methods.
+ * If optimize() or eval() have never been called, the method returns 0.
  ***************************************************************************/
 inline
 double GObservations::npred(void) const
@@ -314,14 +331,14 @@ const GObservations::likelihood& GObservations::function(void) const
 
 
 /***********************************************************************//**
- * @brief Return likelihood function value
+ * @brief Return log-likelihood value of optimizer function
  *
- * @return Likelihood function value.
+ * @return Log-likelihood value of optimizer function.
  *
- * Returns the actual function value of the likelihood function.
+ * Returns the log-likelihood value of optimizer function.
  ***************************************************************************/
 inline
-double GObservations::likelihood::value(void)
+double GObservations::likelihood::value(void) const
 {
     return m_value;
 }

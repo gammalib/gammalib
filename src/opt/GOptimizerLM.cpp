@@ -611,7 +611,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
     // Single loop for common exit point
     do {
-        
+
         // Initialise iteration parameters
         GVector*       grad      = fct.gradient();
         GMatrixSparse* curvature = fct.curvature();
