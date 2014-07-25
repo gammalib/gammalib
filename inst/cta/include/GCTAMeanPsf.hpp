@@ -100,7 +100,8 @@ protected:
     void clear_cube(void);
     void update(const double& delta, const double& logE) const;
     void set_eng_axis(void);
-    
+    void set_to_smooth(void);
+
     // Data
     mutable std::string m_filename;   //!< Filename
     GSkymap             m_cube;       //!< PSF cube

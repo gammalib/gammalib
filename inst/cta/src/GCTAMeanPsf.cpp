@@ -43,6 +43,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_SMOOTH_PSF    //!< Guarantee no singularities
+#define G_SQRT_BINNING  //!< Use sqrt delta spacing (samples better the peak)
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -123,10 +125,6 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string& filename)
  *
  * Constructs a mean PSF cube by computing the mean PSF from all CTA
  * observations found in the observation container.
- *
- * @todo Think about the way how the delta node array is computed. The PSF
- * should be more finely sampled when being close to the peak. For the
- * moment a simple linear sampling is used.
  ***************************************************************************/
 GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
                          const std::string&   coords,
@@ -152,8 +150,14 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
     // Set delta node array
     m_deltas.clear();
     for (int i = 0; i < ndbins; ++i) {
+        #if defined(G_SQRT_BINNING)
+        double binsize = std::sqrt(dmax) / double(ndbins);
+        double delta   = binsize * (double(i) + 0.5); // avoid central singularity
+        delta         *= delta;
+        #else
         double binsize = dmax / double(ndbins);
-        double delta   = binsize * (double(i)+0.5);
+        double delta   = binsize * (double(i) + 0.5); // avoid central singularity
+        #endif
         m_deltas.append(delta);
     }
 
@@ -353,6 +357,11 @@ void GCTAMeanPsf::set(const GCTAObservation& obs)
 
     } // endif: response was valid
 
+    // Compile option: guarantee smooth Psf
+    #if defined(G_SMOOTH_PSF)
+    set_to_smooth();
+    #endif
+
     // Return
     return;
 }
@@ -468,6 +477,11 @@ void GCTAMeanPsf::fill(const GObservations& obs)
         }
     }
 
+    // Compile option: guarantee smooth Psf
+    #if defined(G_SMOOTH_PSF)
+    set_to_smooth();
+    #endif
+
     // Return
     return;
 }
@@ -501,6 +515,11 @@ void GCTAMeanPsf::read(const GFits& fits)
 
     // Set energy node array
     set_eng_axis();
+
+    // Compile option: guarantee smooth Psf
+    #if defined(G_SMOOTH_PSF)
+    set_to_smooth();
+    #endif
 
     // Return
     return;
@@ -735,6 +754,38 @@ void GCTAMeanPsf::clear_cube(void)
 }
 
 /***********************************************************************//**
+ * @brief Update PSF parameter cache
+ *
+ * @param[in] delta Angular separation between true and measured photon
+ *            directions (rad).
+ * @param[in] logE Log10 true photon energy (TeV). 
+ *
+ * This method updates the PSF parameter cache.
+ ***************************************************************************/
+void GCTAMeanPsf::update(const double& delta, const double& logE) const
+{
+    // Set node array interpolation values
+    m_deltas.set_value(delta*gammalib::rad2deg);
+    m_elogmeans.set_value(logE);
+   
+    // Set indices for bi-linear interpolation
+    m_inx1 = offset(m_deltas.inx_left(),  m_elogmeans.inx_left());
+    m_inx2 = offset(m_deltas.inx_left(),  m_elogmeans.inx_right());
+    m_inx3 = offset(m_deltas.inx_right(), m_elogmeans.inx_left());
+    m_inx4 = offset(m_deltas.inx_right(), m_elogmeans.inx_right());
+
+    // Set weighting factors for bi-linear interpolation
+    m_wgt1 = m_deltas.wgt_left()  * m_elogmeans.wgt_left();
+    m_wgt2 = m_deltas.wgt_left()  * m_elogmeans.wgt_right();
+    m_wgt3 = m_deltas.wgt_right() * m_elogmeans.wgt_left();
+    m_wgt4 = m_deltas.wgt_right() * m_elogmeans.wgt_right();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set nodes for a logarithmic (base 10) energy axis
  *
  *
@@ -770,31 +821,37 @@ void GCTAMeanPsf::set_eng_axis(void)
 
 
 /***********************************************************************//**
- * @brief Update PSF parameter cache
+ * @brief Pad the last delta bins with zero
  *
- * @param[in] delta Angular separation between true and measured photon
- *            directions (rad).
- * @param[in] logE Log10 true photon energy (TeV). 
- *
- * This method updates the PSF parameter cache.
+ * Zero padding of the last delta bins assures that the Psf goes to zero
+ * without any step at the last delta value.
  ***************************************************************************/
-void GCTAMeanPsf::update(const double& delta, const double& logE) const
+void GCTAMeanPsf::set_to_smooth(void)
 {
-    // Set node array interpolation values
-    m_deltas.set_value(delta*gammalib::rad2deg);
-    m_elogmeans.set_value(logE);
-   
-    // Set indices for bi-linear interpolation
-    m_inx1 = offset(m_deltas.inx_left(),  m_elogmeans.inx_left());
-    m_inx2 = offset(m_deltas.inx_left(),  m_elogmeans.inx_right());
-    m_inx3 = offset(m_deltas.inx_right(), m_elogmeans.inx_left());
-    m_inx4 = offset(m_deltas.inx_right(), m_elogmeans.inx_right());
+    // Continue only if there are delta bins
+    if (m_deltas.size() > 2) {
 
-    // Set weighting factors for bi-linear interpolation
-    m_wgt1 = m_deltas.wgt_left()  * m_elogmeans.wgt_left();
-    m_wgt2 = m_deltas.wgt_left()  * m_elogmeans.wgt_right();
-    m_wgt3 = m_deltas.wgt_right() * m_elogmeans.wgt_left();
-    m_wgt4 = m_deltas.wgt_right() * m_elogmeans.wgt_right();
+        // Set first delta bin to value of second bin (capped Psf)
+        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+            int isrc = offset(1, iebin);
+            int idst = offset(0, iebin);
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+                m_cube(pixel, idst) = m_cube(pixel, isrc);
+            }
+        }
+    
+        // Get index of last delta bin
+        int idelta = m_deltas.size()-1;
+
+        // Pad mean PSF with zeros in the last delta bin
+        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+            int imap = offset(idelta, iebin);
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+                m_cube(pixel, imap) = 0.0;
+            }
+        }
+
+    } // endif: there were bins to pad
 
     // Return
     return;
