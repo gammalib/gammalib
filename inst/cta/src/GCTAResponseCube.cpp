@@ -262,9 +262,8 @@ double GCTAResponseCube::irf(const GEvent&       event,
     // direction in radians
     double delta = obsDir.dist(srcDir);
 
-    // Get maximum angular separation for PSF (in radians) and add 10%
-    // of margin
-    double delta_max = 1.1 * psf().delta_max();
+    // Get maximum angular separation for PSF (in radians)
+    double delta_max = psf().delta_max();
 
     // Initialise IRF value
     double irf = 0.0;
@@ -385,9 +384,8 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // direction in radians
     double delta = bin->dir().dir().dist(srcDir);
 
-    // Get maximum angular separation for PSF (in radians) and add 10%
-    // of margin
-    double delta_max = 1.1 * psf().delta_max();
+    // Get maximum angular separation for PSF (in radians)
+    double delta_max = psf().delta_max();
 
     // Compute only if we're sufficiently close to PSF
     if (delta <= delta_max) {
@@ -973,7 +971,7 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
 
     // Get offset angle integration interval in radians
     double delta_min = 0.0;
-    double delta_max = 1.1 * psf().delta_max();
+    double delta_max = psf().delta_max();
 
     // Setup integration kernel. We take here the observed photon arrival
     // direction as the true photon arrival direction because the PSF does
@@ -1045,7 +1043,7 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
 
     // Get offset angle integration interval in radians
     double delta_min = 0.0;
-    double delta_max = 1.1 * psf().delta_max();
+    double delta_max = psf().delta_max();
 
     // Setup integration kernel. We take here the observed photon arrival
     // direction as the true photon arrival direction because the PSF does
