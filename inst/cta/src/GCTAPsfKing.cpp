@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.cpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 #define G_FIX_DELTA_MAX
+#define G_SMOOTH_PSF
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -179,6 +180,14 @@ double GCTAPsfKing::operator()(const double& delta,
                                const double& azimuth,
                                const bool&   etrue) const
 {
+    #if defined(G_FIX_DELTA_MAX)
+    #if defined(G_SMOOTH_PSF)
+    // Set ramp down radius
+    static const double ramp_down = 0.95 * r_max;
+    static const double norm_down = 1.0 / (r_max - ramp_down);
+    #endif
+    #endif
+
 	// Initialise PSF value
 	double psf = 0.0;
 
@@ -198,6 +207,17 @@ double GCTAPsfKing::operator()(const double& delta,
         double arg2 = arg * arg;
 		psf = m_par_norm * 
               std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
+
+        // If we are at large offset angles, add a smooth ramp down to
+        // avoid steps in the log-likelihood computation
+        #if defined(G_FIX_DELTA_MAX)
+        #if defined(G_SMOOTH_PSF)
+        if (delta > ramp_down) {
+            double x = norm_down * (delta - ramp_down);
+            psf     *= 1.0 - x * x;
+        }
+        #endif
+        #endif
 
     } // endif: normalization was positive
 
