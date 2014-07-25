@@ -977,8 +977,8 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // direction as the true photon arrival direction because the PSF does
     // not vary significantly over a small region.
     cta_psf_radial_kern_delta integrand(this, model, obsDir, srcEng, srcTime,
-                                 sin_zeta, cos_zeta,
-                                 eps_phi, order_phi);
+                                        sin_zeta, cos_zeta,
+                                        eps_phi, order_phi);
 
     // Integrate over PSF delta angle
     GIntegral integral(&integrand);
