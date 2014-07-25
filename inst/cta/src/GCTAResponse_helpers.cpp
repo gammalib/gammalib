@@ -160,71 +160,84 @@ double cta_nedisp_kern::eval(const double& logEobs)
  ***************************************************************************/
 double cta_irf_radial_kern_rho::eval(const double& rho)
 {
-    // Compute half length of arc that lies within PSF validity circle
-    // (in radians)
-    double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                      m_zeta,
-                                                      m_cos_zeta,
-                                                      m_sin_zeta,
-                                                      m_delta_max,
-                                                      m_cos_delta_max);
-
     // Initialise result
     double irf = 0.0;
 
-    // Continue only if arc length is positive
-    if (domega > 0.0) {
+    // Continue only if rho is positive (otherwise the integral will be
+    // zero)
+    if (rho > 0.0) {
 
-        // Compute omega integration range
-        double omega_min = -domega;
-        double omega_max = +domega;
+        // Compute half length of arc that lies within PSF validity circle
+        // (in radians)
+        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+                                                          m_zeta,
+                                                          m_cos_zeta,
+                                                          m_sin_zeta,
+                                                          m_delta_max,
+                                                          m_cos_delta_max);
 
-        // Evaluate sky model
-        double model = m_model.eval(rho, m_srcEng, m_srcTime);
 
-        // Precompute cosine and sine terms for azimuthal integration
-        double cos_rho = std::cos(rho);
-        double sin_rho = std::sin(rho);
-        double cos_psf = cos_rho*m_cos_zeta;
-        double sin_psf = sin_rho*m_sin_zeta;
-        double cos_ph  = cos_rho*m_cos_lambda;
-        double sin_ph  = sin_rho*m_sin_lambda;
+        // Continue only if arc length is positive
+        if (domega > 0.0) {
 
-        // Setup integration kernel
-        cta_irf_radial_kern_omega integrand(m_rsp,
-                                            m_zenith,
-                                            m_azimuth,
-                                            m_srcLogEng,
-                                            m_obsEng,
-                                            m_zeta,
-                                            m_lambda,
-                                            m_omega0,
-                                            rho,
-                                            cos_psf,
-                                            sin_psf,
-                                            cos_ph,
-                                            sin_ph);
+            // Compute omega integration range
+            double omega_min = -domega;
+            double omega_max = +domega;
 
-        // Integrate over phi
-        GIntegral integral(&integrand);
-        integral.eps(m_rsp.eps());
-        irf = integral.romb(omega_min, omega_max) * model * sin_rho;
+            // Evaluate sky model
+            double model = m_model.eval(rho, m_srcEng, m_srcTime);
 
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-            std::cout << "*** ERROR: cta_irf_radial_kern_rho";
-            std::cout << "(rho=" << rho << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (irf=" << irf;
-            std::cout << ", domega=" << domega;
-            std::cout << ", model=" << model;
-            std::cout << ", sin_rho=" << sin_rho << ")";
-            std::cout << std::endl;
-        }
-        #endif
+            // Continue only if model is positive
+            if (model > 0.0) {
 
-    } // endif: arc length was positive
+                // Precompute cosine and sine terms for azimuthal
+                // integration
+                double cos_rho = std::cos(rho);
+                double sin_rho = std::sin(rho);
+                double cos_psf = cos_rho*m_cos_zeta;
+                double sin_psf = sin_rho*m_sin_zeta;
+                double cos_ph  = cos_rho*m_cos_lambda;
+                double sin_ph  = sin_rho*m_sin_lambda;
+
+                // Setup integration kernel
+                cta_irf_radial_kern_omega integrand(m_rsp,
+                                                    m_zenith,
+                                                    m_azimuth,
+                                                    m_srcLogEng,
+                                                    m_obsEng,
+                                                    m_zeta,
+                                                    m_lambda,
+                                                    m_omega0,
+                                                    rho,
+                                                    cos_psf,
+                                                    sin_psf,
+                                                    cos_ph,
+                                                    sin_ph);
+
+                // Integrate over phi
+                GIntegral integral(&integrand);
+                integral.eps(m_rsp.eps());
+                irf = integral.romb(omega_min, omega_max) * model * sin_rho;
+
+                // Compile option: Check for NaN/Inf
+                #if defined(G_NAN_CHECK)
+                if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+                    std::cout << "*** ERROR: cta_irf_radial_kern_rho";
+                    std::cout << "(rho=" << rho << "):";
+                    std::cout << " NaN/Inf encountered";
+                    std::cout << " (irf=" << irf;
+                    std::cout << ", domega=" << domega;
+                    std::cout << ", model=" << model;
+                    std::cout << ", sin_rho=" << sin_rho << ")";
+                    std::cout << std::endl;
+                }
+                #endif
+
+            } // endif: model was positive
+
+        } // endif: arclength was positive
+
+    } // endif: rho was positive
 
     // Return result
     return irf;
