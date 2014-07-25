@@ -41,6 +41,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_SMOOTH_PSF
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -177,11 +178,29 @@ double GCTAPsfPerfTable::operator()(const double& delta,
                                     const double& azimuth,
                                     const bool&   etrue) const
 {
+    #if defined(G_SMOOTH_PSF)
+    // Compute offset so that PSF goes to 0 at 5 times the sigma value. This
+    // is a kluge to get a PSF that smoothly goes to zero at the edge, which
+    // prevents steps or kinks in the log-likelihood function.
+    static const double offset = std::exp(-0.5*5.0*5.0);
+    #endif
+    
     // Update the parameter cache
     update(logE);
 
     // Compute PSF value
-    double psf = m_par_scale * std::exp(m_par_width * delta * delta);
+    #if defined(G_SMOOTH_PSF)
+    double psf = m_par_scale * (std::exp(m_par_width * delta * delta) - offset);
+    #else
+    double psf = m_par_scale * (std::exp(m_par_width * delta * delta));
+    #endif
+
+    #if defined(G_SMOOTH_PSF)
+    // Make sure that PSF is non-negative
+    if (psf < 0.0) {
+        psf = 0.0;
+    }
+    #endif
     
     // Return PSF
     return psf;

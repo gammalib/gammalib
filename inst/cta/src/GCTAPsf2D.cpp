@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.cpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_SMOOTH_PSF
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -176,6 +177,13 @@ double GCTAPsf2D::operator()(const double& delta,
                              const double& azimuth,
                              const bool&   etrue) const
 {
+    #if defined(G_SMOOTH_PSF)
+    // Compute offset so that PSF goes to 0 at 5 times the sigma value. This
+    // is a kluge to get a PSF that smoothly goes to zero at the edge, which
+    // prevents steps or kinks in the log-likelihood function.
+    static const double offset = std::exp(-0.5*5.0*5.0);
+    #endif
+
     // Initialise PSF value
     double psf = 0.0;
 
@@ -189,6 +197,15 @@ double GCTAPsf2D::operator()(const double& delta,
         double delta2 = delta * delta;
 
         // Compute Psf value
+        #if defined(G_SMOOTH_PSF)
+        psf = std::exp(m_width1 * delta2) - offset;
+        if (m_norm2 > 0.0) {
+            psf += (std::exp(m_width2 * delta2)-offset) * m_norm2;
+        }
+        if (m_norm3 > 0.0) {
+            psf += (std::exp(m_width3 * delta2)-offset) * m_norm3;
+        }
+        #else
         psf = std::exp(m_width1 * delta2);
         if (m_norm2 > 0.0) {
             psf += std::exp(m_width2 * delta2) * m_norm2;
@@ -196,7 +213,15 @@ double GCTAPsf2D::operator()(const double& delta,
         if (m_norm3 > 0.0) {
             psf += std::exp(m_width3 * delta2) * m_norm3;
         }
+        #endif
         psf *= m_norm;
+
+        #if defined(G_SMOOTH_PSF)
+        // Make sure that PSF is non-negative
+        if (psf < 0.0) {
+            psf = 0.0;
+        }
+        #endif
 
     } // endif: normalization was positive
     
