@@ -386,7 +386,6 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
 
         // Initialise variables
         bool   converged = false;
-        double ss        = 0.0;
         double dss       = 0.0;
 
         // Allocate temporal storage
@@ -418,10 +417,9 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
 
             // Starting from iteration k on, use polynomial interpolation
             if (m_iter >= k) {
-                ss = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
-                if (std::abs(dss) <= m_eps * std::abs(ss)) {
+                result = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
+                if (std::abs(dss) <= m_eps * std::abs(result)) {
                     converged    = true;
-                    result       = ss;
                     m_has_abserr = true;
                     m_abserr     = std::abs(dss);
                     if (std::abs(result) > 0) {
@@ -447,10 +445,10 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
             m_message = "Integration uncertainty "+
                         gammalib::str(std::abs(dss))+
                         " exceeds absolute tolerance of "+
-                        gammalib::str(m_eps * std::abs(ss))+
+                        gammalib::str(m_eps * std::abs(result))+
                         " after "+gammalib::str(m_iter)+
                         " iterations. Result "+
-                        gammalib::str(ss)+
+                        gammalib::str(result)+
                         " is inaccurate.";
             if (!m_silent) {
                 std::string origin = "GIntegral::romb("+
