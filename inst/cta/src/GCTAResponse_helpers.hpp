@@ -172,7 +172,9 @@ public:
                             const double&              zeta,
                             const double&              lambda,
                             const double&              omega0,
-                            const double&              delta_max) :
+                            const double&              delta_max,
+                            const double&              eps,
+                            const int&                 order):
                             m_rsp(rsp),
                             m_model(model),
                             m_zenith(zenith),
@@ -189,7 +191,9 @@ public:
                             m_sin_lambda(std::sin(lambda)),
                             m_omega0(omega0),
                             m_delta_max(delta_max),
-                            m_cos_delta_max(std::cos(delta_max)) { }
+                            m_cos_delta_max(std::cos(delta_max)),
+                            m_eps(eps),
+                            m_order(order) { }
     double eval(const double& rho);
 protected:
     const GCTAResponseIrf&     m_rsp;           //!< CTA response
@@ -209,6 +213,8 @@ protected:
     const double&              m_omega0;        //!< Azimuth of pointing in model system
     const double&              m_delta_max;     //!< Maximum PSF radius
     double                     m_cos_delta_max; //!< Cosine of maximum PSF radius
+    const double&              m_eps;           //!< Integration precision
+    const int&                 m_order;         //!< Romberg order
 };
 
 
@@ -1109,6 +1115,106 @@ protected:
     const double&                  m_sin_delta; //!< sin(delta)
     const double&                  m_sin_fact;  //!< sin(delta)*sin(zeta)
     const double&                  m_cos_fact;  //!< cos(delta)*cos(zeta)
+};
+
+//=====================
+// PSF delta integration kernel for radial models
+class cta_irf_radial_kern_delta : public GFunction {
+public:
+    cta_irf_radial_kern_delta(const GCTAResponseIrf*     rsp,
+                              const GModelSpatialRadial* model,
+                              const GCTAPointing&        pnt,
+                              const GEnergy&             srcEng,
+                              const double&              srcLogEng,
+                              const GTime&               srcTime,
+                              const double&              obsOffset,
+                              const GEnergy&             obsEng,
+                              const double&              zeta,
+                              const double&              phi0,
+                              const double&              theta_max,
+                              const double&              eps,
+                              const int&                 order):
+                              m_rsp(rsp),
+                              m_model(model),
+                              m_pnt(pnt),
+                              m_srcEng(srcEng),
+                              m_srcLogEng(srcLogEng),
+                              m_srcTime(srcTime),
+                              m_obsOffset(obsOffset),
+                              m_sin_obs_offset(std::sin(obsOffset)),
+                              m_cos_obs_offset(std::cos(obsOffset)),
+                              m_obsEng(obsEng),
+                              m_zeta(zeta),
+                              m_phi0(phi0),
+                              m_sin_zeta(std::sin(zeta)),
+                              m_cos_zeta(std::cos(zeta)),
+                              m_theta_max(theta_max),
+                              m_cos_theta_max(std::cos(theta_max)),
+                              m_eps(eps),
+                              m_order(order) { }
+    double eval(const double& delta);
+protected:
+    const GCTAResponseIrf*     m_rsp;       //!< Response
+    const GModelSpatialRadial* m_model;     //!< Radial model
+    const GCTAPointing&        m_pnt;       //!< CTA pointing
+    const GEnergy&             m_srcEng;    //!< True photon energy
+    const double&              m_srcLogEng; //!< Log10(true photon energy)
+    const GTime&               m_srcTime;   //!< True photon arrival time
+    const double&              m_obsOffset; //!< Observed photon offset angle
+    const double               m_sin_obs_offset;
+    const double               m_cos_obs_offset;
+    const GEnergy&             m_obsEng;    //!< Measured event energy
+    const double&              m_zeta;      //!< zeta
+    const double&              m_phi0;      //!< phi0
+    const double               m_sin_zeta;  //!< sin(zeta)
+    const double               m_cos_zeta;  //!< cos(zeta)
+    const double&              m_theta_max; //!< Model radius
+    const double               m_cos_theta_max;
+    const double&              m_eps;       //!< Integration precision
+    const int&                 m_order;     //!< Romberg order
+};
+
+// PSF phi integration kernel for radial models
+class cta_irf_radial_kern_phi : public GFunction {
+public:
+    cta_irf_radial_kern_phi(const GCTAResponseIrf*     rsp,
+                            const GModelSpatialRadial* model,
+                            const GCTAPointing&        pnt,
+                            const GEnergy&             srcEng,
+                            const double&              srcLogEng,
+                            const GTime&               srcTime,
+                            const GEnergy&             obsEng,
+                            const double&              phi0,
+                            const double&              sin_fact_model,
+                            const double&              cos_fact_model,
+                            const double&              sin_fact_inst,
+                            const double&              cos_fact_inst):
+                            m_rsp(rsp),
+                            m_model(model),
+                            m_pnt(pnt),
+                            m_srcEng(srcEng),
+                            m_srcLogEng(srcLogEng),
+                            m_srcTime(srcTime),
+                            m_obsEng(obsEng),
+                            m_phi0(phi0),
+                            m_sin_fact_model(sin_fact_model),
+                            m_cos_fact_model(cos_fact_model),
+                            m_sin_fact_inst(sin_fact_inst),
+                            m_cos_fact_inst(cos_fact_inst) { }
+    double eval(const double& phi);
+protected:
+    const GCTAResponseIrf*     m_rsp;            //!< Response
+    const GModelSpatialRadial* m_model;          //!< Radial model
+    const GCTAPointing&        m_pnt;            //!< CTA pointing
+    const GEnergy&             m_srcEng;         //!< True photon energy
+    const double&              m_srcLogEng;      //!< Log10(true photon energy)
+    const GTime&               m_srcTime;        //!< True photon arrival time
+    const GEnergy&             m_obsEng;         //!< Measured event energy
+    const double&              m_phi0;           //!< phi0
+    const double&              m_sin_fact_model; //!< sin(delta)*sin(zeta)
+    const double&              m_cos_fact_model; //!< cos(delta)*cos(zeta)
+    const double&              m_sin_fact_inst;  //!< sin(delta)*sin(obsOffset)
+    const double&              m_cos_fact_inst;  //!< cos(delta)*cos(obsOffset)
 };
 
 #endif /* GCTARESPONSE_HELPERS_HPP */

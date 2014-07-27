@@ -130,9 +130,9 @@ if __name__ == '__main__':
     # Set test
     #test = "point"
     #test = "gauss"
-    #test = "disk"
+    test = "disk"
     #test = "shell"
-    test = "ellipse"
+    #test = "ellipse"
     #test = "diffuse"
 
     # Set response parameters
@@ -174,7 +174,7 @@ if __name__ == '__main__':
         cntref = 337.5 # +/- 1.8 (from ctobssim)
 
     # Perform binned computation
-    binned_irf(model, cntmap, irf, gammalib.GCaldb(caldb), cntref)
+    #binned_irf(model, cntmap, irf, gammalib.GCaldb(caldb), cntref)
 
     # Perform stacked computation
-    #stacked_irf(model, cntmap, expcube, psfcube, cntref)
+    stacked_irf(model, cntmap, expcube, psfcube, cntref)

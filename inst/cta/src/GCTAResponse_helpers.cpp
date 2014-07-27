@@ -42,9 +42,11 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_USE_OBSDIR_FOR_AEFF    //!< Use event offset for Aeff computation
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_INTEGRAL                             //!< Debug integration
+#define G_IRF_RADIAL_DEBUG               //!< Debug radial Irf computations
 
 /* __ Constants __________________________________________________________ */
 
@@ -176,7 +178,6 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
                                                           m_delta_max,
                                                           m_cos_delta_max);
 
-
         // Continue only if arc length is positive
         if (domega > 0.0) {
 
@@ -216,8 +217,9 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
 
                 // Integrate over phi
                 GIntegral integral(&integrand);
-                integral.eps(m_rsp.eps());
-                irf = integral.romb(omega_min, omega_max) * model * sin_rho;
+                integral.eps(m_eps);
+                irf = integral.romb(omega_min, omega_max, m_order) *
+                      model * sin_rho;
 
                 // Compile option: Check for NaN/Inf
                 #if defined(G_NAN_CHECK)
@@ -287,7 +289,7 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
     // Compute PSF offset angle [radians]
     double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
     
-    // Compute observed photon offset angle in camera system [radians]
+    // Compute true photon offset angle in camera system [radians]
     double offset = std::acos(m_cos_ph + m_sin_ph * std::cos(m_omega0 - omega));
     
     //TODO: Compute true photon azimuth angle in camera system [radians]
@@ -1456,6 +1458,216 @@ double cta_psf_elliptical_kern_phi::eval(const double& phi)
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::cout << "*** ERROR: cta_psf_elliptical_kern_phi::eval";
+        std::cout << "(phi=" << phi << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for PSF integration of radial model
+ *
+ * @param[in] delta PSF offset angle (radians).
+ * @return Azimuthally integrated product between PSF and radial model.
+ *
+ * Computes the azimuthally integrated product of point spread function and
+ * the radial model intensity. As the PSF is azimuthally symmetric, it is
+ * not included in the azimuthally integration, but just multiplied on the
+ * azimuthally integrated model. The method returns thus
+ *
+ * \f[
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta {\rm d}\phi
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is the radial model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ ***************************************************************************/
+double cta_irf_radial_kern_delta::eval(const double& delta)
+{
+    // Initialise value
+    double value = 0.0;
+
+    // If we're at the Psf peak the model is zero (due to the sin(delta)
+    // term. We thus only integrate for positive deltas.
+    if (delta > 0.0) {
+
+        // Get Psf for this delta. We use here the event offset instead of
+        // the true photon offset because the Psf varies little over the
+        // dimension of the Psf, hence it should basically be invariant
+        // over such small scales
+        value = m_rsp->psf(delta, m_obsOffset, 0.0, m_pnt.zenith(), m_pnt.azimuth(), m_srcLogEng);
+
+        // Compile option: Get Aeff now using the event offset instead of
+        // computing Aeff later in the azimuthal integration kernel where
+        // the true photon offset is available. This is an approximation and
+        // assumes that Aeff varies little over the dimension of the Psf.
+        // This option is only for testing purposes and should not be used
+        // for production.
+        #if defined(G_USE_OBSDIR_FOR_AEFF)
+        value *= m_rsp->aeff(m_obsOffset, 0.0, m_pnt.zenith(), m_pnt.azimuth(), m_srcLogEng);
+        #endif
+
+        // Continue only if Psf is positive
+        if (value > 0.0) {
+
+            // Compute half length of arc that lies within model (radians)
+            double dphi = 0.5 * gammalib::cta_roi_arclength(delta,
+                                                            m_zeta,
+                                                            m_cos_zeta,
+                                                            m_sin_zeta,
+                                                            m_theta_max,
+                                                            m_cos_theta_max);
+
+            // Continue only if arc length is positive
+            if (dphi > 0.0) {
+
+                // Compute azimuth integration range [phi_min,phi_max].
+                double phi_min = -dphi;
+                double phi_max = +dphi;
+
+                // Pre-compute terms for angular distance computation in
+                // azimuth integration kernel.
+                double sin_delta      = std::sin(delta);
+                double cos_delta      = std::cos(delta);
+                double sin_fact_model = sin_delta * m_sin_zeta;
+                double cos_fact_model = cos_delta * m_cos_zeta;
+                double sin_fact_inst  = sin_delta * m_sin_obs_offset;
+                double cos_fact_inst  = cos_delta * m_cos_obs_offset;
+
+                // Setup kernel for azimuthal integration of the spatial model
+                cta_irf_radial_kern_phi integrand(m_rsp, m_model, m_pnt,
+                                                  m_srcEng, m_srcLogEng, m_srcTime,
+                                                  m_obsEng,
+                                                  m_phi0,
+                                                  sin_fact_model, cos_fact_model,
+                                                  sin_fact_inst,  cos_fact_inst);
+
+                // Debug: dump actual values
+                #if defined(G_IRF_RADIAL_DEBUG)
+                /*
+                std::cout << "Delta=" << delta*gammalib::rad2deg;
+                std::cout << "; phi=[" << phi_min*gammalib::rad2deg;
+                std::cout << ", " << phi_max*gammalib::rad2deg;
+                std::cout << "]" << std::endl;
+                */
+                #endif
+
+                // Integrate kernel
+                GIntegral integral(&integrand);
+                integral.eps(m_eps);
+                value *= integral.romb(phi_min, phi_max, m_order) * sin_delta;
+                /*
+                value *= m_model->eval(0.0, m_srcEng, m_srcTime) *
+                         2.0 * dphi * sin_delta;
+                */
+
+            } // endif: arc length was positive
+
+        } // endif: Psf value was positive
+
+    } // endif: delta was positive
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: cta_irf_radial_kern_delta::eval";
+        std::cout << "(delta=" << delta << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuthal radial model integration
+ *
+ * @param[in] phi Azimuth angle (radians).
+ * @return Radial model value.
+ *
+ * Computes the value of the radial model at the position \f$(\delta,\phi)\f$
+ * given in point spread function coordinates. The \f$\theta\f$ angle of the
+ * radial model is computed using
+ *
+ * \f[
+ *    \theta = \arccos \left( \cos \delta \cos \zeta +
+ *                            \sin \delta \sin \zeta \cos \phi
+ * \f]
+ *
+ * where \f$\delta\f$ is the angle between true and measured photon
+ * direction, \f$\zeta\f$ is the angle between model centre and measured
+ * photon direction, and \f$\phi\f$ is the azimuth angle with respect to the
+ * measured photon direction, where \f$\phi=0\f$ corresponds to the 
+ * connecting line between model centre and measured photon direction.
+ ***************************************************************************/
+double cta_irf_radial_kern_phi::eval(const double& phi)
+{
+    // Compute radial model theta angle
+    double theta = gammalib::acos(m_cos_fact_model +
+                                  m_sin_fact_model * std::cos(phi));
+
+    // Get radial model value
+    double value = m_model->eval(theta, m_srcEng, m_srcTime);
+
+    // Debug: check boundary violation
+    #if defined(G_IRF_RADIAL_DEBUG)
+    if (value == 0.0) {
+        std::cout << "Model 0 at theta=" << theta*gammalib::rad2deg;
+        std::cout << " deg; phi=";
+        std::cout << phi*gammalib::rad2deg << " deg";
+        std::cout << std::endl;
+        throw;
+    }
+    #endif
+
+    // If model is positive the multiply it with the effective area and
+    // optionally fold in energy dispersion
+    #if defined(G_USE_OBSDIR_FOR_AEFF)
+    if (m_rsp->use_edisp() && value > 0.0) {
+
+        // Compute offset angle of true photon in camera system (radians)
+        double offset = gammalib::acos(m_cos_fact_inst +
+                                       m_sin_fact_inst * std::cos(m_phi0 - phi));
+
+        // Take energy dispersion into account
+        value *= m_rsp->edisp(m_obsEng, offset, 0.0, m_pnt.zenith(), m_pnt.azimuth(), m_srcLogEng);
+
+    } // endif: model value was positive
+    #else
+    if (value > 0.0) {
+
+        // Compute offset angle of true photon in camera system (radians)
+        double offset = gammalib::acos(m_cos_fact_inst +
+                                       m_sin_fact_inst * std::cos(m_phi0 - phi));
+
+        // Multiply with effective area
+        value *= m_rsp->aeff(offset, 0.0, m_pnt.zenith(), m_pnt.azimuth(), m_srcLogEng);
+
+        // Optionally take energy dispersion into account
+        if (m_rsp->use_edisp() && value > 0.0) {
+            value *= m_rsp->edisp(m_obsEng, offset, 0.0, m_pnt.zenith(), m_pnt.azimuth(), m_srcLogEng);
+        }
+
+    } // endif: model value was positive
+    #endif
+    
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: cta_irf_radial_kern_phi::eval";
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;

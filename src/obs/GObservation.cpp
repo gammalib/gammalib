@@ -490,7 +490,9 @@ double GObservation::model_grad(const GModel&    model,
         // is right on the boundary, x is displaced slightly from the
         // boundary to allow evaluation of the derivative.
         #if !defined(G_GRAD_RIDDLER)
-        const double step_size = 0.0002;
+        //const double step_size = 0.0002; // ~1 arcsec
+        const double step_size = 0.001; // ~4 arcsec
+        //const double step_size = 1.0e-5;
         double       dx        = step_size;
         if (par.has_min()) {
             double dx_min = x - par.factor_min();
@@ -532,7 +534,8 @@ double GObservation::model_grad(const GModel&    model,
         #if defined(G_GRAD_RIDDLER)
         grad = derivative.value(x);
         #else
-        grad = derivative.difference(x, dx);
+        //grad = derivative.difference(x, dx);
+        grad = derivative.smooth_robust(x, dx, 2, 5);
         #endif
 
         // Restore current model parameter

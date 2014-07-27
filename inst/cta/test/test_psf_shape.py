@@ -22,84 +22,66 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
+import gammalib
+import math
+# Check if matplotlib is available
+try:
+    import matplotlib.pyplot as plt
+    has_matplotlib = True
+except ImportError:
+    print("Matplotlib is not (correctly) installed on your system.")
+    has_matplotlib = False
 
 
-# ============ #
-# Simulate PSF #
-# ============ #
-def sim_psf(response, energy, r_max=0.8, rbins=1000, nmc=1000000):
+# ================ #
+# Show Psf profile #
+# ================ #
+def show_psf(response, energy, r_max=0.8, rbins=1000):
     """
-    Simulate PSF and show results using matplotlib (if available).
+    Show Psf profile.
     """
-    # Check if matplotlib is available
-    try:
-        import matplotlib.pyplot as plt
-        has_matplotlib = True
-    except ImportError:
-        print("Matplotlib is not (correctly) installed on your system.")
-        has_matplotlib = False
 
     # Continue only if matplotlib is available
     if has_matplotlib:
 
         # Create figure
         plt.figure(1)
-        plt.title("MC simulated PSF ("+str(energy)+" TeV)")
+        plt.title("Point spread function ("+str(energy)+" TeV)")
 
         # Set log10(energy)
-        logE = log10(energy)
+        logE = math.log10(energy)
 
         # Create delta axis
         delta = []
         dr    = r_max/rbins
         for i in range(rbins):
-            delta.append((i+0.5)*dr)
+            #delta.append((i+0.5)*dr)
+            delta.append((i)*dr)
 
-        # Reset histogram
-        counts = [0.0 for i in range(rbins)]
-
-        # Allocate random number generator
-        ran = GRan()
-
-        # Simulate offsets
-        for i in range(nmc):
-            offset         = rsp.psf().mc(ran, logE) * 180.0/pi
-            #print(offset)
-            index          = int(offset/dr)
-            if (index < rbins):
-                counts[index] += 1.0
-
-        # Create error bars
-        error = [sqrt(c) for c in counts]
+        # Set Crab direction
+        dir = gammalib.GSkyDir()
+        dir.radec_deg(83.6331, 22.0145)
+        eng = gammalib.GEnergy(energy, "TeV")
 
         # Get expected PSF
-        sum = 0.0
-        psf = []
+        sum       = 0.0
+        psf       = []
         for i in range(rbins):
-            r     = delta[i]*pi/180.0
-            if r <= rsp.psf().delta_max(logE):
-                value = rsp.psf()(r, logE) * 2.0*pi * sin(r) * dr * pi/180.0 * nmc
-            else:
-                value = 0.0
+            r     = delta[i]*math.pi/180.0
+            value = rsp.psf()(dir, r, eng) * \
+                    2.0*math.pi * math.sin(r) * dr * math.pi/180.0
             sum += value
             psf.append(value)
         print(sum)
 
-        # Plot simulated data
-        #plt.plot(delta, counts, 'ro')
-        #plt.errorbar(delta, counts, error, fmt=None, ecolor='r')
-
         # Plot PSF
         plt.plot(delta, psf, 'b-')
-        #plt.semilogy(delta, psf, 'b-')
-        plt.xlim([0.4,0.45])
-        plt.ylim([0,1.0])
+        plt.xlim([0.0,0.01])
+        #plt.ylim([0.0,1.0e-18])
         
         # Set axes
         plt.xlabel("Offset angle (degrees)")
-        plt.ylabel("Number of counts")
+        plt.ylabel("Psf integral")
 
         # Notify
         print("PLEASE CLOSE WINDOW TO CONTINUE ...")
@@ -116,22 +98,26 @@ def sim_psf(response, energy, r_max=0.8, rbins=1000, nmc=1000000):
 #==========================#
 if __name__ == '__main__':
     """
-    Simulate PSF.
+    Show Psf profile
     """
     # Dump header
     print("")
-    print("****************")
-    print("* Simulate PSF *")
-    print("****************")
+    print("********************")
+    print("* Show Psf profile *")
+    print("********************")
 
     # Load response
     #rsp = GCTAResponseIrf("irf_file.fits",
     #                      GCaldb("../caldb/data/cta/e/bcf/IFAE20120510_50h_King"))
-    rsp = GCTAResponseIrf("irf_file.fits",
-                          GCaldb("../caldb/data/cta/e/bcf/IFAE20120510_50h"))
+    #rsp = GCTAResponseIrf("irf_file.fits",
+    #                      GCaldb("../caldb/data/cta/e/bcf/IFAE20120510_50h"))
     #rsp = GCTAResponseIrf("cta_dummy_irf",
     #                      GCaldb("../caldb"))
+    exposure = gammalib.GCTAExposure("data/expcube.fits")
+    #psf      = gammalib.GCTAMeanPsf("data/psfcube.fits")
+    psf      = gammalib.GCTAMeanPsf("psfcube.fits")
+    rsp      = gammalib.GCTAResponseCube(exposure, psf)
 
-    # Simulate PSF
-    sim_psf(rsp, 1.0)
-    #sim_psf(rsp, 1.0, r_max=0.2)
+    # Show PSF
+    show_psf(rsp, 1.0)
+    #show_psf(rsp, 1.0, r_max=0.2)

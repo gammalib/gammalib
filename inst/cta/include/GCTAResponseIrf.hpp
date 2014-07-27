@@ -170,6 +170,15 @@ private:
     void        free_members(void);
     std::string irf_filename(const std::string& filename) const;
 
+double irf_radial_psf(const GEvent&       event,
+                                   const GSource&      source,
+                                   const GObservation& obs) const;
+double irf_radial_model(const GEvent&       event,
+                                   const GSource&      source,
+                                   const GObservation& obs) const;
+
+
+
     // Private data members
     GCaldb          m_caldb;          //!< Calibration database
     std::string     m_rspname;        //!< Name of the instrument response
