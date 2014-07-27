@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GDerivative.i - Derivative class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,9 @@ public:
     double           value(const double& x, const double& step = 0.0);
     double           ridder(const double& x, const double& h, double* err);
     double           minuit2(const double& x, double* err);
+    double           smooth_robust(const double& x, const double& h, 
+                                   const int& degree = 2,
+                                   const int& length = 5);
     double           difference(const double& x, const double& h);
 };
 

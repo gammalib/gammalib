@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GDerivative.cpp - Derivative class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,8 @@
 #define G_VALUE                        "GDerivative::value(double&, double&)"
 #define G_RIDDER             "GDerivative::ridder(double&, double&, double*)"
 #define G_MINUIT2                    "GDerivative::minuit2(double&, double*)"
+#define G_SMOOTH_ROBUST  "GDerivative::smooth_robust(double&, double&, int&,"\
+                                                                     " int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -511,13 +513,187 @@ double GDerivative::minuit2(const double& x, double* err)
  ***************************************************************************/
 double GDerivative::difference(const double& x, const double& h)
 {
-    // Compute gradient
-    double fs1 = m_func->eval(x + h);
-    double fs2 = m_func->eval(x - h);
-    double grd = 0.5 * (fs1 - fs2) / h;
+    // Compute derivative
+    double fs1        = m_func->eval(x + h);
+    double fs2        = m_func->eval(x - h);
+    double derivative = 0.5 * (fs1 - fs2) / h;
 
-    // Return gradient
-    return grd;
+    // Return derivative
+    return derivative;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns smooth noise-robust derivative
+ *
+ * @param[in] x Function value.
+ * @param[in] h Step size.
+ * @param[in] degree Differentiator degree (default: 2).
+ * @param[in] length Filter length (default: 5).
+ *
+ * Compute a smooth noise-robust numerical derivative using the method
+ * proposed by Pavel Holoborodko 
+ * (http://www.holoborodko.com/pavel/numerical-methods/)
+ * Formulae for the following filter lengths and degrees have been
+ * implemented:
+ *
+ *     degree=2 length=5,7,9,11
+ *     degree=4 length=7,9,11
+ ***************************************************************************/
+double GDerivative::smooth_robust(const double& x,      const double& h, 
+                                  const int&    degree, const int&    length)
+{
+    // Initialise derivative
+    double derivative = 0.0;
+
+    // Use method dependent on length and degree
+    switch (degree) {
+
+    // Degree 2
+    case 2:
+        switch (length) {
+        case 5:
+            {
+            double h2  = 2.0 * h;
+            double fp1 = m_func->eval(x + h);
+            double fm1 = m_func->eval(x - h);
+            double fp2 = m_func->eval(x + h2);
+            double fm2 = m_func->eval(x - h2);
+            derivative = (2.0*(fp1-fm1) + (fp2-fm2))/(8.0*h);
+            } // block needed against cross-initialization
+            break;
+        case 7:
+            {
+            double h2  = 2.0 * h;
+            double h3  = 3.0 * h;
+            double fp1 = m_func->eval(x + h);
+            double fm1 = m_func->eval(x - h);
+            double fp2 = m_func->eval(x + h2);
+            double fm2 = m_func->eval(x - h2);
+            double fp3 = m_func->eval(x + h3);
+            double fm3 = m_func->eval(x - h3);
+            derivative = (5.0*(fp1-fm1) + 4.0*(fp2-fm2) + (fp3-fm3))/(32.0*h);
+            } // block needed against cross-initialization
+            break;
+        case 9:
+            {
+            double h2  = 2.0 * h;
+            double h3  = 3.0 * h;
+            double h4  = 4.0 * h;
+            double fp1 = m_func->eval(x + h);
+            double fm1 = m_func->eval(x - h);
+            double fp2 = m_func->eval(x + h2);
+            double fm2 = m_func->eval(x - h2);
+            double fp3 = m_func->eval(x + h3);
+            double fm3 = m_func->eval(x - h3);
+            double fp4 = m_func->eval(x + h4);
+            double fm4 = m_func->eval(x - h4);
+            derivative = (14.0*(fp1-fm1) + 14.0*(fp2-fm2) + 6.0*(fp3-fm3) +
+                          (fp4-fm4))/(128.0*h);
+            } // block needed against cross-initialization
+            break;
+        case 11:
+            {
+            double h2  = 2.0 * h;
+            double h3  = 3.0 * h;
+            double h4  = 4.0 * h;
+            double h5  = 5.0 * h;
+            double fp1 = m_func->eval(x + h);
+            double fm1 = m_func->eval(x - h);
+            double fp2 = m_func->eval(x + h2);
+            double fm2 = m_func->eval(x - h2);
+            double fp3 = m_func->eval(x + h3);
+            double fm3 = m_func->eval(x - h3);
+            double fp4 = m_func->eval(x + h4);
+            double fm4 = m_func->eval(x - h4);
+            double fp5 = m_func->eval(x + h5);
+            double fm5 = m_func->eval(x - h5);
+            derivative = (42.0*(fp1-fm1) + 48.0*(fp2-fm2) + 27.0*(fp3-fm3) +
+                          8.0*(fp4-fm4) + (fp5-fm5))/(512.0*h);
+            } // block needed against cross-initialization
+            break;
+        default:
+            std::string msg = "Specified filter length "+
+                              gammalib::str(length)+" not implemented. Please "
+                              "specify 5,7,9 or 11 as filter length.";
+            throw GException::invalid_argument(G_SMOOTH_ROBUST, msg);
+            break;
+        }
+        break;
+
+    // Degree 4
+    case 4:
+        switch (length) {
+        case 7:
+            {
+            double h2  = 2.0 * h;
+            double h3  = 3.0 * h;
+            double fp1 = m_func->eval(x + h);
+            double fm1 = m_func->eval(x - h);
+            double fp2 = m_func->eval(x + h2);
+            double fm2 = m_func->eval(x - h2);
+            double fp3 = m_func->eval(x + h3);
+            double fm3 = m_func->eval(x - h3);
+            derivative = (39.0*(fp1-fm1) + 12.0*(fp2-fm2) - 5.0*(fp3-fm3)) /
+                         (96.0*h);
+            } // block needed against cross-initialization
+            break;
+        case 9:
+            {
+            double h2  = 2.0 * h;
+            double h3  = 3.0 * h;
+            double h4  = 4.0 * h;
+            double fp1 = m_func->eval(x + h);
+            double fm1 = m_func->eval(x - h);
+            double fp2 = m_func->eval(x + h2);
+            double fm2 = m_func->eval(x - h2);
+            double fp3 = m_func->eval(x + h3);
+            double fm3 = m_func->eval(x - h3);
+            double fp4 = m_func->eval(x + h4);
+            double fm4 = m_func->eval(x - h4);
+            derivative = (27.0*(fp1-fm1) + 16.0*(fp2-fm2) - (fp3-fm3) -
+                          2.0*(fp4-fm4)) / (96.0*h);
+            } // block needed against cross-initialization
+            break;
+        case 11:
+            {
+            double h2  = 2.0 * h;
+            double h3  = 3.0 * h;
+            double h4  = 4.0 * h;
+            double h5  = 4.0 * h;
+            double fp1 = m_func->eval(x + h);
+            double fm1 = m_func->eval(x - h);
+            double fp2 = m_func->eval(x + h2);
+            double fm2 = m_func->eval(x - h2);
+            double fp3 = m_func->eval(x + h3);
+            double fm3 = m_func->eval(x - h3);
+            double fp4 = m_func->eval(x + h4);
+            double fm4 = m_func->eval(x - h4);
+            double fp5 = m_func->eval(x + h5);
+            double fm5 = m_func->eval(x - h5);
+            derivative = (322.0*(fp1-fm1) + 256.0*(fp2-fm2) + 39.0*(fp3-fm3) -
+                          32.0*(fp4-fm4) - 11.0*(fp5-fm5)) / (1536.0*h);
+            } // block needed against cross-initialization
+            break;
+        default:
+            std::string msg = "Specified filter length "+
+                              gammalib::str(length)+" not implemented. Please "
+                              "specify 7,9 or 11 as filter length.";
+            throw GException::invalid_argument(G_SMOOTH_ROBUST, msg);
+            break;
+        }
+        break;
+
+    // Invalid degree
+    default:
+        std::string msg = "Specified degree "+gammalib::str(degree)+
+                          " not implemented. Please specify 2 as degree.";
+        throw GException::invalid_argument(G_SMOOTH_ROBUST, msg);
+        break;
+    }
+
+    // Return derivative
+    return derivative;
 }
 
 
