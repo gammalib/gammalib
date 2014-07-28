@@ -29,9 +29,7 @@ import time
 def unbinned_analysis(model, evtfile, irf, caldb):
     """
     Perform unbinned maximum likelihood fitting of CTA data using GammaLib
-    classes. The function performs two fits, one with the full model and
-    one with the background model only, to evaluate the Test Statistics
-    value of the source component.
+    classes.
     """
     # Dump header
     print("")
@@ -66,50 +64,17 @@ def unbinned_analysis(model, evtfile, irf, caldb):
     # Optimize model parameters
     obs.optimize(opt)
 
-    # Get maximum likelihood value
-    logL = -(opt.value())
-
-    # Get a copy of the model fitting results. We want a copy
-    # here as the models are part of the observation container
-    # "obs", and the container goes out of scope once the function
-    # is left (and thus the models would also get out of scope)
-    models = obs.models().copy()
-
     # Print optimizer results
     print(opt)
-
-    # Create now a copy of the source model without background
-    # only
-    background = gammalib.GModels()
-    for m in models:
-        if m.name() == "Background":
-            background.append(m)
-
-    # Assign background model for fitting
-    obs.models(background)
-
-    # Optimize background parameters
-    obs.optimize(opt)
-
-    # Get maximum likelihood value of background
-    logL0 = -(opt.value())
-
-    # Compute TS
-    ts = 2.0 * (logL - logL0)
-
-    # Print optimizer results
-    print(opt)
-
-    # Print TS
-    print(" Test statistics ...........: %.3f" % ts)
+    print(obs.models())
 
     # Get stop CPU time
     tstop    = time.clock()
     telapsed = tstop - tstart
     print(" Elapsed time ..............: %.3f sec" % telapsed)
 
-    # Return models
-    return models
+    # Return
+    return
 
 
 # =================== #
@@ -118,9 +83,7 @@ def unbinned_analysis(model, evtfile, irf, caldb):
 def binned_analysis(model, cntmap, irf, caldb):
     """
     Perform binned maximum likelihood fitting of CTA data using GammaLib
-    classes. The function performs two fits, one with the full model and
-    one with the background model only, to evaluate the Test Statistics
-    value of the source component.
+    classes.
     """
     # Dump header
     print("")
@@ -155,67 +118,32 @@ def binned_analysis(model, cntmap, irf, caldb):
     # Optimize model parameters
     obs.optimize(opt)
 
-    # Get maximum likelihood value
-    logL = -(opt.value())
-
-    # Get a copy of the model fitting results. We want a copy
-    # here as the models are part of the observation container
-    # "obs", and the container goes out of scope once the function
-    # is left (and thus the models would also get out of scope)
-    models = obs.models().copy()
-
     # Print optimizer results
     print(opt)
-
-    # Create now a copy of the source model without background
-    # only
-    background = gammalib.GModels()
-    for m in models:
-        if m.name() == "Background":
-            background.append(m)
-
-    # Assign background model for fitting
-    obs.models(background)
-
-    # Optimize background parameters
-    obs.optimize(opt)
-
-    # Get maximum likelihood value of background
-    logL0 = -(opt.value())
-
-    # Compute TS
-    ts = 2.0 * (logL - logL0)
-
-    # Print optimizer results
-    print(opt)
-
-    # Print TS
-    print(" Test statistics ...........: %.3f" % ts)
+    print(obs.models())
 
     # Get stop CPU time
     tstop    = time.clock()
     telapsed = tstop - tstart
     print(" Elapsed time ..............: %.3f sec" % telapsed)
 
-    # Return models
-    return models
+    # Return
+    return
 
 
-# ======================= #
-# CTA cube-style analysis #
-# ======================= #
-def cube_analysis(model, cntmap, expcube, psfcube):
+# ==================== #
+# CTA stacked analysis #
+# ==================== #
+def stacked_analysis(model, cntmap, expcube, psfcube):
     """
-    Perform cube-style maximum likelihood fitting of CTA data using GammaLib
-    classes. The function performs two fits, one with the full model and
-    one with the background model only, to evaluate the Test Statistics
-    value of the source component.
+    Perform stacked maximum likelihood fitting of CTA data using GammaLib
+    classes.
     """
     # Dump header
     print("")
-    print("+===================================================+")
-    print("| Cube-style maximum likelihood fitting of CTA data |")
-    print("+===================================================+")
+    print("+================================================+")
+    print("| Stacked maximum likelihood fitting of CTA data |")
+    print("+================================================+")
 
     # Get start CPU time
     tstart = time.clock()
@@ -246,50 +174,17 @@ def cube_analysis(model, cntmap, expcube, psfcube):
     # Optimize model parameters
     obs.optimize(opt)
 
-    # Get maximum likelihood value
-    logL = -(opt.value())
-
-    # Get a copy of the model fitting results. We want a copy
-    # here as the models are part of the observation container
-    # "obs", and the container goes out of scope once the function
-    # is left (and thus the models would also get out of scope)
-    models = obs.models().copy()
-
     # Print optimizer results
     print(opt)
-
-    # Create now a copy of the source model without background
-    # only
-    background = gammalib.GModels()
-    for m in models:
-        if m.name() == "Background":
-            background.append(m)
-
-    # Assign background model for fitting
-    obs.models(background)
-
-    # Optimize background parameters
-    obs.optimize(opt)
-
-    # Get maximum likelihood value of background
-    logL0 = -(opt.value())
-
-    # Compute TS
-    ts = 2.0 * (logL - logL0)
-
-    # Print optimizer results
-    print(opt)
-
-    # Print TS
-    print(" Test statistics ...........: %.3f" % ts)
+    print(obs.models())
 
     # Get stop CPU time
     tstop    = time.clock()
     telapsed = tstop - tstart
     print(" Elapsed time ..............: %.3f sec" % telapsed)
 
-    # Return models
-    return models
+    # Return
+    return
 
 
 #==========================#
@@ -301,28 +196,69 @@ if __name__ == '__main__':
     """
     # Dump header
     print("")
-    print("**************************************************")
-    print("* Perform maximum likelihood fitting of CTA data *")
-    print("**************************************************")
-    print("... please wait for a few seconds")
+    print("********************************************")
+    print("* CTA maximum likelihood fitting benchmark *")
+    print("********************************************")
 
     # Set parameters
     irf     = "cta_dummy_irf"
     caldb   = "../caldb"
-    model   = "data/crab.xml"
-    evtfile = "data/crab_events.fits"
-    cntmap  = "data/crab_cntmap.fits"
     expcube = "data/expcube.fits"
     psfcube = "data/psfcube.fits"
 
-    # Perform unbinned analysis
-    results_binned = unbinned_analysis(model, evtfile, irf, gammalib.GCaldb(caldb))
+    # Set tests
+    tests = ["point", "disk", "gauss", "shell", "ellipse", "diffuse"]
 
-    # Perform binned analysis
-    results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
+    # Loop over tests
+    for test in tests:
 
-    # Perform cube-style analysis
-    results_cube = cube_analysis(model, cntmap, expcube, psfcube)
+        # Set test dependent filenames
+        if test == "point":
+            model  = "data/crab_ptsrc.xml"
+            events = "data/crab_events.fits"
+            cntmap = "data/crab_cntmap.fits"
+            cntref = 934.3 # +/- 3.1 (from ctobssim)
+            evtref = 934.3 # +/- 3.1 (from ctobssim)
+        elif test == "disk":   
+            model  = "data/crab_disk.xml"
+            events = "data/crab_disk_events.fits"
+            cntmap = "data/crab_disk_cntmap.fits"
+            cntref = 933.6 # +/- 3.1 (from ctobssim)
+            evtref = 933.6 # +/- 3.1 (from ctobssim)
+        elif test == "gauss":   
+            model  = "data/crab_gauss.xml"
+            events = "data/crab_gauss_events.fits"
+            cntmap = "data/crab_gauss_cntmap.fits"
+            cntref = 935.1 # +/- 3.1 (from ctobssim)
+            evtref = 935.1 # +/- 3.1 (from ctobssim)
+        elif test == "shell":   
+            model  = "data/crab_shell.xml"
+            events = "data/crab_shell_events.fits"
+            cntmap = "data/crab_shell_cntmap.fits"
+            cntref = 933.5 # +/- 3.1 (from ctobssim)
+            evtref = 933.5 # +/- 3.1 (from ctobssim)
+        elif test == "ellipse":   
+            model  = "data/crab_edisk.xml"
+            events = "data/crab_edisk_events.fits"
+            cntmap = "data/crab_edisk_cntmap.fits"
+            cntref = 845.9 # +/- 2.9 (from ctobssim)
+            evtref = 845.9 # +/- 2.9 (from ctobssim)
+        elif test == "diffuse":
+            model  = "data/radio.xml"
+            events = "data/radio_events.fits"
+            cntmap = "data/radio_cntmap.fits"
+            cntref = 337.5 # +/- 1.8 (from ctobssim)
+            evtref = 368.0 # +/- 1.9 (from ctobssim)
 
-    # Print model results
-    #print(result)
+        # Print header
+        print("")
+        print("Model: %s" % (test))
+
+        # Perform unbinned analysis
+        unbinned_analysis(model, events, irf, gammalib.GCaldb(caldb))
+
+        # Perform binned analysis
+        binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
+
+        # Perform stacked analysis
+        stacked_analysis(model, cntmap, expcube, psfcube)
