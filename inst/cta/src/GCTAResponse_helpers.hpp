@@ -173,8 +173,7 @@ public:
                             const double&              lambda,
                             const double&              omega0,
                             const double&              delta_max,
-                            const double&              eps,
-                            const int&                 order):
+                            const int&                 iter) :
                             m_rsp(rsp),
                             m_model(model),
                             m_zenith(zenith),
@@ -192,8 +191,7 @@ public:
                             m_omega0(omega0),
                             m_delta_max(delta_max),
                             m_cos_delta_max(std::cos(delta_max)),
-                            m_eps(eps),
-                            m_order(order) { }
+                            m_iter(iter) { }
     double eval(const double& rho);
 protected:
     const GCTAResponseIrf&     m_rsp;           //!< CTA response
@@ -213,8 +211,7 @@ protected:
     const double&              m_omega0;        //!< Azimuth of pointing in model system
     const double&              m_delta_max;     //!< Maximum PSF radius
     double                     m_cos_delta_max; //!< Cosine of maximum PSF radius
-    const double&              m_eps;           //!< Integration precision
-    const int&                 m_order;         //!< Romberg order
+    const int&                 m_iter;          //!< Integration iterations
 };
 
 
@@ -320,9 +317,10 @@ public:
                               const GTime&               srcTime,
                               const GCTAObservation&     obs,
                               const GMatrix&             rot,
-                              double                     dist,
-                              double                     radius,
-                              double                     omega0) :
+                              const double&              dist,
+                              const double&              radius,
+                              const double&              omega0,
+                              const int&                 iter) :
                               m_rsp(rsp),
                               m_model(model),
                               m_srcEng(srcEng),
@@ -334,7 +332,8 @@ public:
                               m_sin_dist(std::sin(dist)),
                               m_radius(radius),
                               m_cos_radius(std::cos(radius)),
-                              m_omega0(omega0) { }
+                              m_omega0(omega0),
+                              m_iter(iter) { }
     double eval(const double& rho);
 protected:
     const GCTAResponseIrf&     m_rsp;        //!< CTA response
@@ -343,12 +342,13 @@ protected:
     const GTime&               m_srcTime;    //!< True photon arrival time
     const GCTAObservation&     m_obs;        //!< CTA observation
     const GMatrix&             m_rot;        //!< Rotation matrix
-    double                     m_dist;       //!< Distance model-ROI centre
+    const double&              m_dist;       //!< Distance model-ROI centre
     double                     m_cos_dist;   //!< Cosine of distance model-ROI centre
     double                     m_sin_dist;   //!< Sine of distance model-ROI centre
-    double                     m_radius;     //!< ROI+PSF radius
+    const double&              m_radius;     //!< ROI+PSF radius
     double                     m_cos_radius; //!< Cosine of ROI+PSF radius
-    double                     m_omega0;     //!< Position angle of ROI
+    const double&              m_omega0;     //!< Position angle of ROI
+    const int&                 m_iter;       //!< Integration iterations
 };
 
 
@@ -443,7 +443,8 @@ public:
                                 const double&                  lambda,
                                 const double&                  obsOmega,
                                 const double&                  omega0,
-                                const double&                  delta_max) :
+                                const double&                  delta_max,
+                                const int&                     iter) :
                                 m_rsp(rsp),
                                 m_model(model),
                                 m_zenith(zenith),
@@ -461,7 +462,8 @@ public:
                                 m_obsOmega(obsOmega),
                                 m_omega0(omega0),
                                 m_delta_max(delta_max),
-                                m_cos_delta_max(std::cos(delta_max)) { }
+                                m_cos_delta_max(std::cos(delta_max)),
+                                m_iter(iter) { }
     double eval(const double& rho);
 public:
     const GCTAResponseIrf&         m_rsp;           //!< CTA response
@@ -482,6 +484,7 @@ public:
     const double&                  m_omega0;        //!< Azimuth of pointing in model system
     const double&                  m_delta_max;     //!< Maximum PSF radius
     double                         m_cos_delta_max; //!< Cosine of maximum PSF radius
+    const int&                     m_iter;          //!< Integration iterations
 };
 
 
@@ -597,7 +600,8 @@ public:
                                   const GMatrix&                 rot,
                                   const double&                  dist,
                                   const double&                  radius,
-                                  const double&                  omega0) :
+                                  const double&                  omega0,
+                                  const int&                     iter) :
                                   m_rsp(rsp),
                                   m_model(model),
                                   m_srcEng(srcEng),
@@ -609,7 +613,8 @@ public:
                                   m_sin_dist(std::sin(dist)),
                                   m_radius(radius),
                                   m_cos_radius(std::cos(radius)),
-                                  m_omega0(omega0) { }
+                                  m_omega0(omega0),
+                                  m_iter(iter) { }
     double eval(const double& rho);
 protected:
     const GCTAResponseIrf&         m_rsp;        //!< CTA response
@@ -624,6 +629,7 @@ protected:
     const double&                  m_radius;     //!< ROI+PSF radius
     double                         m_cos_radius; //!< Cosine of ROI+PSF radius
     const double&                  m_omega0;     //!< Position angle of ROI
+    const int&                     m_iter;       //!< Integration iterations
 };
 
 
@@ -723,7 +729,8 @@ public:
                                const double&          srcLogEng,
                                const GEnergy&         obsEng,
                                const GMatrix&         rot,
-                               const double&          eta) :
+                               const double&          eta,
+                               const int&             iter) :
                                m_rsp(rsp),
                                m_model(model),
                                m_theta(theta),
@@ -736,7 +743,8 @@ public:
                                m_obsEng(obsEng),
                                m_rot(rot),
                                m_sin_eta(std::sin(eta)),
-                               m_cos_eta(std::cos(eta)) { }
+                               m_cos_eta(std::cos(eta)),
+                               m_iter(iter) { }
     double eval(const double& theta);
 protected:
     const GCTAResponseIrf& m_rsp;        //!< CTA response
@@ -756,6 +764,7 @@ protected:
     double                 m_cos_eta;    //!< Cosine of angular distance between
                                          //   observed photon direction and
                                          //   camera centre
+    const int&             m_iter;       // Integration iterations
 };
 
 
@@ -862,13 +871,15 @@ public:
                                  const GEnergy&         srcEng,
                                  const GTime&           srcTime,
                                  const GCTAObservation& obs,
-                                 const GMatrix&         rot) :
+                                 const GMatrix&         rot,
+                                 const int&             iter) :
                                  m_rsp(rsp),
                                  m_model(model),
                                  m_srcEng(srcEng),
                                  m_srcTime(srcTime),
                                  m_obs(obs),
-                                 m_rot(rot) { }
+                                 m_rot(rot),
+                                 m_iter(iter) { }
     double eval(const double& theta);
 protected:
     const GCTAResponseIrf& m_rsp;        //!< CTA response
@@ -877,6 +888,7 @@ protected:
     const GTime&           m_srcTime;    //!< True photon arrival time
     const GCTAObservation& m_obs;        //!< CTA observation
     const GMatrix&         m_rot;        //!< Rotation matrix
+    const int&             m_iter;       //!< Integration iterations
 };
 
 
@@ -933,7 +945,11 @@ protected:
 };
 
 
-// PSF delta integration kernel for diffuse models
+/***********************************************************************//**
+ * @class cta_psf_diffuse_kern_delta
+ *
+ * @brief Kernel for Psf delta angle integration used for stacked analysis
+ ***************************************************************************/
 class cta_psf_diffuse_kern_delta : public GFunction {
 public:
     cta_psf_diffuse_kern_delta(const GCTAResponseCube* rsp,
@@ -966,7 +982,12 @@ protected:
     double                  m_psf_max; //!< Maximum PSF value
 };
 
-// PSF phi integration kernel for diffuse models
+
+/***********************************************************************//**
+ * @class cta_psf_diffuse_kern_phi
+ *
+ * @brief Kernel for Psf phi angle integration used for stacked analysis
+ ***************************************************************************/
 class cta_psf_diffuse_kern_phi : public GFunction {
 public:
     cta_psf_diffuse_kern_phi(const GModelSpatial* model,
@@ -992,7 +1013,11 @@ protected:
 };
 
 
-// PSF delta integration kernel for radial models
+/***********************************************************************//**
+ * @class cta_psf_radial_kern_delta
+ *
+ * @brief Kernel for Psf delta angle integration used for stacked analysis
+ ***************************************************************************/
 class cta_psf_radial_kern_delta : public GFunction {
 public:
     cta_psf_radial_kern_delta(const GCTAResponseCube*    rsp,
@@ -1028,14 +1053,19 @@ protected:
     double                     m_psf_max;  //!< Maximum PSF value
 };
 
-// PSF phi integration kernel for radial models
+
+/***********************************************************************//**
+ * @class cta_psf_radial_kern_phi
+ *
+ * @brief Kernel for Psf phi angle integration used for stacked analysis
+ ***************************************************************************/
 class cta_psf_radial_kern_phi : public GFunction {
 public:
     cta_psf_radial_kern_phi(const GModelSpatialRadial* model,
                             const GEnergy&             srcEng,
                             const GTime&               srcTime,
                             const double&              sin_fact,
-                            const double&              cos_fact):
+                            const double&              cos_fact) :
                             m_model(model),
                             m_srcEng(srcEng),
                             m_srcTime(srcTime),
@@ -1050,7 +1080,12 @@ protected:
     const double&              m_cos_fact;  //!< cos(delta)*cos(zeta)
 };
 
-// PSF delta integration kernel for elliptical models
+
+/***********************************************************************//**
+ * @class cta_psf_elliptical_kern_delta
+ *
+ * @brief Kernel for Psf delta angle integration used for stacked analysis
+ ***************************************************************************/
 class cta_psf_elliptical_kern_delta : public GFunction {
 public:
     cta_psf_elliptical_kern_delta(const GCTAResponseCube*        rsp,
@@ -1089,7 +1124,12 @@ protected:
     double                         m_psf_max;   //!< Maximum PSF value
 };
 
-// PSF phi integration kernel for elliptical models
+
+/***********************************************************************//**
+ * @class cta_psf_elliptical_kern_delta
+ *
+ * @brief Kernel for Psf phi angle integration used for stacked analysis
+ ***************************************************************************/
 class cta_psf_elliptical_kern_phi : public GFunction {
 public:
     cta_psf_elliptical_kern_phi(const GModelSpatialElliptical* model,
@@ -1098,7 +1138,7 @@ public:
                                 const double&                  omega,
                                 const double&                  sin_delta,
                                 const double&                  sin_fact,
-                                const double&                  cos_fact):
+                                const double&                  cos_fact) :
                                 m_model(model),
                                 m_srcEng(srcEng),
                                 m_srcTime(srcTime),
@@ -1117,8 +1157,15 @@ protected:
     const double&                  m_cos_fact;  //!< cos(delta)*cos(zeta)
 };
 
-//=====================
-// PSF delta integration kernel for radial models
+
+/***********************************************************************//**
+ * @class cta_irf_radial_kern_delta
+ *
+ * @brief Test kernel for Irf delta angle integration
+ *
+ * This class is used for Psf system based integration. It is only here for
+ * testing and this class may be removed in the future. 
+ ***************************************************************************/
 class cta_irf_radial_kern_delta : public GFunction {
 public:
     cta_irf_radial_kern_delta(const GCTAResponseIrf*     rsp,
@@ -1132,8 +1179,7 @@ public:
                               const double&              zeta,
                               const double&              phi0,
                               const double&              theta_max,
-                              const double&              eps,
-                              const int&                 order):
+                              const int&                 iter) :
                               m_rsp(rsp),
                               m_model(model),
                               m_pnt(pnt),
@@ -1150,8 +1196,7 @@ public:
                               m_cos_zeta(std::cos(zeta)),
                               m_theta_max(theta_max),
                               m_cos_theta_max(std::cos(theta_max)),
-                              m_eps(eps),
-                              m_order(order) { }
+                              m_iter(iter) { }
     double eval(const double& delta);
 protected:
     const GCTAResponseIrf*     m_rsp;       //!< Response
@@ -1170,11 +1215,18 @@ protected:
     const double               m_cos_zeta;  //!< cos(zeta)
     const double&              m_theta_max; //!< Model radius
     const double               m_cos_theta_max;
-    const double&              m_eps;       //!< Integration precision
-    const int&                 m_order;     //!< Romberg order
+    const int&                 m_iter;      //!< Integration iterations
 };
 
-// PSF phi integration kernel for radial models
+
+/***********************************************************************//**
+ * @class cta_irf_radial_kern_phi
+ *
+ * @brief Test kernel for Irf phi angle integration
+ *
+ * This class is used for Psf system based integration. It is only here for
+ * testing and this class may be removed in the future. 
+ ***************************************************************************/
 class cta_irf_radial_kern_phi : public GFunction {
 public:
     cta_irf_radial_kern_phi(const GCTAResponseIrf*     rsp,
@@ -1188,7 +1240,7 @@ public:
                             const double&              sin_fact_model,
                             const double&              cos_fact_model,
                             const double&              sin_fact_inst,
-                            const double&              cos_fact_inst):
+                            const double&              cos_fact_inst) :
                             m_rsp(rsp),
                             m_model(model),
                             m_pnt(pnt),

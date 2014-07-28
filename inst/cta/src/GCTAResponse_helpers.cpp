@@ -42,11 +42,10 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_USE_OBSDIR_FOR_AEFF    //!< Use event offset for Aeff computation
+//#define G_USE_OBSDIR_FOR_AEFF    //!< Use event offset for Aeff computation
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_INTEGRAL                             //!< Debug integration
-#define G_IRF_RADIAL_DEBUG               //!< Debug radial Irf computations
 
 /* __ Constants __________________________________________________________ */
 
@@ -146,7 +145,7 @@ double cta_nedisp_kern::eval(const double& logEobs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Kernel for radial model zenith angle integration of IRF
+ * @brief Kernel for radial model zenith angle integration of Irf
  *
  * @param[in] rho Zenith angle with respect to model centre [radians].
  *
@@ -217,8 +216,8 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
 
                 // Integrate over phi
                 GIntegral integral(&integrand);
-                integral.eps(m_eps);
-                irf = integral.romb(omega_min, omega_max, m_order) *
+                integral.fixed_iter(m_iter);
+                irf = integral.romb(omega_min, omega_max, m_iter) *
                       model * sin_rho;
 
                 // Compile option: Check for NaN/Inf
@@ -347,57 +346,68 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
     // Initialise Npred value
     double npred = 0.0;
 
-    // Compute half length of arc that lies within ROI+PSF radius (radians)
-    double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                      m_dist,
-                                                      m_cos_dist,
-                                                      m_sin_dist,
-                                                      m_radius,
-                                                      m_cos_radius);
+    // Continue only if rho is positive
+    if (rho > 0.0) {
 
-    // Continue only if arc length is positive
-    if (domega > 0.0) {
+        // Compute half length of arc that lies within ROI+PSF radius (radians)
+        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+                                                          m_dist,
+                                                          m_cos_dist,
+                                                          m_sin_dist,
+                                                          m_radius,
+                                                          m_cos_radius);
 
-        // Compute omega integration range
-        double omega_min = m_omega0 - domega;
-        double omega_max = m_omega0 + domega;
+        // Continue only if arc length is positive
+        if (domega > 0.0) {
 
-        // Get radial model value
-        double model = m_model.eval(rho, m_srcEng, m_srcTime);
+            // Compute omega integration range
+            double omega_min = m_omega0 - domega;
+            double omega_max = m_omega0 + domega;
 
-        // Compute sine and cosine of offset angle
-        double sin_rho = std::sin(rho);
-        double cos_rho = std::cos(rho);
+            // Get radial model value
+            double model = m_model.eval(rho, m_srcEng, m_srcTime);
 
-        // Setup phi integration kernel
-        cta_npred_radial_kern_omega integrand(m_rsp,
-                                              m_srcEng,
-                                              m_srcTime,
-                                              m_obs,
-                                              m_rot,
-                                              sin_rho,
-                                              cos_rho);
+            // Continue only if we have a positive model value
+            if (model > 0.0) {
 
-        // Integrate over phi
-        GIntegral integral(&integrand);
-        integral.eps(1.0e-5);
-        npred = integral.romb(omega_min, omega_max) * sin_rho * model;
+                // Compute sine and cosine of offset angle
+                double sin_rho = std::sin(rho);
+                double cos_rho = std::cos(rho);
 
-        // Debug: Check for NaN
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-            std::cout << "*** ERROR: cta_npred_radial_kern_rho::eval";
-            std::cout << "(rho=" << rho << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (npred=" << npred;
-            std::cout << ", model=" << model;
-            std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
-            std::cout << ", sin_rho=" << sin_rho;
-            std::cout << ")" << std::endl;
-        }
-        #endif
+                // Setup phi integration kernel
+                cta_npred_radial_kern_omega integrand(m_rsp,
+                                                      m_srcEng,
+                                                      m_srcTime,
+                                                      m_obs,
+                                                      m_rot,
+                                                      sin_rho,
+                                                      cos_rho);
 
-    } // endif: arc length was positive
+                // Integrate over phi
+                GIntegral integral(&integrand);
+                integral.fixed_iter(m_iter);
+                npred = integral.romb(omega_min, omega_max, m_iter) *
+                        sin_rho * model;
+
+                // Debug: Check for NaN
+                #if defined(G_NAN_CHECK)
+                if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+                    std::cout << "*** ERROR: cta_npred_radial_kern_rho::eval";
+                    std::cout << "(rho=" << rho << "):";
+                    std::cout << " NaN/Inf encountered";
+                    std::cout << " (npred=" << npred;
+                    std::cout << ", model=" << model;
+                    std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
+                    std::cout << ", sin_rho=" << sin_rho;
+                    std::cout << ")" << std::endl;
+                }
+                #endif
+
+            } // endif: model was positive
+
+        } // endif: arc length was positive
+
+    } // endif: rho was positive
 
     // Return Npred
     return npred;
@@ -473,69 +483,74 @@ double cta_npred_radial_kern_omega::eval(const double& omega)
  ***************************************************************************/
 double cta_irf_elliptical_kern_rho::eval(const double& rho)
 {
-    // Compute half length of arc that lies within PSF validity circle
-    // (in radians)
-    double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                      m_zeta,
-                                                      m_cos_zeta,
-                                                      m_sin_zeta,
-                                                      m_delta_max,
-                                                      m_cos_delta_max);
-
     // Initialise result
     double irf = 0.0;
 
-    // Continue only if arc length is positive
-    if (domega > 0.0) {
+    // Continue only if rho is positive
+    if (rho > 0.0) {
 
-        // Compute omega integration range
-        double omega_min = -domega;
-        double omega_max = +domega;
+        // Compute half length of arc that lies within PSF validity circle
+        // (in radians)
+        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+                                                          m_zeta,
+                                                          m_cos_zeta,
+                                                          m_sin_zeta,
+                                                          m_delta_max,
+                                                          m_cos_delta_max);
 
-        // Precompute cosine and sine terms for azimuthal integration
-        double cos_rho = std::cos(rho);
-        double sin_rho = std::sin(rho);
-        double cos_psf = cos_rho*m_cos_zeta;
-        double sin_psf = sin_rho*m_sin_zeta;
-        double cos_ph  = cos_rho*m_cos_lambda;
-        double sin_ph  = sin_rho*m_sin_lambda;
+        // Continue only if arc length is positive
+        if (domega > 0.0) {
 
-        // Setup integration kernel
-        cta_irf_elliptical_kern_omega integrand(m_rsp,
-                                                m_model,
-                                                m_zenith,
-                                                m_azimuth,
-                                                m_srcEng,
-                                                m_srcTime,
-                                                m_srcLogEng,
-                                                m_obsEng,
-                                                m_obsOmega,
-                                                m_omega0,
-                                                rho,
-                                                cos_psf,
-                                                sin_psf,
-                                                cos_ph,
-                                                sin_ph);
+            // Compute omega integration range
+            double omega_min = -domega;
+            double omega_max = +domega;
 
-        // Integrate over phi
-        GIntegral integral(&integrand);
-        integral.eps(1.0e-2);
-        irf = integral.romb(omega_min, omega_max) * sin_rho;
+            // Precompute cosine and sine terms for azimuthal integration
+            double cos_rho = std::cos(rho);
+            double sin_rho = std::sin(rho);
+            double cos_psf = cos_rho*m_cos_zeta;
+            double sin_psf = sin_rho*m_sin_zeta;
+            double cos_ph  = cos_rho*m_cos_lambda;
+            double sin_ph  = sin_rho*m_sin_lambda;
 
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-            std::cout << "*** ERROR: cta_irf_elliptical_kern_rho";
-            std::cout << "(rho=" << rho << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (irf=" << irf;
-            std::cout << ", domega=" << domega;
-            std::cout << ", sin_rho=" << sin_rho << ")";
-            std::cout << std::endl;
-        }
-        #endif
+            // Setup integration kernel
+            cta_irf_elliptical_kern_omega integrand(m_rsp,
+                                                    m_model,
+                                                    m_zenith,
+                                                    m_azimuth,
+                                                    m_srcEng,
+                                                    m_srcTime,
+                                                    m_srcLogEng,
+                                                    m_obsEng,
+                                                    m_obsOmega,
+                                                    m_omega0,
+                                                    rho,
+                                                    cos_psf,
+                                                    sin_psf,
+                                                    cos_ph,
+                                                    sin_ph);
 
-    } // endif: arc length was positive
+            // Integrate over phi
+            GIntegral integral(&integrand);
+            integral.fixed_iter(m_iter);
+            irf = integral.romb(omega_min, omega_max, m_iter) * sin_rho;
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+                std::cout << "*** ERROR: cta_irf_elliptical_kern_rho";
+                std::cout << "(rho=" << rho << "):";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (irf=" << irf;
+                std::cout << ", domega=" << domega;
+                std::cout << ", sin_rho=" << sin_rho << ")";
+                std::cout << std::endl;
+            }
+            #endif
+
+        } // endif: arc length was positive
+    
+    } // endif: rho was positive
 
     // Return result
     return irf;
@@ -654,55 +669,60 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
     // Initialise Npred value
     double npred = 0.0;
 
-    // Compute half length of arc that lies within ROI+PSF radius (radians)
-    double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                      m_dist,
-                                                      m_cos_dist,
-                                                      m_sin_dist,
-                                                      m_radius,
-                                                      m_cos_radius);
+    // Continue only if rho is positive
+    if (rho > 0.0) {
 
-    // Continue only if arc length is positive
-    if (domega > 0.0) {
+        // Compute half length of arc that lies within ROI+PSF radius (radians)
+        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+                                                          m_dist,
+                                                          m_cos_dist,
+                                                          m_sin_dist,
+                                                          m_radius,
+                                                          m_cos_radius);
 
-        // Compute phi integration range
-        double omega_min = m_omega0 - domega;
-        double omega_max = m_omega0 + domega;
+        // Continue only if arc length is positive
+        if (domega > 0.0) {
 
-        // Compute sine and cosine of offset angle
-        double sin_rho = std::sin(rho);
-        double cos_rho = std::cos(rho);
+            // Compute phi integration range
+            double omega_min = m_omega0 - domega;
+            double omega_max = m_omega0 + domega;
 
-        // Setup phi integration kernel
-        cta_npred_elliptical_kern_omega integrand(m_rsp,
-                                                  m_model,
-                                                  m_srcEng,
-                                                  m_srcTime,
-                                                  m_obs,
-                                                  m_rot,
-                                                  sin_rho,
-                                                  cos_rho);
+            // Compute sine and cosine of offset angle
+            double sin_rho = std::sin(rho);
+            double cos_rho = std::cos(rho);
 
-        // Integrate over phi
-        GIntegral integral(&integrand);
-        integral.eps(1.0e-5);
-        npred = integral.romb(omega_min, omega_max) * sin_rho;
+            // Setup phi integration kernel
+            cta_npred_elliptical_kern_omega integrand(m_rsp,
+                                                      m_model,
+                                                      m_srcEng,
+                                                      m_srcTime,
+                                                      m_obs,
+                                                      m_rot,
+                                                      sin_rho,
+                                                      cos_rho);
 
-        // Debug: Check for NaN
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-            std::cout << "*** ERROR: cta_npred_elliptical_kern_rho::eval";
-            std::cout << "(rho=" << rho << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (npred=" << npred;
-            std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
-            std::cout << ", sin_rho=" << sin_rho;
-            std::cout << ", cos_rho=" << cos_rho;
-            std::cout << ")" << std::endl;
-        }
-        #endif
+            // Integrate over phi
+            GIntegral integral(&integrand);
+            integral.fixed_iter(m_iter);
+            npred = integral.romb(omega_min, omega_max, m_iter) * sin_rho;
 
-    } // endif: arc length was positive
+            // Debug: Check for NaN
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+                std::cout << "*** ERROR: cta_npred_elliptical_kern_rho::eval";
+                std::cout << "(rho=" << rho << "):";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (npred=" << npred;
+                std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
+                std::cout << ", sin_rho=" << sin_rho;
+                std::cout << ", cos_rho=" << cos_rho;
+                std::cout << ")" << std::endl;
+            }
+            #endif
+
+        } // endif: arc length was positive
+    
+    } // endif: rho was positive
 
     // Return Npred
     return npred;
@@ -837,10 +857,9 @@ double cta_irf_diffuse_kern_theta::eval(const double& theta)
                                                cos_theta,
                                                sin_ph,
                                                cos_ph);
-
             // Integrate over phi
             GIntegral integral(&integrand);
-            integral.eps(1.0e-2);
+            integral.fixed_iter(m_iter);
             irf = integral.romb(0.0, gammalib::twopi) * psf * sin_theta;
             #if defined(G_DEBUG_INTEGRAL)
             if (!integral.isvalid()) {
@@ -1017,7 +1036,7 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
 
         // Integrate over phi
         GIntegral integral(&integrand);
-        integral.eps(1.0e-5);
+        integral.fixed_iter(m_iter);
         npred = integral.romb(0.0, gammalib::twopi) * sin_theta;
         #if defined(G_DEBUG_INTEGRAL)
         if (!integral.isvalid()) {
@@ -1470,19 +1489,29 @@ double cta_psf_elliptical_kern_phi::eval(const double& phi)
 }
 
 
+/*==========================================================================
+ =                                                                         =
+ =          Helper class methods for response computation testing          =
+ =                                                                         =
+ = WARNING: These helper classes are for testing purposes only and not for =
+ =          production. These classes may be removed at any moment without =
+ =          any warning.                                                   =
+ ==========================================================================*/
+
+
 /***********************************************************************//**
- * @brief Kernel for PSF integration of radial model
+ * @brief Kernel for integration of radial model in Psf system
  *
- * @param[in] delta PSF offset angle (radians).
- * @return Azimuthally integrated product between PSF and radial model.
+ * @param[in] delta Psf offset angle (radians).
+ * @return Azimuthally integrated product between Psf and radial model.
  *
  * Computes the azimuthally integrated product of point spread function and
- * the radial model intensity. As the PSF is azimuthally symmetric, it is
+ * the radial model intensity. As the Psf is azimuthally symmetric, it is
  * not included in the azimuthally integration, but just multiplied on the
  * azimuthally integrated model. The method returns thus
  *
  * \f[
- *    {\rm PSF}(\delta) \times
+ *    {\rm Psf}(\delta) \times
  *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta {\rm d}\phi
  * \f]
  *
@@ -1551,24 +1580,10 @@ double cta_irf_radial_kern_delta::eval(const double& delta)
                                                   sin_fact_model, cos_fact_model,
                                                   sin_fact_inst,  cos_fact_inst);
 
-                // Debug: dump actual values
-                #if defined(G_IRF_RADIAL_DEBUG)
-                /*
-                std::cout << "Delta=" << delta*gammalib::rad2deg;
-                std::cout << "; phi=[" << phi_min*gammalib::rad2deg;
-                std::cout << ", " << phi_max*gammalib::rad2deg;
-                std::cout << "]" << std::endl;
-                */
-                #endif
-
                 // Integrate kernel
                 GIntegral integral(&integrand);
-                integral.eps(m_eps);
-                value *= integral.romb(phi_min, phi_max, m_order) * sin_delta;
-                /*
-                value *= m_model->eval(0.0, m_srcEng, m_srcTime) *
-                         2.0 * dphi * sin_delta;
-                */
+                integral.fixed_iter(m_iter);
+                value *= integral.romb(phi_min, phi_max, m_iter) * sin_delta;
 
             } // endif: arc length was positive
 
@@ -1622,8 +1637,7 @@ double cta_irf_radial_kern_phi::eval(const double& phi)
     // Get radial model value
     double value = m_model->eval(theta, m_srcEng, m_srcTime);
 
-    // Debug: check boundary violation
-    #if defined(G_IRF_RADIAL_DEBUG)
+    // For debugging: Check boundary violation
     if (value == 0.0) {
         std::cout << "Model 0 at theta=" << theta*gammalib::rad2deg;
         std::cout << " deg; phi=";
@@ -1631,7 +1645,6 @@ double cta_irf_radial_kern_phi::eval(const double& phi)
         std::cout << std::endl;
         throw;
     }
-    #endif
 
     // If model is positive the multiply it with the effective area and
     // optionally fold in energy dispersion
