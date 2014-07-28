@@ -3055,26 +3055,12 @@ double GCTAResponseIrf::nedisp(const GSkyDir&      srcDir,
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * We set the relative integration precision to 1e-5 as test images are
- * pretty smooth with this precision and computations are still reasonably
- * fast.
- *
- * The following timing was obtained on a 64 Bit machine (fermi) using the
- * script ./test_model for a disk, a Gaussian, and a shell model:
- *
- *                           Disk      Gauss      Shell
- *      m_eps = 1e-3 : user 0m03.80s  0m13.41s   0m03.83s
- *      m_eps = 1e-4 : user 0m03.85s  0m13.71s   0m04.68s
- *      m_eps = 1e-5 : user 0m06.29s  0m23.22s   0m16.94s
- *      m_eps = 1e-6 : user 0m12.65s  0m55.08s   1m32.52s
  ***************************************************************************/
 void GCTAResponseIrf::init_members(void)
 {
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_eps         = 1.0e-5; //!< Precision for Romberg integration
     m_aeff        = NULL;
     m_psf         = NULL;
     m_edisp       = NULL;
@@ -3110,7 +3096,6 @@ void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
     // Copy members
     m_caldb       = rsp.m_caldb;
     m_rspname     = rsp.m_rspname;
-    m_eps         = rsp.m_eps;
     m_apply_edisp = rsp.m_apply_edisp;
 
     // Copy response filenames

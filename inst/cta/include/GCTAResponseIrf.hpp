@@ -112,8 +112,6 @@ public:
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
     void                  load(const std::string& rspname);
-    void                  eps(const double& eps);
-    const double&         eps(void) const;
     void                  load_aeff(const std::string& filename);
     void                  load_psf(const std::string& filename);
     void                  load_edisp(const std::string& filename);
@@ -170,19 +168,9 @@ private:
     void        free_members(void);
     std::string irf_filename(const std::string& filename) const;
 
-double irf_radial_psf(const GEvent&       event,
-                                   const GSource&      source,
-                                   const GObservation& obs) const;
-double irf_radial_model(const GEvent&       event,
-                                   const GSource&      source,
-                                   const GObservation& obs) const;
-
-
-
     // Private data members
     GCaldb          m_caldb;          //!< Calibration database
     std::string     m_rspname;        //!< Name of the instrument response
-    double          m_eps;            //!< Integration precision
     GCTAAeff*       m_aeff;           //!< Effective area
     GCTAPsf*        m_psf;            //!< Point spread function
     GCTAEdisp*      m_edisp;          //!< Energy dispersion
@@ -293,31 +281,6 @@ void GCTAResponseIrf::caldb(const GCaldb& caldb)
 {
     m_caldb = caldb;
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Set computation precision
- *
- * @param[in] eps Computation precision.
- ***************************************************************************/
-inline
-void GCTAResponseIrf::eps(const double& eps)
-{
-    m_eps = eps;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return computation precision
- *
- * @return Computation precision.
- ***************************************************************************/
-inline
-const double& GCTAResponseIrf::eps(void) const
-{
-    return m_eps;
 }
 
 

@@ -137,8 +137,6 @@ public:
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
     void                  load(const std::string& rspname);
-    void                  eps(const double& eps);
-    const double&         eps(void) const;
     void                  load_aeff(const std::string& filename);
     void                  load_psf(const std::string& filename);
     void                  load_edisp(const std::string& filename);
