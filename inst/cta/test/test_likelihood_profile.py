@@ -82,7 +82,7 @@ def show_likelihood_profile(result):
 # ========================== #
 # Compute likelihood profile #
 # ========================== #
-def compute_likelihood_profile(obs, parname="RA", scale=1.0e-5, steps=10):
+def compute_likelihood_profile(obs, parname="RA", scale=1.0e-4, steps=10):
     """
     Compute the log-likelihood profile for a given parameter.
     
@@ -126,6 +126,7 @@ def compute_likelihood_profile(obs, parname="RA", scale=1.0e-5, steps=10):
     for i in range(-steps, steps+1):
     
         # Set new model parameter
+        obs.models()[0][parname].remove_range()
         obs.models()[0][parname].value(opt_value+i*scale)
         
         # Evaluate log-likelihood and retrieve results
@@ -257,6 +258,7 @@ if __name__ == '__main__':
     #test = "point"
     test = "gauss"
     #test = "disk"
+    #test = "ldisk"
     #test = "shell"
     #test = "ellipse"
     #test = "diffuse"
@@ -278,6 +280,11 @@ if __name__ == '__main__':
     elif test == "disk":   
         model  = "data/crab_disk.xml"
         events = "data/crab_disk_events.fits"
+        cntmap = "data/crab_disk_cntmap.fits"
+        cntref = 933.6 # +/- 3.1 (from ctobssim)
+    elif test == "ldisk":   
+        model  = "crab_ldisk.xml"
+        events = "crab_ldisk_events.fits"
         cntmap = "data/crab_disk_cntmap.fits"
         cntref = 933.6 # +/- 3.1 (from ctobssim)
     elif test == "gauss":   
