@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 # ==========================================================================
-# This script performs a benchmark of the binned response computation
+# This script performs a benchmark of the response computation for all
+# different analysis methods (unbinned, binned, stacked). Specifically it
+# compares the total number of modelled counts to the expected number from
+# Monte-Carlo simulations. This script is used to validate the absolute
+# normalization of the CTA response computations.
 #
 # Copyright (C) 2014 Juergen Knoedlseder
 #
@@ -22,6 +26,49 @@ import gammalib
 import time
 
 
+# ============================ #
+# CTA unbinned IRF computation #
+# ============================ #
+def unbinned_irf(model, events, irf, caldb, evtref):
+    """
+    Perform unbinned IRF computation.
+    """
+    # Dump header
+    print(" Unbinned instrument response computation (Npred):")
+    print(" =================================================")
+
+    # Allocate empty CTA observation
+    obs = gammalib.GCTAObservation()
+
+    # Load events into CTA observation
+    obs.load(events)
+
+    # Specify response for CTA observation
+    obs.response(irf, caldb)
+
+    # Load model to describe the data from XML file
+    models = gammalib.GModels(model)
+    models.remove("Background")
+
+    # Get start CPU time
+    tstart = time.clock()
+
+    # Compute Npred
+    npred = obs.npred(models)
+
+    # Get stop CPU time
+    tstop      = time.clock()
+    telapsed   = tstop - tstart
+    difference = npred-evtref
+    print("  Estimated number of counts : %.3f events" % npred)
+    print("  Estimated - expected ......: %.3f events (%.1f%%)" % \
+          (difference, difference/evtref*100.0))
+    print("  Elapsed time ..............: %.3f sec" % telapsed)
+
+    # Return
+    return
+
+
 # =========================== #
 # CTA binned IRF computation #
 # =========================== #
@@ -30,8 +77,8 @@ def binned_irf(model, cntmap, irf, caldb, cntref):
     Perform binned IRF computation.
     """
     # Dump header
-    print("Binned instrument response computation:")
-    print("=======================================")
+    print(" Binned instrument response computation:")
+    print(" =======================================")
 
     # Allocate empty CTA observation
     obs = gammalib.GCTAObservation()
@@ -58,10 +105,10 @@ def binned_irf(model, cntmap, irf, caldb, cntref):
     tstop      = time.clock()
     telapsed   = tstop - tstart
     difference = total-cntref
-    print(" Estimated number of counts : %.3f events" % total)
-    print(" Estimated - expected ......: %.3f events (%.1f%%)" % \
+    print("  Estimated number of counts : %.3f events" % total)
+    print("  Estimated - expected ......: %.3f events (%.1f%%)" % \
           (difference, difference/cntref*100.0))
-    print(" Elapsed time ..............: %.3f sec" % telapsed)
+    print("  Elapsed time ..............: %.3f sec" % telapsed)
 
     # Return
     return
@@ -75,8 +122,8 @@ def stacked_irf(model, cntmap, expcube, psfcube, cntref):
     Perform stacked IRF computation.
     """
     # Dump header
-    print("Stacked instrument response computation:")
-    print("========================================")
+    print(" Stacked instrument response computation:")
+    print(" ========================================")
 
     # Allocate empty CTA observation
     obs = gammalib.GCTAObservation()
@@ -105,10 +152,10 @@ def stacked_irf(model, cntmap, expcube, psfcube, cntref):
     tstop      = time.clock()
     telapsed   = tstop - tstart
     difference = total-cntref
-    print(" Estimated number of counts : %.3f events" % total)
-    print(" Estimated - expected ......: %.3f events (%.1f%%)" % \
+    print("  Estimated number of counts : %.3f events" % total)
+    print("  Estimated - expected ......: %.3f events (%.1f%%)" % \
           (difference, difference/cntref*100.0))
-    print(" Elapsed time ..............: %.3f sec" % telapsed)
+    print("  Elapsed time ..............: %.3f sec" % telapsed)
 
     # Return
     return
@@ -127,54 +174,65 @@ if __name__ == '__main__':
     print("* CTA response computation benchmark *")
     print("**************************************")
 
-    # Set test
-    #test = "point"
-    #test = "gauss"
-    test = "disk"
-    #test = "shell"
-    #test = "ellipse"
-    #test = "diffuse"
-
     # Set response parameters
     irf     = "cta_dummy_irf"
     caldb   = "../caldb"
     expcube = "data/expcube.fits"
     psfcube = "data/psfcube.fits"
 
-    # Set test dependent filenames
-    if test == "point":
-        model  = "data/crab_ptsrc.xml"
-        events = "data/crab_events.fits"
-        cntmap = "data/crab_cntmap.fits"
-        cntref = 934.3 # +/- 3.1 (from ctobssim)
-    elif test == "disk":   
-        model  = "data/crab_disk.xml"
-        events = "data/crab_disk_events.fits"
-        cntmap = "data/crab_disk_cntmap.fits"
-        cntref = 933.6 # +/- 3.1 (from ctobssim)
-    elif test == "gauss":   
-        model  = "data/crab_gauss.xml"
-        events = "data/crab_gauss_events.fits"
-        cntmap = "data/crab_gauss_cntmap.fits"
-        cntref = 935.1 # +/- 3.1 (from ctobssim)
-    elif test == "shell":   
-        model  = "data/crab_shell.xml"
-        events = "data/crab_shell_events.fits"
-        cntmap = "data/crab_shell_cntmap.fits"
-        cntref = 933.5 # +/- 3.1 (from ctobssim)
-    elif test == "ellipse":   
-        model  = "data/crab_edisk.xml"
-        events = "data/crab_edisk_events.fits"
-        cntmap = "data/crab_edisk_cntmap.fits"
-        cntref = 845.9 # +/- 2.9 (from ctobssim)
-    elif test == "diffuse":
-        model  = "data/radio.xml"
-        events = "data/radio_events.fits"
-        cntmap = "data/radio_cntmap.fits"
-        cntref = 337.5 # +/- 1.8 (from ctobssim)
+    # Set tests
+    tests = ["point", "disk", "gauss", "shell", "ellipse", "diffuse"]
 
-    # Perform binned computation
-    #binned_irf(model, cntmap, irf, gammalib.GCaldb(caldb), cntref)
+    # Loop over tests
+    for test in tests:
 
-    # Perform stacked computation
-    stacked_irf(model, cntmap, expcube, psfcube, cntref)
+        # Set test dependent filenames
+        if test == "point":
+            model  = "data/crab_ptsrc.xml"
+            events = "data/crab_events.fits"
+            cntmap = "data/crab_cntmap.fits"
+            cntref = 934.3 # +/- 3.1 (from ctobssim)
+            evtref = 934.3 # +/- 3.1 (from ctobssim)
+        elif test == "disk":   
+            model  = "data/crab_disk.xml"
+            events = "data/crab_disk_events.fits"
+            cntmap = "data/crab_disk_cntmap.fits"
+            cntref = 933.6 # +/- 3.1 (from ctobssim)
+            evtref = 933.6 # +/- 3.1 (from ctobssim)
+        elif test == "gauss":   
+            model  = "data/crab_gauss.xml"
+            events = "data/crab_gauss_events.fits"
+            cntmap = "data/crab_gauss_cntmap.fits"
+            cntref = 935.1 # +/- 3.1 (from ctobssim)
+            evtref = 935.1 # +/- 3.1 (from ctobssim)
+        elif test == "shell":   
+            model  = "data/crab_shell.xml"
+            events = "data/crab_shell_events.fits"
+            cntmap = "data/crab_shell_cntmap.fits"
+            cntref = 933.5 # +/- 3.1 (from ctobssim)
+            evtref = 933.5 # +/- 3.1 (from ctobssim)
+        elif test == "ellipse":   
+            model  = "data/crab_edisk.xml"
+            events = "data/crab_edisk_events.fits"
+            cntmap = "data/crab_edisk_cntmap.fits"
+            cntref = 845.9 # +/- 2.9 (from ctobssim)
+            evtref = 845.9 # +/- 2.9 (from ctobssim)
+        elif test == "diffuse":
+            model  = "data/radio.xml"
+            events = "data/radio_events.fits"
+            cntmap = "data/radio_cntmap.fits"
+            cntref = 337.5 # +/- 1.8 (from ctobssim)
+            evtref = 368.0 # +/- 1.9 (from ctobssim)
+
+        # Print header
+        print("")
+        print("Model: %s" % (test))
+
+        # Perform unbinned computation
+        unbinned_irf(model, events, irf, gammalib.GCaldb(caldb), evtref)
+
+        # Perform binned computation
+        binned_irf(model, cntmap, irf, gammalib.GCaldb(caldb), cntref)
+
+        # Perform stacked computation
+        stacked_irf(model, cntmap, expcube, psfcube, cntref)
