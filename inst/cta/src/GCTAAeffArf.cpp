@@ -388,7 +388,7 @@ void GCTAAeffArf::remove_thetacut(const GCTAResponseIrf& rsp)
             integral.eps(1.0e-5);
 
             // Perform integration
-            double fraction = integral.romb(0.0, rmax);
+            double fraction = integral.romberg(0.0, rmax);
 
             // Set scale factor
             double scale = 1.0;

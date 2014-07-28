@@ -1321,7 +1321,7 @@ double GObservation::npred_temp(const GModel& model) const
             GIntegral                     integral(&integrand);
 
             // Do Romberg integration
-            result += integral.romb(tstart, tstop);
+            result += integral.romberg(tstart, tstop);
 
         } // endfor: looped over GTIs
 
@@ -1414,7 +1414,7 @@ double GObservation::npred_spec(const GModel& model,
     emin = std::log(emin);
     emax = std::log(emax);
     #endif
-    double result = integral.romb(emin, emax);
+    double result = integral.romberg(emin, emax);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

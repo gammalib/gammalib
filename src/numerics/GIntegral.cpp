@@ -387,7 +387,7 @@ double GIntegral::romberg(std::vector<double> bounds, const int& order)
 
     // Add integral of all intervals
     for (int i = 0; i < bounds.size()-1; ++i) {
-        value += romb(bounds[i], bounds[i+1], order);
+        value += romberg(bounds[i], bounds[i+1], order);
     }
 
     // Return value
@@ -415,7 +415,7 @@ double GIntegral::romberg(std::vector<double> bounds, const int& order)
  * The number of iterations is limited by m_max_iter. m_eps specifies the
  * requested fractional accuracy. By default it is set to 1e-6.
  ***************************************************************************/
-double GIntegral::romb(const double& a, const double& b, const int& order)
+double GIntegral::romberg(const double& a, const double& b, const int& order)
 {
     // Initialise result and status
     double result = 0.0;

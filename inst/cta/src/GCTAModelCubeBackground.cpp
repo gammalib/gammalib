@@ -604,7 +604,7 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
             #endif
 
 			// Spatially integrate spatial component
-			npred = integral.romb(rmin, rmax);
+			npred = integral.romberg(rmin, rmax);
 
 	        // Store result in Npred cache
 	        #if defined(G_USE_NPRED_CACHE)
@@ -1531,7 +1531,7 @@ double GCTAModelCubeBackground::npred_roi_kern_theta::eval(const double& theta)
 			// Integrate over phi
 			GIntegral integral(&integrand);
 	        integral.eps(1e-3);
-			value = integral.romb(phi_min, phi_max) * sin_theta;
+			value = integral.romberg(phi_min, phi_max) * sin_theta;
 
 			// Debug: Check for NaN
 			#if defined(G_NAN_CHECK)

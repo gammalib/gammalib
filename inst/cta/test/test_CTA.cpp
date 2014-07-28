@@ -568,7 +568,8 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     // Set reference value
     //double ref = 13803.800313356;
     //const double ref = 13803.5186374;
-    const double ref = 13803.6932774; // After GWcs::solidangle improvement
+    //const double ref = 13803.6932774; // after GWcs::solidangle improvement
+    const double ref = 13803.3453994; // after Irf computation improvements
 
     // Set parameters
     double src_ra  = 201.3651;
@@ -648,7 +649,8 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     //const double ref = 11212.437464; // npred_spec precision of 1e-5
     //const double ref = 11212.4370702; // After GWcs::solidangle improvement
     //const double ref = 12644.3391902; // After correcting for deadtime bug
-    const double ref = 12643.6159142; // npred_spec precision of 1e-6
+    //const double ref = 12643.6159142; // npred_spec precision of 1e-6
+    const double ref = 10996.9168855; // After response computation change
 
     // Set parameters
     double src_ra  = 201.3651;
@@ -698,7 +700,7 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     double npred = obs.npred(models, NULL);
 
     // Test Npred
-    test_value(npred, ref*1600.0/1800.0, 1.0e-5, "Diffuse Npred computation");
+    test_value(npred, ref, 1.0e-5, "Diffuse Npred computation");
 
     // Return
     return;
@@ -1307,10 +1309,10 @@ void TestGCTAOptimize::test_cube_optimizer(void)
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
                             5.72212e-16, 2.01231e-17,
-                            -2.49252, 0.0250624,
+                            -2.49178, 0.0250624,
                             300000, 0,
                             1, 0,
-                            2.95668, 0.0704068,
+                            2.95657, 0.0704068,
                             6.68923e-05, 1.96972e-06,
                             -1.82086, 0.0163749,
                             1000000, 0,

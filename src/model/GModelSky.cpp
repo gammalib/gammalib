@@ -1407,7 +1407,7 @@ double GModelSky::integrate_energy(const GEvent& event,
                 // Do Romberg integration
                 emin   = std::log(emin);
                 emax   = std::log(emax);
-                value += integral.romb(emin, emax);
+                value += integral.romberg(emin, emax);
     
             } // endif: interval was valid
         } // endfor: looped over intervals

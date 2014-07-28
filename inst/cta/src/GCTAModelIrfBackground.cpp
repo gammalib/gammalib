@@ -532,7 +532,7 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
 			integral.eps(g_cta_inst_background_npred_theta_eps);
 
 			// Spatially integrate radial component
-			npred = integral.romb(0.0, roi_radius);
+			npred = integral.romberg(0.0, roi_radius);
 
 	        // Store result in Npred cache
 	        #if defined(G_USE_NPRED_CACHE)
@@ -1205,7 +1205,7 @@ double GCTAModelIrfBackground::npred_roi_kern_theta::eval(const double& theta)
         // Integrate over phi
         GIntegral integral(&integrand);
         integral.eps(g_cta_inst_background_npred_phi_eps);
-        value = integral.romb(0.0, gammalib::twopi) * std::sin(theta);
+        value = integral.romberg(0.0, gammalib::twopi) * std::sin(theta);
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)

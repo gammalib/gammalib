@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralExpPlaw.cpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -421,7 +421,7 @@ double GModelSpectralExpPlaw::flux(const GEnergy& emin,
         double e_max = emax.MeV();
 
         // Perform integration
-        flux = integral.romb(e_min, e_max);
+        flux = integral.romberg(e_min, e_max);
 
     } // endif: integration range was valid
 
@@ -467,7 +467,7 @@ double GModelSpectralExpPlaw::eflux(const GEnergy& emin,
         double e_max = emax.MeV();
 
         // Perform integration
-        eflux = integral.romb(e_min, e_max);
+        eflux = integral.romberg(e_min, e_max);
 
         // Convert from MeV/cm2/s to erg/cm2/s
         eflux *= gammalib::MeV2erg;

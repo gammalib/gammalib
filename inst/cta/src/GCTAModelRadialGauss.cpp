@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialGauss.cpp - Radial Gaussian CTA model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -392,7 +392,7 @@ double GCTAModelRadialGauss::omega(void) const
     }
 
     // Perform numerical integration
-    double omega = integral.romb(0.0, offset_max) * gammalib::twopi;
+    double omega = integral.romberg(0.0, offset_max) * gammalib::twopi;
 
     // Return integral
     return omega;

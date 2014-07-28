@@ -2003,7 +2003,7 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
             // Integrate over Psf delta angle
             GIntegral integral(&integrand);
             integral.fixed_iter(iter_rho);
-            irf = integral.romb(0.0, delta_max);
+            irf = integral.romberg(0.0, delta_max);
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
@@ -2577,7 +2577,7 @@ double GCTAResponseIrf::npred_diffuse(const GSource& source,
             // Integrate over model's zenith angle
             GIntegral integral(&integrand);
             integral.fixed_iter(iter_rho);
-            npred = integral.romb(0.0, roi_psf_radius);
+            npred = integral.romberg(0.0, roi_psf_radius);
 
             // Compile option: Show integration results
             #if defined(G_DEBUG_NPRED_DIFFUSE)
@@ -2826,7 +2826,7 @@ double GCTAResponseIrf::edisp(const GEnergy& obsEng,
  * boundaries are computed so that only the PSF section that falls in the ROI
  * is considered.
  *
- * @todo Enhance romb() integration method for small integration regions
+ * @todo Enhance romberg() integration method for small integration regions
  *       (see comment about kluge below)
  * @todo Implement phi dependence in camera system
  ***************************************************************************/
@@ -2887,14 +2887,14 @@ double GCTAResponseIrf::npsf(const GSkyDir&      srcDir,
             // Radially integrate PSF. In case that the radial integration
             // region is small, we do the integration using a simple
             // trapezoidal rule. This is a kluge to prevent convergence
-            // problems in the romb() method for small integration intervals.
-            // Ideally, the romb() method should be enhanced to handle this
+            // problems in the romberg() method for small integration intervals.
+            // Ideally, the romberg() method should be enhanced to handle this
             // case automatically. The kluge threshold was fixed manually!
             if (rmax-rmin < 1.0e-12) {
                 value = integral.trapzd(rmin, rmax);
             }
             else {
-                value = integral.romb(rmin, rmax);
+                value = integral.romberg(rmin, rmax);
             }
 
             // Compile option: Check for NaN/Inf
@@ -3017,7 +3017,7 @@ double GCTAResponseIrf::nedisp(const GSkyDir&      srcDir,
                         integral.eps(1.0e-3);
 
                         // Do Romberg integration
-                        nedisp += integral.romb(e_log_min, e_log_max);
+                        nedisp += integral.romberg(e_log_min, e_log_max);
 
                     } // endif: integration range was valid
                 

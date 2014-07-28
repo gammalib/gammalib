@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.cpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Michael Mayer                               *
+ *  copyright (C) 2012-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -424,7 +424,7 @@ double GModelSpectralLogParabola::flux(const GEnergy& emin,
         integral.eps(1.0e-8);
 
         // Calculate integral between emin and emax
-        flux = integral.romb(emin.MeV(), emax.MeV());
+        flux = integral.romberg(emin.MeV(), emax.MeV());
 
     } // endif: integration range was valid
 
@@ -470,7 +470,7 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
         integral.eps(1.0e-8);
 
         // Calculate integral between emin and emax
-        eflux = integral.romb(emin.MeV(), emax.MeV());
+        eflux = integral.romberg(emin.MeV(), emax.MeV());
 
     } // endif: integration range was valid
 

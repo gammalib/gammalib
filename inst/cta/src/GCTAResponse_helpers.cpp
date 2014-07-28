@@ -217,7 +217,7 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
                 // Integrate over phi
                 GIntegral integral(&integrand);
                 integral.fixed_iter(m_iter);
-                irf = integral.romb(omega_min, omega_max, m_iter) *
+                irf = integral.romberg(omega_min, omega_max, m_iter) *
                       model * sin_rho;
 
                 // Compile option: Check for NaN/Inf
@@ -386,7 +386,7 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
                 // Integrate over phi
                 GIntegral integral(&integrand);
                 integral.fixed_iter(m_iter);
-                npred = integral.romb(omega_min, omega_max, m_iter) *
+                npred = integral.romberg(omega_min, omega_max, m_iter) *
                         sin_rho * model;
 
                 // Debug: Check for NaN
@@ -533,7 +533,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             // Integrate over phi
             GIntegral integral(&integrand);
             integral.fixed_iter(m_iter);
-            irf = integral.romb(omega_min, omega_max, m_iter) * sin_rho;
+            irf = integral.romberg(omega_min, omega_max, m_iter) * sin_rho;
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
@@ -704,7 +704,7 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
             // Integrate over phi
             GIntegral integral(&integrand);
             integral.fixed_iter(m_iter);
-            npred = integral.romb(omega_min, omega_max, m_iter) * sin_rho;
+            npred = integral.romberg(omega_min, omega_max, m_iter) * sin_rho;
 
             // Debug: Check for NaN
             #if defined(G_NAN_CHECK)
@@ -860,7 +860,7 @@ double cta_irf_diffuse_kern_theta::eval(const double& theta)
             // Integrate over phi
             GIntegral integral(&integrand);
             integral.fixed_iter(m_iter);
-            irf = integral.romb(0.0, gammalib::twopi) * psf * sin_theta;
+            irf = integral.romberg(0.0, gammalib::twopi) * psf * sin_theta;
             #if defined(G_DEBUG_INTEGRAL)
             if (!integral.isvalid()) {
                 std::cout << "cta_irf_diffuse_kern_theta(theta=";
@@ -1037,7 +1037,7 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
         // Integrate over phi
         GIntegral integral(&integrand);
         integral.fixed_iter(m_iter);
-        npred = integral.romb(0.0, gammalib::twopi) * sin_theta;
+        npred = integral.romberg(0.0, gammalib::twopi) * sin_theta;
         #if defined(G_DEBUG_INTEGRAL)
         if (!integral.isvalid()) {
             std::cout << "cta_npred_diffuse_kern_theta(theta=";
@@ -1178,7 +1178,7 @@ double cta_psf_diffuse_kern_delta::eval(const double& delta)
             // Azimuthally integrate model
             GIntegral integral(&integrand);
             integral.eps(m_eps);
-            value *= integral.romb(0.0, gammalib::twopi, m_order) * sin_delta;
+            value *= integral.romberg(0.0, gammalib::twopi, m_order) * sin_delta;
 
         } // endif: PSF value was positive
 
@@ -1295,7 +1295,7 @@ double cta_psf_radial_kern_delta::eval(const double& delta)
             // Azimuthally integrate model
             GIntegral integral(&integrand);
             integral.eps(m_eps);
-            value *= integral.romb(0.0, gammalib::twopi, m_order) * sin_delta;
+            value *= integral.romberg(0.0, gammalib::twopi, m_order) * sin_delta;
 
         } // endif: PSF value was positive
 
@@ -1411,7 +1411,7 @@ double cta_psf_elliptical_kern_delta::eval(const double& delta)
             // Azimuthally integrate model
             GIntegral integral(&integrand);
             integral.eps(m_eps);
-            value *= integral.romb(0.0, gammalib::twopi, m_order) * sin_delta;
+            value *= integral.romberg(0.0, gammalib::twopi, m_order) * sin_delta;
 
         } // endif: PSF value was positive
 
@@ -1583,7 +1583,7 @@ double cta_irf_radial_kern_delta::eval(const double& delta)
                 // Integrate kernel
                 GIntegral integral(&integrand);
                 integral.fixed_iter(m_iter);
-                value *= integral.romb(phi_min, phi_max, m_iter) * sin_delta;
+                value *= integral.romberg(phi_min, phi_max, m_iter) * sin_delta;
 
             } // endif: arc length was positive
 

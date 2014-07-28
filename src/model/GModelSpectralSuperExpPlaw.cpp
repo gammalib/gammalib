@@ -445,7 +445,7 @@ double GModelSpectralSuperExpPlaw::flux(const GEnergy& emin,
         double e_max = emax.MeV();
 
         // Perform integration
-        flux = integral.romb(e_min, e_max);
+        flux = integral.romberg(e_min, e_max);
 
     } // endif: integration range was valid
 
@@ -491,7 +491,7 @@ double GModelSpectralSuperExpPlaw::eflux(const GEnergy& emin,
         double e_max = emax.MeV();
 
         // Perform integration
-        eflux = integral.romb(e_min, e_max);
+        eflux = integral.romberg(e_min, e_max);
 
         // Convert from MeV/cm2/s to erg/cm2/s
         eflux *= gammalib::MeV2erg;

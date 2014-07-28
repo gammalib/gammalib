@@ -523,7 +523,7 @@ double GCTABackgroundPerfTable::solidangle(void) const
     }
 
     // Perform numerical integration
-    double solidangle = integral.romb(0.0, offset_max) * gammalib::twopi;
+    double solidangle = integral.romberg(0.0, offset_max) * gammalib::twopi;
 
     // Return integral
     return solidangle;

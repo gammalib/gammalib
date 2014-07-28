@@ -983,7 +983,7 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // Integrate over PSF delta angle
     GIntegral integral(&integrand);
     integral.eps(eps_delta);
-    value = integral.romb(delta_min, delta_max, order_delta);
+    value = integral.romberg(delta_min, delta_max, order_delta);
 
     // Return PSF
     return value;
@@ -1055,7 +1055,7 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
     // Integrate over PSF delta angle
     GIntegral integral(&integrand);
     integral.eps(eps_delta);
-    value = integral.romb(delta_min, delta_max, order_delta);
+    value = integral.romberg(delta_min, delta_max, order_delta);
 
     // Return PSF
     return value;

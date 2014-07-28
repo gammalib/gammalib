@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GLATPsfV3.cpp - Fermi/LAT point spread function version 3 class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -607,7 +607,7 @@ double GLATPsfV3::integrate_psf(const double& energy, const int& index)
         GIntegral integral(&integrand);
 
         // Integrate radially from 0 to 90 degrees
-        psf = integral.romb(0.0, gammalib::pihalf) * gammalib::twopi;
+        psf = integral.romberg(0.0, gammalib::pihalf) * gammalib::twopi;
     
     #if defined(G_APPROXIMATE_PSF_INTEGRAL)
     } // endif: exact integral was performed
@@ -676,7 +676,7 @@ void GLATPsfV3::normalize_psf(void)
             double gtail(m_gtail[index]);
             GLATPsfV3::base_integrand integrand(ncore, ntail, score, stail, gcore, gtail);
             GIntegral integral(&integrand);
-            double sum = integral.romb(0.0, pihalf) * twopi;
+            double sum = integral.romberg(0.0, pihalf) * twopi;
             std::cout << "Energy=" << energy;
             std::cout << " cos(theta)=" << m_rpsf_bins.costheta_lo(ic);
             std::cout << " error=" << sum-1.0 << std::endl;

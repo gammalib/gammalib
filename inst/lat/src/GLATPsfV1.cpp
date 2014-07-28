@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GLATPsfV1.cpp - Fermi/LAT point spread function version 1 class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -353,7 +353,7 @@ double GLATPsfV1::psf(const double& offset, const double& logE,
         if (energy < 120.0) {
             GLATPsfV1::base_integrand integrand(ncore, ntail, sigma, gcore, gtail);
             GIntegral integral(&integrand);
-            ncore /= integral.romb(0.0, gammalib::pihalf) * gammalib::twopi;
+            ncore /= integral.romberg(0.0, gammalib::pihalf) * gammalib::twopi;
         }
         else {
             double rmax = gammalib::pihalf / sigma;
@@ -372,7 +372,7 @@ double GLATPsfV1::psf(const double& offset, const double& logE,
         #if G_CHECK_PSF_NORM
         GLATPsfV1::base_integrand integrand(ncore, ntail, sigma, gcore, gtail);
         GIntegral integral(&integrand);
-        double sum = integral.romb(0.0, gammalib::pihalf) * gammalib::twopi;
+        double sum = integral.romberg(0.0, gammalib::pihalf) * gammalib::twopi;
         std::cout << "Energy=" << energy;
         std::cout << " Offset=" << offset;
         std::cout << " cos(theta)=" << ctheta;

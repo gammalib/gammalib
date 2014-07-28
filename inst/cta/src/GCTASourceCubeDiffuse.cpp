@@ -361,7 +361,7 @@ double GCTASourceCubeDiffuse::psf(const GCTAResponseCube* rsp,
     // Integrate over PSF delta angle
     GIntegral integral(&integrand);
     integral.eps(eps_delta);
-    psf = integral.romb(delta_min, delta_max, order_delta);
+    psf = integral.romberg(delta_min, delta_max, order_delta);
 
     // Return PSF
     return psf;

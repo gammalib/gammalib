@@ -95,20 +95,15 @@ void TestGNumerics::test_romberg_integration(void)
     GIntegral integral(&integrand);
 
     // Integrate over the entire Gaussian
-    double result = integral.romb(-10.0*m_sigma, 10.0*m_sigma);
-/*
-std::cout << result << std::endl;
-std::cout << result-1.0 << std::endl;
-std::cout << integral << std::endl;
-*/
+    double result = integral.romberg(-10.0*m_sigma, 10.0*m_sigma);
     test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+gammalib::str(result)+")");
 
     // Test [-1sigma, 1sigma]
-    result = integral.romb(-m_sigma, m_sigma);
+    result = integral.romberg(-m_sigma, m_sigma);
     test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+gammalib::str((result-0.68268948130801355))+")");
 
     // Test [0.0, 1sigma]
-    result = integral.romb(0.0, m_sigma);
+    result = integral.romberg(0.0, m_sigma);
     test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+gammalib::str((result-0.3413447460687748))+")");
 
     // Return

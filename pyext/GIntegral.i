@@ -66,8 +66,8 @@ public:
     const GFunction*   kernel(void) const;
     double             romberg(std::vector<double> bounds,
                                const int& order = 5);
-    double             romb(const double& a, const double& b,
-                            const int& order = 5);
+    double             romberg(const double& a, const double& b,
+                               const int& order = 5);
     double             trapzd(const double& a, const double& b,
                               const int& n = 1, double result = 0.0);
     double             adaptive_simpson(const double& a, const double& b) const;
