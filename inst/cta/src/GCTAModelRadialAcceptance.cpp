@@ -489,7 +489,7 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
         double rmax = roi_radius + roi_distance;
 
         // Spatially integrate radial component
-        npred = integral.romb(rmin, rmax);
+        npred = integral.romberg(rmin, rmax);
 
         // Multiply in spectral and temporal components
         npred *= spectral()->eval(obsEng, obsTime);

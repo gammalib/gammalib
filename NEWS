@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-22 July 2014
+28 July 2014
 
 
 1. Introduction
@@ -17,6 +17,9 @@ The following classes have been renamed:
 * GCTAModelBackground => GCTAModelCubeBackground
 * GCTAModelInstBackground => GCTAModelIrfBackground
 * GCTAResponse => GCTAResponseIrf
+
+The following methods have been renamed:
+* GIntegral::romb() => GIntegral::romberg()
 
 The GObservation::response() method now returns a pointer to GResponse
 instead of a reference.
@@ -237,6 +240,14 @@ A GCTATypemap header has been added to define CTA specific typemaps. This is
 actually used to define class codes for GCTASourceCube so that dynamic type
 casting can be avoided. Dynamic type casting is time consuming, and to speed-up
 response computation, using class codes is more efficient.
+
+The response computation for extended models has been improved. Specifically, the
+response computation was changed so that the resulting log-likelihood profiles
+becomes as smooth as possible. This helps the optimizer during the minimization.
+For this purpose, the integration precision has been replaced by a constant
+iterator depths, which leads to a uniform computation that increases log-likelihood
+profile smoothness. Also, known transition points have been added as internal
+integration boundaries, improving the integral precision.
 
 
 21. COMPTEL interface

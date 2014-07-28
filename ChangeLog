@@ -1,4 +1,4 @@
-2014-07-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-07-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -12,10 +12,12 @@
         Add ts attribute to GModel and use it in GModelSky models
         Add manipulation methods to GCTAResponseTable
         Refactor CTA response class, add GCTAResponseCube class
+        Improve CTA response computation for extended models
         Implement CTA cube-style analysis
         Optimize CTA binned and cube-style analysis 
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
+        Rename GIntegral::romb() to GIntegral::romberg()
         Correctly take into account logfile name change in Python
         Correctly use DETX/DETY in radians in GCTAInstDir
         Introduce class codes to avoid dynamic type casting
