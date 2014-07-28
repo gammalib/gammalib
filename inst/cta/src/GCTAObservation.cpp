@@ -956,8 +956,8 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     m_ra_obj   = (hdu.has_card("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
     m_dec_obj  = (hdu.has_card("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
     m_obs_id   = (hdu.has_card("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
-    //double alt = (hdu.has_card("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
-    //double az  = (hdu.has_card("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
+    double alt = (hdu.has_card("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
+    double az  = (hdu.has_card("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
 
     // Kluge: compute DEADC from livetime and ontime instead of using the
     // keyword value as the original event lists had this values badly
@@ -973,6 +973,8 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     GSkyDir pnt;
     pnt.radec_deg(ra_pnt, dec_pnt);
     m_pointing.dir(pnt);
+    m_pointing.zenith(90.-alt);
+    m_pointing.azimuth(az);
 
     // Return
     return;

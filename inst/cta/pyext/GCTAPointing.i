@@ -56,6 +56,8 @@ public:
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;
+    void           zenith(const double& zenith);  
+    void           azimuth(const double& azimuth); 
     GHorizDir      dir_horiz(const GTime& time) const;
     void           load(const std::string& filename,
                         const std::string& extname = "POINTING");
