@@ -28,10 +28,11 @@
 #include <cmath>            // For std::abs()
 #include <vector>
 #include "GIntegral.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ROMB                      "GIntegral::romb(double&, double&, int&)"
+#define G_ROMBERG                "GIntegral::romberg(double&, double&, int&)"
 #define G_TRAPZD          "GIntegral::trapzd(double&, double&, int&, double)"
 #define G_POLINT  "GIntegral::polint(double*, double*, int, double, double*)"
 
@@ -358,19 +359,22 @@ GIntegral* GIntegral::clone(void) const
  *
  * @param[in] a Left integration boundary.
  * @param[in] b Right integration boundary.
- * @param[in] k Integration order (default: k=5)
+ * @param[in] order Integration order (default: 5)
+ *
+ * @exception GException::invalid_argument
+ *            Integration order incompatible with number of iterations.
  *
  * Returns the integral of the integrand from a to b. Integration is
- * performed by Romberg's method of order 2k, where
- * k=1 is equivalent to the trapezoidal rule,
- * k=2 is equivalent to Simpson's rule, and
- * k=3 is equivalent to Boole's rule.
+ * performed by Romberg's method of order 2*order, where
+ *
+ *     order=1 is equivalent to the trapezoidal rule,
+ *     order=2 is equivalent to Simpson's rule, and
+ *     order=3 is equivalent to Boole's rule.
+ *
  * The number of iterations is limited by m_max_iter. m_eps specifies the
  * requested fractional accuracy. By default it is set to 1e-6.
- *
- * @todo Check that k is smaller than m_max_iter
  ***************************************************************************/
-double GIntegral::romb(const double& a, const double& b, const int& k)
+double GIntegral::romb(const double& a, const double& b, const int& order)
 {
     // Initialise result and status
     double result = 0.0;
@@ -388,16 +392,31 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
         bool   converged = false;
         double dss       = 0.0;
 
+        // Determine (maximum) number of iterations
+        int max_iter = (m_fix_iter > 0) ? m_fix_iter : m_max_iter;
+
+        // Check whether maximum number of iterations is compliant with
+        // order
+        if (order > max_iter) {
+            std::string msg = "Requested integration order "+
+                              gammalib::str(order)+" is larger than the "
+                              "maximum number of iterations "+
+                              gammalib::str(max_iter)+". Either reduced the "
+                              "integration order or increase the (maximum) "
+                              "number of iterations.";
+            throw GException::invalid_argument(G_ROMBERG, msg);
+        }
+
         // Allocate temporal storage
-        double* s = new double[m_max_iter+2];
-        double* h = new double[m_max_iter+2];
+        double* s = new double[max_iter+2];
+        double* h = new double[max_iter+2];
 
         // Initialise step size
         h[1] = 1.0;
         s[0] = 0.0;
 
         // Iterative loop
-        for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
+        for (m_iter = 1; m_iter <= max_iter; ++m_iter) {
 
             // Integration using Trapezoid rule
             s[m_iter] = trapzd(a, b, m_iter, s[m_iter-1]);
@@ -405,7 +424,7 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
             if (is_notanumber(s[m_iter]) || is_infinite(s[m_iter])) {
-                m_message = "*** ERROR: GIntegral::romb"
+                m_message = "*** ERROR: GIntegral::romberg"
                             "(a="+gammalib::str(a)+", b="+gammalib::str(b)+""
                             ", k="+gammalib::str(k)+"): NaN/Inf encountered"
                             " (s["+gammalib::str(m_iter)+"]="
@@ -415,10 +434,18 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
             }
             #endif
 
-            // Starting from iteration k on, use polynomial interpolation
-            if (m_iter >= k) {
-                result = polint(&h[m_iter-k], &s[m_iter-k], k, 0.0, &dss);
-                if (std::abs(dss) <= m_eps * std::abs(result)) {
+            // Starting from iteration order on, use polynomial interpolation
+            if (m_iter >= order) {
+
+                // Compute result using polynom interpolation
+                result = polint(&h[m_iter-order], &s[m_iter-order],
+                                order, 0.0, &dss);
+
+                // If a fixed number of iterations has been requested then
+                // check whether we reached the final one; otherwise check
+                // whether we reached the requested precision.
+                if (((m_fix_iter > 0) && (m_iter == max_iter)) ||
+                    (std::abs(dss) <= m_eps * std::abs(result))) {
                     converged    = true;
                     m_has_abserr = true;
                     m_abserr     = std::abs(dss);
@@ -428,7 +455,8 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
                     }
                     break;
                 }
-            }
+
+            } // endif: polynomial interpolation performed
 
             // Reduce step size
             h[m_iter+1]= 0.25 * h[m_iter];
@@ -451,10 +479,10 @@ double GIntegral::romb(const double& a, const double& b, const int& k)
                         gammalib::str(result)+
                         " is inaccurate.";
             if (!m_silent) {
-                std::string origin = "GIntegral::romb("+
+                std::string origin = "GIntegral::romberg("+
                                      gammalib::str(a)+", "+
                                      gammalib::str(b)+", "+
-                                     gammalib::str(k)+")";
+                                     gammalib::str(order)+")";
                 gammalib::warning(origin, m_message);
             }
         }
@@ -859,9 +887,16 @@ std::string GIntegral::print(const GChatter& chatter) const
         result.append(gammalib::str(calls()));
         result.append("\n"+gammalib::parformat("Iterations"));
         result.append(gammalib::str(iter()));
-        result.append(" (maximum: ");
-        result.append(gammalib::str(max_iter()));
-        result.append(")");
+        if (m_fix_iter > 0) {
+            result.append(" (fixed: ");
+            result.append(gammalib::str(fixed_iter()));
+            result.append(")");
+        }
+        else {
+            result.append(" (maximum: ");
+            result.append(gammalib::str(max_iter()));
+            result.append(")");
+        }
 
         // Append status information
         result.append("\n"+gammalib::parformat("Status"));
@@ -901,6 +936,7 @@ void GIntegral::init_members(void)
     m_kernel    = NULL;
     m_eps       = 1.0e-6;
     m_max_iter  = 20;
+    m_fix_iter  = 0;
     m_message.clear();
     m_silent    = false;
 
@@ -929,6 +965,7 @@ void GIntegral::copy_members(const GIntegral& integral)
     m_kernel   = integral.m_kernel;
     m_eps      = integral.m_eps;
     m_max_iter = integral.m_max_iter;
+    m_fix_iter = integral.m_fix_iter;
     m_message  = integral.m_message;
     m_silent   = integral.m_silent;
 

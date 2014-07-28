@@ -57,19 +57,22 @@ public:
     // Methods
     void               clear(void);
     GIntegral*         clone(void) const;
-    void               max_iter(const int& max_iter);
+    void               max_iter(const int& iter);
+    const int&         max_iter(void) const;
+    void               fixed_iter(const int& iter);
+    const int&         fixed_iter(void) const;
     void               eps(const double& eps);
+    const double&      eps(void) const;
     void               silent(const bool& silent);
+    const bool&        silent(void) const;
     const int&         iter(void) const;
     const int&         calls(void) const;
-    const int&         max_iter(void) const;
-    const double&      eps(void) const;
-    const bool&        silent(void) const;
     const bool&        is_valid(void) const;
     const std::string& message(void) const;
     void               kernel(GFunction* kernel);
     const GFunction*   kernel(void) const;
-    double             romb(const double& a, const double& b, const int& k = 5);
+    double             romb(const double& a, const double& b,
+                            const int& order = 5);
     double             trapzd(const double& a, const double& b, const int& n = 1,
                               double result = 0.0);
     double             adaptive_simpson(const double& a, const double& b) const;
@@ -95,6 +98,7 @@ protected:
     GFunction*  m_kernel;    //!< Pointer to function kernel
     double      m_eps;       //!< Requested relative integration precision
     int         m_max_iter;  //!< Maximum number of iterations
+    int         m_fix_iter;  //!< Fixed number of iterations
     bool        m_silent;    //!< Suppress integration warnings in console
 
     // Integrator results
@@ -125,12 +129,12 @@ const int& GIntegral::iter(void) const
 /***********************************************************************//**
  * @brief Set maximum number of iterations
  *
- * @param[in] max_iter Maximum number of iterations.
+ * @param[in] iter Maximum number of iterations.
  ***************************************************************************/
 inline
-void GIntegral::max_iter(const int& max_iter)
+void GIntegral::max_iter(const int& iter)
 {
-    m_max_iter = max_iter;
+    m_max_iter = iter;
     return;
 }
 
@@ -144,6 +148,36 @@ inline
 const int& GIntegral::max_iter(void) const
 {
     return m_max_iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Set fixed number of iterations
+ *
+ * @param[in] iter Fixed number of iterations.
+ *
+ * If the fixed number of iterations is set, the integration algorithm will
+ * always performed the given number of iterations, irrespectively of the
+ * precision that is reached. This feature is relevant for computing
+ * numerical derivates from numerically integrated functions.
+ ***************************************************************************/
+inline
+void GIntegral::fixed_iter(const int& iter)
+{
+    m_fix_iter = iter;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return fixed number of iterations
+ *
+ * @return Fixed number of iterations.
+ ***************************************************************************/
+inline
+const int& GIntegral::fixed_iter(void) const
+{
+    return m_fix_iter;
 }
 
 

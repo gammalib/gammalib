@@ -50,19 +50,22 @@ public:
     // Methods
     void               clear(void);
     GIntegral*         clone(void) const;
-    void               max_iter(const int& max_iter);
+    void               max_iter(const int& iter);
+    const int&         max_iter(void) const;
+    void               fixed_iter(const int& iter);
+    const int&         fixed_iter(void) const;
     void               eps(const double& eps);
+    const double&      eps(void) const;
     void               silent(const bool& silent);
+    const bool&        silent(void) const;
     const int&         iter(void) const;
     const int&         calls(void) const;
-    const int&         max_iter(void) const;
-    const double&      eps(void) const;
-    const bool&        silent(void) const;
     const bool&        is_valid(void) const;
     const std::string& message(void) const;
     void               kernel(GFunction* kernel);
     const GFunction*   kernel(void) const;
-    double             romb(const double& a, const double& b, const int& k = 5);
+    double             romb(const double& a, const double& b,
+                            const int& order = 5);
     double             trapzd(const double& a, const double& b, const int& n = 1,
                               double result = 0.0);
     double             adaptive_simpson(const double& a, const double& b) const;
