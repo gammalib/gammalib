@@ -98,10 +98,9 @@ public:
                          GVector*       gradient = NULL) const;
     virtual double model_grad(const GModel&    model,
                               const GModelPar& par,
-                              const int&       ipar,
                               const GEvent&    event) const;
-    virtual double npred_grad(const GModel& model,
-                              const int&    ipar) const;
+    virtual double npred_grad(const GModel&    model,
+                              const GModelPar& par) const;
 
     // Implemented methods
     void               name(const std::string& name);
@@ -138,18 +137,18 @@ protected:
     public:
         model_func(const GObservation* parent,
                    const GModel&       model,
-                   const GEvent&       event,
-                   int                 ipar) :
+                   GModelPar*          par,
+                   const GEvent&       event) :
                    m_parent(parent),
-                   m_model(&model),
-                   m_event(&event),
-                   m_ipar(ipar) { }
+                   m_model(model),
+                   m_par(par),
+                   m_event(event) { }
         double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
-        const GModel*       m_model;  //!< Pointer to model
-        const GEvent*       m_event;  //!< Pointer to event
-        int                 m_ipar;   //!< Parameter index
+        const GModel&       m_model;  //!< Reference to model
+        GModelPar*          m_par;    //!< Pointer to parameter
+        const GEvent&       m_event;  //!< Reference to event
     };
 
     // Npred methods
@@ -189,15 +188,15 @@ protected:
     public:
         npred_func(const GObservation* parent,
                    const GModel&       model,
-                   int                 ipar) :
+                   GModelPar*          par) :
                    m_parent(parent),
-                   m_model(&model),
-                   m_ipar(ipar) { }
+                   m_model(model),
+                   m_par(par) { }
         double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
-        const GModel*       m_model;  //!< Pointer to model
-        int                 m_ipar;   //!< Parameter index
+        const GModel&       m_model;  //!< Reference to model
+        GModelPar*          m_par;    //!< Pointer to parameter
     };
 
     // Protected data area

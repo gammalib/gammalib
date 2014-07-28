@@ -67,8 +67,6 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 
 /* __ Coding definitions _________________________________________________ */
 #define G_LN_ENERGY_INT   //!< ln(E) variable substitution for integration
-//#define G_GRAD_RIDDLER  //!< Use Riddler's method for computing derivatives
-#define G_TEST_CODE
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_OPT_DEBUG
@@ -335,7 +333,7 @@ double GObservation::model(const GModels& models, const GEvent& event,
                                 (*gradient)[igrad+ipar] = par.factor_gradient();
                             }
                             else {
-                                (*gradient)[igrad+ipar] = model_grad(*mptr, par, ipar, event);
+                                (*gradient)[igrad+ipar] = model_grad(*mptr, par, event);
                             }
                         }
                         else {
@@ -415,7 +413,8 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
                 // Optionally determine Npred gradients
                 if (gradient != NULL) {
                     for (int k = 0; k < mptr->size(); ++k) {
-                        (*gradient)[igrad+k] = npred_grad(*mptr, k);
+                        const GModelPar& par = (*mptr)[k];
+                        (*gradient)[igrad+k] = npred_grad(*mptr, par);
                     }
                 }
 
@@ -437,36 +436,23 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
  * @brief Returns parameter gradient of model for a given event
  *
  * @param[in] model Model.
+ * @param[in] par Model parameter.
  * @param[in] event Event.
- * @param[in] ipar Parameter index for which gradient should be returned.
  *
- * This method uses a robust but dumb method to estimate parameter
- * gradients that have not been provided by the model. We use here a dumb
- * method as this method is likely used for spatial model parameters, and
- * the spatial model may eventually be noisy due to numerical integration
+ * This method uses a robust but simple difference method to estimate
+ * parameter gradients that have not been provided by the model. We use here
+ * a simple method as this method is likely used for spatial model parameters,
+ * and the spatial model may eventually be noisy due to numerical integration
  * limits.
  *
- * The step size for the dumb method has been fixed to 0.0002, which
- * corresponds to abound 1 arcsec for parameters that are given in degrees.
+ * The step size for the simple method has been fixed to 0.0002, which
+ * corresponds to about 1 arcsec for parameters that are given in degrees.
  * The reasoning behind this value is that parameters that use numerical
  * gradients are typically angles, such as for example the position, and
  * we want to achieve arcsec precision with this method.
- *
- * @todo Implement a more precise numerical derivation scheme. This needs
- *       a deep investigation as the scheme needs to be precise but also
- *       robust (not sensitive to noise in the function).
- * @todo For the Riddler method, we simply remove any parameter boundaries
- *       here for the computation to avoid any out of boundary errors.
- *       We may have models, however, for which out of bound parameters lead
- *       to illegal computations, such as division by zero or taking the
- *       square root of negative values.
- *       I cannot see any elegant method to catch this at this level.
- *       Eventually, the higher level method should avoid going in a
- *       parameter domain that is not defined. 
  ***************************************************************************/
 double GObservation::model_grad(const GModel&    model,
                                 const GModelPar& par,
-                                const int&       ipar,
                                 const GEvent&    event) const
 {
     // Initialise gradient
@@ -485,58 +471,47 @@ double GObservation::model_grad(const GModel&    model,
         double x = par.factor_value();
 
         // Set fixed step size for computation of derivative.
-        // By default, the step size is fixed to 0.0002, but if this would
-        // violate a boundary, dx is reduced accordingly. In case that x
-        // is right on the boundary, x is displaced slightly from the
-        // boundary to allow evaluation of the derivative.
-        #if !defined(G_GRAD_RIDDLER)
-        //const double step_size = 0.0002; // ~1 arcsec
-        const double step_size = 0.001; // ~4 arcsec
-        //const double step_size = 1.0e-5;
-        double       dx        = step_size;
-        if (par.has_min()) {
-            double dx_min = x - par.factor_min();
-            if (dx_min == 0.0) {
-                dx = step_size * x;
-                if (dx == 0.0) {
-                    dx = step_size;
-                }
-                x += dx; 
-            }
-            else if (dx_min < dx) {
-                dx = dx_min;
+        // By default, the step size is fixed to 0.0002.
+        const double step_size = 0.0002; // ~1 arcsec
+        double       h         = step_size;
+
+        // Re-adjust the step-size h in case that the initial step size is
+        // larger than the allowed parameter range 
+        if (par.has_min() && par.has_max()) {
+            double par_h = par.factor_max() - par.factor_min();
+            if (par_h < h) {
+                h = par_h;
             }
         }
-        if (par.has_max()) {
-            double dx_max = par.factor_max() - x;
-            if (dx_max == 0.0) {
-                dx = step_size * x;
-                if (dx == 0.0) {
-                    dx = step_size;
-                }
-                x -= dx; 
+
+        // Continue only if step size is positive
+        if (h > 0.0) {
+
+            // Remove any boundaries to avoid limitations
+            //ptr->remove_range(); // Not needed in principle
+
+            // Setup derivative function
+            GObservation::model_func function(this, model, ptr, event);
+            GDerivative              derivative(&function);
+
+            // If we are too close to the minimum boundary use a right sided
+            // difference ...
+            if (par.has_min() && ((x-par.factor_min()) < h)) {
+                grad = derivative.right_difference(x, h);
             }
-            else if (dx_max < dx) {
-                dx = dx_max;
+            
+            // ... otherwise if we are too close to the maximum boundary use
+            // a left sided difference ...
+            else if (par.has_max() && ((par.factor_max()-x) < h)) {
+                grad = derivative.left_difference(x, h);
             }
-        }
-        #endif
+            
+            // ... otherwise use a symmetric difference
+            else {
+                grad = derivative.difference(x, h);
+            }
 
-        // Remove any boundaries to avoid limitations
-        ptr->remove_range();
-
-        // Setup derivative function
-        GObservation::model_func function(this, model, event, ipar);
-
-        // Get derivative. We use a fixed step size here that has been
-        // checked on spatial parameters of models
-        GDerivative derivative(&function);
-        #if defined(G_GRAD_RIDDLER)
-        grad = derivative.value(x);
-        #else
-        //grad = derivative.difference(x, dx);
-        grad = derivative.smooth_robust(x, dx, 2, 5);
-        #endif
+        } // endif: step size was positive
 
         // Restore current model parameter
         *ptr = current;
@@ -552,7 +527,7 @@ double GObservation::model_grad(const GModel&    model,
  * @brief Returns parameter gradient of Npred
  *
  * @param[in] model Gamma-ray source model.
- * @param[in] ipar Parameter index for which gradient should be returned.
+ * @param[in] par Model parameter.
  *
  * Computes
  * \f[\frac{{\rm d} N_{\rm pred}}{{\rm d} a_i}\f]
@@ -574,97 +549,80 @@ double GObservation::model_grad(const GModel&    model,
  * \f$t\f$ is the true photon arrival time, and
  * \f$d\f$ is the instrument pointing.
  *
- * This method uses a robust but dumb method to estimate gradients. This
- * method has turned out more robust then the Riddler's method implement
- * by the GDerivative::value() method.
+ * This method uses a robust but simple difference method to estimate
+ * parameter gradients that have not been provided by the model. We use here
+ * a simple method as this method is likely used for spatial model parameters,
+ * and the spatial model may eventually be noisy due to numerical integration
+ * limits.
  *
- * The step size for the dumb method has been fixed to 0.0002, which
- * corresponds to abound 1 arcsec for parameters that are given in degrees.
+ * The step size for the simple method has been fixed to 0.0002, which
+ * corresponds to about 1 arcsec for parameters that are given in degrees.
  * The reasoning behind this value is that parameters that use numerical
  * gradients are typically angles, such as for example the position, and
  * we want to achieve arcsec precision with this method.
- *
- * @todo Implement a more precise numerical derivation scheme. This needs
- *       a deep investigation as the scheme needs to be precise but also
- *       robust (not sensitive to noise in the function).
- * @todo For Riddler's method we simply remove any parameter boundaries here
- *       for the computation to avoid any out of boundary errors. We may have
- *       models, however, for which out of bound parameters lead to illegal
- *       computations, such as division by zero or taking the square root of
- *       negative values.
- *       I cannot see any elegant method to catch this at this level.
- *       Eventually, the higher level method should avoid going in a
- *       parameter domain that is not defined. 
  ***************************************************************************/
-double GObservation::npred_grad(const GModel& model, const int& ipar) const
+double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
 {
     // Initialise result
     double grad = 0.0;
 
     // Compute gradient only if parameter is free
-    if (model[ipar].is_free()) {
+    if (par.is_free()) {
 
-        // Get non-const model pointer (circumvent const correctness)
-        GModel* ptr = const_cast<GModel*>(&model);
+        // Get non-const model pointer
+        GModelPar* ptr = const_cast<GModelPar*>(&par);
 
         // Save current model parameter
-        GModelPar current = (*ptr)[ipar];
+        GModelPar current = par;
 
         // Get actual parameter value
-        double x = model[ipar].factor_value();
+        double x = par.factor_value();
 
-        // Determine fixed step size for computation of derivative.
-        // By default, the step size is fixed to 0.0002, but if this would
-        // violate a boundary, dx is reduced accordingly. In case that x
-        // is right on the boundary, x is displaced slightly from the
-        // boundary to allow evaluation of the derivative.
-        #if !defined(G_GRAD_RIDDLER)
-        const double step_size = 0.0002;
-        double       dx        = step_size;
-        if (model[ipar].has_min()) {
-            double dx_min = x - model[ipar].factor_min();
-            if (dx_min == 0.0) {
-                dx = step_size * x;
-                if (dx == 0.0) {
-                    dx = step_size;
-                }
-                x += dx; 
-            }
-            else if (dx_min < dx) {
-                dx = dx_min;
+        // Set fixed step size for computation of derivative.
+        // By default, the step size is fixed to 0.0002.
+        const double step_size = 0.0002; // ~1 arcsec
+        double       h         = step_size;
+
+        // Re-adjust the step-size h in case that the initial step size is
+        // larger than the allowed parameter range 
+        if (par.has_min() && par.has_max()) {
+            double par_h = par.factor_max() - par.factor_min();
+            if (par_h < h) {
+                h = par_h;
             }
         }
-        if (model[ipar].has_max()) {
-            double dx_max = model[ipar].factor_max() - x;
-            if (dx_max == 0.0) {
-                dx = step_size * x;
-                if (dx == 0.0) {
-                    dx = step_size;
-                }
-                x -= dx; 
+
+        // Continue only if step size is positive
+        if (h > 0.0) {
+
+            // Remove any boundaries to avoid limitations
+            //ptr->remove_range(); // Not needed in principle
+
+            // Setup derivative function
+            GObservation::npred_func function(this, model, ptr);
+            GDerivative              derivative(&function);
+
+            // If we are too close to the minimum boundary use a right sided
+            // difference ...
+            if (par.has_min() && ((x-par.factor_min()) < h)) {
+                grad = derivative.right_difference(x, h);
             }
-            else if (dx_max < dx) {
-                dx = dx_max;
+            
+            // ... otherwise if we are too close to the maximum boundary use
+            // a left sided difference ...
+            else if (par.has_max() && ((par.factor_max()-x) < h)) {
+                grad = derivative.left_difference(x, h);
             }
-        }
-        #endif
+            
+            // ... otherwise use a symmetric difference
+            else {
+                grad = derivative.difference(x, h);
+            }
 
-        // Remove any boundaries to avoid limitations
-        (*ptr)[ipar].remove_range();
-
-        // Setup derivative function
-        GObservation::npred_func function(this, model, ipar);
-
-        // Get derivative.
-        GDerivative derivative(&function);
-        #if defined(G_GRAD_RIDDLER)
-        grad = derivative.value(x);
-        #else
-        grad = derivative.difference(x, dx);
-        #endif
+        } // endif: step size was positive
 
         // Restore current model parameter
-        (*ptr)[ipar] = current;
+        *ptr = current;
 
     } // endif: model parameter was free
 
@@ -1252,14 +1210,11 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
  ***************************************************************************/
 double GObservation::model_func::eval(const double& x)
 {
-    // Get non-const model pointer (circumvent const correctness)
-    GModel* model = const_cast<GModel*>(m_model);
-
     // Set value
-    (*model)[m_ipar].factor_value(x);
+    m_par->factor_value(x);
 
     // Compute model value
-    double value = model->eval(*m_event, *m_parent);
+    double value = m_model.eval(m_event, *m_parent);
 
     // Return value
     return value;
@@ -1279,14 +1234,11 @@ double GObservation::model_func::eval(const double& x)
  ***************************************************************************/
 double GObservation::npred_func::eval(const double& x)
 {
-    // Get non-const model pointer (circumvent const correctness)
-    GModel* model = const_cast<GModel*>(m_model);
-
     // Set value
-    (*model)[m_ipar].factor_value(x);
+    m_par->factor_value(x);
 
     // Compute Npred value
-    double npred = m_parent->npred_temp(*model);
+    double npred = m_parent->npred_temp(m_model);
 
     // Return value
     return npred;

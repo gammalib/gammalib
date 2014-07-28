@@ -70,6 +70,22 @@ public:
     virtual void             read(const GXmlElement& xml) = 0;
     virtual void             write(GXmlElement& xml) const = 0;
 
+    // Virtual methods
+    virtual double likelihood(const GModels& models,
+                              GVector*       gradient,
+                              GMatrixSparse* curvature,
+                              double*        npred) const;
+    virtual double model(const GModels& models,
+                         const GEvent&  event,
+                         GVector*       gradient = NULL) const;
+    virtual double npred(const GModels& models,
+                         GVector*       gradient = NULL) const;
+    virtual double model_grad(const GModel&    model,
+                              const GModelPar& par,
+                              const GEvent&    event) const;
+    virtual double npred_grad(const GModel&    model,
+                              const GModelPar& par) const;
+
     // Implemented methods
     void               name(const std::string& name);
     void               id(const std::string& id);
@@ -79,21 +95,6 @@ public:
     const std::string& id(void) const;
     const GEvents*     events(void) const;
     const std::string& statistics(void) const;
-    virtual double     likelihood(const GModels& models,
-                                  GVector*       gradient,
-                                  GMatrixSparse* curvature,
-                                  double*        npred) const;
-    virtual double     model(const GModels& models,
-                             const GEvent&  event,
-                             GVector*       gradient = NULL) const;
-    virtual double     npred(const GModels& models,
-                             GVector*       gradient = NULL) const;
-    virtual double     model_grad(const GModel&    model,
-                                  const GModelPar& par,
-                                  const int&       ipar,
-                                  const GEvent&    event) const;
-    virtual double     npred_grad(const GModel& model,
-                                  const int&    ipar) const;
 };
 
 
