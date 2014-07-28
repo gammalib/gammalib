@@ -5,6 +5,9 @@ depcomp
 pyext/build/
 .libs
 .deps
+inst/cta/test/*.xml
+inst/cta/test/*.fits
+inst/cta/test/*.fits.gz
 inst/spi/test/data/*.xml
 
 # Generated files
