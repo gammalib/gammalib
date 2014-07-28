@@ -37,6 +37,7 @@
 #include "GIntegral.hpp"
 #include "GCaldb.hpp"
 #include "GModelSpatialRadial.hpp"
+#include "GModelSpatialRadialShell.hpp"
 #include "GModelSpatialElliptical.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
@@ -96,22 +97,7 @@
 /* __ Coding definitions _________________________________________________ */
 #define G_USE_IRF_CACHE            //!< Use IRF cache in irf_diffuse method
 #define G_USE_NPRED_CACHE      //!< Use Npred cache in npred_diffuse method
-
-/*
-The following definition enables code that allows comparing a model system
-based integration (the integral is performed in model coordinates) to a
-Psf system based integration (the integral is performed in Psf coordinates).
-*/
-//#define G_COMPARE_SYSTEMS
-
-/*
-If no integration comparison is performed (G_COMPARE_SYSTEMS is undefined),
-the following definition will use the Psf system based integration for radial
-models. If not defined, the model system based integration will be used. If
-G_COMPARE_SYSTEMS is defined, the definition has no impact.
-*/
-#define G_USE_PSF_SYSTEM
-
+//#define G_USE_PSF_SYSTEM      //!< Do radial Irf integrations in Psf system
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_IRF_RADIAL                     //!< Debug irf_radial method
@@ -1332,59 +1318,16 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
  * view, this approximation should be fine. It helps in fact a lot in
  * speeding up the computations.
  ***************************************************************************/
-#if defined(G_COMPARE_SYSTEMS)
+#if defined(G_USE_PSF_SYSTEM)
 double GCTAResponseIrf::irf_radial(const GEvent&       event,
                                    const GSource&      source,
                                    const GObservation& obs) const
-{
-    // PSF system based integration
-    double irf_psf = irf_radial_psf(event, source, obs);
-
-    // Model system based integration
-    double irf_model = irf_radial_model(event, source, obs);
-
-    // Show difference (if large)
-    if (irf_model != 0.0) {
-        double frac = irf_psf/irf_model;
-        if (frac < 0.999 || frac > 1.001) {
-            std::cout << "Psf-based=" << irf_psf;
-            std::cout << "; Model-based=" << irf_model;
-            std::cout << "; Psf-Model=" << irf_psf-irf_model;
-            std::cout << "; Psf/Model=" << frac;
-            std::cout << std::endl;
-        }
-    }
-    else if (irf_psf != 0.0) {
-        std::cout << "Psf-based=" << irf_psf;
-        std::cout << "; Model-based=" << irf_model;
-        std::cout << "; Psf-Model=" << irf_psf-irf_model;
-        std::cout << std::endl;
-    }
-
-    // Return
-    return irf_model;
-}
-#endif
-
-// Psf-based
-#if defined(G_COMPARE_SYSTEMS)
-double GCTAResponseIrf::irf_radial_psf(const GEvent&       event,
-                                       const GSource&      source,
-                                       const GObservation& obs) const
-#elif defined(G_USE_PSF_SYSTEM)
-double GCTAResponseIrf::irf_radial(const GEvent&       event,
-                                   const GSource&      source,
-                                   const GObservation& obs) const
-#endif
-#if defined(G_COMPARE_SYSTEMS) || defined(G_USE_PSF_SYSTEM)
 {
     // Set integration precision and Romberg order. These values have been
     // determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1291
-    static const double eps_delta   = 1.0e-2;
-    static const int    order_delta =      5;
-    static const double eps_phi     = 1.0e-2;
-    static const int    order_phi   =      5;
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_delta = 5;
+    static const int iter_phi   = 5;
 
     // Set a tiny angle (in radians) to be removed from the model boundary
     // to avoid requesting values beyond the boundary due to round-off
@@ -1435,46 +1378,45 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
 
     // Continue only if interval has positive length
     if (delta_max > delta_min) {
-    /*
-std::cout << "Delta [";
-std::cout << delta_min*gammalib::rad2deg;
-std::cout << ",";
-std::cout << delta_max*gammalib::rad2deg;
-std::cout << "]; zeta=";
-std::cout << zeta*gammalib::rad2deg;
-std::cout << " deg; phi0=";
-std::cout << phi0*gammalib::rad2deg;
-std::cout << " deg; theta_max=";
-std::cout << theta_max*gammalib::rad2deg;
-std::cout << " deg; obsDir=";
-std::cout << obsDir;
-std::cout << " deg; model=";
-std::cout << model->dir();
-std::cout << std::endl;
-*/
 
         // Setup integration kernel.
         cta_irf_radial_kern_delta integrand(this, model, pnt,
                                             srcEng, srcLogEng, srcTime,
                                             obsOffset, obsEng,
                                             zeta, phi0, theta_max,
-                                            eps_phi, order_phi);
+                                            iter_phi);
 
         // Setup integration over Psf delta angle
         GIntegral integral(&integrand);
-        integral.eps(eps_delta);
+        integral.fixed_iter(iter_delta);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(delta_min);
+        bounds.push_back(delta_max);
 
         // If the integration range includes a transition between full
-        // containment and partial containment, then split the interval
-        // into two intervals
-        double switch_point = theta_max - zeta;
-        if (switch_point > delta_min && switch_point < delta_max) {
-            irf  = integral.romb(delta_min, switch_point, order_delta);
-            irf += integral.romb(switch_point, delta_max, order_delta);
+        // containment and partial containment, then add a boundary at
+        // this location
+        double transition_point = theta_max - zeta;
+        if (transition_point > delta_min && transition_point < delta_max) {
+            bounds.push_back(transition_point);
         }
-        else {
-            irf = integral.romb(delta_min, delta_max, order_delta);
+
+        // Integrate kernel
+        irf = integral.romberg(bounds, iter_delta);
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+            std::cout << "*** ERROR: GCTAResponseIrf::irf_radial:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", delta_min=" << delta_min;
+            std::cout << ", delta_max=" << delta_max << ")";
+            std::cout << std::endl;
         }
+        #endif
 
         // Apply deadtime correction
         irf *= obs.deadc(srcTime);
@@ -1484,35 +1426,76 @@ std::cout << std::endl;
     // Compile option: Show integration results
     #if defined(G_DEBUG_IRF_RADIAL)
     std::cout << "GCTAResponseIrf::irf_radial:";
-    std::cout << " delta_min=" << delta_min;
-    std::cout << " delta_max=" << delta_max;
+    std::cout << " delta=[" << delta_min*gammalib::rad2deg;
+    std::cout << ", " << delta_max*gammalib::rad2deg << " deg;";
+    std::cout << " zeta=" << zeta*gammalib::rad2deg << " deg;";
+    std::cout << " phi0=" << phi0*gammalib::rad2deg << " deg;";
+    std::cout << " theta_max=" << theta_max*gammalib::rad2deg << " deg;";
+    std::cout << " obsDir=" << obsDir << ";";
+    std::cout << " modelDir=" << model->dir() << ";";
     std::cout << " irf=" << irf << std::endl;
     #endif
 
     // Return Irf value
     return irf;
 }
-#endif
-
-// Model system
-#if defined(G_COMPARE_SYSTEMS)
-double GCTAResponseIrf::irf_radial_model(const GEvent&       event,
-                                         const GSource&      source,
-                                         const GObservation& obs) const
-#elif !defined(G_USE_PSF_SYSTEM)
+#else
+/***********************************************************************//**
+ * @brief Return IRF value for radial source model
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_model_type
+ *            Model is not a radial model.
+ *
+ * Integrates the product of the model and the Irf over the true photon
+ * arrival direction using
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    Irf(\rho, \omega) d\omega d\rho
+ * \f]
+ *
+ * where
+ *
+ *     \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
+ *     \f$Irf(\rho, \omega)\f$ is the IRF
+ *     \f$\rho\f$ is the distance from the model centre, and
+ *     \f$\omega\f$ is the azimuth angle is the position angle with respect
+ *     to the connecting line between the model centre and the observed
+ *     photon arrival direction.
+ *
+ * The integration is performed in the coordinate system of the source
+ * model spanned by \f$\rho\f$ and \f$\omega\f$ which allows to benefit
+ * from the symmetry of the source model.
+ *
+ * The source centre is located at \f$\vec{m}\f$, and a spherical system
+ * is defined around this location with \f$(\omega,\rho)\f$ being the
+ * azimuth and zenith angles, respectively. \f$\omega=0\f$ is defined
+ * by the direction that connects the source centre \f$\vec{m}\f$ to the
+ * measured photon direction \f$\vec{p'}\f$, and \f$\omega\f$ increases
+ * counterclockwise.
+ *
+ * Note that this method approximates the true theta angle (angle between
+ * incident photon and pointing direction) by the measured theta angle
+ * (angle between the measured photon arrival direction and the pointing
+ * direction). Given the slow variation of the Psf shape over the field of
+ * view, this approximation should be fine. It helps in fact a lot in
+ * speeding up the computations.
+ ***************************************************************************/
 double GCTAResponseIrf::irf_radial(const GEvent&       event,
                                    const GSource&      source,
                                    const GObservation& obs) const
-#endif
-#if defined(G_COMPARE_SYSTEMS) || !defined(G_USE_PSF_SYSTEM)
 {
-    // Set integration precision and Romberg order. These values have been
-    // determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1291
-    static const double eps_delta   = 1.0e-2;
-    static const int    order_delta =      5;
-    static const double eps_phi     = 1.0e-2;
-    static const int    order_phi   =      5;
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 5;
+    static const int iter_phi = 5;
 
     // Retrieve CTA pointing
     const GCTAPointing& pnt = retrieve_pnt(G_IRF_RADIAL, obs);
@@ -1588,29 +1571,7 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
 
     // Perform zenith angle integration if interval is valid
     if (rho_max > rho_min) {
-    /*
-std::cout << "Rho [";
-std::cout << rho_min*gammalib::rad2deg;
-std::cout << ",";
-std::cout << rho_max*gammalib::rad2deg;
-std::cout << "]; zeta=";
-std::cout << zeta*gammalib::rad2deg;
-std::cout << "; eta=";
-std::cout << eta*gammalib::rad2deg;
-std::cout << "; lambda=";
-std::cout << lambda*gammalib::rad2deg;
-std::cout << " deg; omega0=";
-std::cout << omega0*gammalib::rad2deg;
-std::cout << " deg; theta_max=";
-std::cout << src_max*gammalib::rad2deg;
-std::cout << " deg; delta_max=";
-std::cout << delta_max*gammalib::rad2deg;
-std::cout << " deg; obsDir=";
-std::cout << obsDir;
-std::cout << " deg; model=";
-std::cout << model->dir();
-std::cout << std::endl;
-*/
+
         // Setup integration kernel
         cta_irf_radial_kern_rho integrand(*this,
                                           *model,
@@ -1624,24 +1585,38 @@ std::cout << std::endl;
                                           lambda,
                                           omega0,
                                           delta_max,
-                                          eps_phi,
-                                          order_phi);
+                                          iter_phi);
 
-        // Integrate over zenith angle
+        // Integrate over model's zenith angle
         GIntegral integral(&integrand);
-        integral.eps(eps_delta);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
 
         // If the integration range includes a transition between full
-        // containment and partial containment, then split the interval
-        // into two intervals
-        double switch_point = delta_max - zeta;
-        if (switch_point > rho_min && switch_point < rho_max) {
-            irf  = integral.romb(rho_min, switch_point, order_delta);
-            irf += integral.romb(switch_point, rho_max, order_delta);
+        // containment and partial containment, then add a boundary at
+        // this location
+        double transition_point = delta_max - zeta;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
         }
-        else {
-            irf = integral.romb(rho_min, rho_max);
+
+        // If we have a shell model then add an integration boundary for the
+        // shell radius as a function discontinuity will occur at this
+        // location
+        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
+        if (shell != NULL) {
+            double shell_radius = shell->radius();
+            if (shell_radius > rho_min && shell_radius < rho_max) {
+                bounds.push_back(shell_radius);
+            }
         }
+
+        // Integrate kernel
+        irf = integral.romberg(bounds, iter_rho);
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -1659,13 +1634,21 @@ std::cout << std::endl;
         // Apply deadtime correction
         irf *= obs.deadc(srcTime);
 
-    }
+    } // endif: integration interval is valid
 
     // Compile option: Show integration results
     #if defined(G_DEBUG_IRF_RADIAL)
     std::cout << "GCTAResponseIrf::irf_radial:";
-    std::cout << " rho_min=" << rho_min;
-    std::cout << " rho_max=" << rho_max;
+    std::cout << " rho=[" << rho_min*gammalib::rad2deg;
+    std::cout << ", " << rho_max*gammalib::rad2deg << " deg;";
+    std::cout << " zeta=" << zeta*gammalib::rad2deg << " deg;";
+    std::cout << " eta=" << eta*gammalib::rad2deg << " deg;";
+    std::cout << " lambda=" << lambda*gammalib::rad2deg << " deg;";
+    std::cout << " omega0=" << omega0*gammalib::rad2deg << " deg;";
+    std::cout << " theta_max=" << src_max*gammalib::rad2deg << " deg;";
+    std::cout << " delta_max=" << delta_max*gammalib::rad2deg << " deg;";
+    std::cout << " obsDir=" << obsDir << ";";
+    std::cout << " modelDir=" << model->dir() << ";";
     std::cout << " irf=" << irf << std::endl;
     #endif
 
@@ -1716,6 +1699,12 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
                                        const GSource&      source,
                                        const GObservation& obs) const
 {
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 5;
+    static const int iter_phi = 5;
+
     // Retrieve CTA pointing
     const GCTAPointing& pnt = retrieve_pnt(G_IRF_ELLIPTICAL, obs);
     const GCTAInstDir&  dir = retrieve_dir(G_IRF_ELLIPTICAL, event);
@@ -1804,12 +1793,39 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
                                               lambda,
                                               obsOmega,
                                               omega0,
-                                              delta_max);
+                                              delta_max,
+                                              iter_phi);
 
-        // Integrate over zenith angle
+        // Integrate over model's zenith angle
         GIntegral integral(&integrand);
-        integral.eps(1.0e-2);
-        irf = integral.romb(rho_min, rho_max);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
+
+        // If the integration range includes a transition between full
+        // containment and partial containment, then add a boundary at
+        // this location
+        double transition_point = delta_max - zeta;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If we have a shell model then add an integration boundary for the
+        // shell radius as a function discontinuity will occur at this
+        // location
+        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
+        if (shell != NULL) {
+            double shell_radius = shell->radius();
+            if (shell_radius > rho_min && shell_radius < rho_max) {
+                bounds.push_back(shell_radius);
+            }
+        }
+
+        // Integrate kernel
+        irf = integral.romberg(bounds, iter_rho);
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -1826,7 +1842,8 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
 
         // Apply deadtime correction
         irf *= obs.deadc(srcTime);
-    }
+
+    } // endif: integration interval is valid
 
     // Compile option: Show integration results
     #if defined(G_DEBUG_IRF_ELLIPTICAL)
@@ -1879,6 +1896,12 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
                                     const GSource&      source,
                                     const GObservation& obs) const
 {
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 5;
+    static const int iter_phi = 5;
+
     // Initialise IRF value
     bool   has_irf = false;
     double irf     = 0.0;
@@ -1974,11 +1997,12 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
                                                  srcLogEng,
                                                  obsEng,
                                                  rot,
-                                                 eta);
+                                                 eta,
+                                                 iter_phi);
 
-            // Integrate over zenith angle
+            // Integrate over Psf delta angle
             GIntegral integral(&integrand);
-            integral.eps(1.0e-4);
+            integral.fixed_iter(iter_rho);
             irf = integral.romb(0.0, delta_max);
 
             // Compile option: Check for NaN/Inf
@@ -2070,6 +2094,12 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
 double GCTAResponseIrf::npred_radial(const GSource& source,
                                      const GObservation& obs) const
 {
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 6;
+    static const int iter_phi = 6;
+
     // Initialise Npred value
     double npred = 0.0;
 
@@ -2146,12 +2176,39 @@ double GCTAResponseIrf::npred_radial(const GSource& source,
                                             rot,
                                             roi_model_distance,
                                             roi_psf_radius,
-                                            omega0);
+                                            omega0,
+                                            iter_phi);
 
-        // Integrate over theta
+        // Integrate over model's zenith angle
         GIntegral integral(&integrand);
-        integral.eps(1.0e-5);
-        npred = integral.romb(rho_min, rho_max);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
+
+        // If the integration range includes a transition between full
+        // containment and partial containment, then add a boundary at
+        // this location
+        double transition_point = roi_psf_radius - roi_model_distance;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If we have a shell model then add an integration boundary for the
+        // shell radius as a function discontinuity will occur at this
+        // location
+        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
+        if (shell != NULL) {
+            double shell_radius = shell->radius();
+            if (shell_radius > rho_min && shell_radius < rho_max) {
+                bounds.push_back(shell_radius);
+            }
+        }
+
+        // Integrate kernel
+        npred = integral.romberg(bounds, iter_rho);
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_RADIAL)
@@ -2231,6 +2288,12 @@ double GCTAResponseIrf::npred_radial(const GSource& source,
 double GCTAResponseIrf::npred_elliptical(const GSource& source,
                                          const GObservation& obs) const
 {
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 6;
+    static const int iter_phi = 6;
+
     // Initialise Npred value
     double npred = 0.0;
 
@@ -2307,12 +2370,39 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
                                                 rot,
                                                 roi_model_distance,
                                                 roi_psf_radius,
-                                                omega0);
+                                                omega0,
+                                                iter_phi);
 
-        // Integrate over theta
+        // Integrate over model's zenith angle
         GIntegral integral(&integrand);
-        integral.eps(1.0e-5);
-        npred = integral.romb(rho_min, rho_max);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
+
+        // If the integration range includes a transition between full
+        // containment and partial containment, then add a boundary at
+        // this location
+        double transition_point = roi_psf_radius - roi_model_distance;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If we have a shell model then add an integration boundary for the
+        // shell radius as a function discontinuity will occur at this
+        // location
+        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
+        if (shell != NULL) {
+            double shell_radius = shell->radius();
+            if (shell_radius > rho_min && shell_radius < rho_max) {
+                bounds.push_back(shell_radius);
+            }
+        }
+
+        // Integrate kernel
+        npred = integral.romberg(bounds, iter_rho);
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_ELLIPTICAL)
@@ -2385,6 +2475,12 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
 double GCTAResponseIrf::npred_diffuse(const GSource& source,
                                       const GObservation& obs) const
 {
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 6;
+    static const int iter_phi = 6;
+
     // Initialise Npred value
     double npred     = 0.0;
     bool   has_npred = false;
@@ -2474,11 +2570,13 @@ double GCTAResponseIrf::npred_diffuse(const GSource& source,
                                                    source.energy(),
                                                    source.time(),
                                                    cta,
-                                                   rot);
+                                                   rot,
+                                                   iter_phi);
 
-            // Integrate over theta
+
+            // Integrate over model's zenith angle
             GIntegral integral(&integrand);
-            integral.eps(1.0e-5);
+            integral.fixed_iter(iter_rho);
             npred = integral.romb(0.0, roi_psf_radius);
 
             // Compile option: Show integration results
