@@ -60,10 +60,12 @@ public:
     double           value(const double& x, const double& step = 0.0);
     double           ridder(const double& x, const double& h, double* err);
     double           minuit2(const double& x, double* err);
+    double           difference(const double& x, const double& h);
+    double           left_difference(const double& x, const double& h);
+    double           right_difference(const double& x, const double& h);
     double           smooth_robust(const double& x, const double& h, 
                                    const int& degree = 2,
                                    const int& length = 5);
-    double           difference(const double& x, const double& h);
 };
 
 

@@ -502,7 +502,7 @@ double GDerivative::minuit2(const double& x, double* err)
 
 
 /***********************************************************************//**
- * @brief Returns gradient computed from function difference
+ * @brief Returns gradient computed from symmetric function difference
  *
  * @param[in] x Function value.
  * @param[in] h Step size.
@@ -517,6 +517,50 @@ double GDerivative::difference(const double& x, const double& h)
     double fs1        = m_func->eval(x + h);
     double fs2        = m_func->eval(x - h);
     double derivative = 0.5 * (fs1 - fs2) / h;
+
+    // Return derivative
+    return derivative;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns gradient computed from left-sided function difference
+ *
+ * @param[in] x Function value.
+ * @param[in] h Step size.
+ *
+ * This is the most simple and dumb gradient computation method we can think
+ * of. It does a reasonable good job if the problem is well controlled, and
+ * in particular, if the step size is known in advance.
+ ***************************************************************************/
+double GDerivative::left_difference(const double& x, const double& h)
+{
+    // Compute derivative
+    double fs1        = m_func->eval(x);
+    double fs2        = m_func->eval(x - h);
+    double derivative = (fs1 - fs2) / h;
+
+    // Return derivative
+    return derivative;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns gradient computed from right-sided function difference
+ *
+ * @param[in] x Function value.
+ * @param[in] h Step size.
+ *
+ * This is the most simple and dumb gradient computation method we can think
+ * of. It does a reasonable good job if the problem is well controlled, and
+ * in particular, if the step size is known in advance.
+ ***************************************************************************/
+double GDerivative::right_difference(const double& x, const double& h)
+{
+    // Compute derivative
+    double fs1        = m_func->eval(x + h);
+    double fs2        = m_func->eval(x);
+    double derivative = (fs1 - fs2) / h;
 
     // Return derivative
     return derivative;
