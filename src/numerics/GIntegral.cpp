@@ -25,8 +25,9 @@
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <cmath>            // For std::abs()
+#include <cmath>            // std::abs()
 #include <vector>
+#include <algorithm>        // std::sort
 #include "GIntegral.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -351,6 +352,46 @@ void GIntegral::clear(void)
 GIntegral* GIntegral::clone(void) const
 {
     return new GIntegral(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Perform Romberg integration
+ *
+ * @param[in] bounds Integration boundaries.
+ * @param[in] order Integration order (default: 5)
+ *
+ * @exception GException::invalid_argument
+ *            Integration order incompatible with number of iterations.
+ *
+ * Returns the integral of the integrand, computed over a number of
+ * intervals [a0,a1], [a1,a2], ... that are given as an unordered vector
+ * by the @p bounds argument.
+ *
+ * Integration is performed by Romberg's method of order 2*order, where
+ *
+ *     order=1 is equivalent to the trapezoidal rule,
+ *     order=2 is equivalent to Simpson's rule, and
+ *     order=3 is equivalent to Boole's rule.
+ *
+ * The number of iterations is limited by m_max_iter. m_eps specifies the
+ * requested fractional accuracy. By default it is set to 1e-6.
+ ***************************************************************************/
+double GIntegral::romberg(std::vector<double> bounds, const int& order)
+{
+    // Sort integration boundaries in ascending order
+    std::sort(bounds.begin(), bounds.end());
+
+    // Initialise integral
+    double value = 0.0;
+
+    // Add integral of all intervals
+    for (int i = 0; i < bounds.size()-1; ++i) {
+        value += romb(bounds[i], bounds[i+1], order);
+    }
+
+    // Return value
+    return value;
 }
 
 

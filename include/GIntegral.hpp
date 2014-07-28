@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GBase.hpp"
 #include "GFunction.hpp"
 
@@ -71,10 +72,12 @@ public:
     const std::string& message(void) const;
     void               kernel(GFunction* kernel);
     const GFunction*   kernel(void) const;
+    double             romberg(std::vector<double> bounds,
+                               const int& order = 5);
     double             romb(const double& a, const double& b,
                             const int& order = 5);
-    double             trapzd(const double& a, const double& b, const int& n = 1,
-                              double result = 0.0);
+    double             trapzd(const double& a, const double& b,
+                              const int& n = 1, double result = 0.0);
     double             adaptive_simpson(const double& a, const double& b) const;
     double             gauss_kronrod(const double& a, const double& b) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
