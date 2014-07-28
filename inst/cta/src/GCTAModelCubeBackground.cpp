@@ -338,7 +338,7 @@ GCTAModelCubeBackground* GCTAModelCubeBackground::clone(void) const
  * @exception GException::invalid_argument
  *            No CTA instrument direction found in event.
  *
- * Evaluates tha CTA background model which is a factorization of a
+ * Evaluates the CTA background model which is a factorization of a
  * spatial, spectral and temporal model component. This method also applies
  * a deadtime correction factor, so that the normalization of the model is
  * a real rate (counts/exposure time).
