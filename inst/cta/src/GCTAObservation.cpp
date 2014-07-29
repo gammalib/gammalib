@@ -973,7 +973,7 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     GSkyDir pnt;
     pnt.radec_deg(ra_pnt, dec_pnt);
     m_pointing.dir(pnt);
-    m_pointing.zenith(90.-alt);
+    m_pointing.zenith(90.0-alt);
     m_pointing.azimuth(az);
 
     // Return
@@ -994,6 +994,8 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     // Compute some attributes
     double ra_pnt  = m_pointing.dir().ra_deg();
     double dec_pnt = m_pointing.dir().dec_deg();
+    double alt     = 90.0 - m_pointing.zenith();
+    double az      = m_pointing.azimuth();
     double tstart  = events()->tstart().convert(timeref);
     double tstop   = events()->tstop().convert(timeref);
     double telapse = events()->gti().telapse();
@@ -1025,8 +1027,8 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     hdu.card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
     hdu.card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");
     hdu.card("DEC_PNT",  dec_pnt,   "[deg] Pointing Declination");
-    hdu.card("ALT_PNT",  0.0,       "[deg] Average altitude of pointing");
-    hdu.card("AZ_PNT",   0.0,       "[deg] Average azimuth of pointing");
+    hdu.card("ALT_PNT",  alt,       "[deg] Average altitude of pointing");
+    hdu.card("AZ_PNT",   az,        "[deg] Average azimuth of pointing");
     hdu.card("RADECSYS", "FK5",     "Coordinate system");
     hdu.card("EQUINOX",  2000.0,    "Epoch");
     hdu.card("CONV_DEP", 0.0,       "Convergence depth of telescopes");

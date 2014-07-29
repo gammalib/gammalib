@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-22 July 2014
+29 July 2014
 
 
 1. Introduction
@@ -237,6 +237,11 @@ A GCTATypemap header has been added to define CTA specific typemaps. This is
 actually used to define class codes for GCTASourceCube so that dynamic type
 casting can be avoided. Dynamic type casting is time consuming, and to speed-up
 response computation, using class codes is more efficient.
+
+The ALT_PNT and AZ_PNT attributes are now read from CTA data and used to set the
+zenith and azimuth angles in the GCTAPointing structure. As well, the information
+in GCTAPointing is now used to set the ALT_PNT and AZ_PNT attributes upon writing
+a dataset.
 
 
 21. COMPTEL interface

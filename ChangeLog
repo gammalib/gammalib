@@ -1,4 +1,4 @@
-2014-07-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-07-29  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -11,6 +11,7 @@
         Add GCTAExposure and GCTAMeanPsf classes
         Add ts attribute to GModel and use it in GModelSky models
         Add manipulation methods to GCTAResponseTable
+        Read/write altitude and azimuth attributes of CTA data
         Refactor CTA response class, add GCTAResponseCube class
         Implement CTA cube-style analysis
         Optimize CTA binned and cube-style analysis 
