@@ -78,6 +78,8 @@ public:
     const GMatrix& rot(void) const;
     const double&  zenith(void) const;
     const double&  azimuth(void) const;
+    void           zenith(const double& zenith);  
+    void           azimuth(const double& azimuth); 
     GHorizDir      dir_horiz(const GTime& time) const;
     void           load(const std::string& filename,
                         const std::string& extname = "POINTING");
@@ -143,4 +145,26 @@ const double& GCTAPointing::azimuth(void) const
     return m_azimuth;
 }
 
+/***********************************************************************//**
+ * @brief assign zenith angle
+ *
+ * @param[in] zenith The zenith angle. (deg)
+ ***************************************************************************/
+inline
+void GCTAPointing::zenith(const double& zenith)
+{
+    m_zenith = zenith;
+}
+
+
+/***********************************************************************//**
+ * @brief assign azimuth angle
+ *
+ * @param[in] azimuth The azimuth angle. (deg)
+ ***************************************************************************/
+inline
+void GCTAPointing::azimuth(const double& azimuth)
+{
+    m_azimuth = azimuth;
+}
 #endif /* GCTAPOINTING_HPP */

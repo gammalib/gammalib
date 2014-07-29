@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-28 July 2014
+29 July 2014
 
 
 1. Introduction
@@ -248,6 +248,11 @@ For this purpose, the integration precision has been replaced by a constant
 iterator depths, which leads to a uniform computation that increases log-likelihood
 profile smoothness. Also, known transition points have been added as internal
 integration boundaries, improving the integral precision.
+
+The ALT_PNT and AZ_PNT attributes are now read from CTA data and used to set the
+zenith and azimuth angles in the GCTAPointing structure. As well, the information
+in GCTAPointing is now used to set the ALT_PNT and AZ_PNT attributes upon writing
+a dataset.
 
 
 21. COMPTEL interface
