@@ -485,9 +485,15 @@ double GIntegral::romberg(const double& a, const double& b, const int& order)
                 // If a fixed number of iterations has been requested then
                 // check whether we reached the final one; otherwise check
                 // whether we reached the requested precision.
-                if (((m_fix_iter > 0) && (m_iter == max_iter)) ||
-                    (std::abs(dss) <= m_eps * std::abs(result))) {
-                    converged    = true;
+                if (m_fix_iter > 0) {
+                    if (m_iter == max_iter) {
+                        converged = true;
+                    }
+                }
+                else if (std::abs(dss) <= m_eps * std::abs(result)) {
+                    converged = true;
+                }
+                if (converged) {
                     m_has_abserr = true;
                     m_abserr     = std::abs(dss);
                     if (std::abs(result) > 0) {
