@@ -59,8 +59,12 @@ def unbinned_analysis(model, events, irf, caldb):
     # Load model to describe the data from XML file
     obs.models(model)
 
+    # Allocate logger
+    log = gammalib.GLog()
+    log.cout(True)
+    
     # Allocate Levenberg-Marquardt optimizer
-    opt = gammalib.GOptimizerLM()
+    opt = gammalib.GOptimizerLM(log)
 
     # Optimize model parameters
     obs.optimize(opt)
@@ -125,8 +129,12 @@ def binned_analysis(model, cntmap, irf, caldb):
     # Load model to describe the data from XML file
     obs.models(model)
 
+    # Allocate logger
+    log = gammalib.GLog()
+    log.cout(True)
+    
     # Allocate Levenberg-Marquardt optimizer
-    opt = gammalib.GOptimizerLM()
+    opt = gammalib.GOptimizerLM(log)
 
     # Optimize model parameters
     obs.optimize(opt)
@@ -193,8 +201,12 @@ def stacked_analysis(model, cntmap, expcube, psfcube):
     # Load model to describe the data from XML file
     obs.models(model)
 
+    # Allocate logger
+    log = gammalib.GLog()
+    log.cout(True)
+    
     # Allocate Levenberg-Marquardt optimizer
-    opt = gammalib.GOptimizerLM()
+    opt = gammalib.GOptimizerLM(log)
 
     # Optimize model parameters
     obs.optimize(opt)
@@ -241,8 +253,8 @@ if __name__ == '__main__':
     #test = "gauss"
     #test = "disk"
     #test = "shell"
-    test = "ellipse"
-    #test = "diffuse"
+    #test = "ellipse"
+    test = "diffuse"
 
     # Set parameters
     irf     = "cta_dummy_irf"
@@ -283,10 +295,10 @@ if __name__ == '__main__':
         cntref = 337.5 # +/- 1.8 (from ctobssim)
 
     # Perform unbinned analysis
-    #results_unbinned = unbinned_analysis(model, events, irf, gammalib.GCaldb(caldb))
+    results_unbinned = unbinned_analysis(model, events, irf, gammalib.GCaldb(caldb))
 
     # Perform binned analysis
     #results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
 
     # Perform stacked analysis
-    results_stacked = stacked_analysis(model, cntmap, expcube, psfcube)
+    #results_stacked = stacked_analysis(model, cntmap, expcube, psfcube)
