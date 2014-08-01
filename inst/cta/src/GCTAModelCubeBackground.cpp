@@ -1264,16 +1264,16 @@ void GCTAModelCubeBackground::init_members(void)
  ***************************************************************************/
 void GCTAModelCubeBackground::copy_members(const GCTAModelCubeBackground& model)
 {
+    // Clone spatial, spectral and temporal model components
+    m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
+    m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
+    m_temporal = (model.m_temporal != NULL) ? model.m_temporal->clone() : NULL;
+
     // Copy cache
     m_npred_names    = model.m_npred_names;
     m_npred_energies = model.m_npred_energies;
     m_npred_times    = model.m_npred_times;
     m_npred_values   = model.m_npred_values;
-
-    // Clone spatial, spectral and temporal model components
-    m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
-    m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
-    m_temporal = (model.m_temporal != NULL) ? model.m_temporal->clone() : NULL;
 
     // Set parameter pointers
     set_pointers();
@@ -1290,11 +1290,6 @@ void GCTAModelCubeBackground::copy_members(const GCTAModelCubeBackground& model)
  ***************************************************************************/
 void GCTAModelCubeBackground::free_members(void)
 {
-	m_npred_names.clear();
-	m_npred_energies.clear();
-	m_npred_times.clear();
-	m_npred_values.clear();
-
     // Free memory
     if (m_spatial  != NULL) delete m_spatial;
     if (m_spectral != NULL) delete m_spectral;

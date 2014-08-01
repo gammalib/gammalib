@@ -171,7 +171,6 @@ protected:
     GModelSpatial*  m_spatial;   //!< Spatial model
     GModelSpectral* m_spectral;  //!< Spectral model
     GModelTemporal* m_temporal;  //!< Temporal model
-    GMatrix         m_rot;       //!< Rotation matrix from model system to skydir
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names
