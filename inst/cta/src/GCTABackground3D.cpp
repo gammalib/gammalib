@@ -305,7 +305,7 @@ GCTABackground3D* GCTABackground3D::clone(void) const
  *
  * @param[in] fits FITS file pointer.
  *
- * Reads the background form the FITS file extension "BACKGROUND". The data
+ * Reads the background from the FITS file extension "BACKGROUND". The data
  * are stored in m_background which is of type GCTAResponseTable. The DETX
  * and DETY axes will be set to radians, the energy axis will be set to
  * log10.
