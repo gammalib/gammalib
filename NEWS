@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-29 July 2014
+5 August 2014
 
 
 1. Introduction
@@ -253,6 +253,8 @@ The ALT_PNT and AZ_PNT attributes are now read from CTA data and used to set the
 zenith and azimuth angles in the GCTAPointing structure. As well, the information
 in GCTAPointing is now used to set the ALT_PNT and AZ_PNT attributes upon writing
 a dataset.
+
+Add read(), write() and save() methods to GCTAPsf2D and GCTAPsfKing classes.
 
 
 21. COMPTEL interface
