@@ -271,35 +271,6 @@ GCTAPsfKing* GCTAPsfKing::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load point spread function from binary table
- *
- * @param[in] filename Performance table file name.
- *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
- *
- * This method loads the point spread function information from a PSF
- * response table.
- ***************************************************************************/
-void GCTAPsfKing::load(const std::string& filename)
-{
-    // Open PSF FITS file
-    GFits file(filename);
-
-    // Read fits file
-    read(file);
-
-    // Close PSF FITS file
-    file.close();
-
-    // Store filename
-    m_filename = filename;
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
  * @brief Read PSF from FITS file
  *
  * @param[in] fits FITS file pointer.
@@ -333,6 +304,7 @@ void GCTAPsfKing::read(const GFits& fits)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Write CTA PSF table into FITS binary table object.
  *
@@ -344,6 +316,36 @@ void GCTAPsfKing::write(GFitsBinTable& hdu) const
 {
     // Write background table
     m_psf.write(hdu);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load point spread function from binary table
+ *
+ * @param[in] filename Performance table file name.
+ *
+ * @exception GCTAExceptionHandler::file_open_error
+ *            File could not be opened for read access.
+ *
+ * This method loads the point spread function information from a PSF
+ * response table.
+ ***************************************************************************/
+void GCTAPsfKing::load(const std::string& filename)
+{
+    // Open PSF FITS file
+    GFits file(filename);
+
+    // Read fits file
+    read(file);
+
+    // Close PSF FITS file
+    file.close();
+
+    // Store filename
+    m_filename = filename;
 
     // Return
     return;
@@ -374,9 +376,6 @@ void GCTAPsfKing::save(const std::string& filename, const bool& clobber) const
     // Return
     return;
 }
-
-
-
 
 
 /***********************************************************************//**

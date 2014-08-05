@@ -268,6 +268,7 @@ GCTAPsf2D* GCTAPsf2D::clone(void) const
     return new GCTAPsf2D(*this);
 }
 
+
 /***********************************************************************//**
  * @brief Read PSF from FITS file
  *
@@ -305,7 +306,21 @@ void GCTAPsf2D::read(const GFits& fits)
 }
 
 
+/***********************************************************************//**
+ * @brief Write CTA PSF table into FITS binary table object.
+ *
+ * @param[in] hdu FITS binary table.
+ *
+ * @todo Add necessary keywords.
+ ***************************************************************************/
+void GCTAPsf2D::write(GFitsBinTable& hdu) const
+{
+    // Write background table
+    m_psf.write(hdu);
 
+    // Return
+    return;
+}
 
 
 /***********************************************************************//**
@@ -337,21 +352,6 @@ void GCTAPsf2D::load(const std::string& filename)
     return;
 }
 
-/***********************************************************************//**
- * @brief Write CTA PSF table into FITS binary table object.
- *
- * @param[in] hdu FITS binary table.
- *
- * @todo Add necessary keywords.
- ***************************************************************************/
-void GCTAPsf2D::write(GFitsBinTable& hdu) const
-{
-    // Write background table
-    m_psf.write(hdu);
-
-    // Return
-    return;
-}
 
 /***********************************************************************//**
  * @brief Save PSF table into FITS file
