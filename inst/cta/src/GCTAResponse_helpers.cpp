@@ -1329,7 +1329,7 @@ double cta_psf_radial_kern_delta::eval(const double& delta)
  *
  * \f[
  *    \theta = \arccos \left( \cos \delta \cos \zeta +
- *                            \sin \delta \sin \zeta \cos \phi
+ *                            \sin \delta \sin \zeta \cos \phi \right)
  * \f]
  *
  * where \f$\delta\f$ is the angle between true and measured photon
@@ -1619,7 +1619,7 @@ double cta_irf_radial_kern_delta::eval(const double& delta)
  *
  * \f[
  *    \theta = \arccos \left( \cos \delta \cos \zeta +
- *                            \sin \delta \sin \zeta \cos \phi
+ *                            \sin \delta \sin \zeta \cos \phi \right)
  * \f]
  *
  * where \f$\delta\f$ is the angle between true and measured photon
