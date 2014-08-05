@@ -719,16 +719,16 @@ void TestGObservation::test_energy(void)
     test_assert(!(a == b), "operator== (non equal values)");
     test_assert(!(a != a), "operator!= (equal values)");
     test_assert((a != b), "operator!= (non equal values)");
-    test_assert((a < b), "operator<");
-    test_assert(!(b < a), "operator<");
-    test_assert(!(a > b), "operator>");
-    test_assert((b > a), "operator>");
-    test_assert((a <= a), "operator<=");
-    test_assert((a <= b), "operator<=");
-    test_assert(!(b <= a), "operator<=");
-    test_assert((a >= a), "operator>=");
-    test_assert(!(a >= b), "operator>=");
-    test_assert((b >= a), "operator>=");
+    test_assert((a < b), "less than operator");
+    test_assert(!(b < a), "less than operator");
+    test_assert(!(a > b), "larger than operator");
+    test_assert((b > a), "larger than operator");
+    test_assert((a <= a), "less or equal operator");
+    test_assert((a <= b), "less or equal operator");
+    test_assert(!(b <= a), "less or equal operator");
+    test_assert((a >= a), "larger or equal operator");
+    test_assert(!(a >= b), "larger or equal operator");
+    test_assert((b >= a), "larger or equal operator");
 
     // Return
     return;
