@@ -117,81 +117,81 @@ protected:
  *                               Inline friends                            *
  ***************************************************************************/
 inline
-GEnergy& GEnergy::operator+= (const GEnergy& eng)
+GEnergy& GEnergy::operator+=(const GEnergy& eng)
 {
     m_energy    += eng.m_energy;
     m_has_log10  = false;
     return *this;
 }
 inline
-GEnergy& GEnergy::operator-= (const GEnergy& eng)
+GEnergy& GEnergy::operator-=(const GEnergy& eng)
 {
-    m_energy     += eng.m_energy;
+    m_energy    -= eng.m_energy;
     m_has_log10  = false;
     return *this;
 }
 inline
-GEnergy operator+ (const GEnergy& a, const GEnergy& b)
+GEnergy operator+(const GEnergy& a, const GEnergy& b)
 {
     GEnergy result;
     result.m_energy = a.m_energy + b.m_energy;
     return result;
 }
 inline
-GEnergy operator- (const GEnergy& a, const GEnergy& b)
+GEnergy operator-(const GEnergy& a, const GEnergy& b)
 {
     GEnergy result;
     result.m_energy = a.m_energy - b.m_energy;
     return result;
 }
 inline
-GEnergy operator* (const double& a, const GEnergy& b)
+GEnergy operator*(const double& a, const GEnergy& b)
 {
     GEnergy result;
     result.m_energy = a * b.m_energy;
     return result;
 }
 inline
-GEnergy operator* (const GEnergy& a, const double& b)
+GEnergy operator*(const GEnergy& a, const double& b)
 {
     GEnergy result;
     result.m_energy = b * a.m_energy;
     return result;
 }
 inline
-GEnergy operator/ (const GEnergy& a, const double& b)
+GEnergy operator/(const GEnergy& a, const double& b)
 {
     GEnergy result;
     result.m_energy = a.m_energy / b;
     return result;
 }
 inline
-bool operator== (const GEnergy &a, const GEnergy &b)
+bool operator==(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy == b.m_energy);
 }
 inline
-bool operator!= (const GEnergy &a, const GEnergy &b)
+bool operator!=(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy != b.m_energy);
 }
 inline
-bool operator< (const GEnergy &a, const GEnergy &b)
+bool operator<(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy < b.m_energy);
 }
 inline
-bool operator<= (const GEnergy &a, const GEnergy &b)
+bool operator<=(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy <= b.m_energy);
 }
 inline
-bool operator> (const GEnergy &a, const GEnergy &b)
+bool operator>(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy > b.m_energy);
 }
 inline
-bool operator>= (const GEnergy &a, const GEnergy &b)
+bool operator>=(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy >= b.m_energy);
 }
