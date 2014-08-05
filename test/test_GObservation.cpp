@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,13 +55,14 @@ void TestGObservation::set(void)
     name("Observation module");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGObservation::test_ebounds), "Test GEbounds");
-    append(static_cast<pfunction>(&TestGObservation::test_gti), "Test GGti");
-    append(static_cast<pfunction>(&TestGObservation::test_time_reference), "Test GTimeReference");
-    append(static_cast<pfunction>(&TestGObservation::test_time), "Test GTime");
-    append(static_cast<pfunction>(&TestGObservation::test_times), "Test GTimes");
-    append(static_cast<pfunction>(&TestGObservation::test_energies), "Test GEnergies");
-    append(static_cast<pfunction>(&TestGObservation::test_photons), "Test GPhotons");
+    append(static_cast<pfunction>(&TestGObservation::test_time_reference), "Test GTimeReference class");
+    append(static_cast<pfunction>(&TestGObservation::test_time), "Test GTime class");
+    append(static_cast<pfunction>(&TestGObservation::test_times), "Test GTimes class");
+    append(static_cast<pfunction>(&TestGObservation::test_gti), "Test GGti class");
+    append(static_cast<pfunction>(&TestGObservation::test_energy), "Test GEnergy class");
+    append(static_cast<pfunction>(&TestGObservation::test_energies), "Test GEnergies class");
+    append(static_cast<pfunction>(&TestGObservation::test_ebounds), "Test GEbounds class");
+    append(static_cast<pfunction>(&TestGObservation::test_photons), "Test GPhotons class");
 
     // Return
     return;
@@ -596,6 +597,138 @@ void TestGObservation::test_times(void)
     times.extend(times);
     test_value(times.size(), 4, "GTimes should have 4 times.");
     test_assert(!times.is_empty(), "GTimes should not be empty.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GEnergy class
+ ***************************************************************************/
+void TestGObservation::test_energy(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GEnergy energy;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructors
+    GEnergy erg(3.0, "erg");
+    test_value(erg.erg(), 3.0, 1.0e-6, "GEnergy(erg) constructor");
+    GEnergy keV(3.0, "keV");
+    test_value(keV.keV(), 3.0, 1.0e-6, "GEnergy(keV) constructor");
+    GEnergy MeV(3.0, "MeV");
+    test_value(MeV.MeV(), 3.0, 1.0e-6, "GEnergy(MeV) constructor");
+    GEnergy GeV(3.0, "GeV");
+    test_value(GeV.GeV(), 3.0, 1.0e-6, "GEnergy(GeV) constructor");
+    GEnergy TeV(3.0, "TeV");
+    test_value(TeV.TeV(), 3.0, 1.0e-6, "GEnergy(TeV) constructor");
+
+    // Test energy value access methods
+    test_value(MeV.erg(), 3.0/gammalib::erg2MeV, 1.0e-6, "erg() get method");
+    test_value(MeV.keV(), 3.0e+3, 1.0e-6, "keV() get method");
+    test_value(MeV.GeV(), 3.0e-3, 1.0e-6, "GeV() get method");
+    test_value(MeV.TeV(), 3.0e-6, 1.0e-6, "TeV() get method");
+    test_value(MeV("erg"), 3.0/gammalib::erg2MeV, 1.0e-6, "(erg) get operator");
+    test_value(MeV("keV"), 3.0e+3, 1.0e-6, "(keV) get operator");
+    test_value(MeV("MeV"), 3.0, 1.0e-6, "(MeV) get operator");
+    test_value(MeV("GeV"), 3.0e-3, 1.0e-6, "(GeV) get operator");
+    test_value(MeV("TeV"), 3.0e-6, 1.0e-6, "(TeV) get operator");
+    test_value(MeV.log10erg(), std::log10(3.0/gammalib::erg2MeV), 1.0e-6, "log10erg() get method");
+    test_value(MeV.log10keV(), std::log10(3.0e+3), 1.0e-6, "log10keV() get method");
+    test_value(MeV.log10MeV(), std::log10(3.0), 1.0e-6, "log10MeV() get method");
+    test_value(MeV.log10GeV(), std::log10(3.0e-3), 1.0e-6, "log10GeV() get method");
+    test_value(MeV.log10TeV(), std::log10(3.0e-6), 1.0e-6, "log10TeV() get method");
+    test_value(MeV.log10("erg"), std::log10(3.0/gammalib::erg2MeV), 1.0e-6, "log10(erg) get method");
+    test_value(MeV.log10("keV"), std::log10(3.0e+3), 1.0e-6, "log10(keV) get method");
+    test_value(MeV.log10("MeV"), std::log10(3.0), 1.0e-6, "log10(MeV) get method");
+    test_value(MeV.log10("GeV"), std::log10(3.0e-3), 1.0e-6, "log10(GeV) get method");
+    test_value(MeV.log10("TeV"), std::log10(3.0e-6), 1.0e-6, "log10(TeV) get method");
+
+    // Test value set methods
+    GEnergy energy;
+    energy.erg(3.0);
+    test_value(energy.erg(), 3.0, 1.0e-6, "erg() set method");
+    energy.keV(3.0);
+    test_value(energy.keV(), 3.0, 1.0e-6, "keV() set method");
+    energy.MeV(3.0);
+    test_value(energy.MeV(), 3.0, 1.0e-6, "MeV() set method");
+    energy.GeV(3.0);
+    test_value(energy.GeV(), 3.0, 1.0e-6, "GeV() set method");
+    energy.TeV(3.0);
+    test_value(energy.TeV(), 3.0, 1.0e-6, "TeV() set method");
+    energy(3.0, "erg");
+    test_value(energy.erg(), 3.0, 1.0e-6, "(erg) set operator");
+    energy(3.0, "keV");
+    test_value(energy.keV(), 3.0, 1.0e-6, "(keV) set method");
+    energy(3.0, "MeV");
+    test_value(energy.MeV(), 3.0, 1.0e-6, "(MeV) set method");
+    energy(3.0, "GeV");
+    test_value(energy.GeV(), 3.0, 1.0e-6, "(GeV) set method");
+    energy(3.0, "TeV");
+    test_value(energy.TeV(), 3.0, 1.0e-6, "(TeV) set method");
+    energy.log10erg(std::log10(3.0));
+    test_value(energy.erg(), 3.0, 1.0e-6, "log10erg() set method");
+    energy.log10keV(std::log10(3.0));
+    test_value(energy.keV(), 3.0, 1.0e-6, "log10keV() set method");
+    energy.log10MeV(std::log10(3.0));
+    test_value(energy.MeV(), 3.0, 1.0e-6, "log10MeV() set method");
+    energy.log10GeV(std::log10(3.0));
+    test_value(energy.GeV(), 3.0, 1.0e-6, "log10GeV() set method");
+    energy.log10TeV(std::log10(3.0));
+    test_value(energy.TeV(), 3.0, 1.0e-6, "log10TeV() set method");
+    energy.log10(std::log10(3.0), "erg");
+    test_value(energy.erg(), 3.0, 1.0e-6, "log10(erg) set method");
+    energy.log10(std::log10(3.0), "keV");
+    test_value(energy.keV(), 3.0, 1.0e-6, "log10(keV) set method");
+    energy.log10(std::log10(3.0), "MeV");
+    test_value(energy.MeV(), 3.0, 1.0e-6, "log10(MeV) set method");
+    energy.log10(std::log10(3.0), "GeV");
+    test_value(energy.GeV(), 3.0, 1.0e-6, "log10(GeV) set method");
+    energy.log10(std::log10(3.0), "TeV");
+    test_value(energy.TeV(), 3.0, 1.0e-6, "log10(TeV) set method");
+
+    // Test operators
+    double  va = 2.1;
+    double  vb = 3.7;
+    GEnergy a(va, "MeV");
+    GEnergy b(vb, "MeV");
+    GEnergy test = a + b;
+    test_value(test.MeV(), va+vb, 1.0e-6, "operator+");
+    test = a - b;
+    test_value(test.MeV(), va-vb, 1.0e-6, "operator-");
+    test = a * 2.9;
+    test_value(test.MeV(), va*2.9, 1.0e-6, "operator*");
+    test = 2.8 * a;
+    test_value(test.MeV(), 2.8*va, 1.0e-6, "operator*");
+    test = a / 3.7;
+    test_value(test.MeV(), va/3.7, 1.0e-6, "operator*");
+    test  = a;
+    test += b;
+    test_value(test.MeV(), va+vb, 1.0e-6, "operator+=");
+    test  = a;
+    test -= b;
+    test_value(test.MeV(), va-vb, 1.0e-6, "operator-=");
+    test_assert((a == a), "operator== (equal values)");
+    test_assert(!(a == b), "operator== (non equal values)");
+    test_assert(!(a != a), "operator!= (equal values)");
+    test_assert((a != b), "operator!= (non equal values)");
+    test_assert((a < b), "operator<");
+    test_assert(!(b < a), "operator<");
+    test_assert(!(a > b), "operator>");
+    test_assert((b > a), "operator>");
+    test_assert((a <= a), "operator<=");
+    test_assert((a <= b), "operator<=");
+    test_assert(!(b <= a), "operator<=");
+    test_assert((a >= a), "operator>=");
+    test_assert(!(a >= b), "operator>=");
+    test_assert((b >= a), "operator>=");
 
     // Return
     return;
