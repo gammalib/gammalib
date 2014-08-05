@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.hpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,6 +82,15 @@ public:
                            const bool&   etrue = true) const;
     std::string  print(const GChatter& chatter = NORMAL) const;
 
+    // Methods
+    const GCTAResponseTable&   table(void) const;
+    void                       table(const GCTAResponseTable& table);
+    void                       read(const GFits& file);
+    void                       write(GFitsBinTable& hdu) const;
+    void                       save(const std::string& filename,
+                                    const bool& clobber = false) const;
+  
+
 
 private:
     // Methods
@@ -116,5 +125,28 @@ std::string GCTAPsfKing::filename(void) const
 {
     return m_filename;
 }
+
+/***********************************************************************//**
+ * @brief Return response table
+ *
+ * @return Response table.
+ ***************************************************************************/
+inline
+const GCTAResponseTable& GCTAPsfKing::table(void) const
+{
+    return m_psf;
+}
+
+/***********************************************************************//**
+ * @brief Assign response table
+ *
+ * @param[in] table Response table.
+ ***************************************************************************/
+inline
+void GCTAPsfKing::table(const GCTAResponseTable& table)
+{
+     m_psf = table;
+}
+
 
 #endif /* GCTAPsfKing_HPP */

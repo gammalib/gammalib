@@ -31,6 +31,8 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFits.hpp"
+#include "GFitsBinTable.hpp"
 #include "GCTAPsfKing.hpp"
 #include "GCTAException.hpp"
 
@@ -269,6 +271,58 @@ GCTAPsfKing* GCTAPsfKing::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Read PSF from FITS file
+ *
+ * @param[in] fits FITS file pointer.
+ *
+ * Reads the PSF from the FITS file extension "POINT SPREAD FUNCTION". The data
+ * are stored in m_psf which is of type GCTAResponseTable. 
+ * The energy axis will be set to log10. The offset angle axis and 
+ * sigma parameter columns will be set to radians.
+ ***************************************************************************/
+void GCTAPsfKing::read(const GFits& fits)
+{
+    // Clear response table
+    m_psf.clear();
+
+    // Get PSF table
+    const GFitsTable& table = *fits.table("POINT SPREAD FUNCTION");
+
+    // Read PSF table
+    m_psf.read(table);
+
+    // Set energy axis to logarithmic scale
+    m_psf.axis_log10(0);
+
+    // Set offset angle axis to radians
+    m_psf.axis_radians(1);
+
+    // Convert sigma parameters to radians
+    m_psf.scale(1, gammalib::deg2rad);
+   
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA PSF table into FITS binary table object.
+ *
+ * @param[in] hdu FITS binary table.
+ *
+ * @todo Add necessary keywords.
+ ***************************************************************************/
+void GCTAPsfKing::write(GFitsBinTable& hdu) const
+{
+    // Write background table
+    m_psf.write(hdu);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load point spread function from binary table
  *
  * @param[in] filename Performance table file name.
@@ -284,26 +338,40 @@ void GCTAPsfKing::load(const std::string& filename)
     // Open PSF FITS file
     GFits file(filename);
 
-    // Get PSF table
-    const GFitsTable& table = *file.table("POINT SPREAD FUNCTION");
-
-    // Read PSF table
-    m_psf.read(table);
-
-    // Set energy axis to logarithmic scale
-    m_psf.axis_log10(0);
-
-    // Set offset angle axis to radians
-    m_psf.axis_radians(1);
-
-    // Convert sigma parameter to radians
-    m_psf.scale(1, gammalib::deg2rad);
+    // Read fits file
+    read(file);
 
     // Close PSF FITS file
     file.close();
 
     // Store filename
     m_filename = filename;
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Save PSF table into FITS file
+ *
+ * @param[in] filename PSF table FITS file name.
+ * @param[in] clobber Overwrite existing file? (true=yes)
+ *
+ * Save the PSF table into a FITS file.
+ ***************************************************************************/
+void GCTAPsfKing::save(const std::string& filename, const bool& clobber) const
+{
+    // Create binary table
+    GFitsBinTable table;
+    table.extname("POINT SPREAD FUNCTION");
+
+    // Write the PSF table
+    write(table);
+
+    // Create FITS file, append table, and write into the file
+    GFits fits;
+    fits.append(table);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

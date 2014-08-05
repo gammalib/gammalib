@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.hpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,9 @@
 #include "GCTAPsf.hpp"
 #include "GCTAResponseTable.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GFits;
+class GFitsBinTable;
 
 /***********************************************************************//**
  * @class GCTAPsf2D
@@ -82,6 +85,15 @@ public:
                           const bool&   etrue = true) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
+    // Methods
+    const GCTAResponseTable&   table(void) const;
+    void                       table(const GCTAResponseTable& table);
+    void                       read(const GFits& file);
+    void                       write(GFitsBinTable& hdu) const;
+    void                       save(const std::string& filename,
+                                    const bool& clobber = false) const;
+    
+
 private:
     // Methods
     void init_members(void);
@@ -118,5 +130,28 @@ std::string GCTAPsf2D::filename(void) const
 {
     return m_filename;
 }
+
+/***********************************************************************//**
+ * @brief Return response table
+ *
+ * @return Response table.
+ ***************************************************************************/
+inline
+const GCTAResponseTable& GCTAPsf2D::table(void) const
+{
+    return m_psf;
+}
+
+/***********************************************************************//**
+ * @brief Assign response table
+ *
+ * @param[in] table Response table.
+ ***************************************************************************/
+inline
+void GCTAPsf2D::table(const GCTAResponseTable& table)
+{
+     m_psf = table;
+}
+
 
 #endif /* GCTAPSF2D_HPP */

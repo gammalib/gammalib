@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAPsfKing.i - King profile CTA point spread function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
