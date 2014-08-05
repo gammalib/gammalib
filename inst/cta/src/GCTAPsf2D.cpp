@@ -324,6 +324,7 @@ void GCTAPsf2D::load(const std::string& filename)
     // Open PSF FITS file
     GFits fits(filename);
 
+    // Read fits file
     read(fits);
 
     // Close PSF FITS file
