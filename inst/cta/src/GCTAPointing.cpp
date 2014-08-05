@@ -309,6 +309,10 @@ GSkyDir GCTAPointing::skydir(const GCTAInstDir& instdir)const
 	GSkyDir sky;
 	sky.celvector(skyvector);
 
+	if (sky.ra_deg() < 0){
+	  sky.radec_deg( 360. + sky.ra_deg(), sky.dec_deg() );
+	}
+
 	// Return
 	return sky;
 
