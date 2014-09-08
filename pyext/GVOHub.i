@@ -34,9 +34,8 @@
  *
  * @brief VO Hub class
  ***************************************************************************/
-class GVOHub {
+class GVOHub : public GBase {
 public:
-    // Constructors and destructors
     // Constructors and destructors
     GVOHub(void);
     GVOHub(const GVOHub& hub);
@@ -44,23 +43,18 @@ public:
 
     // Methods
     void        clear(void);
-    GVOHub*  clone(void) const;
-    //void        connect(void);
-    //void        disconnect(void);
-    //bool        has_hub(void) const;
-    //bool        is_connected(void) const;
-    //GXml        response(void) const;
+    GVOHub*     clone(void) const;
+    void        start(void);
 };
 
 
 /***********************************************************************//**
  * @brief GVOHub class extension
  ***************************************************************************/
-/*
 %extend GVOHub {
     GVOHub copy() {
         return (*self);
     }
 };
-*/
+
 
