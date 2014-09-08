@@ -1,5 +1,5 @@
 /***************************************************************************
- *                    vo.i - Virtual Observatory module                    *
+ *                      GVOHub.i - VO Hub class                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -17,35 +17,50 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall vo.i                                            *
  ***************************************************************************/
 /**
- * @file vo.i
- * @brief Virtual Observatory module
+ * @file GVOHub.i
+ * @brief VO Hub class interface definition
  * @author Juergen Knoedlseder
  */
-%module vo
-%feature("autodoc", "1");
-
-/* __ Headers needed for compilation _____________________________________ */
 %{
-#include <stddef.h>
-#include "GException.hpp"
-#include "GTools.hpp"
+/* Put headers and other declarations here that are needed for compilation */
+#include "GVOHub.hpp"
 %}
 
-/* __ Include standard typemaps for vectors and strings __________________ */
-//%include stl.i
 
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-//%import(module="gammalib.base") "GContainer.i";
+/***********************************************************************//**
+ * @class GVOHub
+ *
+ * @brief VO Hub class
+ ***************************************************************************/
+class GVOHub {
+public:
+    // Constructors and destructors
+    // Constructors and destructors
+    GVOHub(void);
+    //GVOHub(const GVOHub& hub);
+    virtual ~GVOHub(void);
 
-/* __ Make sure that exceptions are catched ______________________________ */
-//%import(module="gammalib.support") "GException.i";
+    // Methods
+    //void        clear(void);
+    //GVOHub*  clone(void) const;
+    //void        connect(void);
+    //void        disconnect(void);
+    //bool        has_hub(void) const;
+    //bool        is_connected(void) const;
+    //GXml        response(void) const;
+};
 
-/* __ Virtual Observatory module _________________________________________ */
-%include "GVOClient.i"
-%include "GVOHub.i"
+
+/***********************************************************************//**
+ * @brief GVOHub class extension
+ ***************************************************************************/
+/*
+%extend GVOHub {
+    GVOHub copy() {
+        return (*self);
+    }
+};
+*/
+
