@@ -1,7 +1,7 @@
 /***************************************************************************
- *                      GVOHub.i - VO Hub class                      *
+ *                       GVOHub.i - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014 by Thierry Louge                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GVOHub.i
- * @brief VO Hub class interface definition
- * @author Juergen Knoedlseder
+ * @brief SAMP hub class interface definition
+ * @author Thierry Louge
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,12 +39,12 @@ public:
     // Constructors and destructors
     // Constructors and destructors
     GVOHub(void);
-    //GVOHub(const GVOHub& hub);
+    GVOHub(const GVOHub& hub);
     virtual ~GVOHub(void);
 
     // Methods
-    //void        clear(void);
-    //GVOHub*  clone(void) const;
+    void        clear(void);
+    GVOHub*  clone(void) const;
     //void        connect(void);
     //void        disconnect(void);
     //bool        has_hub(void) const;

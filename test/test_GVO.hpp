@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void     set(void);
     virtual TestGVO* clone(void) const;
+    void             test_GVOHub(void);
     void             test_GVOClient(void);
 
 private:

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                     GVOHub.hpp - VO SAMP Hub class                     *
+ *                      GVOHub.hpp - VO SAMP Hub class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder & Thierry Louge                             *
+ *  copyright (C) 2014 by Thierry Louge                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GVOHub.hpp
  * @brief SAMP hub class interface definition
- * @author Juergen Knoedlseder, Thierry Louge
+ * @author Thierry Louge
  */
 
 #ifndef GVOHUB_HPP
@@ -43,38 +43,40 @@
  * This class implements a SAMP hub for exchanges 
  * through VO-compatible applications.
  ***************************************************************************/
-class GVOHub {
+class GVOHub : public GBase {
 
 public:
     // Constructors and destructors
     GVOHub(void);
-    //GVOHub(const GVOHub& hub);
+    GVOHub(const GVOHub& hub);
     virtual ~GVOHub(void);
 
     // Operators
     GVOHub& operator=(const GVOHub& hub);
 
     // Methods
-    //void        clear(void);
-    //GVOHub*  clone(void) const;
+    void        clear(void);
+    GVOHub*     clone(void) const;
+    void        start(void);
+    std::string print(const GChatter& chatter = NORMAL) const;
     //void        connect(void);
     //void        disconnect(void);
     //bool        has_hub(void) const;
     //bool        is_connected(void) const;
     //GXml        response(void) const;
-    //std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
     void        init_members(void);
-    void	init_hub(void);
-    int         start_hub(void);
-    //void        free_members(void);
+    void        copy_members(const GVOHub& client);
+    void        free_members(void);
+    void	    init_hub(void);
+    void        start_hub(void);
     //bool        find_hub(void);
     //void        connect_to_hub(void);
     void        register_service(void);
     void        unregister(void);
-    void 	handle_request(socklen_t);
+    void 	    handle_request(const socklen_t& sock);
     //void        send_metadata(void);
     
     // Low-level methods
