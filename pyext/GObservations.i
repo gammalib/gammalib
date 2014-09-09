@@ -30,6 +30,27 @@
 %}
 
 
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GObservation* {
+    // TESTING
+    swig_type_info *myinfo = 0;
+    swig_cast_info *mycast = 0;
+    myinfo = SWIG_TypeDynamicCast(SWIGTYPE_p_GObservation, (void **)&result);
+    printf("Mangled name ..........: %s\n", myinfo->name);  
+    printf("Human readable name ...: %s\n", myinfo->str);
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        printf("Mangled name can cast ......: %s\n", mycast->type->name);  
+        printf("Human readable name can cast: %s\n", mycast->type->str);
+        if (strcmp("_p_GCTAObservation", mycast->type->name) == 0) {
+            myinfo = mycast->type;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+
+
 /***********************************************************************//**
  * @class GObservations
  *
