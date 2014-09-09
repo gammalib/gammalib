@@ -80,6 +80,7 @@ public:
                          GVector*       gradient = NULL) const;
     virtual double npred(const GModels& models,
                          GVector*       gradient = NULL) const;
+    virtual double npred(const GModel& model) const;
     virtual double model_grad(const GModel&    model,
                               const GModelPar& par,
                               const GEvent&    event) const;

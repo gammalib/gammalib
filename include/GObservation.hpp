@@ -96,6 +96,7 @@ public:
                          GVector*       gradient = NULL) const;
     virtual double npred(const GModels& models,
                          GVector*       gradient = NULL) const;
+    virtual double npred(const GModel& model) const;
     virtual double model_grad(const GModel&    model,
                               const GModelPar& par,
                               const GEvent&    event) const;
@@ -152,16 +153,15 @@ protected:
     };
 
     // Npred methods
-    virtual double npred_temp(const GModel& model) const;
     virtual double npred_spec(const GModel& model, const GTime& obsTime) const;
 
     // Npred kernel classes
-    class npred_temp_kern : public GFunction {
+    class npred_kern : public GFunction {
     public:
-        npred_temp_kern(const GObservation* parent,
-                        const GModel*       model) :
-                        m_parent(parent),
-                        m_model(model) { }
+        npred_kern(const GObservation* parent,
+                   const GModel*       model) :
+                   m_parent(parent),
+                   m_model(model) { }
         double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent

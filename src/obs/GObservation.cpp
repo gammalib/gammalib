@@ -45,19 +45,8 @@
 #define G_MODEL                   "GObservation::model(GModels&, GPointing&,"\
                                     " GInstDir&, GEnergy&, GTime&, GVector*)"
 #define G_EVENTS                                     "GObservation::events()"
-#define G_NPRED_TEMP                 "GObservation::npred_temp(GModel&, int)"
+#define G_NPRED                                "GObservation::npred(GModel&)"
 #define G_NPRED_SPEC              "GObservation::npred_spec(GModel&, GTime&)"
-#define G_NPRED_SPAT       "GObservation::npred_spat(GModel&, int, GEnergy&,"\
-                                                                   " GTime&)"
-#define G_NPRED_KERN            "GObservation::npred_kern(GModel&, GSkyDir&,"\
-                                             " GEnergy&, GTime&, GPointing&)"
-#define G_NPRED_GRAD_TEMP       "GObservation::npred_grad_temp(GModel&, int)"
-#define G_NPRED_GRAD_SPEC       "GObservation::npred_grad_spec(GModel&, int,"\
-                                                                   " GTime&)"
-#define G_NPRED_GRAD_SPAT       "GObservation::npred_grad_spat(GModel&, int,"\
-                                                         " GEnergy&, GTime&)"
-#define G_NPRED_GRAD_KERN       "GObservation::npred_grad_kern(GModel&, int,"\
-                                   " GSkyDir&, GEnergy&, GTime&, GPointing&)"
 
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
@@ -408,7 +397,7 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
             if (mptr->is_valid(instrument(), id())) {
 
                 // Determine Npred for model
-                npred += npred_temp(*mptr);
+                npred += this->npred(*mptr);
 
                 // Optionally determine Npred gradients
                 if (gradient != NULL) {
@@ -428,6 +417,97 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     } // endfor: Looped over models
 
     // Return prediction
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return total number of predicted counts for one model
+ *
+ * @param[in] model Gamma-ray source model.
+ *
+ * @exception GException::gti_invalid
+ *            Good Time Interval is invalid.
+ *
+ * Computes
+ * \f[N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm bounds}} \int_{\rm ROI}
+ *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
+ *    {\rm d}\vec{p'} {\rm d}E' {\rm d}t'\f]
+ * where
+ * \f$S(\vec{p}, E, t)\f$ is the source model,
+ * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
+ * spread function,
+ * \f$\vec{p'}\f$ is the measured photon direction,
+ * \f$E'\f$ is the measured photon energy,
+ * \f$t'\f$ is the measured photon arrival time,
+ * \f$\vec{p}\f$ is the true photon arrival direction,
+ * \f$E\f$ is the true photon energy,
+ * \f$t\f$ is the true photon arrival time, and
+ * \f$d\f$ is the instrument pointing.
+ *
+ * \f${\rm GTI}\f$ are the Good Time Intervals that are stored in the
+ * GObservation::m_gti member.
+ * Note that MET is used for the time integration interval. This, however,
+ * is no specialisation since npred_grad_kern_spec::eval() converts the
+ * argument back in a GTime object by assuming that the argument is in MET,
+ * hence the correct time system will be used at the end by the method.
+ ***************************************************************************/
+double GObservation::npred(const GModel& model) const
+{
+    // Initialise result
+    double npred = 0.0;
+
+    // Continue only if model applies to specific instrument and
+    // observation identifier
+    if (model.is_valid(instrument(), id())) {
+
+        // Case A: If the model is constant then integrate analytically
+        if (model.is_constant()) {
+
+            // Evaluate model at first start time and multiply by ontime
+            double ontime = events()->gti().ontime();
+
+            // Integrate only if ontime is positive
+            if (ontime > 0.0) {
+
+                // Integration is a simple multiplication by the time
+                npred = npred_spec(model, events()->gti().tstart()) * ontime;
+
+            }
+
+        } // endif: model was constant
+
+        // ... otherwise integrate temporally
+        else {
+
+            // Loop over GTIs
+            for (int i = 0; i < events()->gti().size(); ++i) {
+
+                // Set integration interval in seconds
+                double tstart = events()->gti().tstart(i).secs();
+                double tstop  = events()->gti().tstop(i).secs();
+
+                // Throw exception if time interval is not valid
+                if (tstop <= tstart) {
+                    throw GException::gti_invalid(G_NPRED,
+                                                  events()->gti().tstart(i),
+                                                  events()->gti().tstop(i));
+                }
+
+                // Setup integration function
+                GObservation::npred_kern integrand(this, &model);
+                GIntegral                integral(&integrand);
+
+                // Do Romberg integration
+                npred += integral.romberg(tstart, tstop);
+
+            } // endfor: looped over GTIs
+
+        } // endelse: integrated temporally
+
+    } // endif: model was valid
+
+    // Return Npred
     return npred;
 }
 
@@ -1238,7 +1318,7 @@ double GObservation::npred_func::eval(const double& x)
     m_par->factor_value(x);
 
     // Compute Npred value
-    double npred = m_parent->npred_temp(m_model);
+    double npred = m_parent->npred(m_model);
 
     // Return value
     return npred;
@@ -1246,98 +1326,11 @@ double GObservation::npred_func::eval(const double& x)
 
 
 /***********************************************************************//**
- * @brief Temporally integrates spatially and spectrally integrated Npred
- *        kernel
- *
- * @param[in] model Gamma-ray source model.
- *
- * @exception GException::gti_invalid
- *            Good Time Interval is invalid.
- *
- * Computes
- * \f[N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm bounds}} \int_{\rm ROI}
- *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p'} {\rm d}E' {\rm d}t'\f]
- * where
- * \f$S(\vec{p}, E, t)\f$ is the source model,
- * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
- * spread function,
- * \f$\vec{p'}\f$ is the measured photon direction,
- * \f$E'\f$ is the measured photon energy,
- * \f$t'\f$ is the measured photon arrival time,
- * \f$\vec{p}\f$ is the true photon arrival direction,
- * \f$E\f$ is the true photon energy,
- * \f$t\f$ is the true photon arrival time, and
- * \f$d\f$ is the instrument pointing.
- *
- * \f${\rm GTI}\f$ are the Good Time Intervals that are stored in the
- * GObservation::m_gti member.
- * Note that MET is used for the time integration interval. This, however,
- * is no specialisation since npred_grad_kern_spec::eval() converts the
- * argument back in a GTime object by assuming that the argument is in MET,
- * hence the correct time system will be used at the end by the method.
- ***************************************************************************/
-double GObservation::npred_temp(const GModel& model) const
-{
-    // Initialise result
-    double result = 0.0;
-
-
-    // Case A: If the model is constant then integrate analytically
-    if (model.is_constant()) {
-
-        // Evaluate model at first start time and multiply by ontime
-        double ontime = events()->gti().ontime();
-
-        // Integrate only if ontime is positive
-        if (ontime > 0.0) {
-
-            // Integration is a simple multiplication by the time
-            result = npred_spec(model, events()->gti().tstart()) * ontime;
-
-        }
-
-    } // endif: model was constant
-
-    // ... otherwise integrate temporally
-    else {
-
-        // Loop over GTIs
-        for (int i = 0; i < events()->gti().size(); ++i) {
-
-            // Set integration interval in seconds
-            double tstart = events()->gti().tstart(i).secs();
-            double tstop  = events()->gti().tstop(i).secs();
-
-            // Throw exception if time interval is not valid
-            if (tstop <= tstart) {
-                throw GException::gti_invalid(G_NPRED_TEMP,
-                                              events()->gti().tstart(i),
-                                              events()->gti().tstop(i));
-            }
-
-            // Setup integration function
-            GObservation::npred_temp_kern integrand(this, &model);
-            GIntegral                     integral(&integrand);
-
-            // Do Romberg integration
-            result += integral.romberg(tstart, tstop);
-
-        } // endfor: looped over GTIs
-
-    } // endelse: integrated temporally
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for npred_temp() method
+ * @brief Integration kernel for npred() method
  *
  * @param[in] x Function value.
  ***************************************************************************/
-double GObservation::npred_temp_kern::eval(const double& x)
+double GObservation::npred_kern::eval(const double& x)
 {
     // Convert argument in native reference in seconds
     GTime time;
