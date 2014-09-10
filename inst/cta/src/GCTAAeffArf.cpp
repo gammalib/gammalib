@@ -252,17 +252,6 @@ void GCTAAeffArf::load(const std::string& filename)
 
     // Get ARF table
     const GFitsTable& table = *file.table("SPECRESP");
-    GFitsHeader header = table.header();
-
-    // Read low energy threshold
-    if (header.contains("LO_THRES")){
-      double m_lo_thres = std::stod(header["LO_THRES"]);
-    }
-    
-    // Read high energy threshold
-    if (header.contains("HI_THRES")){
-      double m_hi_thres = std::stod(header["HI_THRES"]);
-    }
 
     // Read ARF
     read(table);

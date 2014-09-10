@@ -161,11 +161,6 @@ public:
                   const GCTAPointing& pnt,
                   const GEbounds&     ebds) const;
 
-protected:
-    // Energy thresholds
-    double        m_lo_thres;           //!< low safe energy threshold
-    double        m_hi_thres;           //!< high safe energy threshold
-
 private:
     // Private methods
     void        init_members(void);

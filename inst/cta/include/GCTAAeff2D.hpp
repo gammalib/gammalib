@@ -68,13 +68,12 @@ public:
     std::string print(const GChatter& chatter = NORMAL) const;
 
     // Methods
-    const GCTAResponseTable&   table(void) const;
-    void                       table(const GCTAResponseTable& table);
-    void                       read(const GFits& file);
-    void                       write(GFitsBinTable& hdu) const;
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
-    
+    const GCTAResponseTable& table(void) const;
+    void                     table(const GCTAResponseTable& table);
+    void                     read(const GFits& file);
+    void                     write(GFitsBinTable& hdu) const;
+    void                     save(const std::string& filename,
+                                  const bool& clobber = false) const;
     
 private:
     // Methods
@@ -100,6 +99,7 @@ std::string GCTAAeff2D::filename(void) const
     return m_filename;
 }
 
+
 /***********************************************************************//**
  * @brief Return response table
  *
@@ -110,6 +110,7 @@ const GCTAResponseTable& GCTAAeff2D::table(void) const
 {
     return m_aeff;
 }
+
 
 /***********************************************************************//**
  * @brief Assign response table
