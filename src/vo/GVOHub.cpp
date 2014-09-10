@@ -188,7 +188,7 @@ void GVOHub::start(void)
  ***************************************************************************/
 void GVOHub::register_service(void)
 {
-
+    printf("Registration request received");
     // Return
     return;
 }
@@ -425,7 +425,10 @@ void GVOHub::handle_request(const socklen_t& sock)
     // Initialize buffer
     char buffer[256];
     bzero(buffer,256);
-
+   
+    // Declare empty XML document
+    GXml xml;
+    
     // Read buffer
     int n = read(sock,buffer,255);
     if (n < 0) {
@@ -433,10 +436,28 @@ void GVOHub::handle_request(const socklen_t& sock)
         throw GException::invalid_value(G_HANDLE_REQUEST, msg);
     }
     printf("Here is the message: %s\n",buffer);
+    std::string response = buffer;
 
-    // Here, obviously not simple string matching but xml parsing to be done with 
-    // help of GXml object. This is only for architectural purpose.
-    if (strcmp(buffer,"register") == 0) {
+    // Find start of XML text
+    size_t start = response.find("<?xml");
+    // If found then convert text into XML document
+    if (start != std::string::npos) {
+        xml = GXml(response.substr(start, std::string::npos));
+    }
+
+    std::string method_called = "";
+    // Search for value of methodName
+    const GXmlNode* node = xml.element("methodCall", 0);
+    const GXmlNode* ptr = node->element("methodName", 0);
+    if (ptr != NULL) {
+        const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
+        if (text != NULL) {
+            method_called = text->text();
+        }
+    }
+    // endif: connection has been established
+    //std::string method_called = get_response_value(xml, "methodName");
+    if (method_called.compare("samp.hub.register") == 0) {
         register_service();
     }
     
@@ -519,3 +540,49 @@ void GVOHub::start_hub(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Extract name / value pair from XML node
+ *
+ * @param[in] node Pointer to XML node.
+ * @param[out] name Name string.
+ * @param[out] value Value string.
+ *
+ * Extracts a name / value pair from a XML node. If the XML node pointer is
+ * NULL, the name and value strings will be empty.
+ ***************************************************************************/
+void GVOHub::get_name_value_pair(const GXmlNode* node,
+                                    std::string&    name,
+                                    std::string&    value) const
+{
+    // Clear name and value strings
+    name.clear();
+    value.clear();
+
+    // Continue only if node is valid
+    if (node != NULL) {
+
+        // Get name node and extract text content
+        const GXmlNode* ptr = node->element("name", 0);
+        if (ptr != NULL) {
+            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
+            if (text != NULL) {
+                name = text->text();
+            }
+        }
+
+        // Get value node and extract text content
+        ptr = node->element("value", 0);
+        if (ptr != NULL) {
+            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
+            if (text != NULL) {
+                value = text->text();
+            }
+        }
+    }
+
+    // Return
+    return;
+}
+
