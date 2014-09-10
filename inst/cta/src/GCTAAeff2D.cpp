@@ -29,6 +29,8 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GFits.hpp"
+#include "GFitsBinTable.hpp"
 #include "GFitsTable.hpp"
 #include "GCTAAeff2D.hpp"
 
@@ -255,16 +257,46 @@ void GCTAAeff2D::load(const std::string& filename)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Write CTA effective area table into FITS binary table object.
+ *
+ * @param[in] hdu FITS binary table.
+ *
+ * @todo Add necessary keywords.
+ ***************************************************************************/
+void GCTAAeff2D::write(GFitsBinTable& hdu) const
+{
+    // Write background table
+    m_aeff.write(hdu);
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
- * @brief Return filename
+ * @brief Save effectiva area table into FITS file
  *
- * @return Returns filename from which effective area was loaded
+ * @param[in] filename Effective area table FITS file name.
+ * @param[in] clobber Overwrite existing file? (true=yes)
+ *
+ * Save the effectiva area table into a FITS file.
  ***************************************************************************/
-std::string GCTAAeff2D::filename(void) const
+void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
 {
-    // Return filename
-    return m_filename;
+    // Create binary table
+    GFitsBinTable table;
+    table.extname("EFFECTIVE AREA");
+
+    // Write the Effective area table
+    write(table);
+
+    // Create FITS file, append table, and write into the file
+    GFits fits;
+    fits.append(table);
+    fits.saveto(filename, clobber);
+
+    // Return
+    return;
 }
 
 

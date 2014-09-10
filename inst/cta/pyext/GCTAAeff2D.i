@@ -59,7 +59,12 @@ public:
     std::string filename(void) const;
 
     // Methods
-    void read(const GFits& file);
+    const GCTAResponseTable&   table(void) const;
+    void                       table(const GCTAResponseTable& table);
+    void                       read(const GFits& file);
+    void                       write(GFitsBinTable& hdu) const;
+    void                       save(const std::string& filename,
+                                    const bool& clobber = false) const;
 };
 
 
