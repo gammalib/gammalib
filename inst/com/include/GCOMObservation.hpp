@@ -63,6 +63,7 @@ public:
     // Implement pure virtual methods
     virtual void                clear(void);
     virtual GCOMObservation*    clone(void) const;
+    virtual std::string         type(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GCOMResponse* response(void) const;
     virtual std::string         instrument(void) const { return m_instrument; }
@@ -120,6 +121,18 @@ protected:
     double       m_deadc;       //!< Deadtime correction
     double       m_ewidth;      //!< Energy width (MeV)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class type
+ *
+ * @return Returns "GCOMObservation".
+ ***************************************************************************/
+inline
+std::string GCOMObservation::type(void) const
+{
+    return "GCOMObservation";
+}
 
 
 /***********************************************************************//**

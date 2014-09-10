@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.i - Multi-wavelength observation class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     // Implement pure virtual methods
     virtual void                clear(void);
     virtual GMWLObservation*    clone(void) const;
+    virtual std::string         type(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GMWLResponse* response(void) const;
     virtual std::string         instrument(void) const;

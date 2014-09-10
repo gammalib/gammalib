@@ -72,6 +72,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                clear(void);
     virtual GCTAObservation*    clone(void) const;
+    virtual std::string         type(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GCTAResponse* response(void) const;
     virtual std::string         instrument(void) const;
@@ -133,6 +134,18 @@ protected:
     // Special protected member for GCTAModelCubeBackground friend
     std::string  m_bgdfile;      //!< Background filename
 };
+
+
+/***********************************************************************//**
+ * @brief Return class type
+ *
+ * @return Returns "GCTAObservation".
+ ***************************************************************************/
+inline
+std::string GCTAObservation::type(void) const
+{
+    return "GCTAObservation";
+}
 
 
 /***********************************************************************//**

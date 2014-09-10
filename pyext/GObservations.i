@@ -32,18 +32,16 @@
 
 /* __ Typemaps ___________________________________________________________ */
 %typemap(out) GObservation* {
-    // TESTING
-    swig_type_info *myinfo = 0;
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->type().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GObservation;
     swig_cast_info *mycast = 0;
-    myinfo = SWIG_TypeDynamicCast(SWIGTYPE_p_GObservation, (void **)&result);
-    printf("Mangled name ..........: %s\n", myinfo->name);  
-    printf("Human readable name ...: %s\n", myinfo->str);
     mycast = myinfo->cast;
     while (mycast != 0) {
-        printf("Mangled name can cast ......: %s\n", mycast->type->name);  
-        printf("Human readable name can cast: %s\n", mycast->type->str);
-        if (strcmp("_p_GCTAObservation", mycast->type->name) == 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
             myinfo = mycast->type;
+            break;
         }
         mycast = mycast->next;
     }

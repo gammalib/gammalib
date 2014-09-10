@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATObservation.hpp - Fermi/LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                clear(void);
     virtual GLATObservation*    clone(void) const;
+    virtual std::string         type(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GLATResponse* response(void) const;
     virtual std::string         instrument(void) const;
@@ -94,6 +95,18 @@ protected:
     GLATResponse m_response;     //!< Instrument response functions
     GLATLtCube*  m_ltcube;       //!< Pointer to lifetime cube
 };
+
+
+/***********************************************************************//**
+ * @brief Return class type
+ *
+ * @return Returns "GLATObservation".
+ ***************************************************************************/
+inline
+std::string GLATObservation::type(void) const
+{
+    return "GLATObservation";
+}
 
 
 /***********************************************************************//**

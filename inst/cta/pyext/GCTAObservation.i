@@ -62,6 +62,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                clear(void);
     virtual GCTAObservation*    clone(void) const;
+    virtual std::string         type(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GCTAResponse* response(void) const;
     virtual std::string         instrument(void) const;
@@ -107,15 +108,5 @@ public:
 %extend GCTAObservation {
     GCTAObservation copy() {
         return (*self);
-    }
-    GCTAObservation(GObservation* obs) {
-        GCTAObservation* ptr = dynamic_cast<GCTAObservation*>(obs);
-        if (ptr != NULL) {
-            return (ptr->clone());
-        }
-        else {
-            throw GException::bad_type("GCTAObservation(GObservation*)",
-                                       "GObservation not of type GCTAObservation");
-        }
     }
 };
