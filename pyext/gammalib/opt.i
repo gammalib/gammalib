@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       opt.i - Optimization module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,40 @@
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
+
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GOptimizer* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GOptimizer;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GOptimizerPar* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GOptimizerPar;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
 
 /* __ Optimizer module ___________________________________________________ */
 %include "GOptimizer.i"

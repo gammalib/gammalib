@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModels.i - Model container class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,19 +30,6 @@
 #include "GModelSky.hpp"
 #include "GModelData.hpp"
 %}
-
-/* __ Typemaps ___________________________________________________________ */
-%typemap(out) GModel* {
-    if (dynamic_cast<GModelSky*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSky, 0 |  0 );
-    }
-    else if (dynamic_cast<GModelData*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelData, 0 |  0 );
-    }
-    else {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModel, 0 |  0 );
-    }
-}
 
 
 /***********************************************************************//**

@@ -51,6 +51,72 @@
 %import(module="gammalib.opt") "GOptimizerPar.i";
 %import(module="gammalib.opt") "GOptimizerPars.i";
 
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GModel* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GModel;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GModelSpatial* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GModelSpatial;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GModelSpectral* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GModelSpectral;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GModelTemporal* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GModelTemporal;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+
 /* __ Model handling _____________________________________________________ */
 %include "GModelPar.i"
 %include "GModels.i"

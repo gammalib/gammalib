@@ -46,6 +46,24 @@
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
 
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GXmlNode* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GXmlNode;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+
 /* __ XML module _________________________________________________________ */
 %include "GXml.i"
 %include "GXmlNode.i"

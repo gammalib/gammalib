@@ -46,6 +46,72 @@
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
 
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GFitsHDU* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GFitsHDU;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GFitsImage* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GFitsImage;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GFitsTable* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GFitsTable;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+%typemap(out) GFitsTableCol* {
+    char classname[80];
+    strcpy(classname, "_p_");
+    strcat(classname, result->classname().c_str());
+    swig_type_info *myinfo = SWIGTYPE_p_GFitsTableCol;
+    swig_cast_info *mycast = 0;
+    mycast = myinfo->cast;
+    while (mycast != 0) {
+        if (strcmp(classname, mycast->type->name) == 0) {
+            myinfo = mycast->type;
+            break;
+        }
+        mycast = mycast->next;
+    }
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), myinfo, 0 |  0);
+}
+
 /* __ FITS module ________________________________________________________ */
 %include "GFits.i"
 %include "GFitsHDU.i"
