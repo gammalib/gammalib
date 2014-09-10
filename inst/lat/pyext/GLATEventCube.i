@@ -82,14 +82,4 @@ public:
     GLATEventCube copy() {
         return (*self);
     }
-    GLATEventCube(GEventCube* cube) {
-        GLATEventCube* ptr = dynamic_cast<GLATEventCube*>(cube);
-        if (ptr != NULL) {
-            return (ptr->clone());
-        }
-        else {
-            throw GException::bad_type("GLATEventCube(GEventCube*)",
-                                       "GEventCube not of type GLATEventCube");
-        }
-    }
 };

@@ -29,20 +29,6 @@
 %}
 
 
-/* __ Typemaps ___________________________________________________________ */
-%typemap(out) GCTAResponse* {
-    if (dynamic_cast<GCTAResponseIrf*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAResponseIrf, 0 |  0 );
-    }
-    else if (dynamic_cast<GCTAResponseCube*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAResponseCube, 0 |  0 );
-    }
-    else {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GCTAResponse, 0 |  0 );
-    }
-}
-
-
 /***********************************************************************//**
  * @class GCTAObservation
  *

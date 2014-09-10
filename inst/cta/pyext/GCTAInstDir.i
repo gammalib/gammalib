@@ -64,14 +64,4 @@ public:
     GCTAInstDir copy() {
         return (*self);
     }
-    GCTAInstDir(GInstDir* dir) {
-        GCTAInstDir* ptr = dynamic_cast<GCTAInstDir*>(dir);
-        if (ptr != NULL) {
-            return (ptr->clone());
-        }
-        else {
-            throw GException::bad_type("GCTAInstDir(GInstDir*)",
-                                       "GInstDir not of type GCTAInstDir");
-        }
-    }
 };

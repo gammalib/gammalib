@@ -71,16 +71,6 @@ public:
     GCTAEventList copy() {
         return (*self);
     }
-    GCTAEventList(GEventList* list) {
-        GCTAEventList* ptr = dynamic_cast<GCTAEventList*>(list);
-        if (ptr != NULL) {
-            return (ptr->clone());
-        }
-        else {
-            throw GException::bad_type("GCTAEventList(GEventList*)",
-                                       "GEventList not of type GCTAEventList");
-        }
-    }
     GCTAEventAtom* __getitem__(int index) {
         if (index >= 0 && index < self->size())
             return (*self)[index];

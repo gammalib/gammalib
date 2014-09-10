@@ -84,14 +84,4 @@ public:
         else
             throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
-    GCTAEventCube(GEventCube* cube) {
-        GCTAEventCube* ptr = dynamic_cast<GCTAEventCube*>(cube);
-        if (ptr != NULL) {
-            return (ptr->clone());
-        }
-        else {
-            throw GException::bad_type("GCTAEventCube(GEventCube*)",
-                                       "GEventCube not of type GCTAEventCube");
-        }
-    }
 };
