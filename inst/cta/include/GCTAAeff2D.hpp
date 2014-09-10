@@ -68,7 +68,13 @@ public:
     std::string print(const GChatter& chatter = NORMAL) const;
 
     // Methods
-    void read(const GFits& file);
+    const GCTAResponseTable&   table(void) const;
+    void                       table(const GCTAResponseTable& table);
+    void                       read(const GFits& file);
+    void                       write(GFitsBinTable& hdu) const;
+    void                       save(const std::string& filename,
+                                    const bool& clobber = false) const;
+    
     
 private:
     // Methods
@@ -80,5 +86,40 @@ private:
     std::string       m_filename;  //!< Name of Aeff response file
     GCTAResponseTable m_aeff;      //!< Aeff response table
 };
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which effective area was loaded
+ ***************************************************************************/
+inline
+std::string GCTAAeff2D::filename(void) const
+{
+    // Return filename
+    return m_filename;
+}
+
+/***********************************************************************//**
+ * @brief Return response table
+ *
+ * @return Response table.
+ ***************************************************************************/
+inline
+const GCTAResponseTable& GCTAAeff2D::table(void) const
+{
+    return m_aeff;
+}
+
+/***********************************************************************//**
+ * @brief Assign response table
+ *
+ * @param[in] table Response table.
+ ***************************************************************************/
+inline
+void GCTAAeff2D::table(const GCTAResponseTable& table)
+{
+     m_aeff = table;
+}
 
 #endif /* GCTAAEFF2D_HPP */
