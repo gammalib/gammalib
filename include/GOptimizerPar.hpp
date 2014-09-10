@@ -147,6 +147,7 @@ public:
     // Other methods
     void               clear(void);
     GOptimizerPar*     clone(void) const;
+    std::string        classname(void) const;
     const std::string& name(void) const;
     const std::string& unit(void) const;
     void               name(const std::string& name);
@@ -174,6 +175,18 @@ protected:
     bool        m_has_max;          //!< Parameter has maximum boundary
     bool        m_has_grad;         //!< Parameter has analytic gradient
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GOptimizerPar").
+ ***************************************************************************/
+inline
+std::string GOptimizerPar::classname(void) const
+{
+    return ("GOptimizerPar");
+}
 
 
 /***********************************************************************//**

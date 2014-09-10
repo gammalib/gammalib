@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GEventCube.hpp - Abstract event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GEventCube* clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual int         size(void) const = 0;
     virtual int         dim(void) const = 0;
     virtual int         naxis(const int& axis) const = 0;

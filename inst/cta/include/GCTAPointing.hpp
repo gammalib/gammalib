@@ -68,6 +68,7 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GCTAPointing* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -108,6 +109,18 @@ protected:
     mutable bool    m_has_cache;  //!< Has transformation cache
     mutable GMatrix m_Rback;      //!< Rotation matrix
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAPointing").
+ ***************************************************************************/
+inline
+std::string GCTAPointing::classname(void) const
+{
+    return ("GCTAPointing");
+}
 
 
 /***********************************************************************//**

@@ -84,6 +84,7 @@ public:
     // Methods
     void               clear(void);
     int                size(void) const;
+    std::string        classname(void) const;
     void               open(const std::string& filename, const bool& clobber = false);
     void               close(void);
     void               flush(const bool& force = false);
@@ -130,6 +131,18 @@ protected:
     std::string m_buffer;     //!< Output string buffer
     GChatter    m_chatter;    //!< Chattiness for print() method
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLog").
+ ***************************************************************************/
+inline
+std::string GLog::classname(void) const
+{
+    return ("GLog");
+}
 
 
 /***********************************************************************//**

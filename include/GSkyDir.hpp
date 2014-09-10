@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.hpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,6 +68,7 @@ public:
     // Methods
     void          clear(void);
     GSkyDir*      clone(void) const;
+    std::string   classname(void) const;
     void          radec(const double& ra, const double& dec);
     void          radec_deg(const double& ra, const double& dec);
     void          lb(const double& l, const double& b);
@@ -117,6 +118,18 @@ private:
     mutable double m_cos_dec;
     #endif
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GSkyDir").
+ ***************************************************************************/
+inline
+std::string GSkyDir::classname(void) const
+{
+    return ("GSkyDir");
+}
 
 
 /***********************************************************************//**

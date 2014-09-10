@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATAeff.hpp - Fermi/LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,7 @@ public:
     // Methods
     void          clear(void);
     GLATAeff*     clone(void) const;
+    std::string   classname(void) const;
     void          load(const std::string& filename);
     void          save(const std::string& filename,
                        const bool &clobber = false);
@@ -102,6 +103,18 @@ private:
     GLATEfficiency*     m_eff_func1;    //!< Efficiency functor 1
     GLATEfficiency*     m_eff_func2;    //!< Efficiency functor 2
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATAeff").
+ ***************************************************************************/
+inline
+std::string GLATAeff::classname(void) const
+{
+    return ("GLATAeff");
+}
 
 
 /***********************************************************************//**

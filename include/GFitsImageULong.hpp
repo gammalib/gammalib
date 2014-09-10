@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsImageULong.hpp - Unsigned long image FITS class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Methods
     void                 clear(void);
     GFitsImageULong*     clone(void) const;
+    std::string          classname(void) const;
     unsigned long&       at(const int& ix);
     unsigned long&       at(const int& ix, const int& iy);
     unsigned long&       at(const int& ix, const int& iy, const int& iz);
@@ -96,5 +97,17 @@ private:
     unsigned long* m_pixels;      //!< Pixels
     unsigned long* m_nulval;      //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsImageULong").
+ ***************************************************************************/
+inline
+std::string GFitsImageULong::classname(void) const
+{
+    return ("GFitsImageULong");
+}
 
 #endif /* GFITSIMAGEULONG_HPP */

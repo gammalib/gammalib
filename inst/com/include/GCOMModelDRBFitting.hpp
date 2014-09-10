@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCOMModelDRBFitting.hpp - COMPTEL DRB model fitting class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Implemented pure virtual methods
     virtual void                 clear(void);
     virtual GCOMModelDRBFitting* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual bool                 is_constant(void) const;
     virtual double               eval(const GEvent& event,
@@ -95,6 +96,18 @@ protected:
     mutable std::vector<double> m_old_phibars;  //!< Old Phibar values
     mutable GNodeArray          m_nodes;        //!< Phibar node values
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCOMModelDRBFitting").
+ ***************************************************************************/
+inline
+std::string GCOMModelDRBFitting::classname(void) const
+{
+    return ("GCOMModelDRBFitting");
+}
 
 
 /***********************************************************************//**

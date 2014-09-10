@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GWcsAIT.hpp - Aitoff (AIT) projection class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GWcsAIT*    clone(void) const;
+    virtual std::string classname(void) const;
     virtual std::string code(void) const;
     virtual std::string name(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
@@ -75,6 +76,18 @@ private:
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GWcsAIT").
+ ***************************************************************************/
+inline
+std::string GWcsAIT::classname(void) const
+{
+    return ("GWcsAIT");
+}
 
 
 /***********************************************************************//**

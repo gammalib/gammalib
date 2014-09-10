@@ -67,6 +67,7 @@ public:
     // Methods
     void          clear(void);
     GHorizDir*    clone(void) const;
+    std::string   classname(void) const;
     void          altaz(const double& alt, const double& az);
     void          altaz_deg(const double& alt, const double& az);
     void          celvector(const GVector& vector);
@@ -92,6 +93,18 @@ private:
     double m_alt;       //!< altitude in radians
     double m_az;        //!< azimuth in radians
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GHorizDir").
+ ***************************************************************************/
+inline
+std::string GHorizDir::classname(void) const
+{
+    return ("GHorizDir");
+}
 
 
 /***********************************************************************//**

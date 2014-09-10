@@ -65,6 +65,7 @@ public:
     // Implemented pure virtual methods
     void         clear(void);
     GCTAPsfKing* clone(void) const;
+    std::string  classname(void) const;
     void         load(const std::string& filename);
     std::string  filename(void) const;
     double       mc(GRan&         ran,
@@ -111,6 +112,18 @@ private:
     mutable double m_par_sigma2; //!< King profile sigma squared
     mutable double m_par_gamma;  //!< King profile gamma parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAPsfKing").
+ ***************************************************************************/
+inline
+std::string GCTAPsfKing::classname(void) const
+{
+    return ("GCTAPsfKing");
+}
 
 
 /***********************************************************************//**

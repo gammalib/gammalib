@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageFloat.hpp - Single precision FITS image class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Methods
     void             clear(void);
     GFitsImageFloat* clone(void) const;
+    std::string      classname(void) const;
     float&           at(const int& ix);
     float&           at(const int& ix, const int& iy);
     float&           at(const int& ix, const int& iy, const int& iz);
@@ -96,5 +97,17 @@ private:
     float* m_pixels;      //!< Pixels
     float* m_nulval;      //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsImageFloat").
+ ***************************************************************************/
+inline
+std::string GFitsImageFloat::classname(void) const
+{
+    return ("GFitsImageFloat");
+}
 
 #endif /* GFITSIMAGEFLOAT_HPP */

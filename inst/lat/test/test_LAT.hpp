@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_LAT.hpp  -  Test LAT classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGLATResponse* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGLATResponse"; }
     void                      test_response_p6(void);
     void                      test_response_p7(void);
     void                      test_one_response(const std::string& irf);
@@ -67,6 +68,7 @@ public:
     // Methods
     virtual void            set(void);
     virtual TestGLATLtCube* clone(void) const;
+    virtual std::string     classname(void) const { return "TestGLATLtCube"; }
     void                    test_ltcube_p6(void);
     void                    test_ltcube_p7(void);
     void                    test_one_ltcube(const std::string& datadir, const double& reference);
@@ -89,6 +91,7 @@ public:
     // Methods
     virtual void                 set(void);
     virtual TestGLATObservation* clone(void) const;
+    virtual std::string          classname(void) const { return "TestGLATObservation"; }
     void                         test_unbinned_obs_p6(void);
     void                         test_unbinned_obs_p7(void);
     void                         test_binned_obs_p6(void);
@@ -115,6 +118,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGLATOptimize* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGLATOptimize"; }
     void                      test_binned_optimizer_p6(void);
     void                      test_binned_optimizer_p7(void);
     void                      test_one_binned_optimizer(const std::string& datadir,

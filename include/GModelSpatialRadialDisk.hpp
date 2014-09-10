@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.hpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Christoph Deil                              *
+ *  copyright (C) 2011-2014 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                     clear(void);
     virtual GModelSpatialRadialDisk* clone(void) const;
+    virtual std::string              classname(void) const;
     virtual std::string              type(void) const;
     virtual double                   eval(const double&  theta,
                                           const GEnergy& energy,
@@ -94,6 +95,18 @@ protected:
     mutable double m_radius_rad;    //!< Radius in radians
     mutable double m_norm;          //!< Normalization
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpatialRadialDisk").
+ ***************************************************************************/
+inline
+std::string GModelSpatialRadialDisk::classname(void) const
+{
+    return ("GModelSpatialRadialDisk");
+}
 
 
 /***********************************************************************//**

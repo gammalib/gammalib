@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.hpp - FITS table column abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,7 @@ public:
     // Pure virtual methods
     virtual void            clear(void) = 0;
     virtual GFitsTableCol*  clone(void) const = 0;
+    virtual std::string     classname(void) const = 0;
     virtual std::string     string(const int& row, const int& inx = 0) const = 0;
     virtual double          real(const int& row, const int& inx = 0) const = 0;
     virtual int             integer(const int& row, const int& inx = 0) const = 0;

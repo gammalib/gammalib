@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void          set(void);
     virtual TestGSupport* clone(void) const;
+    virtual std::string   classname(void) const { return "TestGSupport"; }
     void                  test_expand_env(void);
     void                  test_node_array(void);
     void                  test_url_file(void);

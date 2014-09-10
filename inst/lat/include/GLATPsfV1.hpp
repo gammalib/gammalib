@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GLATPsfV1.hpp - Fermi/LAT point spread function version 1 class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Methods
     void        clear(void);
     GLATPsfV1*  clone(void) const;
+    std::string classname(void) const;
     void        read(const GFitsTable& table);
     void        write(GFits& file) const;
     double      psf(const double& offset, const double& logE,
@@ -103,6 +104,18 @@ private:
     std::vector<double> m_gcore;        //!< PSF gcore parameter
     std::vector<double> m_gtail;        //!< PSF gtail parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATPsfV1").
+ ***************************************************************************/
+inline
+std::string GLATPsfV1::classname(void) const
+{
+    return ("GLATPsfV1");
+}
 
 
 /***********************************************************************//**

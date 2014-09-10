@@ -56,6 +56,7 @@ public:
     // Methods
     void                   clear(void);
     GRan*                  clone(void) const;
+    std::string            classname(void) const;
     void                   seed(unsigned long long int seed);
     unsigned long long int seed(void) const;
     unsigned long int      int32(void);
@@ -87,6 +88,18 @@ protected:
     double m_log_lambda;    //!< log(lambda)
     double m_exp_lambda;    //!< exp(-lambda)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GRan").
+ ***************************************************************************/
+inline
+std::string GRan::classname(void) const
+{
+    return ("GRan");
+}
 
 
 /***********************************************************************//**

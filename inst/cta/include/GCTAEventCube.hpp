@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEventCube.hpp - CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,6 +66,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GCTAEventCube* clone(void) const;
+    virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual int            dim(void) const;
     virtual int            naxis(const int& axis) const;
@@ -110,6 +111,18 @@ protected:
     std::vector<GEnergy>     m_ewidth;     //!< Array of energy bin widths
     double                   m_ontime;     //!< Event cube ontime (sec)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAEventCube").
+ ***************************************************************************/
+inline
+std::string GCTAEventCube::classname(void) const
+{
+    return ("GCTAEventCube");
+}
 
 
 /***********************************************************************//**

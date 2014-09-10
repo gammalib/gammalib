@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GWcsRegistry.hpp - World Coordinate Projection registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     GWcsRegistry& operator=(const GWcsRegistry& registry);
 
     // Methods
+    std::string classname(void) const;
     int         size(void) const;
     GWcs*       alloc(const std::string& code) const;
     std::string code(const int& index) const;
@@ -102,6 +103,18 @@ private:
         return m_projections;
     };
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GWcsRegistry").
+ ***************************************************************************/
+inline
+std::string GWcsRegistry::classname(void) const
+{
+    return ("GWcsRegistry");
+}
 
 
 /***********************************************************************//**

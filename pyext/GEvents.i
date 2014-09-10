@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEvents.i - Abstract event container class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,19 +31,6 @@
 #include "GEventAtom.hpp"
 #include "GTools.hpp"
 %}
-
-/* __ Typemaps ___________________________________________________________ */
-%typemap(out) GEvent* {
-    if (dynamic_cast<GEventBin*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventBin, 0 |  0 );
-    }
-    else if (dynamic_cast<GEventAtom*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventAtom, 0 |  0 );
-    }
-    else {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEvent, 0 |  0 );
-    }
-}
 
 
 /***********************************************************************//**

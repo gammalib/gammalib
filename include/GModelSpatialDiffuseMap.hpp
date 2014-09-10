@@ -66,6 +66,7 @@ public:
     // Implemented pure virtual methods
     virtual void                     clear(void);
     virtual GModelSpatialDiffuseMap* clone(void) const;
+    virtual std::string              classname(void) const;
     virtual std::string              type(void) const;
     virtual double                   eval(const GPhoton& photon) const;
     virtual double                   eval_gradients(const GPhoton& photon) const;
@@ -102,6 +103,19 @@ protected:
     bool                m_normalize;  //!< Normalize map (default: true)
     double              m_norm;       //!< Map normalization
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpatialDiffuseMap").
+ ***************************************************************************/
+inline
+std::string GModelSpatialDiffuseMap::classname(void) const
+{
+    return ("GModelSpatialDiffuseMap");
+}
+
 
 /***********************************************************************//**
  * @brief Return spatial model type

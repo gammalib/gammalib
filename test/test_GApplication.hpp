@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGApplication* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGApplication"; }
     void                      test_constructor(void);
     void                      test_stream_logger(void);
     void                      test_C_logger(void);

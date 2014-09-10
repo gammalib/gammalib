@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.hpp - XSPEC Pulse Height Analyzer class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,6 +70,7 @@ public:
     // Methods
     void               clear(void);
     GPha*              clone(void) const;
+    std::string        classname(void) const;
     int                size(void) const;
     double&            at(const int& index);
     const double&      at(const int& index) const;
@@ -101,6 +102,18 @@ protected:
     double              m_outflow;    //!< Number of outflowing events
     GEbounds            m_ebounds;    //!< Energy boundaries
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GPha").
+ ***************************************************************************/
+inline
+std::string GPha::classname(void) const
+{
+    return ("GPha");
+}
 
 
 /***********************************************************************//**

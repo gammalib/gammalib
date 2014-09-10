@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.hpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Michael Mayer                               *
+ *  copyright (C) 2012-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,6 +77,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                       clear(void);
     virtual GModelSpectralLogParabola* clone(void) const;
+    virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
     virtual double                     eval(const GEnergy& srcEng,
                                             const GTime&   srcTime) const;
@@ -181,6 +182,18 @@ protected:
     mutable double m_mc_pow_ewidth; //!< Power of energy width
     mutable double m_mc_norm; 	    //!< Norm of powerlaw model at logparabola pivot energy
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpectralLogParabola").
+ ***************************************************************************/
+inline
+std::string GModelSpectralLogParabola::classname(void) const
+{
+    return ("GModelSpectralLogParabola");
+}
 
 
 /***********************************************************************//**

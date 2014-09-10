@@ -38,19 +38,20 @@ public:
     virtual ~TestGSky(void) { }
 
     // Methods
-    virtual void      set(void);
-    virtual TestGSky* clone(void) const;
-    void              test_GWcs(void);
-    void              test_GSkyPixel(void);
-    void              test_GSkymap_healpix_construct(void);
-    void              test_GSkymap_healpix_io(void);
-    void              test_GSkymap_wcs_construct(void);
-    void              test_GSkymap_wcs_io(void);
-    void              test_GSkymap(void);
-    void              test_GSkyRegions_io(void);
-    void              test_GSkyRegionCircle_construct(void);
-    void              test_GSkyRegionCircle_logic(void);
-    void              test_GHorizDir(void);
+    virtual void        set(void);
+    virtual TestGSky*   clone(void) const;
+    virtual std::string classname(void) const { return "TestGSky"; }
+    void                test_GWcs(void);
+    void                test_GSkyPixel(void);
+    void                test_GSkymap_healpix_construct(void);
+    void                test_GSkymap_healpix_io(void);
+    void                test_GSkymap_wcs_construct(void);
+    void                test_GSkymap_wcs_io(void);
+    void                test_GSkymap(void);
+    void                test_GSkyRegions_io(void);
+    void                test_GSkyRegionCircle_construct(void);
+    void                test_GSkyRegionCircle_logic(void);
+    void                test_GHorizDir(void);
 
 // Private methods
 private:

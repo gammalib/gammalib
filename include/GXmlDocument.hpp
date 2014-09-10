@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlDocument.hpp - XML document node class definition         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,12 +59,13 @@ public:
     GXmlDocument& operator=(const GXmlDocument& node);
 
     // Implemented pure virtual base class methods
-    void          clear(void);
-    GXmlDocument* clone(void) const;
-    void          write(GUrl& url, const int& indent = 0) const;
-    NodeType      type(void) const { return NT_DOCUMENT; }
-    std::string   print(const GChatter& chatter = NORMAL,
-                        const int&      indent = 0) const;
+    virtual void          clear(void);
+    virtual GXmlDocument* clone(void) const;
+    virtual std::string   classname(void) const;
+    virtual void          write(GUrl& url, const int& indent = 0) const;
+    virtual NodeType      type(void) const { return NT_DOCUMENT; }
+    virtual std::string   print(const GChatter& chatter = NORMAL,
+                                const int&      indent = 0) const;
 
     // Methods
     std::string   version(void) const { return m_version.value(); }
@@ -85,5 +86,17 @@ protected:
     GXmlAttribute m_encoding;     //!< Encoding (e.g. "UTF-8")
     GXmlAttribute m_standalone;   //!< Standalone ("yes", "no") 
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GXmlDocument").
+ ***************************************************************************/
+inline
+std::string GXmlDocument::classname(void) const
+{
+    return ("GXmlDocument");
+}
 
 #endif /* GXMLDOCUMENT_HPP */

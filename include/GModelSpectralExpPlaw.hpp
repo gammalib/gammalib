@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralExpPlaw.hpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,6 +75,7 @@ public:
     // Implemented pure virtual methods
     virtual void                   clear(void);
     virtual GModelSpectralExpPlaw* clone(void) const;
+    virtual std::string            classname(void) const;
     virtual std::string            type(void) const;
     virtual double                 eval(const GEnergy& srcEng,
                                         const GTime&   srcTime) const;
@@ -168,6 +169,18 @@ protected:
     mutable double  m_mc_pow_emin;   //!< Power of minimum energy
     mutable double  m_mc_pow_ewidth; //!< Power of energy width
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpectralExpPlaw").
+ ***************************************************************************/
+inline
+std::string GModelSpectralExpPlaw::classname(void) const
+{
+    return ("GModelSpectralExpPlaw");
+}
 
 
 /***********************************************************************//**

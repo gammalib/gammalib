@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GTimes.hpp - Time container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Methods
     void        clear(void);
     GTimes*     clone(void) const;
+    std::string classname(void) const;
     int         size(void) const;
     bool        is_empty(void) const;
     void        append(const GTime& time);
@@ -76,6 +77,18 @@ protected:
     // Protected data members
     std::vector<GTime> m_times;  //!< List of times
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GTimes").
+ ***************************************************************************/
+inline
+std::string GTimes::classname(void) const
+{
+    return ("GTimes");
+}
 
 
 /***********************************************************************//**

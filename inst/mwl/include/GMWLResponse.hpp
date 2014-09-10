@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.hpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GMWLResponse* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual bool          use_edisp(void) const;
     virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
@@ -72,6 +73,18 @@ protected:
     void copy_members(const GMWLResponse& pnt);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GMWLResponse").
+ ***************************************************************************/
+inline
+std::string GMWLResponse::classname(void) const
+{
+    return ("GMWLResponse");
+}
 
 
 /***********************************************************************//**

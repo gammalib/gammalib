@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-5 August 2014
+10 September 2014
 
 
 1. Introduction
@@ -26,6 +26,9 @@ instead of a reference.
 
 The GCTAObservation::load(GFits&) and GCTAObservation::save(GFits&)
 methods have been remaned to read() and write().
+
+A classname() method has been added to all classes that returns the name
+of the GammaLib class.
 
 
 3. Configuration
@@ -112,6 +115,8 @@ the response computations. This avoids dynamic type casting which can be
 quite time consuming (at least for methods that are called very often, such
 as the response methods). The class code enumerators are defined in
 GTypemaps.
+
+Full automatic typecasting has been implemented for the Python module.
 
 
 11. Optimization module

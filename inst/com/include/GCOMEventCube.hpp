@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.hpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,6 +68,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GCOMEventCube* clone(void) const;
+    virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual int            dim(void) const;
     virtual int            naxis(const int& axis) const;
@@ -113,5 +114,17 @@ protected:
     std::vector<double>  m_phi;        //!< Array of event scatter angles
     std::vector<double>  m_dphi;       //!< Array of event scatter angles widths
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCOMEventCube").
+ ***************************************************************************/
+inline
+std::string GCOMEventCube::classname(void) const
+{
+    return ("GCOMEventCube");
+}
 
 #endif /* GCOMEVENTCUBE_HPP */

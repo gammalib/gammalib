@@ -61,6 +61,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GHealpix*   clone(void) const;
+    virtual std::string classname(void) const;
     virtual int         size(void) const;
     virtual std::string code(void) const;
     virtual std::string name(void) const;
@@ -103,6 +104,18 @@ private:
     double   m_fact2;        //!<
     double   m_solidangle;   //!< Solid angle of pixel
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GHealpix").
+ ***************************************************************************/
+inline
+std::string GHealpix::classname(void) const
+{
+    return ("GHealpix");
+}
 
 
 /***********************************************************************//**

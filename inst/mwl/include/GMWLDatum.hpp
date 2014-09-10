@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLDatum.hpp - Multi-wavelength spectral point class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void               clear(void);
     virtual GMWLDatum*         clone(void) const;
+    virtual std::string        classname(void) const;
     virtual double             size(void) const;
     virtual const GMWLInstDir& dir(void) const;
     virtual const GEnergy&     energy(void) const;
@@ -90,6 +91,18 @@ protected:
     double      m_flux_err;  //!< Uncertainty in flux (ph/cm2/s/MeV)
 
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GMWLDatum").
+ ***************************************************************************/
+inline
+std::string GMWLDatum::classname(void) const
+{
+    return ("GMWLDatum");
+}
 
 
 /***********************************************************************//**

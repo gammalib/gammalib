@@ -65,7 +65,8 @@ public:
     // Pure virtual methods
     virtual void          clear(void) = 0;
     virtual GCTAResponse* clone(void) const = 0;
-    virtual bool          isvalid(void) const = 0;
+    virtual std::string   classname(void) const = 0;
+    virtual bool          is_valid(void) const = 0;
     virtual bool          use_edisp(void) const = 0;
     virtual bool          use_tdisp(void) const = 0;
     virtual bool          apply_edisp(void) const = 0;

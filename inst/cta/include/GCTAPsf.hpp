@@ -65,6 +65,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GCTAPsf*    clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
     virtual double      mc(GRan&         ran,

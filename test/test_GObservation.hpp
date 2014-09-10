@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGObservation* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGObservation"; }
     void                      test_ebounds(void);
     void                      test_gti(void);
     void                      test_photons(void);
@@ -73,6 +74,7 @@ public:
     // Methods
     virtual void        set(void);
     virtual TestOpenMP* clone(void) const;
+    virtual std::string classname(void) const { return "TestOpenMP"; }
     void                test_observations_optimizer_unbinned_1();
     void                test_observations_optimizer_unbinned_10();
     void                test_observations_optimizer_binned_1();

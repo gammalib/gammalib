@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GOptimizerPars.hpp - Optimizer parameter container class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,7 @@ public:
     // Methods
     void                 clear(void);
     GOptimizerPars*      clone(void) const;
+    std::string          classname(void) const;
     GOptimizerPar*       at(const int& index);
     const GOptimizerPar* at(const int& index) const;
     int                  size(void) const;
@@ -97,6 +98,18 @@ protected:
     std::vector<GOptimizerPar*> m_pars;   //!< List of parameters
     std::vector<bool>           m_alloc;  //!< Flags allocation
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GOptimizerPars").
+ ***************************************************************************/
+inline
+std::string GOptimizerPars::classname(void) const
+{
+    return ("GOptimizerPars");
+}
 
 
 /***********************************************************************//**

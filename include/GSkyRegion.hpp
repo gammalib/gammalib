@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GSkyRegion.hpp - Abstract virtual sky region base class         *
  * ----------------------------------------------------------------------- *
- * copyright (C) 2013 by Pierrick Martin                                   *
+ * copyright (C) 2013-2014 by Pierrick Martin                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,6 +68,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GSkyRegion* clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual void        read(const std::string& regstring) = 0;
     virtual std::string write(void) const = 0;
     virtual bool        contains(const GSkyDir& dir) const = 0;

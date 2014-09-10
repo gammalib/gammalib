@@ -96,6 +96,7 @@ class GTestEventAtom : public GEventAtom {
         }
         
         GTestEventAtom*     clone(void) const{ return new GTestEventAtom(*this);}
+        std::string         classname(void) const { return "GTestEventAtom"; }
         const GTestInstDir& dir(void) const { return m_dir; }
         const GEnergy&      energy(void) const { return m_energy; }
         const GTime&        time(void) const { return m_time; }

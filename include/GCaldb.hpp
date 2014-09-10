@@ -78,6 +78,7 @@ public:
     // Methods
     void        clear(void);
     GCaldb*     clone(void) const;
+    std::string classname(void) const;
     int         size(void) const;
     std::string rootdir(void) const;
     void        rootdir(const std::string& pathname);
@@ -110,5 +111,17 @@ protected:
     GFits       m_fits;         //!< CIF FITS file
     GFitsTable* m_cif;          //!< Pointer to CIF table
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCaldb").
+ ***************************************************************************/
+inline
+std::string GCaldb::classname(void) const
+{
+    return ("GCaldb");
+}
 
 #endif /* GCALDB_HPP */

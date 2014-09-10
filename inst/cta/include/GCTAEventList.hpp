@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.hpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GCTAEventList* clone(void) const;
+    virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual void           load(const std::string& filename);
     virtual void           save(const std::string& filename,
@@ -105,6 +106,18 @@ protected:
     mutable std::vector<std::string>          m_irf_names;  //!< Model names
     mutable std::vector<std::vector<double> > m_irf_values; //!< IRF values
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAEventList").
+ ***************************************************************************/
+inline
+std::string GCTAEventList::classname(void) const
+{
+    return ("GCTAEventList");
+}
 
 
 /***********************************************************************//**

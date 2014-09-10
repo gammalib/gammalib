@@ -116,6 +116,7 @@ public:
     // Methods
     void                  clear(void);
     GSkymap*              clone(void) const;
+    std::string           classname(void) const;
     const int&            npix(void) const;
     const int&            nx(void) const;
     const int&            ny(void) const;
@@ -177,6 +178,18 @@ private:
     mutable double  m_wgt3;       //!< Interpolation weight 3
     mutable double  m_wgt4;       //!< Interpolation weight 4
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GSkymap").
+ ***************************************************************************/
+inline
+std::string GSkymap::classname(void) const
+{
+    return ("GSkymap");
+}
 
 
 /***********************************************************************//**

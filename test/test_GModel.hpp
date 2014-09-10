@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void        set(void);
     virtual TestGModel* clone(void) const;
+    virtual std::string classname(void) const { return "TestGModel"; }
     void                test_model_par(void);
     void                test_sky_model(void);
     void                test_point_source(void);

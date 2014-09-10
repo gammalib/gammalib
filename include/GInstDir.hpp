@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GInstDir.hpp - Abstract instrument direction base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GInstDir*   clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:

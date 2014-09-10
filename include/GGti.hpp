@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.hpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,7 @@ public:
     // Methods
     void                  clear(void);
     GGti*                 clone(void) const;
+    std::string           classname(void) const;
     int                   size(void) const;
     bool                  is_empty(void) const;
     void                  append(const GTime& tstart, const GTime& tstop);
@@ -112,6 +113,18 @@ protected:
     GTime          *m_stop;      //!< Array of stop times
     GTimeReference  m_reference; //!< Time reference
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GGti").
+ ***************************************************************************/
+inline
+std::string GGti::classname(void) const
+{
+    return ("GGti");
+}
 
 
 /***********************************************************************//**

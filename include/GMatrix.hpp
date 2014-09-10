@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GMatrix.hpp - General matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -108,6 +108,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void          clear(void);
     virtual GMatrix*      clone(void) const;
+    virtual std::string   classname(void) const;
     virtual double&       at(const int& row, const int& column);
     virtual const double& at(const int& row, const int& column) const;
     virtual GVector       row(const int& row) const;
@@ -141,6 +142,18 @@ private:
     void free_members(void);
     void alloc_members(const int& rows, const int& columns);
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GMatrix").
+ ***************************************************************************/
+inline
+std::string GMatrix::classname(void) const
+{
+    return ("GMatrix");
+}
 
 
 /***********************************************************************//**

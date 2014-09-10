@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,7 @@ public:
     // Methods
     void               clear(void);
     GApplication*      clone(void) const;
+    std::string        classname(void) const;
     const std::string& name(void) const;
     const std::string& version(void) const;
     double             telapse(void) const;
@@ -105,6 +106,18 @@ protected:
     std::clock_t             m_cstart;     //!< Clock start time of execution
     GApplicationPars         m_pars;       //!< Application parameters
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GApplication").
+ ***************************************************************************/
+inline
+std::string GApplication::classname(void) const
+{
+    return ("GApplication");
+}
 
 
 /***********************************************************************//**

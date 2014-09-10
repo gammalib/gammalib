@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GXmlElement.hpp - XML element node class definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ public:
     // Methods
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
+    virtual std::string  classname(void) const;
     const std::string&   name(void) const { return m_name; }
     void                 name(const std::string& name) { m_name=name; }
     std::string          attribute(const std::string& name) const;
@@ -86,5 +87,17 @@ protected:
     GXmlNode*                   m_parent;   //!< Pointer on parent node
     std::vector<GXmlAttribute*> m_attr;     //!< Attributes
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GXmlElement").
+ ***************************************************************************/
+inline
+std::string GXmlElement::classname(void) const
+{
+    return ("GXmlElement");
+}
 
 #endif /* GXMLELEMENT_HPP */

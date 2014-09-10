@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GTestRoi.hpp - Test region of interest class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,7 @@ public:
     virtual GTestRoi* clone(void) const{
         return new GTestRoi(*this);
     }
+    virtual std::string classname(void) const { return "GTestRoi"; }
     virtual bool contains(const GEvent& event) const {
         return true;
     }

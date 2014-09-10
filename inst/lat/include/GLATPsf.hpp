@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATPsf.hpp - Fermi LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,6 +70,7 @@ public:
     // Methods
     void        clear(void);
     GLATPsf*    clone(void) const;
+    std::string classname(void) const;
     void        load(const std::string& filename);
     void        save(const std::string& filename,
                      const bool& clobber = false);
@@ -95,5 +96,17 @@ private:
     // Members
     GLATPsfBase* m_psf;   //!< Pointer to versioned point spread function
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATPsf").
+ ***************************************************************************/
+inline
+std::string GLATPsf::classname(void) const
+{
+    return ("GLATPsf");
+}
 
 #endif /* GLATPSF_HPP */

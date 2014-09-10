@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplicationPar.hpp - Application parameter class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ public:
     // Methods
     void               clear(void);
     GApplicationPar*   clone(void) const;
+    std::string        classname(void) const;
     void               type(const std::string& type);
     void               mode(const std::string& mode);
     void               value(const std::string& value);
@@ -126,6 +127,18 @@ protected:
     std::string m_prompt;  //!< Parameter prompt
     Status      m_status;  //!< Parameter status
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GApplicationPar").
+ ***************************************************************************/
+inline
+std::string GApplicationPar::classname(void) const
+{
+    return ("GApplicationPar");
+}
 
 
 /***********************************************************************//**

@@ -63,6 +63,7 @@ public:
     // Implemented pure virtual methods
     void                       clear(void);
     GCTABackground3D*          clone(void) const;
+    std::string                classname(void) const;
     void                       load(const std::string& filename);
     std::string                filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
@@ -109,6 +110,18 @@ private:
     mutable double              m_mc_logE_max; //!< log10 energy maximum (TeV)
     mutable double              m_mc_logE_bin; //!< log10 energy binsize (TeV)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTABackground3D").
+ ***************************************************************************/
+inline
+std::string GCTABackground3D::classname(void) const
+{
+    return ("GCTABackground3D");
+}
 
 
 /***********************************************************************//**

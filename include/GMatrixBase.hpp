@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GMatrixBase.hpp - Abstract matrix base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -156,6 +156,7 @@ public:
     // Pure virtual methods
     virtual void          clear(void) = 0;
     virtual GMatrixBase*  clone(void) const = 0;
+    virtual std::string   classname(void) const = 0;
     virtual double&       at(const int& row, const int& column) = 0;
     virtual const double& at(const int& row, const int& column) const = 0;
     virtual GVector       row(const int& row) const = 0;

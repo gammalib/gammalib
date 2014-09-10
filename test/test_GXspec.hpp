@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GXspec.hpp - Test Xspec module                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void        set(void);
     virtual TestGXspec* clone(void) const;
+    virtual std::string classname(void) const { return "TestGXspec"; }
     void                test_GPha(void);
     void                test_GArf(void);
     void                test_GRmf(void);

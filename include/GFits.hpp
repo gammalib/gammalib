@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GFits.hpp - FITS file class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -78,6 +78,7 @@ public:
     // Methods
     void               clear(void);
     GFits*             clone(void) const;
+    std::string        classname(void) const;
     GFitsHDU*          at(const int& extno);
     const GFitsHDU*    at(const int& extno) const;
     GFitsHDU*          at(const std::string& extname);
@@ -140,6 +141,18 @@ private:
     bool                   m_readwrite;  //!< FITS file is readwrite (true/false)
     bool                   m_created;    //!< FITS file has been created (true/false)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFits").
+ ***************************************************************************/
+inline
+std::string GFits::classname(void) const
+{
+    return ("GFits");
+}
 
 
 /***********************************************************************//**

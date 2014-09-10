@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModels.hpp - Model container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -161,6 +161,7 @@ public:
     // Methods
     void           clear(void);
     GModels*       clone(void) const;
+    std::string    classname(void) const;
     GModel*        at(const int& index);
     const GModel*  at(const int& index) const;
     int            size(void) const;
@@ -195,6 +196,18 @@ protected:
     // Proteced members
     std::vector<GModel*> m_models;  //!< List of models
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModels").
+ ***************************************************************************/
+inline
+std::string GModels::classname(void) const
+{
+    return ("GModels");
+}
 
 
 /***********************************************************************//**

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GRegistry.hpp - Interface class for registries             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,6 +105,14 @@ public:
     ///
     /// Destroys class.
     virtual ~GRegistry(void) {}
+
+    /// @brief Return class name
+    ///
+    /// @return String containing the class name.
+    ///
+    /// Returns the class name for non-abstract classes in a human readable
+    /// way.
+    virtual std::string classname(void) const = 0;
 
     /// @brief Return number of classes in registry
     ///

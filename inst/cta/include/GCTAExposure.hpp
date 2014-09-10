@@ -71,6 +71,7 @@ public:
     // Methods
     void               clear(void);
     GCTAExposure*      clone(void) const;
+    std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs);
     const GSkymap&     cube(void) const;
@@ -106,6 +107,18 @@ private:
     mutable double m_wgt_left;       //!< Weight of left node
     mutable double m_wgt_right;      //!< Weight of right node
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAExposure").
+ ***************************************************************************/
+inline
+std::string GCTAExposure::classname(void) const
+{
+    return ("GCTAExposure");
+}
 
 
 /***********************************************************************//**

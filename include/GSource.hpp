@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GSource.hpp - Source class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,6 +68,7 @@ public:
     // Methods
     void                 clear(void);
     GSource*             clone(void) const;
+    std::string          classname(void) const;
     const std::string&   name(void) const;
     const GModelSpatial* model(void) const;
     const GEnergy&       energy(void) const;
@@ -90,6 +91,18 @@ protected:
     GEnergy        m_energy;   //!< Photon energy
     GTime          m_time;     //!< Photon arrival time
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GSource").
+ ***************************************************************************/
+inline
+std::string GSource::classname(void) const
+{
+    return ("GSource");
+}
 
 
 /***********************************************************************//**

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GArf.hpp - XSPEC Auxiliary Response File class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Methods
     void               clear(void);
     GArf*              clone(void) const;
+    std::string        classname(void) const;
     int                size(void) const;
     double&            at(const int& index);
     const double&      at(const int& index) const;
@@ -81,6 +82,18 @@ protected:
     GEbounds            m_ebounds;    //!< Energy boundaries
     std::vector<double> m_specresp;   //!< Spectral response
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GArf").
+ ***************************************************************************/
+inline
+std::string GArf::classname(void) const
+{
+    return ("GArf");
+}
 
 
 /***********************************************************************//**

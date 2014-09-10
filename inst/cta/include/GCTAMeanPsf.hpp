@@ -77,6 +77,7 @@ public:
     // Methods
     void               clear(void);
     GCTAMeanPsf*       clone(void) const;
+    std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs);
     const GSkymap&     map(void) const;
@@ -120,6 +121,18 @@ private:
     mutable double m_wgt3;            //!< Weight of upper right node
     mutable double m_wgt4;            //!< Weight of lower right node
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAMeanPsf").
+ ***************************************************************************/
+inline
+std::string GCTAMeanPsf::classname(void) const
+{
+    return ("GCTAMeanPsf");
+}
 
 
 /***********************************************************************//**

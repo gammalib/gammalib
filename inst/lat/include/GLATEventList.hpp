@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventList.hpp - Fermi/LAT event list class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GLATEventList* clone(void) const;
+    virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual void           load(const std::string& filename);
     virtual void           save(const std::string& filename,
@@ -91,6 +92,18 @@ protected:
     std::vector<std::string>   m_ds_value;       //!< Data selection values
     std::vector<std::string>   m_ds_reference;   //!< Data selection references
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATEventList").
+ ***************************************************************************/
+inline
+std::string GLATEventList::classname(void) const
+{
+    return ("GLATEventList");
+}
 
 
 /***********************************************************************//**

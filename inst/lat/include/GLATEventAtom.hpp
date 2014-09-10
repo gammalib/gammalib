@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventAtom.hpp - Fermi/LAT event atom class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@ public:
     // Implemented pure virtual base class methods
     void               clear(void);
     GLATEventAtom*     clone(void) const;
+    std::string        classname(void) const;
     const GLATInstDir& dir(void) const;
     const GEnergy&     energy(void) const;
     const GTime&       time(void) const;
@@ -86,6 +87,18 @@ protected:
     double*     m_difrsp;              //!< Diffuse response components
     int         m_num_difrsp;          //!< Number of diffuse model components
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATEventAtom").
+ ***************************************************************************/
+inline
+std::string GLATEventAtom::classname(void) const
+{
+    return ("GLATEventAtom");
+}
 
 
 /***********************************************************************//**

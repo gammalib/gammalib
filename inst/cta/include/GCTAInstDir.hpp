@@ -56,6 +56,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void         clear(void);
     virtual GCTAInstDir* clone(void) const;
+    virtual std::string  classname(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -78,6 +79,18 @@ protected:
     double  m_detx;  //!< Instrument coordinate X (radians)
     double  m_dety;  //!< Instrument coordinate Y (radians)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAInstDir").
+ ***************************************************************************/
+inline
+std::string GCTAInstDir::classname(void) const
+{
+    return ("GCTAInstDir");
+}
 
 
 /***********************************************************************//**

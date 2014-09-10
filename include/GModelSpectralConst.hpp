@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralConst.hpp - Spectral constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,6 +66,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralConst* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GEnergy& srcEng,
                                       const GTime&   srcTime) const;
@@ -96,6 +97,18 @@ protected:
     // Protected members
     GModelPar m_norm;  //!< Normalization factor
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpectralConst").
+ ***************************************************************************/
+inline
+std::string GModelSpectralConst::classname(void) const
+{
+    return ("GModelSpectralConst");
+}
 
 
 /***********************************************************************//**

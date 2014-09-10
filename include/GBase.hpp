@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GBase.hpp - GammaLib base class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,12 +42,12 @@
  * abstract base class from which all other GammaLib classes will be
  * derived. The interface class imposes on all GammaLib classes to
  * implement the following methods:
- * 
- * clear() Sets the object to a clean initial state
  *
- * clone() Creates a deep copy of the object
+ *     clear      - Clear container
+ *     clone      - Clones container
+ *     class_name - Returns the class name
+ *     print      - Print container content
  *
- * print() Print content of object
  ***************************************************************************/
 class GBase {
 
@@ -71,6 +71,14 @@ public:
     /// Creates a deep copy of the object and returns a pointer to the
     /// object.
     virtual GBase*      clone(void) const = 0;
+
+    /// @brief Return class name
+    ///
+    /// @return String containing the class name.
+    ///
+    /// Returns the class name for non-abstract classes in a human readable
+    /// way.
+    virtual std::string classname(void) const = 0;
 
     /// @brief Print content of object
     ///

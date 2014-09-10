@@ -60,7 +60,7 @@ public:
     // Implement pure virtual methods
     virtual void                clear(void);
     virtual GMWLObservation*    clone(void) const;
-    virtual std::string         type(void) const;
+    virtual std::string         classname(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GMWLResponse* response(void) const;
     virtual std::string         instrument(void) const;
@@ -98,14 +98,14 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Return class type
+ * @brief Return class name
  *
- * @return Returns "GMWLObservation".
+ * @return String containing the class name ("GMWLObservation").
  ***************************************************************************/
 inline
-std::string GMWLObservation::type(void) const
+std::string GMWLObservation::classname(void) const
 {
-    return "GMWLObservation";
+    return ("GMWLObservation");
 }
 
 

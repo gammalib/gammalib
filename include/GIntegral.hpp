@@ -58,6 +58,7 @@ public:
     // Methods
     void               clear(void);
     GIntegral*         clone(void) const;
+    std::string        classname(void) const;
     void               max_iter(const int& iter);
     const int&         max_iter(void) const;
     void               fixed_iter(const int& iter);
@@ -115,6 +116,18 @@ protected:
     mutable std::string m_message;    //!< Status message (if result is invalid)
 
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GIntegral").
+ ***************************************************************************/
+inline
+std::string GIntegral::classname(void) const
+{
+    return ("GIntegral");
+}
 
 
 /***********************************************************************//**

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsImageUShort.hpp - Unsigned short FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Methods
     void                  clear(void);
     GFitsImageUShort*     clone(void) const;
+    std::string           classname(void) const;
     unsigned short&       at(const int& ix);
     unsigned short&       at(const int& ix, const int& iy);
     unsigned short&       at(const int& ix, const int& iy, const int& iz);
@@ -96,5 +97,17 @@ private:
     unsigned short* m_pixels;      //!< Pixels
     unsigned short* m_nulval;      //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsImageUShort").
+ ***************************************************************************/
+inline
+std::string GFitsImageUShort::classname(void) const
+{
+    return ("GFitsImageUShort");
+}
 
 #endif /* GFITSIMAGEUSHORT_HPP */

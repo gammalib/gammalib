@@ -73,6 +73,7 @@ public:
     // Implemented pure virtual methods
     virtual void                     clear(void);
     virtual GCTAModelCubeBackground* clone(void) const;
+    virtual std::string              classname(void) const;
     virtual std::string              type(void) const;
     virtual bool                     is_constant(void) const;
     virtual double                   eval(const GEvent& event,
@@ -178,6 +179,18 @@ protected:
     mutable std::vector<GTime>       m_npred_times;    //!< Model time
     mutable std::vector<double>      m_npred_values;   //!< Model values
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAModelCubeBackground").
+ ***************************************************************************/
+inline
+std::string GCTAModelCubeBackground::classname(void) const
+{
+    return ("GCTAModelCubeBackground");
+}
 
 
 /***********************************************************************//**

@@ -60,6 +60,7 @@ public:
     // Pure virtual base class methods
     virtual void                  clear(void) = 0;
     virtual GModelSpatialDiffuse* clone(void) const = 0;
+    virtual std::string           classname(void) const = 0;
     virtual std::string           type(void) const = 0;
     virtual double                eval(const GPhoton& photon) const = 0;
     virtual double                eval_gradients(const GPhoton& photon) const = 0;

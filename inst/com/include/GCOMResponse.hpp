@@ -60,6 +60,7 @@ public:
     // Implement pure virtual base class methods
     virtual void          clear(void);
     virtual GCOMResponse* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual bool          use_edisp(void) const;
     virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
@@ -97,6 +98,18 @@ private:
     double              m_phibar_bin_size;   //!< Phigeo binsize (deg)
     double              m_phibar_min;        //!< Phigeo value of first bin (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCOMResponse").
+ ***************************************************************************/
+inline
+std::string GCOMResponse::classname(void) const
+{
+    return ("GCOMResponse");
+}
 
 
 /***********************************************************************//**

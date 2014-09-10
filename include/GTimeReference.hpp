@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GTimeReference.hpp - Time reference class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,6 +74,7 @@ public:
     // Methods
     void               clear(void);
     GTimeReference*    clone(void) const;
+    std::string        classname(void) const;
     void               read(const GFitsHDU& hdu);
     void               write(GFitsHDU& hdu) const;
     void               set(const double&      mrdref,
@@ -107,5 +108,17 @@ protected:
     std::string m_timeref;       //!< Time reference
     bool        m_unit_sec;      //!< True: unit is seconds, False: unit is days
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GTimeReference").
+ ***************************************************************************/
+inline
+std::string GTimeReference::classname(void) const
+{
+    return ("GTimeReference");
+}
 
 #endif /* GTIMEREFERENCE_HPP */

@@ -70,6 +70,7 @@ public:
     // Methods
     void           clear(void);
     GLATLtCubeMap* clone(void) const;
+    std::string    classname(void) const;
     void           read(const GFitsTable& table);
     void           write(GFits& file) const;
     const int&     ncostheta(void) const;
@@ -94,6 +95,18 @@ private:
     double  m_min_ctheta;   //!< Minimum cos theta value
     bool    m_sqrt_bin;     //!< Square root binning?
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATLtCubeMap").
+ ***************************************************************************/
+inline
+std::string GLATLtCubeMap::classname(void) const
+{
+    return ("GLATLtCubeMap");
+}
 
 
 /***********************************************************************//**

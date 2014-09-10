@@ -58,6 +58,7 @@ public:
     // Pure virtual methods
     virtual void         clear(void) = 0;
     virtual GLATPsfBase* clone(void) const = 0;
+    virtual std::string  classname(void) const = 0;
     virtual void         read(const GFitsTable& table) = 0;
     virtual void         write(GFits& file) const = 0;
     virtual double       psf(const double& offset, const double& logE,

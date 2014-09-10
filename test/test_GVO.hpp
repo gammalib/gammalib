@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GVO.hpp - Test VO module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,9 +44,10 @@ public:
     virtual ~TestGVO(void) {}
 
     // Methods
-    virtual void     set(void);
-    virtual TestGVO* clone(void) const;
-    void             test_GVOClient(void);
+    virtual void        set(void);
+    virtual TestGVO*    clone(void) const;
+    virtual std::string classname(void) const { return "TestGVO"; }
+    void                test_GVOClient(void);
 
 private:
     // Private members

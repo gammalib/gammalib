@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.hpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,6 +66,7 @@ public:
     // Implemented pure virtual methods
     virtual void                       clear(void);
     virtual GCTAModelRadialAcceptance* clone(void) const;
+    virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
     virtual bool                       is_constant(void) const;
     virtual double                     eval(const GEvent& event,
@@ -120,6 +121,18 @@ protected:
     GModelSpectral*  m_spectral;     //!< Spectral model
     GModelTemporal*  m_temporal;     //!< Temporal model
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAModelRadialAcceptance").
+ ***************************************************************************/
+inline
+std::string GCTAModelRadialAcceptance::classname(void) const
+{
+    return ("GCTAModelRadialAcceptance");
+}
 
 
 /***********************************************************************//**

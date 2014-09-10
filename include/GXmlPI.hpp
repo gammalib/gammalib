@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlPI.hpp - XML PI node class definition                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GXmlPI*     clone(void) const;
+    virtual std::string classname(void) const;
     virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const { return NT_PI; }
     virtual std::string print(const GChatter& chatter = NORMAL,
@@ -74,5 +75,17 @@ protected:
     // Protected data members
     std::string m_pi;       //!< Processing instruction (without brackets)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GXmlPI").
+ ***************************************************************************/
+inline
+std::string GXmlPI::classname(void) const
+{
+    return ("GXmlPI");
+}
 
 #endif /* GXMLPI_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.hpp - Sky region container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Pierrick Martin                                  *
+ *  copyright (C) 2013-2014 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,7 @@ public:
     // Methods
     void               clear(void);
     GSkyRegions*       clone(void) const;
+    std::string        classname(void) const;
     GSkyRegion*        at(const int& index);
     const GSkyRegion*  at(const int& index) const;
     int                size(void) const;
@@ -101,6 +102,18 @@ protected:
     mutable std::string      m_filename;   //!< Filename of origin
     std::vector<GSkyRegion*> m_regions;    //!< List of regions
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GSkyRegions").
+ ***************************************************************************/
+inline
+std::string GSkyRegions::classname(void) const
+{
+    return ("GSkyRegions");
+}
 
 
 /***********************************************************************//**

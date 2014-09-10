@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GPhoton.hpp - Photon class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,6 +64,7 @@ public:
     // Methods
     void           clear(void);
     GPhoton*       clone(void) const;
+    std::string    classname(void) const;
     const GSkyDir& dir(void) const;
     const GEnergy& energy(void) const;
     const GTime&   time(void) const;
@@ -86,6 +87,18 @@ protected:
     GTime   m_time;     //!< Photon arrival time
     int     m_mc_id;    //!< Monte Carlo simulation origin
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GPhoton").
+ ***************************************************************************/
+inline
+std::string GPhoton::classname(void) const
+{
+    return ("GPhoton");
+}
 
 
 /***********************************************************************//**

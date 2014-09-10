@@ -65,6 +65,7 @@ public:
     // Methods
     void               clear(void);
     GTestCase*         clone(void) const;
+    std::string        classname(void) const;
     const std::string& name(void) const;
     void               name(const std::string& name);
     const std::string& message(void) const;
@@ -93,6 +94,18 @@ protected:
     ErrorKind   m_kind;       //!< Kind of test case (failure or error test)
     double      m_duration;   //!< Test duration
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GTestCase").
+ ***************************************************************************/
+inline
+std::string GTestCase::classname(void) const
+{
+    return ("GTestCase");
+}
 
 
 /***********************************************************************//**

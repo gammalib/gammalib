@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.hpp - Test suite container class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,6 +64,7 @@ public:
     // Methods
     void               clear(void);
     GTestSuites*       clone(void) const;
+    std::string        classname(void) const;
     GTestSuite*        at(const int& index);
     const GTestSuite*  at(const int& index) const;
     int                size(void) const;
@@ -98,6 +99,18 @@ protected:
     time_t                   m_timestamp;  //!< Timestamp
     GLog                     m_log;        //!< Log
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GTestSuites").
+ ***************************************************************************/
+inline
+std::string GTestSuites::classname(void) const
+{
+    return ("GTestSuites");
+}
 
 
 /***********************************************************************//**

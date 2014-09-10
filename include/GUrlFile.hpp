@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GUrlFile.hpp - File URL class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,6 +53,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GUrlFile*   clone(void) const;
+    virtual std::string classname(void) const;
     virtual void        open(const std::string& url, const std::string& mode);
     virtual void        close(void);
     virtual int         read(void* buffer, const int& nbyte);
@@ -74,5 +75,17 @@ protected:
     std::string m_mode;  //!< File mode
     FILE*       m_fptr;  //!< File pointer
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GUrlFile").
+ ***************************************************************************/
+inline
+std::string GUrlFile::classname(void) const
+{
+    return ("GUrlFile");
+}
 
 #endif /* GURLFILE_HPP */

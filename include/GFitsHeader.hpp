@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsHeader.hpp - FITS header cards container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Methods
     void                   clear(void);
     GFitsHeader*           clone(void) const;
+    std::string            classname(void) const;
     GFitsHeaderCard&       at(const int& cardno);
     const GFitsHeaderCard& at(const int& cardno) const;
     GFitsHeaderCard&       at(const std::string& keyname);
@@ -98,6 +99,18 @@ private:
     // Private data area
     std::vector<GFitsHeaderCard> m_cards; //!< Header cards
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsHeader").
+ ***************************************************************************/
+inline
+std::string GFitsHeader::classname(void) const
+{
+    return ("GFitsHeader");
+}
 
 
 /***********************************************************************//**

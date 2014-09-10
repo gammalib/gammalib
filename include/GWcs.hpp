@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.hpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,7 @@ public:
     // Pure virtual base class methods
     virtual void        clear(void) = 0;
     virtual GWcs*       clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual std::string code(void) const = 0;
     virtual std::string name(void) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;

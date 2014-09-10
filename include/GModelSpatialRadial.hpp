@@ -64,6 +64,7 @@ public:
     // Pure virtual methods
     virtual void                 clear(void) = 0;
     virtual GModelSpatialRadial* clone(void) const = 0;
+    virtual std::string          classname(void) const = 0;
     virtual std::string          type(void) const = 0;
     virtual double               eval(const double&  theta,
                                       const GEnergy& energy,

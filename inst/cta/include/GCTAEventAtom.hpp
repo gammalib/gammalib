@@ -60,6 +60,7 @@ public:
     // Implemented pure virtual base class methods
     void               clear(void);
     GCTAEventAtom*     clone(void) const;
+    std::string        classname(void) const;
     const GCTAInstDir& dir(void) const;
     const GEnergy&     energy(void) const;
     const GTime&       time(void) const;
@@ -106,6 +107,18 @@ protected:
     float         m_hil_msl;        //!< Hillas MSL
     float         m_hil_msl_err;    //!< Hillas MSL error
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAEventAtom").
+ ***************************************************************************/
+inline
+std::string GCTAEventAtom::classname(void) const
+{
+    return ("GCTAEventAtom");
+}
 
 
 /***********************************************************************//**

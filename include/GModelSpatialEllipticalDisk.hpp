@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.hpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                         clear(void);
     virtual GModelSpatialEllipticalDisk* clone(void) const;
+    virtual std::string                  classname(void) const;
     virtual std::string                  type(void) const;
     virtual double                       eval(const double&  theta,
                                               const double&  posangle,
@@ -104,6 +105,18 @@ protected:
     mutable double m_semimajor_rad;    //!< Radius in radians
     mutable double m_norm;             //!< Normalization
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpatialEllipticalDisk").
+ ***************************************************************************/
+inline
+std::string GModelSpatialEllipticalDisk::classname(void) const
+{
+    return ("GModelSpatialEllipticalDisk");
+}
 
 
 /***********************************************************************//**

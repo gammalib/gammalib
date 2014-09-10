@@ -72,6 +72,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralGauss* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GEnergy& srcEng,
                                       const GTime&   srcTime) const;
@@ -125,6 +126,18 @@ protected:
     GModelPar m_mean;  //!< Gaussian mean energy
     GModelPar m_sigma; //!< Gaussian energy width
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpectralGauss").
+ ***************************************************************************/
+inline
+std::string GModelSpectralGauss::classname(void) const
+{
+    return ("GModelSpectralGauss");
+}
 
 
 /***********************************************************************//**

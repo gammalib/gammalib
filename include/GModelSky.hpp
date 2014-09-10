@@ -145,6 +145,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GModelSky*  clone(void) const;
+    virtual std::string classname(void) const;
     virtual std::string type(void) const;
     virtual bool        is_constant(void) const;
     virtual double      eval(const GEvent& event,
@@ -221,6 +222,18 @@ protected:
     GModelSpectral* m_spectral;   //!< Spectral model
     GModelTemporal* m_temporal;   //!< Temporal model
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSky").
+ ***************************************************************************/
+inline
+std::string GModelSky::classname(void) const
+{
+    return ("GModelSky");
+}
 
 
 /***********************************************************************//**

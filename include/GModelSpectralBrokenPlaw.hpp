@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralBrokenPlaw.hpp - Broken power law spectrum class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Anneli Schulz                                    *
+ *  copyright (C) 2013-2014 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,6 +72,7 @@ public:
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpectralBrokenPlaw* clone(void) const;
+    virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GEnergy& srcEng,
                                            const GTime&   srcTime) const;
@@ -132,6 +133,18 @@ protected:
     mutable std::vector<double> m_mc_max; //!< Upper boundary for MC
     mutable std::vector<double> m_mc_exp; //!< Exponent for MC
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpectralBrokenPlaw").
+ ***************************************************************************/
+inline
+std::string GModelSpectralBrokenPlaw::classname(void) const
+{
+    return ("GModelSpectralBrokenPlaw");
+}
 
 
 /***********************************************************************//**

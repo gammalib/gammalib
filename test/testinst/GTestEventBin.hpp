@@ -89,8 +89,9 @@ public:
         // Return
         return;
     }
-    virtual GTestEventBin*      clone(void) const{ return new GTestEventBin(*this); }
-    virtual double             size(void) const{
+    virtual GTestEventBin* clone(void) const{ return new GTestEventBin(*this); }
+    virtual std::string    classname(void) const { return "GTestEventBin"; }
+    virtual double         size(void) const{
         // Compute bin size
         double size = ewidth().MeV() * ontime();
 

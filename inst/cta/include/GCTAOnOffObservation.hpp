@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.hpp - CTA on-off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Chia-Chun Lu & Christoph Deil                    *
+ *  copyright (C) 2013-2014 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ public:
     // Methods
     void                  clear(void);
     GCTAOnOffObservation* clone(void) const;
+    std::string           classname(void) const;
     void                  name(const std::string& name);
     void                  instrument(const std::string& instrument);
     void                  id(const std::string& id);
@@ -98,6 +99,18 @@ protected:
     GSkyRegions m_on_regions;
     GSkyRegions m_off_regions;
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAOnOffObservation").
+ ***************************************************************************/
+inline
+std::string GCTAOnOffObservation::classname(void) const
+{
+    return ("GCTAOnOffObservation");
+}
 
 
 /***********************************************************************//**

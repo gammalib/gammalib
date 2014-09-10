@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialProfile.hpp - Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,7 @@ public:
     // Implemented pure virtual methods
     virtual void                    clear(void);
     virtual GCTAModelRadialProfile* clone(void) const;
+    virtual std::string             classname(void) const;
     virtual std::string             type(void) const;
     virtual double                  eval(const double& offset) const;
     virtual double                  eval_gradients(const double& offset) const;
@@ -109,6 +110,18 @@ protected:
     GModelPar m_core;         //!< Core parameter
     GModelPar m_tail;         //!< Tail parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAModelRadialProfile").
+ ***************************************************************************/
+inline
+std::string GCTAModelRadialProfile::classname(void) const
+{
+    return ("GCTAModelRadialProfile");
+}
 
 
 /***********************************************************************//**

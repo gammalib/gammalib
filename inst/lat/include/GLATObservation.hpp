@@ -58,7 +58,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                clear(void);
     virtual GLATObservation*    clone(void) const;
-    virtual std::string         type(void) const;
+    virtual std::string         classname(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GLATResponse* response(void) const;
     virtual std::string         instrument(void) const;
@@ -98,14 +98,14 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Return class type
+ * @brief Return class name
  *
- * @return Returns "GLATObservation".
+ * @return String containing the class name ("GLATObservation").
  ***************************************************************************/
 inline
-std::string GLATObservation::type(void) const
+std::string GLATObservation::classname(void) const
 {
-    return "GLATObservation";
+    return ("GLATObservation");
 }
 
 

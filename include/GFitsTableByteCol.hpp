@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsTableByteCol.hpp - FITS table Byte column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,7 @@ public:
     // Implement virtual methods
     virtual void               clear(void);
     virtual GFitsTableByteCol* clone(void) const;
+    virtual std::string        classname(void) const;
     virtual std::string        string(const int& row, const int& col = 0) const;
     virtual double             real(const int& row, const int& col = 0) const;
     virtual int                integer(const int& row, const int& col = 0) const;
@@ -90,6 +91,18 @@ private:
     unsigned char* m_data;       //!< Data vector
     unsigned char* m_nulval;     //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsTableByteCol").
+ ***************************************************************************/
+inline
+std::string GFitsTableByteCol::classname(void) const
+{
+    return ("GFitsTableByteCol");
+}
 
 
 /***********************************************************************//**

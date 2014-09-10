@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GXml.hpp  -   Test xml module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,13 +44,14 @@ public:
     virtual ~TestGXml(void) {}
 
     // Methods
-    virtual void      set(void);
-    virtual TestGXml* clone(void) const;
-    void              test_GXml_attributes(void);
-    void              test_GXml_elements(void);
-    void              test_GXml_construct(void);
-    void              test_GXml_load(void);
-    void              test_GXml_access(void);
+    virtual void        set(void);
+    virtual TestGXml*   clone(void) const;
+    virtual std::string classname(void) const { return "TestGXml"; }
+    void                test_GXml_attributes(void);
+    void                test_GXml_elements(void);
+    void                test_GXml_construct(void);
+    void                test_GXml_load(void);
+    void                test_GXml_access(void);
 
 private:
     // Private members

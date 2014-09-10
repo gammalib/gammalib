@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.hpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GLATEventCube* clone(void) const;
+    virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual int            dim(void) const;
     virtual int            naxis(const int& axis) const;
@@ -119,6 +120,18 @@ protected:
     std::vector<std::string> m_srcmap_names; //!< Source map names
     GNodeArray               m_enodes;       //!< Energy nodes
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATEventCube").
+ ***************************************************************************/
+inline
+std::string GLATEventCube::classname(void) const
+{
+    return ("GLATEventCube");
+}
 
 
 /***********************************************************************//**

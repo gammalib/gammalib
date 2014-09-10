@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GMatrixSymmetric.hpp - Symmetric matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -99,6 +99,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void              clear(void);
     virtual GMatrixSymmetric* clone(void) const;
+    virtual std::string       classname(void) const;
     virtual double&           at(const int& row, const int& column);
     virtual const double&     at(const int& row, const int& column) const;
     virtual GVector           row(const int& row) const;
@@ -136,6 +137,18 @@ private:
     int  m_num_inx;          //!< Number of indices in array
     int* m_inx;              //!< Index array of non-zero rows/columns
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GMatrixSymmetric").
+ ***************************************************************************/
+inline
+std::string GMatrixSymmetric::classname(void) const
+{
+    return ("GMatrixSymmetric");
+}
 
 
 /***********************************************************************//**

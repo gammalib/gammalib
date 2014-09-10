@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void            set(void);
     virtual TestGOptimizer* clone(void) const;
+    virtual std::string     classname(void) const { return "TestGOptimizer"; }
     void                    test_unbinned_optimizer(void);
     void                    test_binned_optimizer(void);
     void                    test_optimizer(const int& mode);

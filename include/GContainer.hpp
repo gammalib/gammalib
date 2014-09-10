@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GContainer.hpp - Container interface class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,9 +42,10 @@
  *
  *     clear      - Clear container (inherited from GBase)
  *     clone      - Clones container (inherited from GBase)
+ *     classname  - Returns the class name (inherited from GBase)
  *     print      - Print container content (inherited from GBase)
  *     size       - Returns number of objects is container
- *     is_empty    - Checks if container is empty
+ *     is_empty   - Checks if container is empty
  *     remove     - Removes an object from the container
  *     reserve    - Reserves space in the container
  ***************************************************************************/

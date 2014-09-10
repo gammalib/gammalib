@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.hpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -78,6 +78,7 @@ public:
     // Methods
     void           clear(void);
     GTime*         clone(void) const;
+    std::string    classname(void) const;
     double         jd(void) const;
     double         mjd(void) const;
     const double&  secs(void) const;
@@ -100,6 +101,18 @@ protected:
     // Protected data members
     double m_time;   //!< Time in seconds in native reference
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GTime").
+ ***************************************************************************/
+inline
+std::string GTime::classname(void) const
+{
+    return ("GTime");
+}
 
 
 /***********************************************************************//**

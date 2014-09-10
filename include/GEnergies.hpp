@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GEnergies.hpp - Energy container class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,7 @@ public:
     // Methods
     void           clear(void);
     GEnergies*     clone(void) const;
+    std::string    classname(void) const;
     GEnergy&       at(const int& index);
     const GEnergy& at(const int& index) const;
     int            size(void) const;
@@ -89,6 +90,18 @@ protected:
     // Protected data members
     std::vector<GEnergy> m_energies;  //!< List of energies
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GEnergies").
+ ***************************************************************************/
+inline
+std::string GEnergies::classname(void) const
+{
+    return ("GEnergies");
+}
 
 
 /***********************************************************************//**

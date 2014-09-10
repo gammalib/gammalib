@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GVector.hpp - Test vector class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void         set(void);
     virtual TestGVector* clone(void) const;
+    virtual std::string  classname(void) const { return "TestGVector"; }
     void                 define_vectors(void);
     void                 allocation(void);
     void                 assign(void);

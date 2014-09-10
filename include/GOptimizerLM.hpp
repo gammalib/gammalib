@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.hpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,6 +64,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void          clear(void);
     virtual GOptimizerLM* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual void          optimize(GOptimizerFunction& fct, GOptimizerPars& pars);
     virtual double        value(void) const { return m_value; }   //!< @brief Return function value
     virtual int           status(void) const { return m_status; } //!< @brief Return optimization status
@@ -120,5 +121,17 @@ protected:
     GLog*             m_logger;          //!< Pointer to optional logger
 
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GOptimizerLM").
+ ***************************************************************************/
+inline
+std::string GOptimizerLM::classname(void) const
+{
+    return ("GOptimizerLM");
+}
 
 #endif /* GOPTIMIZERLM_HPP */

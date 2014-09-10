@@ -63,6 +63,7 @@ public:
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpatialPointSource* clone(void) const;
+    virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual GClassCode                code(void) const;
     virtual double                    eval(const GPhoton& photon) const;
@@ -94,6 +95,18 @@ protected:
     GModelPar m_ra;          //!< Right Ascension (deg)
     GModelPar m_dec;         //!< Declination (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpatialPointSource").
+ ***************************************************************************/
+inline
+std::string GModelSpatialPointSource::classname(void) const
+{
+    return ("GModelSpatialPointSource");
+}
 
 
 /***********************************************************************//**

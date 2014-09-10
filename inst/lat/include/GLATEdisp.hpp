@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,7 @@ public:
     // Methods
     void         clear(void);
     GLATEdisp*   clone(void) const;
+    std::string  classname(void) const;
     void         load(const std::string& filename);
     void         save(const std::string& filename,
                       const bool& clobber = false);
@@ -88,6 +89,18 @@ private:
     std::vector<double> m_ls1;          //!< Energy dispersion ...
     std::vector<double> m_scale;        //!< Energy dispersion scaling parameters
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATEdisp").
+ ***************************************************************************/
+inline
+std::string GLATEdisp::classname(void) const
+{
+    return ("GLATEdisp");
+}
 
 
 /***********************************************************************//**

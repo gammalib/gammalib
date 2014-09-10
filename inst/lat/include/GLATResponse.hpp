@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.hpp - Fermi/LAT Response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,7 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GLATResponse* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual bool          use_edisp(void) const;
     virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,
@@ -113,6 +114,18 @@ private:
     std::vector<GLATEdisp*>   m_edisp;      //!< Energy dispersions
     std::vector<GLATMeanPsf*> m_ptsrc;      //!< Mean PSFs for point sources
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATResponse").
+ ***************************************************************************/
+inline
+std::string GLATResponse::classname(void) const
+{
+    return ("GLATResponse");
+}
 
 
 /***********************************************************************//**

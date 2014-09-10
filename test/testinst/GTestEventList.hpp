@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GTestEventList.hpp - Test event atom container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -93,6 +93,7 @@ public:
     virtual GTestEventList* clone(void) const{
         return new GTestEventList(*this);
     }
+    virtual std::string     classname(void) const { return "GTestEventList"; }
     virtual int  size(void) const { return m_events.size(); }
     virtual void load(const std::string& filename) {}
     virtual void save(const std::string& filename,

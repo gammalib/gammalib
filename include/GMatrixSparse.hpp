@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GMatrixSparse.hpp - Sparse matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -233,6 +233,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GMatrixSparse* clone(void) const;
+    virtual std::string    classname(void) const;
     virtual double&        at(const int& row, const int& column);
     virtual const double&  at(const int& row, const int& column) const;
     virtual GVector        row(const int& row) const;
@@ -310,6 +311,18 @@ private:
     int*    m_stack_rows;         //!< Stack push integer working array [m_cols]
     double* m_stack_values;       //!< Stack push double buffer [m_cols]
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GMatrixSparse").
+ ***************************************************************************/
+inline
+std::string GMatrixSparse::classname(void) const
+{
+    return ("GMatrixSparse");
+}
 
 
 /***********************************************************************//**

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GMWLInstDir.hpp - Multi-wavelength instrument direction class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@ public:
     // Methods
     void         clear(void);
     GMWLInstDir* clone(void) const;
+    std::string  classname(void) const;
     std::string  print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -63,5 +64,17 @@ protected:
     void copy_members(const GMWLInstDir& dir);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GMWLInstDir").
+ ***************************************************************************/
+inline
+std::string GMWLInstDir::classname(void) const
+{
+    return ("GMWLInstDir");
+}
 
 #endif /* GMWLINSTDIR_HPP */

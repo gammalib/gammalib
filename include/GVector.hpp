@@ -104,6 +104,7 @@ public:
     // Vector methods
     void          clear(void);
     GVector*      clone(void) const;
+    std::string   classname(void) const;
     const int&    size(void) const;
     double&       at(const int& index);
     const double& at(const int& index) const;
@@ -126,6 +127,18 @@ private:
     int     m_num;    //!< Number of elements in vector
     double* m_data;   //!< Vector array
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GVector").
+ ***************************************************************************/
+inline
+std::string GVector::classname(void) const
+{
+    return ("GVector");
+}
 
 
 /***********************************************************************//**

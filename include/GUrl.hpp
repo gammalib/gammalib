@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GUrl.hpp - Abstract URL base class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,6 +55,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GUrl*       clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual void        open(const std::string& url, const std::string& mode) = 0;
     virtual void        close(void) = 0;
     virtual int         read(void* buffer, const int& nbyte) = 0;

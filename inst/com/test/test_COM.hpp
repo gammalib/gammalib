@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_COM.hpp  -  Test COMPTEL classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGCOMResponse* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGCOMResponse"; }
     void                      test_inst_dir(void);
     void                      test_response(void);
 };
@@ -69,6 +70,7 @@ public:
     // Methods
     virtual void                 set(void);
     virtual TestGCOMObservation* clone(void) const;
+    virtual std::string          classname(void) const { return "TestGCOMObservation"; }
     void                         test_binned_obs(void);
     void                         test_event_bin(void);
     void                         test_event_cube(void);
@@ -91,6 +93,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGCOMOptimize* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGCOMOptimize"; }
     void                      test_binned_optimizer(void);
 };
 

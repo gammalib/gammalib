@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsTableCDoubleCol.hpp - FITS table double precision complex column  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Implement virtual methods
     virtual void                  clear(void);
     virtual GFitsTableCDoubleCol* clone(void) const;
+    virtual std::string           classname(void) const;
     virtual std::string           string(const int& row, const int& col = 0) const;
     virtual double                real(const int& row, const int& col = 0) const;
     virtual int                   integer(const int& row, const int& col = 0) const;
@@ -91,6 +92,18 @@ private:
     GFits::cdouble* m_data;       //!< Data vector
     GFits::cdouble* m_nulval;     //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsTableCDoubleCol").
+ ***************************************************************************/
+inline
+std::string GFitsTableCDoubleCol::classname(void) const
+{
+    return ("GFitsTableCDoubleCol");
+}
 
 
 /***********************************************************************//**

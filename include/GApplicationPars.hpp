@@ -65,6 +65,7 @@ public:
     // Methods
     void                   clear(void);
     GApplicationPars*      clone(void) const;
+    std::string            classname(void) const;
     GApplicationPar&       at(const int& index);
     const GApplicationPar& at(const int& index) const;
     int                    size(void) const;
@@ -107,6 +108,18 @@ protected:
     std::vector<size_t>          m_vstop;     //!< Column of value stop
     std::string                  m_mode;      //!< Effective mode
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GApplicationPars").
+ ***************************************************************************/
+inline
+std::string GApplicationPars::classname(void) const
+{
+    return ("GApplicationPars");
+}
 
 
 /***********************************************************************//**

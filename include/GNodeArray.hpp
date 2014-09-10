@@ -73,6 +73,7 @@ public:
     // Methods
     void          clear(void);
     GNodeArray*   clone(void) const;
+    std::string   classname(void) const;
     double&       at(const int& index);
     const double& at(const int& index) const;
     int           size(void) const;
@@ -124,6 +125,18 @@ private:
     mutable double              m_wgt_left;       //!< Weight for left node for linear interpolation
     mutable double              m_wgt_right;      //!< Weight for right node for linear interpolation
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GNodeArray").
+ ***************************************************************************/
+inline
+std::string GNodeArray::classname(void) const
+{
+    return ("GNodeArray");
+}
 
 
 /***********************************************************************//**

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsTableBitCol.hpp - FITS table bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ public:
     // Implemented virtual methods
     virtual void              clear(void);
     virtual GFitsTableBitCol* clone(void) const;
+    virtual std::string       classname(void) const;
     virtual std::string       string(const int& row, const int& col = 0) const;
     virtual double            real(const int& row, const int& col = 0) const;
     virtual int               integer(const int& row, const int& col = 0) const;
@@ -107,6 +108,18 @@ private:
     int            m_bit_byte;       //!< Row of actual bit to be accessed
     int            m_bit_mask;       //!< Index of actual bit to be accessed
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsTableBitCol").
+ ***************************************************************************/
+inline
+std::string GFitsTableBitCol::classname(void) const
+{
+    return ("GFitsTableBitCol");
+}
 
 
 /***********************************************************************//**

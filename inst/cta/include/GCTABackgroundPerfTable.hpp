@@ -62,6 +62,7 @@ public:
     // Implemented pure virtual methods
     void                       clear(void);
     GCTABackgroundPerfTable*   clone(void) const;
+    std::string                classname(void) const;
     void                       load(const std::string& filename);
     std::string                filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
@@ -107,6 +108,18 @@ private:
     // Monte Carlo cache
     mutable GModelSpectralNodes m_mc_spectrum; //!< Background spectrum
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTABackgroundPerfTable").
+ ***************************************************************************/
+inline
+std::string GCTABackgroundPerfTable::classname(void) const
+{
+    return ("GCTABackgroundPerfTable");
+}
 
 
 /***********************************************************************//**

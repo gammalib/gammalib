@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsBinTable.hpp - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     // Implemented pure virtual methods
     virtual void           clear(void);
     virtual GFitsBinTable* clone(void) const;
+    virtual std::string    classname(void) const;
     HDUType                exttype(void) const;
 
 private:
@@ -59,6 +60,18 @@ private:
     void copy_members(const GFitsBinTable& table);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsBinTable").
+ ***************************************************************************/
+inline
+std::string GFitsBinTable::classname(void) const
+{
+    return ("GFitsBinTable");
+}
 
 
 /***********************************************************************//**

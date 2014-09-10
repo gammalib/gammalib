@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GFitsTableCFloatCol.hpp - FITS table single precision complex column  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Implement virtual methods
     virtual void                 clear(void);
     virtual GFitsTableCFloatCol* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          string(const int& row, const int& col = 0) const;
     virtual double               real(const int& row, const int& col = 0) const;
     virtual int                  integer(const int& row, const int& col = 0) const;
@@ -91,6 +92,18 @@ private:
     GFits::cfloat* m_data;       //!< Data vector
     GFits::cfloat* m_nulval;     //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsTableCFloatCol").
+ ***************************************************************************/
+inline
+std::string GFitsTableCFloatCol::classname(void) const
+{
+    return ("GFitsTableCFloatCol");
+}
 
 
 /***********************************************************************//**

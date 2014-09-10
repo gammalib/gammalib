@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralPlaw2.hpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -85,6 +85,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralPlaw2* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GEnergy& srcEng,
                                       const GTime&   srcTime) const;
@@ -142,6 +143,18 @@ protected:
     mutable double  m_last_g_integral; //!< Last integral flux gradient
     mutable double  m_last_g_index;    //!< Last spectral index gradient
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpectralPlaw2").
+ ***************************************************************************/
+inline
+std::string GModelSpectralPlaw2::classname(void) const
+{
+    return ("GModelSpectralPlaw2");
+}
 
 
 /***********************************************************************//**

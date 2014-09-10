@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModelPar.hpp - Model parameter class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -99,9 +99,10 @@ public:
     GModelPar& operator=(const GModelPar& par);
 
     // Methods
-    GModelPar* clone(void) const;
-    void       read(const GXmlElement& xml);
-    void       write(GXmlElement& xml) const;
+    GModelPar*  clone(void) const;
+    std::string classname(void) const;
+    void        read(const GXmlElement& xml);
+    void        write(GXmlElement& xml) const;
 
 protected:
     // Protected methods
@@ -109,5 +110,17 @@ protected:
     void copy_members(const GModelPar& par);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelPar").
+ ***************************************************************************/
+inline
+std::string GModelPar::classname(void) const
+{
+    return ("GModelPar");
+}
 
 #endif /* GMODELPAR_HPP */

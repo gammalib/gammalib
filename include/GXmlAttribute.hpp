@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlAttribute.hpp - XML attribute class definition            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,6 +66,7 @@ public:
     // Methods
     void               clear(void);
     GXmlAttribute*     clone(void) const;
+    std::string        classname(void) const;
     void               write(GUrl& url) const;
     const std::string& name(void) const { return m_name; }
     std::string        value(void) const;
@@ -83,5 +84,17 @@ protected:
     std::string m_name;     //!< Attribute name
     std::string m_value;    //!< Attribute value including hyphens
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GXmlAttribute").
+ ***************************************************************************/
+inline
+std::string GXmlAttribute::classname(void) const
+{
+    return ("GXmlAttribute");
+}
 
 #endif /* GXMLATTRIBUTE_HPP */

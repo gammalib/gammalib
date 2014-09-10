@@ -47,6 +47,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGCTAResponse* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGCTAResponse"; }
     void                      test_response(void);
     void                      test_response_aeff(void);
     void                      test_response_psf(void);
@@ -78,6 +79,7 @@ public:
     // Methods
     virtual void           set(void);
     virtual TestGCTAModel* clone(void) const;
+    virtual std::string    classname(void) const { return "TestGCTAModel"; }
     void                   test_model_cube_bgd(void);
     void                   test_model_irf_bgd(void);
 };
@@ -99,6 +101,7 @@ public:
     // Methods
     virtual void                 set(void);
     virtual TestGCTAObservation* clone(void) const;
+    virtual std::string          classname(void) const { return "TestGCTAObservation"; }
     void                         test_unbinned_obs(void);
     void                         test_binned_obs(void);
     void                         test_cube_obs(void);
@@ -121,6 +124,7 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGCTAOptimize* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGCTAOptimize"; }
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
     void                      test_cube_optimizer(void);
@@ -143,10 +147,9 @@ public:
     // Methods
     virtual void              set(void);
     virtual TestGCTAPointing* clone(void) const;
+    virtual std::string       classname(void) const { return "TestGCTAPointing"; }
     void                      test_load_table(void);
     void                      test_interpolate_altaz(void);
 };
-
-
 
 #endif /* TEST_CTA_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATLtCube.hpp - Fermi/LAT livetime cube class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,6 +70,7 @@ public:
     // Methods
     void        clear(void);
     GLATLtCube* clone(void) const;
+    std::string classname(void) const;
     void        load(const std::string& filename);
     void        save(const std::string& filename,
                      const bool& clobber=false) const;
@@ -86,5 +87,17 @@ private:
     GLATLtCubeMap m_weighted_exposure;
     GGti          m_gti;
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATLtCube").
+ ***************************************************************************/
+inline
+std::string GLATLtCube::classname(void) const
+{
+    return ("GLATLtCube");
+}
 
 #endif /* GLATLTCUBE_HPP */

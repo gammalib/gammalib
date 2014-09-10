@@ -77,6 +77,7 @@ public:
     // Methods
     void        clear(void);
     GEnergy*    clone(void) const;
+    std::string classname(void) const;
     double      erg(void) const;
     double      keV(void) const;
     double      MeV(void) const;
@@ -112,6 +113,19 @@ protected:
     mutable double m_elog10;      //!< log10 of energy in MeV
     mutable bool   m_has_log10;   //!< log10 of energy is valid
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GEnergy").
+ ***************************************************************************/
+inline
+std::string GEnergy::classname(void) const
+{
+    return ("GEnergy");
+}
+
 
 /***************************************************************************
  *                               Inline friends                            *

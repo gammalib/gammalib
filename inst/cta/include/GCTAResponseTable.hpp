@@ -71,6 +71,7 @@ public:
     // Methods
     void               clear(void);
     GCTAResponseTable* clone(void) const;
+    std::string        classname(void) const;
     int                size(void) const;
     const int&         elements(void) const;
     const int&         axes(void) const;
@@ -151,6 +152,18 @@ private:
     mutable double m_wgt7;            //!< Weight of upper right node
     mutable double m_wgt8;            //!< Weight of lower right node
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAResponseTable").
+ ***************************************************************************/
+inline
+std::string GCTAResponseTable::classname(void) const
+{
+    return ("GCTAResponseTable");
+}
 
 
 /***********************************************************************//**

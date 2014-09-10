@@ -68,6 +68,7 @@ public:
     // Implemented pure virtual methods
     void        clear(void);
     GCTAPsf2D*  clone(void) const;
+    std::string classname(void) const;
     void        load(const std::string& filename);
     std::string filename(void) const;
     double      mc(GRan&         ran,
@@ -118,6 +119,18 @@ private:
     mutable double    m_width2;     //!< Gaussian 2 width
     mutable double    m_width3;     //!< Gaussian 3 width
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAPsf2D").
+ ***************************************************************************/
+inline
+std::string GCTAPsf2D::classname(void) const
+{
+    return ("GCTAPsf2D");
+}
 
 
 /***********************************************************************//**

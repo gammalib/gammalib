@@ -69,7 +69,8 @@ public:
     // Implemented pure virtual methods
     void                   clear(void);
     GCTASourceCubeDiffuse* clone(void) const;
-    virtual GCTAClassCode  code(void) const;
+    std::string            classname(void) const;
+    GCTAClassCode          code(void) const;
     void                   set(const std::string&   name,
                                const GModelSpatial& model,
                                const GObservation&  obs);
@@ -93,6 +94,18 @@ protected:
     // Data members
     GSkymap m_cube;  //!< Diffuse map convolved with IRF
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTASourceCubeDiffuse").
+ ***************************************************************************/
+inline
+std::string GCTASourceCubeDiffuse::classname(void) const
+{
+    return ("GCTASourceCubeDiffuse");
+}
 
 
 /***********************************************************************//**

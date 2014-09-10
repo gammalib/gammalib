@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTARoi.hpp - CTA region of interest class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GCTARoi*    clone(void) const;
+    virtual std::string classname(void) const;
     virtual bool        contains(const GEvent& event) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
@@ -79,6 +80,18 @@ protected:
     GCTAInstDir m_centre;   //!< Centre of ROI in instrument coordinates
     double      m_radius;   //!< Radius of ROI in degrees
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTARoi").
+ ***************************************************************************/
+inline
+std::string GCTARoi::classname(void) const
+{
+    return ("GCTARoi");
+}
 
 
 /***********************************************************************//**

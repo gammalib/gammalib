@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GTestInstDir.hpp  -  Test instrument direction class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -85,6 +85,7 @@ public:
     }
     
     GTestInstDir* clone(void) const{ return new GTestInstDir(*this); }
+    std::string   classname(void) const { return "GTestInstDir"; }
         
     std::string  print(const GChatter& chatter = NORMAL) const{ 
         std::string result = "=== GTestInstDir ===";

@@ -104,6 +104,7 @@ public:
     // Methods
     void                clear(void);
     GObservations*      clone(void) const;
+    std::string         classname(void) const;
     GObservation*       at(const int& index);
     const GObservation* at(const int& index) const;
     int                 size(void) const;
@@ -181,6 +182,18 @@ protected:
     GModels                    m_models; //!< List of models
     GObservations::likelihood  m_fct;    //!< Optimizer function
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GObservations").
+ ***************************************************************************/
+inline
+std::string GObservations::classname(void) const
+{
+    return ("GObservations");
+}
 
 
 /***********************************************************************//**

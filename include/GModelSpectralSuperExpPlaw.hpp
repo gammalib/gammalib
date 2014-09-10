@@ -78,6 +78,7 @@ public:
     // Implemented pure virtual methods
     virtual void                        clear(void);
     virtual GModelSpectralSuperExpPlaw* clone(void) const;
+    virtual std::string                 classname(void) const;
     virtual std::string                 type(void) const;
     virtual double                      eval(const GEnergy& srcEng,
                                              const GTime&   srcTime) const;
@@ -182,6 +183,18 @@ protected:
     mutable double  m_mc_pow_emin;   //!< Power of minimum energy
     mutable double  m_mc_pow_ewidth; //!< Power of energy width
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpectralSuperExpPlaw").
+ ***************************************************************************/
+inline
+std::string GModelSpectralSuperExpPlaw::classname(void) const
+{
+    return ("GModelSpectralSuperExpPlaw");
+}
 
 
 /***********************************************************************//**

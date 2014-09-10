@@ -67,6 +67,7 @@ public:
     // Methods
     virtual void           set(void);
     virtual TestGNumerics* clone(void) const;
+    virtual std::string    classname(void) const { return "TestGNumerics"; }
     void                   test_integral(void);
     void                   test_romberg_integration(void);
     void                   test_adaptive_simpson_integration(void);

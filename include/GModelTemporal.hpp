@@ -66,6 +66,7 @@ public:
     // Virtual methods
     virtual void            clear(void) = 0;
     virtual GModelTemporal* clone(void) const = 0;
+    virtual std::string     classname(void) const = 0;
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GTime& srcTime) const = 0;
     virtual double          eval_gradients(const GTime& srcTime) = 0;

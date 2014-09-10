@@ -32,19 +32,6 @@
 #include "GTools.hpp"
 %}
 
-/* __ Typemaps ___________________________________________________________ */
-%typemap(out) GEvents* {
-    if (dynamic_cast<GEventList*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventList, 0 |  0 );
-    }
-    else if (dynamic_cast<GEventCube*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventCube, 0 |  0 );
-    }
-    else {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEvents, 0 |  0 );
-    }
-}
-
 
 /***********************************************************************//**
  * @class GObservation
@@ -61,7 +48,7 @@ public:
     // Pure virtual methods
     virtual void             clear(void) = 0;
     virtual GObservation*    clone(void) const = 0;
-    virtual std::string      type(void) const = 0;
+    virtual std::string      classname(void) const = 0;
     virtual void             response(const GResponse& rsp) = 0;
     virtual const GResponse* response(void) const = 0;
     virtual std::string      instrument(void) const = 0;

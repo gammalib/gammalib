@@ -66,6 +66,7 @@ public:
     // Implemented pure virtual methods
     void          clear(void);
     GCTAEdispRmf* clone(void) const;
+    std::string   classname(void) const;
     void          load(const std::string& filename);
     std::string   filename(void) const;
     GEnergy       mc(GRan& ran,
@@ -105,6 +106,18 @@ private:
     mutable std::vector<int>     m_mc_measured_start;
     mutable std::vector<GVector> m_mc_measured_cdf;
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAEdispRmf").
+ ***************************************************************************/
+inline
+std::string GCTAEdispRmf::classname(void) const
+{
+    return ("GCTAEdispRmf");
+}
 
 
 /***********************************************************************//**

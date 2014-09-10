@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.hpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,6 +81,7 @@ public:
     // Methods
     virtual void               clear(void) = 0;
     virtual GXmlNode*          clone(void) const = 0;
+    virtual std::string        classname(void) const = 0;
     virtual int                size(void) const { return m_nodes.size(); }
     virtual bool               is_empty(void) const { return m_nodes.empty(); }
     virtual GXmlNode*          set(const int& index, const GXmlNode& node);

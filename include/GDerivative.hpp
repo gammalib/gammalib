@@ -58,6 +58,7 @@ public:
     // Methods
     void             clear(void);
     GDerivative*     clone(void) const;
+    std::string      classname(void) const;
     void             max_iter(const int& max_iter);
     void             eps(const double& eps);
     void             step_frac(const double& fraction);
@@ -107,6 +108,18 @@ protected:
     int        m_iter;         //!< Number of iterations used
     bool       m_silent;       //!< Suppress warnings
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GDerivative").
+ ***************************************************************************/
+inline
+std::string GDerivative::classname(void) const
+{
+    return ("GDerivative");
+}
 
 
 /***********************************************************************//**

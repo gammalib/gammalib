@@ -63,7 +63,7 @@ public:
     // Implement pure virtual methods
     virtual void                clear(void);
     virtual GCOMObservation*    clone(void) const;
-    virtual std::string         type(void) const;
+    virtual std::string         classname(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GCOMResponse* response(void) const;
     virtual std::string         instrument(void) const { return m_instrument; }
@@ -124,14 +124,14 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Return class type
+ * @brief Return class name
  *
- * @return Returns "GCOMObservation".
+ * @return String containing the class name ("GCOMObservation").
  ***************************************************************************/
 inline
-std::string GCOMObservation::type(void) const
+std::string GCOMObservation::classname(void) const
 {
-    return "GCOMObservation";
+    return ("GCOMObservation");
 }
 
 

@@ -66,6 +66,7 @@ public:
     // Methods
     void           clear(void);
     GEbounds*      clone(void) const;
+    std::string    classname(void) const;
     int            size(void) const;
     bool           is_empty(void) const;
     void           append(const GEnergy& emin, const GEnergy& emax);
@@ -114,6 +115,18 @@ protected:
     GEnergy* m_min;         //!< Array of interval minimum energies
     GEnergy* m_max;         //!< Array of interval maximum energies
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GEbounds").
+ ***************************************************************************/
+inline
+std::string GEbounds::classname(void) const
+{
+    return ("GEbounds");
+}
 
 
 /***********************************************************************//**

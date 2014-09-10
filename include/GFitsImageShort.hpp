@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GFitsImageShort.hpp - Short integer FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Methods
     void             clear(void);
     GFitsImageShort* clone(void) const;
+    std::string      classname(void) const;
     short&           at(const int& ix);
     short&           at(const int& ix, const int& iy);
     short&           at(const int& ix, const int& iy, const int& iz);
@@ -96,5 +97,17 @@ private:
     short* m_pixels;      //!< Pixels
     short* m_nulval;      //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsImageShort").
+ ***************************************************************************/
+inline
+std::string GFitsImageShort::classname(void) const
+{
+    return ("GFitsImageShort");
+}
 
 #endif /* GFITSIMAGESHORT_HPP */

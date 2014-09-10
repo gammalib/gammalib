@@ -70,6 +70,7 @@ public:
     virtual GTestObservation* clone(void) const {
         return new GTestObservation(*this);
     }
+    virtual std::string classname(void) const { return "GTestObservation"; }
     virtual void response(const GResponse& rsp) {
         const GTestResponse* testrsp = dynamic_cast<const GTestResponse*>(&rsp);
         if (testrsp == NULL) {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GTestModelData.hpp - Test data model class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -87,6 +87,7 @@ public:
         return;
     }
     virtual GTestModelData* clone(void) const { return new GTestModelData(*this); }
+    virtual std::string     classname(void) const { return "GTestModelData"; }
     virtual std::string     type(void) const {return "=== GTestModelData ===";}
     virtual bool            is_constant(void) const {return true;}
     virtual double          eval(const GEvent& event,

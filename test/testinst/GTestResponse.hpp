@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GTestResponse.hpp  -  Test response class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -98,6 +98,7 @@ public:
     virtual GTestResponse* clone(void) const{
         return new GTestResponse(*this);
     }
+    virtual std::string classname(void) const { return "GTestResponse"; }
     
     virtual bool          use_edisp(void) const { return false; }
     virtual bool          use_tdisp(void) const { return false; }

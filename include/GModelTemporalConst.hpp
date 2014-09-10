@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelTemporalConst.hpp - Temporal constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -67,6 +67,7 @@ public:
     // Implemented virtual base class methods
     virtual void                 clear(void);
     virtual GModelTemporalConst* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GTime& srcTime) const;
     virtual double               eval_gradients(const GTime& srcTime);
@@ -89,6 +90,18 @@ protected:
     // Protected members
     GModelPar m_norm;    //!< Constant
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelTemporalConst").
+ ***************************************************************************/
+inline
+std::string GModelTemporalConst::classname(void) const
+{
+    return ("GModelTemporalConst");
+}
 
 
 /***********************************************************************//**

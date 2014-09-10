@@ -51,7 +51,7 @@ public:
     // Implement pure virtual methods
     virtual void                clear(void);
     virtual GMWLObservation*    clone(void) const;
-    virtual std::string         type(void) const;
+    virtual std::string         classname(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GMWLResponse* response(void) const;
     virtual std::string         instrument(void) const;

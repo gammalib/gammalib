@@ -66,6 +66,7 @@ public:
     // Implemented pure virtual methods
     void                clear(void);
     GCTAEdispPerfTable* clone(void) const;
+    std::string         classname(void) const;
     void                load(const std::string& filename);
     std::string         filename(void) const;
     GEnergy             mc(GRan&         ran,
@@ -104,6 +105,18 @@ private:
     mutable double      m_par_sigma; //!< Gaussian sigma
     mutable double      m_par_width; //!< Gaussian width parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAEdispPerfTable").
+ ***************************************************************************/
+inline
+std::string GCTAEdispPerfTable::classname(void) const
+{
+    return ("GCTAEdispPerfTable");
+}
 
 
 /***********************************************************************//**

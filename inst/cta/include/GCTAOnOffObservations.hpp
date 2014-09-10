@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAOnOffObservations.hpp - CTA on-off observation container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Pierrick Martin                                  *
+ *  copyright (C) 2013-2014 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ public:
     // Methods
     void                        clear(void);
     GCTAOnOffObservations*      clone(void) const;
+    std::string                 classname(void) const;
     GCTAOnOffObservation*       at(const int& index);
     const GCTAOnOffObservation* at(const int& index) const;
     int                         size(void) const;
@@ -104,6 +105,18 @@ protected:
     std::vector<GCTAOnOffObservation*> m_obs;    //!< List of observations
     GModels                            m_models; //!< List of models
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAOnOffObservations").
+ ***************************************************************************/
+inline
+std::string GCTAOnOffObservations::classname(void) const
+{
+    return ("GCTAOnOffObservations");
+}
 
 
 /***********************************************************************//**

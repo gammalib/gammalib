@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.hpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Methods
     void        clear(void);
     GVOClient*  clone(void) const;
+    std::string classname(void) const;
     void        connect(void);
     void        disconnect(void);
     bool        has_hub(void) const;
@@ -100,5 +101,17 @@ protected:
     std::string m_client_id;   //!< Client identifier
     int         m_socket;      //!< Hub socket
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GVOClient").
+ ***************************************************************************/
+inline
+std::string GVOClient::classname(void) const
+{
+    return ("GVOClient");
+}
 
 #endif /* GVOCLIENT_HPP */

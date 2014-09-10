@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GTestEventCube.hpp - Test event bin container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2013-2014 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,6 +97,7 @@ public:
         return;
     }
     virtual GTestEventCube* clone(void) const { return new GTestEventCube(*this);}
+    virtual std::string     classname(void) const { return "GTestEventCube"; }
     virtual int            size(void) const { return m_bins.size(); }
     virtual int            dim(void) const { return 1; }
     virtual int            naxis(const int& axis) const { return 1;}

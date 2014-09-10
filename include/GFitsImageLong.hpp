@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsImageLong.hpp - Long integer FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     // Methods
     void            clear(void);
     GFitsImageLong* clone(void) const;
+    std::string     classname(void) const;
     long&           at(const int& ix);
     long&           at(const int& ix, const int& iy);
     long&           at(const int& ix, const int& iy, const int& iz);
@@ -96,5 +97,17 @@ private:
     long* m_pixels;      //!< Pixels
     long* m_nulval;      //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GFitsImageLong").
+ ***************************************************************************/
+inline
+std::string GFitsImageLong::classname(void) const
+{
+    return ("GFitsImageLong");
+}
 
 #endif /* GFITSIMAGELONG_HPP */

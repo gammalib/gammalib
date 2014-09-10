@@ -68,6 +68,7 @@ public:
     // Implemented pure virtual methods
     void         clear(void);
     GCTAAeffArf* clone(void) const;
+    std::string  classname(void) const;
     void         load(const std::string& filename);
     std::string  filename(void) const;
     std::string  print(const GChatter& chatter = NORMAL) const;
@@ -97,6 +98,18 @@ private:
     double              m_thetacut;  //!< Theta cut for ARF
     double              m_scale;     //!< Scale for ARF
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAAeffArf").
+ ***************************************************************************/
+inline
+std::string GCTAAeffArf::classname(void) const
+{
+    return ("GCTAAeffArf");
+}
 
 
 /***********************************************************************//**

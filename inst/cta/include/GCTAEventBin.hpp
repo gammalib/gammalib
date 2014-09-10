@@ -66,6 +66,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void               clear(void);
     virtual GCTAEventBin*      clone(void) const;
+    virtual std::string        classname(void) const;
     virtual double             size(void) const;
     virtual const GCTAInstDir& dir(void) const;
     virtual const GEnergy&     energy(void) const;
@@ -99,6 +100,18 @@ protected:
     GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
     double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAEventBin").
+ ***************************************************************************/
+inline
+std::string GCTAEventBin::classname(void) const
+{
+    return ("GCTAEventBin");
+}
 
 
 /***********************************************************************//**

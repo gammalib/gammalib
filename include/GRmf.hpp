@@ -61,6 +61,7 @@ public:
     // Methods
     void                 clear(void);
     GRmf*                clone(void) const;
+    std::string          classname(void) const;
     int                  size(void) const;
     int                  ntrue(void) const;
     int                  nmeasured(void) const;
@@ -94,6 +95,18 @@ protected:
     GMatrixSparse       m_matrix;        //!< Sparse redistribution matrix
     
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GRmf").
+ ***************************************************************************/
+inline
+std::string GRmf::classname(void) const
+{
+    return ("GRmf");
+}
 
 
 /***********************************************************************//**

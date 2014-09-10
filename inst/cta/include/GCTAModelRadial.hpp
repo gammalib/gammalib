@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAModelRadial.hpp - Radial model abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,7 @@ public:
     // Pure virtual methods
     virtual void             clear(void) = 0;
     virtual GCTAModelRadial* clone(void) const = 0;
+    virtual std::string      classname(void) const = 0;
     virtual std::string      type(void) const = 0;
     virtual double           eval(const double& offset) const = 0;
     virtual double           eval_gradients(const double& offset) const = 0;

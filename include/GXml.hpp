@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GXml.hpp - XML class                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -190,6 +190,7 @@ public:
     // Methods
     void               clear(void);
     GXml*              clone(void) const;
+    std::string        classname(void) const;
     int                size(void) const { return m_root.size(); }
     bool               is_empty(void) const { return m_root.is_empty(); }
     GXmlNode*          set(const int& index, const GXmlNode& node);
@@ -237,5 +238,17 @@ protected:
     // Protected members
     GXmlDocument m_root;   //!< Root document node
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GXml").
+ ***************************************************************************/
+inline
+std::string GXml::classname(void) const
+{
+    return ("GXml");
+}
 
 #endif /* GXML_HPP */

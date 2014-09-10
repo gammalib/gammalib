@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATInstDir.hpp - Fermi/LAT instrument direction class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void         clear(void);
     virtual GLATInstDir* clone(void) const;
+    virtual std::string  classname(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -72,6 +73,18 @@ protected:
     // Data members
     GSkyDir m_dir;  //!< Observed incident direction of event
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATInstDir").
+ ***************************************************************************/
+inline
+std::string GLATInstDir::classname(void) const
+{
+    return ("GLATInstDir");
+}
 
 
 /***********************************************************************//**

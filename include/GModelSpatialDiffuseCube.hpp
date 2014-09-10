@@ -71,6 +71,7 @@ public:
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpatialDiffuseCube* clone(void) const;
+    virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GPhoton& photon) const;
     virtual double                    eval_gradients(const GPhoton& photon) const;
@@ -120,6 +121,18 @@ protected:
     GSkyDir             m_mc_cone_dir; //!< Monte Carlo simulation cone centre
     double              m_mc_cone_rad; //!< Monte Carlo simulation cone radius
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GModelSpatialDiffuseCube").
+ ***************************************************************************/
+inline
+std::string GModelSpatialDiffuseCube::classname(void) const
+{
+    return ("GModelSpatialDiffuseCube");
+}
 
 
 /***********************************************************************//**

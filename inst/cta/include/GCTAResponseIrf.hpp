@@ -74,7 +74,8 @@ public:
     // Implement pure virtual base class methods
     virtual void             clear(void);
     virtual GCTAResponseIrf* clone(void) const;
-    virtual bool             isvalid(void) const;
+    virtual std::string      classname(void) const;
+    virtual bool             is_valid(void) const;
     virtual bool             use_edisp(void) const;
     virtual bool             use_tdisp(void) const;
     virtual bool             apply_edisp(void) const;
@@ -194,12 +195,24 @@ private:
 
 
 /***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GCTAResponseIrf").
+ ***************************************************************************/
+inline
+std::string GCTAResponseIrf::classname(void) const
+{
+    return ("GCTAResponseIrf");
+}
+
+
+/***********************************************************************//**
  * @brief Signal if response is valid
  *
  * @return True if response is valid
  ***************************************************************************/
 inline
-bool GCTAResponseIrf::isvalid(void) const
+bool GCTAResponseIrf::is_valid(void) const
 {
     return ((m_aeff != NULL) && (m_psf != NULL));
 }

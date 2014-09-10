@@ -72,7 +72,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                clear(void);
     virtual GCTAObservation*    clone(void) const;
-    virtual std::string         type(void) const;
+    virtual std::string         classname(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GCTAResponse* response(void) const;
     virtual std::string         instrument(void) const;
@@ -137,14 +137,14 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Return class type
+ * @brief Return class name
  *
- * @return Returns "GCTAObservation".
+ * @return String containing the class name ("GCTAObservation").
  ***************************************************************************/
 inline
-std::string GCTAObservation::type(void) const
+std::string GCTAObservation::classname(void) const
 {
-    return "GCTAObservation";
+    return ("GCTAObservation");
 }
 
 
@@ -208,7 +208,7 @@ double GCTAObservation::deadc(const GTime& time) const
 inline
 bool GCTAObservation::has_response(void) const
 {
-    return ((m_response != NULL) && (m_response->isvalid()));
+    return ((m_response != NULL) && (m_response->is_valid()));
 }
 
 

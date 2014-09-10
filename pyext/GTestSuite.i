@@ -114,6 +114,11 @@ public:
         return new GPythonTestSuite(*this);
     }
 
+    // Classname method (implementation makes this class non-abstract)
+    std::string classname(void) const {
+        return ("GPythonTestSuite");
+    }
+
     // Generic test function for Python callback
     void test(void) {
 

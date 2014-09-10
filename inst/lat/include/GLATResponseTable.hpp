@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATResponseTable.hpp - Fermi-LAT Response table class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ public:
     // Methods
     void                clear(void);
     GLATResponseTable*  clone(void) const;
+    std::string         classname(void) const;
     void                read(const GFitsTable& hdu);
     void                write(GFitsTable& hdu) const;
     int                 index(const int& ie, const int& ic) const;
@@ -110,6 +111,18 @@ private:
     double     m_wgt3;         //!< Weighting factor 3
     double     m_wgt4;         //!< Weighting factor 4
 };
+
+
+/***********************************************************************//**
+ * @brief Return class name
+ *
+ * @return String containing the class name ("GLATResponseTable").
+ ***************************************************************************/
+inline
+std::string GLATResponseTable::classname(void) const
+{
+    return ("GLATResponseTable");
+}
 
 
 /***********************************************************************//**
