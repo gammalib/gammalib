@@ -423,28 +423,28 @@ std::string GVOHub::get_hub_lockfile(void) const
 void GVOHub::handle_request(const socklen_t& sock)
 {
     // Initialize buffer
-    char buffer[256];
-    bzero(buffer,256);
+    char buffer[1024];
+    bzero(buffer,1024);
    
     // Declare empty XML document
     GXml xml;
     
     // Read buffer
-    int n = read(sock,buffer,255);
+    int n = read(sock,buffer,1024);
     if (n < 0) {
         std::string msg = "Could not read socket buffer.";
         throw GException::invalid_value(G_HANDLE_REQUEST, msg);
     }
     printf("Here is the message: %s\n",buffer);
     std::string response = buffer;
-
+	
     // Find start of XML text
     size_t start = response.find("<?xml");
     // If found then convert text into XML document
     if (start != std::string::npos) {
         xml = GXml(response.substr(start, std::string::npos));
     }
-
+    
     std::string method_called = "";
     // Search for value of methodName
     const GXmlNode* node = xml.element("methodCall", 0);
