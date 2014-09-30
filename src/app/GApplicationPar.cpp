@@ -420,7 +420,7 @@ void GApplicationPar::real(const double& value)
     }
 
     // Set value string
-    std::string value_string = gammalib::str(value);
+    std::string value_string = gammalib::str(value,5);
 
     // Set value
     set_value(value_string);

@@ -601,6 +601,12 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
     // Set observation identifiers
     ids(xml.attribute("id"));
 
+    // Check flag if TS value should be computed
+    bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
+
+    // Set flag if TS value should be computed
+    this->tscalc(tscalc);
+
     // Set pointers
     set_pointers();
 

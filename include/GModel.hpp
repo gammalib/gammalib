@@ -136,6 +136,8 @@ public:
     void                name(const std::string& name);
     const double&       ts(void) const;
     void                ts(const double& ts);
+    const bool&      tscalc(void) const;
+    void                  tscalc(const bool& tscalc);
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
     GModelPar           scale(const std::string& instrument) const;
@@ -161,6 +163,7 @@ protected:
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
     bool                     m_has_ts;       //!< Signals if TS is available
+    bool                     m_tscalc;        //!< Signals if TS should be computed
     double                   m_ts;           //!< Test Statistic of the model
 };
 
@@ -239,7 +242,6 @@ void GModel::name(const std::string& name)
     return;
 }
 
-
 /***********************************************************************//**
  * @brief Return Test Statistic value
  *
@@ -272,6 +274,39 @@ void GModel::ts(const double& ts)
     m_has_ts = true; //!< Signals that TS is now available
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Return flag wether TS value should be computed Statistic value
+ *
+ * @return boolean flag to compute TS value
+ *
+ * Returns the flag wether the TS value should be computed for this
+ *  model.
+ ***************************************************************************/
+inline
+const bool& GModel::tscalc(void) const
+{
+    return m_tscalc;
+}
+
+
+/***********************************************************************//**
+ * @brief Set Test Statistic value
+ *
+ * @param[in] ts Test Statistic value.
+ *
+ * Set the flag wether the TS value should be computed by ctlike.
+ ***************************************************************************/
+inline
+void GModel::tscalc(const bool& tscalc)
+{
+    m_tscalc     = tscalc;
+    return;
+}
+
+
+
 
 
 #endif /* GMODEL_HPP */

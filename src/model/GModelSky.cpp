@@ -671,6 +671,12 @@ void GModelSky::read(const GXmlElement& xml)
         this->ts(gammalib::todouble(ts));
     }
 
+    // Check flag if TS value should be computed
+    bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
+
+    // Set flag if TS value should be computed
+    this->tscalc(tscalc);
+
     // Set instruments
     instruments(xml.attribute("instrument"));
 

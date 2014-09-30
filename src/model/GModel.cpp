@@ -556,6 +556,7 @@ void GModel::init_members(void)
     m_pars.clear();
     m_ts     = 0.0;
     m_has_ts = false;
+    m_tscalc = false;
     
     // Return
     return;
@@ -577,6 +578,7 @@ void GModel::copy_members(const GModel& model)
     m_pars        = model.m_pars;
     m_ts          = model.m_ts;
     m_has_ts      = model.m_has_ts;
+    m_tscalc    = model.m_tscalc;
 
     // Return
     return;
