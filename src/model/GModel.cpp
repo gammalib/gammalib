@@ -578,7 +578,7 @@ void GModel::copy_members(const GModel& model)
     m_pars        = model.m_pars;
     m_ts          = model.m_ts;
     m_has_ts      = model.m_has_ts;
-    m_tscalc    = model.m_tscalc;
+    m_tscalc      = model.m_tscalc;
 
     // Return
     return;
@@ -741,6 +741,10 @@ std::string GModel::print_attributes(void) const
     if (m_has_ts) {
         result.append("\n"+gammalib::parformat("Test Statistic"));
         result.append(gammalib::str(ts()));
+    }
+    else if (m_tscalc) {
+        result.append("\n"+gammalib::parformat("Test Statistic"));
+        result.append("Computation requested");
     }
 
     // Append instrument scale factors

@@ -963,9 +963,6 @@ std::string GModelSky::print(const GChatter& chatter) const
         // Append header
         result.append("=== GModelSky ===");
 
-        // Append model
-        //result.append("\n"+print_model(chatter));
-
         // Determine number of parameters per type
         int n_spatial  = (m_spatial  != NULL) ? m_spatial->size()  : 0;
         int n_spectral = (m_spectral != NULL) ? m_spectral->size() : 0;

@@ -1,4 +1,4 @@
-2014-09-10  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-09-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -9,7 +9,7 @@
         Add +=, -=, *= and /= operators to GSkymap
         Add integration status tracking to GIntegral
         Add GCTAExposure and GCTAMeanPsf classes
-        Add ts attribute to GModel and use it in GModelSky models
+        Add ts and tscalc attributes to GModel and use them in models
         Add manipulation methods to GCTAResponseTable
         Add read(), write() and save() methods to GCTAPsf2D and GCTAPsfKing
         Add classname() method to all classes

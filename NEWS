@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-10 September 2014
+30 September 2014
 
 
 1. Introduction
@@ -86,6 +86,10 @@ cone (applies so for the point sources, radial source and elliptical sources).
 The TS attribute has been added to GModel to store the Test Statistics value
 after model fitting. The ts() methods can be used to read and write the value.
 GModelSky will write the TS value into the XML file and read it if it's there.
+In addition, the tscalc attribute has been added to signal whether a TS value
+should be computed or not. If tscalc="1" is added to an XML, the tscalc
+attribute of the corresponding model component will be set to true. Otherwise
+it will be set to false.
 
 
 9. Numerics module
