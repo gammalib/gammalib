@@ -722,6 +722,27 @@ void GObservations::optimize(GOptimizer& opt)
 
 
 /***********************************************************************//**
+ * @brief Computes parameter errors using optimizer
+ *
+ * @param[in] opt Optimizer.
+ *
+ * Calculates the errors of the free parameters of the models by using
+ * the optimizer that has been provided by the @p opt argument.
+ ***************************************************************************/
+void GObservations::errors(GOptimizer& opt)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
+    // Optimize model parameters
+    opt.errors(m_fct, pars);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Evaluate function
  *
  * Evaluates the likelihood funtion at the actual set of parameters.

@@ -409,9 +409,6 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             }
 
         } // endfor: iterations
-
-        // Compute parameter uncertainties
-        errors(fct, pars);
         
         // Free now all temporarily frozen parameters so that the resulting
         // model has the same attributes as the initial model
@@ -432,7 +429,12 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
     // ... otherwise just execute final step
     else {
-        errors(fct, pars);
+
+    	// Evaluate function
+        fct.eval(pars);
+
+        // Save function value
+        m_value = fct.value();
     }
 
     // Return

@@ -66,6 +66,7 @@ public:
     virtual GOptimizerLM* clone(void) const;
     virtual std::string   classname(void) const;
     virtual void          optimize(GOptimizerFunction& fct, GOptimizerPars& pars);
+    void                      errors(GOptimizerFunction& fct, GOptimizerPars& pars);
     virtual double        value(void) const { return m_value; }   //!< @brief Return function value
     virtual int           status(void) const { return m_status; } //!< @brief Return optimization status
     virtual int           iter(void) const { return m_iter; }     //!< @brief Return number of iterations
@@ -94,7 +95,6 @@ protected:
     void   copy_members(const GOptimizerLM& opt);
     void   free_members(void);
     void   iteration(GOptimizerFunction& fct, GOptimizerPars& pars);
-    void   errors(GOptimizerFunction& fct, GOptimizerPars& pars);
     double step_size(const GVector& grad, const GOptimizerPars& pars);
 
     // Protected members
