@@ -125,6 +125,7 @@ public:
     void                models(const std::string& filename);
     const GModels&      models(void) const;
     void                optimize(GOptimizer& opt);
+    void                errors(GOptimizer& opt);
     void                eval(void);
     double              logL(void) const;
     double              npred(void) const;

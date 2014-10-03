@@ -1,7 +1,7 @@
 /***************************************************************************
- * GOptimizerLM.i  -  Levenberg Marquardt optimizer class Python interface *
+ *           GOptimizerLM.i - Levenberg Marquardt optimizer class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,9 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GOptimizerLM* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual void          optimize(GOptimizerFunction& fct, GOptimizerPars& pars);
+    virtual void          errors(GOptimizerFunction& fct, GOptimizerPars& pars);
     virtual double        value(void) const;
     virtual int           status(void) const;
     virtual int           iter(void) const;

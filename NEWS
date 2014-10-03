@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-30 September 2014
+3 October 2014
 
 
 1. Introduction
@@ -25,7 +25,7 @@ The GObservation::response() method now returns a pointer to GResponse
 instead of a reference.
 
 The GCTAObservation::load(GFits&) and GCTAObservation::save(GFits&)
-methods have been remaned to read() and write().
+methods have been renamed to read() and write().
 
 A classname() method has been added to all classes that returns the name
 of the GammaLib class.
@@ -127,6 +127,11 @@ Full automatic typecasting has been implemented for the Python module.
 -----------------------
 The GOptimizerPar::error() method now always returns a positive number (the
 absolute value of the internally stored error is returned).
+
+The parameter error computation has been removed from the GOptimizerLM::optimize()
+method and an explicit call to GOptimizerLM::errors() is now required for
+error computation. GOptimizer::errors() has been added as pure virtual
+method for all optimizer classes.
 
 
 12. Sky module

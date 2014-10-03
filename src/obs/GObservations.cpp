@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GObservations.cpp - Observation container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -715,6 +715,27 @@ void GObservations::optimize(GOptimizer& opt)
 
     // Optimize model parameters
     opt.optimize(m_fct, pars);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes parameter errors using optimizer
+ *
+ * @param[in] opt Optimizer.
+ *
+ * Calculates the errors of the free parameters of the models by using
+ * the optimizer that has been provided by the @p opt argument.
+ ***************************************************************************/
+void GObservations::errors(GOptimizer& opt)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
+    // Compute model parameter errors
+    opt.errors(m_fct, pars);
 
     // Return
     return;

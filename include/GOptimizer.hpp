@@ -67,6 +67,7 @@ public:
     virtual GOptimizer* clone(void) const = 0;
     virtual std::string classname(void) const = 0;
     virtual void        optimize(GOptimizerFunction& fct, GOptimizerPars& pars) = 0;
+    virtual void        errors(GOptimizerFunction& fct, GOptimizerPars& pars) = 0;
     virtual double      value(void) const = 0;
     virtual int         status(void) const = 0;
     virtual int         iter(void) const = 0;
