@@ -443,6 +443,119 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
 
 /***********************************************************************//**
+ * @brief Compute parameter uncertainties
+ *
+ * @param[in] fct Optimizer function.
+ * @param[in] pars Function parameters.
+ *
+ * Compute parameter uncertainties from the diagonal elements of the
+ * curvature matrix.
+ ***************************************************************************/
+void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
+{
+    // Get number of parameters
+    int npars = pars.size();
+
+    // Perform final parameter evaluation
+    fct.eval(pars);
+
+    // Fetch sparse matrix pointer. We have to do this after the eval()
+    // method since eval() will allocate new memory for the curvature
+    // matrix!
+    GMatrixSparse* curvature = fct.curvature();
+
+    // Save best fitting value
+    m_value = fct.value();
+
+    // Save curvature matrix
+    GMatrixSparse save_curvature = GMatrixSparse(*curvature);
+
+    // Signal no diagonal element loading
+    bool diag_loaded = false;
+
+    // Loop over error computation (maximum 2 turns)
+    for (int i = 0; i < 2; ++i) {
+
+        // Solve: curvature * X = unit
+        try {
+            GMatrixSparse decomposition = curvature->cholesky_decompose(true);
+            GVector unit(npars);
+            for (int ipar = 0; ipar < npars; ++ipar) {
+                unit[ipar] = 1.0;
+                GVector x  = decomposition.cholesky_solver(unit, true);
+                if (x[ipar] >= 0.0) {
+                    pars[ipar]->factor_error(sqrt(x[ipar]));
+                }
+                else {
+                    pars[ipar]->factor_error(0.0);
+                    m_status = G_LM_BAD_ERRORS;
+                }
+                unit[ipar] = 0.0;
+            }
+        }
+        catch (GException::matrix_zero &e) {
+            m_status = G_LM_SINGULAR;
+            if (m_logger != NULL) {
+                *m_logger << "GOptimizerLM::terminate: "
+                          << "All curvature matrix elements are zero."
+                          << std::endl;
+            }
+            break;
+        }
+        catch (GException::matrix_not_pos_definite &e) {
+
+            // Load diagonal if this has not yet been tried
+            if (!diag_loaded) {
+
+                // Flag errors as inaccurate
+                m_status = G_LM_BAD_ERRORS;
+                if (m_logger != NULL) {
+                    *m_logger << "Non-Positive definite curvature matrix encountered."
+                              << std::endl;
+                    *m_logger << "Load diagonal elements with 1e-10."
+                              << " Fit errors may be inaccurate."
+                              << std::endl;
+                }
+
+                // Try now with diagonal loaded matrix
+                *curvature = save_curvature;
+                for (int ipar = 0; ipar < npars; ++ipar) {
+                    (*curvature)(ipar,ipar) += 1.0e-10;
+                }
+
+                // Signal loading
+                diag_loaded = true;
+
+                // Try again
+                continue;
+
+            } // endif: diagonal has not yet been loaded
+
+            // ... otherwise signal an error
+            else {
+                m_status = G_LM_NOT_POSTIVE_DEFINITE;
+                if (m_logger != NULL) {
+                    *m_logger << "Non-Positive definite curvature matrix encountered,"
+                              << " even after diagonal loading." << std::endl;
+                }
+                break;
+            }
+        }
+        catch (std::exception &e) {
+            throw;
+        }
+
+        // If no error occured then break now
+        break;
+
+    } // endfor: looped over error computation
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print optimizer information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -865,119 +978,6 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
     // Return
     return;
 
-}
-
-
-/***********************************************************************//**
- * @brief Compute parameter uncertainties
- *
- * @param[in] fct Optimizer function.
- * @param[in] pars Function parameters.
- *
- * Compute parameter uncertainties from the diagonal elements of the
- * curvature matrix.
- ***************************************************************************/
-void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
-{
-    // Get number of parameters
-    int npars = pars.size();
-
-    // Perform final parameter evaluation
-    fct.eval(pars);
-
-    // Fetch sparse matrix pointer. We have to do this after the eval()
-    // method since eval() will allocate new memory for the curvature
-    // matrix!
-    GMatrixSparse* curvature = fct.curvature();
-
-    // Save best fitting value
-    m_value = fct.value();
-
-    // Save curvature matrix
-    GMatrixSparse save_curvature = GMatrixSparse(*curvature);
-
-    // Signal no diagonal element loading
-    bool diag_loaded = false;
-
-    // Loop over error computation (maximum 2 turns)
-    for (int i = 0; i < 2; ++i) {
-
-        // Solve: curvature * X = unit
-        try {
-            GMatrixSparse decomposition = curvature->cholesky_decompose(true);
-            GVector unit(npars);
-            for (int ipar = 0; ipar < npars; ++ipar) {
-                unit[ipar] = 1.0;
-                GVector x  = decomposition.cholesky_solver(unit, true);
-                if (x[ipar] >= 0.0) {
-                    pars[ipar]->factor_error(sqrt(x[ipar]));
-                }
-                else {
-                    pars[ipar]->factor_error(0.0);
-                    m_status = G_LM_BAD_ERRORS;
-                }
-                unit[ipar] = 0.0;
-            }
-        }
-        catch (GException::matrix_zero &e) {
-            m_status = G_LM_SINGULAR;
-            if (m_logger != NULL) {
-                *m_logger << "GOptimizerLM::terminate: "
-                          << "All curvature matrix elements are zero."
-                          << std::endl;
-            }
-            break;
-        }
-        catch (GException::matrix_not_pos_definite &e) {
-
-            // Load diagonal if this has not yet been tried
-            if (!diag_loaded) {
-
-                // Flag errors as inaccurate
-                m_status = G_LM_BAD_ERRORS;
-                if (m_logger != NULL) {
-                    *m_logger << "Non-Positive definite curvature matrix encountered."
-                              << std::endl;
-                    *m_logger << "Load diagonal elements with 1e-10."
-                              << " Fit errors may be inaccurate."
-                              << std::endl;
-                }
-
-                // Try now with diagonal loaded matrix
-                *curvature = save_curvature;
-                for (int ipar = 0; ipar < npars; ++ipar) {
-                    (*curvature)(ipar,ipar) += 1.0e-10;
-                }
-
-                // Signal loading
-                diag_loaded = true;
-
-                // Try again
-                continue;
-
-            } // endif: diagonal has not yet been loaded
-
-            // ... otherwise signal an error
-            else {
-                m_status = G_LM_NOT_POSTIVE_DEFINITE;
-                if (m_logger != NULL) {
-                    *m_logger << "Non-Positive definite curvature matrix encountered,"
-                              << " even after diagonal loading." << std::endl;
-                }
-                break;
-            }
-        }
-        catch (std::exception &e) {
-            throw;
-        }
-
-        // If no error occured then break now
-        break;
-
-    } // endfor: looped over error computation
-
-    // Return
-    return;
 }
 
 
