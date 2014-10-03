@@ -992,7 +992,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
     // Optimize
     obs.optimize(opt);
 
-    // Compute errore
+    // Compute errors
     obs.errors(opt);
 
     // Get the result
