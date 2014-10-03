@@ -138,6 +138,9 @@ void TestGOptimizer::test_optimizer(const int& mode)
     // Optimize
     obs.optimize(opt);
 
+    // Compute errors
+    obs.errors(opt);
+
     // Get the result
     GModelPar result = (*(obs.models()[0]))[0];
 

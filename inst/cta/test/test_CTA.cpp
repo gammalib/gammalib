@@ -1211,6 +1211,7 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
         GOptimizerLM opt;
         opt.max_iter(100);
         obs.optimize(opt);
+        obs.errors(opt);
         test_try_success();
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
             const GModel* model = obs.models()[i];
@@ -1273,6 +1274,7 @@ void TestGCTAOptimize::test_binned_optimizer(void)
         GOptimizerLM opt;
         opt.max_iter(100);
         obs.optimize(opt);
+        obs.errors(opt);
         test_try_success();
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
             const GModel* model = obs.models()[i];
@@ -1322,6 +1324,7 @@ void TestGCTAOptimize::test_cube_optimizer(void)
         GOptimizerLM opt;
         opt.max_iter(100);
         obs.optimize(opt);
+        obs.errors(opt);
         test_try_success();
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
             const GModel* model = obs.models()[i];

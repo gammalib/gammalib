@@ -180,6 +180,7 @@ void TestGMWL::test_optimizer(void)
         GOptimizerLM opt(log);
         opt.max_iter(1000);
         obs.optimize(opt);
+        obs.errors(opt);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -234,6 +235,7 @@ void TestGMWL::test_optimizer(void)
         GOptimizerLM opt(log);
         opt.max_iter(1000);
         obs.optimize(opt);
+        obs.errors(opt);
         test_try_success();
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
             const GModel* model = obs.models()[i];
