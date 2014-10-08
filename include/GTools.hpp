@@ -37,10 +37,11 @@
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {
-    const double MeV2erg    =  1.6021765e-6;
-    const double erg2MeV    =  624150.96;
-    const double pc2cm      =  3.08568025e18;
-    const double sec_in_day = 86400.0;
+    const double MeV2erg      =  1.6021765e-6;
+    const double erg2MeV      =  624150.96;
+    const double MeV2Angstrom =  1.239841875e-2;
+    const double pc2cm        =  3.08568025e18;
+    const double sec_in_day   = 86400.0;
 }
 
 /* __ Prototypes ________________________________________________________ */

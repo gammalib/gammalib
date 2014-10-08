@@ -188,7 +188,7 @@ void GEnergy::operator()(const double& eng, const std::string& unit)
     }
     else if (eunit == "angstrom") {
         if (eng != 0.0) {
-            this->MeV(0.012417281/eng);
+            this->MeV(gammalib::MeV2Angstrom/eng);
         }
         else {
             throw GException::invalid_value(G_OPERATOR1,
@@ -241,7 +241,7 @@ double GEnergy::operator()(const std::string& unit) const
     }
     else if (eunit == "angstrom") {
         if (this->MeV() != 0.0) {
-            energy = 0.012417281/this->MeV();
+            energy = gammalib::MeV2Angstrom/this->MeV();
         }
         else {
             throw GException::invalid_value(G_OPERATOR2,
