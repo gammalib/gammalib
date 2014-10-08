@@ -187,12 +187,18 @@ void GEnergy::operator()(const double& eng, const std::string& unit)
         this->TeV(eng);
     }
     else if (eunit == "angstrom") {
-        this->MeV(0.012417281/eng);
+        if (eng != 0.0) {
+            this->MeV(0.012417281/eng);
+        }
+        else {
+            throw GException::invalid_value(G_OPERATOR1,
+                  "Cannot convert 0 Angstrom into an energy.");
+        }
     }
     else {
         throw GException::invalid_argument(G_OPERATOR1, unit,
               "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
-              " \"GeV\", or \"TeV\" (case insensitive).");
+              " \"GeV\", \"TeV\", or \"Angstrom\" (case insensitive).");
     }
 
     // Return
@@ -203,7 +209,7 @@ void GEnergy::operator()(const double& eng, const std::string& unit)
 /***********************************************************************//**
  * @brief Unit access operator
  *
- * @param[in] unit Unit.
+ * @param[in] unit Energy unit (one of erg(s), keV, MeV, GeV, TeV, Angstrom).
  * @return Energy in requested units.
  *
  * @exception GException::invalid_argument
@@ -232,6 +238,15 @@ double GEnergy::operator()(const std::string& unit) const
     }
     else if (eunit == "tev") {
         energy = this->TeV();
+    }
+    else if (eunit == "angstrom") {
+        if (this->MeV() != 0.0) {
+            energy = 0.012417281/this->MeV();
+        }
+        else {
+            throw GException::invalid_value(G_OPERATOR2,
+                  "Cannot convert energy of 0 MeV into Angstrom.");
+        }
     }
     else {
         throw GException::invalid_argument(G_OPERATOR2, unit,
