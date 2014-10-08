@@ -62,6 +62,7 @@ public:
     double   MeV(void) const;
     double   GeV(void) const;
     double   TeV(void) const;
+    double   Angstrom(void) const;
     double   log10erg(void) const;
     double   log10keV(void) const;
     double   log10MeV(void) const;
@@ -73,6 +74,7 @@ public:
     void     MeV(const double& eng);
     void     GeV(const double& eng);
     void     TeV(const double& eng);
+    void     Angstrom(const double& wavelength);
     void     log10erg(const double& eng);
     void     log10keV(const double& eng);
     void     log10MeV(const double& eng);

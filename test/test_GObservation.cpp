@@ -629,17 +629,21 @@ void TestGObservation::test_energy(void)
     test_value(GeV.GeV(), 3.0, 1.0e-6, "GEnergy(GeV) constructor");
     GEnergy TeV(3.0, "TeV");
     test_value(TeV.TeV(), 3.0, 1.0e-6, "GEnergy(TeV) constructor");
+    GEnergy Angstrom(3.0, "Angstrom");
+    test_value(Angstrom.Angstrom(), 3.0, 1.0e-6, "GEnergy(Angstrom) constructor");
 
     // Test energy value access methods
     test_value(MeV.erg(), 3.0/gammalib::erg2MeV, 1.0e-6, "erg() get method");
     test_value(MeV.keV(), 3.0e+3, 1.0e-6, "keV() get method");
     test_value(MeV.GeV(), 3.0e-3, 1.0e-6, "GeV() get method");
     test_value(MeV.TeV(), 3.0e-6, 1.0e-6, "TeV() get method");
+    test_value(MeV.Angstrom(), gammalib::MeV2Angstrom/3.0, 1.0e-6, "Angstrom() get method");
     test_value(MeV("erg"), 3.0/gammalib::erg2MeV, 1.0e-6, "(erg) get operator");
     test_value(MeV("keV"), 3.0e+3, 1.0e-6, "(keV) get operator");
     test_value(MeV("MeV"), 3.0, 1.0e-6, "(MeV) get operator");
     test_value(MeV("GeV"), 3.0e-3, 1.0e-6, "(GeV) get operator");
     test_value(MeV("TeV"), 3.0e-6, 1.0e-6, "(TeV) get operator");
+    test_value(MeV("Angstrom"), gammalib::MeV2Angstrom/3.0, 1.0e-6, "(Angstrom) get operator");
     test_value(MeV.log10erg(), std::log10(3.0/gammalib::erg2MeV), 1.0e-6, "log10erg() get method");
     test_value(MeV.log10keV(), std::log10(3.0e+3), 1.0e-6, "log10keV() get method");
     test_value(MeV.log10MeV(), std::log10(3.0), 1.0e-6, "log10MeV() get method");
@@ -663,6 +667,8 @@ void TestGObservation::test_energy(void)
     test_value(energy.GeV(), 3.0, 1.0e-6, "GeV() set method");
     energy.TeV(3.0);
     test_value(energy.TeV(), 3.0, 1.0e-6, "TeV() set method");
+    energy.Angstrom(3.0);
+    test_value(energy.Angstrom(), 3.0, 1.0e-6, "Angstrom() set method");
     energy(3.0, "erg");
     test_value(energy.erg(), 3.0, 1.0e-6, "(erg) set operator");
     energy(3.0, "keV");
@@ -673,6 +679,8 @@ void TestGObservation::test_energy(void)
     test_value(energy.GeV(), 3.0, 1.0e-6, "(GeV) set method");
     energy(3.0, "TeV");
     test_value(energy.TeV(), 3.0, 1.0e-6, "(TeV) set method");
+    energy(3.0, "Angstrom");
+    test_value(energy.Angstrom(), 3.0, 1.0e-6, "(Angstrom) set method");
     energy.log10erg(std::log10(3.0));
     test_value(energy.erg(), 3.0, 1.0e-6, "log10erg() set method");
     energy.log10keV(std::log10(3.0));

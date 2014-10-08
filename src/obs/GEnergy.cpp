@@ -40,6 +40,8 @@
 #define G_CONSTRUCT                 "GEnergy::GEnergy(double&, std::string&)"
 #define G_OPERATOR1              "GEnergy::operator()(double&, std::string&)"
 #define G_OPERATOR2                       "GEnergy::operator()(std::string&)"
+#define G_ANGSTROM_GET                                  "GEnergy::Angstrom()"
+#define G_ANGSTROM_SET                           "GEnergy::Angstrom(double&)"
 #define G_LOG10_GET                            "GEnergy::log10(std::string&)"
 #define G_LOG10_SET                   "GEnergy::log10(double&, std::string&)"
 
@@ -187,13 +189,7 @@ void GEnergy::operator()(const double& eng, const std::string& unit)
         this->TeV(eng);
     }
     else if (eunit == "angstrom") {
-        if (eng != 0.0) {
-            this->MeV(gammalib::MeV2Angstrom/eng);
-        }
-        else {
-            throw GException::invalid_value(G_OPERATOR1,
-                  "Cannot convert 0 Angstrom into an energy.");
-        }
+        this->Angstrom(eng);
     }
     else {
         throw GException::invalid_argument(G_OPERATOR1, unit,
@@ -240,18 +236,12 @@ double GEnergy::operator()(const std::string& unit) const
         energy = this->TeV();
     }
     else if (eunit == "angstrom") {
-        if (this->MeV() != 0.0) {
-            energy = gammalib::MeV2Angstrom/this->MeV();
-        }
-        else {
-            throw GException::invalid_value(G_OPERATOR2,
-                  "Cannot convert energy of 0 MeV into Angstrom.");
-        }
+        energy = this->Angstrom();
     }
     else {
         throw GException::invalid_argument(G_OPERATOR2, unit,
               "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
-              " \"GeV\", or \"TeV\" (case insensitive).");
+              " \"GeV\", \"TeV\", or \"Angstrom\" (case insensitive).");
     }
   
     // Return energy
@@ -362,6 +352,30 @@ double GEnergy::TeV(void) const
     
     // Return energy
     return energy; 
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy as wavelength in Angstrom
+ *
+ * @return Energy as wavelength in Angstrom (1e-10 metres).
+ *
+ * @exception GException::invalid_value
+ *            Cannot convert zero energy into a wavelength.
+ ***************************************************************************/
+double GEnergy::Angstrom(void) const
+{
+    // Throw exception if energy is zero
+    if (m_energy == 0) {
+        throw GException::invalid_value(G_ANGSTROM_GET,
+              "Cannot convert energy of 0 MeV into Angstrom.");
+    }
+
+    // Compute wavelength
+    double wavelength = gammalib::MeV2Angstrom/m_energy;
+    
+    // Return wavelength in Angstrom
+    return wavelength; 
 }
 
 
@@ -570,6 +584,33 @@ void GEnergy::TeV(const double& eng)
 {
     // Set energy
     m_energy = eng * 1.0e+6;
+    
+    // Signals that log10 of energy is not valid
+    m_has_log10 = false;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy from wavelength in Angstrom
+ *
+ * @param[in] wavelength Wavelength in Angstrom.
+ *
+ * @exception GException::invalid_argument
+ *            Cannot set energy from zero wavelength.
+ ***************************************************************************/
+void GEnergy::Angstrom(const double& wavelength)
+{
+    // Throw exception if wavelength is zero
+    if (wavelength == 0) {
+        throw GException::invalid_argument(G_ANGSTROM_SET,
+              "Cannot set energy from a wavelength that is zero.");
+    }
+
+    // Set energy
+    m_energy = gammalib::MeV2Angstrom / wavelength;
     
     // Signals that log10 of energy is not valid
     m_has_log10 = false;
