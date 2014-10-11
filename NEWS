@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-3 October 2014
+12 October 2014
 
 
 1. Introduction
@@ -121,6 +121,11 @@ as the response methods). The class code enumerators are defined in
 GTypemaps.
 
 Full automatic typecasting has been implemented for the Python module.
+
+Added utc() methods to GTime to allow setting and retrieving the time as
+a string in the UTC time system. Leap seconds are taken into account in
+the time conversion. The leap seconds are hard coded so the software
+needs a regular update in case that leap seconds need to be added.
 
 
 11. Optimization module
