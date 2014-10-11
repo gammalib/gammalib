@@ -992,24 +992,30 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     GTimeReference timeref = events()->gti().reference();
 
     // Compute some attributes
-    double ra_pnt  = m_pointing.dir().ra_deg();
-    double dec_pnt = m_pointing.dir().dec_deg();
-    double alt     = 90.0 - m_pointing.zenith();
-    double az      = m_pointing.azimuth();
-    double tstart  = events()->tstart().convert(timeref);
-    double tstop   = events()->tstop().convert(timeref);
-    double telapse = events()->gti().telapse();
-    double ontime  = events()->gti().ontime();
-    double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
+    double      ra_pnt   = m_pointing.dir().ra_deg();
+    double      dec_pnt  = m_pointing.dir().dec_deg();
+    double      alt      = 90.0 - m_pointing.zenith();
+    double      az       = m_pointing.azimuth();
+    double      tstart   = events()->tstart().convert(timeref);
+    double      tstop    = events()->tstop().convert(timeref);
+    double      telapse  = events()->gti().telapse();
+    double      ontime   = events()->gti().ontime();
+    double      deadc    = (ontime > 0.0) ? livetime() / ontime : 0.0;
+    std::string utc_obs  = events()->tstart().utc();
+    std::string utc_end  = events()->tstop().utc();
+    std::string date_obs = utc_obs.substr(0, 10);
+    std::string time_obs = utc_obs.substr(11, 8);
+    std::string date_end = utc_end.substr(0, 10);
+    std::string time_end = utc_end.substr(11, 8);
 
     // Set observation information
     hdu.card("CREATOR",  "GammaLib",   "Program which created the file");
     hdu.card("TELESCOP", instrument(), "Telescope");
     hdu.card("OBS_ID",   obs_id(),     "Observation identifier");
-    hdu.card("DATE_OBS", "string",     "Observation start date");
-    hdu.card("TIME_OBS", "string",     "Observation start time");
-    hdu.card("DATE_END", "string",     "Observation end date");
-    hdu.card("TIME_END", "string",     "Observation end time");
+    hdu.card("DATE_OBS", date_obs,     "Observation start date");
+    hdu.card("TIME_OBS", time_obs,     "Observation start time");
+    hdu.card("DATE_END", date_end,     "Observation end date");
+    hdu.card("TIME_END", time_end,     "Observation end time");
 
     // Set observation time information
     hdu.card("TSTART",   tstart, "[s] Mission time of start of observation");
