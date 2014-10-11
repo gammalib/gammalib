@@ -139,6 +139,7 @@ public:
     void                  read(const GFitsHDU& hdu);
     void                  write(GFits& file) const;
     std::string           print(const GChatter& chatter = NORMAL) const;
+    GSkymap        stack_maps(void);
 
 private:
     // Private methods

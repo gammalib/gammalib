@@ -157,6 +157,7 @@ public:
     void                  save(const std::string& filename, bool clobber = false) const;
     void                  read(const GFitsHDU& hdu);
     void                  write(GFits& file) const;
+    GSkymap               stack_maps(void);
 };
 
 
