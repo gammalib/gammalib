@@ -840,8 +840,10 @@ void TestGSky::test_GSkymap(void)
     // Fill map pixels
     double total_src = 0.0;
     for (int pix = 0; pix < map_src.npix(); ++pix) {
-        map_src(pix) = pix+1;
-        total_src   += map_src(pix);
+        for (int k = 0; k < map_src.nmaps(); ++k) {
+            map_src(pix,k) = pix+1;
+            total_src     += map_src(pix,k);
+        }
     }
 
     // Add pixels to destination map
@@ -852,7 +854,9 @@ void TestGSky::test_GSkymap(void)
     // is expected to perform strict bi-linear interpolation
     double total_dst = 0.0;
     for (int pix = 0; pix < map_dst.npix(); ++pix) {
-        total_dst   += map_dst(pix);
+        for (int k = 0; k < map_dst.nmaps(); ++k) {
+            total_dst += map_dst(pix,k);
+        }
     }
     total_dst /= 100.0;
 	test_value(total_dst, total_src, 1.0e-3, "Test operator+");
@@ -864,13 +868,25 @@ void TestGSky::test_GSkymap(void)
     // map should be zero.
     total_dst = 0.0;
     for (int pix = 0; pix < map_dst.npix(); ++pix) {
-        total_dst   += map_dst(pix);
+        for (int k = 0; k < map_dst.nmaps(); ++k) {
+            total_dst += map_dst(pix,k);
+        }
     }
 	test_value(total_dst, 0.0, 1.0e-3, "Test operator+");
 
     // Save maps
     map_src.save("test_map_src.fits", true);
     map_dst.save("test_map_dst.fits", true);
+
+    // Test map stacking
+    GSkymap map_stacked = map_src;
+    map_stacked.stack_maps();
+    double total_stacked = 0.0;
+    for (int pix = 0; pix < map_stacked.npix(); ++pix) {
+        total_stacked += map_stacked(pix);
+    }
+	test_value(total_stacked, total_src, 1.0e-3, "Test stack_maps() method");
+	test_value(map_stacked.nmaps(), 1, "Test stack_maps() method");    
 
     // Exit test
     return;

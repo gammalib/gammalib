@@ -134,12 +134,12 @@ public:
     const GSkyProjection* projection(void) const;
     void                  projection(const GSkyProjection& proj);
     const double*         pixels(void) const;
+    void                  stack_maps(void);
     void                  load(const std::string& filename);
     void                  save(const std::string& filename, bool clobber = false) const;
     void                  read(const GFitsHDU& hdu);
     void                  write(GFits& file) const;
     std::string           print(const GChatter& chatter = NORMAL) const;
-    GSkymap        stack_maps(void);
 
 private:
     // Private methods

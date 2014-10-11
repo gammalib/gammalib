@@ -1185,6 +1185,49 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
 
 
 /***********************************************************************//**
+ * @brief Stack all maps into a single map
+ *
+ * @return Stacked map.
+ *
+ * The methods replaces the sky map by a version with only a single map
+ * by summing over the pixel values for all maps. If the sky map has no
+ * pixels or there is only a single map in the object, the method does
+ * nothing.
+ ***************************************************************************/
+void GSkymap::stack_maps(void)
+{
+    // Continue only if the map has pixels and if there is more than 1 map
+    if (m_num_pixels > 0 && m_num_maps > 1) {
+
+        // Allocate memory for stacked map
+        double* pixels = new double[m_num_pixels];
+
+        // Stack map and save in memory
+        for (int i = 0; i < m_num_pixels; ++i) {
+            double sum = 0.0;
+            for (int k = 0; k < m_num_maps; ++k) {
+                sum += (*this)(i,k);
+            }
+            pixels[i] = sum;
+        }
+
+        // Free existing pixels
+        if (m_pixels != NULL) delete [] m_pixels;
+
+        // Set pointer to stacked pixels
+        m_pixels = pixels;
+
+        // Set number of maps to 1
+        m_num_maps = 1;
+    
+    } // endif: map had pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load skymap from FITS file.
  *
  * @param[in] filename FITS file name..
@@ -1420,47 +1463,6 @@ std::string GSkymap::print(const GChatter& chatter) const
     // Return result
     return result;
 }
-
-/***********************************************************************//**
- * @brief stack maps into one 2D map
- *
- * @return 2D skymap, integrated along z axis
- ***************************************************************************/
-GSkymap GSkymap::stack_maps(void)
-{
-	// Get parameters to build new 2D skymap
-
-	GWcs* wcs = dynamic_cast<GWcs*>(m_proj->clone());
-
-	std::string wcsname = wcs->code();
-	std::string coordsys = wcs->coordsys();
-	double xref = wcs->crval(0);
-	double yref = wcs->crval(1);
-	double binsz_x = wcs->cdelt(0);
-	double binsz_y = wcs->cdelt(1);
-
-	// Initialise new skymap
-	GSkymap result = GSkymap(wcsname, coordsys, xref, yref, binsz_x, binsz_y,
-			m_num_x, m_num_y, 1);
-
-	// Fill new skymap
-	// Loop over pixels
-	for (int i = 0; i < npix(); ++i) {
-
-		// Loop over maps
-		for (int j = 0; j < nmaps(); j++) {
-
-			// Add content to new map
-			result(i,0)+=(*this)(i,j);
-
-		} // endfor: loop over maps
-
-	} // endfor: loop over pixels
-
-	// Return skymap
-	return result;
-}
-
 
 /*==========================================================================
  =                                                                         =
