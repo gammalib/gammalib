@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdio>
 #include "GTime.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
@@ -40,6 +41,7 @@ const double jd_ref  = mjd_ref + 2400000.5;               //!< JD of time=0
 #define G_CONSTRUCT                     "GTime::GTime(double&, std::string&)"
 #define G_TIME                 "GTime::time(double&, double&, std::string&, " \
                                                  "std::string&, std::string&"
+#define G_UTC                                      "GTime::utc(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -349,6 +351,115 @@ void GTime::days(const double& days)
 
 
 /***********************************************************************//**
+ * @brief Set time as string in UTC time system
+ *
+ * @param[in] time Time string (UTC).
+ *
+ * @exception GException::invalid_argument
+ *            Invalid time string specified.
+ *
+ * The time has to be given in the format YYYY-MM-DDThh:mm:ss.s, where
+ * YYYY is a four-digit year, MM a two-digit month, DD a two-digit day of
+ * month, hh two digits of hour (0 through 23), mm two digits of minutes,
+ * ss two digits of second and s one or more digits representing a
+ * decimal fraction of a second (ISO 8601 time standard).
+ *
+ * The method is only accurate for dates from 1972 on.
+ ***************************************************************************/
+void GTime::utc(const std::string& time)
+{
+    // Define number of days per month
+    static int daymonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    // Analyse the UTC string
+    long   year   = 0;
+    int    month  = 0;
+    long   day    = 0;
+    long   hour   = 0;
+    long   minute = 0;
+    double second = 0.0;
+    int    n      = sscanf(time.c_str(), "%ld-%d-%ldT%ld:%ld:%lg",
+		                   &year, &month, &day, &hour, &minute, &second);
+
+    // Adjust number of days per month for leap years
+    if (year % 4) {
+        daymonth[1] = 28;
+    }
+    else {
+        daymonth[1] = 29;
+    }
+
+    // Check time string
+    if (n != 3 && n != 6) {
+        std::string msg = "Invalid time string \""+time+"\" encountered. "
+                          "Please specify the time in the format YYYY-MM-DD "
+                          "or YYYY-MM-DDThh:mm:ss.s.";
+        throw GException::invalid_argument(G_UTC, msg);
+    }
+    if (year < 1000 || year > 9999) {
+        std::string msg = "Invalid year "+gammalib::str(year)+" specified. "
+                          "The year needs to be a four-digit year.";
+        throw GException::invalid_argument(G_UTC, msg);
+    }
+    if (month < 1 || month > 12) {
+        std::string msg = "Invalid month "+gammalib::str(month)+" specified. "
+                          "The month needs to be comprised between 01 and 12";
+        throw GException::invalid_argument(G_UTC, msg);
+    }
+    if (day < 1 || day > daymonth[month-1]) {
+        std::string msg = "Invalid day "+gammalib::str(day)+" specified. "
+                          "The day for month "+gammalib::str(month)+" needs "
+                          "to be comprised between 01 and "+
+                          gammalib::str(daymonth[month-1])+".";
+        throw GException::invalid_argument(G_UTC, msg);
+    }
+    if (hour < 0 || hour > 23) {
+        std::string msg = "Invalid hour "+gammalib::str(hour)+" specified. "
+                          "The hour needs to be comprised between 00 and 23";
+        throw GException::invalid_argument(G_UTC, msg);
+    }
+    if (minute < 0 || minute > 59) {
+        std::string msg = "Invalid minute "+gammalib::str(minute)+" specified. "
+                          "The minute needs to be comprised between 00 and 59";
+        throw GException::invalid_argument(G_UTC, msg);
+    }
+    if (second < 0 || second >= 60.0) {
+        std::string msg = "Invalid second "+gammalib::str(second)+" specified. "
+                          "The second needs to be comprised between 00 and <60";
+        throw GException::invalid_argument(G_UTC, msg);
+    }
+
+    // Compute MJD day
+    month--;
+    for (int i = 0; i < month; ++i) { // Add days passed per month
+        day += daymonth[i];
+    }
+    day += (year - 1972) * 365 - 1;   // Add days passed per year
+    day += (year - 1969) / 4;         // Add leap days passed
+    day += 41317;                     // Add MJD at 1972
+
+    // Compute MJD fraction (UTC)
+    double fraction = ((double)hour * 3600.0 + (double)minute * 60.0 + second) *
+                      gammalib::sec2day;
+
+    // Compute MJD (UTC)
+    double mjd = (double)day + fraction;
+
+    // Get conversion from UTC to TAI to TT
+    double correction = leap_seconds(mjd) + gammalib::tai2tt;
+
+    // Convert MJD from UTC to TT
+    mjd += correction * gammalib::sec2day;
+
+    // Set time
+    this->mjd(mjd);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set time given in specified reference
  *
  * @param[in] time Time in given reference system.
@@ -461,4 +572,72 @@ void GTime::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of leap seconds for a given MJD
+ *
+ * @param[in] mjd Modified Julian Day.
+ * @return Number of lead seconds.
+ *
+ * Return the number of leap seconds for a given MJD specified in the UTC
+ * time system. This method returns valid number if leap seconds for the
+ * years 1972-2015.
+ *
+ * See http://www.nist.gov/pml/div688/grp50/leapsecond.cfm for a table of
+ * leap seconds.
+ ***************************************************************************/
+double GTime::leap_seconds(const double& mjd)
+{
+    // Leap second table from 1972 on
+    // see http://www.nist.gov/pml/div688/grp50/leapsecond.cfm
+    // The first entry is 1-Jan-1972
+    const long   leapsmjd[] = {41317,  // 1972-01-01
+                               41498,  // 1972-06-30
+                               41682,  // 1972-12-31
+                               42047,  // 1973-12-31
+                               42412,  // 1974-12-31
+                               42777,  // 1975-12-31
+                               43143,  // 1976-12-31
+                               43508,  // 1977-12-31
+                               43873,  // 1978-12-31
+                               44238,  // 1979-12-31
+                               44785,  // 1981-06-30
+                               45150,  // 1982-06-30
+                               45515,  // 1983-06-30
+                               46246,  // 1985-06-30
+                               47160,  // 1987-12-31
+                               47891,  // 1989-12-31
+                               48256,  // 1990-12-31
+                               48803,  // 1992-06-30
+                               49168,  // 1993-06-30
+                               49533,  // 1994-06-30
+                               50082,  // 1995-12-31
+                               50629,  // 1997-06-30
+                               51178,  // 1998-12-31
+                               53735,  // 2005-12-31
+                               54831,  // 2008-12-31
+                               56108}; // 2012-06-30
+    const double leapsecs[] = {10.0, 11.0, 12.0, 13.0, 14.0,
+                               15.0, 16.0, 17.0, 18.0, 19.0,
+                               20.0, 21.0, 22.0, 23.0, 24.0,
+                               25.0, 26.0, 27.0, 28.0, 29.0,
+                               30.0, 31.0, 32.0, 33.0, 34.0,
+                               35.0};
+    const int    n_leapsecs = sizeof(leapsmjd)/sizeof(long);
+
+    // Extract MJD day and MJD fraction
+    long   day      = (long)mjd;
+    double fraction = mjd - (double)day;
+
+    // Find the leap second MJD that is equal or larger to the specified
+    // day
+    int i = n_leapsecs - 1;
+    while ((day <= leapsmjd[i]) && i > 0) {
+        i--;
+    }
+
+    // Return leap seconds
+    return (leapsecs[i]);
 }

@@ -88,15 +88,17 @@ public:
     void           mjd(const double& time);
     void           secs(const double& seconds);
     void           days(const double& days);
+    void           utc(const std::string& time);
     void           set(const double& time, const GTimeReference& ref);
     GTimeReference reference(void) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GTime& time);
-    void free_members(void);
+    void   init_members(void);
+    void   copy_members(const GTime& time);
+    void   free_members(void);
+    double leap_seconds(const double& mjd);
 
     // Protected data members
     double m_time;   //!< Time in seconds in native reference
