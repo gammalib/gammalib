@@ -54,6 +54,7 @@ public:
     double         mjd(void) const;
     const double&  secs(void) const;
     double         days(void) const;
+    std::string    utc(void) const;
     double         convert(const GTimeReference& ref) const;
     void           jd(const double& time);
     void           mjd(const double& time);

@@ -273,6 +273,102 @@ double GTime::days(void) const
 
 
 /***********************************************************************//**
+ * @brief Return time as string in UTC time system
+ *
+ * @return Time as string in UTC time system.
+ *
+ * Returns time in the format YYYY-MM-DDThh:mm:ss, where YYYY is a four-digit
+ * year, MM a two-digit month, DD a two-digit day of month, hh two digits of
+ * hour (0 through 23), mm two digits of minutes, and ss two digits of
+ * second (ISO 8601 time standard).
+ *
+ * The method is only accurate for dates from 1972 on.
+ ***************************************************************************/
+std::string GTime::utc(void) const
+{
+    // Define number of days per month
+    static int daymonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    // Get MJD in TAI time system
+    double mjd = this->mjd() - gammalib::tai2tt * gammalib::sec2day;
+    
+    // Correct for leap seconds (repeat is a kluge to converge as the
+    // argument is given in the UTC system but upon start we're in the TAI
+    // system
+    double leaps = leap_seconds(mjd) * gammalib::sec2day;
+    leaps = leap_seconds(mjd - leaps) * gammalib::sec2day;
+    leaps = leap_seconds(mjd - leaps) * gammalib::sec2day;
+    mjd  -= leaps;
+
+    // Split in day and fraction
+    int    day      = (int)mjd;
+    double fraction = mjd - (double)day;
+
+    // Compute time in day. We add a margin to the seconds and subtract it
+    // later to avoid rounding of 59 to 60.
+    double second = fraction * gammalib::sec_in_day + 0.0000005;
+    int    hour   = (int)second / 3600;
+    second       -= hour * 3600.0;
+    int minute    = (int)second / 60;
+    second       -= minute * 60.0;
+    if (hour > 23) {
+        hour -= 24;
+        day++;
+    }
+    second -= 0.0000005;
+    if (second < 0.0) {
+        second = 0.0;
+    }
+
+    // Compute year and day in the year
+    int i    = 0;
+    int year = 1972;           // Set year to 1972
+    day     -= 41317;          // Subtract MJD of 1-1-1972
+    day++;                     // Day 0 is 1 January
+    while (day > 365) {        // Continue if there is more than a year left
+        if (!i) {              // We have a leap year
+            if (day == 366) {  // If there are exactly 366 days left ...
+                break;         // ... then exit loop
+            }
+            else {
+                day--;         // ... otherway subtract the extra day
+            }
+        }
+        day -= 365;            // Subtract the days of a normal year
+        year++;                // Increment the number of years
+        i = (i+1) % 4;         // Leap year computation
+    }
+
+    // Adjust number of days per month for leap years
+    if (year % 4) {
+        daymonth[1] = 28;
+    }
+    else {
+        daymonth[1] = 29;
+    }
+
+    // Compute month and day in the month
+    int month = 0;
+    while (month < 12) {
+        if (day <= daymonth[month]) {
+            break;
+        }
+        day -= daymonth[month];
+        month++;
+    }
+    month++;
+
+    // Create string
+    char utc[32];
+    sprintf(utc, "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d",
+            year, month, day, hour, minute, (int)second);
+
+    // Return
+    return (std::string(utc));
+}
+
+
+/***********************************************************************//**
  * @brief Return time in specified reference
  *
  * @return Time in specified reference.
@@ -588,7 +684,7 @@ void GTime::free_members(void)
  * See http://www.nist.gov/pml/div688/grp50/leapsecond.cfm for a table of
  * leap seconds.
  ***************************************************************************/
-double GTime::leap_seconds(const double& mjd)
+double GTime::leap_seconds(const double& mjd) const
 {
     // Leap second table from 1972 on
     // see http://www.nist.gov/pml/div688/grp50/leapsecond.cfm
