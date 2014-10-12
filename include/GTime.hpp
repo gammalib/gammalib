@@ -100,6 +100,8 @@ protected:
     void   copy_members(const GTime& time);
     void   free_members(void);
     double leap_seconds(const double& mjd) const;
+    bool   is_leap_year(const int& year) const;
+    int    days_in_year(const int& year) const;
 
     // Protected data members
     double m_time;   //!< Time in seconds in native reference
@@ -140,6 +142,35 @@ void GTime::secs(const double& seconds)
 {
     m_time = seconds;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if year is a leap year
+ *
+ * @param[in] year Year (four digits integer).
+ * @return True if year is a leap year.
+ ***************************************************************************/
+inline
+bool GTime::is_leap_year(const int& year) const
+{
+    bool is_leap_year = (((year % 400) == 0) || 
+                         (((year % 100) != 0) && ((year % 4) == 0)));
+    return (is_leap_year);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of days in year
+ *
+ * @param[in] year Year (four digits integer).
+ * @return Number of days in year.
+ ***************************************************************************/
+inline
+int GTime::days_in_year(const int& year) const
+{
+    int days = (is_leap_year(year)) ? 366 : 365;
+    return (days);
 }
 
 
@@ -305,5 +336,7 @@ bool operator>=(const GTime &a, const GTime &b)
 {
     return (a.m_time >= b.m_time);
 }
+
+
 
 #endif /* GTIME_HPP */

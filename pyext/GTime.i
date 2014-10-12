@@ -46,7 +46,7 @@ public:
     explicit GTime(const double& time, const std::string& unit = "sec");
     explicit GTime(const double& time, const GTimeReference& ref);
     virtual ~GTime(void);
- 
+
     // Methods
     void           clear(void);
     GTime*         clone(void) const;

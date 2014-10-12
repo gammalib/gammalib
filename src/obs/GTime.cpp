@@ -282,7 +282,7 @@ double GTime::days(void) const
  * hour (0 through 23), mm two digits of minutes, and ss two digits of
  * second (ISO 8601 time standard).
  *
- * The method is only accurate for dates from 1972 on.
+ * The method is only valid for dates from year 1972 on.
  ***************************************************************************/
 std::string GTime::utc(void) const
 {
@@ -321,30 +321,22 @@ std::string GTime::utc(void) const
     }
 
     // Compute year and day in the year
-    int i    = 0;
     int year = 1972;           // Set year to 1972
     day     -= 41317;          // Subtract MJD of 1-1-1972
     day++;                     // Day 0 is 1 January
-    while (day > 365) {        // Continue if there is more than a year left
-        if (!i) {              // We have a leap year
-            if (day == 366) {  // If there are exactly 366 days left ...
-                break;         // ... then exit loop
-            }
-            else {
-                day--;         // ... otherway subtract the extra day
-            }
-        }
-        day -= 365;            // Subtract the days of a normal year
-        year++;                // Increment the number of years
-        i = (i+1) % 4;         // Leap year computation
+    int days = days_in_year(year);
+    while (day > days) {
+        day -= days;
+        year++;
+        days = days_in_year(year);
     }
 
     // Adjust number of days per month for leap years
-    if (year % 4) {
-        daymonth[1] = 28;
+    if (is_leap_year(year)) {
+        daymonth[1] = 29;
     }
     else {
-        daymonth[1] = 29;
+        daymonth[1] = 28;
     }
 
     // Compute month and day in the month
@@ -360,8 +352,8 @@ std::string GTime::utc(void) const
 
     // Create string
     char utc[32];
-    sprintf(utc, "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d",
-            year, month, day, hour, minute, (int)second);
+    sprintf(utc, "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%02.0f",
+            year, month, day, hour, minute, second);
 
     // Return
     return (std::string(utc));
@@ -460,7 +452,7 @@ void GTime::days(const double& days)
  * ss two digits of second and s one or more digits representing a
  * decimal fraction of a second (ISO 8601 time standard).
  *
- * The method is only accurate for dates from 1972 on.
+ * The method is only valid for dates from year 1972 on.
  ***************************************************************************/
 void GTime::utc(const std::string& time)
 {
@@ -478,11 +470,11 @@ void GTime::utc(const std::string& time)
 		                   &year, &month, &day, &hour, &minute, &second);
 
     // Adjust number of days per month for leap years
-    if (year % 4) {
-        daymonth[1] = 28;
+    if (is_leap_year(year)) {
+        daymonth[1] = 29;
     }
     else {
-        daymonth[1] = 29;
+        daymonth[1] = 28;
     }
 
     // Check time string
@@ -531,7 +523,9 @@ void GTime::utc(const std::string& time)
         day += daymonth[i];
     }
     day += (year - 1972) * 365 - 1;   // Add days passed per year
-    day += (year - 1969) / 4;         // Add leap days passed
+    day += (year - 1969) / 4;         // Add leap days passed (every 4 years)
+    day -= (year - 1901) / 100;       // Add leap days passed (not every 100 years)
+    day += (year - 1601) / 400;       // Add leap days passed (every 400 years)
     day += 41317;                     // Add MJD at 1972
 
     // Compute MJD fraction (UTC)
