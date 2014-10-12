@@ -32,10 +32,7 @@
 /***********************************************************************//**
  * @class GTime
  *
- * @brief Class that handles times in a system independent way
- *
- * The GTime class stores a time value in seconds and its MJD reference in
- * days. The time can be retrieved in any MJD reference.
+ * @brief Time class
  ***************************************************************************/
 class GTime : public GBase {
 
@@ -43,13 +40,14 @@ public:
     // Constructors and destructors
     GTime(void);
     GTime(const GTime& time);
-    explicit GTime(const double& time, const std::string& unit = "sec");
-    explicit GTime(const double& time, const GTimeReference& ref);
+    GTime(const double& time, const std::string& unit = "sec");
+    GTime(const double& time, const GTimeReference& ref);
     virtual ~GTime(void);
 
     // Methods
     void           clear(void);
     GTime*         clone(void) const;
+    std::string    classname(void) const;
     double         jd(void) const;
     double         mjd(void) const;
     const double&  secs(void) const;

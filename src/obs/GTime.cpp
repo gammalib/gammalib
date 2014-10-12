@@ -90,14 +90,14 @@ GTime::GTime(const GTime& time)
 /***********************************************************************//**
  * @brief Time constructor
  *
- * @param[in] time Time value (seconds or days).
+ * @param[in] time Time value in TT (seconds or days).
  * @param[in] unit Time unit (default: "secs").
  *
  * @exception GException::time_invalid_unit
  *            Invalid time unit specified.
  *
  * Constructs a GTime object by setting the time in the native reference
- * in units of seconds (default) or days.
+ * in the TT time system in units of seconds (default) or days.
  ***************************************************************************/
 GTime::GTime(const double& time, const std::string& unit)
 {
@@ -296,9 +296,9 @@ std::string GTime::utc(void) const
     // argument is given in the UTC system but upon start we're in the TAI
     // system
     double leaps = leap_seconds(mjd) * gammalib::sec2day;
-    leaps = leap_seconds(mjd - leaps) * gammalib::sec2day;
-    leaps = leap_seconds(mjd - leaps) * gammalib::sec2day;
-    mjd  -= leaps;
+    leaps        = leap_seconds(mjd - leaps) * gammalib::sec2day;
+    leaps        = leap_seconds(mjd - leaps) * gammalib::sec2day;
+    mjd         -= leaps;
 
     // Split in day and fraction
     int    day      = (int)mjd;
@@ -367,13 +367,10 @@ std::string GTime::utc(void) const
  *
  * Convert the time from the native reference system into the specified
  * reference system.
- *
- * @todo Implement TT-UTC conversion if required. This requires
- *       implementation of leap seconds.
  ***************************************************************************/
 double GTime::convert(const GTimeReference& ref) const
 {
-    // Retrieve time in native reference (seconds)
+    // Retrieve time in native reference (TT in seconds)
     double time = m_time;
     
     // Compute time offset in seconds
@@ -381,6 +378,25 @@ double GTime::convert(const GTimeReference& ref) const
         
     // Add time offset in seconds
     time += offset;
+
+    // Subtract leap seconds in case that time is requested in UTC time
+    // system
+    if (gammalib::toupper(ref.timesys()) == "UTC") {
+
+        // Get MJD in TAI time system
+        double mjd = this->mjd() - gammalib::tai2tt * gammalib::sec2day;
+    
+        // Get leap seconds (repeat is a kluge to converge as the
+        // argument is given in the UTC system but upon start we're in the TAI
+        // system
+        double leaps = leap_seconds(mjd);
+        leaps        = leap_seconds(mjd - leaps * gammalib::sec2day);
+        leaps        = leap_seconds(mjd - leaps * gammalib::sec2day);
+
+        // Subtract leap seconds and TAI offset
+        time -= (leaps + gammalib::tai2tt);
+
+    } // endif: UTC time system has been requested
 
     // Convert to specified time unit
     double to_unit = ref.unitseconds();
@@ -556,9 +572,6 @@ void GTime::utc(const std::string& time)
  * @param[in] ref Reference system.
  *
  * Set the time to a value given in a specific reference system.
- *
- * @todo Implement TT-UTC conversion if required. This requires
- *       implementation of leap seconds.
  ***************************************************************************/
 void GTime::set(const double& time, const GTimeReference& ref)
 {
@@ -570,6 +583,15 @@ void GTime::set(const double& time, const GTimeReference& ref)
         
     // Subtract time offset in seconds
     m_time -= offset;
+
+    // Add leap seconds in case that time was given in UTC time system
+    if (gammalib::toupper(ref.timesys()) == "UTC") {
+
+        // Add leap seconds and offset between TAI and TT time system
+        m_time += leap_seconds(this->mjd());
+        m_time += gammalib::tai2tt;
+
+    } // endif: Time was given in UTC time system
 
     // Return
     return;

@@ -557,6 +557,23 @@ void TestGObservation::test_time(void)
     time.set(12.3, GTimeReference(0.0, "secs", "TT", "LOCAL"));
     test_value(time.secs(), 12.3 - mjd_ref*86400.0);
 
+    // Test conversion to different time systems
+    time.utc("2005-10-08T14:30:25");
+    test_value(time.convert(GTimeReference(0.0, "days", "TT", "LOCAL")),
+               53651.60519889, 1.0e-6);
+    test_value(time.convert(GTimeReference(0.0, "days", "UTC", "LOCAL")),
+               53651.60445602, 1.0e-6);
+
+    // Test setting to different time systems
+    time.set(53651.60519889, GTimeReference(0.0, "days", "TT", "LOCAL"));
+    test_assert(time.utc() == "2005-10-08T14:30:25",
+                "GTime::utc(): 2005-10-08T14:30:25 expected, "+
+                time.utc()+" found.");
+    time.set(53651.60445602, GTimeReference(0.0, "days", "UTC", "LOCAL"));
+    test_assert(time.utc() == "2005-10-08T14:30:25",
+                "GTime::utc(): 2005-10-08T14:30:25 expected, "+
+                time.utc()+" found.");
+
     // Test operators
     GTime a(13.72);
     GTime b(6.28);

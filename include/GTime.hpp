@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class GTime
  *
- * @brief Handles times in a system independent way
+ * @brief Time class
  *
  * The GTime class stores a time value in seconds in a GammaLib native time
  * reference system. The GammaLib native time reference (i.e. time=0) is
@@ -68,8 +68,8 @@ public:
     // Constructors and destructors
     GTime(void);
     GTime(const GTime& time);
-    explicit GTime(const double& time, const std::string& unit = "sec");
-    explicit GTime(const double& time, const GTimeReference& ref);
+    GTime(const double& time, const std::string& unit = "sec");
+    GTime(const double& time, const GTimeReference& ref);
     virtual ~GTime(void);
  
     // Operators
@@ -104,7 +104,7 @@ protected:
     int    days_in_year(const int& year) const;
 
     // Protected data members
-    double m_time;   //!< Time in seconds in native reference
+    double m_time; //!< Time in seconds in native reference (TT)
 };
 
 
