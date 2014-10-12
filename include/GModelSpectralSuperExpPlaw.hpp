@@ -257,7 +257,7 @@ double GModelSpectralSuperExpPlaw::index1(void) const
 /***********************************************************************//**
  * @brief Set power law index 
  *
- * @param[in] index Power law index.
+ * @param[in] index1 Power law index.
  *
  * Sets the power law index.
  ***************************************************************************/
@@ -285,7 +285,7 @@ double GModelSpectralSuperExpPlaw::index2(void) const
 /***********************************************************************//**
  * @brief Set cut off index
  *
- * @param[in] index Cut off index.
+ * @param[in] index2 Cut off index.
  *
  * Sets the cut off index.
  ***************************************************************************/

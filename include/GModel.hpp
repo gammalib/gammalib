@@ -277,12 +277,13 @@ void GModel::ts(const double& ts)
 
 
 /***********************************************************************//**
- * @brief Return flag whether TS value should be computed Statistic value
+ * @brief Return Test Statistic computation flag
  *
- * @return Boolean flag to compute TS value
+ * @return Test Statistic computation flag; true is Test Statistic should be
+ *         computed.
  *
- * Returns the flag whether the TS value should be computed for this
- * model.
+ * Returns the flag that signals whether Test Statistic values should be
+ * computed.
  ***************************************************************************/
 inline
 const bool& GModel::tscalc(void) const
@@ -292,11 +293,12 @@ const bool& GModel::tscalc(void) const
 
 
 /***********************************************************************//**
- * @brief Set Test Statistic value
+ * @brief Set Test Statistic computation flag
  *
- * @param[in] ts Test Statistic value.
+ * @param[in] tscalc Test Statistic computation flag.
  *
- * Set the flag whether the TS value should be computed by ctlike.
+ * Set the flag that signals whether Test Statistic values should be
+ * computed.
  ***************************************************************************/
 inline
 void GModel::tscalc(const bool& tscalc)
