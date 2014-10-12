@@ -1185,6 +1185,49 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
 
 
 /***********************************************************************//**
+ * @brief Stack all maps into a single map
+ *
+ * @return Stacked map.
+ *
+ * The methods replaces the sky map by a version with only a single map
+ * by summing over the pixel values for all maps. If the sky map has no
+ * pixels or there is only a single map in the object, the method does
+ * nothing.
+ ***************************************************************************/
+void GSkymap::stack_maps(void)
+{
+    // Continue only if the map has pixels and if there is more than 1 map
+    if (m_num_pixels > 0 && m_num_maps > 1) {
+
+        // Allocate memory for stacked map
+        double* pixels = new double[m_num_pixels];
+
+        // Stack map and save in memory
+        for (int i = 0; i < m_num_pixels; ++i) {
+            double sum = 0.0;
+            for (int k = 0; k < m_num_maps; ++k) {
+                sum += (*this)(i,k);
+            }
+            pixels[i] = sum;
+        }
+
+        // Free existing pixels
+        if (m_pixels != NULL) delete [] m_pixels;
+
+        // Set pointer to stacked pixels
+        m_pixels = pixels;
+
+        // Set number of maps to 1
+        m_num_maps = 1;
+    
+    } // endif: map had pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load skymap from FITS file.
  *
  * @param[in] filename FITS file name..
@@ -1420,7 +1463,6 @@ std::string GSkymap::print(const GChatter& chatter) const
     // Return result
     return result;
 }
-
 
 /*==========================================================================
  =                                                                         =
