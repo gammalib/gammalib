@@ -502,8 +502,14 @@ void TestGObservation::test_time(void)
     test_value(time.mjd(), t/86400.0 + mjd_ref);
     test_value(time.secs(), t);
     test_value(time.days(), t/86400.0);
+    test_assert(time.utc() == "2010-01-02T10:17:37",
+                "GTime::utc(): 2010-01-02T10:17:37 expected, "+
+                time.utc()+" found.");
 
-    // Test set method
+    // Test set method. The UTC conversion to MJD (TT) was done using xTime.
+    // Note that xTime missed a second for the "2006-01-01T00:00:00"
+    // conversion, hence I added the second by hand to the expected
+    // result
     time.jd(57.9);
     test_value(time.jd(), 57.9);
     time.mjd(57.9);
@@ -512,6 +518,31 @@ void TestGObservation::test_time(void)
     test_value(time.secs(), 57.9);
     time.days(57.9);
     test_value(time.days(), 57.9);
+    time.utc("1994-01-01T00:00:00");
+    test_assert(time.utc() == "1994-01-01T00:00:00",
+                "GTime::utc(): 1994-01-01T00:00:00 expected, "+
+                time.utc()+" found.");
+    test_value(time.mjd(), 49353.00069657, 1.0e-6);
+    time.utc("1999-12-31T23:59:59");
+    test_assert(time.utc() == "1999-12-31T23:59:59",
+                "GTime::utc(): 1999-12-31T23:59:59 expected, "+
+                time.utc()+" found.");
+    test_value(time.mjd(), 51544.00073130, 1.0e-6);
+    time.utc("2000-01-01T00:00:00");
+    test_assert(time.utc() == "2000-01-01T00:00:00",
+                "GTime::utc(): 2000-01-01T00:00:00 expected, "+
+                time.utc()+" found.");
+    test_value(time.mjd(), 51544.00074287, 1.0e-6);
+    time.utc("2006-01-01T00:00:00");
+    test_assert(time.utc() == "2006-01-01T00:00:00",
+                "GTime::utc(): 2006-01-01T00:00:00 expected, "+
+                time.utc()+" found.");
+    test_value(time.mjd(), 53736.0007544, 1.0e-6);
+    time.utc("2014-10-12T22:08:37");
+    test_assert(time.utc() == "2014-10-12T22:08:37",
+                "GTime::utc(): 2014-10-12T22:08:37 expected, "+
+                time.utc()+" found.");
+    test_value(time.mjd(), 56942.92342806, 1.0e-6);
 
     // Test convert method
     time.secs(t);
