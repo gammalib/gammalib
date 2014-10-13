@@ -70,14 +70,14 @@ protected:
     void        init_members(void);
     void        copy_members(const GVOHub& client);
     void        free_members(void);
-    void	    init_hub(void);
+    void	init_hub(void);
     void        start_hub(void);
     //bool        find_hub(void);
     //void        connect_to_hub(void);
-    void        register_service(void);
+    void        register_service(const socklen_t& sock);
     void        unregister(void);
-    void 	    handle_request(const socklen_t& sock);
-    //void        send_metadata(void);
+    void 	handle_request(const socklen_t& sock);
+    void        register_metadata(const GXml& xml);
     
     // Low-level methods
     void        post_string(const std::string& string) const;

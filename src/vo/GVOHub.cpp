@@ -186,10 +186,33 @@ void GVOHub::start(void)
  *
  *
  ***************************************************************************/
-void GVOHub::register_service(void)
+void GVOHub::register_service(const socklen_t& sock)
 {
-    printf("Registration request received");
-    // Return
+    printf("Registration request received\n");
+    // Declare message
+    std::string msg = "";
+
+    // Set methodResponse elts
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("<params>\n");
+    msg.append("<param><value><struct>\n");
+    msg.append("<member><name>samp.private-key</name><value><string>client-key:" + m_hub_id + "</string></value></member>\n");
+    msg.append("<member><name>samp.hub-id</name><value><string>client-id:" + m_hub_id + "</string></value></member>\n");
+    msg.append("<member><name>samp.self-id</name><value><string>client-id:" + m_client_id + "</string></value></member>\n");
+    msg.append("</struct></value></param>\n");
+    msg.append("</params>\n");
+    msg.append("</methodResponse>\n");
+
+    int length = msg.length();
+    
+    int n = write(sock,msg.c_str(),length);
+    if (n < 0) {
+        std::string msg = "Could not write socket buffer.";
+        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
+    }
+
+    //Return
     return;
 }
 
@@ -206,6 +229,20 @@ void GVOHub::unregister(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief 
+ *
+ *
+ ***************************************************************************/
+void GVOHub::register_metadata(const GXml& xml)
+{
+    printf("Client Metadata received\n");
+    // Search for metadata values to store
+    std::string client_name = get_response_value(xml, "samp.name");
+    //printf("Client Metadata : \n" + client_name.c_str());
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Print VO hub information
@@ -458,16 +495,14 @@ void GVOHub::handle_request(const socklen_t& sock)
     // endif: connection has been established
     //std::string method_called = get_response_value(xml, "methodName");
     if (method_called.compare("samp.hub.register") == 0) {
-        register_service();
+        register_service(sock);
     }
-    
-    // Same for writing, we'll use GXml
-    n = write(sock,"I got your message",18);
-    if (n < 0) {
-        std::string msg = "Could not write socket buffer.";
-        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
+    if (method_called.compare("samp.hub.unregister") == 0) {
+        unregister();
     }
-    
+    if (method_called.compare("samp.hub.declareMetadata") == 0) {
+        register_metadata(xml);
+    }
     // Return
     return;
 }
@@ -540,7 +575,55 @@ void GVOHub::start_hub(void)
     // Return
     return;
 }
+/***********************************************************************//**
+ * @brief Returns value for a SAMP client query parameter
+ *
+ * @param[in] xml client query XML document.
+ * @param[in] name Parameter name.
+ * @return Parameter value.
+ *
+ * Returns value for a SAMP client query parameter. If the specified
+ * parameter was not found or if the response structure is not compliant,
+ * an empty string is returned.
+ ***************************************************************************/
+std::string GVOHub::get_response_value(const GXml&        xml,
+                                          const std::string& name) const
+{
+    // Declare value
+    std::string value = "";
 
+    // Search for value of specified member
+    const GXmlNode* node = xml.element("methodCall", 0);
+    if (node != NULL) {
+        node = node->element("params", 0);
+        if (node != NULL) {
+            node = node->element("param", 1);
+            if (node != NULL) {
+	      node = node->element("value", 0);
+	      if (node != NULL) {
+		node = node->element("struct", 0);
+		if (node != NULL) {
+		  int num = node->elements("member");            
+                    for (int i = 0; i < num; ++i) {
+                            const GXmlNode* member = node->element("member", i);
+                            const GXmlNode* member_name = member->element("name", 0);
+			    std::string one_name;
+                            std::string one_value;
+                            get_name_value_pair(member_name, one_name, one_value);
+                            if (one_name == name) {
+                                value = one_value;
+                                break;
+                            }
+                        }
+		      }
+		    }
+		}
+            }
+        }
+
+    // Return value
+    return value;
+}
 
 /***********************************************************************//**
  * @brief Extract name / value pair from XML node
