@@ -1,4 +1,4 @@
-2014-10-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-10-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -19,7 +19,8 @@
         Improve CTA response computation for extended models
         Implement CTA cube-style analysis
         Implement full automatic typecasting in Python module
-        Optimize CTA binned and cube-style analysis 
+        Optimize CTA binned and cube-style analysis
+        Fill DETX and DETY values in GCTAResponseIrf::mc 
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
         Rename GIntegral::romb() to GIntegral::romberg()

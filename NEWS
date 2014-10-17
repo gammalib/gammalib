@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-12 October 2014
+17 October 2014
 
 
 1. Introduction
@@ -274,6 +274,9 @@ in GCTAPointing is now used to set the ALT_PNT and AZ_PNT attributes upon writin
 a dataset.
 
 Add read(), write() and save() methods to GCTAPsf2D and GCTAPsfKing classes.
+
+The GCTAResponseIrf::mc method now automatically sets the DETX and DETY
+values.
 
 
 21. COMPTEL interface
