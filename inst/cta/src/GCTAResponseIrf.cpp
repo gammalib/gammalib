@@ -516,9 +516,8 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
             GSkyDir sky_dir = photon.dir();
             sky_dir.rotate_deg(alpha, delta);
 
-            // Set measured photon arrival direction
-            GCTAInstDir inst_dir;
-            inst_dir.dir(sky_dir);
+            // Set measured photon arrival direction in instrument direction
+            GCTAInstDir inst_dir = pnt.instdir(sky_dir);
 
             // Set measured photon energy
             GEnergy energy = photon.energy();
