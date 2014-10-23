@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlNode.i - Abstract XML node base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,28 +33,6 @@
 #include "GXmlText.hpp"
 #include "GTypemaps.hpp"
 %}
-
-/* __ Typemaps ___________________________________________________________ */
-%typemap(out) GXmlNode* {
-    if (dynamic_cast<GXmlElement*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlElement, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlComment*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlComment, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlDocument*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlDocument, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlPI*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlPI, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlText*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlText, 0 |  0 );
-    }
-    else {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlNode, 0 |  0 );
-    }
-}
 
 
 /***********************************************************************//**
@@ -96,6 +74,7 @@ public:
     virtual int                elements(void) const;
     virtual int                elements(const std::string& name) const;
     virtual GXmlElement*       element(const int& index);
+    virtual GXmlElement*       element(const std::string& name);
     virtual GXmlElement*       element(const std::string& name, const int& index);
     virtual void               write(GUrl& url, const int& indent) const = 0;
     virtual NodeType           type(void) const = 0;

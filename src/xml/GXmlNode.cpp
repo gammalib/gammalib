@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include "GException.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlElement.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                 "GXmlNode::operator[](int&)"
@@ -39,7 +40,9 @@
 #define G_INSERT                          "GXmlNode::insert(int&, GXmlNode&)"
 #define G_REMOVE                                     "GXmlNode::remove(int&)"
 #define G_ELEMENT1                        "GXmlNode* GXmlNode::element(int&)"
-#define G_ELEMENT2          "GXmlNode* GXmlNode::element(std::string&, int&)"
+#define G_ELEMENT2                "GXmlNode* GXmlNode::element(std::string&)"
+#define G_ELEMENT3          "GXmlNode* GXmlNode::element(std::string&, int&)"
+#define G_EXTRACT_INDEX               "GXmlNode::extract_index(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -401,7 +404,7 @@ void GXmlNode::extend(const GXmlNode& node)
 /***********************************************************************//**
  * @brief Return number of GXMLElement children of node
  *
- * @return Number of GXMLElement children of XML node.
+ * @return Number of child elements.
  *
  * Returns the number of GXMLElement child elements of the XML node.
  * GXMLElement child elements are nodes of type NT_ELEMENT.
@@ -425,7 +428,7 @@ int GXmlNode::elements(void) const
  * @brief Return number of GXMLElement children with a given name
  *
  * @param[in] name Name of GXMLElement elements.
- * @return Number of GXMLElement children with a given @p name.
+ * @return Number of child elements with a given @p name.
  *
  * Returns the number of GXMLElement child elements of the XML node that
  * have a given @p name. GXMLElement child elements are nodes of type
@@ -452,7 +455,7 @@ int GXmlNode::elements(const std::string& name) const
  * @brief Return pointer to GXMLElement child
  *
  * @param[in] index Node index [0,...,elements()-1].
- * @return Pointer to GXMLElement child.
+ * @return Pointer to child element (NULL if element does not exist).
  *
  * @exception GException::out_of_range
  *            Child element index is out of range.
@@ -490,7 +493,7 @@ GXmlElement* GXmlNode::element(const int& index)
  * @brief Return pointer to GXMLElement child (const variant)
  *
  * @param[in] index Node index [0,...,elements()-1].
- * @return Pointer to GXMLElement child.
+ * @return Pointer to child element (NULL if element does not exist).
  *
  * @exception GException::out_of_range
  *            Child element index is out of range.
@@ -525,10 +528,118 @@ const GXmlElement* GXmlNode::element(const int& index) const
 
 
 /***********************************************************************//**
+ * @brief Return pointer on child walking down a hierarchy of tags
+ *
+ * @param[in] name Child element hierarchy.
+ * @return Pointer to child element (NULL if element does not exist).
+ *
+ * @exception GException::invalid_argument
+ *            Hierarchy string invalid.
+ *
+ * Returns a pointer to the child element described by a hierarchy of the
+ * following syntax
+ *
+ *     params > param[1] > value > struct
+ *
+ * The > symbols indicate subsequent hierarchy levels, the square brackets
+ * provides the index in case that multiple tags with the same name exist
+ * at a given hierarchy level. Omitting the index means that the first
+ * tag with the specified name is accessed.
+ *
+ * If the specified element does not exist the method returns a NULL pointer.
+ ***************************************************************************/
+GXmlElement* GXmlNode::element(const std::string& name)
+{
+    // Initialise child node pointer
+    GXmlElement* element = NULL;
+
+    // Split name into tags
+    std::vector<std::string> tags = gammalib::split(name, ">");
+
+    // Walk down the hierarchy
+    GXmlNode* current = this;
+    for (int i = 0; i < tags.size(); ++i) {
+
+        // Get tag name and index
+        std::string tag   = gammalib::strip_whitespace(tags[i]);
+        int         index = extract_index(tag);
+
+        // Get node
+        element = current->element(tag, index);
+        current = element;
+
+        // Break if node has not been found
+        if (current == NULL) {
+            break;
+        }
+        
+    } // endfor: walked down hierarchy
+
+    // Return child element
+    return element;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on child walking down a hierarchy of tags (const
+ *        version)
+ *
+ * @param[in] name Child element hierarchy.
+ * @return Pointer to child element (NULL if element does not exist).
+ *
+ * @exception GException::invalid_argument
+ *            Hierarchy string invalid.
+ *
+ * Returns a pointer to the child element described by a hierarchy of the
+ * following syntax
+ *
+ *     params > param[1] > value > struct
+ *
+ * The > symbols indicate subsequent hierarchy levels, the square brackets
+ * provides the index in case that multiple tags with the same name exist
+ * at a given hierarchy level. Omitting the index means that the first
+ * tag with the specified name is accessed.
+ *
+ * If the specified element does not exist the method returns a NULL pointer.
+ ***************************************************************************/
+const GXmlElement* GXmlNode::element(const std::string& name) const
+{
+    // Initialise child node pointer
+    const GXmlElement* element = NULL;
+
+    // Split name into tags
+    std::vector<std::string> tags = gammalib::split(name, ">");
+
+    // Walk down the hierarchy
+    const GXmlNode* current = this;
+    for (int i = 0; i < tags.size(); ++i) {
+
+        // Get tag name and index
+        std::string tag   = gammalib::strip_whitespace(tags[i]);
+        int         index = extract_index(tag);
+
+        // Get node
+        element = current->element(tag, index);
+        current = element;
+
+        // Break if node has not been found
+        if (current == NULL) {
+            break;
+        }
+        
+    } // endfor: walked down hierarchy
+
+    // Return child element
+    return element;
+}
+
+
+/***********************************************************************//**
  * @brief Return pointer on GXMLElement child of a given name
  *
  * @param[in] name Name of child element.
  * @param[in] index Node index [0,...,elements()-1].
+ * @return Pointer to child element (NULL if element does not exist).
  *
  * @exception GException::xml_name_not_found
  *            Child element name not found.
@@ -545,12 +656,12 @@ GXmlElement* GXmlNode::element(const std::string& name, const int& index)
 
     // Signal if no children exist
     if (n < 1) {
-        throw GException::xml_name_not_found(G_ELEMENT2, name);
+        throw GException::xml_name_not_found(G_ELEMENT3, name);
     }
 
     // If index is outside boundary then throw an error
     if (index < 0 || index >= n) {
-        throw GException::out_of_range(G_ELEMENT2, index, 0, n-1);
+        throw GException::out_of_range(G_ELEMENT3, index, 0, n-1);
     }
 
     // Get the requested child element
@@ -579,6 +690,7 @@ GXmlElement* GXmlNode::element(const std::string& name, const int& index)
  *
  * @param[in] name Name of child element.
  * @param[in] index Node index [0,...,elements()-1].
+ * @return Pointer to child element (NULL if element does not exist).
  *
  * @exception GException::xml_name_not_found
  *            Child element name not found.
@@ -595,12 +707,12 @@ const GXmlElement* GXmlNode::element(const std::string& name, const int& index) 
 
     // Signal if no children exist
     if (n < 1) {
-        throw GException::xml_name_not_found(G_ELEMENT2, name);
+        throw GException::xml_name_not_found(G_ELEMENT3, name);
     }
 
     // If index is outside boundary then throw an error
     if (index < 0 || index >= n) {
-        throw GException::out_of_range(G_ELEMENT2, index, 0, n-1);
+        throw GException::out_of_range(G_ELEMENT3, index, 0, n-1);
     }
 
     // Get the requested child element
@@ -694,4 +806,53 @@ void GXmlNode::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract index from tag
+ *
+ * @param[in,out] tag Tag.
+ * @return Index.
+ *
+ * @exception GException::invalid_argument
+ *            Tag string invalid.
+ *
+ * Extracts the index from a tag string of the following syntax
+ *
+ *     param[1]
+ *
+ * The value within the squared brackets provides the index of the element.
+ * If the squared brackets are omitted, an index of 0 will be returned.
+ ***************************************************************************/
+int GXmlNode::extract_index(std::string& tag) const
+{
+    // Initialise index
+    int index = 0;
+
+    // Search for squared brackets, extract index, and strip brackets
+    // from tag
+    size_t      start = tag.find_first_of("[");
+    if (start != std::string::npos) {
+        size_t stop = tag.find_first_of("]", start);
+        if (stop == std::string::npos) {
+            std::string msg = "Tag specifier \""+tag+"\" is missing "
+                              "a ] bracket.";
+            throw GException::invalid_argument(G_EXTRACT_INDEX, msg);
+        }
+        else {
+            size_t length = stop - start - 1;
+            if (length < 1) {
+                std::string msg = "Index value is missing for \""+tag+"\".";
+                throw GException::invalid_argument(G_EXTRACT_INDEX, msg);
+            }
+            else {
+                index = gammalib::toint(tag.substr(start+1, length));
+                tag   = tag.substr(0, start);
+            }
+        }
+    }
+
+    // Return index
+    return index;
 }

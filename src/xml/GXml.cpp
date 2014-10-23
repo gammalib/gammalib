@@ -355,11 +355,11 @@ void GXml::extend(const GXmlNode& node)
 
 
 /***********************************************************************//**
- * @brief Return number of GXMLElement children in XML document root
+ * @brief Return number of child elements in XML document root
  *
- * @return Number of GXMLElement children in XML document root.
+ * @return Number of child elements in XML document root.
  *
- * Returns the number of GXMLElement child elements of the XML document root.
+ * Returns the number of GXmlElement child elements of the XML document root.
  * GXMLElement child elements are nodes of type NT_ELEMENT.
  ***************************************************************************/
 int GXml::elements(void) const
@@ -370,15 +370,15 @@ int GXml::elements(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of GXMLElement children with a given name in XML
+ * @brief Return number of child elements with a given name in XML
  *        document root
  *
  * @param[in] name Name of child elements.
- * @return Number of GXMLElement children with a given @p name in XML
+ * @return Number of child elements with a given @p name in XML
  *         document root.
  *
  * Returns the number of GXMLElement child elements of the XML document root
- * that have a given @p name. GXMLElement child elements are nodes of type
+ * that have a given @p name. GXmlElement child elements are nodes of type
  * NT_ELEMENT.
  ***************************************************************************/
 int GXml::elements(const std::string& name) const
@@ -389,10 +389,10 @@ int GXml::elements(const std::string& name) const
 
 
 /***********************************************************************//**
- * @brief Return pointer to GXMLElement child
+ * @brief Return pointer to child element
  *
  * @param[in] index Node index [0,...,elements()-1].
- * @return Pointer to GXMLElement child.
+ * @return Pointer to child element.
  *
  * Returns a pointer to the child number @p index of the XML document root.
  * An exception will be thrown if the @p index is not valid.
@@ -405,10 +405,10 @@ GXmlElement* GXml::element(const int& index)
 
 
 /***********************************************************************//**
- * @brief Return pointer to GXMLElement child (const variant)
+ * @brief Return pointer to child element (const variant)
  *
  * @param[in] index Node index [0,...,elements()-1].
- * @return Pointer to GXMLElement child.
+ * @return Pointer to child element.
  *
  * Returns a pointer to the child number @p index of the XML document root.
  * An exception will be thrown if the @p index is not valid.
@@ -421,11 +421,57 @@ const GXmlElement* GXml::element(const int& index) const
 
 
 /***********************************************************************//**
- * @brief Return pointer on GXMLElement child of a given name
+ * @brief Return pointer to child element by hierarchy
+ *
+ * @param[in] name Child element hierarchy.
+ * @return Pointer to child element.
+ *
+ * Returns a pointer to the child element described by a hierarchy of the
+ * following syntax
+ *
+ *     params > param[1] > value > struct
+ *
+ * The > symbols indicate subsequent hierarchy levels, the square brackets
+ * provides the index in case that multiple tags with the same name exist
+ * at a given hierarchy level. Omitting the index means that the first
+ * tag with the specified name is accessed.
+ ***************************************************************************/
+GXmlElement* GXml::element(const std::string& name)
+{
+    // Return pointer
+    return m_root.element(name);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to child element by hierarchy (const version)
+ *
+ * @param[in] name Child element hierarchy.
+ * @return Pointer to child element.
+ *
+ * Returns a pointer to the child element described by a hierarchy of the
+ * following syntax
+ *
+ *     params > param[1] > value > struct
+ *
+ * The > symbols indicate subsequent hierarchy levels, the square brackets
+ * provides the index in case that multiple tags with the same name exist
+ * at a given hierarchy level. Omitting the index means that the first
+ * tag with the specified name is accessed.
+ ***************************************************************************/
+const GXmlElement* GXml::element(const std::string& name) const
+{
+    // Return pointer
+    return m_root.element(name);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to child element of a given name
  *
  * @param[in] name Name of child element.
  * @param[in] index Node index [0,...,elements()-1].
- * @return Pointer to GXMLElement child.
+ * @return Pointer to child element.
  *
  * Returns a pointer to the child number @p index with @p name of the XML
  * document root. An exception will be thrown if the @p index is not valid.
@@ -438,11 +484,11 @@ GXmlElement* GXml::element(const std::string& name, const int& index)
 
 
 /***********************************************************************//**
- * @brief Return pointer on GXMLElement child of a given name (const variant)
+ * @brief Return pointer to child element of a given name (const variant)
  *
  * @param[in] name Name of child element.
  * @param[in] index Node index [0,...,elements()-1].
- * @return Pointer to GXMLElement child.
+ * @return Pointer to child element.
  *
  * Returns a pointer to the child number @p index with @p name of the XML
  * document root. An exception will be thrown if the @p index is not valid.

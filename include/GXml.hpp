@@ -191,8 +191,8 @@ public:
     void               clear(void);
     GXml*              clone(void) const;
     std::string        classname(void) const;
-    int                size(void) const { return m_root.size(); }
-    bool               is_empty(void) const { return m_root.is_empty(); }
+    int                size(void) const;
+    bool               is_empty(void) const;
     GXmlNode*          set(const int& index, const GXmlNode& node);
     GXmlNode*          append(const GXmlNode& node);
     GXmlElement*       append(const std::string& segment);
@@ -204,6 +204,8 @@ public:
     int                elements(const std::string& name) const;
     GXmlElement*       element(const int& index);
     const GXmlElement* element(const int& index) const;
+    GXmlElement*       element(const std::string& name);
+    const GXmlElement* element(const std::string& name) const;
     GXmlElement*       element(const std::string& name, const int& index);
     const GXmlElement* element(const std::string& name, const int& index) const;
     void               load(const std::string& filename);
@@ -249,6 +251,30 @@ inline
 std::string GXml::classname(void) const
 {
     return ("GXml");
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of child nodes
+ *
+ * @return Number of child nodes in node.
+ ***************************************************************************/
+inline
+int GXml::size(void) const
+{
+    return m_root.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if document has no child nodes
+ *
+ * @return True if document has no child nodes.
+ ***************************************************************************/
+inline
+bool GXml::is_empty(void) const
+{
+    return m_root.is_empty();
 }
 
 #endif /* GXML_HPP */

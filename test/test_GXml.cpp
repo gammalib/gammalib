@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   test_GXml.hpp - Test xml module                       *
+ *                    test_GXml.cpp - Test xml module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -352,6 +352,22 @@ void TestGXml::test_GXml_access(void)
                     "Unexpected element name "+ptr->name());
     }
 
+    // Test hierarchy access
+    GXmlElement* ptr = NULL;
+    ptr = xml.element("source_library");
+    test_assert(ptr->name() == "source_library", "Test hierarchy access",
+                "Unexpected element name "+ptr->name());
+    ptr = xml.element("source_library > source");
+    test_assert(ptr->name() == "source", "Test hierarchy access",
+                "Unexpected element name "+ptr->name());
+    ptr = xml.element("source_library > source > spectrum");
+    test_assert(ptr->name() == "spectrum", "Test hierarchy access",
+                "Unexpected element name "+ptr->name());
+    ptr = xml.element("source_library > source > spectrum > parameter[2]");
+    test_assert(ptr->name() == "parameter", "Test hierarchy access",
+                "Unexpected element name "+ptr->name());
+    test_assert(ptr->attribute("name") == "Scale", "Test hierarchy access",
+                "Unexpected element attribute "+ptr->attribute("name"));
 
     // Return
     return;

@@ -1,4 +1,4 @@
-2014-10-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-10-23  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -14,6 +14,7 @@
         Add read(), write() and save() methods to GCTAPsf2D and GCTAPsfKing
         Add classname() method to all classes
         Add utc() methods to GTime class
+        Add hierachical element access methods to GXml and GXmlNode
         Read/write altitude and azimuth attributes of CTA data
         Refactor CTA response class, add GCTAResponseCube class
         Improve CTA response computation for extended models

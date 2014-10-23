@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.hpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -752,6 +752,7 @@ std::string GVOClient::get_response_value(const GXml&        xml,
     std::string value = "";
 
     // Search for value of specified member
+    /*
     const GXmlNode* node = xml.element("methodResponse", 0);
     if (node != NULL) {
         node = node->element("params", 0);
@@ -775,6 +776,21 @@ std::string GVOClient::get_response_value(const GXml&        xml,
                         }
                     }
                 }
+            }
+        }
+    }
+    */
+    const GXmlNode* node = xml.element("methodResponse > params > param > value > struct");
+    if (node != NULL) {
+        int num = node->elements("member");
+        for (int i = 0; i < num; ++i) {
+            const GXmlNode* member = node->element("member", i);
+            std::string one_name;
+            std::string one_value;
+            get_name_value_pair(member, one_name, one_value);
+            if (one_name == name) {
+                value = one_value;
+                break;
             }
         }
     }

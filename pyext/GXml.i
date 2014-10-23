@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GXml.i - XML class                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,28 +29,6 @@
 #include "GTools.hpp"
 %}
 
-/* __ Typemaps ___________________________________________________________ */
-%typemap(out) GXmlNode* {
-    if (dynamic_cast<GXmlElement*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlElement, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlText*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlText, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlComment*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlComment, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlPI*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlPI, 0 |  0 );
-    }
-    else if (dynamic_cast<GXmlDocument*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlDocument, 0 |  0 );
-    }
-    else {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlNode, 0 |  0 );
-    }
-}
-
 
 /***********************************************************************//**
  * @class GXml
@@ -66,25 +44,27 @@ public:
     virtual ~GXml(void);
 
     // Methods
-    void               clear(void);
-    GXml*              clone(void) const;
-    int                size(void) const;
-    bool               is_empty(void) const;
-    GXmlNode*          set(const int& index, const GXmlNode& node);
-    GXmlNode*          append(const GXmlNode& node);
-    GXmlElement*       append(const std::string& segment);
-    GXmlNode*          insert(const int& index, const GXmlNode& node);
-    void               remove(const int& index);
-    void               reserve(const int& num);
-    void               extend(const GXmlNode& node);
-    int                elements(void) const;
-    int                elements(const std::string& name) const;
-    GXmlElement*       element(const int& index);
-    GXmlElement*       element(const std::string& name, const int& index);
-    void               load(const std::string& filename);
-    void               save(const std::string& filename);
-    void               read(const GUrl& url);
-    void               write(GUrl& url, const int& indent = 0) const;
+    void         clear(void);
+    GXml*        clone(void) const;
+    std::string  classname(void) const;
+    int          size(void) const;
+    bool         is_empty(void) const;
+    GXmlNode*    set(const int& index, const GXmlNode& node);
+    GXmlNode*    append(const GXmlNode& node);
+    GXmlElement* append(const std::string& segment);
+    GXmlNode*    insert(const int& index, const GXmlNode& node);
+    void         remove(const int& index);
+    void         reserve(const int& num);
+    void         extend(const GXmlNode& node);
+    int          elements(void) const;
+    int          elements(const std::string& name) const;
+    GXmlElement* element(const int& index);
+    GXmlElement* element(const std::string& name);
+    GXmlElement* element(const std::string& name, const int& index);
+    void         load(const std::string& filename);
+    void         save(const std::string& filename);
+    void         read(const GUrl& url);
+    void         write(GUrl& url, const int& indent = 0) const;
 };
 
 

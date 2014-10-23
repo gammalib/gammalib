@@ -82,19 +82,21 @@ public:
     virtual void               clear(void) = 0;
     virtual GXmlNode*          clone(void) const = 0;
     virtual std::string        classname(void) const = 0;
-    virtual int                size(void) const { return m_nodes.size(); }
-    virtual bool               is_empty(void) const { return m_nodes.empty(); }
+    virtual int                size(void) const;
+    virtual bool               is_empty(void) const;
     virtual GXmlNode*          set(const int& index, const GXmlNode& node);
     virtual GXmlNode*          append(const GXmlNode& node);
     virtual GXmlElement*       append(const std::string& segment);
     virtual GXmlNode*          insert(const int& index, const GXmlNode& node);
     virtual void               remove(const int& index);
-    virtual void               reserve(const int& num) { return m_nodes.reserve(num); }
+    virtual void               reserve(const int& num);
     virtual void               extend(const GXmlNode& node);
     virtual int                elements(void) const;
     virtual int                elements(const std::string& name) const;
     virtual GXmlElement*       element(const int& index);
     virtual const GXmlElement* element(const int& index) const;
+    virtual GXmlElement*       element(const std::string& name);
+    virtual const GXmlElement* element(const std::string& name) const;
     virtual GXmlElement*       element(const std::string& name, const int& index);
     virtual const GXmlElement* element(const std::string& name, const int& index) const;
     virtual void               write(GUrl& url, const int& indent) const = 0;
@@ -108,9 +110,47 @@ protected:
     void init_members(void);
     void copy_members(const GXmlNode& node);
     void free_members(void);
+    int  extract_index(std::string& tag) const;
 
     // Protected data members
     std::vector<GXmlNode*> m_nodes;   //!< Pointer to child nodes
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of child nodes
+ *
+ * @return Number of child nodes in node.
+ ***************************************************************************/
+inline
+int GXmlNode::size(void) const
+{
+    return m_nodes.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if node has no child nodes
+ *
+ * @return True if node has no child nodes.
+ ***************************************************************************/
+inline
+bool GXmlNode::is_empty(void) const
+{
+    return m_nodes.empty();
+}
+
+
+/***********************************************************************//**
+ * @brief Reserve space for child nodes
+ *
+ * @param[in] num Number of child nodes for which space should be reserved.
+ ***************************************************************************/
+inline
+void GXmlNode::reserve(const int& num)
+{
+    m_nodes.reserve(num);
+    return;
+}
 
 #endif /* GXMLNODE_HPP */

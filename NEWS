@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-17 October 2014
+23 October 2014
 
 
 1. Introduction
@@ -156,7 +156,13 @@ array values.
 
 14. XML module
 --------------
-None
+Hierarchical element access methods have been added to GXml and GXmlNode.
+Using a string in the format "params > param[1] > value > struct" one can
+in a single method call walk down the hierarchy of an XML document to
+access an element. The squared brackets allow specifying an element index
+in case that multiple elements with the same name exist. If squared brackets
+are omitted, an index of 0 is assumed. If the indicated element does not
+exist, the method returns a pointer to NULL.
 
 
 15. VO module
