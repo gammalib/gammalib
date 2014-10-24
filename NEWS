@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-23 October 2014
+24 October 2014
 
 
 1. Introduction
@@ -283,6 +283,10 @@ Add read(), write() and save() methods to GCTAPsf2D and GCTAPsfKing classes.
 
 The GCTAResponseIrf::mc method now automatically sets the DETX and DETY
 values.
+
+Events are now only loaded when needed into GCTAObservation. This reduces memory
+the usage. The method dispose_events() has been added to explicitely allow the
+disposal of the events. 
 
 
 21. COMPTEL interface

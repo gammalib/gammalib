@@ -83,6 +83,10 @@ public:
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
+    // Overwrite virtual base class methods
+    virtual const GEvents* events(void) const;
+    virtual void           events(const GEvents& events);
+
     // Other methods
     bool                has_response(void) const;
     void                read(const GFits& fits);
@@ -110,6 +114,7 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    void                dispose_events(void);
 
 protected:
     // Protected methods
@@ -118,10 +123,12 @@ protected:
     void free_members(void);
     void read_attributes(const GFitsHDU& hdu);
     void write_attributes(GFitsHDU& hdu) const;
+    void set_event_type(void);
 
     // Protected members
     std::string   m_instrument;  //!< Instrument name
     std::string   m_eventfile;   //!< Event filename
+    std::string   m_eventtype;   //!< Event type (for XML file)
     GCTAResponse* m_response;    //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;    //!< Pointing direction
     int           m_obs_id;      //!< Observation ID
@@ -132,7 +139,7 @@ protected:
     double        m_dec_obj;     //!< Declination of object (degrees)
 
     // Special protected member for GCTAModelCubeBackground friend
-    std::string  m_bgdfile;      //!< Background filename
+    std::string   m_bgdfile;     //!< Background filename
 };
 
 

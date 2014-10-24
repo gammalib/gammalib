@@ -1,4 +1,4 @@
-2014-10-23  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-10-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -19,8 +19,9 @@
         Refactor CTA response class, add GCTAResponseCube class
         Improve CTA response computation for extended models
         Implement CTA cube-style analysis
-        Implement full automatic typecasting in Python module
         Optimize CTA binned and cube-style analysis
+        Load events only when needed into GCTAObservation
+        Implement full automatic typecasting in Python module
         Fill DETX and DETY values in GCTAResponseIrf::mc 
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground

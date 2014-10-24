@@ -58,6 +58,7 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
 #define G_LOAD           "GCTAObservation::load(std::string&, std::string&, "\
                                                               "std::string&)"
+#define G_EVENTS                                  "GCTAObservation::events()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -92,9 +93,9 @@ GCTAObservation::GCTAObservation(void) : GObservation()
  *
  * @param[in] instrument Instrument name.
  *
- * Creates empty CTA observation class for a given instrument. This enables
- * using the CTA specific interface for any other THE instrument. Note that
- * each other THE instruments needs a specific registry at the beginning
+ * Creates an empty CTA observation for a given instrument. This enables
+ * using the CTA specific interface for any other VHE instrument. Note that
+ * each other VHE instruments needs a specific registry at the beginning
  * of the GCTAObservation.cpp file. So far the following instruments are
  * supported: CTA, HESS, VERITAS, MAGIC.
  ***************************************************************************/
@@ -118,7 +119,7 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
  * @param[in] expcube Exposure cube file name.
  * @param[in] psfcube Psf cube file name.
  *
- * Creates CTA observation from a counts cube, an exposure cube and a Psf
+ * Creates a CTA observation from a counts cube, an exposure cube and a Psf
  * cube.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const std::string& cntcube,
@@ -141,7 +142,7 @@ GCTAObservation::GCTAObservation(const std::string& cntcube,
  *
  * @param[in] obs CTA observation.
  *
- * Creates CTA observation by copying an existing CTA observation.
+ * Creates a CTA observation by copying an existing CTA observation.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const GCTAObservation& obs) : GObservation(obs)
 {
@@ -385,6 +386,11 @@ void GCTAObservation::response(const GCTAExposure& expcube,
  *     </observation>
  *
  * for a binned observation.
+ *
+ * The method does no load the events into memory but stores the file name
+ * of the event file. The events are only loaded when required. This reduces
+ * the memory needs for an CTA observation object and allows for loading
+ * of event information upon need.
  ***************************************************************************/
 void GCTAObservation::read(const GXmlElement& xml)
 {
@@ -414,11 +420,14 @@ void GCTAObservation::read(const GXmlElement& xml)
         if ((par->attribute("name") == "EventList") ||
             (par->attribute("name") == "CountsMap")) {
 
+            // Store event type
+            m_eventtype = par->attribute("name");
+
             // Read eventlist file name
             std::string filename = par->attribute("file");
 
-            // Load unbinned observation
-            load(filename);
+            // Load events
+            //load(filename); //!< We now do not load the events immediately
 
             // Store event filename
             m_eventfile = filename;
@@ -509,8 +518,8 @@ void GCTAObservation::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::no_list
- *            No valid CTA event list or event cube found.
+ * @exception GException::invalid_value
+ *            No valid events found in observation.
  * @exception GException::xml_invalid_parnum
  *            Invalid number of parameters found in XML element.
  * @exception GException::xml_invalid_parnames
@@ -532,31 +541,29 @@ void GCTAObservation::read(const GXmlElement& xml)
  *     </observation>
  *
  * for a binned observation.
- *
- * @todo We should create a special exception that informs that there is
- *       neither a valid CTA event list nor a valid CTA counts map in this
- *       observations.
  ***************************************************************************/
 void GCTAObservation::write(GXmlElement& xml) const
 {
-    // Determine if we deal with a binned or unbinned observation
-    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(m_events);
-    const GCTAEventCube* cube = dynamic_cast<const GCTAEventCube*>(m_events);
-    if (list == NULL && cube == NULL) {
-        throw GException::no_list(G_WRITE);
-    }
-
-    // Set event list flag
-    bool is_list = (list != NULL);
-
-    // If XML element has 0 nodes then required parameter nodes
-    if (xml.elements() == 0) {
-        if (is_list) {
-            xml.append(GXmlElement("parameter name=\"EventList\""));
+    // Throw an exception if m_eventtype is neither "EventList" nor
+    // "CountsMap"
+    if ((m_eventtype != "EventList") && (m_eventtype != "CountsMap")) {
+        std::string msg;
+        if (m_eventtype.length() == 0) {
+            msg = "The observation does not contain any events, hence "
+                  "it cannot be written into an XML file.";
         }
         else {
-            xml.append(GXmlElement("parameter name=\"CountsMap\""));
+            msg = "The observation contains an unknown event type \""+
+                  m_eventtype+"\". The event type needs to be either "
+                  "\"EventList\" or \"CountsMap\".";
         }
+        throw GException::invalid_value(G_WRITE, msg);
+    }
+
+    // If XML element has 0 nodes then add the required parameter nodes
+    if (xml.elements() == 0) {
+        std::string text = "parameter name=\""+m_eventtype+"\"";
+        xml.append(GXmlElement(text));
     }
 
     // Determine number of parameter nodes in XML element
@@ -576,8 +583,7 @@ void GCTAObservation::write(GXmlElement& xml) const
         GXmlElement* par = xml.element("parameter", i);
 
         // Handle Eventlist and Countsmap
-        if ((par->attribute("name") == "EventList") ||
-            (par->attribute("name") == "CountsMap")) {
+        if (par->attribute("name") == m_eventtype) {
             par->attribute("file", m_eventfile);
             npar[0]++;
         }
@@ -649,6 +655,9 @@ void GCTAObservation::read(const GFits& fits)
 
     }
 
+    // Set the event type
+    set_event_type();
+
     // Return
     return;
 }
@@ -658,12 +667,14 @@ void GCTAObservation::read(const GFits& fits)
  * @brief Write CTA observation into FITS object.
  *
  * @param[in] fits FITS object.
+ *
+ * This method does nothing if no events are within the CTA observation.
  ***************************************************************************/
 void GCTAObservation::write(GFits& fits) const
 {
     // Get pointers on event list
-    GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
-    GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(m_events);
+    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(events());
+    const GCTAEventCube* cube = dynamic_cast<const GCTAEventCube*>(events());
 
     // Case A: Observation contains an event list
     if (list != NULL) {
@@ -736,6 +747,7 @@ void GCTAObservation::load(const std::string& filename)
 void GCTAObservation::load(const std::string& cntcube,
                            const std::string& expcube,
                            const std::string& psfcube) {
+
     // Load counts cube FITS file
     load(cntcube);
 
@@ -783,6 +795,101 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
 
 
 /***********************************************************************//**
+ * @brief Set event container
+ *
+ * @param[in] events Event container.
+ *
+ * Set the event container for this observation by cloning the @p events.
+ ***************************************************************************/
+void GCTAObservation::events(const GEvents& events)
+{
+    // Remove an existing event container
+    if (m_events != NULL) delete m_events;
+
+    // Clone events
+    m_events = events.clone();
+
+    // Set event type
+    set_event_type();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to event container
+ *
+ * @return Pointer to event container (always valid).
+ *
+ * @exception GException::invalid_value
+ *            Events could not be fetched from disk.
+ *
+ * Returns a pointer to the event container. If no events exist the method
+ * tries to fetch events from the file specified by the m_eventfile member.
+ * If this fails, an exception will be thrown.
+ ***************************************************************************/
+const GEvents* GCTAObservation::events(void) const
+{
+    // If event container is offline then bring it online now
+    if (m_events == NULL) {
+
+        // Try loading the events from FITS file. Catch any exception. Put
+        // the code into a critical zone as it might be called from within
+        // a parallelized thread.
+        try {
+            #pragma omp critical
+            {
+                const_cast<GCTAObservation*>(this)->load(m_eventfile);
+            }
+        }
+        catch (std::exception &e) {
+            ;
+        }
+
+        // Throw an exception if the event container is still not valid
+        if (m_events == NULL) {
+            std::string msg;
+            if (m_eventfile.length() == 0) {
+                msg = "The observation does not contain any information about "
+                      "the event file, hence the events cannot be fetched "
+                      "from disk for access.";
+            }
+            else {
+                msg = "Could no load the event file \""+m_eventfile+"\" into "
+                      "the observation. Please check that the file name is "
+                      "valid and that the file contains events.";
+            }
+            throw GException::invalid_value(G_EVENTS, msg);
+        }
+
+    }
+
+    // Return pointer to event container
+    return m_events;
+}
+
+
+/***********************************************************************//**
+ * @brief Dispose events
+ *
+ * Drops the events from the observation. Be careful with using this method
+ * as the events are not saved before being disposed.
+ ***************************************************************************/
+void GCTAObservation::dispose_events(void)
+{
+    // Delete any existing event container
+    if (m_events != NULL) delete m_events;
+
+    // Signal that we disposed the events
+    m_events = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print CTA observation information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -803,6 +910,8 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Name")+name());
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
+        result.append("\n"+gammalib::parformat("Event file")+eventfile());
+        result.append("\n"+gammalib::parformat("Event type")+m_eventtype);
         result.append("\n"+gammalib::parformat("Statistics")+statistics());
         result.append("\n"+gammalib::parformat("Ontime"));
         result.append(gammalib::str(ontime())+" s");
@@ -855,6 +964,7 @@ void GCTAObservation::init_members(void)
     // Initialise members
     m_instrument = "CTA";
     m_eventfile.clear();
+    m_eventtype.clear();
     m_bgdfile.clear();
     m_response = NULL;
     m_pointing.clear();
@@ -880,6 +990,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     // Copy members
     m_instrument = obs.m_instrument;
     m_eventfile  = obs.m_eventfile;
+    m_eventtype  = obs.m_eventtype;
     m_bgdfile    = obs.m_bgdfile;
     m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
@@ -1052,6 +1163,49 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     // Other information
     hdu.card("EUNIT",    "TeV",    "Energy unit");
     hdu.card("EVTVER",   "draft1", "Event list version number");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set event type
+ *
+ * Depending on the type of events that are stored in the m_events member,
+ * set the event type to
+ *
+ *     "EventList" if m_events is of type GCTAEventList
+ *     "CountsMap" if m_events is of type GCTAEventCube
+ *     "Events" if m_events is not NULL but neither GCTAEventList nor GCTAEventCube
+ *     "" if m_events is NULL
+ *
+ ***************************************************************************/
+void GCTAObservation::set_event_type(void)
+{
+    // Continue only if events are loaded
+    if (m_events != NULL) {
+
+        // Case A: we have a list
+        GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
+        if (list != NULL) {
+            m_eventtype = "EventList";
+        }
+
+        // Case B: we have a cube
+        else {
+            GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(m_events);
+            if (cube != NULL) {
+                m_eventtype = "CountsMap";
+            }
+
+            // Case C: we don't know what we have
+            else {
+                m_eventtype = "Events";
+            }
+        }
+
+    }
 
     // Return
     return;
