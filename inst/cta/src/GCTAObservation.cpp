@@ -34,6 +34,7 @@
 #include "GTools.hpp"
 #include "GIntegral.hpp"
 #include "GCTAException.hpp"
+#include "GCTASupport.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTAResponseCube.hpp"
@@ -53,7 +54,8 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_RESPONSE_SET                "GCTAObservation::response(GResponse&)"
-#define G_RESPONSE_GET            "GCTAResponse* GCTAObservation::response()"
+#define G_RESPONSE_GET                          "GCTAObservation::response()"
+#define G_ROI                                        "GCTAObservation::roi()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
 #define G_LOAD           "GCTAObservation::load(std::string&, std::string&, "\
@@ -357,6 +359,76 @@ void GCTAObservation::response(const GCTAExposure& expcube,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get Region of Interest
+ *
+ * @exception GException::invalid_value
+ *            Events is not an event list or unable to open an event file.
+ *
+ * Extract the Region of Interest from the event list. If events are loaded
+ * into the observation, the RoI is simply copied over. If no events are
+ * present, the method attemps to read the RoI from the header keywords of
+ * the event file. This obviously only works if a valid event file name is
+ * available.
+ ***************************************************************************/
+GCTARoi GCTAObservation::roi(void) const
+{
+    // Initialise ROI
+    GCTARoi roi;
+
+    // If CTA has events then simply retrieve the ROI from the event list
+    if (m_events != NULL) {
+
+        // Extract region of interest from CTA observation
+        const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(m_events);
+        if (list == NULL) {
+            std::string msg = "The observation does not contain an event "
+                              "list. An event list is needed to retrieve "
+                              "the Region of Interest.";
+            throw GException::invalid_value(G_ROI, msg);
+        }
+        roi = list->roi();
+
+    }
+
+    // ... otherwise try reading the ROI from the event file header
+    else {
+
+        // Try opening event file
+        GFits fits;
+        try {
+            fits.open(m_eventfile);
+        }
+        catch (std::exception &e) {
+            std::string msg;
+            if (m_eventfile.length() == 0) {
+                msg = "The observation does not contain any information about "
+                      "the event file, hence the Region of Interest cannot be "
+                      "determined.";
+            }
+            else {
+                msg = "Could no open the event file \""+m_eventfile+"\". "
+                      "Please check that the file name is valid.";
+            }
+            throw GException::invalid_value(G_ROI, msg);
+        }
+    
+        // Get event list HDU
+        const GFitsTable& hdu = *fits.table("EVENTS");
+
+        // Read ROI from data selection keywords
+        roi = gammalib::read_ds_roi(hdu);
+
+        // Close FITS file
+        fits.close();
+
+    }
+
+    // Return ROI
+    return roi;
 }
 
 
