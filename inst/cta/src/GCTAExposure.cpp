@@ -37,7 +37,6 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                           "GCTAExposure::set(GCTAObservation&)"
-#define G_FILL                           "GCTAExposure::fill(GObservations&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -346,19 +345,11 @@ void GCTAExposure::fill(const GObservations& obs)
     for (int i = 0; i < obs.size(); ++i) {
 
         // Get observation and continue only if it is a CTA observation
-        const GCTAObservation *cta = dynamic_cast<const GCTAObservation*>(obs[i]);
+        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
         if (cta != NULL) {
 
             // Extract region of interest from CTA observation
-            const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(cta->events());
-            if (list == NULL) {
-                std::string msg = "CTA Observation does not contain an event "
-                                  "list. Event list information is needed to "
-                                  "retrieve the Region of Interest for each "
-                                  "CTA observation.";
-                throw GException::invalid_value(G_FILL, msg);
-            }
-            const GCTARoi& roi = list->roi();
+            GCTARoi roi = cta->roi();
 
             // Get references on CTA response and pointing direction
             const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
