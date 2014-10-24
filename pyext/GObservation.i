@@ -59,30 +59,30 @@ public:
     virtual void             write(GXmlElement& xml) const = 0;
 
     // Virtual methods
-    virtual double likelihood(const GModels& models,
-                              GVector*       gradient,
-                              GMatrixSparse* curvature,
-                              double*        npred) const;
-    virtual double model(const GModels& models,
-                         const GEvent&  event,
-                         GVector*       gradient = NULL) const;
-    virtual double npred(const GModels& models,
-                         GVector*       gradient = NULL) const;
-    virtual double npred(const GModel& model) const;
-    virtual double model_grad(const GModel&    model,
-                              const GModelPar& par,
-                              const GEvent&    event) const;
-    virtual double npred_grad(const GModel&    model,
-                              const GModelPar& par) const;
+    virtual const GEvents*   events(void) const;
+    virtual void             events(const GEvents& events);
+    virtual double           likelihood(const GModels& models,
+                                        GVector*       gradient,
+                                        GMatrixSparse* curvature,
+                                        double*        npred) const;
+    virtual double           model(const GModels& models,
+                                   const GEvent&  event,
+                                   GVector*       gradient = NULL) const;
+    virtual double           npred(const GModels& models,
+                                   GVector*       gradient = NULL) const;
+    virtual double           npred(const GModel& model) const;
+    virtual double           model_grad(const GModel&    model,
+                                        const GModelPar& par,
+                                        const GEvent&    event) const;
+    virtual double           npred_grad(const GModel&    model,
+                                        const GModelPar& par) const;
 
     // Implemented methods
     void               name(const std::string& name);
     void               id(const std::string& id);
-    void               events(const GEvents& events);
     void               statistics(const std::string& statistics);
     const std::string& name(void) const;
     const std::string& id(void) const;
-    const GEvents*     events(void) const;
     const std::string& statistics(void) const;
 };
 
