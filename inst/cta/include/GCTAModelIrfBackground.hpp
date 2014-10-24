@@ -78,7 +78,7 @@ public:
     // Other methods
     GModelSpectral* spectral(void) const;
     GModelTemporal* temporal(void) const;
-    
+
 private:
     // Methods
     void            init_members(void);
@@ -92,7 +92,7 @@ private:
     // ROI integration kernel over theta
     class npred_roi_kern_theta : public GFunction {
     public:
-    	npred_roi_kern_theta(const GCTABackground* bgd,
+        npred_roi_kern_theta(const GCTABackground* bgd,
                              const double&         logE) :
                              m_bgd(bgd),
                              m_logE(logE) { }
@@ -105,7 +105,7 @@ private:
     // ROI integration kernel over phi
     class npred_roi_kern_phi : public GFunction {
     public:
-    	npred_roi_kern_phi(const GCTABackground* bgd,
+        npred_roi_kern_phi(const GCTABackground* bgd,
                            const double&         logE,
                            const double&         theta) :
                            m_bgd(bgd),

@@ -71,7 +71,7 @@ public:
                                   GRan& ran) const;
     const GModelSpectralNodes& spectrum(void) const;
     std::string                print(const GChatter& chatter = NORMAL) const;
-   
+
     // Methods
     const GCTAResponseTable&   table(void) const;
     void                       table(const GCTAResponseTable& table);
@@ -79,7 +79,7 @@ public:
     void                       write(GFitsBinTable& hdu) const;
     void                       save(const std::string& filename,
                                     const bool& clobber = false) const;
-    
+
 private:
     // Methods
     void init_members(void);

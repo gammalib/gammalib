@@ -257,7 +257,7 @@ double GCTABackground3D::operator()(const double& logE,
     if (rate < 0.0) {
         rate = 0.0;
     }
-    
+
     // Return background rate
     return rate;
 }
@@ -748,10 +748,10 @@ void GCTABackground3D::init_mc_cache(const bool& etrue) const
             // Normalize cumulative pixel fluxes so that the values in the
             // cache run from 0 to 1
             if (total_rate > 0.0) {
-        		for (int k = 0, element = offset; k < m_mc_npix; ++k, ++element) {
-        			m_mc_cache[element] /= total_rate;
-        		}
-        	}
+                for (int k = 0, element = offset; k < m_mc_npix; ++k, ++element) {
+                    m_mc_cache[element] /= total_rate;
+                }
+            }
 
             // Make sure that last pixel in the cache is >1
             m_mc_cache[m_mc_npix+offset] = 1.0001;
@@ -759,7 +759,7 @@ void GCTABackground3D::init_mc_cache(const bool& etrue) const
             // Set energy value (unit independent)
             GEnergy energy;
             energy.log10(logE, m_background.axis_lo_unit(2));
-                
+
             // Only append node if rate > 0
             if (total_rate > 0.0) {
                 m_mc_spectrum.append(energy, total_rate);

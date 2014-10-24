@@ -460,19 +460,19 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
     if (!m_npred_names.empty()) {
 
         // Search for unique identifier, and if found, recover Npred value
-		// and break
-		for (int i = 0; i < m_npred_names.size(); ++i) {
-			if (m_npred_names[i] == id && m_npred_energies[i] == obsEng) {
-				npred     = m_npred_values[i];
-				has_npred = true;
-				#if defined(G_DEBUG_NPRED)
-				std::cout << "GCTAModelIrfBackground::npred:";
-				std::cout << " cache=" << i;
-				std::cout << " npred=" << npred << std::endl;
-				#endif
-				break;
-			}
-		}
+        // and break
+        for (int i = 0; i < m_npred_names.size(); ++i) {
+            if (m_npred_names[i] == id && m_npred_energies[i] == obsEng) {
+                npred     = m_npred_values[i];
+                has_npred = true;
+                #if defined(G_DEBUG_NPRED)
+                std::cout << "GCTAModelIrfBackground::npred:";
+                std::cout << " cache=" << i;
+                std::cout << " npred=" << npred << std::endl;
+                #endif
+                break;
+            }
+        }
 
     } // endif: there were values in the Npred cache
     #endif
@@ -498,7 +498,7 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
                                   " an IRF response.\n" + obs.print();
                 throw GException::invalid_argument(G_NPRED, msg);
             }
-            
+
             // Retrieve pointer to CTA background
             const GCTABackground* bgd = rsp->background();
             if (bgd == NULL) {
@@ -508,7 +508,7 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
             }
 
             // Get CTA event list
-			const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+            const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
             if (events == NULL) {
                 std::string msg = "No CTA event list found in observation.\n" +
                                   obs.print();
@@ -518,51 +518,51 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
             // Get reference to ROI centre
             const GSkyDir& roi_centre = events->roi().centre().dir();
 
-			// Get ROI radius in radians
-			double roi_radius = events->roi().radius() * gammalib::deg2rad;
+            // Get ROI radius in radians
+            double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
             // Get log10 of energy in TeV
             double logE = obsEng.log10TeV();
 
-			// Setup integration function
-			GCTAModelIrfBackground::npred_roi_kern_theta integrand(bgd, logE);
+            // Setup integration function
+            GCTAModelIrfBackground::npred_roi_kern_theta integrand(bgd, logE);
 
-			// Setup integrator
-			GIntegral integral(&integrand);
-			integral.eps(g_cta_inst_background_npred_theta_eps);
+            // Setup integrator
+            GIntegral integral(&integrand);
+            integral.eps(g_cta_inst_background_npred_theta_eps);
 
-			// Spatially integrate radial component
-			npred = integral.romberg(0.0, roi_radius);
+            // Spatially integrate radial component
+            npred = integral.romberg(0.0, roi_radius);
 
-	        // Store result in Npred cache
-	        #if defined(G_USE_NPRED_CACHE)
-	        m_npred_names.push_back(id);
-	        m_npred_energies.push_back(obsEng);
-	        m_npred_times.push_back(obsTime);
-	        m_npred_values.push_back(npred);
-	        #endif
+            // Store result in Npred cache
+            #if defined(G_USE_NPRED_CACHE)
+            m_npred_names.push_back(id);
+            m_npred_energies.push_back(obsEng);
+            m_npred_times.push_back(obsTime);
+            m_npred_values.push_back(npred);
+            #endif
 
-	        // Debug: Check for NaN
-	        #if defined(G_NAN_CHECK)
-	        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+            // Debug: Check for NaN
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
                 std::string origin  = "GCTAModelIrfBackground::npred";
                 std::string message = " NaN/Inf encountered (npred=" +
                                       gammalib::str(npred) + ", roi_radius=" +
                                       gammalib::str(roi_radius) + ")";
                 gammalib::warning(origin, message);
-	        }
-	        #endif
+            }
+            #endif
 
         } // endif: model was valid
 
     } // endif: Npred computation required
 
-	// Multiply in spectral and temporal components
-	npred *= spectral()->eval(obsEng, obsTime);
-	npred *= temporal()->eval(obsTime);
+    // Multiply in spectral and temporal components
+    npred *= spectral()->eval(obsEng, obsTime);
+    npred *= temporal()->eval(obsTime);
 
-	// Apply deadtime correction
-	npred *= obs.deadc(obsTime);
+    // Apply deadtime correction
+    npred *= obs.deadc(obsTime);
 
     // Return Npred
     return npred;
@@ -620,7 +620,7 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
 
         // Retrieve CTA response and pointing
         const GCTAPointing& pnt = cta->pointing();
-        
+
         // Get pointer to CTA background
         const GCTABackground* bgd = rsp->background();
         if (bgd == NULL) {
@@ -1251,20 +1251,20 @@ double GCTAModelIrfBackground::npred_roi_kern_theta::eval(const double& theta)
  ***************************************************************************/
 double GCTAModelIrfBackground::npred_roi_kern_phi::eval(const double& phi)
 {
-	// Compute detx and dety
+    // Compute detx and dety
     double detx(0.0);
     double dety(0.0);
-	if (m_theta > 0.0 ) {
-		detx = m_theta * std::cos(phi);
-		dety = m_theta * std::sin(phi);
-	}
+    if (m_theta > 0.0 ) {
+        detx = m_theta * std::cos(phi);
+        dety = m_theta * std::sin(phi);
+    }
 
     // Get background value
     double value = (*m_bgd)(m_logE, detx, dety);
 
-	// Debug: Check for NaN
-	#if defined(G_NAN_CHECK)
-	if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
         std::string origin  = "GCTAModelIrfBackground::npred_roi_kern_phi::eval"
                               "(" + gammalib::str(phi) + ")";
         std::string message = " NaN/Inf encountered (value=" +
@@ -1272,8 +1272,8 @@ double GCTAModelIrfBackground::npred_roi_kern_phi::eval(const double& phi)
                               gammalib::str(detx) + ", dety=" +
                               gammalib::str(dety) + ")";
         gammalib::warning(origin, message);
-	}
-	#endif
+    }
+    #endif
 
     // Return Npred
     return value;

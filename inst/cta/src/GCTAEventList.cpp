@@ -883,7 +883,7 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU& hdu)
                       "\" encountered in data selection key \""+
                       value_key+"\"");
             }
-            
+
         } // endif: ENERGY type_key found
 
     } // endfor: looped over data selection keys
