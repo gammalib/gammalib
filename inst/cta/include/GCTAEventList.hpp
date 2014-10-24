@@ -92,7 +92,6 @@ protected:
     void         read_events_v1(const GFitsTable& hdu);
     void         read_events_hillas(const GFitsTable& hdu);
     void         read_ds_ebounds(const GFitsHDU& hdu);
-    void         read_ds_roi(const GFitsHDU& hdu);
     void         write_events(GFitsBinTable& hdu) const;
     void         write_ds_keys(GFitsHDU& hdu) const;
     int          irf_cache_init(const std::string& name) const;

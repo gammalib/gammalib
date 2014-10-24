@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.hpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,11 +33,16 @@
 
 /* __ Constants __________________________________________________________ */
 
+/* __ Forward declarations _______________________________________________ */
+class GFitsHDU;
+class GCTARoi;
+
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
-    double cta_roi_arclength(const double& rad,     const double& dist,
-                             const double& cosdist, const double& sindist,
-                             const double& roi,     const double& cosroi);
+    double  cta_roi_arclength(const double& rad,     const double& dist,
+                              const double& cosdist, const double& sindist,
+                              const double& roi,     const double& cosroi);
+    GCTARoi read_ds_roi(const GFitsHDU& hdu);
 }
 
 #endif /* GCTASUPPORT_HPP */

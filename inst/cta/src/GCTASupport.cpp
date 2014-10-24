@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.cpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,16 @@
 #endif
 #include <cmath>
 #include <iostream>
+#include <string>
 #include "GCTASupport.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFitsHDU.hpp"
+#include "GCTARoi.hpp"
+#include "GCTAInstDir.hpp"
+
+/* __ Method name definitions ____________________________________________ */
+#define G_READ_DS_ROI                      "gammalib::read_ds_roi(GFitsHDU&)"
 
 /* __ Coding definitions _________________________________________________ */
 
@@ -115,4 +122,72 @@ double gammalib::cta_roi_arclength(const double& rad,     const double& dist,
 
     // Return arclength
     return arclength;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract ROI from data selection keywords
+ *
+ * @param[in] hdu FITS HDU
+ *
+ * @exception GException::invalid_value
+ *            Invalid ROI data selection encountered
+ *
+ * Reads the ROI data selection keywords by searching for a DSTYPx keyword
+ * named "POS(RA,DEC)". The data selection information is expected to be
+ * in the format "CIRCLE(267.0208,-24.78,4.5)", where the 3 arguments are
+ * Right Ascension, Declination and radius in units of degrees. No detailed
+ * syntax checking is performed.
+ *
+ * If no ROI information has been found, an GCTARoi object with initial
+ * values will be returned. 
+ ***************************************************************************/
+GCTARoi gammalib::read_ds_roi(const GFitsHDU& hdu)
+{
+    // Initialise ROI
+    GCTARoi roi;
+
+    // Get number of data selection keywords (default to 0 if keyword is
+    // not found)
+    int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
+
+    // Loop over all data selection keys
+    for (int i = 1; i <= ndskeys; ++i) {
+
+        // Set data selection key strings
+        std::string type_key  = "DSTYP"+gammalib::str(i);
+        //std::string unit_key  = "DSUNI"+gammalib::str(i);
+        std::string value_key = "DSVAL"+gammalib::str(i);
+
+        // Continue only if type_key is found and if this key is POS(RA,DEC)
+        if (hdu.has_card(type_key) && hdu.string(type_key) == "POS(RA,DEC)") {
+
+            // ...
+            //std::string unit              = gammalib::toupper(hdu.string(unit_key));
+            std::string value             = hdu.string(value_key);
+            std::string value_proc        = gammalib::strip_chars(value, "CIRCLE(");
+            value_proc                    = gammalib::strip_chars(value_proc, ")");
+            std::vector<std::string> args = gammalib::split(value_proc, ",");
+            if (args.size() == 3) {
+                double ra  = gammalib::todouble(args[0]);
+                double dec = gammalib::todouble(args[1]);
+                double rad = gammalib::todouble(args[2]);
+                GCTAInstDir dir;
+                dir.dir().radec_deg(ra, dec);
+                roi.centre(dir);
+                roi.radius(rad);
+            }
+            else {
+                std::string msg = "Invalid acceptance cone value \""+value+
+                                  "\" encountered in data selection key \""+
+                                  value_key+"\"";
+                throw GException::invalid_value(G_READ_DS_ROI, msg);
+            }
+
+        } // endif: POS(RA,DEC) type found
+
+    } // endfor: looped over data selection keys
+
+    // Return roi
+    return roi;
 }

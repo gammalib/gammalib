@@ -30,6 +30,7 @@
 #endif
 #include "GCTAEventList.hpp"
 #include "GCTAException.hpp"
+#include "GCTASupport.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
@@ -46,7 +47,6 @@
 #define G_OPERATOR                          "GCTAEventList::operator[](int&)"
 #define G_ROI                                     "GCTAEventList::roi(GRoi&)"
 #define G_READ_DS_EBOUNDS         "GCTAEventList::read_ds_ebounds(GFitsHDU*)"
-#define G_READ_DS_ROI                 "GCTAEventList::read_ds_roi(GFitsHDU*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -346,7 +346,7 @@ void GCTAEventList::read(const GFits& fits)
     read_events(events);
 
     // Read region of interest from data selection keyword
-    read_ds_roi(events);
+    m_roi = gammalib::read_ds_roi(events);
 
     // Read energy boundaries from data selection keyword
     read_ds_ebounds(events);
@@ -885,74 +885,6 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU& hdu)
             }
 
         } // endif: ENERGY type_key found
-
-    } // endfor: looped over data selection keys
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Read ROI data selection keywords
- *
- * @param[in] hdu FITS HDU
- *
- * @exception GException::no_roi
- *            Invalid ROI data selection encountered
- *
- * Reads the ROI data selection keywords by searching for a DSTYPx keyword
- * named "POS(RA,DEC)". The data selection information is expected to be
- * in the format "CIRCLE(267.0208,-24.78,4.5)", where the 3 arguments are
- * Right Ascension, Declination and radius in units of degrees. No detailed
- * syntax checking is performed.
- *
- * This method clears the ROI, irrespectively of whether ROI information has
- * been found in the HDU.
- ***************************************************************************/
-void GCTAEventList::read_ds_roi(const GFitsHDU& hdu)
-{
-    // Reset ROI
-    m_roi.clear();
-
-    // Get number of data selection keywords (default to 0 if keyword is
-    // not found)
-    int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
-
-    // Loop over all data selection keys
-    for (int i = 1; i <= ndskeys; ++i) {
-
-        // Set data selection key strings
-        std::string type_key  = "DSTYP"+gammalib::str(i);
-        //std::string unit_key  = "DSUNI"+gammalib::str(i);
-        std::string value_key = "DSVAL"+gammalib::str(i);
-
-        // Continue only if type_key is found and if this key is POS(RA,DEC)
-        if (hdu.has_card(type_key) && hdu.string(type_key) == "POS(RA,DEC)") {
-
-            // ...
-            //std::string unit              = gammalib::toupper(hdu.string(unit_key));
-            std::string value             = hdu.string(value_key);
-            value                         = gammalib::strip_chars(value, "CIRCLE(");
-            value                         = gammalib::strip_chars(value, ")");
-            std::vector<std::string> args = gammalib::split(value, ",");
-            if (args.size() == 3) {
-                double ra  = gammalib::todouble(args[0]);
-                double dec = gammalib::todouble(args[1]);
-                double rad = gammalib::todouble(args[2]);
-                GCTAInstDir dir;
-                dir.dir().radec_deg(ra, dec);
-                m_roi.centre(dir);
-                m_roi.radius(rad);
-            }
-            else {
-                throw GException::no_roi(G_READ_DS_ROI,
-                      "Invalid acceptance cone value \""+value+
-                      "\" encountered in data selection key \""+
-                      value_key+"\"");
-            }
-
-        } // endif: POS(RA,DEC) type found
 
     } // endfor: looped over data selection keys
 
