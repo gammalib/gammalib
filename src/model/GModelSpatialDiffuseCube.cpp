@@ -1033,13 +1033,16 @@ void GModelSpatialDiffuseCube::free_members(void)
 /***********************************************************************//**
  * @brief Fetch cube
  *
- * Load diffuse cube if it is not yet loaded.
+ * Load diffuse cube if it is not yet loaded. The loading is thread save.
  ***************************************************************************/
 void GModelSpatialDiffuseCube::fetch_cube(void) const
 {
     // Load cube if it is not yet loaded
     if (!m_loaded && !m_filename.empty()) {
-        const_cast<GModelSpatialDiffuseCube*>(this)->load(m_filename);
+        #pragma omp critical
+        {
+            const_cast<GModelSpatialDiffuseCube*>(this)->load(m_filename);
+        }
     }
 
     // Return
