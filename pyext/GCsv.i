@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCsv.i - Column separated values table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -86,6 +86,7 @@ class GCsv : public GBase {
 public:
     // Constructors and destructors
     GCsv(void);
+    GCsv(const int& nrows, const int& ncols);
     GCsv(const std::string& filename, const std::string& sep = " ");
     GCsv(const GCsv& csv);
     virtual ~GCsv(void);
@@ -96,10 +97,17 @@ public:
     int         size(void) const;
     const int&  ncols(void) const;
     const int&  nrows(void) const;
+    const int&  precision(void) const;
+    void        precision(const int& precision);
     std::string string(const int& row, const int& col) const;
     double      real(const int& row, const int& col) const;
     int         integer(const int& row, const int& col) const;
+    void        string(const int& row, const int& col, const std::string& value);
+    void        real(const int& row, const int& col, const double& value);
+    void        integer(const int& row, const int& col, const int& value);
     void        load(const std::string& filename, const std::string& sep = " ");
+    void        save(const std::string& filename, const std::string& sep = " ",
+                     const bool& clobber = false) const;
 };
 
 

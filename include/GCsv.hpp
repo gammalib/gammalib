@@ -56,6 +56,7 @@ class GCsv : public GBase {
 public:
     // Constructors and destructors
     GCsv(void);
+    GCsv(const int& nrows, const int& ncols);
     GCsv(const std::string& filename, const std::string& sep = " ");
     GCsv(const GCsv& csv);
     virtual ~GCsv(void);
@@ -72,10 +73,17 @@ public:
     int         size(void) const;
     const int&  ncols(void) const;
     const int&  nrows(void) const;
+    const int&  precision(void) const;
+    void        precision(const int& precision);
     std::string string(const int& row, const int& col) const;
     double      real(const int& row, const int& col) const;
     int         integer(const int& row, const int& col) const;
+    void        string(const int& row, const int& col, const std::string& value);
+    void        real(const int& row, const int& col, const double& value);
+    void        integer(const int& row, const int& col, const int& value);
     void        load(const std::string& filename, const std::string& sep = " ");
+    void        save(const std::string& filename, const std::string& sep = " ",
+                     const bool& clobber = false) const;
     std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
@@ -85,9 +93,10 @@ protected:
     void free_members(void);
 
     // Protected data members
-    int                                    m_cols;  //!< Number of columns
-    int                                    m_rows;  //!< Number of rows
-    std::vector<std::vector<std::string> > m_data;  //!< CSV table data
+    int                                    m_cols;      //!< Number of columns
+    int                                    m_rows;      //!< Number of rows
+    std::vector<std::vector<std::string> > m_data;      //!< CSV table data
+    int                                    m_precision; //!< Precision for floats
 };
 
 
@@ -136,6 +145,39 @@ inline
 const int& GCsv::nrows(void) const
 {
     return m_rows;
+}
+
+
+/***********************************************************************//**
+ * @brief Return fixed field floating point precision
+ *
+ * @return Fixed field floating point precision.
+ *
+ * Returns the precision for floating point values when setting values using
+ * the real() method. Any value >0 indicates the number of decimal places
+ * that the floating point value will have.
+ ***************************************************************************/
+inline
+const int& GCsv::precision(void) const
+{
+    return m_precision;
+}
+
+
+/***********************************************************************//**
+ * @brief Set fixed field floating point precision
+ *
+ * @param[in] precision Fixed field floating point precision.
+ *
+ * Set the precision for floating point values when setting values using
+ * the real() method. Any value >0 indicates the number of decimal places
+ * that the floating point value will have.
+ ***************************************************************************/
+inline
+void GCsv::precision(const int& precision)
+{
+    m_precision = precision;
+    return;
 }
 
 #endif /* GCSV_HPP */

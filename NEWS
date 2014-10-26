@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-24 October 2014
+26 October 2014
 
 
 1. Introduction
@@ -152,6 +152,9 @@ reprojection or rebinning of skymaps.
 The GNodeArray non-const access operator[] now signals that an update of the
 internal pre-computation is needed, as this operator[] may change the node
 array values.
+
+Methods have been added to the GCsv class that allow the creation and the
+saving of CSV tables.
 
 
 14. XML module

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCsv.cpp - Column separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                               "GCsv::operator()(int&, int&)"
 #define G_LOAD                       "GCsv::load(std::string&, std::string&)"
+#define G_SAVE                "GCsv::save(std::string&, std::string&, bool&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -58,6 +59,32 @@ GCsv::GCsv(void)
     // Initialise private members
     init_members();
   
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Table constructor
+ *
+ * @param[in] nrows Number of rows.
+ * @param[in] ncols Number of columns.
+ ***************************************************************************/
+GCsv::GCsv(const int& nrows, const int& ncols)
+{
+    // Initialise private members
+    init_members();
+
+    // Allocate empty row
+    std::vector<std::string> row(ncols, "");
+
+    // Allocate table
+    m_data.assign(nrows, row);
+
+    // Set table dimensions
+    m_cols = ncols;
+    m_rows = nrows;
+
     // Return
     return;
 }
@@ -273,6 +300,63 @@ int GCsv::integer(const int& row, const int& col) const
 
 
 /***********************************************************************//**
+ * @brief Get string value
+ *
+ * @param[in] row Table row.
+ * @param[in] col Table column.
+ * @param[in] value String value.
+ *
+ * Set value of specified row and column as string.
+ ***************************************************************************/
+void GCsv::string(const int& row, const int& col, const std::string& value)
+{
+    // Set value
+    (*this)(row, col) = value;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get double precision value
+ *
+ * @param[in] row Table row.
+ * @param[in] col Table column.
+ * @param[in] value Double precision floating point value.
+ *
+ * Set value of specified row and column as double precision floating point.
+ ***************************************************************************/
+void GCsv::real(const int& row, const int& col, const double& value)
+{
+    // Set value
+    (*this)(row, col) = gammalib::str(value, m_precision);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get integer value
+ *
+ * @param[in] row Table row.
+ * @param[in] col Table column.
+ * @param[in] value Integer value.
+ *
+ * Set value of specified row and column as integer.
+ ***************************************************************************/
+void GCsv::integer(const int& row, const int& col, const int& value)
+{
+    // Set value
+    (*this)(row, col) = gammalib::str(value);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load CSV table
  *
  * @param[in] filename Filename.
@@ -283,8 +367,8 @@ int GCsv::integer(const int& row, const int& col) const
  * @exception GException::csv_bad_columns
  *            Inconsistent columns encountered in CSV table file.
  *
- * Load CSV table from ASCII file.
- * Any environment variable present in the filename will be expanded.
+ * Load CSV table from ASCII file. Any environment variable present in the
+ * filename will be expanded.
  **************************************************************************/
 void GCsv::load(const std::string& filename, const std::string& sep)
 {
@@ -298,7 +382,7 @@ void GCsv::load(const std::string& filename, const std::string& sep)
     // Expand environment variables
     std::string fname = gammalib::expand_env(filename);
 
-    // Open CSV table (read-only
+    // Open CSV table (read-only)
     FILE* fptr = std::fopen(fname.c_str(), "r");
     if (fptr == NULL) {
         throw GException::file_not_found(G_LOAD, fname);
@@ -312,7 +396,8 @@ void GCsv::load(const std::string& filename, const std::string& sep)
         iline++;
 
         // Get line with leading and trailing whitespace removed
-        std::string sline = gammalib::strip_chars(gammalib::strip_whitespace(std::string(line)),"\n");
+        std::string sline =
+            gammalib::strip_chars(gammalib::strip_whitespace(std::string(line)),"\n");
 
         // Skip line if empty
         if (sline.length() == 0) {
@@ -357,6 +442,65 @@ void GCsv::load(const std::string& filename, const std::string& sep)
 
 
 /***********************************************************************//**
+ * @brief Save CSV table
+ *
+ * @param[in] filename Filename.
+ * @param[in] sep Column separator (default: whitespace).
+ * @param[in] bool Overwrite existing file? (default: false).
+ *
+ * @exception GException::invalid_value
+ *            Attempt to overwrite existing file.
+ * @exception GException::file_error
+ *            Unable to create file.
+ *
+ * Save CSV table into ASCII file. Any environment variable present in the
+ * filename will be expanded.
+ **************************************************************************/
+void GCsv::save(const std::string& filename, const std::string& sep,
+                const bool& clobber) const
+{
+    // Throw exception if file exists but clobber flag is false
+    if (!clobber && gammalib::file_exists(filename)) {
+        std::string msg = "File \""+filename+"\" exists already but the "
+                          "clobber flag is set to \"false\". Set the "
+                          "clobber flag to true to overwrite the existing "
+                          "file or specify another file name.";
+        throw GException::invalid_value(G_SAVE, msg);
+    }
+
+    // Expand environment variables
+    std::string fname = gammalib::expand_env(filename);
+
+    // Open CSV table (write-only)
+    FILE* fptr = std::fopen(fname.c_str(), "w");
+    if (fptr == NULL) {
+        std::string msg = "Unable to create file \""+filename+"\".";
+        throw GException::file_error(G_SAVE, msg);
+    }
+
+    // Loop over the rows
+    for (int row = 0; row < m_rows; ++row) {
+
+        // Write columns
+        for (int col = 0; col < m_cols; ++col) {
+            std::fputs(m_data[row][col].c_str(), fptr);
+            std::fputs(sep.c_str(), fptr);
+        }
+
+        // Write linebreak
+        std::fputs("\n", fptr);
+
+    } // endfor: looped over rows
+
+    // Close file
+    std::fclose(fptr);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print column separated values information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -378,6 +522,13 @@ std::string GCsv::print(const GChatter& chatter) const
         result.append(gammalib::str(m_cols));
         result.append("\n"+gammalib::parformat("Number of rows"));
         result.append(gammalib::str(m_rows));
+        result.append("\n"+gammalib::parformat("Floating point precision"));
+        if (m_precision == 0) {
+            result.append("default");
+        }
+        else {
+        result.append(gammalib::str(m_precision));
+        }
 
     } // endif: chatter was not silent
 
@@ -401,6 +552,7 @@ void GCsv::init_members(void)
     m_cols = 0;
     m_rows = 0;
     m_data.clear();
+    m_precision = 0;
   
     // Return
     return;
@@ -415,9 +567,10 @@ void GCsv::init_members(void)
 void GCsv::copy_members(const GCsv& csv)
 {
     // Copy members
-    m_cols = csv.m_cols;
-    m_rows = csv.m_rows;
-    m_data = csv.m_data;
+    m_cols      = csv.m_cols;
+    m_rows      = csv.m_rows;
+    m_data      = csv.m_data;
+    m_precision = csv.m_precision;
     
     // Return
     return;
