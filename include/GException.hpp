@@ -112,11 +112,18 @@ public:
 
     //overflow_error
 
+    // File error
+    class file_error : public GExceptionHandler {
+    public:
+        file_error(const std::string& origin,
+                   const std::string& message = "");
+    };
+
     // Feature not implemented
     class feature_not_implemented : public GExceptionHandler {
     public:
-        feature_not_implemented(std::string origin,
-                                std::string message = "");
+        feature_not_implemented(const std::string& origin,
+                                const std::string& message = "");
     };
 
     // --- OLD EXCEPTIONS ---

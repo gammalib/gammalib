@@ -131,6 +131,29 @@ GException::out_of_range::out_of_range(const std::string& origin,
 
 
 /***********************************************************************//**
+ * @brief File error
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::file_error::file_error(const std::string& origin,
+                                   const std::string& message)
+{
+    // Set origin
+    m_origin  = origin;
+
+    // Set message string
+    m_message = "File error.";
+    if (message.length() > 0) {
+        m_message += ("\n" + message);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Feature not implement
  *
  * @param[in] origin Name of method that has thrown the exception.
@@ -139,8 +162,8 @@ GException::out_of_range::out_of_range(const std::string& origin,
  * This exception signals features that are not yet implemented. It may be
  * thrown by modules that are still under development.
  ***************************************************************************/
-GException::feature_not_implemented::feature_not_implemented(std::string origin,
-                                                             std::string message)
+GException::feature_not_implemented::feature_not_implemented(const std::string& origin,
+                                                             const std::string& message)
 {
     // Set origin
     m_origin = origin;
