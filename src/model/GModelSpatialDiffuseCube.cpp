@@ -1038,9 +1038,9 @@ void GModelSpatialDiffuseCube::free_members(void)
 void GModelSpatialDiffuseCube::fetch_cube(void) const
 {
     // Load cube if it is not yet loaded
-    #pragma omp critical
-    {
-        if (!m_loaded && !m_filename.empty()) {
+    if (!m_loaded && !m_filename.empty()) {
+        #pragma omp critical
+        {
             const_cast<GModelSpatialDiffuseCube*>(this)->load(m_filename);
         }
     }
