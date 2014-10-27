@@ -31,6 +31,7 @@
 #include "GObservationRegistry.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GGti.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
 #include "GCTAException.hpp"
@@ -56,6 +57,7 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_RESPONSE_SET                "GCTAObservation::response(GResponse&)"
 #define G_RESPONSE_GET                          "GCTAObservation::response()"
 #define G_ROI                                        "GCTAObservation::roi()"
+#define G_GTI                                        "GCTAObservation::gti()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
 #define G_LOAD           "GCTAObservation::load(std::string&, std::string&, "\
@@ -429,6 +431,92 @@ GCTARoi GCTAObservation::roi(void) const
 
     // Return ROI
     return roi;
+}
+
+
+/***********************************************************************//**
+ * @brief Get Good Time Intervals
+ *
+ * @exception GException::invalid_value
+ *            Unable to open the event file.
+ *
+ * Extract the Good Time Intervals from the events. If events are loaded into
+ * the observation, the GTIs are simply copied over. If no events are present
+ * the method attemps to read the GTIs from the event file. This obviously
+ * only works if a valid event file name is available.
+ ***************************************************************************/
+GGti GCTAObservation::gti(void) const
+{
+    // Initialise GTIs
+    GGti gti;
+
+    // If CTA has events then simply retrieve the GTIs from the events
+    if (m_events != NULL) {
+
+        // Copy over GTIs
+        gti = m_events->gti();
+
+    }
+
+    // ... otherwise try reading the GTIs from the event file
+    else {
+
+        // Try opening event file
+        GFits fits;
+        try {
+            fits.open(m_eventfile);
+        }
+        catch (std::exception &e) {
+            std::string msg;
+            if (m_eventfile.length() == 0) {
+                msg = "The observation does not contain any information about "
+                      "the event file, hence the Good Time Intervals cannot be "
+                      "determined.";
+            }
+            else {
+                msg = "Could no open the event file \""+m_eventfile+"\". "
+                      "Please check that the file name is valid.";
+            }
+            throw GException::invalid_value(G_GTI, msg);
+        }
+    
+        // If we have a GTI extension, then read Good Time Intervals from
+        // that extension
+        if (fits.contains("GTI")) {
+            const GFitsTable& table = *fits.table("GTI");
+            gti.read(table);
+        }
+
+        // ... otherwise build GTI from TSTART and TSTOP
+        else if (fits.contains("EVENTS")) {
+
+            // Read start and stop time
+            const GFitsTable& events = *fits.table("EVENTS");
+            double            tstart = events.real("TSTART");
+            double            tstop  = events.real("TSTOP");
+
+            // Create time reference from header information
+            GTimeReference timeref(events);
+
+            // Set start and stop time
+            GTime start(tstart);
+            GTime stop(tstop);
+
+            // Append start and stop time as single time interval to GTI
+            gti.append(start, stop);
+
+            // Set GTI time reference
+            gti.reference(timeref);
+
+        } // endelse: GTI built from TSTART and TSTOP on event file
+
+        // Close FITS file
+        fits.close();
+
+    }
+
+    // Return GTIs
+    return gti;
 }
 
 
