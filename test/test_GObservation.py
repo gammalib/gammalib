@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,15 +49,43 @@ class Test(GPythonTestSuite):
         self.name("obs")
 
         # Append tests
-        self.append(self.test, "Observation module dummy test")
+        self.append(self.test_energy, "Test GEnergy class")
 
         # Return
         return
 
-    # Test function
-    def test(self):
+    # Test GEnergy class
+    def test_energy(self):
         """
-        Test function.
+        Test GEnergy class.
         """
+        # Setup energies
+        energy    = GEnergy(3.0, "TeV")
+        energy_b  = energy.copy()
+
+        # Unary addition operator
+        energy += energy_b
+        self.test_value(energy.TeV(), 6.0);
+
+        # Unary subtraction operator
+        energy -= energy_b
+        self.test_value(energy.TeV(), 3.0);
+
+        # Binary addition operator
+        energy = energy + energy_b
+        self.test_value(energy.TeV(), 6.0);
+
+        # Binary subtraction operator
+        energy = energy - energy_b
+        self.test_value(energy.TeV(), 3.0);
+
+        # Scalar multiplication operator
+        energy = energy * 2.0
+        self.test_value(energy.TeV(), 6.0);
+
+        # Scalar division operator
+        energy = energy / 2.0
+        self.test_value(energy.TeV(), 3.0);
+
         # Return
         return

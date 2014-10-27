@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -79,6 +79,8 @@ class Test(GPythonTestSuite):
         self.append(self.test_skymap_stg, "Test STG projection map")
         self.append(self.test_skymap_tan, "Test TAN projection map")
         self.append(self.test_fk5_to_galactic, "Test FK5 to Galactic coordinate conversion")
+        self.append(self.test_operators, "Test skymap operators")
+
         
         # Return
         return
@@ -302,3 +304,48 @@ class Test(GPythonTestSuite):
 
         # Return
         return
+
+    # Test skymap operators
+    def test_operators(self):
+        """
+        Test the skymap operators.
+        """
+        # Setup skymaps
+        map    = GSkymap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
+        map[0] = 1.0
+        map[1] = 2.0
+        map[2] = 3.0
+        map[3] = 4.0
+        map_b  = map.copy()
+        
+        # Addition operator
+        map += map_b
+        self.test_value(map[0], 2.0);
+        self.test_value(map[1], 4.0);
+        self.test_value(map[2], 6.0);
+        self.test_value(map[3], 8.0);
+
+        # Multiplication operator
+        map *= map_b
+        self.test_value(map[0],  2.0);
+        self.test_value(map[1],  8.0);
+        self.test_value(map[2], 18.0);
+        self.test_value(map[3], 32.0);
+
+        # Subtraction operator
+        map -= map_b
+        self.test_value(map[0],  1.0);
+        self.test_value(map[1],  6.0);
+        self.test_value(map[2], 15.0);
+        self.test_value(map[3], 28.0);
+
+        # Division operator
+        map /= map_b
+        self.test_value(map[0], 1.0);
+        self.test_value(map[1], 3.0);
+        self.test_value(map[2], 5.0);
+        self.test_value(map[3], 7.0);
+        
+        # Return
+        return
+        
