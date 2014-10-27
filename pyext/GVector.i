@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,7 +55,6 @@ public:
     GVector& operator+=(const double& value);
     GVector& operator-=(const double& value);
     GVector& operator*=(const double& value);
-    GVector& operator/=(const double& value);
     GVector  operator-(void) const;
 
     // Vector functions
@@ -105,8 +104,23 @@ public:
     GVector __mul__(const double &a) {
         return (*self) * a;
     }
+    // Python 2.x
     GVector __div__(const double &a) {
         return (*self) / a;
+    }
+    // Python 3.x
+    GVector __truediv__(const double &a) {
+        return (*self) / a;
+    }
+    // Python 2.x operator/=
+    GVector __idiv__(const double& value) {
+        self->operator/=(value);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GVector __itruediv__(const double& value) {
+        self->operator/=(value);
+        return (*self);
     }
     int __is__(const GVector &a) {
             return (*self) == a;

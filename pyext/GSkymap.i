@@ -201,12 +201,12 @@ public:
     }
     // Python 2.x operator/=
     GSkymap __idiv__(const GSkymap& map) {
-        self->operator /=(map);
+        self->operator/=(map);
         return (*self);
     }
     // Python 3.x operator/=
     GSkymap __itruediv__(const GSkymap& map) {
-        self->operator /=(map);
+        self->operator/=(map);
         return (*self);
     }
 };

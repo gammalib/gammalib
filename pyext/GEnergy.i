@@ -97,7 +97,12 @@ public:
     GEnergy __mul__(const double& factor) const {
         return ((*self) * factor);
     }
+    // Python 2.x
     GEnergy __div__(const double& factor) const {
+        return ((*self) / factor);
+    }
+    // Python 3.x
+    GEnergy __truediv__(const double& factor) const {
         return ((*self) / factor);
     }
     bool __eq__(const GEnergy& eng) const {
