@@ -227,8 +227,8 @@ Handling the instrument response
 Overview
 ^^^^^^^^
 
-The CTA specific instrument response is described by the :doxy:`GCTAResponse`
-class (see :ref:`sec_response` for a general description of response
+The CTA specific instrument response is described by the 
+:doxy:`GCTAResponseIrf` class (see :ref:`sec_response` for a general description of response
 handling in GammaLib). The CTA response is factorised into 
 the effective area :math:`A_{\rm eff}(d, p, E, t)` (units :math:`cm^2`),
 the point spread function :math:`PSF(p' | d, p, E, t)`,
@@ -271,7 +271,7 @@ The effective area response is implemented by one of the classes
 :doxy:`GCTAAeffPerfTable`, :doxy:`GCTAAeffArf` and :doxy:`GCTAAeff2D` that
 implement the different response formats that are currently used in
 the CTA project. Dependent on the specified response file, the
-method :doxy:`GCTAResponse::load_aeff` allocates the appropriate response
+method :doxy:`GCTAResponseIrf::load_aeff` allocates the appropriate response
 class. :doxy:`GCTAAeff2D` is allocated if the response file is a FITS file
 containing an extension named ``EFFECTIVE AREA``; :doxy:`GCTAAeffArf` is
 allocated if an extension named ``SPECRESP`` is found; otherwise, 
