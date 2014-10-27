@@ -35,11 +35,13 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GFitsHDU.hpp"
+#include "GEbounds.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_DS_ROI                      "gammalib::read_ds_roi(GFitsHDU&)"
+#define G_READ_DS_EBOUNDS              "gammalib::read_ds_ebounds(GFitsHDU&)"
 
 /* __ Coding definitions _________________________________________________ */
 
@@ -190,4 +192,66 @@ GCTARoi gammalib::read_ds_roi(const GFitsHDU& hdu)
 
     // Return roi
     return roi;
+}
+
+
+/***********************************************************************//**
+ * @brief Read energy boundary data selection keywords
+ *
+ * @param[in] hdu FITS HDU
+ *
+ * @exception GException::invalid_value
+ *            Invalid energy data selection encountered
+ *
+ * Reads the energy boundary data selection keywords by searching for a 
+ * DSTYPx keyword named "ENERGY". The data selection information is expected
+ * to be in the format "200:50000", where the 2 arguments are the minimum
+ * and maximum energy. The energy unit is given by the keyword DSUNIx, which
+ * supports keV, MeV, GeV and TeV (case independent). No detailed syntax
+ * checking is performed.
+ ***************************************************************************/
+GEbounds gammalib::read_ds_ebounds(const GFitsHDU& hdu)
+{
+    // Initialise energy boundaries
+    GEbounds ebounds;
+
+    // Get number of data selection keywords (default to 0 if keyword is
+    // not found)
+    int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
+
+    // Loop over all data selection keys
+    for (int i = 1; i <= ndskeys; ++i) {
+
+        // Set data selection key strings
+        std::string type_key  = "DSTYP"+gammalib::str(i);
+        std::string unit_key  = "DSUNI"+gammalib::str(i);
+        std::string value_key = "DSVAL"+gammalib::str(i);
+
+        // Continue only if type_key is found and if this key is ENERGY
+        if (hdu.has_card(type_key) && hdu.string(type_key) == "ENERGY") {
+
+            // Extract energy boundaries
+            std::string value               = hdu.string(value_key);
+            std::string unit                = hdu.string(unit_key);
+            std::vector<std::string> values = gammalib::split(value, ":");
+            if (values.size() == 2) {
+                double  emin = gammalib::todouble(values[0]);
+                double  emax = gammalib::todouble(values[1]);
+                GEnergy e_min(emin, unit);
+                GEnergy e_max(emax, unit);
+                ebounds.append(e_min, e_max);
+            }
+            else {
+                std::string msg = "Invalid energy value \""+value+
+                                  "\" encountered in data selection key \""+
+                                  value_key+"\"";
+                throw GException::invalid_value(G_READ_DS_EBOUNDS, msg);
+            }
+
+        } // endif: ENERGY type_key found
+
+    } // endfor: looped over data selection keys
+
+    // Return
+    return ebounds;
 }

@@ -58,6 +58,7 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_RESPONSE_GET                          "GCTAObservation::response()"
 #define G_ROI                                        "GCTAObservation::roi()"
 #define G_GTI                                        "GCTAObservation::gti()"
+#define G_EBOUNDS                                "GCTAObservation::ebounds()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
 #define G_LOAD           "GCTAObservation::load(std::string&, std::string&, "\
@@ -438,7 +439,8 @@ GCTARoi GCTAObservation::roi(void) const
  * @brief Get Good Time Intervals
  *
  * @exception GException::invalid_value
- *            Unable to open the event file.
+ *            Unable to open the event file or to extract GTI information
+ *            from file.
  *
  * Extract the Good Time Intervals from the events. If events are loaded into
  * the observation, the GTIs are simply copied over. If no events are present
@@ -510,6 +512,15 @@ GGti GCTAObservation::gti(void) const
 
         } // endelse: GTI built from TSTART and TSTOP on event file
 
+        // ... else throw an exception
+        else {
+            std::string msg = "Could no find Good Time Interval information "
+                              "in the event file \""+m_eventfile+"\". Please "
+                              "check that Good Time Interval information is "
+                              "properly set in the event file.";
+            throw GException::invalid_value(G_GTI, msg);
+        }
+
         // Close FITS file
         fits.close();
 
@@ -517,6 +528,88 @@ GGti GCTAObservation::gti(void) const
 
     // Return GTIs
     return gti;
+}
+
+
+/***********************************************************************//**
+ * @brief Get energy boundaries
+ *
+ * @exception GException::invalid_value
+ *            Unable to open the event file or to extract energy boundaries
+ *            from file.
+ *
+ * Extract the energy boundaries from the events. If events are loaded into
+ * the observation, the energy boundaries are simply copied over. If no
+ * events are present the method attemps to read the energy boundaries from
+ * the event file. This obviously only works if a valid event file name is
+ * available.
+ ***************************************************************************/
+GEbounds GCTAObservation::ebounds(void) const
+{
+    // Initialise energy boundaries
+    GEbounds ebounds;
+
+    // If CTA has events then simply retrieve the energy boundaries from the
+    // events
+    if (m_events != NULL) {
+
+        // Copy over energy boundaries
+        ebounds = m_events->ebounds();
+
+    }
+
+    // ... otherwise try reading the energy boundaries from the event file
+    else {
+
+        // Try opening event file
+        GFits fits;
+        try {
+            fits.open(m_eventfile);
+        }
+        catch (std::exception &e) {
+            std::string msg;
+            if (m_eventfile.length() == 0) {
+                msg = "The observation does not contain any information about "
+                      "the event file, hence the energy boundaries cannot be "
+                      "determined.";
+            }
+            else {
+                msg = "Could no open the event file \""+m_eventfile+"\". "
+                      "Please check that the file name is valid.";
+            }
+            throw GException::invalid_value(G_EBOUNDS, msg);
+        }
+
+        // If file contains an EBOUNDS extension then load the energy
+        // boundaries from that extension
+        if (fits.contains("EBOUNDS")) {
+            const GFitsTable& hdu = *fits.table("EBOUNDS");
+            ebounds.read(hdu);
+        }
+
+        // ... otherwise, if file contains an EVENTS extension then load the
+        // energy boundaries from the data selection keywords
+        else if (fits.contains("EVENTS")) {
+            const GFitsTable& hdu = *fits.table("EVENTS");
+            ebounds = gammalib::read_ds_ebounds(hdu);
+        }
+
+        // ... else throw an exception
+        else {
+            std::string msg = "Could no find energy boundary information in "
+                              "the event file \""+m_eventfile+"\". Please "
+                              "check that energy boundary information is "
+                              "properly set in the event file.";
+            throw GException::invalid_value(G_EBOUNDS, msg);
+        }
+        
+        // Close FITS file
+        fits.close();
+
+    }
+
+    // Return energy boundaries
+    return ebounds;
 }
 
 
