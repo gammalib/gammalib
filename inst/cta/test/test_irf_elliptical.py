@@ -78,6 +78,81 @@ def cta_roi_arclength(rad, dist, roi):
     # Return
     return arclength
 
+# ============== #
+# Limit interval #
+# ============== #
+def limit_omega(min, max, domega, log=False):
+    """
+    """
+    # Compute only if domega < pi
+    if (domega < gammalib.pi):
+
+        # Save initial interval
+        min_initial = min
+        max_initial = max
+
+        # Initialise intervals
+        intervals = []
+        
+        # Limit each of the intervals to [omega_min, omega_max]
+        omega_min       = -domega
+        omega_max       = +domega
+        omega_min_plus  = omega_min + gammalib.twopi
+        omega_max_plus  = omega_max + gammalib.twopi
+        omega_min_minus = omega_min - gammalib.twopi
+        omega_max_minus = omega_max - gammalib.twopi
+
+        # Check for overlaps
+        in_unshifted = False
+        in_plus      = False
+        in_minus     = False
+        if (max_initial > omega_min and min_initial < omega_max):
+            min = min_initial
+            max = max_initial
+            in_unshifted = True
+            if (min < omega_min):
+                min = omega_min
+            if (max > omega_max):
+                max = omega_max
+            intervals.append({'min': min, 'max': max})
+        if (max_initial > omega_min_plus and min_initial < omega_max_plus):
+            min = min_initial
+            max = max_initial
+            in_plus = True
+            if (min < omega_min_plus):
+                min = omega_min_plus
+            if (max > omega_max_plus):
+                max = omega_max_plus
+            intervals.append({'min': min, 'max': max})
+        if (max_initial > omega_min_minus and min_initial < omega_max_minus):
+            min = min_initial
+            max = max_initial
+            in_minus = True
+            if (min < omega_min_minus):
+                min = omega_min_minus
+            if (max > omega_max_minus):
+                max = omega_max_minus
+            intervals.append({'min': min, 'max': max})
+
+        # Debug
+        if log:
+            print("[%7.2f,%7.2f] => [%7.2f,%7.2f] (%i[%7.2f,%7.2f]  %i[%7.2f,%7.2f]  %i[%7.2f,%7.2f])" %
+              (min_initial*gammalib.rad2deg, max_initial*gammalib.rad2deg, \
+               min*gammalib.rad2deg, max*gammalib.rad2deg, \
+               in_unshifted, \
+               omega_min*gammalib.rad2deg, omega_max*gammalib.rad2deg, \
+               in_plus, \
+               omega_min_plus*gammalib.rad2deg, omega_max_plus*gammalib.rad2deg, \
+               in_minus, \
+               omega_min_minus*gammalib.rad2deg, omega_max_minus*gammalib.rad2deg))
+
+    # ... just copy over the input interval
+    else:
+        intervals = [{'min': min, 'max': max}]
+
+    # Return
+    return intervals
+    
 
 # ======================= #
 # Show ellptical response #
@@ -252,118 +327,37 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
 
                     # Logging
                     if log:
-                        print("  Omega range 1 (initial) ............: %.2f - %.2f deg" % (omega1_min*gammalib.rad2deg,omega1_max*gammalib.rad2deg))
-                        print("  Omega range 2 (initial) ............: %.2f - %.2f deg" % (omega2_min*gammalib.rad2deg,omega2_max*gammalib.rad2deg))
-
-                    # Limit each of the intervals to [omega_min, omega_max]
-                    omega_min       = -domega
-                    omega_max       = +domega
-                    omega_min_plus  = omega_min + gammalib.twopi
-                    omega_max_plus  = omega_max + gammalib.twopi
-                    omega_min_minus = omega_min - gammalib.twopi
-                    omega_max_minus = omega_max - gammalib.twopi
-
-                    # If interval 1 overlaps then limit interval boundaries
-                    if (omega1_max > omega_min and omega1_min < omega_max):
-                        if (omega1_min < omega_min):
-                            omega1_min = omega_min
-                        if (omega1_max > omega_max):
-                            omega1_max = omega_max
-                    elif (omega1_max > omega_min_plus and omega1_min < omega_max_plus):
-                        if (omega1_min < omega_min_plus):
-                            omega1_min = omega_min_plus
-                        if (omega1_max > omega_max_plus):
-                            omega1_max = omega_max_plus
-                    elif (omega1_max > omega_min_minus and omega1_min < omega_max_minus):
-                        if (omega1_min < omega_min_minus):
-                            omega1_min = omega_min_minus
-                        if (omega1_max > omega_max_minus):
-                            omega1_max = omega_max_minus
-                    else:
-                        omega1_min = 0.0 # Dummy for no-interval
-                        omega1_max = 0.0
-
-                    # If interval 2 overlaps then limit interval boundaries
-                    if (omega2_max > omega_min and omega2_min < omega_max):
-                        if (omega2_min < omega_min):
-                            omega2_min = omega_min
-                        if (omega2_max > omega_max):
-                            omega2_max = omega_max
-                    elif (omega2_max > omega_min_plus and omega2_min < omega_max_plus):
-                        if (omega2_min < omega_min_plus):
-                            omega2_min = omega_min_plus
-                        if (omega2_max > omega_max_plus):
-                            omega2_max = omega_max_plus
-                    elif (omega2_max > omega_min_minus and omega2_min < omega_max_minus):
-                        if (omega2_min < omega_min_minus):
-                            omega2_min = omega_min_minus
-                        if (omega2_max > omega_max_minus):
-                            omega2_max = omega_max_minus
-                    else:
-                        omega2_min = 0.0 # Dummy for no-interval
-                        omega2_max = 0.0
-
-                    # Print results
-                    if log:
                         print("  omega_0 ............................: %.2f deg" % (omega_0*gammalib.rad2deg))
-                        print("  Omega range ........................: %.2f - %.2f deg" % (omega_min*gammalib.rad2deg,omega_max*gammalib.rad2deg))
                         print("  Omega range 1 ......................: %.2f - %.2f deg" % (omega1_min*gammalib.rad2deg,omega1_max*gammalib.rad2deg))
                         print("  Omega range 2 ......................: %.2f - %.2f deg" % (omega2_min*gammalib.rad2deg,omega2_max*gammalib.rad2deg))
 
-                    # Draw Omega range lines and circle segments
-                    if (omega1_min < omega1_max):
-                        #n    = 10
-                        #step = rho/n
-                        #x    = []
-                        #y    = []
-                        #for i in range(n+1):
-                        #    x.append(i*step * math.sin(omega1_min+posangle_obs))
-                        #    y.append(i*step * math.cos(omega1_min+posangle_obs))
-                        #plt.plot(x, y, 'k-.')
-                        #x    = []
-                        #y    = []
-                        #for i in range(n+1):
-                        #    x.append(i*step * math.sin(omega1_max+posangle_obs))
-                        #    y.append(i*step * math.cos(omega1_max+posangle_obs))
-                        #plt.plot(x, y, 'k-.')
-                        n    = 100
-                        x    = []
-                        y    = []
-                        step = (omega1_max - omega1_min)/n
-                        for i in range(n+1):
-                            radians = i*step + omega1_min
-                            cos_radians = math.sin(radians+posangle_obs)
-                            sin_radians = math.cos(radians+posangle_obs)
-                            x.append(rho * cos_radians)
-                            y.append(rho * sin_radians)
-                        plt.plot(x, y, 'k-')
+                    # Limit intervals
+                    intervals  = limit_omega(omega1_min, omega1_max, domega)
+                    intervals2 = limit_omega(omega2_min, omega2_max, domega)
+                    intervals.extend(intervals2)
 
-                    if (omega2_min < omega2_max):
-                        #n    = 10
-                        #step = rho/n
-                        #x    = []
-                        #y    = []
-                        #for i in range(n+1):
-                        #    x.append(i*step * math.sin(omega2_min+posangle_obs))
-                        #    y.append(i*step * math.cos(omega2_min+posangle_obs))
-                        #plt.plot(x, y, 'k-.')
-                        #x    = []
-                        #y    = []
-                        #for i in range(n+1):
-                        #    x.append(i*step * math.sin(omega2_max+posangle_obs))
-                        #    y.append(i*step * math.cos(omega2_max+posangle_obs))
-                        #plt.plot(x, y, 'k-.')
-                        n    = 100
-                        x    = []
-                        y    = []
-                        step = (omega2_max - omega2_min)/n
-                        for i in range(n+1):
-                            radians = i*step + omega2_min
-                            cos_radians = math.sin(radians+posangle_obs)
-                            sin_radians = math.cos(radians+posangle_obs)
-                            x.append(rho * cos_radians)
-                            y.append(rho * sin_radians)
-                        plt.plot(x, y, 'k-')
+                    # Print results
+                    if log:
+                        for interval in intervals:
+                            print("  Omega interval .....................: %.2f - %.2f deg" % (interval['min']*gammalib.rad2deg,interval['max']*gammalib.rad2deg))
+
+                    # Draw Omega range lines and circle segments
+                    for interval in intervals:
+                        omega_min = interval['min']
+                        omega_max = interval['max']
+                        if (omega_min < omega_max):
+                            n    = 100
+                            x    = []
+                            y    = []
+                            step = (omega_max - omega_min)/n
+                            for i in range(n+1):
+                                radians = i*step + omega_min
+                                cos_radians = math.sin(radians+posangle_obs)
+                                sin_radians = math.cos(radians+posangle_obs)
+                                x.append(rho * cos_radians)
+                                y.append(rho * sin_radians)
+                            plt.plot(x, y, 'k-')
+
 
         # Test line
         #x = []
@@ -414,19 +408,20 @@ if __name__ == '__main__':
         sys.exit()
 
     # Set Psf size
-    delta_max = 0.4
+    delta_max = 0.5
 
     # Set model parameters
     centre = gammalib.GSkyDir()
     centre.radec_deg(0.0, 0.0)
     semimajor = 1.0
     semiminor = 0.50
-    posang    = -99.0
+    posang    = 120.0
 
     # Set observed photon direction
     obsDir = gammalib.GSkyDir()
     #obsDir.radec_deg(0.4, -0.3)
-    obsDir.radec_deg(-0.4, -0.3)
+    #obsDir.radec_deg(-0.4, -0.3)
+    obsDir.radec_deg(0.4, 0.4)
 
     # Set pointing direction
     pntDir = gammalib.GSkyDir()
