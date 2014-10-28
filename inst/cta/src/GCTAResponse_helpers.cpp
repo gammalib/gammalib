@@ -52,6 +52,104 @@
 
 /*==========================================================================
  =                                                                         =
+ =                              Helper functions                           =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Limit omega interval
+ *
+ * @param[in] min Interval minimum (radians).
+ * @param[in] max Interval maximum (radians).
+ * @param[in] domega Half length of interval (radians).
+ * @return Vector of intervals.
+ *
+ * Limits an omega interval [@p min,@p max] to the interval specified by
+ * [-@p domega,@p domega]. This may lead to a split of [@p min,@p max] in
+ * several intervals. The method thus returns a vector of intervals that
+ * overlap with [-@p domega,@p domega]. If there is no overlap with the
+ * interval, the method returns an empty vector.
+ *
+ * The method takes care of wrap arounds. It is assumed that on input
+ * [@p min,@p max] is contained within [-2pi,+2pi].
+ ***************************************************************************/
+cta_omega_intervals gammalib::limit_omega(const double& min,
+                                          const double& max,
+                                          const double& domega)
+{
+    // Allocate intervals
+    cta_omega_intervals intervals;
+
+    // Continue only if domega is smaller than pi
+    if (domega < gammalib::pi) {
+
+        // Set limiting intervals. To take care of a possible wrap around in
+        // omega we consider also intervals that are shifted by +/-2pi
+        double omega_min       = -domega;
+        double omega_max       = +domega;
+        double omega_min_plus  = omega_min + gammalib::twopi;
+        double omega_max_plus  = omega_max + gammalib::twopi;
+        double omega_min_minus = omega_min - gammalib::twopi;
+        double omega_max_minus = omega_max - gammalib::twopi;
+
+        // If the [min,max] interval overlaps with the unshifted
+        // [-domega,domega] interval then constrain the interval
+        if (max > omega_min && min < omega_max) {
+            double interval_min = min;
+            double interval_max = max;
+            if (interval_min < omega_min) {
+                interval_min = omega_min;
+            }
+            if (interval_max > omega_max) {
+                interval_max = omega_max;
+            }
+            intervals.push_back(std::make_pair(interval_min,interval_max));
+        }
+
+        // If the [min,max] interval overlaps with the [-domega,domega]
+        // interval shifted by +2pi then constrain the interval using the
+        // shifted interval
+        if (max > omega_min_plus && min < omega_max_plus) {
+            double interval_min = min;
+            double interval_max = max;
+            if (interval_min < omega_min_plus) {
+                interval_min = omega_min_plus;
+            }
+            if (interval_max > omega_max_plus) {
+                interval_max = omega_max_plus;
+            }
+            intervals.push_back(std::make_pair(interval_min,interval_max));
+        }
+ 
+        // If the [min,max] interval overlaps with the [-domega,domega]
+        // interval shifted by -2pi then constrain the interval using the
+        // shifted interval
+        if (max > omega_min_minus && min < omega_max_minus) {
+            double interval_min = min;
+            double interval_max = max;
+            if (interval_min < omega_min_minus) {
+                interval_min = omega_min_minus;
+            }
+            if (interval_max > omega_max_minus) {
+                interval_max = omega_max_minus;
+            }
+            intervals.push_back(std::make_pair(interval_min,interval_max));
+        }
+
+    } // endif: interval was not the full circle
+
+    // ... otherwise append the provided interval
+    else {
+        intervals.push_back(std::make_pair(min,max));
+    }
+
+    // Return intervals
+    return intervals;
+}
+
+
+/*==========================================================================
+ =                                                                         =
  =              Helper class methods for response computation              =
  =                                                                         =
  ==========================================================================*/
@@ -470,7 +568,8 @@ double cta_npred_radial_kern_omega::eval(const double& omega)
 /***********************************************************************//**
  * @brief Kernel for elliptical model integration over model's zenith angle
  *
- * @param[in] rho Zenith angle with respect to model centre [radians].
+ * @param[in] rho Radial distance from model centre [radians].
+ * @return Radial IRF integration kernel.
  *
  * Computes
  *
@@ -481,9 +580,19 @@ double cta_npred_radial_kern_omega::eval(const double& omega)
  *                     d\omega
  * \f]
  *
- * If \f$\rho < {\tt m\_semiminor}\f$ the Psf is fully comprised within the
- * ellipse and the integration can be performed over \f$2\pi\f$ in azimuth.
- * 
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the observed photon direction, and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical source model
+ * for a given true photon energy and photon arrival time,
+ * \f$IRF(\rho, \omega)\f$ is the instrument response function.
+ *
+ * The method performs the required coordinate transformations from the
+ * model system, spanned by \f$(\rho, \omega)\f$, to the system needed for
+ * IRF computations. Furthermore, the method limits the integration range
+ * to area where the ellipse intersects the IRF.
  ***************************************************************************/
 double cta_irf_elliptical_kern_rho::eval(const double& rho)
 {
@@ -493,12 +602,13 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
     // Continue only if rho is positive
     if (rho > 0.0) {
 
-        // Compute half length of arc that lies within Psf validity circle
-        // (in radians)
+        // Compute half length of the arc (in radians) from a circle with
+        // radius rho that intersects with the point spread function, defined
+        // as a circle with maximum radius m_delta_max
         double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                          m_zeta,
-                                                          m_cos_zeta,
-                                                          m_sin_zeta,
+                                                          m_rho_obs,
+                                                          m_cos_rho_obs,
+                                                          m_sin_rho_obs,
                                                           m_delta_max,
                                                           m_cos_delta_max);
 
@@ -508,10 +618,10 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             // Precompute cosine and sine terms for azimuthal integration
             double cos_rho = std::cos(rho);
             double sin_rho = std::sin(rho);
-            double cos_psf = cos_rho*m_cos_zeta;
-            double sin_psf = sin_rho*m_sin_zeta;
-            double cos_ph  = cos_rho*m_cos_lambda;
-            double sin_ph  = sin_rho*m_sin_lambda;
+            double cos_psf = cos_rho * m_cos_rho_obs;
+            double sin_psf = sin_rho * m_sin_rho_obs;
+            double cos_ph  = cos_rho * m_cos_rho_pnt;
+            double sin_ph  = sin_rho * m_sin_rho_pnt;
 
             // Setup integration kernel
             cta_irf_elliptical_kern_omega integrand(m_rsp,
@@ -522,8 +632,8 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
                                                     m_srcTime,
                                                     m_srcLogEng,
                                                     m_obsEng,
-                                                    m_obsOmega,
-                                                    m_omega0,
+                                                    m_posangle_obs,
+                                                    m_omega_pnt,
                                                     rho,
                                                     cos_psf,
                                                     sin_psf,
@@ -534,14 +644,12 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             GIntegral integral(&integrand);
             integral.fixed_iter(m_iter);
 
-            // If the radius rho is not larger than the semiminor axis, the
-            // circle with that radius is fully contained in the ellipse
-            // and we can just integrate over the relevant arc
+            // If the radius rho is not larger than the semiminor axis
+            // boundary, the circle with that radius is fully contained in
+            // the ellipse and we can just integrate over the relevant arc
             if (rho < m_semiminor) {
 
-                // Compute omega integration range. Omega=0 is the connecting
-                // line between model centre and Psf centre (defined by
-                // m_obsOmega), at maximum [-pi,pi]
+                // Compute omega integration range
                 double omega_min = -domega;
                 double omega_max = +domega;
 
@@ -551,23 +659,28 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
 
             } // endif: circle comprised in ellipse
 
-            // ... otherwise compute the relevant sub-intervals
+            // ... otherwise there are arcs that intersect with the Psf circle
             else {
 
-                // Compute azimuth angle of intersection point, comprised
-                // in interval [0,pi/2]
+                // Compute half the arc length (in radians) of a circle of
+                // radius rho, centred on the model, that intersects with
+                // the ellipse boundary
                 double arg1 = 1.0 - (m_semiminor*m_semiminor) / (rho*rho);
                 double arg2 = 1.0 - (m_semiminor*m_semiminor) /
                                     (m_semimajor*m_semimajor);
                 double omega_width = std::acos(std::sqrt(arg1/arg2));
 
-                // Continue only if arclength is positive
+                // Continue only if the arclength is positive
                 if (omega_width > 0.0) {
 
-                    // Compute reference angle in [-pi,pi] interval
-                    //TODO: can be done before as nothing depends here on
-                    //rho
-                    double omega_0     = m_posangle - m_obsOmega;
+                    // Compute azimuth angle difference between ellipse
+                    // position angle and position angle of observed
+                    // photon in the model system. This angle will define
+                    // the reference point around which the circle arc. Make
+                    // sure that omega_0 is within [-pi,pi] thus that the omega
+                    // intervals are between [-2pi,2pi]
+                    double omega_0 = m_model.posangle() * gammalib::deg2rad - 
+                                     m_posangle_obs;
                     if (omega_0 > gammalib::pi) {
                         omega_0 -= gammalib::pi;
                     }
@@ -575,27 +688,36 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
                         omega_0 += gammalib::pi;
                     }
 
-                    // Compute intervals
-                    double omega1_min = omega_0 - omega_width;
-                    double omega1_max = omega_0 + omega_width;
+                    // Compute azimuth angle intervals
+                    double omega1_min = omega_0    - omega_width;
+                    double omega1_max = omega_0    + omega_width;
                     double omega2_min = omega1_min + gammalib::pi;
                     double omega2_max = omega1_max + gammalib::pi;
 
-                    // Limit intervals to [omega_min, omega_max]
+                    // Limit intervals to the intersection of the ellipse with
+                    // the Psf circle. This may lead to a split of intervals,
+                    // and we gather all these intervals in a special interval
+                    // pair containers
+                    cta_omega_intervals intervals1 = 
+                        gammalib::limit_omega(omega1_min, omega1_max, domega);
+                    cta_omega_intervals intervals2 = 
+                        gammalib::limit_omega(omega2_min, omega2_max, domega);
 
-                    // Integrate over first interval
-                    if (omega1_max > omega1_min) {
-                        irf = integral.romberg(omega1_min, omega1_max, m_iter) *
-                              sin_rho;
+                    // Integrate over all intervals for omega1
+                    for (int i = 0; i < intervals1.size(); ++i) {
+                        double min = intervals1[i].first;
+                        double max = intervals1[i].second;
+                        irf       += integral.romberg(min, max, m_iter) * sin_rho;
                     }
 
-                    // Integrate over second interval
-                    if (omega2_max > omega2_min) {
-                        irf += integral.romberg(omega2_min, omega2_max, m_iter) *
-                               sin_rho;
+                    // Integrate over all intervals for omega2
+                    for (int i = 0; i < intervals2.size(); ++i) {
+                        double min = intervals2[i].first;
+                        double max = intervals2[i].second;
+                        irf       += integral.romberg(min, max, m_iter) * sin_rho;
                     }
 
-                } // endif: arclength was positive
+                } // endif: arc length was positive
 
             } // endelse: circle was not comprised in ellipse
 
@@ -629,12 +751,18 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
  * Computes
  *
  * \f[
- *    S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega)
+ *    S_{\rm p}(\omega | \rho, E, t) \, IRF(\omega | \rho)
  * \f]
  *
- * From the model coordinates \f$(\rho,\omega)\f$, the method computes the
- * angle between the true (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) 
- * photon arrival direction using
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the observed photon direction, and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ *
+ * From the coordinates \f$(\rho,\omega)\f$ in the model system, the method
+ * computes the angle between the true (\f$\vec{p}\f$) and observed
+ * (\f$\vec{p'}\f$) photon arrival direction using
  * 
  * \f[\delta = \arccos(\cos \rho \cos \zeta + 
  *                     \sin \rho \sin \zeta \cos \omega)\f]
@@ -663,7 +791,7 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
     double irf = 0.0;
 
     // Evaluate sky model
-    double model = m_model.eval(m_rho, omega + m_obsOmega, m_srcEng, m_srcTime);
+    double model = m_model.eval(m_rho, omega + m_posangle_obs, m_srcEng, m_srcTime);
 
     // Continue only if model is positive
     if (model > 0.0) {
@@ -673,7 +801,7 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
     
         // Compute true photon offset and azimuth angle in camera system
         // [radians]
-        double theta = std::acos(m_cos_ph + m_sin_ph * std::cos(m_omega0 - omega));
+        double theta = std::acos(m_cos_ph + m_sin_ph * std::cos(m_omega_pnt - omega));
         double phi   = 0.0; //TODO: Implement IRF Phi dependence
 
         // Evaluate IRF * model
@@ -738,18 +866,18 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
 
         // Compute half length of arc that lies within ROI+PSF radius (radians)
         double domega = 0.5 * gammalib::cta_roi_arclength(rho,
-                                                          m_dist,
-                                                          m_cos_dist,
-                                                          m_sin_dist,
-                                                          m_radius,
-                                                          m_cos_radius);
+                                                          m_rho_roi,
+                                                          m_cos_rho_roi,
+                                                          m_sin_rho_roi,
+                                                          m_radius_roi,
+                                                          m_cos_radius_roi);
 
         // Continue only if arc length is positive
         if (domega > 0.0) {
 
             // Compute phi integration range
-            double omega_min = m_omega0 - domega;
-            double omega_max = m_omega0 + domega;
+            double omega_min = m_posangle_roi - domega;
+            double omega_max = m_posangle_roi + domega;
 
             // Compute sine and cosine of offset angle
             double sin_rho = std::sin(rho);
@@ -765,10 +893,87 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                                                       sin_rho,
                                                       cos_rho);
 
-            // Integrate over phi
+            // Setup integrator
             GIntegral integral(&integrand);
             integral.fixed_iter(m_iter);
-            npred = integral.romberg(omega_min, omega_max, m_iter) * sin_rho;
+
+            // If the radius rho is not larger than the semiminor axis
+            // boundary, the circle with that radius is fully contained in
+            // the ellipse and we can just integrate over the relevant arc
+            if (rho < m_semiminor) {
+
+                // Compute omega integration range
+                double omega_min = -domega;
+                double omega_max = +domega;
+
+                // Integrate over omega
+                npred = integral.romberg(omega_min, omega_max, m_iter) *
+                        sin_rho;
+
+            } // endif: circle comprised in ellipse
+
+            // ... otherwise there are arcs that intersect with the ROI
+            // circle
+            else {
+
+                // Compute half the arc length (in radians) of a circle of
+                // radius rho, centred on the model, that intersects with
+                // the ellipse boundary
+                double arg1 = 1.0 - (m_semiminor*m_semiminor) / (rho*rho);
+                double arg2 = 1.0 - (m_semiminor*m_semiminor) /
+                                    (m_semimajor*m_semimajor);
+                double omega_width = std::acos(std::sqrt(arg1/arg2));
+
+                // Continue only if the arclength is positive
+                if (omega_width > 0.0) {
+
+                    // Compute azimuth angle difference between ellipse
+                    // position angle and position angle of observed
+                    // photon in the model system. This angle will define
+                    // the reference point around which the circle arc. Make
+                    // sure that omega_0 is within [-pi,pi] thus that the omega
+                    // intervals are between [-2pi,2pi]
+                    double omega_0 = m_model.posangle() * gammalib::deg2rad - 
+                                     m_posangle_roi;
+                    if (omega_0 > gammalib::pi) {
+                        omega_0 -= gammalib::pi;
+                    }
+                    else if (omega_0 < -gammalib::pi) {
+                        omega_0 += gammalib::pi;
+                    }
+
+                    // Compute azimuth angle intervals
+                    double omega1_min = omega_0    - omega_width;
+                    double omega1_max = omega_0    + omega_width;
+                    double omega2_min = omega1_min + gammalib::pi;
+                    double omega2_max = omega1_max + gammalib::pi;
+
+                    // Limit intervals to the intersection of the ellipse with
+                    // the Psf circle. This may lead to a split of intervals,
+                    // and we gather all these intervals in a special interval
+                    // pair containers
+                    cta_omega_intervals intervals1 = 
+                        gammalib::limit_omega(omega1_min, omega1_max, domega);
+                    cta_omega_intervals intervals2 = 
+                        gammalib::limit_omega(omega2_min, omega2_max, domega);
+
+                    // Integrate over all intervals for omega1
+                    for (int i = 0; i < intervals1.size(); ++i) {
+                        double min = intervals1[i].first;
+                        double max = intervals1[i].second;
+                        npred     += integral.romberg(min, max, m_iter) * sin_rho;
+                    }
+
+                    // Integrate over all intervals for omega2
+                    for (int i = 0; i < intervals2.size(); ++i) {
+                        double min = intervals2[i].first;
+                        double max = intervals2[i].second;
+                        npred     += integral.romberg(min, max, m_iter) * sin_rho;
+                    }
+
+                } // endif: arc length was positive
+
+            } // endelse: circle was not comprised in ellipse
 
             // Debug: Check for NaN
             #if defined(G_NAN_CHECK)
@@ -777,7 +982,6 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                 std::cout << "(rho=" << rho << "):";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (npred=" << npred;
-                std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
                 std::cout << ", sin_rho=" << sin_rho;
                 std::cout << ", cos_rho=" << cos_rho;
                 std::cout << ")" << std::endl;
