@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -634,32 +634,6 @@ std::string GModelSpatialEllipticalDisk::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::init_members(void)
 {
-    // Initialise semi-minor axis
-    m_semiminor.clear();
-    m_semiminor.name("MinorRadius");
-    m_semiminor.unit("deg");
-    m_semiminor.value(2.778e-4); // 1 arcsec
-    m_semiminor.min(2.778e-4);   // 1 arcsec
-    m_semiminor.free();
-    m_semiminor.scale(1.0);
-    m_semiminor.gradient(0.0);
-    m_semiminor.has_grad(false);  // Elliptical components never have gradients
-
-    // Initialise semi-major axis
-    m_semimajor.clear();
-    m_semimajor.name("MajorRadius");
-    m_semimajor.unit("deg");
-    m_semimajor.value(2.778e-4); // 1 arcsec
-    m_semimajor.min(2.778e-4);   // 1 arcsec
-    m_semimajor.free();
-    m_semimajor.scale(1.0);
-    m_semimajor.gradient(0.0);
-    m_semimajor.has_grad(false);  // Elliptical components never have gradients
-
-    // Set parameter pointer(s)
-    m_pars.push_back(&m_semiminor);
-    m_pars.push_back(&m_semimajor);
-
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius is not meaningful
     m_last_semiminor = 0.0;
@@ -684,10 +658,6 @@ void GModelSpatialEllipticalDisk::init_members(void)
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::copy_members(const GModelSpatialEllipticalDisk& model)
 {
-    // Copy members
-	m_semiminor = model.m_semiminor;
-	m_semimajor = model.m_semimajor;
-
     // Copy precomputation cache
     m_last_semiminor = model.m_last_semiminor;
     m_last_semimajor = model.m_last_semimajor;

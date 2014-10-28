@@ -94,6 +94,10 @@ public:
     void    dec(const double& dec);
     double  posangle(void) const;
     void    posangle(const double& posangle);
+    double  semiminor(void) const;
+    double  semimajor(void) const;
+    void    semiminor(const double& semiminor);
+    void    semimajor(const double& semimajor);
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 
@@ -104,9 +108,11 @@ protected:
     void free_members(void);
 
     // Proteced members
-    GModelPar m_ra;       //!< Right Ascension (deg)
-    GModelPar m_dec;      //!< Declination (deg)
-    GModelPar m_posangle; //!< Position angle from North, counterclockwise (deg)
+    GModelPar m_ra;        //!< Right Ascension (deg)
+    GModelPar m_dec;       //!< Declination (deg)
+    GModelPar m_posangle;  //!< Position angle from North, counterclockwise (deg)
+    GModelPar m_semiminor; //!< Semi-minor axis of ellipse (deg)
+    GModelPar m_semimajor; //!< Semi-major axis of ellipse (deg)
 };
 
 
@@ -209,6 +215,64 @@ inline
 void GModelSpatialElliptical::posangle(const double& posangle)
 {
     m_posangle.value(posangle);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return semi-minor axis of ellipse
+ *
+ * @return Semi-minor axis of ellipse (degrees).
+ *
+ * Returns the semi-minor axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialElliptical::semiminor(void) const
+{
+    return (m_semiminor.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set semi-minor axis of ellipse
+ *
+ * @param[in] semiminor Semi-minor axis of ellipse (degrees)
+ *
+ * Sets the semi-minor axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialElliptical::semiminor(const double& semiminor)
+{
+    m_semiminor.value(semiminor);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return semi-major axis of ellipse
+ *
+ * @return Semi-major axis of ellipse (degrees).
+ *
+ * Returns the semi-major axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialElliptical::semimajor(void) const
+{
+    return (m_semimajor.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set semi-major axis of ellipse
+ *
+ * @param[in] semimajor Semi-major axis of ellipse (degrees)
+ *
+ * Sets the semi-major axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialElliptical::semimajor(const double& semimajor)
+{
+    m_semimajor.value(semimajor);
     return;
 }
 
