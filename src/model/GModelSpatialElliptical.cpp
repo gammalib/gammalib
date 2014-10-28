@@ -521,6 +521,8 @@ void GModelSpatialElliptical::copy_members(const GModelSpatialElliptical& model)
     m_pars.push_back(&m_ra);
     m_pars.push_back(&m_dec);
     m_pars.push_back(&m_posangle);
+    m_pars.push_back(&m_semiminor);
+    m_pars.push_back(&m_semimajor);
 
     // Return
     return;
