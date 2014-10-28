@@ -77,7 +77,12 @@ public:
     GTime __mul__(const double& factor) const {
         return ((*self) * factor);
     }
+    // Python 2.x
     GTime __div__(const double& factor) const {
+        return ((*self) / factor);
+    }
+    // Python 3.x
+    GTime __truediv__(const double& factor) const {
         return ((*self) / factor);
     }
     bool __eq__(const GTime& time) const {
