@@ -74,6 +74,10 @@ public:
  
     // Operators
     GTime& operator=(const GTime& time);
+    GTime& operator+=(const GTime& time);
+    GTime& operator-=(const GTime& time);
+    GTime& operator*=(const double& scale);
+    GTime& operator/=(const double& scale);
 
     // Methods
     void           clear(void);
@@ -175,6 +179,62 @@ int GTime::days_in_year(const int& year) const
 
 
 /***********************************************************************//**
+ * @brief Time unary addition operator
+ *
+ * @param[in] time Time.
+ * @return Sum of times.
+ ***************************************************************************/
+inline
+GTime& GTime::operator+=(const GTime& time)
+{
+    m_time += time.m_time;
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Time unary subtraction operator
+ *
+ * @param[in] time Time.
+ * @return Difference of times.
+ ***************************************************************************/
+inline
+GTime& GTime::operator-=(const GTime& time)
+{
+    m_time -= time.m_time;
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Time unary multiplication operator
+ *
+ * @param[in] scale Scale.
+ * @return Time multiplied by scale.
+ ***************************************************************************/
+inline
+GTime& GTime::operator*=(const double& scale)
+{
+    m_time *= scale;
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Time unary division operator
+ *
+ * @param[in] scale Scale.
+ * @return Time divided by scale.
+ ***************************************************************************/
+inline
+GTime& GTime::operator/=(const double& scale)
+{
+    m_time /= scale;
+    return *this;
+}
+
+
+/***********************************************************************//**
  * @brief Time addition operator friend
  *
  * @param[in] a First time.
@@ -230,7 +290,7 @@ GTime operator*(const double& s, const GTime& time)
  * @return Multiplied time.
  ***************************************************************************/
 inline
-GTime operator* (const GTime& time, const double& s)
+GTime operator*(const GTime& time, const double& s)
 {
     GTime result;
     result.m_time = s * time.m_time;

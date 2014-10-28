@@ -51,6 +51,7 @@ public:
     // Operators
     GEnergy& operator+=(const GEnergy& eng);
     GEnergy& operator-=(const GEnergy& eng);
+    GEnergy& operator*=(const double& scale);
     void     operator()(const double& eng, const std::string& unit);
     double   operator()(const std::string& unit) const;
 
@@ -104,6 +105,16 @@ public:
     // Python 3.x
     GEnergy __truediv__(const double& factor) const {
         return ((*self) / factor);
+    }
+    // Python 2.x operator/=
+    GEnergy __idiv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GEnergy __itruediv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
     }
     bool __eq__(const GEnergy& eng) const {
         return ((*self) == eng);

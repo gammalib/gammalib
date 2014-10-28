@@ -48,17 +48,17 @@
 class GEnergy : public GBase {
 
     // Operator friends
-    friend GEnergy operator+ (const GEnergy &a, const GEnergy &b);
-    friend GEnergy operator- (const GEnergy &a, const GEnergy &b);
-    friend GEnergy operator* (const double &a, const GEnergy &b);
-    friend GEnergy operator* (const GEnergy &a, const double &b);
-    friend GEnergy operator/ (const GEnergy &a, const double &b);
-    friend bool    operator== (const GEnergy &a, const GEnergy &b);
-    friend bool    operator!= (const GEnergy &a, const GEnergy &b);
-    friend bool    operator< (const GEnergy &a, const GEnergy &b);
-    friend bool    operator<= (const GEnergy &a, const GEnergy &b);
-    friend bool    operator> (const GEnergy &a, const GEnergy &b);
-    friend bool    operator>= (const GEnergy &a, const GEnergy &b);
+    friend GEnergy operator+(const GEnergy &a, const GEnergy &b);
+    friend GEnergy operator-(const GEnergy &a, const GEnergy &b);
+    friend GEnergy operator*(const double &a, const GEnergy &b);
+    friend GEnergy operator*(const GEnergy &a, const double &b);
+    friend GEnergy operator/(const GEnergy &a, const double &b);
+    friend bool    operator==(const GEnergy &a, const GEnergy &b);
+    friend bool    operator!=(const GEnergy &a, const GEnergy &b);
+    friend bool    operator<(const GEnergy &a, const GEnergy &b);
+    friend bool    operator<=(const GEnergy &a, const GEnergy &b);
+    friend bool    operator>(const GEnergy &a, const GEnergy &b);
+    friend bool    operator>=(const GEnergy &a, const GEnergy &b);
 
 public:
     // Constructors and destructors
@@ -71,6 +71,8 @@ public:
     GEnergy& operator=(const GEnergy& eng);
     GEnergy& operator+=(const GEnergy& eng);
     GEnergy& operator-=(const GEnergy& eng);
+    GEnergy& operator*=(const double& scale);
+    GEnergy& operator/=(const double& scale);
     void     operator()(const double& eng, const std::string& unit);
     double   operator()(const std::string& unit) const;
 
@@ -129,8 +131,11 @@ std::string GEnergy::classname(void) const
 }
 
 
-/***************************************************************************
- *                               Inline friends                            *
+/***********************************************************************//**
+ * @brief Energy unary addition operator
+ *
+ * @param[in] eng Energy.
+ * @return Sum of energies.
  ***************************************************************************/
 inline
 GEnergy& GEnergy::operator+=(const GEnergy& eng)
@@ -139,6 +144,14 @@ GEnergy& GEnergy::operator+=(const GEnergy& eng)
     m_has_log10  = false;
     return *this;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy unary differnce operator
+ *
+ * @param[in] eng Energy.
+ * @return Difference of energies.
+ ***************************************************************************/
 inline
 GEnergy& GEnergy::operator-=(const GEnergy& eng)
 {
@@ -146,6 +159,45 @@ GEnergy& GEnergy::operator-=(const GEnergy& eng)
     m_has_log10  = false;
     return *this;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy unary multiplication operator
+ *
+ * @param[in] scale Scale.
+ * @return Energy multiplied with scale.
+ ***************************************************************************/
+inline
+GEnergy& GEnergy::operator*=(const double& scale)
+{
+    m_energy    *= scale;
+    m_has_log10  = false;
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Energy unary division operator
+ *
+ * @param[in] scale Scale.
+ * @return Energy divided by scale.
+ ***************************************************************************/
+inline
+GEnergy& GEnergy::operator/=(const double& scale)
+{
+    m_energy    /= scale;
+    m_has_log10  = false;
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Energy addition operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return Sum of energies.
+ ***************************************************************************/
 inline
 GEnergy operator+(const GEnergy& a, const GEnergy& b)
 {
@@ -153,6 +205,15 @@ GEnergy operator+(const GEnergy& a, const GEnergy& b)
     result.m_energy = a.m_energy + b.m_energy;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy subtraction operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return Difference of energies.
+ ***************************************************************************/
 inline
 GEnergy operator-(const GEnergy& a, const GEnergy& b)
 {
@@ -160,6 +221,15 @@ GEnergy operator-(const GEnergy& a, const GEnergy& b)
     result.m_energy = a.m_energy - b.m_energy;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy multiplication operator friend
+ *
+ * @param[in] a Scale.
+ * @param[in] b Energy.
+ * @return Energy multiplied by scale.
+ ***************************************************************************/
 inline
 GEnergy operator*(const double& a, const GEnergy& b)
 {
@@ -167,6 +237,15 @@ GEnergy operator*(const double& a, const GEnergy& b)
     result.m_energy = a * b.m_energy;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy multiplication operator friend
+ *
+ * @param[in] a Energy.
+ * @param[in] b Scale.
+ * @return Energy multiplied by scale.
+ ***************************************************************************/
 inline
 GEnergy operator*(const GEnergy& a, const double& b)
 {
@@ -174,6 +253,15 @@ GEnergy operator*(const GEnergy& a, const double& b)
     result.m_energy = b * a.m_energy;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy division operator friend
+ *
+ * @param[in] a Energy.
+ * @param[in] b Scale.
+ * @return Energy divided by scale.
+ ***************************************************************************/
 inline
 GEnergy operator/(const GEnergy& a, const double& b)
 {
@@ -181,31 +269,85 @@ GEnergy operator/(const GEnergy& a, const double& b)
     result.m_energy = a.m_energy / b;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Energy equality operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return True if both energies are equal.
+ ***************************************************************************/
 inline
 bool operator==(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy == b.m_energy);
 }
+
+
+/***********************************************************************//**
+ * @brief Energy non-equality operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return True if both energies are not equal.
+ ***************************************************************************/
 inline
 bool operator!=(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy != b.m_energy);
 }
+
+
+/***********************************************************************//**
+ * @brief Energy smaller than operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return True if first energy is smaller than second energy.
+ ***************************************************************************/
 inline
 bool operator<(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy < b.m_energy);
 }
+
+
+/***********************************************************************//**
+ * @brief Energy smaller than or equal to operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return True if first energy is smaller than or equal to second energy.
+ ***************************************************************************/
 inline
 bool operator<=(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy <= b.m_energy);
 }
+
+
+/***********************************************************************//**
+ * @brief Energy larger than operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return True if first energy is larger than second energy.
+ ***************************************************************************/
 inline
 bool operator>(const GEnergy &a, const GEnergy &b)
 {
     return (a.m_energy > b.m_energy);
 }
+
+
+/***********************************************************************//**
+ * @brief Energy larger than or equal to operator friend
+ *
+ * @param[in] a First energy.
+ * @param[in] b Second energy.
+ * @return True if first energy is larger than or equal to second energy.
+ ***************************************************************************/
 inline
 bool operator>=(const GEnergy &a, const GEnergy &b)
 {

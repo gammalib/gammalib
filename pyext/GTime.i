@@ -44,6 +44,11 @@ public:
     GTime(const double& time, const GTimeReference& ref);
     virtual ~GTime(void);
 
+    // Operators
+    GTime& operator+=(const GTime& time);
+    GTime& operator-=(const GTime& time);
+    GTime& operator*=(const double& scale);
+
     // Methods
     void           clear(void);
     GTime*         clone(void) const;
@@ -84,6 +89,16 @@ public:
     // Python 3.x
     GTime __truediv__(const double& factor) const {
         return ((*self) / factor);
+    }
+    // Python 2.x operator/=
+    GTime __idiv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GTime __itruediv__(const double& scale) {
+        self->operator/=(scale);
+        return (*self);
     }
     bool __eq__(const GTime& time) const {
         return ((*self) == time);

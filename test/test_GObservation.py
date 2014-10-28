@@ -17,15 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
-import os
+import gammalib
 
 
 # ========================================== #
 # Test class for GammaLib observation module #
 # ========================================== #
-class Test(GPythonTestSuite):
+class Test(gammalib.GPythonTestSuite):
     """
     Test class for GammaLib observation module.
     """
@@ -35,7 +33,7 @@ class Test(GPythonTestSuite):
         Constructor.
         """
         # Call base class constructor
-        GPythonTestSuite.__init__(self)
+        gammalib.GPythonTestSuite.__init__(self)
 
         # Return
         return
@@ -61,8 +59,8 @@ class Test(GPythonTestSuite):
         Test GEnergy class.
         """
         # Setup energies
-        energy    = GEnergy(3.0, "TeV")
-        energy_b  = energy.copy()
+        energy   = gammalib.GEnergy(3.0, "TeV")
+        energy_b = energy.copy()
 
         # Unary addition operator
         energy += energy_b
@@ -70,6 +68,14 @@ class Test(GPythonTestSuite):
 
         # Unary subtraction operator
         energy -= energy_b
+        self.test_value(energy.TeV(), 3.0);
+
+        # Unary multiplication operator
+        energy *= 2.0
+        self.test_value(energy.TeV(), 6.0);
+
+        # Unary division operator
+        energy /= 2.0
         self.test_value(energy.TeV(), 3.0);
 
         # Binary addition operator
@@ -98,9 +104,25 @@ class Test(GPythonTestSuite):
         Test GTime class.
         """
         # Setup times
-        time   = GTime(3.0)
+        time   = gammalib.GTime(3.0)
         time_b = time.copy()
 
+        # Unary addition operator
+        time += time_b
+        self.test_value(time.secs(), 6.0);
+
+        # Unary subtraction operator
+        time -= time_b
+        self.test_value(time.secs(), 3.0);
+
+        # Unary multiplication operator
+        time *= 2.0
+        self.test_value(time.secs(), 6.0);
+
+        # Unary division operator
+        time /= 2.0
+        self.test_value(time.secs(), 3.0);
+        
         # Binary addition operator
         time = time + time_b
         self.test_value(time.secs(), 6.0);
