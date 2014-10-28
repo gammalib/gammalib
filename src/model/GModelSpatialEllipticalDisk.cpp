@@ -405,7 +405,7 @@ GSkyDir GModelSpatialEllipticalDisk::mc(const GEnergy& energy,
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
  *
- * @return Returns maximum model radians.
+ * @return Returns maximum model radius.
  ***************************************************************************/
 double GModelSpatialEllipticalDisk::theta_max(void) const
 {
