@@ -50,6 +50,7 @@ class Test(GPythonTestSuite):
 
         # Append tests
         self.append(self.test_energy, "Test GEnergy class")
+        self.append(self.test_time, "Test GTime class")
 
         # Return
         return
@@ -86,6 +87,35 @@ class Test(GPythonTestSuite):
         # Scalar division operator
         energy = energy / 2.0
         self.test_value(energy.TeV(), 3.0);
+
+        # Return
+        return
+
+
+    # Test GTime class
+    def test_time(self):
+        """
+        Test GTime class.
+        """
+        # Setup times
+        time   = GTime(3.0)
+        time_b = time.copy()
+
+        # Binary addition operator
+        time = time + time_b
+        self.test_value(time.secs(), 6.0);
+
+        # Binary subtraction operator
+        time = time - time_b
+        self.test_value(time.secs(), 3.0);
+
+        # Scalar multiplication operator
+        time = time * 2.0
+        self.test_value(time.secs(), 6.0);
+
+        # Scalar division operator
+        time = time / 2.0
+        self.test_value(time.secs(), 3.0);
 
         # Return
         return
