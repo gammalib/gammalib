@@ -111,7 +111,7 @@ private:
     void   free_members(void);
     int    cache_index(const std::string& name) const;
     double psf_radial(const GModelSpatialRadial* model,
-                      const double&              zeta,
+                      const double&              rho_obs,
                       const GSkyDir&             obsDir,
                       const GEnergy&             srcEng,
                       const GTime&               srcTime) const;
