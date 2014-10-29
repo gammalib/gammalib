@@ -2409,6 +2409,12 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
             bounds.push_back(transition_point);
         }
 
+        // If the integration range includes the semiminor boundary, then
+        // add an integration boundary at that location
+        if (semiminor > rho_min && semiminor < rho_max) {
+            bounds.push_back(semiminor);
+        }
+
         // Integrate kernel
         npred = integral.romberg(bounds, iter_rho);
 
