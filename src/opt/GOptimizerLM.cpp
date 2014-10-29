@@ -520,10 +520,10 @@ void GOptimizerLM::init_members(void)
     m_lambda_start = 1.0e-3;
     m_lambda_inc   = 10.0;
     m_lambda_dec   = 0.1;
-    m_eps          = 1.0e-6;
-    m_max_iter     = 1000;
+    m_eps          = 5.0e-3;  //!< Changed on 30/10/2014 from 1.0e-6
+    m_max_iter     = 100;     //!< Changed on 30/10/2014 from 1000
     m_max_stall    = 10;
-    m_max_hit      = 3; //!< Maximum successive boundary hits before freeze
+    m_max_hit      = 3;       //!< Maximum successive boundary hits before freeze
     m_step_adjust  = true;
 
     // Initialise bookkeeping arrays
