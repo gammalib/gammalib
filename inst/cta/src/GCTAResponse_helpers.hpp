@@ -1091,6 +1091,75 @@ public:
 
 
 /***********************************************************************//**
+ * @class cta_psf_radial_kern_delta
+ *
+ * @brief Kernel for Psf delta angle integration used for stacked analysis
+ ***************************************************************************/
+class cta_psf_radial_kern_delta : public GFunction {
+public:
+    cta_psf_radial_kern_delta(const GCTAResponseCube*    rsp,
+                              const GModelSpatialRadial* model,
+                              const GSkyDir&             srcDir,
+                              const GEnergy&             srcEng,
+                              const GTime&               srcTime,
+                              const double&              delta_mod,
+                              const double&              theta_max,
+                              const int&                 iter) :
+                              m_rsp(rsp),
+                              m_model(model),
+                              m_srcDir(srcDir),
+                              m_srcEng(srcEng),
+                              m_srcTime(srcTime),
+                              m_delta_mod(delta_mod),
+                              m_cos_delta_mod(std::cos(delta_mod)),
+                              m_sin_delta_mod(std::sin(delta_mod)),
+                              m_theta_max(theta_max),
+                              m_cos_theta_max(std::cos(theta_max)),
+                              m_iter(iter) { }
+    double eval(const double& delta);
+protected:
+    const GCTAResponseCube*    m_rsp;           //!< Response cube
+    const GModelSpatialRadial* m_model;         //!< Radial model
+    const GSkyDir&             m_srcDir;        //!< True photon arrival direction
+    const GEnergy&             m_srcEng;        //!< True photon energy
+    const GTime&               m_srcTime;       //!< True photon arrival time
+    const double&              m_delta_mod;     //!< Distance of model from Psf
+    double                     m_cos_delta_mod; //!< Cosine of m_delta_mod
+    double                     m_sin_delta_mod; //!< Sine of m_delta_mod
+    const double&              m_theta_max;     //!< Maximum model radius
+    double                     m_cos_theta_max; //!< Cosine of m_theta_max
+    const int&                 m_iter;          //!< Integration iterations
+};
+
+
+/***********************************************************************//**
+ * @class cta_psf_radial_kern_phi
+ *
+ * @brief Kernel for Psf phi angle integration used for stacked analysis
+ ***************************************************************************/
+class cta_psf_radial_kern_phi : public GFunction {
+public:
+    cta_psf_radial_kern_phi(const GModelSpatialRadial* model,
+                            const GEnergy&             srcEng,
+                            const GTime&               srcTime,
+                            const double&              sin_fact,
+                            const double&              cos_fact) :
+                            m_model(model),
+                            m_srcEng(srcEng),
+                            m_srcTime(srcTime),
+                            m_sin_fact(sin_fact),
+                            m_cos_fact(cos_fact) { }
+    double eval(const double& phi);
+protected:
+    const GModelSpatialRadial* m_model;     //!< Radial model
+    const GEnergy&             m_srcEng;    //!< True photon energy
+    const GTime&               m_srcTime;   //!< True photon arrival time
+    const double&              m_sin_fact;  //!< sin(delta)*sin(delta_mod)
+    const double&              m_cos_fact;  //!< cos(delta)*cos(delta_mod)
+};
+
+
+/***********************************************************************//**
  * @class cta_irf_elliptical_kern_rho
  *
  * @brief Kernel for elliptical model zenith angle integration

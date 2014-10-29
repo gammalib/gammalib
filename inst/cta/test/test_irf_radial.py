@@ -210,18 +210,19 @@ if __name__ == '__main__':
         sys.exit()
 
     # Set Psf size
-    delta_max = 0.6
+    delta_max = 0.8
 
     # Set model parameters
     centre = gammalib.GSkyDir()
     centre.radec_deg(0.0, 0.0)
-    radius = 0.8
+    radius = 1.0
 
     # Set observed photon direction
     obsDir = gammalib.GSkyDir()
-    obsDir.radec_deg(0.4, -0.3)
+    #obsDir.radec_deg(0.4, -0.3)
     #obsDir.radec_deg(-0.4, -0.3)
     #obsDir.radec_deg(0.4, 0.4)
+    obsDir.radec_deg(0.0, 0.3)
 
     # Show elliptical response geometry
     show_response(centre, radius, obsDir, delta_max)

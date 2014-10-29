@@ -64,6 +64,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_RADIAL_PSF_BASED  //!< Use Psf-based integration for radial model
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -237,11 +238,12 @@ GCTAResponseCube* GCTAResponseCube::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return value of instrument response function
+ * @brief Return instrument response
  *
  * @param[in] event Observed event.
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
+ * @return Instrument response.
  ***************************************************************************/
 double GCTAResponseCube::irf(const GEvent&       event,
                              const GPhoton&      photon,
@@ -308,14 +310,14 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return value of instrument response function
+ * @brief Return instrument response
  *
  * @param[in] event Event.
  * @param[in] source Source.
  * @param[in] obs Observation.
+ * @return Instrument response.
  *
- * Returns the instrument response function for a given event, source and
- * observation.
+ * Returns the instrument response for a given event, source and observation.
  ***************************************************************************/
 double GCTAResponseCube::irf(const GEvent&       event,
                              const GSource&      source,
@@ -348,15 +350,14 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return value of point source instrument response function
+ * @brief Return instrument response to point source
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
  * @param[in] obs Observation.
- * @return Value of instrument response function for a point source.
+ * @return Instrument response to point source.
  *
- * This method returns the value of the instrument response function for a
- * point source.
+ * Returns the instrument response to a specified point source.
  ***************************************************************************/
 double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
                                    const GSource&      source,
@@ -426,15 +427,14 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return value of radial source instrument response function
+ * @brief Return instrument response to radial source
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
  * @param[in] obs Observation.
- * @return Value of instrument response function for a radial source.
+ * @return Instrument response to radial source.
  *
- * This method returns the value of the instrument response function for a
- * radial source. Response values are computed on the fly.
+ * Returns the instrument response to a specified radial source.
  ***************************************************************************/
 double GCTAResponseCube::irf_radial(const GEvent&       event,
                                     const GSource&      source,
@@ -497,15 +497,14 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return value of elliptical source instrument response function
+ * @brief Return instrument response to elliptical source
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
  * @param[in] obs Observation.
- * @return Value of instrument response function for an elliptical source.
+ * @return Instrument response to elliptical source.
  *
- * This method returns the value of the instrument response function for an
- * elliptical source. Response values are computed on the fly.
+ * Returns the instrument response to a specified elliptical source.
  ***************************************************************************/
 double GCTAResponseCube::irf_elliptical(const GEvent&       event,
                                         const GSource&      source,
@@ -569,21 +568,20 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return value of extended source instrument response function
+ * @brief Return instrument response to diffuse source
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
  * @param[in] obs Observation.
- * @return Value of instrument response function for an extended source.
+ * @return Instrument response to diffuse source.
  *
- * This method returns the value of the instrument response function for an
- * extended source. It uses a pre-computation cache to store the IRF for
- * the spatial model component.
+ * Returns the instrument response to a specified diffuse source.
  *
- * The pre-computation cache is initialised if no cache has yet been
- * allocated, or if at the beginning of a scan over the events, the model
- * parameters have changed. The beginning of a scan is defined by an event
- * bin index of 0.
+ * The method uses a pre-computation cache to store the instrument response
+ * for the spatial model component. The pre-computation cache is initialised
+ * if no cache has yet been allocated, or if at the beginning of a scan over
+ * the events, the model parameters have changed. The beginning of a scan is
+ * defined by an event bin index of 0.
  ***************************************************************************/
 double GCTAResponseCube::irf_diffuse(const GEvent&       event,
                                      const GSource&      source,
@@ -652,9 +650,13 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
  *
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
+ * @return Spatial integral of point spread function. 
  *
  * @exception GException::feature_not_implemented
  *            Method not implemented.
+ *
+ * This method is a dummy method that is required for a class derived from
+ * GResponse but that needs not to be implemented for a binned response.
  ***************************************************************************/
 double GCTAResponseCube::npred(const GPhoton&      photon,
                                const GObservation& obs) const
@@ -669,21 +671,21 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
 
 
 /***********************************************************************//**
- * @brief Read response
+ * @brief Read response information from Xml element
  *
  * @param[in] xml XML element.
  *
  * @exception GException::xml_invalid_parnames
  *            Invalid parameter names found in XML element.
  *
- * Reads information for a CTA observation from an XML element. The exposure
- * and PSF cubes are specified using
+ * Reads response information from an Xml element. The Exposure and Psf cubes
+ * are specified using
  *
- *     <observation name="..." id="..." instrument="...">
- *       ...
- *       <parameter name="ExposureCube" file="..."/>
- *       <parameter name="PsfCube"      file="..."/>
- *     </observation>
+ *      <observation name="..." id="..." instrument="...">
+ *        ...
+ *        <parameter name="ExposureCube" file="..."/>
+ *        <parameter name="PsfCube"      file="..."/>
+ *      </observation>
  *
  ***************************************************************************/
 void GCTAResponseCube::read(const GXmlElement& xml)
@@ -738,18 +740,18 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 
 
 /***********************************************************************//**
- * @brief Write response
+ * @brief Write response information into Xml element
  *
  * @param[in] xml XML element.
  *
- * Writes information for a CTA observation into an XML element. The exposure
- * and PSF cubes are specified using
+ * Writes response information into an Xml element. The Exposure and Psf
+ * cubes are specified using
  *
- *     <observation name="..." id="..." instrument="...">
- *       ...
- *       <parameter name="ExposureCube" file="..."/>
- *       <parameter name="PsfCube"      file="..."/>
- *     </observation>
+ *      <observation name="..." id="..." instrument="...">
+ *        ...
+ *        <parameter name="ExposureCube" file="..."/>
+ *        <parameter name="PsfCube"      file="..."/>
+ *      </observation>
  *
  ***************************************************************************/
 void GCTAResponseCube::write(GXmlElement& xml) const
@@ -774,10 +776,10 @@ void GCTAResponseCube::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print CTA response information
+ * @brief Print response information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing CTA response information.
+ * @return String containing response information.
  ***************************************************************************/
 std::string GCTAResponseCube::print(const GChatter& chatter) const
 {
@@ -819,20 +821,6 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
 
 /*==========================================================================
  =                                                                         =
- =              Model type dependent CTA response methods                  =
- =                                                                         =
- ==========================================================================*/
-
-
-/*==========================================================================
- =                                                                         =
- =                    Low-level CTA response methods                       =
- =                                                                         =
- ==========================================================================*/
-
-
-/*==========================================================================
- =                                                                         =
  =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
@@ -858,7 +846,7 @@ void GCTAResponseCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] rsp Response to be copied
+ * @param[in] rsp Response.
  ***************************************************************************/
 void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
 {
@@ -894,10 +882,12 @@ void GCTAResponseCube::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Determines the cache index for a given model name
+ * @brief Determine cache index for model
  *
  * @param[in] name Model name.
  * @return Cache index (-1 if model has not been found).
+ *
+ * Determines the cache index for a given model @p name.
  ***************************************************************************/
 int GCTAResponseCube::cache_index(const std::string& name) const
 {
@@ -922,8 +912,114 @@ int GCTAResponseCube::cache_index(const std::string& name) const
 }
 
 
+#if defined(G_RADIAL_PSF_BASED)
 /***********************************************************************//**
- * @brief Integrate PSF over radial model
+ * @brief Integrate Psf over radial model
+ *
+ * @param[in] model Radial model.
+ * @param[in] delta_mod Angle between model centre and measured photon
+ *                      direction (radians).
+ * @param[in] obsDir Observed event direction.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ *
+ * Integrates the product of the spatial model and the point spread
+ * function over the true photon arrival direction using
+ * 
+ * \f[
+ *    \int_{\delta_{\rm min}}^{\delta_{\rm max}}
+ *    \sin \delta \times {\rm Psf}(\delta) \times
+ *    \int_{\phi_{\rm min}}^{\phi_{\rm max}} 
+ *    S_{\rm p}(\delta, \phi | E, t) d\phi d\delta
+ * \f]
+ *
+ * where
+ * \f$S_{\rm p}(\delta, \phi | E, t)\f$ is the radial spatial model,
+ * \f${\rm Psf}(\delta)\f$ is the point spread function,
+ * \f$\delta\f$ is angular distance between the true and the measured
+ * photon direction, and
+ * \f$\phi\f$ is the position angle around the observed photon direction
+ * measured counterclockwise from the connecting line between the model
+ * centre and the observed photon arrival direction.
+ ***************************************************************************/
+double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
+                                    const double&              delta_mod,
+                                    const GSkyDir&             obsDir,
+                                    const GEnergy&             srcEng,
+                                    const GTime&               srcTime) const
+{
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1291
+    static const int iter_delta = 5;
+    static const int iter_phi   = 6;
+
+    // Initialise value
+    double value = 0.0;
+
+    // Get maximum Psf radius (radians)
+    double psf_max = psf().delta_max();
+
+    // Get maximum model radius (radians)
+    double theta_max = model->theta_max();
+
+    // Set offset angle integration range (radians)
+    double delta_min = (delta_mod > theta_max) ? delta_mod - theta_max : 0.0;
+    double delta_max = delta_mod + theta_max;
+    if (delta_max > psf_max) {
+        delta_max = psf_max;
+    }
+
+    // Setup integration kernel. We take here the observed photon arrival
+    // direction as the true photon arrival direction because the PSF does
+    // not vary significantly over a small region.
+    cta_psf_radial_kern_delta integrand(this,
+                                        model,
+                                        obsDir,
+                                        srcEng,
+                                        srcTime,
+                                        delta_mod,
+                                        theta_max,
+                                        iter_phi);
+
+    // Integrate over model's zenith angle
+    GIntegral integral(&integrand);
+    integral.fixed_iter(iter_delta);
+
+    // Setup integration boundaries
+    std::vector<double> bounds;
+    bounds.push_back(delta_min);
+    bounds.push_back(delta_max);
+
+    // If the integration range includes a transition between full
+    // containment of Psf within model and partial containment, then
+    // add a boundary at this location
+    double transition_point = theta_max - delta_mod;
+    if (transition_point > delta_min && transition_point < delta_max) {
+        bounds.push_back(transition_point);
+    }
+
+    // Integrate kernel
+    value = integral.romberg(bounds, iter_delta);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: GCTAResponseCube::psf_radial:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ", delta_min=" << delta_min;
+        std::cout << ", delta_max=" << delta_max << ")";
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return integral
+    return value;
+}
+#else
+/***********************************************************************//**
+ * @brief Integrate Psf over radial model
  *
  * @param[in] model Radial model.
  * @param[in] rho_obs Angle between model centre and measured photon direction
@@ -932,21 +1028,23 @@ int GCTAResponseCube::cache_index(const std::string& name) const
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  *
- * Computes the integral
+ * Integrates the product of the spatial model and the point spread
+ * function over the true photon arrival direction using
  * 
  * \f[
- *    \int_0^{\delta_{\rm max}}
- *    {\rm PSF}(\delta) \times
- *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta
- *    {\rm d}\phi {\rm d}\delta
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    {\rm Psf}(\rho, \omega) d\omega d\rho
  * \f]
  *
- * where \f${\rm M}(\delta, \phi)\f$ is a radial model in the coordinate
- * system of the point spread function, defined by the angle \f$\delta\f$
- * between the true and the measured photon direction and the azimuth angle
- * \f$\phi\f$ around the measured photon direction.
- * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
- * function.
+ * where
+ * \f$S_{\rm p}(\rho | E, t)\f$ is the radial spatial model,
+ * \f${\rm Psf}(\rho, \omega)\f$ is the point spread function,
+ * \f$\rho\f$ is the radial distance from the model centre, and
+ * \f$\omega\f$ is the position angle around the model centre measured
+ * counterclockwise from the connecting line between the model centre and
+ * the observed photon arrival direction.
  ***************************************************************************/
 double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
                                     const double&              rho_obs,
@@ -1006,14 +1104,6 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
             bounds.push_back(transition_point);
         }
 
-        // If the integration range includes a transition between full
-        // containment of Psf within model and partial containment, then
-        // add a boundary at this location
-        transition_point = src_max - delta_max;
-        if (transition_point > rho_min && transition_point < rho_max) {
-            bounds.push_back(transition_point);
-        }
-
         // If we have a shell model then add an integration boundary for the
         // shell radius as a function discontinuity will occur at this
         // location
@@ -1045,10 +1135,11 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // Return PSF
     return irf;
 }
+#endif
 
 
 /***********************************************************************//**
- * @brief Integrate PSF over elliptical model
+ * @brief Integrate Psf over elliptical model
  *
  * @param[in] model Elliptical model.
  * @param[in] rho_obs Angle between model centre and measured photon direction
@@ -1059,36 +1150,24 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  *
- * Computes the integral
+ * Integrates the product of the spatial model and the point spread
+ * function over the true photon arrival direction using
  * 
  * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
- *    \sin \rho \times
+ *    \sin \rho \times 
  *    \int_{\omega} 
- *    S_{\rm p}(\rho, \omega | E, t) \, PSF(\rho, \omega) d\omega d\rho
+ *    S_{\rm p}(\rho, \omega | E, t) \times
+ *    {\rm Psf}(\rho, \omega) d\omega d\rho
  * \f]
  *
  * where
- * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical model,
- * \f$PSF(\rho, \omega)\f$ is the point spread function,
- * \f$\rho\f$ is the distance from the model centre, and
- * \f$\omega\f$ is the position angle with respect to the connecting line
- * between the model centre and the observed photon arrival direction.
- ***************************************************************************/
-/*
- * \f[
- *    \int_0^{\delta_{\rm max}}
- *    {\rm PSF}(\delta) \times
- *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta
- *    {\rm d}\phi {\rm d}\delta
- * \f]
- *
- * where \f${\rm M}(\delta, \phi)\f$ is an elliptical model in the coordinate
- * system of the point spread function, defined by the angle \f$\delta\f$
- * between the true and the measured photon direction and the azimuth angle
- * \f$\phi\f$ around the measured photon direction.
- * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
- * function.
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical spatial model,
+ * \f${\rm Psf}(\rho, \omega)\f$ is the point spread function,
+ * \f$\rho\f$ is the radial distance from the model centre, and
+ * \f$\omega\f$ is the position angle around the model centre measured
+ * counterclockwise from the connecting line between the model centre and
+ * the observed photon arrival direction.
  ***************************************************************************/
 double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
                                         const double&                  rho_obs,

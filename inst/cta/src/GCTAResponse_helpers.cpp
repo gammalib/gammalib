@@ -692,7 +692,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             // If the radius rho is not larger than the semiminor axis
             // boundary, the circle with that radius is fully contained in
             // the ellipse and we can just integrate over the relevant arc
-            if (rho < m_semiminor) {
+            if (rho <= m_semiminor) {
 
                 // Compute omega integration range
                 double omega_min = -domega;
@@ -984,7 +984,7 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
             // If the radius rho is not larger than the semiminor axis
             // boundary, the circle with that radius is fully contained in
             // the ellipse and we can just integrate over the relevant arc
-            if (rho < m_semiminor) {
+            if (rho <= m_semiminor) {
 
                 // Compute omega integration range
                 double omega_min = -domega;
@@ -1699,6 +1699,165 @@ double cta_psf_radial_kern_omega::eval(const double& omega)
 
 
 /***********************************************************************//**
+ * @brief Kernel for PSF integration of radial model
+ *
+ * @param[in] delta PSF offset angle (radians).
+ * @return Azimuthally integrated product between PSF and radial model.
+ *
+ * Computes the azimuthally integrated product of point spread function and
+ * the radial model intensity. As the PSF is azimuthally symmetric, it is
+ * not included in the azimuthally integration, but just multiplied on the
+ * azimuthally integrated model. The method returns thus
+ *
+ * \f[
+ *    {\rm PSF}(\delta) \times
+ *    \int_0^{2\pi} {\rm M}(\delta, \phi) \sin \delta {\rm d}\phi
+ * \f]
+ *
+ * where \f${\rm M}(\delta, \phi)\f$ is the radial model in the coordinate
+ * system of the point spread function, defined by the angle \f$\delta\f$
+ * between the true and the measured photon direction and the azimuth angle
+ * \f$\phi\f$ around the measured photon direction.
+ ***************************************************************************/
+double cta_psf_radial_kern_delta::eval(const double& delta)
+{
+    // Initialise value
+    double value = 0.0;
+
+    // If we're at the Psf peak the model is zero (due to the sin(delta)
+    // term. We thus only integrate for positive deltas.
+    if (delta > 0.0) {
+
+        // Get Psf for this delta
+        double psf = m_rsp->psf()(m_srcDir, delta, m_srcEng);
+
+        // Continue only if Psf is positive
+        if (psf > 0.0) {
+
+            // Compute half length of the arc (in radians) from a circle with
+            // radius delta that intersects with the model, defined as a circle
+            // with maximum radius m_theta_max
+            double dphi = 0.5 * gammalib::cta_roi_arclength(delta,
+                                                            m_delta_mod,
+                                                            m_cos_delta_mod,
+                                                            m_sin_delta_mod,
+                                                            m_theta_max,
+                                                            m_cos_theta_max);
+
+            // Continue only if arc length is positive
+            if (dphi > 0.0) {
+
+                // Compute phi integration range
+                double phi_min = -dphi;
+                double phi_max = +dphi;
+
+                // Precompute cosine and sine terms for azimuthal integration
+                double sin_delta = std::sin(delta);
+                double cos_delta = std::cos(delta);
+                double sin_fact  = sin_delta * m_sin_delta_mod;
+                double cos_fact  = cos_delta * m_cos_delta_mod;
+
+                // Setup kernel for azimuthal integration of the spatial model
+                cta_psf_radial_kern_phi integrand(m_model,
+                                                  m_srcEng,
+                                                  m_srcTime,
+                                                  sin_fact,
+                                                  cos_fact);
+
+                // Setup integrator
+                GIntegral integral(&integrand);
+                integral.fixed_iter(m_iter);
+
+                // Integrate over azimuth
+                value = integral.romberg(phi_min, phi_max, m_iter) *
+                        psf * sin_delta;
+
+                // Debug: Check for NaN
+                #if defined(G_NAN_CHECK)
+                if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+                    std::cout << "*** ERROR: cta_psf_radial_kern_delta::eval";
+                    std::cout << "(delta=" << delta << "):";
+                    std::cout << " NaN/Inf encountered";
+                    std::cout << " (value=" << value;
+                    std::cout << ")" << std::endl;
+                }
+                #endif
+
+            } // endif: Psf value was positive
+
+        } // endif: arc length was positive
+
+    } // endif: delta was positive
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuthal radial model integration
+ *
+ * @param[in] phi Azimuth angle (radians).
+ * @return Radial model value.
+ *
+ * Computes the value of the radial model at the position \f$(\delta,\phi)\f$
+ * given in point spread function coordinates. The \f$\theta\f$ angle of the
+ * radial model is computed using
+ *
+ * \f[
+ *    \theta = \arccos \left( \cos \delta \cos \zeta +
+ *                            \sin \delta \sin \zeta \cos \phi \right)
+ * \f]
+ *
+ * where \f$\delta\f$ is the angle between true and measured photon
+ * direction, \f$\zeta\f$ is the angle between model centre and measured
+ * photon direction, and \f$\phi\f$ is the azimuth angle with respect to the
+ * measured photon direction, where \f$\phi=0\f$ corresponds to the 
+ * connecting line between model centre and measured photon direction.
+ ***************************************************************************/
+double cta_psf_radial_kern_phi::eval(const double& phi)
+{
+    // Compute radial model theta angle
+    double theta = std::acos(m_cos_fact + m_sin_fact * std::cos(phi));
+
+    // Reduce theta by an infinite amount to avoid rounding errors at the
+    // boundary of a sharp edged model
+    double theta_kluge = theta - 1.0e-12;
+    if (theta_kluge < 0.0) {
+        theta_kluge = 0.0;
+    }
+
+    // Get radial model value
+    double value = m_model->eval(theta_kluge, m_srcEng, m_srcTime); 
+
+    // Debug: test if model is non positive
+    #if defined(G_DEBUG_MODEL_ZERO)
+    if (value <= 0.0) {
+        std::cout << "*** WARNING: cta_psf_radial_kern_phi::eval";
+        std::cout << " zero model for (phi)=(";
+        std::cout << phi*gammalib::rad2deg << ")";
+        std::cout << " theta-r_model=" << (theta-m_model->theta_max());
+        std::cout << " radians" << std::endl;
+    }
+    #endif
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: cta_psf_radial_kern_phi::eval";
+        std::cout << "(phi=" << phi << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return kernel value
+    return value;
+}
+
+
+/***********************************************************************//**
  * @brief Kernel for elliptical model integration over zenith angle
  *
  * @param[in] rho Radial distance from model centre (radians).
@@ -1777,7 +1936,7 @@ double cta_psf_elliptical_kern_rho::eval(const double& rho)
             // If the radius rho is not larger than the semiminor axis
             // boundary, the circle with that radius is fully contained in
             // the ellipse and we can just integrate over the relevant arc
-            if (rho < m_semiminor) {
+            if (rho <= m_semiminor) {
 
                 // Compute omega integration range
                 double omega_min = -domega;

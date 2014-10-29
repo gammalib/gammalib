@@ -279,7 +279,7 @@ def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radi
             if (domega > 0.0):
 
                 # Full containment within ellipse
-                if (rho < bound_minor):
+                if (rho <= bound_minor):
             
                     # Compute phi integration range
                     omega_min = -domega
@@ -400,17 +400,16 @@ if __name__ == '__main__':
     # Set model parameters
     centre = gammalib.GSkyDir()
     centre.radec_deg(0.0, 0.0)
-    #semimajor = 1.0
-    #semiminor = 0.50
-    semiminor = 1.0
-    semimajor = 0.50
-    posang    = 310.0
+    semimajor = 1.0
+    semiminor = 0.50
+    posang    = 30.0
 
     # Set ROI direction
     roiDir = gammalib.GSkyDir()
-    #roiDir.radec_deg(-0.4, -0.3)
-    roiDir.radec_deg(+0.4, -0.3)
+    roiDir.radec_deg(-0.4, -0.3)
+    #roiDir.radec_deg(+0.4, -0.3)
     #roiDir.radec_deg(+0.4, +0.3)
+    #roiDir.radec_deg(0.0, 0.1)
 
     # Set pointing direction
     pntDir = gammalib.GSkyDir()

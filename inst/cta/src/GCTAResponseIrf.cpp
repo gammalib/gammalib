@@ -1268,7 +1268,7 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
 
 /*==========================================================================
  =                                                                         =
- =              Model type dependent CTA response methods                  =
+ =                Model type dependent CTA response methods                =
  =                                                                         =
  ==========================================================================*/
 
@@ -1282,24 +1282,22 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
- * Integrates the product of the model and the Irf over the true photon
- * arrival direction using
+ * Integrates the product of the spatial model and the instrument response
+ * function over the true photon arrival direction using
  *
  * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
  *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
  *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
- *    Irf(\rho, \omega) d\omega d\rho
+ *    {\rm Irf}(\rho, \omega) d\omega d\rho
  * \f]
  *
  * where
- *
- *     \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
- *     \f$Irf(\rho, \omega)\f$ is the IRF
- *     \f$\rho\f$ is the distance from the model centre, and
- *     \f$\omega\f$ is the azimuth angle is the position angle with respect
- *     to the connecting line between the model centre and the observed
- *     photon arrival direction.
+ * \f$S_{\rm p}(\rho | E, t)\f$ is the radial spatial model,
+ * \f${\rm Irf}(\rho, \omega)\f$ is the instrument response function,
+ * \f$\rho\f$ is the radial distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
  *
  * The integration is performed in the coordinate system of the source
  * model spanned by \f$\rho\f$ and \f$\omega\f$ which allows to benefit
@@ -1436,14 +1434,6 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
             bounds.push_back(transition_point);
         }
 
-        // If the integration range includes a transition between full
-        // containment of Psf within model and partial containment, then
-        // add a boundary at this location
-        transition_point = src_max - delta_max;
-        if (transition_point > rho_min && transition_point < rho_max) {
-            bounds.push_back(transition_point);
-        }
-
         // If we have a shell model then add an integration boundary for the
         // shell radius as a function discontinuity will occur at this
         // location
@@ -1498,7 +1488,7 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return IRF value for elliptical source model
+ * @brief Return Irf value for elliptical source model
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
