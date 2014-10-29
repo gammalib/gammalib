@@ -1,4 +1,4 @@
-2014-07-29  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-10-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -14,8 +14,8 @@
         Read/write altitude and azimuth attributes of CTA data
         Refactor CTA response class, add GCTAResponseCube class
         Improve CTA response computation for extended models
-        Implement CTA cube-style analysis
-        Optimize CTA binned and cube-style analysis 
+        Implement CTA stacked analysis
+        Optimize CTA binned and stacked analysis 
         Rename GCTAModelBackground to GCTAModelCubeBackground
         Rename GCTAModelInstBackground to GCTAModelIrfBackground
         Rename GIntegral::romb() to GIntegral::romberg()
