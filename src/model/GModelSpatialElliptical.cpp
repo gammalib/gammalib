@@ -467,17 +467,6 @@ void GModelSpatialElliptical::init_members(void)
     m_posangle.gradient(0.0);
     m_posangle.has_grad(false);
 
-    // Initialise semi-minor axis
-    m_semiminor.clear();
-    m_semiminor.name("MinorRadius");
-    m_semiminor.unit("deg");
-    m_semiminor.value(2.778e-4); // 1 arcsec
-    m_semiminor.min(2.778e-4);   // 1 arcsec
-    m_semiminor.free();
-    m_semiminor.scale(1.0);
-    m_semiminor.gradient(0.0);
-    m_semiminor.has_grad(false); // Elliptical components never have gradients
-
     // Initialise semi-major axis
     m_semimajor.clear();
     m_semimajor.name("MajorRadius");
@@ -489,13 +478,24 @@ void GModelSpatialElliptical::init_members(void)
     m_semimajor.gradient(0.0);
     m_semimajor.has_grad(false); // Elliptical components never have gradients
 
+    // Initialise semi-minor axis
+    m_semiminor.clear();
+    m_semiminor.name("MinorRadius");
+    m_semiminor.unit("deg");
+    m_semiminor.value(2.778e-4); // 1 arcsec
+    m_semiminor.min(2.778e-4);   // 1 arcsec
+    m_semiminor.free();
+    m_semiminor.scale(1.0);
+    m_semiminor.gradient(0.0);
+    m_semiminor.has_grad(false); // Elliptical components never have gradients
+
     // Set parameter pointer(s)
     m_pars.clear();
     m_pars.push_back(&m_ra);
     m_pars.push_back(&m_dec);
     m_pars.push_back(&m_posangle);
-    m_pars.push_back(&m_semiminor);
     m_pars.push_back(&m_semimajor);
+    m_pars.push_back(&m_semiminor);
 
     // Return
     return;
@@ -521,8 +521,8 @@ void GModelSpatialElliptical::copy_members(const GModelSpatialElliptical& model)
     m_pars.push_back(&m_ra);
     m_pars.push_back(&m_dec);
     m_pars.push_back(&m_posangle);
-    m_pars.push_back(&m_semiminor);
     m_pars.push_back(&m_semimajor);
+    m_pars.push_back(&m_semiminor);
 
     // Return
     return;
