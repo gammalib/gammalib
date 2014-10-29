@@ -1597,9 +1597,17 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
         bounds.push_back(rho_max);
 
         // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
+        // containment of model within Psf and partial containment, then
+        // add a boundary at this location
         double transition_point = delta_max - zeta;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If the integration range includes a transition between full
+        // containment of Psf within model and partial containment, then
+        // add a boundary at this location
+        transition_point = src_max - delta_max;
         if (transition_point > rho_min && transition_point < rho_max) {
             bounds.push_back(transition_point);
         }
@@ -1676,17 +1684,16 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
  * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
  *    \sin \rho \times
- *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    \int_{\omega} 
  *    S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega) d\omega d\rho
  * \f]
  *
  * where
- * - \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the radial model,
- * - \f$IRF(\rho, \omega)\f$ is the IRF
- * - \f$\rho\f$ is the distance from the model centre, and
- * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
- *   the connecting line between the model centre and the observed photon
- *   arrival direction.
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical model,
+ * \f$IRF(\rho, \omega)\f$ is the instrument response function,
+ * \f$\rho\f$ is the distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
  *
  * The source model centre is located at \f$\vec{m}\f$, and a spherical
  * coordinate system is defined around this location with \f$(\rho,\omega)\f$
@@ -1754,22 +1761,27 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     double phi       = 0.0; //TODO: Implement IRF Phi dependence
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
-    // Get semimajor and semiminor ellipse boundaries [radians]
-    /*
-    double aspect_ratio = (model->semimajor() > 0) ?
-                           model->semiminor() / model->semimajor() : 0.0;
-    double semimajor    = model->theta_max();
-    double semiminor    = semimajor * aspect_ratio;
-    */
-    double semimajor    = model->semimajor() * gammalib::deg2rad;
-    double semiminor    = model->semiminor() * gammalib::deg2rad;
-
-    //TEST TEST TEST
-    if (semimajor < semiminor) {
-        std::cout << "Warning:";
-        std::cout << " semiminor=" << semiminor * gammalib::rad2deg;
-        std::cout << " semimajor=" << semimajor * gammalib::rad2deg;
+    // Get the ellipse boundary (radians). Note that these are NOT the
+    // parameters of the ellipse but of a boundary ellipse that is used
+    // for computing the relevant omega angle intervals for a given angle
+    // rho. The boundary ellipse takes care of the possibility that the
+    // semiminor axis is larger than the semimajor axis
+    double semimajor;    // Will be the larger axis
+    double semiminor;    // Will be the smaller axis
+    double posangle;     // Will be the corrected position angle
+    double aspect_ratio; // Ratio between smaller/larger axis of model
+    if (model->semimajor() >= model->semiminor()) {
+        aspect_ratio = (model->semimajor() > 0.0) ?
+                        model->semiminor() / model->semimajor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad;
     }
+    else {
+        aspect_ratio = (model->semiminor() > 0.0) ?
+                        model->semimajor() / model->semiminor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad + gammalib::pihalf;
+    }
+    semimajor = model->theta_max();
+    semiminor = semimajor * aspect_ratio;
 
     // Set zenith angle integration range for elliptical model
     double rho_min = (rho_obs > delta_max) ? rho_obs - delta_max : 0.0;
@@ -1789,6 +1801,7 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
                                               *model,
                                               semimajor,
                                               semiminor,
+                                              posangle,
                                               zenith,
                                               azimuth,
                                               srcEng,
@@ -1814,10 +1827,12 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
         // If the integration range includes a transition between full
         // containment and partial containment, then add a boundary at
         // this location
+        /*
         double transition_point = delta_max - rho_obs;
         if (transition_point > rho_min && transition_point < rho_max) {
             bounds.push_back(transition_point);
         }
+        */
 
         // If the integration range includes the semiminor boundary, then
         // add an integration boundary at that location
@@ -2189,9 +2204,17 @@ double GCTAResponseIrf::npred_radial(const GSource& source,
         bounds.push_back(rho_max);
 
         // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
+        // containment of model within ROI and partial containment, then
+        // add a boundary at this location
         double transition_point = roi_psf_radius - roi_model_distance;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If the integration range includes a transition between full
+        // containment of ROI within model and partial containment, then
+        // add a boundary at this location
+        transition_point = roi_psf_radius + roi_model_distance;
         if (transition_point > rho_min && transition_point < rho_max) {
             bounds.push_back(transition_point);
         }
@@ -2336,28 +2359,32 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
     // Compute distance between ROI and model centre (radians)
     double rho_roi = roi.centre().dir().dist(centre);
 
-    // Get semimajor and semiminor ellipse boundaries [radians]
-    /*
-    double aspect_ratio = (model->semimajor() > 0) ?
-                           model->semiminor() / model->semimajor() : 0.0;
-    double semimajor    = model->theta_max();
-    double semiminor    = semimajor * aspect_ratio;
-    */
-    double semimajor    = model->semimajor() * gammalib::deg2rad;
-    double semiminor    = model->semiminor() * gammalib::deg2rad;
-
-    //TEST TEST TEST
-    if (semimajor < semiminor) {
-        std::cout << "Warning:";
-        std::cout << " semiminor=" << semiminor * gammalib::rad2deg;
-        std::cout << " semimajor=" << semimajor * gammalib::rad2deg;
+    // Get the ellipse boundary (radians). Note that these are NOT the
+    // parameters of the ellipse but of a boundary ellipse that is used
+    // for computing the relevant omega angle intervals for a given angle
+    // rho. The boundary ellipse takes care of the possibility that the
+    // semiminor axis is larger than the semimajor axis
+    double semimajor;    // Will be the larger axis
+    double semiminor;    // Will be the smaller axis
+    double posangle;     // Will be the corrected position angle
+    double aspect_ratio; // Ratio between smaller/larger axis of model
+    if (model->semimajor() >= model->semiminor()) {
+        aspect_ratio = (model->semimajor() > 0.0) ?
+                        model->semiminor() / model->semimajor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad;
     }
+    else {
+        aspect_ratio = (model->semiminor() > 0.0) ?
+                        model->semimajor() / model->semiminor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad + gammalib::pihalf;
+    }
+    semimajor = model->theta_max();
+    semiminor = semimajor * aspect_ratio;
 
     // Set offset angle integration range. We take here the ROI+PSF into
     // account to make no integrations beyond the point where the
     // contribution drops to zero.
     double rho_min = (rho_roi > radius_roi) ? rho_roi - radius_roi: 0.0;
-    //double rho_max = semimajor;
     double rho_max = rho_roi + radius_roi;
     if (rho_max > semimajor) {
         rho_max = semimajor;
@@ -2383,6 +2410,7 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
                                                 *model,
                                                 semimajor,
                                                 semiminor,
+                                                posangle,
                                                 srcEng,
                                                 srcTime,
                                                 cta,
@@ -2400,14 +2428,6 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
         std::vector<double> bounds;
         bounds.push_back(rho_min);
         bounds.push_back(rho_max);
-
-        // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
-        double transition_point = radius_roi - rho_roi;
-        if (transition_point > rho_min && transition_point < rho_max) {
-            bounds.push_back(transition_point);
-        }
 
         // If the integration range includes the semiminor boundary, then
         // add an integration boundary at that location

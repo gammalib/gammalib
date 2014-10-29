@@ -286,6 +286,17 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
             // Evaluate sky model
             double model = m_model.eval(rho, m_srcEng, m_srcTime);
 
+            // Debug: test if model is non positive
+            #if defined(G_DEBUG_MODEL_ZERO)
+            if (model <= 0.0) {
+                std::cout << "*** WARNING: cta_irf_radial_kern_rho::eval";
+                std::cout << " zero model for (rho)=(";
+                std::cout << rho*gammalib::rad2deg << ")";
+                std::cout << " rho-r_model" << (rho-m_model.theta_max());
+                std::cout << " radians" << std::endl;
+            }
+            #endif
+
             // Continue only if model is positive
             if (model > 0.0) {
 
@@ -465,6 +476,17 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
 
             // Get radial model value
             double model = m_model.eval(rho, m_srcEng, m_srcTime);
+
+            // Debug: test if model is non positive
+            #if defined(G_DEBUG_MODEL_ZERO)
+            if (model <= 0.0) {
+                std::cout << "*** WARNING: cta_npred_radial_kern_rho::eval";
+                std::cout << " zero model for (rho)=(";
+                std::cout << rho*gammalib::rad2deg << ")";
+                std::cout << " rho-r_model" << (rho-m_model.theta_max());
+                std::cout << " radians" << std::endl;
+            }
+            #endif
 
             // Continue only if we have a positive model value
             if (model > 0.0) {
@@ -688,8 +710,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
                     // the reference point around which the circle arc. Make
                     // sure that omega_0 is within [-pi,pi] thus that the omega
                     // intervals are between [-2pi,2pi]
-                    double omega_0 = m_model.posangle() * gammalib::deg2rad - 
-                                     m_posangle_obs;
+                    double omega_0 = m_posangle - m_posangle_obs;
                     if (omega_0 > gammalib::pi) {
                         omega_0 -= gammalib::pi;
                     }
@@ -818,7 +839,7 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
         double r_ellipse       = m_semiminor_rad * m_semimajor_rad /
                                  std::sqrt(arg1*arg1 + arg2*arg2);
         std::cout << "*** WARNING: cta_irf_elliptical_kern_omega::eval";
-        std::cout << " zero model for (rho,omega)=";
+        std::cout << " zero model for (rho,omega)=(";
         std::cout << m_rho*gammalib::rad2deg << ",";
         std::cout << omega*gammalib::rad2deg << ")";
         std::cout << " rho-r_ellipse=" << (m_rho-r_ellipse) << " radians";
@@ -981,8 +1002,7 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                     // system. This angle will define the reference point for
                     // the circle arcs. Make sure that omega_0 is within [-pi,pi]
                     // thus that the omega intervals are between [-2pi,2pi]
-                    double omega_0 = m_model.posangle() * gammalib::deg2rad - 
-                                     m_posangle_roi;
+                    double omega_0 = m_posangle - m_posangle_roi;
                     if (omega_0 > gammalib::pi) {
                         omega_0 -= gammalib::pi;
                     }
@@ -1090,7 +1110,7 @@ double cta_npred_elliptical_kern_omega::eval(const double& omega)
         double r_ellipse       = m_semiminor_rad * m_semimajor_rad /
                                  std::sqrt(arg1*arg1 + arg2*arg2);
         std::cout << "*** WARNING: cta_npred_elliptical_kern_omega::eval";
-        std::cout << " zero model for (rho,omega)=";
+        std::cout << " zero model for (rho,omega)=(";
         std::cout << m_rho*gammalib::rad2deg << ",";
         std::cout << omega*gammalib::rad2deg << ")";
         std::cout << " rho-r_ellipse=" << (m_rho-r_ellipse) << " radians";
@@ -1713,6 +1733,185 @@ double cta_psf_radial_kern_phi::eval(const double& phi)
 
 
 /***********************************************************************//**
+ * @brief Kernel for radial model integration over zenith angle
+ *
+ * @param[in] rho Radial distance from model centre (radians).
+ * @return Integration kernel.
+ *
+ * Computes the integration kernel
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     S_{\rm p}(\rho | E, t) \times
+ *                     \int_{\omega} PSF(\rho, \omega) d\omega
+ * \f]
+ *
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the observed photon direction, and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ * \f$S_{\rm p}(\rho | E, t)\f$ is the radial source model
+ * for a given true photon energy and photon arrival time,
+ * \f$PSF(\rho, \omega)\f$ is the point spread function.
+ ***************************************************************************/
+double cta_psf_radial_kern_rho::eval(const double& rho)
+{
+    // Initialise result
+    double irf = 0.0;
+
+    // Continue only if rho is positive
+    if (rho > 0.0) {
+
+        // Compute half length of the arc (in radians) from a circle with
+        // radius rho that intersects with the point spread function, defined
+        // as a circle with maximum radius m_delta_max
+        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+                                                          m_rho_obs,
+                                                          m_cos_rho_obs,
+                                                          m_sin_rho_obs,
+                                                          m_delta_max,
+                                                          m_cos_delta_max);
+
+        // Continue only if arc length is positive
+        if (domega > 0.0) {
+
+            // Reduce rho by an infinite amount to avoid rounding errors
+            // at the boundary of a sharp edged model (e.g. an elliptical
+            // disk model)
+            double rho_kluge = rho - 1.0e-12;
+            if (rho_kluge < 0.0) {
+                rho_kluge = 0.0;
+            }
+
+            // Evaluate sky model
+            double model = m_model->eval(rho_kluge, m_srcEng, m_srcTime);
+
+            // Debug: test if model is non positive
+            #if defined(G_DEBUG_MODEL_ZERO)
+            if (model <= 0.0) {
+                std::cout << "*** WARNING: cta_psf_radial_kern_rho::eval";
+                std::cout << " zero model for (rho)=(";
+                std::cout << rho*gammalib::rad2deg << ")";
+                std::cout << " rho-r_model" << (rho-m_model->theta_max());
+                std::cout << " radians" << std::endl;
+            }
+            #endif
+
+            // Continue only if model is positive
+            if (model > 0.0) {
+
+                // Compute omega integration range
+                double omega_min = -domega;
+                double omega_max = +domega;
+
+                // Precompute cosine and sine terms for azimuthal integration
+                double cos_rho = std::cos(rho);
+                double sin_rho = std::sin(rho);
+                double cos_psf = cos_rho * m_cos_rho_obs;
+                double sin_psf = sin_rho * m_sin_rho_obs;
+
+                // Setup integration kernel
+                cta_psf_radial_kern_omega integrand(m_rsp,
+                                                    m_model,
+                                                    m_srcDir,
+                                                    m_srcEng,
+                                                    m_srcTime,
+                                                    cos_psf,
+                                                    sin_psf);
+
+                // Setup integrator
+                GIntegral integral(&integrand);
+                integral.fixed_iter(m_iter);
+
+                // Integrate over omega
+                irf = integral.romberg(omega_min, omega_max, m_iter) *
+                      model * sin_rho;
+
+                // Compile option: Check for NaN/Inf
+                #if defined(G_NAN_CHECK)
+                if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+                    std::cout << "*** ERROR: cta_psf_radial_kern_rho";
+                    std::cout << "(rho=" << rho << "):";
+                    std::cout << " NaN/Inf encountered";
+                    std::cout << " (irf=" << irf;
+                    std::cout << ", domega=" << domega;
+                    std::cout << ", model=" << model;
+                    std::cout << ", sin_rho=" << sin_rho << ")";
+                    std::cout << std::endl;
+                }
+                #endif
+
+            } // endif: model was positive
+
+        } // endif: arclength was positive
+
+    } // endif: rho was positive
+
+    // Return result
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for radial model integration over azimuth angle
+ *
+ * @param[in] omega Azimuth angle (radians).
+ *
+ * Computes
+ *
+ * \f[
+ *    K(\omega | \rho, E, t) = PSF(\omega | \rho)
+ * \f]
+ *
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the observed photon direction, and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ *
+ * From the coordinates \f$(\rho,\omega)\f$ in the model system, the method
+ * computes the angle between the true (\f$\vec{p}\f$) and observed
+ * (\f$\vec{p'}\f$) photon arrival direction using
+ * 
+ * \f[\delta = \arccos(\cos \rho \cos \rho_{\rm obs} + 
+ *                     \sin \rho \sin \rho_{\rm obs} \cos \omega)\f]
+ *
+ * where
+ * \f$\rho_{\rm obs}\f$ is the angular distance between the observed photon
+ * arrival direction \f$\vec{p'}\f$ and the model centre \f$\vec{m}\f$.
+ * \f$\delta\f$ is used to compute the value of the point spread function.
+ ***************************************************************************/
+double cta_psf_radial_kern_omega::eval(const double& omega)
+{
+    // Initialise Irf value
+    double irf = 0.0;
+
+    // Compute Psf offset angle (radians)
+    double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
+
+    // Evaluate Psf * model for this delta
+    irf = m_rsp->psf()(m_srcDir, delta, m_srcEng);
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: cta_psf_radial_kern_omega::eval";
+        std::cout << "(omega=" << omega << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (irf=" << irf;
+        std::cout << ", delta=" << delta;
+        std::cout << ", omega=" << omega << ")";
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return
+    return irf;
+}
+
+
+/***********************************************************************//**
  * @brief Kernel for PSF integration of elliptical model
  *
  * @param[in] delta PSF offset angle (radians).
@@ -1836,6 +2035,273 @@ double cta_psf_elliptical_kern_phi::eval(const double& phi)
 
     // Return kernel value
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for elliptical model integration over zenith angle
+ *
+ * @param[in] rho Radial distance from model centre (radians).
+ * @return Integration kernel.
+ *
+ * Computes the integration kernel
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega} 
+ *                     S_{\rm p}(\rho, \omega | E, t) \, PSF(\rho, \omega)
+ *                     d\omega
+ * \f]
+ *
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the observed photon direction, and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical source model
+ * for a given true photon energy and photon arrival time,
+ * \f$PSF(\rho, \omega)\f$ is the point spread function.
+ * The integration is over the \f$\omega\f$ values that are comprised within
+ * the ellipse boundaries.
+ ***************************************************************************/
+double cta_psf_elliptical_kern_rho::eval(const double& rho)
+{
+    // Initialise result
+    double irf = 0.0;
+
+    // Continue only if rho is positive
+    if (rho > 0.0) {
+
+        // Compute half length of the arc (in radians) from a circle with
+        // radius rho that intersects with the point spread function, defined
+        // as a circle with maximum radius m_delta_max
+        double domega = 0.5 * gammalib::cta_roi_arclength(rho,
+                                                          m_rho_obs,
+                                                          m_cos_rho_obs,
+                                                          m_sin_rho_obs,
+                                                          m_delta_max,
+                                                          m_cos_delta_max);
+
+        // Continue only if arc length is positive
+        if (domega > 0.0) {
+
+            // Precompute cosine and sine terms for azimuthal integration
+            double cos_rho = std::cos(rho);
+            double sin_rho = std::sin(rho);
+            double cos_psf = cos_rho * m_cos_rho_obs;
+            double sin_psf = sin_rho * m_sin_rho_obs;
+
+            // Reduce rho by an infinite amount to avoid rounding errors
+            // at the boundary of a sharp edged model (e.g. an elliptical
+            // disk model)
+            double rho_kluge = rho - 1.0e-12;
+            if (rho_kluge < 0.0) {
+                rho_kluge = 0.0;
+            }
+
+            // Setup integration kernel
+            cta_psf_elliptical_kern_omega integrand(m_rsp,
+                                                    m_model,
+                                                    m_srcDir,
+                                                    m_srcEng,
+                                                    m_srcTime,
+                                                    m_posangle_obs,
+                                                    rho_kluge,
+                                                    cos_psf,
+                                                    sin_psf);
+
+            // Setup integrator
+            GIntegral integral(&integrand);
+            integral.fixed_iter(m_iter);
+
+            // If the radius rho is not larger than the semiminor axis
+            // boundary, the circle with that radius is fully contained in
+            // the ellipse and we can just integrate over the relevant arc
+            if (rho < m_semiminor) {
+
+                // Compute omega integration range
+                double omega_min = -domega;
+                double omega_max = +domega;
+
+                // Integrate over omega
+                irf = integral.romberg(omega_min, omega_max, m_iter) *
+                      sin_rho;
+
+            } // endif: circle comprised in ellipse
+
+            // ... otherwise there are arcs that intersect with the Psf circle
+            else {
+
+                // Compute half the arc length (in radians) of a circle of
+                // radius rho, centred on the model, that intersects with
+                // the ellipse boundary
+                double arg1 = 1.0 - (m_semiminor*m_semiminor) / (rho*rho);
+                double arg2 = 1.0 - (m_semiminor*m_semiminor) /
+                                    (m_semimajor*m_semimajor);
+                double omega_width = std::acos(std::sqrt(arg1/arg2));
+
+                // Continue only if the arclength is positive
+                if (omega_width > 0.0) {
+
+                    // Compute azimuth angle difference between ellipse
+                    // position angle and position angle of observed
+                    // photon in the model system. This angle will define
+                    // the reference point around which the circle arc. Make
+                    // sure that omega_0 is within [-pi,pi] thus that the omega
+                    // intervals are between [-2pi,2pi]
+                    double omega_0 = m_posangle - m_posangle_obs;
+                    if (omega_0 > gammalib::pi) {
+                        omega_0 -= gammalib::pi;
+                    }
+                    else if (omega_0 < -gammalib::pi) {
+                        omega_0 += gammalib::pi;
+                    }
+
+                    // Compute azimuth angle intervals
+                    double omega1_min = omega_0    - omega_width;
+                    double omega1_max = omega_0    + omega_width;
+                    double omega2_min = omega1_min + gammalib::pi;
+                    double omega2_max = omega1_max + gammalib::pi;
+
+                    // Limit intervals to the intersection of the ellipse with
+                    // the Psf circle. This may lead to a split of intervals,
+                    // and we gather all these intervals in a special interval
+                    // pair containers
+                    cta_omega_intervals intervals1 = 
+                        gammalib::limit_omega(omega1_min, omega1_max, domega);
+                    cta_omega_intervals intervals2 = 
+                        gammalib::limit_omega(omega2_min, omega2_max, domega);
+
+                    // Integrate over all intervals for omega1
+                    for (int i = 0; i < intervals1.size(); ++i) {
+                        double min = intervals1[i].first;
+                        double max = intervals1[i].second;
+                        irf       += integral.romberg(min, max, m_iter) * sin_rho;
+                    }
+
+                    // Integrate over all intervals for omega2
+                    for (int i = 0; i < intervals2.size(); ++i) {
+                        double min = intervals2[i].first;
+                        double max = intervals2[i].second;
+                        irf       += integral.romberg(min, max, m_iter) * sin_rho;
+                    }
+
+                } // endif: arc length was positive
+
+            } // endelse: circle was not comprised in ellipse
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+                std::cout << "*** ERROR: cta_psf_elliptical_kern_rho";
+                std::cout << "(rho=" << rho << "):";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (irf=" << irf;
+                std::cout << ", domega=" << domega;
+                std::cout << ", sin_rho=" << sin_rho << ")";
+                std::cout << std::endl;
+            }
+            #endif
+
+        } // endif: arc length was positive
+    
+    } // endif: rho was positive
+
+    // Return result
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for elliptical model integration over azimuth angle
+ *
+ * @param[in] omega Azimuth angle (radians).
+ *
+ * Computes
+ *
+ * \f[
+ *    K(\omega | \rho, E, t) = S_{\rm p}(\omega | \rho, E, t) \,
+ *                             PSF(\omega | \rho)
+ * \f]
+ *
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the observed photon direction, and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ *
+ * From the coordinates \f$(\rho,\omega)\f$ in the model system, the method
+ * computes the angle between the true (\f$\vec{p}\f$) and observed
+ * (\f$\vec{p'}\f$) photon arrival direction using
+ * 
+ * \f[\delta = \arccos(\cos \rho \cos \rho_{\rm obs} + 
+ *                     \sin \rho \sin \rho_{\rm obs} \cos \omega)\f]
+ *
+ * where
+ * \f$\rho_{\rm obs}\f$ is the angular distance between the observed photon
+ * arrival direction \f$\vec{p'}\f$ and the model centre \f$\vec{m}\f$.
+ * \f$\delta\f$ is used to compute the value of the point spread function.
+ ***************************************************************************/
+double cta_psf_elliptical_kern_omega::eval(const double& omega)
+{
+    // Initialise Irf value
+    double irf = 0.0;
+
+    // Compute azimuth angle in model coordinate system (radians)
+    double omega_model = omega + m_posangle_obs;
+
+    // Evaluate sky model
+    double model = m_model->eval(m_rho, omega_model, m_srcEng, m_srcTime);
+
+    // Debug: test if model is non positive
+    #if defined(G_DEBUG_MODEL_ZERO)
+    if (model <= 0.0) {
+        double semiminor_rad = m_model->semiminor() * gammalib::deg2rad;
+        double semimajor_rad = m_model->semimajor() * gammalib::deg2rad;
+        double diff_angle    = omega_model - m_model->posangle() * gammalib::deg2rad;
+        double cosinus       = std::cos(diff_angle);
+        double sinus         = std::sin(diff_angle);
+        double arg1          = semiminor_rad * cosinus;
+        double arg2          = semimajor_rad * sinus;
+        double r_ellipse     = semiminor_rad * semimajor_rad /
+                               std::sqrt(arg1*arg1 + arg2*arg2);
+        std::cout << "*** WARNING: cta_psf_elliptical_kern_omega::eval";
+        std::cout << " zero model for (rho,omega)=";
+        std::cout << m_rho*gammalib::rad2deg << ",";
+        std::cout << omega*gammalib::rad2deg << ")";
+        std::cout << " rho-r_ellipse=" << (m_rho-r_ellipse) << " radians";
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Continue only if model is positive
+    if (model > 0.0) {
+
+        // Compute Psf offset angle (radians)
+        double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
+
+        // Evaluate Psf * model for this delta
+        irf = m_rsp->psf()(m_srcDir, delta, m_srcEng) * model;
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+            std::cout << "*** ERROR: cta_psf_elliptical_kern_omega::eval";
+            std::cout << "(omega=" << omega << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", model=" << model;
+            std::cout << ", delta=" << delta;
+            std::cout << ", rho=" << m_rho;
+            std::cout << ", omega=" << omega << ")";
+            std::cout << std::endl;
+        }
+        #endif
+
+    } // endif: model is positive
+
+    // Return
+    return irf;
 }
 
 

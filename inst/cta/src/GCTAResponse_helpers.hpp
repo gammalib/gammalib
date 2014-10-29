@@ -447,6 +447,7 @@ public:
                                 const GModelSpatialElliptical& model,
                                 const double&                  semimajor,
                                 const double&                  semiminor,
+                                const double&                  posangle,
                                 const double&                  zenith,
                                 const double&                  azimuth,
                                 const GEnergy&                 srcEng,
@@ -463,6 +464,7 @@ public:
                                 m_model(model),
                                 m_semimajor(semimajor),
                                 m_semiminor(semiminor),
+                                m_posangle(posangle),
                                 m_zenith(zenith),
                                 m_azimuth(azimuth),
                                 m_srcEng(srcEng),
@@ -483,20 +485,21 @@ public:
     double eval(const double& rho);
 public:
     const GCTAResponseIrf&         m_rsp;           //!< CTA response
-    const GModelSpatialElliptical& m_model;         //!< Spatial model
-    const double&                  m_semimajor;     //!< Semimajor ellipse boundary
-    const double&                  m_semiminor;     //!< Semiminor ellipse boundary
+    const GModelSpatialElliptical& m_model;         //!< Elliptical model
+    const double&                  m_semimajor;     //!< Ellipse boundary semimajor axis
+    const double&                  m_semiminor;     //!< Ellipse boundary semiminor axis
+    const double&                  m_posangle;      //!< Ellipse boundary position angle
     const double&                  m_zenith;        //!< Zenith angle
     const double&                  m_azimuth;       //!< Azimuth angle
     const GEnergy&                 m_srcEng;        //!< True photon energy
     const GTime&                   m_srcTime;       //!< True photon time
     const double&                  m_srcLogEng;     //!< True photon log energy
     const GEnergy&                 m_obsEng;        //!< Measured event energy
-    const double&                  m_rho_obs;       //!< Distance model centre - measured photon
+    const double&                  m_rho_obs;       //!< Distance of model centre from measured photon
     double                         m_cos_rho_obs;   //!< Cosine of m_rho_obs
     double                         m_sin_rho_obs;   //!< Sine of m_rho_obs
-    const double&                  m_posangle_obs;  //!< Measured photon position angle from model centre
-    const double&                  m_rho_pnt;       //!< Distance model centre - pointing
+    const double&                  m_posangle_obs;  //!< Photon position angle measured from model centre
+    const double&                  m_rho_pnt;       //!< Distance of model centre from pointing
     double                         m_cos_rho_pnt;   //!< Cosine of m_rho_pnt
     double                         m_sin_rho_pnt;   //!< Sine of m_rho_pnt
     const double&                  m_omega_pnt;     //!< Azimuth of pointing in model system
@@ -614,6 +617,7 @@ public:
                                   const GModelSpatialElliptical& model,
                                   const double&                  semimajor,
                                   const double&                  semiminor,
+                                  const double&                  posangle,
                                   const GEnergy&                 srcEng,
                                   const GTime&                   srcTime,
                                   const GCTAObservation&         obs,
@@ -626,6 +630,7 @@ public:
                                   m_model(model),
                                   m_semimajor(semimajor),
                                   m_semiminor(semiminor),
+                                  m_posangle(posangle),
                                   m_srcEng(srcEng),
                                   m_srcTime(srcTime),
                                   m_obs(obs),
@@ -640,19 +645,20 @@ public:
     double eval(const double& rho);
 protected:
     const GCTAResponseIrf&         m_rsp;            //!< CTA response
-    const GModelSpatialElliptical& m_model;          //!< Spatial model
-    const double&                  m_semimajor;      //!< Semimajor ellipse boundary
-    const double&                  m_semiminor;      //!< Semiminor ellipse boundary
+    const GModelSpatialElliptical& m_model;          //!< Elliptical model
+    const double&                  m_semimajor;      //!< Ellipse boundary semimajor axis
+    const double&                  m_semiminor;      //!< Ellipse boundary semiminor axis
+    const double&                  m_posangle;       //!< Ellipse boundary position angle
     const GEnergy&                 m_srcEng;         //!< True photon energy
     const GTime&                   m_srcTime;        //!< True photon arrival time
     const GCTAObservation&         m_obs;            //!< CTA observation
     const GMatrix&                 m_rot;            //!< Rotation matrix
-    const double&                  m_rho_roi;        //!< Distance model-ROI centre
-    double                         m_cos_rho_roi;    //!< Cosine of distance model-ROI centre
-    double                         m_sin_rho_roi;    //!< Sine of distance model-ROI centre
+    const double&                  m_rho_roi;        //!< Distance between model and ROI centre
+    double                         m_cos_rho_roi;    //!< Cosine of m_rho_roi
+    double                         m_sin_rho_roi;    //!< Sine of m_rho_roi
     const double&                  m_posangle_roi;   //!< Position angle of ROI
     const double&                  m_radius_roi;     //!< ROI+PSF radius
-    double                         m_cos_radius_roi; //!< Cosine of ROI+PSF radius
+    double                         m_cos_radius_roi; //!< Cosine of m_radius_roi
     const int&                     m_iter;           //!< Integration iterations
 };
 
@@ -1112,6 +1118,115 @@ protected:
 
 
 /***********************************************************************//**
+ * @class cta_irf_radial_kern_rho
+ *
+ * @brief Kernel for radial model zenith angle integration
+ *
+ * This class implements the integration kernel \f$K(\rho)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of radial spatial models. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     S_{\rm p}(\rho | E, t) \times
+ *                     \int_{\omega} PSF(\rho, \omega) d\omega
+ * \f]
+ *
+ * where
+ * \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
+ * \f$PSF(\rho, \omega)\f$ is the point spread function,
+ * \f$\rho\f$ is the distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
+ ***************************************************************************/
+class cta_psf_radial_kern_rho : public GFunction {
+public:
+    cta_psf_radial_kern_rho(const GCTAResponseCube*    rsp,
+                            const GModelSpatialRadial* model,
+                            const GSkyDir&             srcDir,
+                            const GEnergy&             srcEng,
+                            const GTime&               srcTime,
+                            const double&              rho_obs,
+                            const double&              delta_max,
+                            const int&                 iter) :
+                            m_rsp(rsp),
+                            m_model(model),
+                            m_srcDir(srcDir),
+                            m_srcEng(srcEng),
+                            m_srcTime(srcTime),
+                            m_rho_obs(rho_obs),
+                            m_cos_rho_obs(std::cos(rho_obs)),
+                            m_sin_rho_obs(std::sin(rho_obs)),
+                            m_delta_max(delta_max),
+                            m_cos_delta_max(std::cos(delta_max)),
+                            m_iter(iter) { }
+    double eval(const double& rho);
+public:
+    const GCTAResponseCube*    m_rsp;           //!< CTA response
+    const GModelSpatialRadial* m_model;         //!< Radial model
+    const GSkyDir&             m_srcDir;        //!< True photon arrival direction
+    const GEnergy&             m_srcEng;        //!< True photon energy
+    const GTime&               m_srcTime;       //!< True photon time
+    const double&              m_rho_obs;       //!< Distance of model centre from measured photon
+    double                     m_cos_rho_obs;   //!< Cosine of m_rho_obs
+    double                     m_sin_rho_obs;   //!< Sine of m_rho_obs
+    const double&              m_delta_max;     //!< Maximum PSF radius
+    double                     m_cos_delta_max; //!< Cosine of maximum PSF radius
+    const int&                 m_iter;          //!< Integration iterations
+};
+
+
+/***********************************************************************//**
+ * @class cta_irf_radial_kern_omega
+ *
+ * @brief Kernel for radial model azimuth angle integration
+ *
+ * This class implements the computation of
+ *
+ * \f[
+ *    K(\omega | \rho, E, t) = PSF(\omega | \rho)
+ * \f]
+ *
+ * where
+ * \f$PSF(\omega | \rho)\f$ is the point spread function,
+ * \f$\rho\f$ is the distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
+ ***************************************************************************/
+class cta_psf_radial_kern_omega : public GFunction {
+public:
+    cta_psf_radial_kern_omega(const GCTAResponseCube*    rsp,
+                              const GModelSpatialRadial* model,
+                              const GSkyDir&             srcDir,
+                              const GEnergy&             srcEng,
+                              const GTime&               srcTime,
+                              const double&              cos_psf,
+                              const double&              sin_psf) :
+                              m_rsp(rsp),
+                              m_model(model),
+                              m_srcDir(srcDir),
+                              m_srcEng(srcEng),
+                              m_srcTime(srcTime),
+                              m_cos_psf(cos_psf),
+                              m_sin_psf(sin_psf) { }
+    double eval(const double& omega);
+public:
+    const GCTAResponseCube*    m_rsp;     //!< CTA response
+    const GModelSpatialRadial* m_model;   //!< Radial model
+    const GSkyDir&             m_srcDir;  //!< True photon sky direction
+    const GEnergy&             m_srcEng;  //!< True photon energy
+    const GTime&               m_srcTime; //!< True photon time
+    const double&              m_cos_psf; //!< Cosine term for PSF offset angle computation
+    const double&              m_sin_psf; //!< Sine term for PSF offset angle computation
+};
+
+
+/***********************************************************************//**
  * @class cta_psf_elliptical_kern_delta
  *
  * @brief Kernel for Psf delta angle integration used for stacked analysis
@@ -1185,6 +1300,135 @@ protected:
     const double&                  m_sin_delta; //!< sin(delta)
     const double&                  m_sin_fact;  //!< sin(delta)*sin(zeta)
     const double&                  m_cos_fact;  //!< cos(delta)*cos(zeta)
+};
+
+
+/***********************************************************************//**
+ * @class cta_irf_elliptical_kern_rho
+ *
+ * @brief Kernel for elliptical model zenith angle integration
+ *
+ * This class implements the integration kernel \f$K(\rho)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of elliptical spatial models. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega} 
+ *                     S_{\rm p}(\rho, \omega | E, t) \, PSF(\rho, \omega)
+ *                     d\omega
+ * \f]
+ *
+ * where
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical model,
+ * \f$PSF(\rho, \omega)\f$ is the point spread function,
+ * \f$\rho\f$ is the distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
+ ***************************************************************************/
+class cta_psf_elliptical_kern_rho : public GFunction {
+public:
+    cta_psf_elliptical_kern_rho(const GCTAResponseCube*        rsp,
+                                const GModelSpatialElliptical* model,
+                                const double&                  semimajor,
+                                const double&                  semiminor,
+                                const double&                  posangle,
+                                const GSkyDir&                 srcDir,
+                                const GEnergy&                 srcEng,
+                                const GTime&                   srcTime,
+                                const double&                  rho_obs,
+                                const double&                  posangle_obs,
+                                const double&                  delta_max,
+                                const int&                     iter) :
+                                m_rsp(rsp),
+                                m_model(model),
+                                m_semimajor(semimajor),
+                                m_semiminor(semiminor),
+                                m_posangle(posangle),
+                                m_srcDir(srcDir),
+                                m_srcEng(srcEng),
+                                m_srcTime(srcTime),
+                                m_rho_obs(rho_obs),
+                                m_cos_rho_obs(std::cos(rho_obs)),
+                                m_sin_rho_obs(std::sin(rho_obs)),
+                                m_posangle_obs(posangle_obs),
+                                m_delta_max(delta_max),
+                                m_cos_delta_max(std::cos(delta_max)),
+                                m_iter(iter) { }
+    double eval(const double& rho);
+public:
+    const GCTAResponseCube*        m_rsp;           //!< CTA response
+    const GModelSpatialElliptical* m_model;         //!< Elliptical model
+    const double&                  m_semimajor;     //!< Ellipse boundary semimajor axis
+    const double&                  m_semiminor;     //!< Ellipse boundary semiminor axis
+    const double&                  m_posangle;      //!< Ellipse boundary position angle
+    const GSkyDir&                 m_srcDir;        //!< True photon arrival direction
+    const GEnergy&                 m_srcEng;        //!< True photon energy
+    const GTime&                   m_srcTime;       //!< True photon time
+    const double&                  m_rho_obs;       //!< Distance of model centre from measured photon
+    double                         m_cos_rho_obs;   //!< Cosine of m_rho_obs
+    double                         m_sin_rho_obs;   //!< Sine of m_rho_obs
+    const double&                  m_posangle_obs;  //!< Photon position angle measured from model centre
+    const double&                  m_delta_max;     //!< Maximum PSF radius
+    double                         m_cos_delta_max; //!< Cosine of maximum PSF radius
+    const int&                     m_iter;          //!< Integration iterations
+};
+
+
+/***********************************************************************//**
+ * @class cta_irf_elliptical_kern_omega
+ *
+ * @brief Kernel for elliptical model azimuth angle integration
+ *
+ * This class implements the computation of
+ *
+ * \f[
+ *    S_{\rm p}(\omega | \rho, E, t) \, PSF(\omega | \rho)
+ * \f]
+ *
+ * where
+ * \f$S_{\rm p}(\omega | \rho, E, t)\f$ is the elliptical model,
+ * \f$ PSF(\omega | \rho)\f$ is the point spread function,
+ * \f$\rho\f$ is the distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
+ ***************************************************************************/
+class cta_psf_elliptical_kern_omega : public GFunction {
+public:
+    cta_psf_elliptical_kern_omega(const GCTAResponseCube*        rsp,
+                                  const GModelSpatialElliptical* model,
+                                  const GSkyDir&                 srcDir,
+                                  const GEnergy&                 srcEng,
+                                  const GTime&                   srcTime,
+                                  const double&                  posangle_obs,
+                                  const double&                  rho,
+                                  const double&                  cos_psf,
+                                  const double&                  sin_psf) :
+                                  m_rsp(rsp),
+                                  m_model(model),
+                                  m_srcDir(srcDir),
+                                  m_srcEng(srcEng),
+                                  m_srcTime(srcTime),
+                                  m_posangle_obs(posangle_obs),
+                                  m_rho(rho),
+                                  m_cos_psf(cos_psf),
+                                  m_sin_psf(sin_psf) { }
+    double eval(const double& omega);
+public:
+    const GCTAResponseCube*        m_rsp;          //!< CTA response
+    const GModelSpatialElliptical* m_model;        //!< Spatial model
+    const GSkyDir&                 m_srcDir;       //!< True photon sky direction
+    const GEnergy&                 m_srcEng;       //!< True photon energy
+    const GTime&                   m_srcTime;      //!< True photon time
+    const double&                  m_posangle_obs; //!< Measured photon position angle from model centre
+    const double&                  m_rho;          //!< Model zenith angle
+    const double&                  m_cos_psf;      //!< Cosine term for PSF offset angle computation
+    const double&                  m_sin_psf;      //!< Sine term for PSF offset angle computation
 };
 
 

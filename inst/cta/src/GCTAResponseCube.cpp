@@ -63,6 +63,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_NEW_PSF_RADIAL
+#define G_NEW_PSF_ELLIPTICAL
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -473,7 +475,7 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
 
         // Continue only if exposure is positive
         if (irf > 0.0) {
-            irf /= obs.livetime(); //!< Revover effective area from exposure
+            irf /= obs.livetime(); //!< Recover effective area from exposure
             irf *= psf_radial(model, zeta, obsDir, obsEng, obsTime);
             irf *= obs.deadc(obsTime);
         }
@@ -533,20 +535,20 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
 
     // Compute angle between model centre and measured photon direction and
     // position angle (radians)
-    double zeta  = model->dir().dist(obsDir);
-    double omega = model->dir().posang(obsDir);
+    double rho_obs      = model->dir().dist(obsDir);      // was zeta
+    double posangle_obs = model->dir().posang(obsDir);    // was omega
 
     // Continue only if we're sufficiently close to the model centre to get a
     // non-zero response
-    if (zeta <= model->theta_max()+psf().delta_max()) {
+    if (rho_obs <= model->theta_max()+psf().delta_max()) {
 
         // Get exposure
         irf = exposure()(obsDir, obsEng);
 
         // Continue only if exposure is positive
         if (irf > 0.0) {
-            irf /= obs.livetime(); //!< Revover effective area from exposure
-            irf *= psf_elliptical(model, zeta, omega, obsDir, obsEng, obsTime);
+            irf /= obs.livetime(); //!< Recover effective area from exposure
+            irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, obsEng, obsTime);
             irf *= obs.deadc(obsTime);
         }
         
@@ -947,6 +949,94 @@ int GCTAResponseCube::cache_index(const std::string& name) const
  * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
  * function.
  ***************************************************************************/
+#if defined(G_NEW_PSF_ELLIPTICAL)
+double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
+                                    const double&              rho_obs, // was zeta
+                                    const GSkyDir&             obsDir,
+                                    const GEnergy&             srcEng,
+                                    const GTime&               srcTime) const
+{
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 5;
+    static const int iter_phi = 5;
+
+    // Initialise value
+    double irf = 0.0;
+
+    // Get maximum PSF radius (radians)
+    double delta_max = psf().delta_max();
+
+    // Set zenith angle integration range for elliptical model (radians)
+    double rho_min = (rho_obs > delta_max) ? rho_obs - delta_max : 0.0;
+    double rho_max = rho_obs + delta_max;
+    double src_max = model->theta_max();
+    if (rho_max > src_max) {
+        rho_max = src_max;
+    }
+
+    // Perform zenith angle integration if interval is valid
+    if (rho_max > rho_min) {
+
+        // Setup integration kernel. We take here the observed photon arrival
+        // direction as the true photon arrival direction because the PSF does
+        // not vary significantly over a small region.
+        cta_psf_radial_kern_rho integrand(this,
+                                          model,
+                                          obsDir,
+                                          srcEng,
+                                          srcTime,
+                                          rho_obs,
+                                          delta_max,
+                                          iter_phi);
+
+        // Integrate over model's zenith angle
+        GIntegral integral(&integrand);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
+
+        // If the integration range includes a transition between full
+        // containment of model within Psf and partial containment, then
+        // add a boundary at this location
+        double transition_point = delta_max - rho_obs;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If the integration range includes a transition between full
+        // containment of Psf within model and partial containment, then
+        // add a boundary at this location
+        transition_point = src_max - delta_max;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // Integrate kernel
+        irf = integral.romberg(bounds, iter_rho);
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+            std::cout << "*** ERROR: GCTAResponseCube::psf_radial:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", rho_min=" << rho_min;
+            std::cout << ", rho_max=" << rho_max << ")";
+            std::cout << std::endl;
+        }
+        #endif
+
+    } // endif: integration interval is valid
+
+    // Return PSF
+    return irf;
+}
+#else
 double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
                                     const double&              zeta,
                                     const GSkyDir&             obsDir,
@@ -988,22 +1078,38 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
     // Return PSF
     return value;
 }
+#endif
 
 
 /***********************************************************************//**
  * @brief Integrate PSF over elliptical model
  *
  * @param[in] model Elliptical model.
- * @param[in] zeta Angle between model centre and measured photon direction
- *                 (radians).
- * @param[in] omega Position angle of measured photon direction with
- *                  respect to model centre (radians)
+ * @param[in] rho_obs Angle between model centre and measured photon direction
+ *                    (radians).
+ * @param[in] posangle_obs Position angle of measured photon direction with
+ *                         respect to model centre (radians).
  * @param[in] obsDir Observed event direction.
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  *
  * Computes the integral
  * 
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    \sin \rho \times
+ *    \int_{\omega} 
+ *    S_{\rm p}(\rho, \omega | E, t) \, PSF(\rho, \omega) d\omega d\rho
+ * \f]
+ *
+ * where
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical model,
+ * \f$PSF(\rho, \omega)\f$ is the point spread function,
+ * \f$\rho\f$ is the distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
+ ***************************************************************************/
+/*
  * \f[
  *    \int_0^{\delta_{\rm max}}
  *    {\rm PSF}(\delta) \times
@@ -1018,9 +1124,123 @@ double GCTAResponseCube::psf_radial(const GModelSpatialRadial* model,
  * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
  * function.
  ***************************************************************************/
+#if defined(G_NEW_PSF_ELLIPTICAL)
 double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
-                                        const double&                  zeta,
-                                        const double&                  omega,
+                                        const double&                  rho_obs,
+                                        const double&                  posangle_obs,
+                                        const GSkyDir&                 obsDir,
+                                        const GEnergy&                 srcEng,
+                                        const GTime&                   srcTime) const
+{
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 5;
+    static const int iter_phi = 5;
+
+    // Initialise value
+    double irf = 0.0;
+
+    // Get maximum PSF radius (radians)
+    double delta_max = psf().delta_max();
+
+    // Get the ellipse boundary (radians). Note that these are NOT the
+    // parameters of the ellipse but of a boundary ellipse that is used
+    // for computing the relevant omega angle intervals for a given angle
+    // rho. The boundary ellipse takes care of the possibility that the
+    // semiminor axis is larger than the semimajor axis
+    double semimajor;    // Will be the larger axis
+    double semiminor;    // Will be the smaller axis
+    double posangle;     // Will be the corrected position angle
+    double aspect_ratio; // Ratio between smaller/larger axis of model
+    if (model->semimajor() >= model->semiminor()) {
+        aspect_ratio = (model->semimajor() > 0.0) ?
+                        model->semiminor() / model->semimajor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad;
+    }
+    else {
+        aspect_ratio = (model->semiminor() > 0.0) ?
+                        model->semimajor() / model->semiminor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad + gammalib::pihalf;
+    }
+    semimajor = model->theta_max();
+    semiminor = semimajor * aspect_ratio;
+
+    // Set zenith angle integration range for elliptical model
+    double rho_min = (rho_obs > delta_max) ? rho_obs - delta_max : 0.0;
+    double rho_max = rho_obs + delta_max;
+    if (rho_max > semimajor) {
+        rho_max = semimajor;
+    }
+
+    // Perform zenith angle integration if interval is valid
+    if (rho_max > rho_min) {
+
+        // Setup integration kernel. We take here the observed photon arrival
+        // direction as the true photon arrival direction because the PSF does
+        // not vary significantly over a small region.
+        cta_psf_elliptical_kern_rho integrand(this,
+                                              model,
+                                              semimajor,
+                                              semiminor,
+                                              posangle,
+                                              obsDir,
+                                              srcEng,
+                                              srcTime,
+                                              rho_obs,
+                                              posangle_obs,
+                                              delta_max,
+                                              iter_phi);
+
+        // Integrate over model's zenith angle
+        GIntegral integral(&integrand);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
+
+        // If the integration range includes a transition between full
+        // containment and partial containment, then add a boundary at
+        // this location
+        /*
+        double transition_point = delta_max - rho_obs;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+        */
+
+        // If the integration range includes the semiminor boundary, then
+        // add an integration boundary at that location
+        if (semiminor > rho_min && semiminor < rho_max) {
+            bounds.push_back(semiminor);
+        }
+
+        // Integrate kernel
+        irf = integral.romberg(bounds, iter_rho);
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+            std::cout << "*** ERROR: GCTAResponseCube::psf_elliptical:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", rho_min=" << rho_min;
+            std::cout << ", rho_max=" << rho_max << ")";
+            std::cout << std::endl;
+        }
+        #endif
+
+    } // endif: integration interval is valid
+
+    // Return PSF
+    return irf;
+}
+#else
+double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
+                                        const double&                  rho_obs,
+                                        const double&                  posangle_obs,
                                         const GSkyDir&                 obsDir,
                                         const GEnergy&                 srcEng,
                                         const GTime&                   srcTime) const
@@ -1038,8 +1258,8 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
 
     // Compute sin and cosine of angle between model centre and measured
     // photon direction
-    double sin_zeta = std::sin(zeta);
-    double cos_zeta = std::cos(zeta);
+    double sin_rho_obs = std::sin(rho_obs);
+    double cos_rho_obs = std::cos(rho_obs);
 
     // Get offset angle integration interval in radians
     double delta_min = 0.0;
@@ -1049,7 +1269,7 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
     // direction as the true photon arrival direction because the PSF does
     // not vary significantly over a small region.
     cta_psf_elliptical_kern_delta integrand(this, model, obsDir, srcEng, srcTime,
-                                            sin_zeta, cos_zeta, omega,
+                                            sin_rho_obs, cos_rho_obs, posangle_obs,
                                             eps_phi, order_phi);
 
     // Integrate over PSF delta angle
@@ -1060,3 +1280,4 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
     // Return PSF
     return value;
 }
+#endif

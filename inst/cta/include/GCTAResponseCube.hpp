@@ -116,8 +116,8 @@ private:
                       const GEnergy&             srcEng,
                       const GTime&               srcTime) const;
     double psf_elliptical(const GModelSpatialElliptical* model,
-                          const double&                  zeta,
-                          const double&                  omega,
+                          const double&                  rho_obs,
+                          const double&                  posangle_obs,
                           const GSkyDir&                 obsDir,
                           const GEnergy&                 srcEng,
                           const GTime&                   srcTime) const;
