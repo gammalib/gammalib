@@ -180,9 +180,12 @@ def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radi
 
     # Rho limits
     rho_min = 0.0
-    rho_max = theta_max
+    #rho_max = theta_max
+    rho_max = rho_roi + radius_roi
     if (rho_roi > radius_roi):
         rho_min = rho_roi - radius_roi
+    if (rho_max > theta_max):
+        rho_max = theta_max
 
     # Setup ellipse as vector
     x = []
@@ -370,8 +373,8 @@ if __name__ == '__main__':
         sys.exit()
 
     # Set Parameters
-    roi_radius = 0.5
-    delta_max  = 0.2
+    roi_radius = 1.0
+    delta_max  = 0.4
 
     # Set model parameters
     centre = gammalib.GSkyDir()

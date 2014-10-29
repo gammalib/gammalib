@@ -46,6 +46,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_INTEGRAL                             //!< Debug integration
+#define G_DEBUG_MODEL_ZERO           //!< Debug check for zero model values
 
 /* __ Constants __________________________________________________________ */
 
@@ -623,6 +624,14 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             double cos_ph  = cos_rho * m_cos_rho_pnt;
             double sin_ph  = sin_rho * m_sin_rho_pnt;
 
+            // Reduce rho by an infinite amount to avoid rounding errors
+            // at the boundary of a sharp edged model (e.g. an elliptical
+            // disk model)
+            double rho_kluge = rho - 1.0e-12;
+            if (rho_kluge < 0.0) {
+                rho_kluge = 0.0;
+            }
+
             // Setup integration kernel
             cta_irf_elliptical_kern_omega integrand(m_rsp,
                                                     m_model,
@@ -634,7 +643,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
                                                     m_obsEng,
                                                     m_posangle_obs,
                                                     m_omega_pnt,
-                                                    rho,
+                                                    rho_kluge,
                                                     cos_psf,
                                                     sin_psf,
                                                     cos_ph,
@@ -790,8 +799,32 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
     // Initialise IRF value
     double irf = 0.0;
 
+    // Compute azimuth angle in model coordinate system (radians)
+    double omega_model = omega + m_posangle_obs;
+
     // Evaluate sky model
-    double model = m_model.eval(m_rho, omega + m_posangle_obs, m_srcEng, m_srcTime);
+    double model = m_model.eval(m_rho, omega_model, m_srcEng, m_srcTime);
+
+    // Debug: test if model is non positive
+    #if defined(G_DEBUG_MODEL_ZERO)
+    if (model <= 0.0) {
+        double m_semiminor_rad = m_model.semiminor() * gammalib::deg2rad;
+        double m_semimajor_rad = m_model.semimajor() * gammalib::deg2rad;
+        double diff_angle      = omega_model - m_model.posangle() * gammalib::deg2rad;
+        double cosinus         = std::cos(diff_angle);
+        double sinus           = std::sin(diff_angle);
+        double arg1            = m_semiminor_rad * cosinus;
+        double arg2            = m_semimajor_rad * sinus;
+        double r_ellipse       = m_semiminor_rad * m_semimajor_rad /
+                                 std::sqrt(arg1*arg1 + arg2*arg2);
+        std::cout << "*** WARNING: cta_irf_elliptical_kern_omega::eval";
+        std::cout << " zero model for (rho,omega)=";
+        std::cout << m_rho*gammalib::rad2deg << ",";
+        std::cout << omega*gammalib::rad2deg << ")";
+        std::cout << " rho-r_ellipse=" << (m_rho-r_ellipse) << " radians";
+        std::cout << std::endl;
+    }
+    #endif
 
     // Continue only if model is positive
     if (model > 0.0) {
@@ -851,10 +884,20 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
  *                     N_{\rm pred}(\rho,\omega) d\omega
  * \f]
  *
- * The azimuth angle integration range 
- * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
- * is limited to an arc around the vector connecting the model centre to
- * the ROI centre. This limitation assures proper converges properly.
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the ROI centre, and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical source model
+ * for a given true photon energy and photon arrival time,
+ * \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral over the
+ * response function.
+ *
+ * The method performs the required coordinate transformations from the
+ * model system, spanned by \f$(\rho, \omega)\f$, to the system needed for
+ * Npred computations. Furthermore, the method limits the integration range
+ * to area where the ellipse intersects the ROI.
  ***************************************************************************/
 double cta_npred_elliptical_kern_rho::eval(const double& rho)
 {
@@ -875,13 +918,17 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
         // Continue only if arc length is positive
         if (domega > 0.0) {
 
-            // Compute phi integration range
-            double omega_min = m_posangle_roi - domega;
-            double omega_max = m_posangle_roi + domega;
-
-            // Compute sine and cosine of offset angle
+            // Compute sine and cosine terms for azimuthal integration
             double sin_rho = std::sin(rho);
             double cos_rho = std::cos(rho);
+
+            // Reduce rho by an infinite amount to avoid rounding errors
+            // at the boundary of a sharp edged model (e.g. an elliptical
+            // disk model)
+            double rho_kluge = rho - 1.0e-12;
+            if (rho_kluge < 0.0) {
+                rho_kluge = 0.0;
+            }
 
             // Setup phi integration kernel
             cta_npred_elliptical_kern_omega integrand(m_rsp,
@@ -890,8 +937,10 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                                                       m_srcTime,
                                                       m_obs,
                                                       m_rot,
+                                                      rho_kluge,
                                                       sin_rho,
-                                                      cos_rho);
+                                                      cos_rho,
+                                                      m_posangle_roi);
 
             // Setup integrator
             GIntegral integral(&integrand);
@@ -928,11 +977,10 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                 if (omega_width > 0.0) {
 
                     // Compute azimuth angle difference between ellipse
-                    // position angle and position angle of observed
-                    // photon in the model system. This angle will define
-                    // the reference point around which the circle arc. Make
-                    // sure that omega_0 is within [-pi,pi] thus that the omega
-                    // intervals are between [-2pi,2pi]
+                    // position angle and position angle of ROI in the model
+                    // system. This angle will define the reference point for
+                    // the circle arcs. Make sure that omega_0 is within [-pi,pi]
+                    // thus that the omega intervals are between [-2pi,2pi]
                     double omega_0 = m_model.posangle() * gammalib::deg2rad - 
                                      m_posangle_roi;
                     if (omega_0 > gammalib::pi) {
@@ -1005,34 +1053,68 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
  * Computes
  *
  * \f[
- *    S_{\rm p}(\rho,\omega | E, t) \, N_{\rm pred}(\rho,\omega)
+ *    S_{\rm p}(\omega | \rho, E, t) \, N_{\rm pred}(\omega | \rho)
  * \f]
+ *
+ * where
+ * \f$\omega\f$ is the azimuth angle with respect to the model centre,
+ * counted counterclockwise from the vector connecting the model centre
+ * to the centre of the Region of Interest (ROI), and
+ * \f$\rho\f$ is the radial distance from the model centre.
+ *
+ * @todo Npred computation goes over sky coordinates. This can maybe be
+ *       optimized to reduce the number of coordinate transformations.
+ * @todo Check whether the Npred omega argument is the right one.
  ***************************************************************************/
 double cta_npred_elliptical_kern_omega::eval(const double& omega)
 {
     // Initialise Npred value
     double npred = 0.0;
 
-    // Compute sky direction vector in native coordinates
-    double  cos_omega = std::cos(omega);
-    double  sin_omega = std::sin(omega);
-    GVector native(-cos_omega*m_sin_rho, sin_omega*m_sin_rho, m_cos_rho);
+    // Compute azimuth angle in model coordinate system (radians)
+    double omega_model = omega + m_posangle_roi;
 
-    // Rotate from native into celestial system
-    GVector cel = m_rot * native;
+    // Evaluate sky model
+    double model = m_model.eval(m_rho, omega_model, m_srcEng, m_srcTime);
 
-    // Set sky direction
-    GSkyDir srcDir;
-    srcDir.celvector(cel);
-
-    // Set Photon
-    GPhoton photon(srcDir, m_srcEng, m_srcTime);
-
-    // Get model value for this photon
-    double model = m_model.eval(photon);
-
-    // Continue only if sky intensity is positive
+    // Debug: test if model is non positive
+    #if defined(G_DEBUG_MODEL_ZERO)
+    if (model <= 0.0) {
+        double m_semiminor_rad = m_model.semiminor() * gammalib::deg2rad;
+        double m_semimajor_rad = m_model.semimajor() * gammalib::deg2rad;
+        double diff_angle      = omega_model - m_model.posangle() * gammalib::deg2rad;
+        double cosinus         = std::cos(diff_angle);
+        double sinus           = std::sin(diff_angle);
+        double arg1            = m_semiminor_rad * cosinus;
+        double arg2            = m_semimajor_rad * sinus;
+        double r_ellipse       = m_semiminor_rad * m_semimajor_rad /
+                                 std::sqrt(arg1*arg1 + arg2*arg2);
+        std::cout << "*** WARNING: cta_npred_elliptical_kern_omega::eval";
+        std::cout << " zero model for (rho,omega)=";
+        std::cout << m_rho*gammalib::rad2deg << ",";
+        std::cout << omega*gammalib::rad2deg << ")";
+        std::cout << " rho-r_ellipse=" << (m_rho-r_ellipse) << " radians";
+        std::cout << std::endl;
+    }
+    #endif
+    
+    // Continue only if model is positive
     if (model > 0.0) {
+    
+        // Compute sky direction vector in native coordinates
+        double  cos_omega = std::cos(omega_model);
+        double  sin_omega = std::sin(omega_model);
+        GVector native(-cos_omega*m_sin_rho, sin_omega*m_sin_rho, m_cos_rho);
+
+        // Rotate from native into celestial system
+        GVector cel = m_rot * native;
+
+        // Set sky direction
+        GSkyDir srcDir;
+        srcDir.celvector(cel);
+
+        // Set Photon
+        GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
         // Compute Npred for this sky direction
         npred = m_rsp.npred(photon, m_obs) * model;

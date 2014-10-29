@@ -687,26 +687,32 @@ public:
                                     const GTime&                   srcTime,
                                     const GCTAObservation&         obs,
                                     const GMatrix&                 rot,
+                                    const double&                  rho,
                                     const double&                  sin_rho,
-                                    const double&                  cos_rho) :
+                                    const double&                  cos_rho,
+                                    const double&                  posangle_roi) :
                                     m_rsp(rsp),
                                     m_model(model),
                                     m_srcEng(srcEng),
                                     m_srcTime(srcTime),
                                     m_obs(obs),
                                     m_rot(rot),
+                                    m_rho(rho),
                                     m_sin_rho(sin_rho),
-                                    m_cos_rho(cos_rho) { }
+                                    m_cos_rho(cos_rho),
+                                    m_posangle_roi(posangle_roi) { }
     double eval(const double& omega);
 protected:
-    const GCTAResponseIrf&         m_rsp;      //!< CTA response
-    const GModelSpatialElliptical& m_model;    //!< Model
-    const GEnergy&                 m_srcEng;   //!< True photon energy
-    const GTime&                   m_srcTime;  //!< True photon arrival time
-    const GCTAObservation&         m_obs;      //!< Pointer to observation
-    const GMatrix&                 m_rot;      //!< Rotation matrix
-    const double&                  m_sin_rho;  //!< Sine of offset angle
-    const double&                  m_cos_rho;  //!< Cosine of offset angle
+    const GCTAResponseIrf&         m_rsp;          //!< CTA response
+    const GModelSpatialElliptical& m_model;        //!< Model
+    const GEnergy&                 m_srcEng;       //!< True photon energy
+    const GTime&                   m_srcTime;      //!< True photon arrival time
+    const GCTAObservation&         m_obs;          //!< Pointer to observation
+    const GMatrix&                 m_rot;          //!< Rotation matrix
+    const double&                  m_rho;
+    const double&                  m_sin_rho;      //!< Sine of offset angle
+    const double&                  m_cos_rho;      //!< Cosine of offset angle
+    const double&                  m_posangle_roi; //!< Position angle of ROI
 };
 
 

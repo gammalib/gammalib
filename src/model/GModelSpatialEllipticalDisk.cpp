@@ -692,7 +692,7 @@ void GModelSpatialEllipticalDisk::free_members(void)
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::update() const
 {
-    // Update if one axis has changed has changed
+    // Update if one axis has changed
     if (m_last_semiminor != semiminor() || m_last_semimajor != semimajor()) {
 
         // Store last values

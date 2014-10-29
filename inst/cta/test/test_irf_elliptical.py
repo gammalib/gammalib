@@ -413,8 +413,10 @@ if __name__ == '__main__':
     # Set model parameters
     centre = gammalib.GSkyDir()
     centre.radec_deg(0.0, 0.0)
-    semimajor = 1.0
-    semiminor = 0.50
+    #semimajor = 1.0
+    #semiminor = 0.50
+    semimajor = 0.5
+    semiminor = 1.0
     posang    = 120.0
 
     # Set observed photon direction

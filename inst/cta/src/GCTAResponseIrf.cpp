@@ -1755,10 +1755,21 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
     // Get semimajor and semiminor ellipse boundaries [radians]
-    double aspect_ratio = (model->semiminor() > 0) ?
-                          model->semimajor() / model->semiminor() : 0.0;
+    /*
+    double aspect_ratio = (model->semimajor() > 0) ?
+                           model->semiminor() / model->semimajor() : 0.0;
     double semimajor    = model->theta_max();
     double semiminor    = semimajor * aspect_ratio;
+    */
+    double semimajor    = model->semimajor() * gammalib::deg2rad;
+    double semiminor    = model->semiminor() * gammalib::deg2rad;
+
+    //TEST TEST TEST
+    if (semimajor < semiminor) {
+        std::cout << "Warning:";
+        std::cout << " semiminor=" << semiminor * gammalib::rad2deg;
+        std::cout << " semimajor=" << semimajor * gammalib::rad2deg;
+    }
 
     // Set zenith angle integration range for elliptical model
     double rho_min = (rho_obs > delta_max) ? rho_obs - delta_max : 0.0;
@@ -2326,10 +2337,21 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
     double rho_roi = roi.centre().dir().dist(centre);
 
     // Get semimajor and semiminor ellipse boundaries [radians]
-    double aspect_ratio = (model->semiminor() > 0) ?
-                          model->semimajor() / model->semiminor() : 0.0;
+    /*
+    double aspect_ratio = (model->semimajor() > 0) ?
+                           model->semiminor() / model->semimajor() : 0.0;
     double semimajor    = model->theta_max();
     double semiminor    = semimajor * aspect_ratio;
+    */
+    double semimajor    = model->semimajor() * gammalib::deg2rad;
+    double semiminor    = model->semiminor() * gammalib::deg2rad;
+
+    //TEST TEST TEST
+    if (semimajor < semiminor) {
+        std::cout << "Warning:";
+        std::cout << " semiminor=" << semiminor * gammalib::rad2deg;
+        std::cout << " semimajor=" << semimajor * gammalib::rad2deg;
+    }
 
     // Set offset angle integration range. We take here the ROI+PSF into
     // account to make no integrations beyond the point where the
@@ -2361,8 +2383,8 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
                                                 *model,
                                                 semimajor,
                                                 semiminor,
-                                                source.energy(),
-                                                source.time(),
+                                                srcEng,
+                                                srcTime,
                                                 cta,
                                                 rot,
                                                 rho_roi,
