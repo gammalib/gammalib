@@ -158,7 +158,7 @@ def limit_omega(min, max, domega, log=True):
 # ======================= #
 # Show ellptical response #
 # ======================= #
-def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radius, psf_max_radius, rhos, log=False):
+def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radius, psf_max_radius, log=False):
     """
     Show ellptical response
     """
@@ -166,26 +166,47 @@ def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radi
     plt.figure(1)
     plt.title("Elliptical Npred computation")
 
-    # Convert arguments to radians
-    roi_radius     *= gammalib.deg2rad
-    psf_max_radius *= gammalib.deg2rad
-    radius_roi      = roi_radius + psf_max_radius
+    # Get ellipse boundary (used for intersection computation)
+    if (semimajor >= semiminor):
+        bound_major  = semimajor
+        bound_minor  = semiminor
+        bound_pa     = posang
+    else:
+        bound_major  = semiminor
+        bound_minor  = semimajor
+        bound_pa     = posang + 90.0
+
+    # Compute effective ROI radius
+    radius_roi = roi_radius + psf_max_radius
 
     # Compute some stuff
     cos_pa       = math.cos(posang * gammalib.deg2rad)
     sin_pa       = math.sin(posang * gammalib.deg2rad)
-    rho_roi      = roiDir.dist(centre)
-    theta_max    = semimajor * gammalib.deg2rad
+    rho_roi      = roiDir.dist_deg(centre)
+    theta_max    = bound_major
     posangle_roi = centre.posang(roiDir) # omega0
 
     # Rho limits
     rho_min = 0.0
-    #rho_max = theta_max
     rho_max = rho_roi + radius_roi
     if (rho_roi > radius_roi):
         rho_min = rho_roi - radius_roi
     if (rho_max > theta_max):
         rho_max = theta_max
+
+    # Convert to radians
+    roi_radius     *= gammalib.deg2rad
+    psf_max_radius *= gammalib.deg2rad
+    radius_roi     *= gammalib.deg2rad
+    rho_roi        *= gammalib.deg2rad
+    theta_max      *= gammalib.deg2rad
+
+    # Setup rhos
+    rhos = []
+    for i in range(51):
+        rho = i*0.02
+        if (rho >= rho_min and rho <= rho_max):
+            rhos.append(rho)
 
     # Setup ellipse as vector
     x = []
@@ -199,8 +220,8 @@ def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radi
 
     # Plot ellipse
     plt.plot(x, y, 'r-')
-    plt.xlim([ 2.0*semimajor,-2.0*semimajor])
-    plt.ylim([-2.0*semimajor, 2.0*semimajor])
+    plt.xlim([ 2.0*bound_major,-2.0*bound_major])
+    plt.ylim([-2.0*bound_major, 2.0*bound_major])
     plt.plot([0.0], [0.0], 'ro')
 
     # Plot ROI centre
@@ -258,7 +279,7 @@ def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radi
             if (domega > 0.0):
 
                 # Full containment within ellipse
-                if (rho < semiminor):
+                if (rho < bound_minor):
             
                     # Compute phi integration range
                     omega_min = -domega
@@ -286,8 +307,8 @@ def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radi
 
                     # Azimuth angle of intersection points between ellipse and
                     # circle with radius of rho
-                    arg1        = 1.0 - (semiminor*semiminor) / (rho*rho)
-                    arg2        = 1.0 - (semiminor*semiminor) / (semimajor*semimajor)
+                    arg1        = 1.0 - (bound_minor*bound_minor) / (rho*rho)
+                    arg2        = 1.0 - (bound_minor*bound_minor) / (bound_major*bound_major)
                     omega_width = math.acos(math.sqrt(arg1/arg2))
 
                     # Print Omega width
@@ -301,7 +322,7 @@ def show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radi
                         # to connecting line between model and observed photon. Make
                         # sure that omega_0 is within [-pi,pi] thus that the omega
                         # intervals are between [-2pi,2pi]
-                        omega_0 = posang * gammalib.deg2rad - posangle_roi
+                        omega_0 = bound_pa * gammalib.deg2rad - posangle_roi
                         if (omega_0 > gammalib.pi):
                             omega_0 -= gammalib.pi
                         elif (omega_0 < -gammalib.pi):
@@ -373,14 +394,16 @@ if __name__ == '__main__':
         sys.exit()
 
     # Set Parameters
-    roi_radius = 1.0
+    roi_radius = 0.5
     delta_max  = 0.4
 
     # Set model parameters
     centre = gammalib.GSkyDir()
     centre.radec_deg(0.0, 0.0)
-    semimajor = 1.0
-    semiminor = 0.50
+    #semimajor = 1.0
+    #semiminor = 0.50
+    semiminor = 1.0
+    semimajor = 0.50
     posang    = 310.0
 
     # Set ROI direction
@@ -393,9 +416,6 @@ if __name__ == '__main__':
     pntDir = gammalib.GSkyDir()
     pntDir.radec_deg(0.1, -1.0)
 
-    # Set rhos
-    rhos = [i*0.02 for i in range(51)]
-
     # Show elliptical response geometry
-    show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radius, delta_max, rhos)
+    show_response(centre, semimajor, semiminor, posang, roiDir, pntDir, roi_radius, delta_max)
     

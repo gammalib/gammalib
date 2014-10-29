@@ -5,7 +5,7 @@
 #
 # --------------------------------------------------------------------------
 #
-# Copyright (C) 2013-2014 Juergen Knoedlseder
+# Copyright (C) 2014 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -157,7 +157,7 @@ def limit_omega(min, max, domega, log=False):
 # ======================= #
 # Show ellptical response #
 # ======================= #
-def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_max, rhos, log=False):
+def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_max, log=False):
     """
     Show ellptical response
     """
@@ -165,18 +165,25 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
     plt.figure(1)
     plt.title("Elliptical response")
 
-    # Convert delta_max to radians
-    delta_max *= gammalib.deg2rad
+    # Get ellipse boundary (used for intersection computation)
+    if (semimajor >= semiminor):
+        bound_major  = semimajor
+        bound_minor  = semiminor
+        bound_pa     = posang
+    else:
+        bound_major  = semiminor
+        bound_minor  = semimajor
+        bound_pa     = posang + 90.0
 
     # Compute some stuff
     cos_pa       = math.cos(posang * gammalib.deg2rad)
     sin_pa       = math.sin(posang * gammalib.deg2rad)
-    rho_obs      = centre.dist(obsDir)
+    rho_obs      = centre.dist_deg(obsDir)
     posangle_obs = centre.posang(obsDir)
     rho_pnt      = centre.dist(pntDir)
     posangle_pnt = centre.posang(pntDir)
     omega_pnt    = posangle_pnt - posangle_obs
-    src_max      = semimajor * gammalib.deg2rad
+    src_max      = semimajor
 
     # Rho limits
     rho_min = 0.0
@@ -185,6 +192,18 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
         rho_min = rho_obs - delta_max
     if rho_max > src_max:
         rho_max = src_max
+
+    # Convert to radians
+    delta_max *= gammalib.deg2rad
+    rho_obs   *= gammalib.deg2rad
+    src_max   *= gammalib.deg2rad
+
+    # Setup rhos
+    rhos = []
+    for i in range(51):
+        rho = i*0.02
+        if (rho >= rho_min and rho <= rho_max):
+            rhos.append(rho)
 
     # Setup ellipse as vector
     x = []
@@ -198,8 +217,8 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
 
     # Plot ellipse
     plt.plot(x, y, 'r-')
-    plt.xlim([ 1.5*semimajor,-1.5*semimajor])
-    plt.ylim([-1.5*semimajor, 1.5*semimajor])
+    plt.xlim([ 1.5*bound_major,-1.5*bound_major])
+    plt.ylim([-1.5*bound_major, 1.5*bound_major])
     plt.plot([0.0], [0.0], 'ro')
 
     # Plot observed direction
@@ -270,7 +289,7 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
             sin_ph  = sin_rho * math.sin(rho_pnt)
 
             # Full containment within ellipse
-            if (rho < semiminor):
+            if (rho < bound_minor):
 
                 # Set Omega range
                 omega_min = -domega
@@ -298,8 +317,8 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
 
                 # Azimuth angle of intersection points between ellipse and
                 # circle with radius of rho
-                arg1        = 1.0 - (semiminor*semiminor) / (rho*rho)
-                arg2        = 1.0 - (semiminor*semiminor) / (semimajor*semimajor)
+                arg1        = 1.0 - (bound_minor*bound_minor) / (rho*rho)
+                arg2        = 1.0 - (bound_minor*bound_minor) / (bound_major*bound_major)
                 omega_width = math.acos(math.sqrt(arg1/arg2))
 
                 # Print Omega width
@@ -313,7 +332,7 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
                     # to connecting line between model and observed photon. Make
                     # sure that omega_0 is within [-pi,pi] thus that the omega
                     # intervals are between [-2pi,2pi]
-                    omega_0 = posang * gammalib.deg2rad - posangle_obs
+                    omega_0 = bound_pa * gammalib.deg2rad - posangle_obs
                     if (omega_0 > gammalib.pi):
                         omega_0 -= gammalib.pi
                     elif (omega_0 < -gammalib.pi):
@@ -359,27 +378,6 @@ def show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_ma
                             plt.plot(x, y, 'k-')
 
 
-        # Test line
-        #x = []
-        #y = []
-        #for i in range(10):
-        #    x.append(i*0.1 * math.sin(0.0+posangle_obs))
-        #    y.append(i*0.1 * math.cos(0.0+posangle_obs))
-        #plt.plot(x, y, 'k-')
-
-        # Build circle
-        #circle_x = []
-        #circle_y = []
-        #for angle in range(0, 360):
-        #    radians     = angle * gammalib.deg2rad
-        #    cos_radians = math.cos(radians)
-        #    sin_radians = math.sin(radians)
-        #    x = rho * cos_radians
-        #    y = rho * sin_radians
-        #    circle_x.append(x)
-        #    circle_y.append(y)
-        #plt.plot(circle_x, circle_y, 'k-.')
-
     # Show plot
     plt.show()
 
@@ -413,25 +411,22 @@ if __name__ == '__main__':
     # Set model parameters
     centre = gammalib.GSkyDir()
     centre.radec_deg(0.0, 0.0)
-    #semimajor = 1.0
-    #semiminor = 0.50
-    semimajor = 0.5
-    semiminor = 1.0
-    posang    = 120.0
+    semimajor = 1.0
+    semiminor = 0.50
+    #semimajor = 0.5
+    #semiminor = 1.0
+    posang    = 30.0
 
     # Set observed photon direction
     obsDir = gammalib.GSkyDir()
-    #obsDir.radec_deg(0.4, -0.3)
+    obsDir.radec_deg(0.4, -0.3)
     #obsDir.radec_deg(-0.4, -0.3)
-    obsDir.radec_deg(0.4, 0.4)
+    #obsDir.radec_deg(0.4, 0.4)
 
     # Set pointing direction
     pntDir = gammalib.GSkyDir()
     pntDir.radec_deg(0.1, -1.0)
 
-    # Set rhos
-    rhos = [i*0.02 for i in range(51)]
-
     # Show elliptical response geometry
-    show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_max, rhos)
+    show_response(centre, semimajor, semiminor, posang, obsDir, pntDir, delta_max)
     
