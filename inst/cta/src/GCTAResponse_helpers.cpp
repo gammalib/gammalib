@@ -49,6 +49,14 @@
 #define G_DEBUG_MODEL_ZERO           //!< Debug check for zero model values
 
 /* __ Constants __________________________________________________________ */
+const double g_kulge_radius = 1.0e-12;         //!< Tiny angle (radians)
+const double g_ellipse_kulge_radius = 1.0e-6;  //!< About 0.2 arc seconds
+                                               //   A larger radius is used
+                                               //   as the ellipse is defined
+                                               //   in cartesian coordinates
+                                               //   while distances are
+                                               //   computed in spherical
+                                               //   trigonometry
 
 
 /*==========================================================================
@@ -285,7 +293,7 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
 
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model
-            double rho_kluge = rho - 1.0e-12;
+            double rho_kluge = rho - g_kulge_radius;
             if (rho_kluge < 0.0) {
                 rho_kluge = 0.0;
             }
@@ -483,7 +491,7 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
 
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model
-            double rho_kluge = rho - 1.0e-12;
+            double rho_kluge = rho - g_kulge_radius;
             if (rho_kluge < 0.0) {
                 rho_kluge = 0.0;
             }
@@ -663,7 +671,7 @@ double cta_irf_elliptical_kern_rho::eval(const double& rho)
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model (e.g. an elliptical
             // disk model)
-            double rho_kluge = rho - 1.0e-12;
+            double rho_kluge = rho - g_ellipse_kulge_radius;
             if (rho_kluge < 0.0) {
                 rho_kluge = 0.0;
             }
@@ -960,7 +968,7 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model (e.g. an elliptical
             // disk model)
-            double rho_kluge = rho - 1.0e-12;
+            double rho_kluge = rho - g_ellipse_kulge_radius;
             if (rho_kluge < 0.0) {
                 rho_kluge = 0.0;
             }
@@ -1566,7 +1574,7 @@ double cta_psf_radial_kern_rho::eval(const double& rho)
 
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model
-            double rho_kluge = rho - 1.0e-12;
+            double rho_kluge = rho - g_kulge_radius;
             if (rho_kluge < 0.0) {
                 rho_kluge = 0.0;
             }
@@ -1913,7 +1921,7 @@ double cta_psf_elliptical_kern_rho::eval(const double& rho)
             // Reduce rho by an infinite amount to avoid rounding errors
             // at the boundary of a sharp edged model (e.g. an elliptical
             // disk model)
-            double rho_kluge = rho - 1.0e-12;
+            double rho_kluge = rho - g_ellipse_kulge_radius;
             if (rho_kluge < 0.0) {
                 rho_kluge = 0.0;
             }
