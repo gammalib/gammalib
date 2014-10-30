@@ -100,8 +100,9 @@ def compute_likelihood_profile(obs, parname="Radius", scale=1.0e-5, steps=10):
     opt = gammalib.GOptimizerLM(log)
     opt.eps(5.0e-3)
 
-    # Optimize model parameters
+    # Optimize model parameters and compute errors
     obs.optimize(opt)
+    obs.errors(opt)
 
     # Log optimizer into console
     print(opt)

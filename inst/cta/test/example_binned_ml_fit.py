@@ -62,8 +62,9 @@ def binned_analysis(model, cntmap, irf, caldb):
     # Allocate Levenberg-Marquardt optimizer
     opt = gammalib.GOptimizerLM()
 
-    # Optimize model parameters
+    # Optimize model parameters and compute errors
     obs.optimize(opt)
+    obs.errors(opt)
 
     # Get maximum likelihood value
     logL = -(opt.value())
@@ -111,21 +112,21 @@ def binned_analysis(model, cntmap, irf, caldb):
     return models
 
 
-# ======================= #
-# CTA cube-style analysis #
-# ======================= #
-def cube_analysis(model, cntmap, expcube, psfcube):
+# ==================== #
+# CTA stacked analysis #
+# ==================== #
+def stacked_analysis(model, cntmap, expcube, psfcube):
     """
-    Perform cube-style maximum likelihood fitting of CTA data using GammaLib
+    Perform stacked maximum likelihood fitting of CTA data using GammaLib
     classes. The function performs two fits, one with the full model and
     one with the background model only, to evaluate the Test Statistics
     value of the source component.
     """
     # Dump header
     print("")
-    print("+===================================================+")
-    print("| Cube-style maximum likelihood fitting of CTA data |")
-    print("+===================================================+")
+    print("+================================================+")
+    print("| Stacked maximum likelihood fitting of CTA data |")
+    print("+================================================+")
 
     # Get start CPU time
     tstart = time.clock()
@@ -153,8 +154,9 @@ def cube_analysis(model, cntmap, expcube, psfcube):
     # Allocate Levenberg-Marquardt optimizer
     opt = gammalib.GOptimizerLM()
 
-    # Optimize model parameters
+    # Optimize model parameters and compute errors
     obs.optimize(opt)
+    obs.errors(opt)
 
     # Get maximum likelihood value
     logL = -(opt.value())
@@ -207,7 +209,7 @@ def cube_analysis(model, cntmap, expcube, psfcube):
 #==========================#
 if __name__ == '__main__':
     """
-    Example illustrating a binned data analysis.
+    Example illustrating binned data analyses.
     """
     # Dump header
     print("")
@@ -227,8 +229,8 @@ if __name__ == '__main__':
     # Perform binned analysis
     results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
 
-    # Perform cube-style analysis
-    results_cube = cube_analysis(model, cntmap, expcube, psfcube)
+    # Perform stacked analysis
+    results_cube = stacked_analysis(model, cntmap, expcube, psfcube)
 
     # Print model results
     #print(result)

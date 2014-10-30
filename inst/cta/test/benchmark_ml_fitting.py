@@ -64,8 +64,9 @@ def unbinned_analysis(model, evtfile, irf, caldb):
     opt = gammalib.GOptimizerLM(log)
     opt.eps(5.0e-3)
 
-    # Optimize model parameters
+    # Optimize model parameters and compute errors
     obs.optimize(opt)
+    obs.errors(opt)
 
     # Print optimizer results
     print(opt)
@@ -121,8 +122,9 @@ def binned_analysis(model, cntmap, irf, caldb):
     opt = gammalib.GOptimizerLM(log)
     opt.eps(5.0e-3)
 
-    # Optimize model parameters
+    # Optimize model parameters and compute errors
     obs.optimize(opt)
+    obs.errors(opt)
 
     # Print optimizer results
     print(opt)
@@ -180,8 +182,9 @@ def stacked_analysis(model, cntmap, expcube, psfcube):
     opt = gammalib.GOptimizerLM(log)
     opt.eps(5.0e-3)
 
-    # Optimize model parameters
+    # Optimize model parameters and compute errors
     obs.optimize(opt)
+    obs.errors(opt)
 
     # Print optimizer results
     print(opt)
