@@ -1,7 +1,7 @@
 /***************************************************************************
  *            optimize.cpp - Illustrates optimizer class usage             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,7 +37,7 @@ class parabola : public GOptimizerFunction {
 public:
     parabola(void) : m_value(0), m_gradient(1), m_curvature(1,1) {}
     void           eval(const GOptimizerPars& pars);
-    double         value(void) { return m_value; }
+    double         value(void) const { return m_value; }
     GVector*       gradient(void) { return &m_gradient; }
     GMatrixSparse* curvature(void) { return &m_curvature; }
 protected:

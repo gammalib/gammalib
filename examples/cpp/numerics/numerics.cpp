@@ -1,7 +1,7 @@
 /***************************************************************************
  *            numerics.cpp - Illustrates numerical class usage             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,7 +61,7 @@ int main(void) {
     integral.eps(1.0e-8);
 
     // Integrate over the interval [-10,10]
-    double result = integral.romb(-15.0, +15.0);
+    double result = integral.romberg(-15.0, +15.0);
 
     // Print result (should be basically 1)
     std::cout << "Integral:       " << result << std::endl;
