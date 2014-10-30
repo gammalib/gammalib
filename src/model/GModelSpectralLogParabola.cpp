@@ -809,7 +809,7 @@ void GModelSpectralLogParabola::init_members(void)
     m_norm.unit("ph/cm2/s/MeV");
     m_norm.scale(1.0);
     m_norm.value(1.0);          // default: 1.0
-    m_norm.min(0.1);            // min:     0.0
+    m_norm.min(0.0);            // min:     0.0
     m_norm.free();
     m_norm.gradient(0.0);
     m_norm.has_grad(true);
