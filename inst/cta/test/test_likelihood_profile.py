@@ -82,7 +82,7 @@ def show_likelihood_profile(result):
 # ========================== #
 # Compute likelihood profile #
 # ========================== #
-def compute_likelihood_profile(obs, parname="RA", scale=1.0e-4, steps=10):
+def compute_likelihood_profile(obs, parname="Radius", scale=1.0e-5, steps=10):
     """
     Compute the log-likelihood profile for a given parameter.
     
@@ -93,12 +93,12 @@ def compute_likelihood_profile(obs, parname="RA", scale=1.0e-4, steps=10):
     """
     # Free parameter for which profile is to be determined
     obs.models()[0][parname].free()
-    obs.models()[0]["DEC"].free()
 
     # Allocate Levenberg-Marquardt optimizer
     log = gammalib.GLog()
     log.cout(True)
     opt = gammalib.GOptimizerLM(log)
+    opt.eps(5.0e-3)
 
     # Optimize model parameters
     obs.optimize(opt)
@@ -256,8 +256,8 @@ if __name__ == '__main__':
 
     # Set test
     #test = "point"
-    test = "gauss"
-    #test = "disk"
+    #test = "gauss"
+    test = "disk"
     #test = "ldisk"
     #test = "shell"
     #test = "ellipse"
@@ -309,10 +309,10 @@ if __name__ == '__main__':
         cntref = 337.5 # +/- 1.8 (from ctobssim)
 
     # Perform unbinned computation
-    original_likelihood_profile(model, events, irf, gammalib.GCaldb(caldb), cntref)
+    #original_likelihood_profile(model, events, irf, gammalib.GCaldb(caldb), cntref)
 
     # Perform binned computation
     #original_likelihood_profile(model, cntmap, irf, gammalib.GCaldb(caldb), cntref)
 
     # Perform stacked computation
-    #stacked_likelihood_profile(model, cntmap, expcube, psfcube, cntref)
+    stacked_likelihood_profile(model, cntmap, expcube, psfcube, cntref)

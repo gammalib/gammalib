@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialEllipticalDisk.i - Elliptical disk source model class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2014 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,12 +65,6 @@ public:
     virtual double                       theta_max(void) const;
     virtual void                         read(const GXmlElement& xml);
     virtual void                         write(GXmlElement& xml) const;
-
-    // Other methods
-    double semiminor(void) const;
-    double semimajor(void) const;
-    void   semiminor(const double& semiminor);
-    void   semimajor(const double& semimajor);
 };
 
 

@@ -73,6 +73,10 @@ public:
     void    dec(const double& dec);
     double  posangle(void) const;
     void    posangle(const double& posangle);
+    double  semiminor(void) const;
+    double  semimajor(void) const;
+    void    semiminor(const double& semiminor);
+    void    semimajor(const double& semimajor);
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 };

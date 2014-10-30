@@ -236,7 +236,7 @@ The type of the GCTAModelCubeBackground class has been set to GCTACubeBackground
 the type of the GCTAModelIrfBackground class to GCTAIrfBackground. XML files need
 to be adapted accordingly.
 
-For cube-style analysis, the GCTAExposure and GCTAMeanPsf classes have been added.
+For stacked analysis, the GCTAExposure and GCTAMeanPsf classes have been added.
 GCTAExposure represents the summed exposure for a list of CTA observations
 (computed as the sum of effective area times livetime), GCTAMeanPsf represents
 the average PSF, computed by weighing the PSF of each observation by the respective
@@ -257,10 +257,10 @@ GCTAResponseIrf derives. The class GCTAResponseCube, which also derives from
 GCTAResponse, has been added to handle cube-style analysis. GCTAResponseCube
 holds an exposure cube (GCTAExposure) and a PSF cube (GCTAMeanPsf) to describe
 the response. GCTAObservation has been modified to allocate either IRF-style or
-cube-style response, dependent on the information found in the XML file.
+stacked response, dependent on the information found in the XML file.
 
 The abstract GCTASourceCube class has been added to handle the pre-computation
-cache for cube-style analysis. A first implementation of this cache is provided
+cache for stacked analysis. A first implementation of this cache is provided
 by the GCTASourceCubePointSource class for point source analysis. The cache has
 been added to GCTAResponseCube who takes care of initializing and using the cache.
 

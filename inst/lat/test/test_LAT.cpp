@@ -617,23 +617,8 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
 void TestGLATOptimize::test_binned_optimizer_p6(void)
 {
     // Set expected fit results
-    /*
     double fit_results[] = {1, 0,
-                            3.214411831, 0.744781,
-                            1, 0,
-                            1, 0,
-                            0.8068908818, 0.08764042542,
-                            1, 0,
-                            83.6331, 0,
-                            22.0145, 0,
-                            2.103749294e-06, 1.560611406e-07,
-                            -2.126826057, 0.053618,
-                            100, 0,
-                            500000, 0,
-                            1, 0};
-    */
-    double fit_results[] = {1, 0,
-                            2.342467831, 0.7339917,
+                            2.34236, 0.7339917,
                             1, 0,
                             1, 0,
                             0.8167256818, 0.08569407542,
@@ -663,23 +648,8 @@ void TestGLATOptimize::test_binned_optimizer_p6(void)
 void TestGLATOptimize::test_binned_optimizer_p7(void)
 {
     // Set expected fit results
-    /*
     double fit_results[] = {1, 0,
-                            2.896021569, 0.441842,
-                            1, 0,
-                            1, 0,
-                            0.8629520722, 0.06376048926,
-                            1, 0,
-                            83.6331, 0,
-                            22.0145, 0,
-                            1.922525774e-06, 1.209507237e-07,
-                            -2.038629122, 0.0509173084,
-                            100, 0,
-                            500000, 0,
-                            1, 0};
-    */
-    double fit_results[] = {1, 0,
-                            2.374909569, 0.4548979,
+                            2.37468, 0.4548979,
                             1, 0,
                             1, 0,
                             0.8419824722, 0.06340531926,
@@ -687,7 +657,7 @@ void TestGLATOptimize::test_binned_optimizer_p7(void)
                             83.6331, 0,
                             22.0145, 0,
                             1.922525774e-06, 1.209507237e-07,
-                            -2.124145722, 0.0493105484,
+                            -2.12421, 0.0493105484,
                             100, 0,
                             500000, 0,
                             1, 0};

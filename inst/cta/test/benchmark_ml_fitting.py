@@ -59,7 +59,10 @@ def unbinned_analysis(model, evtfile, irf, caldb):
     obs.models(model)
 
     # Allocate Levenberg-Marquardt optimizer
-    opt = gammalib.GOptimizerLM()
+    log = gammalib.GLog()
+    log.cout(True)
+    opt = gammalib.GOptimizerLM(log)
+    opt.eps(5.0e-3)
 
     # Optimize model parameters
     obs.optimize(opt)
@@ -113,7 +116,10 @@ def binned_analysis(model, cntmap, irf, caldb):
     obs.models(model)
 
     # Allocate Levenberg-Marquardt optimizer
-    opt = gammalib.GOptimizerLM()
+    log = gammalib.GLog()
+    log.cout(True)
+    opt = gammalib.GOptimizerLM(log)
+    opt.eps(5.0e-3)
 
     # Optimize model parameters
     obs.optimize(opt)
@@ -169,7 +175,10 @@ def stacked_analysis(model, cntmap, expcube, psfcube):
     obs.models(model)
 
     # Allocate Levenberg-Marquardt optimizer
-    opt = gammalib.GOptimizerLM()
+    log = gammalib.GLog()
+    log.cout(True)
+    opt = gammalib.GOptimizerLM(log)
+    opt.eps(5.0e-3)
 
     # Optimize model parameters
     obs.optimize(opt)

@@ -1267,7 +1267,7 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
 
 /*==========================================================================
  =                                                                         =
- =              Model type dependent CTA response methods                  =
+ =                Model type dependent CTA response methods                =
  =                                                                         =
  ==========================================================================*/
 
@@ -1281,192 +1281,22 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
- * Integrates the product of the model and the IRF over the true photon
- * arrival direction using
+ * Integrates the product of the spatial model and the instrument response
+ * function over the true photon arrival direction using
  *
  * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
  *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
  *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
- *    IRF(\rho, \omega) d\omega d\rho
+ *    {\rm Irf}(\rho, \omega) d\omega d\rho
  * \f]
  *
  * where
- * - \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
- * - \f$IRF(\rho, \omega)\f$ is the IRF
- * - \f$\rho\f$ is the distance from the model centre, and
- * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
- *   the connecting line between the model centre and the observed photon
- *   arrival direction.
- *
- * The integration is performed in the coordinate system of the source
- * model spanned by \f$\rho\f$ and \f$\omega\f$ which allows to benefit
- * from the symmetry of the source model.
- *
- * The source centre is located at \f$\vec{m}\f$, and a spherical system
- * is defined around this location with \f$(\omega,\rho)\f$ being the
- * azimuth and zenith angles, respectively. \f$\omega=0\f$ is defined
- * by the direction that connects the source centre \f$\vec{m}\f$ to the
- * measured photon direction \f$\vec{p'}\f$, and \f$\omega\f$ increases
- * counterclockwise.
- *
- * Note that this method approximates the true theta angle (angle between
- * incident photon and pointing direction) by the measured theta angle
- * (angle between the measured photon arrival direction and the pointing
- * direction). Given the slow variation of the PSF shape over the field of
- * view, this approximation should be fine. It helps in fact a lot in
- * speeding up the computations.
- ***************************************************************************/
-#if defined(G_USE_PSF_SYSTEM)
-double GCTAResponseIrf::irf_radial(const GEvent&       event,
-                                   const GSource&      source,
-                                   const GObservation& obs) const
-{
-    // Set integration precision and Romberg order. These values have been
-    // determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1299
-    static const int iter_delta = 5;
-    static const int iter_phi   = 5;
-
-    // Set a tiny angle (in radians) to be removed from the model boundary
-    // to avoid requesting values beyond the boundary due to round-off
-    // errors (this could produce a discontinuity that the integrator does
-    // not like)
-    static const double tiny = 1.0e-9;
-
-    // Initialise Irf
-    double irf = 0.0;
-
-    // Retrieve CTA pointing
-    const GCTAPointing& pnt = retrieve_pnt(G_IRF_RADIAL, obs);
-    const GCTAInstDir&  dir = retrieve_dir(G_IRF_RADIAL, event);
-
-    // Get pointer to radial model
-    const GModelSpatialRadial* model = static_cast<const GModelSpatialRadial*>(source.model());
-
-    // Get event attributes
-    const GSkyDir& obsDir = dir.dir();
-    const GEnergy& obsEng = event.energy();
-
-    // Get source attributes
-    const GEnergy& srcEng    = source.energy();
-    const GTime&   srcTime   = source.time();
-    double         srcLogEng = srcEng.log10TeV();
-
-    // Angle between measured photon and model centre (radians)
-    double zeta = obsDir.dist(model->dir());
-
-    // Angle between measured photon and pointing (radians)
-    double obsOffset = obsDir.dist(pnt.dir());
-
-    // Compute position angle of pointing in Psf system (radians).
-    // The angle Phi=0 of the Psf system is given by the connecting line
-    // between the measured photon direction and the model centre
-    double phi0 = obsDir.posang(pnt.dir()) - obsDir.posang(model->dir());
-    
-    // Get Psf delta integration interval [delta_min, delta_max] (radians)
-    double theta_max = model->theta_max() - tiny;
-    double delta_min = (zeta > theta_max) ? zeta - theta_max : 0.0;
-    double delta_max = psf_delta_max(obsOffset, 0.0,
-                                     pnt.zenith(), pnt.azimuth(),
-                                     srcLogEng);
-    double distance  = zeta + theta_max;
-    if (distance < delta_max) {
-        delta_max = distance;
-    }
-
-    // Continue only if interval has positive length
-    if (delta_max > delta_min) {
-
-        // Setup integration kernel.
-        cta_irf_radial_kern_delta integrand(this, model, pnt,
-                                            srcEng, srcLogEng, srcTime,
-                                            obsOffset, obsEng,
-                                            zeta, phi0, theta_max,
-                                            iter_phi);
-
-        // Setup integration over Psf delta angle
-        GIntegral integral(&integrand);
-        integral.fixed_iter(iter_delta);
-
-        // Setup integration boundaries
-        std::vector<double> bounds;
-        bounds.push_back(delta_min);
-        bounds.push_back(delta_max);
-
-        // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
-        double transition_point = theta_max - zeta;
-        if (transition_point > delta_min && transition_point < delta_max) {
-            bounds.push_back(transition_point);
-        }
-
-        // Integrate kernel
-        irf = integral.romberg(bounds, iter_delta);
-
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-            std::cout << "*** ERROR: GCTAResponseIrf::irf_radial:";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (irf=" << irf;
-            std::cout << ", delta_min=" << delta_min;
-            std::cout << ", delta_max=" << delta_max << ")";
-            std::cout << std::endl;
-        }
-        #endif
-
-        // Apply deadtime correction
-        irf *= obs.deadc(srcTime);
-
-    } // endif: delta interval has positive length
-
-    // Compile option: Show integration results
-    #if defined(G_DEBUG_IRF_RADIAL)
-    std::cout << "GCTAResponseIrf::irf_radial:";
-    std::cout << " delta=[" << delta_min*gammalib::rad2deg;
-    std::cout << ", " << delta_max*gammalib::rad2deg << " deg;";
-    std::cout << " zeta=" << zeta*gammalib::rad2deg << " deg;";
-    std::cout << " phi0=" << phi0*gammalib::rad2deg << " deg;";
-    std::cout << " theta_max=" << theta_max*gammalib::rad2deg << " deg;";
-    std::cout << " obsDir=" << obsDir << ";";
-    std::cout << " modelDir=" << model->dir() << ";";
-    std::cout << " irf=" << irf << std::endl;
-    #endif
-
-    // Return Irf value
-    return irf;
-}
-#else
-/***********************************************************************//**
- * @brief Return IRF value for radial source model
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- *
- * @exception GCTAException::bad_model_type
- *            Model is not a radial model.
- *
- * Integrates the product of the model and the Irf over the true photon
- * arrival direction using
- *
- * \f[
- *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
- *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
- *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
- *    Irf(\rho, \omega) d\omega d\rho
- * \f]
- *
- * where
- *
- *     \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
- *     \f$Irf(\rho, \omega)\f$ is the IRF
- *     \f$\rho\f$ is the distance from the model centre, and
- *     \f$\omega\f$ is the azimuth angle is the position angle with respect
- *     to the connecting line between the model centre and the observed
- *     photon arrival direction.
+ * \f$S_{\rm p}(\rho | E, t)\f$ is the radial spatial model,
+ * \f${\rm Irf}(\rho, \omega)\f$ is the instrument response function,
+ * \f$\rho\f$ is the radial distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
  *
  * The integration is performed in the coordinate system of the source
  * model spanned by \f$\rho\f$ and \f$\omega\f$ which allows to benefit
@@ -1596,8 +1426,8 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
         bounds.push_back(rho_max);
 
         // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
+        // containment of model within Psf and partial containment, then
+        // add a boundary at this location
         double transition_point = delta_max - zeta;
         if (transition_point > rho_min && transition_point < rho_max) {
             bounds.push_back(transition_point);
@@ -1608,7 +1438,7 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
         // location
         const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
         if (shell != NULL) {
-            double shell_radius = shell->radius();
+            double shell_radius = shell->radius() * gammalib::deg2rad;
             if (shell_radius > rho_min && shell_radius < rho_max) {
                 bounds.push_back(shell_radius);
             }
@@ -1654,11 +1484,10 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
     // Return IRF value
     return irf;
 }
-#endif
 
 
 /***********************************************************************//**
- * @brief Return IRF value for elliptical source model
+ * @brief Return Irf value for elliptical source model
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
@@ -1675,17 +1504,16 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
  * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
  *    \sin \rho \times
- *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    \int_{\omega} 
  *    S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega) d\omega d\rho
  * \f]
  *
  * where
- * - \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the radial model,
- * - \f$IRF(\rho, \omega)\f$ is the IRF
- * - \f$\rho\f$ is the distance from the model centre, and
- * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
- *   the connecting line between the model centre and the observed photon
- *   arrival direction.
+ * \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical model,
+ * \f$IRF(\rho, \omega)\f$ is the instrument response function,
+ * \f$\rho\f$ is the distance from the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between the model centre and the observed photon arrival direction.
  *
  * The source model centre is located at \f$\vec{m}\f$, and a spherical
  * coordinate system is defined around this location with \f$(\rho,\omega)\f$
@@ -1731,26 +1559,16 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     // Determine angular distance between observed photon direction and model
     // centre and position angle of observed photon direction seen from the
     // model centre [radians]
-    double zeta     = centre.dist(obsDir);
-    double obsOmega = centre.posang(obsDir);
-
-    // Determine angular distance between measured photon direction and
-    // pointing direction [radians]
-    double eta = pnt.dir().dist(obsDir);
+    double rho_obs      = centre.dist(obsDir);
+    double posangle_obs = centre.posang(obsDir);
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
-    double lambda = centre.dist(pnt.dir());
+    double rho_pnt      = centre.dist(pnt.dir());
+    double posangle_pnt = centre.posang(pnt.dir());
 
     // Compute azimuth angle of pointing in model coordinate system [radians]
-    // This azimuth angle is comprised in the interval [0,pi], and defines
-    // the zero point of the model coordinate system.
-    double omega0 = 0.0;
-    double denom  = std::sin(lambda) * std::sin(zeta);
-    if (denom != 0.0) {
-        double arg = (std::cos(eta) - std::cos(lambda) * std::cos(zeta))/denom;
-        omega0     = gammalib::acos(arg);
-    }
+    double omega_pnt = posangle_pnt - posangle_obs;
 
     // Get log10(E/TeV) of true photon energy
     double srcLogEng = srcEng.log10TeV();
@@ -1759,18 +1577,37 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     // angle (eta) as the true theta angle between the source and the pointing
     // directions. As we only use the angle to determine the maximum PSF size,
     // this should be sufficient.
-    double theta     = eta;
+    double theta     = pnt.dir().dist(obsDir);
     double phi       = 0.0; //TODO: Implement IRF Phi dependence
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
-    // Get maximum source model radius [radians]
-    double src_max = model->theta_max();
+    // Get the ellipse boundary (radians). Note that these are NOT the
+    // parameters of the ellipse but of a boundary ellipse that is used
+    // for computing the relevant omega angle intervals for a given angle
+    // rho. The boundary ellipse takes care of the possibility that the
+    // semiminor axis is larger than the semimajor axis
+    double semimajor;    // Will be the larger axis
+    double semiminor;    // Will be the smaller axis
+    double posangle;     // Will be the corrected position angle
+    double aspect_ratio; // Ratio between smaller/larger axis of model
+    if (model->semimajor() >= model->semiminor()) {
+        aspect_ratio = (model->semimajor() > 0.0) ?
+                        model->semiminor() / model->semimajor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad;
+    }
+    else {
+        aspect_ratio = (model->semiminor() > 0.0) ?
+                        model->semimajor() / model->semiminor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad + gammalib::pihalf;
+    }
+    semimajor = model->theta_max();
+    semiminor = semimajor * aspect_ratio;
 
     // Set zenith angle integration range for elliptical model
-    double rho_min = (zeta > delta_max) ? zeta - delta_max : 0.0;
-    double rho_max = zeta + delta_max;
-    if (rho_max > src_max) {
-        rho_max = src_max;
+    double rho_min = (rho_obs > delta_max) ? rho_obs - delta_max : 0.0;
+    double rho_max = rho_obs + delta_max;
+    if (rho_max > semimajor) {
+        rho_max = semimajor;
     }
 
     // Initialise IRF value
@@ -1782,16 +1619,19 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
         // Setup integration kernel
         cta_irf_elliptical_kern_rho integrand(*this,
                                               *model,
+                                              semimajor,
+                                              semiminor,
+                                              posangle,
                                               zenith,
                                               azimuth,
                                               srcEng,
                                               srcTime,
                                               srcLogEng,
                                               obsEng,
-                                              zeta,
-                                              lambda,
-                                              obsOmega,
-                                              omega0,
+                                              rho_obs,
+                                              posangle_obs,
+                                              rho_pnt,
+                                              omega_pnt,
                                               delta_max,
                                               iter_phi);
 
@@ -1804,23 +1644,10 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
         bounds.push_back(rho_min);
         bounds.push_back(rho_max);
 
-        // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
-        double transition_point = delta_max - zeta;
-        if (transition_point > rho_min && transition_point < rho_max) {
-            bounds.push_back(transition_point);
-        }
-
-        // If we have a shell model then add an integration boundary for the
-        // shell radius as a function discontinuity will occur at this
-        // location
-        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
-        if (shell != NULL) {
-            double shell_radius = shell->radius();
-            if (shell_radius > rho_min && shell_radius < rho_max) {
-                bounds.push_back(shell_radius);
-            }
+        // If the integration range includes the semiminor boundary, then
+        // add an integration boundary at that location
+        if (semiminor > rho_min && semiminor < rho_max) {
+            bounds.push_back(semiminor);
         }
 
         // Integrate kernel
@@ -1833,8 +1660,7 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
             std::cout << " NaN/Inf encountered";
             std::cout << " (irf=" << irf;
             std::cout << ", rho_min=" << rho_min;
-            std::cout << ", rho_max=" << rho_max;
-            std::cout << ", omega0=" << omega0 << ")";
+            std::cout << ", rho_max=" << rho_max << ")";
             std::cout << std::endl;
         }
         #endif
@@ -2188,9 +2014,17 @@ double GCTAResponseIrf::npred_radial(const GSource& source,
         bounds.push_back(rho_max);
 
         // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
+        // containment of model within ROI and partial containment, then
+        // add a boundary at this location
         double transition_point = roi_psf_radius - roi_model_distance;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If the integration range includes a transition between full
+        // containment of ROI within model and partial containment, then
+        // add a boundary at this location
+        transition_point = roi_psf_radius + roi_model_distance;
         if (transition_point > rho_min && transition_point < rho_max) {
             bounds.push_back(transition_point);
         }
@@ -2200,7 +2034,7 @@ double GCTAResponseIrf::npred_radial(const GSource& source,
         // location
         const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
         if (shell != NULL) {
-            double shell_radius = shell->radius();
+            double shell_radius = shell->radius() * gammalib::deg2rad;
             if (shell_radius > rho_min && shell_radius < rho_max) {
                 bounds.push_back(shell_radius);
             }
@@ -2327,23 +2161,44 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
     // to make sure we encompass the entire PSF.
     double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
-    // Extract ROI radius (radians)
-    double roi_radius = roi.radius() * gammalib::deg2rad;
-
-    // Compute distance between ROI and model centre (radians)
-    double roi_model_distance = roi.centre().dir().dist(centre);
-
-    // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+    // Extract ROI radius plus maximum PSF radius (radians). Any photon
     // coming from beyond this radius will not make it in the dataspace and
     // thus can be neglected.
-    double roi_psf_radius = roi_radius + psf_max_radius;
+    double radius_roi = roi.radius() * gammalib::deg2rad + psf_max_radius;
+
+    // Compute distance between ROI and model centre (radians)
+    double rho_roi = roi.centre().dir().dist(centre);
+
+    // Get the ellipse boundary (radians). Note that these are NOT the
+    // parameters of the ellipse but of a boundary ellipse that is used
+    // for computing the relevant omega angle intervals for a given angle
+    // rho. The boundary ellipse takes care of the possibility that the
+    // semiminor axis is larger than the semimajor axis
+    double semimajor;    // Will be the larger axis
+    double semiminor;    // Will be the smaller axis
+    double posangle;     // Will be the corrected position angle
+    double aspect_ratio; // Ratio between smaller/larger axis of model
+    if (model->semimajor() >= model->semiminor()) {
+        aspect_ratio = (model->semimajor() > 0.0) ?
+                        model->semiminor() / model->semimajor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad;
+    }
+    else {
+        aspect_ratio = (model->semiminor() > 0.0) ?
+                        model->semimajor() / model->semiminor() : 0.0;
+        posangle     = model->posangle() * gammalib::deg2rad + gammalib::pihalf;
+    }
+    semimajor = model->theta_max();
+    semiminor = semimajor * aspect_ratio;
 
     // Set offset angle integration range. We take here the ROI+PSF into
     // account to make no integrations beyond the point where the
     // contribution drops to zero.
-    double rho_min = (roi_model_distance > roi_psf_radius)
-                     ? roi_model_distance - roi_psf_radius: 0.0;
-    double rho_max = model->theta_max();
+    double rho_min = (rho_roi > radius_roi) ? rho_roi - radius_roi: 0.0;
+    double rho_max = rho_roi + radius_roi;
+    if (rho_max > semimajor) {
+        rho_max = semimajor;
+    }
 
     // Perform offset angle integration only if interval is valid
     if (rho_max > rho_min) {
@@ -2358,18 +2213,21 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
 
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double omega0 = centre.posang(roi.centre().dir());
+        double posangle_roi = centre.posang(roi.centre().dir());
 
         // Setup integration kernel
         cta_npred_elliptical_kern_rho integrand(*this,
                                                 *model,
-                                                source.energy(),
-                                                source.time(),
+                                                semimajor,
+                                                semiminor,
+                                                posangle,
+                                                srcEng,
+                                                srcTime,
                                                 cta,
                                                 rot,
-                                                roi_model_distance,
-                                                roi_psf_radius,
-                                                omega0,
+                                                rho_roi,
+                                                posangle_roi,
+                                                radius_roi,
                                                 iter_phi);
 
         // Integrate over model's zenith angle
@@ -2381,23 +2239,10 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
         bounds.push_back(rho_min);
         bounds.push_back(rho_max);
 
-        // If the integration range includes a transition between full
-        // containment and partial containment, then add a boundary at
-        // this location
-        double transition_point = roi_psf_radius - roi_model_distance;
-        if (transition_point > rho_min && transition_point < rho_max) {
-            bounds.push_back(transition_point);
-        }
-
-        // If we have a shell model then add an integration boundary for the
-        // shell radius as a function discontinuity will occur at this
-        // location
-        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
-        if (shell != NULL) {
-            double shell_radius = shell->radius();
-            if (shell_radius > rho_min && shell_radius < rho_max) {
-                bounds.push_back(shell_radius);
-            }
+        // If the integration range includes the semiminor boundary, then
+        // add an integration boundary at that location
+        if (semiminor > rho_min && semiminor < rho_max) {
+            bounds.push_back(semiminor);
         }
 
         // Integrate kernel
