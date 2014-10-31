@@ -1245,6 +1245,16 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
         bounds.push_back(rho_min);
         bounds.push_back(rho_max);
 
+        // Kluge: add this transition point as this allows to fit the test
+        // case without any stalls. Not clear why this is the case, maybe
+        // simply because the rho integral gets cut down into one more
+        // sub-interval which may increase precision and smoothed the
+        // likelihood contour
+        double transition_point = delta_max - rho_obs;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
         // If the integration range includes the semiminor boundary, then
         // add an integration boundary at that location
         if (semiminor > rho_min && semiminor < rho_max) {
