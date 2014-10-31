@@ -42,8 +42,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_SMOOTH_PSF    //!< Guarantee no singularities
-#define G_SQRT_BINNING  //!< Use sqrt delta spacing (samples better the peak)
+#define G_SMOOTH_PSF                        //!< Guarantee no singularities
+#define G_QUADRATIC_BINNING                //!< Use quadratic delta spacing
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -149,7 +149,7 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
     // Set delta node array
     m_deltas.clear();
     for (int i = 0; i < ndbins; ++i) {
-        #if defined(G_SQRT_BINNING)
+        #if defined(G_QUADRATIC_BINNING)
         double binsize = std::sqrt(dmax) / double(ndbins);
         double delta   = binsize * (double(i) + 0.5); // avoid central singularity
         delta         *= delta;
@@ -505,6 +505,9 @@ void GCTAMeanPsf::read(const GFits& fits)
     // Read delta nodes
     m_deltas.read(hdu_deltas);
 
+    // Set delta node array for computation
+    set_delta_axis();
+
     // Set energy node array
     set_eng_axis();
 
@@ -669,6 +672,8 @@ void GCTAMeanPsf::init_members(void)
     m_ebounds.clear();
     m_elogmeans.clear();
     m_deltas.clear();
+    m_deltas_cache.clear();
+    m_quadratic_binning = false;
 
     // Initialise cache
     m_inx1 = 0;
@@ -693,11 +698,13 @@ void GCTAMeanPsf::init_members(void)
 void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
 {
     // Copy members
-    m_filename  = cube.m_filename;
-    m_cube      = cube.m_cube;
-    m_ebounds   = cube.m_ebounds;
-    m_elogmeans = cube.m_elogmeans;
-    m_deltas    = cube.m_deltas;
+    m_filename          = cube.m_filename;
+    m_cube              = cube.m_cube;
+    m_ebounds           = cube.m_ebounds;
+    m_elogmeans         = cube.m_elogmeans;
+    m_deltas            = cube.m_deltas;
+    m_deltas_cache      = cube.m_deltas_cache;
+    m_quadratic_binning = cube.m_quadratic_binning;
 
     // Copy cache
     m_inx1 = cube.m_inx1;
@@ -749,28 +756,87 @@ void GCTAMeanPsf::clear_cube(void)
  * @brief Update PSF parameter cache
  *
  * @param[in] delta Angular separation between true and measured photon
- *            directions (rad).
+ *            directions (radians).
  * @param[in] logE Log10 true photon energy (TeV). 
  *
  * This method updates the PSF parameter cache.
  ***************************************************************************/
 void GCTAMeanPsf::update(const double& delta, const double& logE) const
 {
-    // Set node array interpolation values
-    m_deltas.set_value(delta*gammalib::rad2deg);
+    // Set node array for delta interpolation
+    if (m_quadratic_binning) {
+        m_deltas_cache.set_value(std::sqrt(delta));
+    }
+    else {
+        m_deltas_cache.set_value(delta);
+    }
+
+    // Set node array for energy interpolation
     m_elogmeans.set_value(logE);
    
     // Set indices for bi-linear interpolation
-    m_inx1 = offset(m_deltas.inx_left(),  m_elogmeans.inx_left());
-    m_inx2 = offset(m_deltas.inx_left(),  m_elogmeans.inx_right());
-    m_inx3 = offset(m_deltas.inx_right(), m_elogmeans.inx_left());
-    m_inx4 = offset(m_deltas.inx_right(), m_elogmeans.inx_right());
+    m_inx1 = offset(m_deltas_cache.inx_left(),  m_elogmeans.inx_left());
+    m_inx2 = offset(m_deltas_cache.inx_left(),  m_elogmeans.inx_right());
+    m_inx3 = offset(m_deltas_cache.inx_right(), m_elogmeans.inx_left());
+    m_inx4 = offset(m_deltas_cache.inx_right(), m_elogmeans.inx_right());
 
     // Set weighting factors for bi-linear interpolation
-    m_wgt1 = m_deltas.wgt_left()  * m_elogmeans.wgt_left();
-    m_wgt2 = m_deltas.wgt_left()  * m_elogmeans.wgt_right();
-    m_wgt3 = m_deltas.wgt_right() * m_elogmeans.wgt_left();
-    m_wgt4 = m_deltas.wgt_right() * m_elogmeans.wgt_right();
+    m_wgt1 = m_deltas_cache.wgt_left()  * m_elogmeans.wgt_left();
+    m_wgt2 = m_deltas_cache.wgt_left()  * m_elogmeans.wgt_right();
+    m_wgt3 = m_deltas_cache.wgt_right() * m_elogmeans.wgt_left();
+    m_wgt4 = m_deltas_cache.wgt_right() * m_elogmeans.wgt_right();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set nodes for delta axis in radians
+ *
+ * Set the delta axis nodes in radians. If a quadratic binning is detected,
+ * the axis is set to sqrt(delta) so that a linear interpolation scheme
+ * can be used which is much faster than a quadratic scheme.
+ *
+ * @todo Check that none of the axis boundaries is non-positive.
+ ***************************************************************************/
+void GCTAMeanPsf::set_delta_axis(void)
+{
+    // Initialise computation members
+    m_deltas_cache.clear();
+    m_quadratic_binning = false;
+
+    // Set up a linear array that represents the square root of the delta
+    // values. If this array corresponds within some numerical precision
+    // to the actual delta values, will will use these values for the
+    // interpolation (the m_quadratic_binning member will be set to true).
+    // Otherwise, the original delta values will be kept and the
+    // m_quadratic_binning member will be set to false.
+    int ndbins = m_deltas.size();
+    if (ndbins > 1) {
+        m_quadratic_binning  = true;
+        double binsize = (std::sqrt(m_deltas[ndbins-1] * gammalib::deg2rad) -
+                          std::sqrt(m_deltas[0] * gammalib::deg2rad)) /
+                          double(ndbins-1);
+        for (int i = 0; i < ndbins; ++i) {
+            double delta = binsize * (double(i) + 0.5);
+            double diff  = std::abs(delta*delta-m_deltas[i] * gammalib::deg2rad);
+            if (diff > 1.0e-6) {
+                m_quadratic_binning = false;
+                break;
+            }
+            m_deltas_cache.append(delta);
+        }
+    }
+
+    // If we do not have square root binning then use the original values
+    // but convert them to radians
+    if (!m_quadratic_binning) {
+        m_deltas_cache.clear();
+        for (int i = 0; i < m_deltas.size(); ++i) {
+            m_deltas_cache.append(m_deltas[i] * gammalib::deg2rad);
+        }
+    }
 
     // Return
     return;

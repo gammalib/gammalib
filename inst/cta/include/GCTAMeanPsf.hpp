@@ -100,15 +100,18 @@ protected:
     void free_members(void);
     void clear_cube(void);
     void update(const double& delta, const double& logE) const;
+    void set_delta_axis(void);
     void set_eng_axis(void);
     void set_to_smooth(void);
 
     // Data
-    mutable std::string m_filename;   //!< Filename
-    GSkymap             m_cube;       //!< PSF cube
-    GEbounds            m_ebounds;    //!< Energy bounds for the PSF cube
-    GNodeArray          m_elogmeans;  //!< Mean log10TeV energy for the PSF cube
-    GNodeArray          m_deltas;     //!< Delta bins (deg) for the PSF cube
+    mutable std::string m_filename;          //!< Filename
+    GSkymap             m_cube;              //!< PSF cube
+    GEbounds            m_ebounds;           //!< Energy bounds for the PSF cube
+    GNodeArray          m_elogmeans;         //!< Mean log10TeV energy for the PSF cube
+    GNodeArray          m_deltas;            //!< Delta bins (deg) for the PSF cube
+    GNodeArray          m_deltas_cache;      //!< Internal delta bins (rad)
+    bool                m_quadratic_binning; //!< Internal binning is linear
 
 private:
     // Response table computation cache for 2D access
