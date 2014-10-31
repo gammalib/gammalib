@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GXmlText.cpp - XML text node class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,7 +82,8 @@ GXmlText::GXmlText(const GXmlText& node) : GXmlNode(node)
  *
  * @param[in] text Text string.
  *
- * Construct object by attributing a text string.
+ * Construct object by attributing a text string. Predefined entities
+ * (e.g. &quot;) are automatically converted into normal characters.
  ***************************************************************************/
 GXmlText::GXmlText(const std::string& text) : GXmlNode()
 {
@@ -90,7 +91,7 @@ GXmlText::GXmlText(const std::string& text) : GXmlNode()
     init_members();
 
     // Set text
-    m_text = text;
+    m_text = gammalib::xml2str(text);
 
     // Return
     return;
@@ -190,12 +191,13 @@ GXmlText* GXmlText::clone(void) const
  * @param[in] url Unified Resource Locator.
  * @param[in] indent Text indentation (parameter ignored).
  *
- * Writes the text into the URL.
+ * Writes the text into the URL. Special characters are automatically
+ * transformed into predefined entities (e.g. &quot;).
  ***************************************************************************/
 void GXmlText::write(GUrl& url, const int& indent) const
 {
     // Write text
-    url.printf("%s", m_text.c_str());
+    url.printf("%s", gammalib::str2xml(m_text).c_str());
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GXmlAttribute.cpp - XML attribute class implementation          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GXmlAttribute.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -84,7 +85,9 @@ GXmlAttribute::GXmlAttribute(const GXmlAttribute& attr)
  * @param[in] name Attribute name.
  * @param[in] value Attribute value.
  *
- * Construct attribute form a p@ name and a @p value.
+ * Construct attribute form a p@ name and a @p value. Predefined entities
+ * (e.g. &quot;) in attribute values are automatically converted into normal
+ * characters.
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(const std::string& name, const std::string& value)
 {
@@ -93,7 +96,7 @@ GXmlAttribute::GXmlAttribute(const std::string& name, const std::string& value)
 
     // Set attribute
     this->name(name);
-    this->value(value);
+    this->value(gammalib::xml2str(value));
 
     // Return
     return;
@@ -187,12 +190,19 @@ GXmlAttribute* GXmlAttribute::clone(void) const
  *
  * @param[in] url Unified Resource Locator.
  *
- * Writes the element attribute into the @p url.
+ * Writes the element attribute into the @p url. Special characters are
+ * automatically transformed into predefined entities (e.g. &quot;).
  ***************************************************************************/
 void GXmlAttribute::write(GUrl& url) const
 {
+    // Get value without quotation marks
+    std::string value = m_value.substr(1, m_value.length()-2);
+
+    // Convert value to XML format
+    value = "\""+gammalib::str2xml(value)+"\"";
+
     // Write attribute into URL
-    url.printf(" %s=%s", m_name.c_str(), m_value.c_str());
+    url.printf(" %s=%s", m_name.c_str(), value.c_str());
 
     // Return
     return;

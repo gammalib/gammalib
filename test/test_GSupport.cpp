@@ -49,6 +49,7 @@ void TestGSupport::set(void){
     name("GSupport");
 
     // Append tests
+    append(static_cast<pfunction>(&TestGSupport::test_tools), "Test GTools");
     append(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
     append(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
     append(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
@@ -72,6 +73,30 @@ TestGSupport* TestGSupport::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Test GTools
+ *
+ * Test the GTools functions
+ ***************************************************************************/
+void TestGSupport::test_tools(void)
+{
+    // Test XML to string conversion
+    std::string s_in  = "Hallo World, you \"are\" my 'nice' <planet> & place";
+    std::string s_ref = "Hallo World, you &quot;are&quot; my &apos;nice&apos;"
+                        " &lt;planet&gt; &amp; place";
+    std::string s_out;
+    s_out = gammalib::str2xml(s_in);
+    test_assert(s_out == s_ref, "gammalib::str2xml()",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
+    s_out = gammalib::xml2str(s_out);
+    test_assert(s_out == s_in, "gammalib::str2xml()",
+                "Unexpected string \""+s_out+"\" (expected \""+s_in+"\")");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test expand_env function
  *
  * Test the environment variable expansion function.
@@ -88,7 +113,8 @@ void TestGSupport::test_expand_env(void)
     s_in  = "This string has no environment variable.";
     s_ref = s_in;
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"no environment variable","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"no environment variable",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Get home environment variable
     std::string home(std::getenv("HOME"));
@@ -97,79 +123,92 @@ void TestGSupport::test_expand_env(void)
     s_in  = "My $ENV{HOME} is my castle.";
     s_ref = "My "+home+" is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"$ENV{HOME} environment variable within string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"$ENV{HOME} environment variable within string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // ${HOME} environment variable within string
     s_in  = "My ${HOME} is my castle.";
     s_ref = "My "+home+" is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"${HOME} environment variable within string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"${HOME} environment variable within string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // $HOME/path environment variable within string
     s_in  = "My $HOME/path is my castle.";
     s_ref = "My "+home+"/path is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"$HOME/path environment variable within string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"$HOME/path environment variable within string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // $HOME environment variable at end of string
     s_in  = "My $HOME";
     s_ref = "My "+home;
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"$HOME environment variable at end of string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"$HOME environment variable at end of string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Environment variable within single quotes
     s_in  = "My '$(HOME)' is my castle.";
     s_ref = s_in;
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"Environment variable within single quotes","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"Environment variable within single quotes",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Environment variable within double quotes
     s_in  = "My \"$(HOME)\" is my castle.";
     s_ref = "My \""+home+"\" is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"Environment variable within double quotes","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"Environment variable within double quotes",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Non existing environment variable within string
     s_in  = "My $(HOMEIXYZ) is my castle.";
     s_ref = "My  is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"Non existing environment variable within string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"Non existing environment variable within string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Empty environment variable within string
     s_in  = "My $() is my castle.";
     s_ref = "My  is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"Empty environment variable within string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"Empty environment variable within string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Two successive environment variables within string
     s_in  = "My $(HOME)$ENV{HOME} is my castle.";
     s_ref = "My "+home+home+" is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"Two successive environment variables within string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"Two successive environment variables within string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // $(HOME) at beginning of string
     s_in  = "$(HOME) is my castle.";
     s_ref = home+" is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"$(HOME) at beginning of string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"$(HOME) at beginning of string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // $ENV(HOME) at beginning of string
     s_in  = "$ENV(HOME) is my castle.";
     s_ref = home+" is my castle.";
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"$ENV(HOME) at beginning of string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"$ENV(HOME) at beginning of string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // $(HOME) at end of string
     s_in  = "My castle is $(HOME)";
     s_ref = "My castle is "+home;
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"$(HOME) at end of string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"$(HOME) at end of string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // $ENV{HOME}${HOME}$ENV(HOME)$(HOME) only string
     s_in  = "$ENV{HOME}${HOME}$ENV(HOME)$(HOME)";
     s_ref = home+home+home+home;
     s_out = gammalib::expand_env(s_in);
-    test_assert(s_out == s_ref,"$ENV{HOME}${HOME}$ENV(HOME)$(HOME) only string","Unexpected string '"+s_out+"' (expected '"+s_ref+"')");
+    test_assert(s_out == s_ref,"$ENV{HOME}${HOME}$ENV(HOME)$(HOME) only string",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Debugging
     //std::cout << std::endl;

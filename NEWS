@@ -163,6 +163,9 @@ array values.
 Methods have been added to the GCsv class that allow the creation and the
 saving of CSV tables.
 
+The str2xml() and xml2str() functions have been added to GTools to handle
+predefined entities in XML files.
+
 
 14. XML module
 --------------
@@ -173,6 +176,12 @@ access an element. The squared brackets allow specifying an element index
 in case that multiple elements with the same name exist. If squared brackets
 are omitted, an index of 0 is assumed. If the indicated element does not
 exist, the method returns a pointer to NULL.
+
+The XML module now handles predefined entities. Special characters, such as
+" will now be transformed into their predefined entities, e.g. &quot;, when
+writing the XML file. Upon reading, predefined entities will be converted
+into special chacaters, so that the user always deals with a human readable
+string.
 
 
 15. VO module

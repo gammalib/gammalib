@@ -45,29 +45,6 @@ namespace gammalib {
     std::string              expand_env(const std::string& arg);
     std::string              filepath(const std::string& pathname,
                                       const std::string& filename);
-/*
-    std::string              str(const unsigned short int& value);
-    std::string              str(const unsigned int& value);
-    std::string              str(const unsigned long int& value);
-    std::string              str(const unsigned long long int& value);
-    std::string              str(const short int& value);
-    std::string              str(const int& value);
-    std::string              str(const long int& value);
-    std::string              str(const long long int& value);
-    std::string              str(const float& value);
-    std::string              str(const double& value);
-    char*                    tochar(const std::string& arg);
-    short                    toshort(const std::string& arg);
-    unsigned short           toushort(const std::string& arg);
-    int                      toint(const std::string& arg);
-    unsigned int             touint(const std::string& arg);
-    long                     tolong(const std::string& arg);
-    unsigned long            toulong(const std::string& arg);
-    long long                tolonglong(const std::string& arg);
-    unsigned long long       toulonglong(const std::string& arg);
-    float                    tofloat(const std::string& arg);
-    double                   todouble(const std::string& arg);
-*/
     std::string              toupper(const std::string& s);
     std::string              tolower(const std::string& s);
     std::vector<std::string> split(const std::string& s, const std::string& sep);
@@ -84,8 +61,17 @@ namespace gammalib {
                                               const double& emax,
                                               const double& epivot,
                                               const double& gamma);
+    GEnergy                  elogmean(const GEnergy& a, const GEnergy& b);
     bool                     file_exists(const std::string& filename);
     bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);
     bool                     is_notanumber(const double& x);
+    bool                     contains(const std::string& str,
+                                      const std::string& substring);
+    void                     warning(const std::string& origin,
+                                     const std::string& message);
+    GXmlElement*             parameter(GXmlElement& xml,
+                                       const std::string& name);
+    std::string              xml2str(const std::string& arg);
+    std::string              str2xml(const std::string& arg);
 }

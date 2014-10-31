@@ -105,7 +105,10 @@ namespace gammalib {
                                      const std::string& message);
     GXmlElement*             parameter(GXmlElement& xml,
                                        const std::string& name);
+    std::string              xml2str(const std::string& arg);
+    std::string              str2xml(const std::string& arg);
 }
+
 
 /***********************************************************************//**
  * @brief Signal if argument is infinite

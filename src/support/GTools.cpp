@@ -39,8 +39,12 @@
 #include <sstream>
 #include <algorithm>
 #include "GTools.hpp"
+#include "GException.hpp"
 
 /* __ Compile options ____________________________________________________ */
+
+/* __ Function name definitions __________________________________________ */
+#define G_XML2STRING                     "gammalib::xml2string(std::string&)"
 
 /* __ Coding definitions _________________________________________________ */
 #define G_PARFORMAT_LENGTH 29
@@ -1016,4 +1020,185 @@ GXmlElement* gammalib::parameter(GXmlElement& xml, const std::string& name)
 
     // Return
     return par;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert XML character references in string to characters
+ *
+ * @param[in] arg String containing XML character references.
+ * @return String with character reference replaced by respective characters.
+ *
+ * Converts all character references found in a string in their respective
+ * characters. For more information about XML character references read
+ * http://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
+ ***************************************************************************/
+std::string gammalib::xml2str(const std::string& arg)
+{
+    // Initialise string
+    std::string result;
+
+    // Iitialise position, lenghts and flags
+    size_t length = arg.length();
+    size_t pos    = 0;
+    size_t start  = 0;
+    size_t stop   = 0;
+    size_t len    = 0;      // Length of string preceeding char. reference
+    bool   found  = false;
+
+    // Loop over string
+    while (pos < length) {
+
+        // If we have not yet found a character reference then search for
+        // the next one. If we do not find one we break here.
+        if (!found) {
+            start = arg.find("&", pos);
+            if (start != std::string::npos) {
+                len   = start - pos;
+                pos   = start;
+                found = true;
+            }
+            else {
+                break;
+            }
+        }
+
+        // ... otherwise search for end of the actual character reference.
+        // Throw an exception if no end is found.
+        else {
+            stop = arg.find(";", pos);
+            if (stop != std::string::npos) {
+                
+                // First attach leading string to the result
+                if (len > 0) {
+                    result += arg.substr(start-len, len);
+                }
+
+                // Next extract character reference
+                std::string cref = arg.substr(start+1, stop-start-1);
+                len              = cref.length();
+
+                // Check for a numerical character reference
+                //TODO: Check that there are only valid characters in
+                //      numerical field
+                if (len >= 2 && cref[0] == '#') {
+                    int number = -1;
+                    if (cref[1] == 'x') {
+                        number = (int)std::strtol(cref.substr(2,len-2).c_str(), NULL, 16);
+                    }
+                    else {
+                        number = toint(cref.substr(1,len-1));
+                    }
+                    if (number != -1) {
+                        result.push_back((char)number);
+                    }
+                    else {
+                        std::string msg = "Could not extract number from "
+                                          "numerical character reference &"+
+                                          cref+";";
+                        throw GException::invalid_argument(G_XML2STRING, msg);
+                    }
+                }
+
+                // ... otherwise check for a character entity reference
+                // and push back the corresponding character to the result
+                // string
+                else {
+                    if (cref == "quot") {
+                        result.push_back((char)34);
+                    }
+                    else if (cref == "amp") {
+                        result.push_back((char)38);
+                    }
+                    else if (cref == "apos") {
+                        result.push_back((char)39);
+                    }
+                    else if (cref == "lt") {
+                        result.push_back((char)60);
+                    }
+                    else if (cref == "gt") {
+                        result.push_back((char)62);
+                    }
+                    else {
+                        std::string msg = "Unknown character entity reference "
+                                          "&"+cref+"; encountered in XML string \""+
+                                          arg+"\".";
+                        throw GException::invalid_argument(G_XML2STRING, msg);
+                    }
+                }
+
+                // Signal that we're done and that we search for the
+                // next character reference
+                found = false;
+                pos   = stop + 1;
+
+            } // endif: end of character reference found
+
+            // ... otherwise throw an exception
+            else {
+                std::string msg = "Missing ; character at end of character "
+                                  "reference in XML string \""+arg+"\".";
+                throw GException::invalid_argument(G_XML2STRING, msg);
+            }
+
+        } // endelse: search for end of character reference
+
+    } // endwhile
+
+    // Append any pending string to the result
+    if (pos < length) {
+        len     = length - pos;
+        result += arg.substr(pos, len);
+    }
+    
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert special characters in string to XML character references
+ *
+ * @param[in] arg String.
+ * @return String with special characters replaced by character references.
+ *
+ * Converts all special characters found in a string into character
+ * references. For more information about XML character references read
+ * http://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
+ ***************************************************************************/
+std::string gammalib::str2xml(const std::string& arg)
+{
+    // Initialise string
+    std::string result;
+
+    // Loop over string
+    for (int i = 0; i < arg.length(); ++i) {
+
+        // Initialize string to add
+        std::string character = arg.substr(i, 1);
+
+        // Replace special characters
+        if (character == "\"") {
+            character = "&quot;";
+        }
+        else if (character == "&") {
+            character = "&amp;";
+        }
+        else if (character == "'") {
+            character = "&apos;";
+        }
+        else if (character == "<") {
+            character = "&lt;";
+        }
+        else if (character == ">") {
+            character = "&gt;";
+        }
+
+        // Append character
+        result += character;
+
+    }
+
+    // Return result
+    return result;
 }

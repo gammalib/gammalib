@@ -16,6 +16,7 @@
         Add utc() methods to GTime class
         Add hierachical element access methods to GXml and GXmlNode
         Add table creation and saving methods to GCsv class
+        Add predefined entity support to XML module
         Read/write altitude and azimuth attributes of CTA data
         Refactor CTA response class, add GCTAResponseCube class
         Improve CTA response computation for extended models
