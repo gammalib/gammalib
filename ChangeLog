@@ -1,4 +1,4 @@
-2014-10-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-10-31  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -21,6 +21,7 @@
         Improve CTA response computation for extended models
         Implement CTA stacked analysis
         Optimize CTA binned and stacked analysis
+        LM optimizer now allows logL decreases up to 1.0
         Load events only when needed into GCTAObservation
         Implement full automatic typecasting in Python module
         Fill DETX and DETY values in GCTAResponseIrf::mc 

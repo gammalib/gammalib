@@ -577,6 +577,8 @@ std::string GOptimizerLM::print(const GChatter& chatter) const
         result.append(gammalib::str(m_value, 3));
         result.append("\n"+gammalib::parformat("Absolute precision"));
         result.append(gammalib::str(m_eps));
+        result.append("\n"+gammalib::parformat("Acceptable value decrease"));
+        result.append(gammalib::str(std::abs(m_accept_dec)));
 
         // Append status
         result.append("\n"+gammalib::parformat("Optimization status"));
@@ -636,6 +638,7 @@ void GOptimizerLM::init_members(void)
     m_lambda_inc   = 10.0;
     m_lambda_dec   = 0.1;
     m_eps          = 5.0e-3;  //!< Changed on 30/10/2014 from 1.0e-6
+    m_accept_dec   = 1.0;     //!< Allow to decrease by 1.0
     m_max_iter     = 100;     //!< Changed on 30/10/2014 from 1000
     m_max_stall    = 10;
     m_max_hit      = 3;       //!< Maximum successive boundary hits before freeze
@@ -675,6 +678,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_lambda_inc   = opt.m_lambda_inc;
     m_lambda_dec   = opt.m_lambda_dec;
     m_eps          = opt.m_eps;
+    m_accept_dec   = opt.m_accept_dec;
     m_max_iter     = opt.m_max_iter;
     m_max_stall    = opt.m_max_stall;
     m_step_adjust  = opt.m_step_adjust;
@@ -948,9 +952,10 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
             }
         }
 
-        // ... if function worsened slightly then accept new solution and
-        // increase lambda
-        else if (m_delta > -1.0e-6) {
+        // ... if function worsened by an amount smaller than m_accept_dec
+        // then accept new solution and increase lambda for the next
+        // iteration
+        else if (m_delta >= -std::abs(m_accept_dec)) {
             m_lambda *= m_lambda_inc;
         }
 

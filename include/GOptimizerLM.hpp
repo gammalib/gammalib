@@ -67,27 +67,29 @@ public:
     virtual std::string   classname(void) const;
     virtual void          optimize(GOptimizerFunction& fct, GOptimizerPars& pars);
     virtual void          errors(GOptimizerFunction& fct, GOptimizerPars& pars);
-    virtual double        value(void) const { return m_value; }   //!< @brief Return function value
-    virtual int           status(void) const { return m_status; } //!< @brief Return optimization status
-    virtual int           iter(void) const { return m_iter; }     //!< @brief Return number of iterations
+    virtual double        value(void) const;
+    virtual int           status(void) const;
+    virtual int           iter(void) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
     
     // Methods
-    void          max_iter(const int& n) { m_max_iter=n; }                //!< @brief Set maximum number of iterations
-    void          max_stalls(const int& n) { m_max_stall=n; }             //!< @brief Set maximum number of stalls
-    void          max_boundary_hits(const int& n) { m_max_stall=n; }      //!< @brief Set maximum number of boundary hits
-    void          lambda_start(const double& val) { m_lambda_start=val; } //!< @brief Set lambda start value
-    void          lambda_inc(const double& val) { m_lambda_inc=val; }     //!< @brief Set lambda increment
-    void          lambda_dec(const double& val) { m_lambda_dec=val; }     //!< @brief Set lambda decrement
-    void          eps(const double& eps) { m_eps=eps; }                   //!< @brief Set convergence precisions
-    int           max_iter(void) const { return m_max_iter; }             //!< @brief Return maximum number of iterations
-    int           max_stalls(void) const { return m_max_stall; }          //!< @brief Return maximum number of stalls 
-    int           max_boundary_hits(void) const { return m_max_hit; }     //!< @brief Return maximum number of boundary hits
-    const double& lambda_start(void) const { return m_lambda_start; }     //!< @brief Return lambda start value
-    const double& lambda_inc(void) const { return m_lambda_inc; }         //!< @brief Return lambda increment
-    const double& lambda_dec(void) const { return m_lambda_dec; }         //!< @brief Return lambda decrement
-    const double& lambda(void) const { return m_lambda; }                 //!< @brief Return lambda value
-    const double& eps(void) const { return m_eps; }                       //!< @brief Return convergence precision
+    void          max_iter(const int& max_iter);
+    void          max_stalls(const int& max_stalls);
+    void          max_boundary_hits(const int& max_hit);
+    void          lambda_start(const double& value);
+    void          lambda_inc(const double& value);
+    void          lambda_dec(const double& value);
+    void          eps(const double& eps);
+    void          accept_dec(const double& value);
+    int           max_iter(void) const;
+    int           max_stalls(void) const;
+    int           max_boundary_hits(void) const;
+    const double& lambda_start(void) const;
+    const double& lambda_inc(void) const;
+    const double& lambda_dec(void) const;
+    const double& lambda(void) const;
+    const double& eps(void) const;
+    const double& accept_dec(void) const;
 
 protected:
     // Protected methods
@@ -104,6 +106,7 @@ protected:
     double            m_lambda_inc;      //!< Lambda increase
     double            m_lambda_dec;      //!< Lambda decrease
     double            m_eps;             //!< Absolute precision
+    double            m_accept_dec;      //!< Acceptable function decrease
     int               m_max_iter;        //!< Maximum number of iterations
     int               m_max_stall;       //!< Maximum number of stalls
     int               m_max_hit;         //!< Maximum number of successive hits
@@ -132,6 +135,260 @@ inline
 std::string GOptimizerLM::classname(void) const
 {
     return ("GOptimizerLM");
+}
+
+
+/***********************************************************************//**
+ * @brief Return function value
+ *
+ * @return Function value.
+ ***************************************************************************/
+inline
+double GOptimizerLM::value(void) const
+{
+    return (m_value);
+}
+
+
+/***********************************************************************//**
+ * @brief Return optimizer status
+ *
+ * @return Optimizer status.
+ ***************************************************************************/
+inline
+int GOptimizerLM::status(void) const
+{
+    return (m_status);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of iterations
+ *
+ * @return Number of iterations.
+ ***************************************************************************/
+inline
+int GOptimizerLM::iter(void) const
+{
+    return (m_iter);
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum number of iterations
+ *
+ * @param[in] max_iter Maximum number of iterations.
+ ***************************************************************************/
+inline
+void GOptimizerLM::max_iter(const int& max_iter)
+{
+    m_max_iter = max_iter;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum number of allowed subsequent stalls
+ *
+ * @param[in] max_stalls Maximum number of allowed subsequent stalls.
+ ***************************************************************************/
+inline
+void GOptimizerLM::max_stalls(const int& max_stalls)
+{
+    m_max_stall = max_stalls;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum number of parameter boundary hits
+ *
+ * @param[in] max_hit Maximum number of parameter boundary hits.
+ ***************************************************************************/
+inline
+void GOptimizerLM::max_boundary_hits(const int& max_hit)
+{
+    m_max_hit = max_hit;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set lambda starting value
+ *
+ * @param[in] value Lambda starting value.
+ ***************************************************************************/
+inline
+void GOptimizerLM::lambda_start(const double& value)
+{
+    m_lambda_start = value;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set lambda increment value
+ *
+ * @param[in] value Lambda increment value.
+ ***************************************************************************/
+inline
+void GOptimizerLM::lambda_inc(const double& value)
+{
+    m_lambda_inc = value;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set lambda decrement value
+ *
+ * @param[in] value Lambda decrement value.
+ ***************************************************************************/
+inline
+void GOptimizerLM::lambda_dec(const double& value)
+{
+    m_lambda_dec = value;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set requested absolute convergence precision
+ *
+ * @param[in] eps Requested absolute convergence precision.
+ ***************************************************************************/
+inline
+void GOptimizerLM::eps(const double& eps)
+{
+    m_eps = eps;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set acceptable function decrease
+ *
+ * @param[in] value Acceptable function decrease.
+ *
+ * Sets the acceptable function decrease value for which the new solution
+ * will be kept and the iterations continue. This strategy provides better
+ * convergence in case that a function decrease is encountered.
+ ***************************************************************************/
+inline
+void GOptimizerLM::accept_dec(const double& value)
+{
+    m_accept_dec = value;
+    return;
+}
+
+
+
+
+/***********************************************************************//**
+ * @brief Return maximum number of iterations
+ *
+ * @return Maximum number of iterations.
+ ***************************************************************************/
+inline
+int GOptimizerLM::max_iter(void) const
+{
+    return (m_max_iter);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum number of allowed subsequent stalls
+ *
+ * @return Maximum number of allowed subsequent stalls.
+ ***************************************************************************/
+inline
+int GOptimizerLM::max_stalls(void) const
+{
+    return (m_max_stall);
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum number of parameter boundary hits
+ *
+ * @return Maximum number of parameter boundary hits.
+ ***************************************************************************/
+inline
+int GOptimizerLM::max_boundary_hits(void) const
+{
+    return (m_max_hit);
+}
+
+
+/***********************************************************************//**
+ * @brief Return lambda starting value
+ *
+ * @return Lambda starting value.
+ ***************************************************************************/
+inline
+const double& GOptimizerLM::lambda_start(void) const
+{
+    return (m_lambda_start);
+}
+
+
+/***********************************************************************//**
+ * @brief Return lambda increment value
+ *
+ * @return Lambda increment value.
+ ***************************************************************************/
+inline
+const double& GOptimizerLM::lambda_inc(void) const
+{
+    return (m_lambda_inc);
+}
+
+
+/***********************************************************************//**
+ * @brief Return lambda decrement value
+ *
+ * @return Lambda decrement value.
+ ***************************************************************************/
+inline
+const double& GOptimizerLM::lambda_dec(void) const
+{
+    return (m_lambda_dec);
+}
+
+
+/***********************************************************************//**
+ * @brief Return lambda value
+ *
+ * @return Lambda value.
+ ***************************************************************************/
+inline
+const double& GOptimizerLM::lambda(void) const
+{
+    return (m_lambda);
+}
+
+
+/***********************************************************************//**
+ * @brief Return requested absolute convergence precision
+ *
+ * @return Requested absolute convergence precision.
+ ***************************************************************************/
+inline
+const double& GOptimizerLM::eps(void) const
+{
+    return (m_eps);
+}
+
+
+/***********************************************************************//**
+ * @brief Return acceptable function decrease
+ *
+ * @return Acceptable function decrease.
+ ***************************************************************************/
+inline
+const double& GOptimizerLM::accept_dec(void) const
+{
+    return (m_accept_dec);
 }
 
 #endif /* GOPTIMIZERLM_HPP */

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-26 October 2014
+31 October 2014
 
 
 1. Introduction
@@ -137,6 +137,13 @@ The parameter error computation has been removed from the GOptimizerLM::optimize
 method and an explicit call to GOptimizerLM::errors() is now required for
 error computation. GOptimizer::errors() has been added as pure virtual
 method for all optimizer classes.
+
+A new parameter was introduce to specify the acceptable function decrease in
+an iteration. Acceptable means that the new parameters are kept for continuing
+the iterations. This behaviour existed already before, but a low threshold of
+1e-6 did not really activate it. Now the threshold was raised to 1.0 and this
+help ctlike to converge quicker. Methods accept_dec() have been implemented
+to get and set the acceptable threshold.
 
 
 12. Sky module
