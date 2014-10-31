@@ -110,7 +110,7 @@ private:
     void update(const double& arg1, const double& arg2) const;
     void update(const double& arg1, const double& arg2,
                 const double& arg3) const;
-
+protected:
     // Table information
     int                               m_naxes;       //!< Number of axes
     int                               m_npars;       //!< Number of parameters
