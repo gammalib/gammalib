@@ -110,6 +110,7 @@ protected:
     int               m_max_iter;        //!< Maximum number of iterations
     int               m_max_stall;       //!< Maximum number of stalls
     int               m_max_hit;         //!< Maximum number of successive hits
+    int               m_max_dec;         //!< Maximum number of function decrease
     bool              m_step_adjust;     //!< Adjust step size to boundaries
     std::vector<bool> m_hit_boundary;    //!< Bookkeeping array for boundary hits
     std::vector<int>  m_hit_minimum;     //!< Bookkeeping of successive minimum hits
@@ -121,6 +122,7 @@ protected:
     double            m_delta;           //!< Function improvement
     int               m_status;          //!< Fit status
     int               m_iter;            //!< Iteration
+    int               m_num_dec;         //!< Number of function decreases
     GLog*             m_logger;          //!< Pointer to optional logger
 
 };
