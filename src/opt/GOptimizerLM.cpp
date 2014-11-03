@@ -190,6 +190,9 @@ GOptimizerLM* GOptimizerLM::clone(void) const
  ***************************************************************************/
 void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 {
+    // Initialize optimizer parameters
+    m_num_dec = 0;
+
     // Get number of parameters. Continue only if there are free parameters
     m_npars = pars.size();
     m_nfree = pars.nfree();
@@ -247,7 +250,6 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
         m_value = fct.value();
 
         // Save initial statistics and lambda values
-        double value_old  = m_value;
         double lambda_old = m_lambda;
         int    lambda_inc = 0;
 
@@ -275,9 +277,6 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
             // Perform one iteration
             iteration(fct, pars);
-
-            // Compute function improvement (>0 means decrease)
-            //double delta = value_old - m_value;
 
             // Determine maximum (scaled) gradient
             double grad_max  = 0.0;
@@ -338,17 +337,12 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                 lambda_inc = 0;
             }
 
-            // If function increased while lambda did not increase then stop
-            // iterations
-            //if ((m_lambda <= lambda_old) && (delta < 0.0))
-            //    break;
-
             // Stop if convergence was reached. Before stopping, check
             // if some parameters were frozen, and if this was the case,
             // free them now and continue. We do this only once, i.e.
             // the next time a parameter is frozen and convergence is
             // reached we really stop.
-            if ((m_lambda <= lambda_old) && (m_delta < m_eps)) {
+            if ((m_lambda <= lambda_old) && (m_delta >= 0.0) && (m_delta < m_eps)) {
 
                 // Check for frozen parameters, and if some exist, free
                 // them and start over
@@ -379,7 +373,6 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                     // again (initialise optimizer)
                     if (nfrozen > 0) {
                         m_lambda   = m_lambda_start;
-                        value_old  = m_value;
                         lambda_old = m_lambda;
                         lambda_inc = 0;
                         continue;
@@ -404,9 +397,6 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             // lambda to detect turn arounds in the lambda tendency; however
             // we always keep the best function value)
             lambda_old = m_lambda;
-            if (m_delta > 0.0) {
-                value_old = m_value;
-            }
 
         } // endfor: iterations
         
@@ -638,10 +628,11 @@ void GOptimizerLM::init_members(void)
     m_lambda_inc   = 10.0;
     m_lambda_dec   = 0.1;
     m_eps          = 5.0e-3;  //!< Changed on 30/10/2014 from 1.0e-6
-    m_accept_dec   = 1.0;     //!< Allow to decrease by 1.0
+    m_accept_dec   = 2.0;     //!< Allow to decrease by 2.0
     m_max_iter     = 100;     //!< Changed on 30/10/2014 from 1000
     m_max_stall    = 10;
     m_max_hit      = 3;       //!< Maximum successive boundary hits before freeze
+    m_max_dec      = 3;       //!< Maximum number of function decreases
     m_step_adjust  = true;
 
     // Initialise bookkeeping arrays
@@ -652,11 +643,12 @@ void GOptimizerLM::init_members(void)
     m_par_remove.clear();
 
     // Initialise optimizer values
-    m_lambda = m_lambda_start;
-    m_value  = 0.0;
-    m_delta  = 0.0;
-    m_status = 0;
-    m_iter   = 0;
+    m_lambda  = m_lambda_start;
+    m_value   = 0.0;
+    m_delta   = 0.0;
+    m_status  = 0;
+    m_iter    = 0;
+    m_num_dec = 0;
 
     // Initialise pointer to logger
     m_logger = NULL;
@@ -681,6 +673,7 @@ void GOptimizerLM::copy_members(const GOptimizerLM& opt)
     m_accept_dec   = opt.m_accept_dec;
     m_max_iter     = opt.m_max_iter;
     m_max_stall    = opt.m_max_stall;
+    m_max_dec      = opt.m_max_dec;
     m_step_adjust  = opt.m_step_adjust;
     m_hit_boundary = opt.m_hit_boundary;
     m_hit_minimum  = opt.m_hit_minimum;
@@ -954,9 +947,12 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // ... if function worsened by an amount smaller than m_accept_dec
         // then accept new solution and increase lambda for the next
-        // iteration
-        else if (m_delta >= -std::abs(m_accept_dec)) {
+        // iteration. This kluge which may help to overcome some local
+        // minimum will only for m_max_dec times at maximum to avoid
+        // keeping oscillating in a loop.
+        else if ((m_num_dec < m_max_dec) && (m_delta >= -std::abs(m_accept_dec))) {
             m_lambda *= m_lambda_inc;
+            m_num_dec++;
         }
 
         // ... otherwise, if the statistics did not improve then use old
