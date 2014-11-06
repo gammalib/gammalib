@@ -120,6 +120,8 @@ public:
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
     void                dispose_events(void);
+    double            lo_user_thres(void) const;
+    double            hi_user_thres(void) const;
 
 protected:
     // Protected methods
@@ -142,6 +144,10 @@ protected:
     double        m_deadc;       //!< Deadtime correction (livetime/ontime)
     double        m_ra_obj;      //!< Right Ascension of object (degrees)
     double        m_dec_obj;     //!< Declination of object (degrees)
+
+    // User defined energy thresholds
+    double         m_lo_user_thres; //!< user defined lower energy threshold
+    double         m_hi_user_thres; //!< user defined upper energy boundary
 
     // Special protected member for GCTAModelCubeBackground friend
     std::string   m_bgdfile;     //!< Background filename
@@ -386,5 +392,31 @@ const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
 }
+
+
+/***********************************************************************//**
+ * @brief Return low energy threshold from IRF
+ *
+ * @return return low energy threshold
+ ***************************************************************************/
+inline
+double GCTAObservation::lo_user_thres(void) const
+{
+    return m_lo_user_thres;
+}
+
+/***********************************************************************//**
+ * @brief Return high energy threshold from IRF
+ *
+ * @return return low energy threshold
+ ***************************************************************************/
+inline
+double GCTAObservation::hi_user_thres(void) const
+{
+    return m_hi_user_thres;
+}
+
+
+
 
 #endif /* GCTAOBSERVATION_HPP */

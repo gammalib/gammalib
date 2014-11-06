@@ -652,6 +652,17 @@ void GCTAObservation::read(const GXmlElement& xml)
 
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
+//    m_name = xml.attribute("name");
+//    m_id = xml.attribute("id");
+
+    // Read in user defined energy boundaries of this observation
+    if (xml.attribute("emin") != "") {
+        m_lo_user_thres = gammalib::todouble(xml.attribute("emin"));
+    }
+
+    if (xml.attribute("emax") != "") {
+        m_hi_user_thres = gammalib::todouble(xml.attribute("emax"));
+    }
 
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
@@ -811,6 +822,13 @@ void GCTAObservation::write(GXmlElement& xml) const
                   "\"EventList\" or \"CountsMap\".";
         }
         throw GException::invalid_value(G_WRITE, msg);
+    }
+
+    if (m_lo_user_thres > 0.0) {
+        xml.attribute("emin",gammalib::str(m_lo_user_thres));
+    }
+    if (m_hi_user_thres > 0.0) {
+        xml.attribute("emax",gammalib::str(m_hi_user_thres));
     }
 
     // If XML element has 0 nodes then add the required parameter nodes
@@ -1033,6 +1051,7 @@ void GCTAObservation::load(const std::string& cntcube,
  ***************************************************************************/
 void GCTAObservation::save(const std::string& filename, const bool& clobber) const
 {
+
     // Create FITS file
     GFits fits;
 
@@ -1227,6 +1246,8 @@ void GCTAObservation::init_members(void)
     m_deadc      = 0.0;
     m_ra_obj     = 0.0;
     m_dec_obj    = 0.0;
+    m_lo_user_thres = 0.0;
+    m_hi_user_thres = 0.0;
 
     // Return
     return;
@@ -1252,6 +1273,8 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_deadc      = obs.m_deadc;
     m_ra_obj     = obs.m_ra_obj;
     m_dec_obj    = obs.m_dec_obj;
+    m_lo_user_thres = obs.m_lo_user_thres;
+    m_hi_user_thres = obs.m_hi_user_thres;
 
     // Clone members
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;

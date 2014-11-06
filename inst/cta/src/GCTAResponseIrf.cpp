@@ -948,6 +948,17 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
         // If file contains an "EFFECTIVE AREA" extension then load it
         // as CTA response table
         if (file.contains("EFFECTIVE AREA")) {
+
+            const GFitsHDU* hdu = file.at("EFFECTIVE AREA");
+
+            // Read save energy threshold if available
+            if (hdu->has_card("LO_THRES")) {
+                m_lo_save_thres = hdu->real("LO_THRES");
+            }
+            if (hdu->has_card("HI_THRES")) {
+                m_hi_save_thres = hdu->real("HI_THRES");
+            }
+
             file.close();
             m_aeff = new GCTAAeff2D(filename);
         }
@@ -955,6 +966,17 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
         // ... else if file contains a "SPECRESP" extension then load it
         // as ARF
         else if (file.contains("SPECRESP")) {
+
+            const GFitsHDU* hdu = file.at("SPECRESP");
+
+            // Read save energy threshold if available
+            if (hdu->has_card("LO_THRES")) {
+                m_lo_save_thres = file["SPECRESP"]->real("LO_THRES");
+            }
+            if (hdu->has_card("LO_THRES")) {
+                m_hi_save_thres = file["SPECRESP"]->real("HI_THRES");
+            }
+
             file.close();
             m_aeff = new GCTAAeffArf(filename);
         }
@@ -2911,6 +2933,10 @@ void GCTAResponseIrf::init_members(void)
     m_background  = NULL;
     m_apply_edisp = false;  //!< Switched off by default
 
+    // Energy thresholds
+    m_lo_save_thres = 0.0;
+    m_hi_save_thres = 0.0;
+
     // XML response filenames
     m_xml_caldb.clear();
     m_xml_rspname.clear();
@@ -2941,6 +2967,10 @@ void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
     m_caldb       = rsp.m_caldb;
     m_rspname     = rsp.m_rspname;
     m_apply_edisp = rsp.m_apply_edisp;
+
+    // Copy energy thresholds
+    m_lo_save_thres = rsp.m_lo_save_thres;
+    m_hi_save_thres = rsp.m_hi_save_thres;
 
     // Copy response filenames
     m_xml_caldb      = rsp.m_xml_caldb;

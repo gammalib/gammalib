@@ -128,6 +128,9 @@ public:
     const GCTABackground* background(void) const;
     void                  background(GCTABackground* background);
 
+    double               lo_save_thres(void) const;
+    double               hi_save_thres(void) const;
+
     // Low-level response methods
     double aeff(const double& theta,
                 const double& phi,
@@ -177,6 +180,10 @@ private:
     GCTAEdisp*      m_edisp;          //!< Energy dispersion
     GCTABackground* m_background;     //!< Energy dispersion
     mutable bool    m_apply_edisp;    //!< Apply energy dispersion
+
+    // Energy thresholds
+    double             m_lo_save_thres;//!< save energy threshold
+    double             m_hi_save_thres;//!< save maximum energy
 
     // XML response filename
     std::string     m_xml_caldb;      //!< Calibration database string in XML file
@@ -397,5 +404,29 @@ void GCTAResponseIrf::background(GCTABackground* background)
     m_background = background;
     return;
 }
+
+/***********************************************************************//**
+ * @brief Return low energy threshold from IRF
+ *
+ * @return return low energy threshold
+ ***************************************************************************/
+inline
+double GCTAResponseIrf::lo_save_thres(void) const
+{
+    return m_lo_save_thres;
+}
+
+/***********************************************************************//**
+ * @brief Return high energy threshold from IRF
+ *
+ * @return return low energy threshold
+ ***************************************************************************/
+inline
+double GCTAResponseIrf::hi_save_thres(void) const
+{
+    return m_hi_save_thres;
+}
+
+
 
 #endif /* GCTARESPONSEIRF_HPP */

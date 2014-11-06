@@ -93,6 +93,7 @@ protected:
                                         const GObservation& obs) const;
     const GCTAInstDir&     retrieve_dir(const std::string& origin,
                                         const GEvent&      event) const;
+
 };
 
 #endif /* GCTARESPONSE_HPP */
