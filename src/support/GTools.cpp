@@ -791,14 +791,15 @@ double gammalib::plaw_photon_flux(const double& emin, const double& emax,
 
         // Compute photon flux. Computations dependend on the exponent. We
         // add here a kluge to assure numerical accuracy.
-        flux = std::pow(epivot, -gamma);
+        double xmin     = emin/epivot;
+        double xmax     = emax/epivot;
         double exponent = gamma + 1.0;
         if (std::abs(exponent) > 1.0e-11) {
-            flux *= (std::pow(emax, exponent) -
-                     std::pow(emin, exponent)) / exponent;
+            flux = epivot / exponent * (std::pow(xmax, exponent) -
+                                        std::pow(xmin, exponent));
         }
         else {
-            flux *= (std::log(emax) - std::log(emin));
+            flux = epivot * (std::log(xmax) - std::log(xmin));
         }
 
     } // endif: emax > emin
@@ -836,14 +837,16 @@ double gammalib::plaw_energy_flux(const double& emin, const double& emax,
 
         // Compute energy flux. Computations dependend on the exponent. We
         // add here a kluge to assure numerical accuracy.
-        flux = std::pow(epivot, -gamma);
+        double xmin     = emin/epivot;
+        double xmax     = emax/epivot;
         double exponent = gamma + 2.0;
+        double epivot2  = epivot * epivot;
         if (std::abs(exponent) > 1.0e-11) {
-            flux *= (std::pow(emax, exponent) -
-                     std::pow(emin, exponent)) / exponent;
+            flux = epivot2 / exponent * (std::pow(xmax, exponent) -
+                                         std::pow(xmin, exponent));
         }
         else {
-            flux *= (std::log(emax) - std::log(emin));
+            flux = epivot2 * (std::log(xmax) - std::log(xmin));
         }
 
     } // endif: emax > emin
