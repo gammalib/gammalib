@@ -120,6 +120,8 @@ public:
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
     void                dispose_events(void);
+    const double&       lo_user_thres(void) const;
+    const double&       hi_user_thres(void) const;
 
 protected:
     // Protected methods
@@ -131,17 +133,19 @@ protected:
     void set_event_type(void);
 
     // Protected members
-    std::string   m_instrument;  //!< Instrument name
-    std::string   m_eventfile;   //!< Event filename
-    std::string   m_eventtype;   //!< Event type (for XML file)
-    GCTAResponse* m_response;    //!< Pointer to instrument response functions
-    GCTAPointing  m_pointing;    //!< Pointing direction
-    int           m_obs_id;      //!< Observation ID
-    double        m_ontime;      //!< Ontime (seconds)
-    double        m_livetime;    //!< Livetime (seconds)
-    double        m_deadc;       //!< Deadtime correction (livetime/ontime)
-    double        m_ra_obj;      //!< Right Ascension of object (degrees)
-    double        m_dec_obj;     //!< Declination of object (degrees)
+    std::string   m_instrument;    //!< Instrument name
+    std::string   m_eventfile;     //!< Event filename
+    std::string   m_eventtype;     //!< Event type (for XML file)
+    GCTAResponse* m_response;      //!< Pointer to instrument response functions
+    GCTAPointing  m_pointing;      //!< Pointing direction
+    int           m_obs_id;        //!< Observation ID
+    double        m_ontime;        //!< Ontime (seconds)
+    double        m_livetime;      //!< Livetime (seconds)
+    double        m_deadc;         //!< Deadtime correction (livetime/ontime)
+    double        m_ra_obj;        //!< Right Ascension of object (degrees)
+    double        m_dec_obj;       //!< Declination of object (degrees)
+    double        m_lo_user_thres; //!< User defined lower energy threshold
+    double        m_hi_user_thres; //!< User defined upper energy boundary
 
     // Special protected member for GCTAModelCubeBackground friend
     std::string   m_bgdfile;     //!< Background filename
@@ -386,5 +390,31 @@ const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
 }
+
+
+/***********************************************************************//**
+ * @brief Return user low energy threshold
+ *
+ * @return User low energy threshold.
+ ***************************************************************************/
+inline
+const double& GCTAObservation::lo_user_thres(void) const
+{
+    return m_lo_user_thres;
+}
+
+/***********************************************************************//**
+ * @brief Return user high energy threshold
+ *
+ * @return User high energy threshold.
+ ***************************************************************************/
+inline
+const double& GCTAObservation::hi_user_thres(void) const
+{
+    return m_hi_user_thres;
+}
+
+
+
 
 #endif /* GCTAOBSERVATION_HPP */

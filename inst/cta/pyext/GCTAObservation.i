@@ -93,6 +93,8 @@ public:
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
     void                dispose_events(void);
+    const double&       lo_user_thres(void) const;
+    const double&       hi_user_thres(void) const;
 };
 
 

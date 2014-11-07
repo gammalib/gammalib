@@ -646,7 +646,7 @@ void GObservations::write(GXml& xml) const
 
     // Write all observations into library
     for (int i = 0; i < size(); ++i) {
-    
+
         // Initialise pointer on observation
         GXmlElement* obs = NULL;
 
@@ -670,7 +670,7 @@ void GObservations::write(GXml& xml) const
             obs->attribute("id", m_obs[i]->id());
             obs->attribute("instrument", m_obs[i]->instrument());
         }
-    
+
         // Write now observation
         m_obs[i]->write(*obs);
 
