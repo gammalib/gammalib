@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-00
 
 Author(s) : Juergen Knoedlseder
 
-31 October 2014
+7 November 2014
 
 
 1. Introduction
@@ -306,6 +306,11 @@ values.
 Events are now only loaded when needed into GCTAObservation. This reduces memory
 the usage. The method dispose_events() has been added to explicitely allow the
 disposal of the events. 
+
+Support for user provided energy thresholds and save energy thresholds has been
+implemented. Save energy thresholds will be extracted from the LO_THRES and
+HI_THRES keywords if they are present in the effective area response FITS
+file. The user may supply energy thresholds in the XML file.
 
 
 21. COMPTEL interface

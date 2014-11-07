@@ -638,7 +638,10 @@ GEbounds GCTAObservation::ebounds(void) const
  *       ...
  *     </observation>
  *
- * for a binned observation.
+ * for a binned observation. Optional user energy thresholds can be
+ * specified by adding the emin and emax attributes:
+ *
+ *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
  *
  * The method does no load the events into memory but stores the file name
  * of the event file. The events are only loaded when required. This reduces
@@ -652,14 +655,11 @@ void GCTAObservation::read(const GXmlElement& xml)
 
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
-//    m_name = xml.attribute("name");
-//    m_id = xml.attribute("id");
 
     // Read in user defined energy boundaries of this observation
     if (xml.attribute("emin") != "") {
         m_lo_user_thres = gammalib::todouble(xml.attribute("emin"));
     }
-
     if (xml.attribute("emax") != "") {
         m_hi_user_thres = gammalib::todouble(xml.attribute("emax"));
     }
@@ -804,7 +804,12 @@ void GCTAObservation::read(const GXmlElement& xml)
  *       ...
  *     </observation>
  *
- * for a binned observation.
+ * for a binned observation. If user energy threshold are defined (i.e.
+ * threshold values are >0) the additional emin and emax attributes will
+ * be written to the file:
+ *
+ *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
+ *
  ***************************************************************************/
 void GCTAObservation::write(GXmlElement& xml) const
 {
@@ -824,11 +829,12 @@ void GCTAObservation::write(GXmlElement& xml) const
         throw GException::invalid_value(G_WRITE, msg);
     }
 
+    // Add user energy threshold attributes (if set)
     if (m_lo_user_thres > 0.0) {
-        xml.attribute("emin",gammalib::str(m_lo_user_thres));
+        xml.attribute("emin", gammalib::str(m_lo_user_thres));
     }
     if (m_hi_user_thres > 0.0) {
-        xml.attribute("emax",gammalib::str(m_hi_user_thres));
+        xml.attribute("emax", gammalib::str(m_hi_user_thres));
     }
 
     // If XML element has 0 nodes then add the required parameter nodes
@@ -1192,6 +1198,28 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Deadtime correction"));
         result.append(gammalib::str(m_deadc));
 
+        // Append user energy threshold information
+        result.append("\n"+gammalib::parformat("User energy range"));
+        if (m_lo_user_thres > 0.0 && m_hi_user_thres) {
+            result.append(gammalib::str(m_lo_user_thres));
+            result.append(" - ");
+            result.append(gammalib::str(m_hi_user_thres));
+            result.append(" TeV");
+        }
+        else if (m_lo_user_thres > 0.0) {
+            result.append("> ");
+            result.append(gammalib::str(m_lo_user_thres));
+            result.append(" TeV");
+        }
+        else if (m_hi_user_thres > 0.0) {
+            result.append("< ");
+            result.append(gammalib::str(m_hi_user_thres));
+            result.append(" TeV");
+        }
+        else {
+            result.append("undefined");
+        }
+
         // Append detailed information
         GChatter reduced_chatter = gammalib::reduce(chatter);
         if (reduced_chatter > SILENT) {
@@ -1240,12 +1268,12 @@ void GCTAObservation::init_members(void)
     m_bgdfile.clear();
     m_response = NULL;
     m_pointing.clear();
-    m_obs_id     = 0;
-    m_ontime     = 0.0;
-    m_livetime   = 0.0;
-    m_deadc      = 0.0;
-    m_ra_obj     = 0.0;
-    m_dec_obj    = 0.0;
+    m_obs_id        = 0;
+    m_ontime        = 0.0;
+    m_livetime      = 0.0;
+    m_deadc         = 0.0;
+    m_ra_obj        = 0.0;
+    m_dec_obj       = 0.0;
     m_lo_user_thres = 0.0;
     m_hi_user_thres = 0.0;
 
@@ -1262,17 +1290,17 @@ void GCTAObservation::init_members(void)
 void GCTAObservation::copy_members(const GCTAObservation& obs)
 {
     // Copy members
-    m_instrument = obs.m_instrument;
-    m_eventfile  = obs.m_eventfile;
-    m_eventtype  = obs.m_eventtype;
-    m_bgdfile    = obs.m_bgdfile;
-    m_pointing   = obs.m_pointing;
-    m_obs_id     = obs.m_obs_id;
-    m_ontime     = obs.m_ontime;
-    m_livetime   = obs.m_livetime;
-    m_deadc      = obs.m_deadc;
-    m_ra_obj     = obs.m_ra_obj;
-    m_dec_obj    = obs.m_dec_obj;
+    m_instrument    = obs.m_instrument;
+    m_eventfile     = obs.m_eventfile;
+    m_eventtype     = obs.m_eventtype;
+    m_bgdfile       = obs.m_bgdfile;
+    m_pointing      = obs.m_pointing;
+    m_obs_id        = obs.m_obs_id;
+    m_ontime        = obs.m_ontime;
+    m_livetime      = obs.m_livetime;
+    m_deadc         = obs.m_deadc;
+    m_ra_obj        = obs.m_ra_obj;
+    m_dec_obj       = obs.m_dec_obj;
     m_lo_user_thres = obs.m_lo_user_thres;
     m_hi_user_thres = obs.m_hi_user_thres;
 

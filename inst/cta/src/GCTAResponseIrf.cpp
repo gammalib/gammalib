@@ -949,9 +949,10 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
         // as CTA response table
         if (file.contains("EFFECTIVE AREA")) {
 
+            // Get HDU
             const GFitsHDU* hdu = file.at("EFFECTIVE AREA");
 
-            // Read save energy threshold if available
+            // Read save energy thresholds if available
             if (hdu->has_card("LO_THRES")) {
                 m_lo_save_thres = hdu->real("LO_THRES");
             }
@@ -959,26 +960,35 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
                 m_hi_save_thres = hdu->real("HI_THRES");
             }
 
+            // Close file
             file.close();
+
+            // Allocate Aeff from file
             m_aeff = new GCTAAeff2D(filename);
+
         }
 
         // ... else if file contains a "SPECRESP" extension then load it
         // as ARF
         else if (file.contains("SPECRESP")) {
 
+            // Get HDU
             const GFitsHDU* hdu = file.at("SPECRESP");
 
-            // Read save energy threshold if available
+            // Read save energy thresholds if available
             if (hdu->has_card("LO_THRES")) {
-                m_lo_save_thres = file["SPECRESP"]->real("LO_THRES");
+                m_lo_save_thres = hdu->real("LO_THRES");
             }
             if (hdu->has_card("LO_THRES")) {
-                m_hi_save_thres = file["SPECRESP"]->real("HI_THRES");
+                m_hi_save_thres = hdu->real("HI_THRES");
             }
 
+            // Close file
             file.close();
+
+            // Allocate Aeff from file
             m_aeff = new GCTAAeffArf(filename);
+
         }
 
     }
@@ -1241,6 +1251,28 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
             else {
                 result.append("Not used");
             }
+        }
+
+        // Append save energy threshold information
+        result.append("\n"+gammalib::parformat("Save energy range"));
+        if (m_lo_save_thres > 0.0 && m_hi_save_thres) {
+            result.append(gammalib::str(m_lo_save_thres));
+            result.append(" - ");
+            result.append(gammalib::str(m_hi_save_thres));
+            result.append(" TeV");
+        }
+        else if (m_lo_save_thres > 0.0) {
+            result.append("> ");
+            result.append(gammalib::str(m_lo_save_thres));
+            result.append(" TeV");
+        }
+        else if (m_hi_save_thres > 0.0) {
+            result.append("< ");
+            result.append(gammalib::str(m_hi_save_thres));
+            result.append(" TeV");
+        }
+        else {
+            result.append("undefined");
         }
 
         // Append calibration database
@@ -2927,13 +2959,11 @@ void GCTAResponseIrf::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_aeff        = NULL;
-    m_psf         = NULL;
-    m_edisp       = NULL;
-    m_background  = NULL;
-    m_apply_edisp = false;  //!< Switched off by default
-
-    // Energy thresholds
+    m_aeff          = NULL;
+    m_psf           = NULL;
+    m_edisp         = NULL;
+    m_background    = NULL;
+    m_apply_edisp   = false;  //!< Switched off by default
     m_lo_save_thres = 0.0;
     m_hi_save_thres = 0.0;
 
@@ -2964,11 +2994,9 @@ void GCTAResponseIrf::init_members(void)
 void GCTAResponseIrf::copy_members(const GCTAResponseIrf& rsp)
 {
     // Copy members
-    m_caldb       = rsp.m_caldb;
-    m_rspname     = rsp.m_rspname;
-    m_apply_edisp = rsp.m_apply_edisp;
-
-    // Copy energy thresholds
+    m_caldb         = rsp.m_caldb;
+    m_rspname       = rsp.m_rspname;
+    m_apply_edisp   = rsp.m_apply_edisp;
     m_lo_save_thres = rsp.m_lo_save_thres;
     m_hi_save_thres = rsp.m_hi_save_thres;
 

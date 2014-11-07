@@ -1,4 +1,4 @@
-2014-10-31  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-11-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
@@ -34,6 +34,7 @@
         Introduce class codes to avoid dynamic type casting
         Remove error computation from optimization
         Add GOptimize::errors() method for error computation
+        Add support for user and save CTA energy thresholds
         Several bug corrections
 
 
