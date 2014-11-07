@@ -91,6 +91,12 @@ void TestGSupport::test_tools(void)
     test_assert(s_out == s_in, "gammalib::str2xml()",
                 "Unexpected string \""+s_out+"\" (expected \""+s_in+"\")");
 
+    // Test power law flux computations
+    test_value(gammalib::plaw_energy_flux(2.0, 3.0, 2.5, -1.0), 2.5);
+    test_value(gammalib::plaw_energy_flux(2.0, 3.0, 2.5, -2.5), 2.56453824468);
+    test_value(gammalib::plaw_photon_flux(2.0, 3.0, 2.5, -1.0), 1.01366277027);
+    test_value(gammalib::plaw_photon_flux(2.0, 3.0, 2.5, -2.5), 1.06136118604);
+
     // Return
     return;
 }
