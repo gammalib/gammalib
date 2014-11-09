@@ -761,6 +761,12 @@ void GModelSky::write(GXmlElement& xml) const
         src->attribute("ts", gammalib::str(ts(), 3));
     }
 
+    // If tscalc parameter was available, then write it to XML
+    if (m_has_tscalc) {
+        std::string ts_calc = tscalc() ? "1" : "0";
+        src->attribute("tscalc", ts_calc);
+    }
+
     // Write spectral model
     if (spectral() != NULL) {
         GXmlElement* spec = src->element("spectrum", 0);
