@@ -163,7 +163,7 @@ protected:
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
     bool                     m_has_ts;       //!< Signals if TS is available
-    bool                     m_has_tscalc; //!< Signals if tscalc attribute is available
+    bool                     m_has_tscalc;   //!< Signals if tscalc attribute is available
     bool                     m_tscalc;       //!< Signals if TS should be computed
     double                   m_ts;           //!< Test Statistic of the model
 };
@@ -304,8 +304,8 @@ const bool& GModel::tscalc(void) const
 inline
 void GModel::tscalc(const bool& tscalc)
 {
-    m_tscalc = tscalc;
-    m_has_tscalc = true;
+    m_tscalc     = tscalc;
+    m_has_tscalc = true; //!< Signals that tscalc is now available
     return;
 }
 
