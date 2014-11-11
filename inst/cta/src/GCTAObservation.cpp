@@ -690,8 +690,23 @@ void GCTAObservation::read(const GXmlElement& xml)
             // Read eventlist file name
             std::string filename = par->attribute("file");
 
-            // Load events
-            //load(filename); //!< We now do not load the events immediately
+            // Open FITS file
+            GFits fits(filename);
+
+            // Read event attributes but do not load the events here
+            // to save memory
+            if (fits.contains("EVENTS")) {
+                const GFitsHDU& hdu = *fits.at("EVENTS");
+                read_attributes(hdu);
+            }
+            else {
+                const GFitsHDU& hdu = *fits.at(0);
+                read_attributes(hdu);
+
+            }
+
+            // Close FITS file
+            fits.close();
 
             // Store event filename
             m_eventfile = filename;

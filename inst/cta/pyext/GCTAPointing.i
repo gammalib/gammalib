@@ -34,7 +34,7 @@
  *
  * @brief CTA pointing class
  ***************************************************************************/
-class GCTAPointing {
+class GCTAPointing : public GBase {
 public:
     // Constructors and destructors
     GCTAPointing(void);
