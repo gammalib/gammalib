@@ -34,6 +34,7 @@
 #include "GSkymap.hpp"
 #include "GObservations.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAEventCube.hpp"
 
 
 /***********************************************************************//**
@@ -53,6 +54,7 @@ public:
     GCTAExposure(void);
     GCTAExposure(const GCTAExposure& cube);
     explicit GCTAExposure(const std::string& filename);
+    GCTAExposure(const GCTAEventCube& cube);
     GCTAExposure(const std::string&   wcs,
                  const std::string&   coords,
                  const double&        x,

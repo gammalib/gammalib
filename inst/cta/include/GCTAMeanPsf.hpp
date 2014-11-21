@@ -35,7 +35,7 @@
 #include "GObservations.hpp"
 #include "GCTAObservation.hpp"
 #include "GNodeArray.hpp"
-
+#include "GCTAEventCube.hpp"
 
 /***********************************************************************//**
  * @class GCTAMeanPsf
@@ -55,6 +55,7 @@ public:
     GCTAMeanPsf(void);
     GCTAMeanPsf(const GCTAMeanPsf& cube);
     explicit GCTAMeanPsf(const std::string& filename);
+    GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax, const int& ndbins);
     GCTAMeanPsf(const std::string&   wcs,
                 const std::string&   coords,
                 const double&        x,

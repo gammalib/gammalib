@@ -35,6 +35,8 @@
 #include "GCTAExposure.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
+#include "GWcsRegistry.hpp"
+#include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                            "GCTAMeanPsf::set(GCTAObservation&)"
@@ -104,6 +106,52 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string& filename)
 
     // Return
     return;
+}
+
+GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax, const int& ndbins)
+{
+    // Initialise class members
+    init_members();
+
+    // Store energy boundaries
+    m_ebounds = cube.ebounds();
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
+    // Set delta node array
+
+    m_deltas.clear();
+    for (int i = 0; i < ndbins; ++i) {
+        #if defined(G_QUADRATIC_BINNING)
+        double binsize = std::sqrt(dmax) / double(ndbins);
+        double delta   = binsize * (double(i) + 0.5); // avoid central singularity
+        delta         *= delta;
+        #else
+        double binsize = dmax / double(ndbins);
+        double delta   = binsize * (double(i) + 0.5); // avoid central singularity
+        #endif
+        m_deltas.append(delta);
+    }
+
+    // Compute number of sky maps
+    int nmaps = m_ebounds.size() * m_deltas.size();
+
+
+    // Create sky map
+    const GWcs* wcs = dynamic_cast<const GWcs*>(cube.map().projection());// reg.alloc(cube.map().projection()->code());
+
+    std::string coordsys = wcs->coordsys();
+    std::string proj = wcs->code();
+    double xref = wcs->crval(0);
+    double yref = wcs->crval(1);
+    double xbinsz = wcs->cdelt(0);
+    double ybinsz = wcs->cdelt(1);
+    m_cube = GSkymap(proj, coordsys, xref, yref, xbinsz, ybinsz, cube.map().nx(), cube.map().ny(), nmaps);
+
+    // Return
+    return;
+
 }
 
 
@@ -431,7 +479,7 @@ void GCTAMeanPsf::fill(const GObservations& obs)
 
                                 // Set map index
                                 int imap = offset(idelta, iebin);
-                
+
                                 // Add on PSF cube
                                 m_cube(pixel, imap) +=
                                     rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;

@@ -104,6 +104,25 @@ GCTAExposure::GCTAExposure(const std::string& filename)
     return;
 }
 
+GCTAExposure::GCTAExposure(const GCTAEventCube& cube)
+{
+    // Initialise class members
+    init_members();
+
+    // Store energy boundaries
+    m_ebounds = cube.ebounds();
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
+    // Get sky map
+    m_cube = cube.map();
+
+    // Return
+    return;
+
+}
+
 
 /***********************************************************************//**
  * @brief Exposure cube constructor
