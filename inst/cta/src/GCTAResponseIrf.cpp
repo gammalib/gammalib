@@ -2902,9 +2902,12 @@ double GCTAResponseIrf::nedisp(const GSkyDir&      srcDir,
                         double e_log_min = emin.log10TeV();
                         double e_log_max = emax.log10TeV();
 
+                        // Get log10 of source energy
+                        double logEsrc = srcEng.log10TeV();
+                        
                         // Setup integration function
                         cta_nedisp_kern integrand(*this,
-                                                  srcEng.log10TeV(),
+                                                  logEsrc,
                                                   theta,
                                                   phi,
                                                   zenith,
