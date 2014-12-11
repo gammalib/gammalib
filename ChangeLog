@@ -1,4 +1,10 @@
-2014-11-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-12-11  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+        * Version 1.0.0 released
+        ========================
+
+        Fixed bug #1383
+
 
         * Version 0.9.0 released
         ========================
