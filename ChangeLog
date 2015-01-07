@@ -1,9 +1,9 @@
-2014-12-11  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
-        * Version 1.0.0 released
-        ========================
+        * Bug fix version 0.9.1 released
+        ================================
 
-        Fixed bug #1383
+        Fixed bug #1383 (unit test error with recent gcc compiler)
 
 
         * Version 0.9.0 released

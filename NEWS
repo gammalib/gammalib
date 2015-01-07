@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-09-00
+New Features and Important Changes in GammaLib 00-09-01
 
 Author(s) : Juergen Knoedlseder
 
-7 November 2014
+7 January 2015
 
 
 1. Introduction
@@ -13,22 +13,7 @@ changes made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-The following classes have been renamed:
-* GCTAModelBackground => GCTAModelCubeBackground
-* GCTAModelInstBackground => GCTAModelIrfBackground
-* GCTAResponse => GCTAResponseIrf
-
-The following methods have been renamed:
-* GIntegral::romb() => GIntegral::romberg()
-
-The GObservation::response() method now returns a pointer to GResponse
-instead of a reference.
-
-The GCTAObservation::load(GFits&) and GCTAObservation::save(GFits&)
-methods have been renamed to read() and write().
-
-A classname() method has been added to all classes that returns the name
-of the GammaLib class.
+None
 
 
 3. Configuration
@@ -38,10 +23,7 @@ None
 
 4. Application module
 ---------------------
-The logfile name is now always parsed in the parameter file before it is
-employed. This guarantees that a logfile parameter change is taken into
-account at any stage. This corrects a bug where the logfile name change
-was not taken into account when running tools under Python. 
+None
 
 
 5. Base module
@@ -61,127 +43,37 @@ None
 
 8. Model module
 ---------------
-A division by zero error occured in GModelSpectralPlaw2::eval_gradients
-in case that the integral was zero. The code has been changed to avoid
-this situation.
-
-The map cube in GModelSpatialDiffuseCube is now only loaded from the file
-when needed. This allows manipulating GModelSpatialDiffuseCube objects
-that describe huge map cubes without need for loading the map cubes into
-memory. This property is useful for Fermi/LAT analysis.
-
-Implement GModelSpectralSuperExpPlaw class to model a super exponentially
-cut off power law spectral functions.
-
-Added normalize attribute to GModelSpatialDiffuseMap that allows control
-over the internal normalization of the map. By default, the map is normalized,
-but by specifying normalize="0" the normalization can be switched off.
-
-A norm() method has been added to the abstract GModelSpatial interface that
-returns the model normalization within a circular region. This is used in the
-GModelSky::mc method to correctly reflect the normalization specified in the
-XML file. The method is also used to flag sources outside the simulation
-cone (applies so for the point sources, radial source and elliptical sources).
-
-The TS attribute has been added to GModel to store the Test Statistics value
-after model fitting. The ts() methods can be used to read and write the value.
-GModelSky will write the TS value into the XML file and read it if it's there.
-In addition, the tscalc attribute has been added to signal whether a TS value
-should be computed or not. If tscalc="1" is added to an XML, the tscalc
-attribute of the corresponding model component will be set to true. Otherwise
-it will be set to false.
+None
 
 
 9. Numerics module
 ------------------
-Status information is now tracked using a message string in GIntegral. The
-message string is accessible using the message() method. If the string was
-set, the isvalid() method will return false. Otherwise, if no warning or
-error occured, the isvalid() method returns true.
+None
 
 
 10. Observation module
 ----------------------
-Added __len__ and copy() methods to GEvents Python interface.
-
-The integration precision in GObservation::npred_spec has been increased
-to 1e-8 to cope with strongly fluctuating file functions (as they appear
-for CTA background models). See bug #1142 for more information.
-
-The binned likelihood functions now implement data filtering. All event
-bins with negative values will be excluded from the likelihood computation.
-
-The GObservation::model and GObservation::model_grad have been rearranged
-to reduce function call overhead. Some speed-up has been achieved.
-
-The GModelSpatial now implements class codes that allow fast branching in
-the response computations. This avoids dynamic type casting which can be
-quite time consuming (at least for methods that are called very often, such
-as the response methods). The class code enumerators are defined in
-GTypemaps.
-
-Full automatic typecasting has been implemented for the Python module.
-
-Added utc() methods to GTime to allow setting and retrieving the time as
-a string in the UTC time system. Leap seconds are taken into account in
-the time conversion. The leap seconds are hard coded so the software
-needs a regular update in case that leap seconds need to be added.
+None
 
 
 11. Optimization module
 -----------------------
-The GOptimizerPar::error() method now always returns a positive number (the
-absolute value of the internally stored error is returned).
-
-The parameter error computation has been removed from the GOptimizerLM::optimize()
-method and an explicit call to GOptimizerLM::errors() is now required for
-error computation. GOptimizer::errors() has been added as pure virtual
-method for all optimizer classes.
-
-A new parameter was introduce to specify the acceptable function decrease in
-an iteration. Acceptable means that the new parameters are kept for continuing
-the iterations. This behaviour existed already before, but a low threshold of
-1e-6 did not really activate it. Now the threshold was raised to 1.0 and this
-help ctlike to converge quicker. Methods accept_dec() have been implemented
-to get and set the acceptable threshold.
+None
 
 
 12. Sky module
 --------------
-Addition, subtraction, multiplication and division unary operators have
-been added to GSkymap that allow adding or subtracing skymaps. Values in
-the right-hand side skymap are bi-linearily interpolated, allowing for
-reprojection or rebinning of skymaps.
+None
 
 
 13. Support module
 ------------------
-The GNodeArray non-const access operator[] now signals that an update of the
-internal pre-computation is needed, as this operator[] may change the node
-array values.
-
-Methods have been added to the GCsv class that allow the creation and the
-saving of CSV tables.
-
-The str2xml() and xml2str() functions have been added to GTools to handle
-predefined entities in XML files.
+None
 
 
 14. XML module
 --------------
-Hierarchical element access methods have been added to GXml and GXmlNode.
-Using a string in the format "params > param[1] > value > struct" one can
-in a single method call walk down the hierarchy of an XML document to
-access an element. The squared brackets allow specifying an element index
-in case that multiple elements with the same name exist. If squared brackets
-are omitted, an index of 0 is assumed. If the indicated element does not
-exist, the method returns a pointer to NULL.
-
-The XML module now handles predefined entities. Special characters, such as
-" will now be transformed into their predefined entities, e.g. &quot;, when
-writing the XML file. Upon reading, predefined entities will be converted
-into special chacaters, so that the user always deals with a human readable
-string.
+None
 
 
 15. VO module
@@ -206,115 +98,15 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-Pass 7 response files have been added.
-
-A bug in the computation of the Point Spread Function (PSF) has been corrected
-that led to differences between Fermi/LAT ScienceTools and GammaLib results.
-The former code applied in fact the front energy scaling to the back PSF. This
-has now been fixed and checked with a test dataset. GammaLib results are now
-very close to Fermi/LAT ScienceTools results.
-
-Another bug in the computation of the mean PSF for sources falling outside the
-event cube have been fixed. The GLATEventCube::maxrad method now returns zero
-if a source lies outside the event cube. PSF normalization for event cubes is
-not only performed for sources within the event cube.
+None
 
 
 20. CTA interface
 -----------------
-Energy dispersion has been added to the CTA module. The class GCTAEdispPerfTable
-implements a simple Gaussian energy dispersion that is based on the energy dispersion
-rms value provided in the ASCII performance files.
-
-Classes have been implemented to support background modelling for CTA in the
-instrument system. Background information has been added to the CTA response in
-form of the abstract GCTABackground base class, being able to represent an expected
-background rate as function of energy and spatial parameters.
-
-GCTABackgroundPerfTable implements background rate information extracted from a
-performance table, GCTABackground3D implements background information provided by
-a cube spanned by DETX, DETY and energy.
-
-The instrumental background is handled by the GCTAModelInstBackground class that
-derives from GModelData.
-
-load() and save() methods have been added to GCTAObservation that operate directly
-on GFits objects, so data have not be saved to disk for reloading. This is useful
-in streamlining ctselect (see #1149). A load() method has been implemented that
-recognizes automatically whether the file is an event list or a event cube, making
-load_unbinned() and load_binned() obsolete. These methods will be removed in the
-next major release.
-
-The GCTAPointing class now also supports pointing tables, which provide the altitude
-and azimuth on the sky as function of time.
-
-The type of the GCTAModelCubeBackground class has been set to GCTACubeBackground,
-the type of the GCTAModelIrfBackground class to GCTAIrfBackground. XML files need
-to be adapted accordingly.
-
-For stacked analysis, the GCTAExposure and GCTAMeanPsf classes have been added.
-GCTAExposure represents the summed exposure for a list of CTA observations
-(computed as the sum of effective area times livetime), GCTAMeanPsf represents
-the average PSF, computed by weighing the PSF of each observation by the respective
-exposure. 
-
-GCTAEventList was storing the m_detx and m_dety members in degrees upon load, while
-the class expects to hold these values in radians. Unit conversion has now been
-added to the reader and writers, so that DETX and DETY are in degrees in the file
-while they are in radians internally in GammaLib, and specifically in GCTAInstDir.
-
-Manipulation methods have been added to GCTAResponseTable that allow building a
-response table from scratch. These include appending of axes and parameters, as
-well as accessing axis boundaries.
-
-The CTA response classes have been refactored. GCTAResponse has been renamed to
-GCTAResponseIrf, and GCTAResponse is now an abstract base class from which
-GCTAResponseIrf derives. The class GCTAResponseCube, which also derives from
-GCTAResponse, has been added to handle cube-style analysis. GCTAResponseCube
-holds an exposure cube (GCTAExposure) and a PSF cube (GCTAMeanPsf) to describe
-the response. GCTAObservation has been modified to allocate either IRF-style or
-stacked response, dependent on the information found in the XML file.
-
-The abstract GCTASourceCube class has been added to handle the pre-computation
-cache for stacked analysis. A first implementation of this cache is provided
-by the GCTASourceCubePointSource class for point source analysis. The cache has
-been added to GCTAResponseCube who takes care of initializing and using the cache.
-
-A GCTATypemap header has been added to define CTA specific typemaps. This is
-actually used to define class codes for GCTASourceCube so that dynamic type
-casting can be avoided. Dynamic type casting is time consuming, and to speed-up
-response computation, using class codes is more efficient.
-
-The response computation for extended models has been improved. Specifically, the
-response computation was changed so that the resulting log-likelihood profiles
-becomes as smooth as possible. This helps the optimizer during the minimization.
-For this purpose, the integration precision has been replaced by a constant
-iterator depths, which leads to a uniform computation that increases log-likelihood
-profile smoothness. Also, known transition points have been added as internal
-integration boundaries, improving the integral precision.
-
-The ALT_PNT and AZ_PNT attributes are now read from CTA data and used to set the
-zenith and azimuth angles in the GCTAPointing structure. As well, the information
-in GCTAPointing is now used to set the ALT_PNT and AZ_PNT attributes upon writing
-a dataset.
-
-Add read(), write() and save() methods to GCTAPsf2D and GCTAPsfKing classes.
-
-The GCTAResponseIrf::mc method now automatically sets the DETX and DETY
-values.
-
-Events are now only loaded when needed into GCTAObservation. This reduces memory
-the usage. The method dispose_events() has been added to explicitely allow the
-disposal of the events. 
-
-Support for user provided energy thresholds and save energy thresholds has been
-implemented. Save energy thresholds will be extracted from the LO_THRES and
-HI_THRES keywords if they are present in the effective area response FITS
-file. The user may supply energy thresholds in the XML file.
+Corrected bug #1383 that led to a unit test failure for the CTA energy dispersion
+computation on recent gcc compiler versions.
 
 
 21. COMPTEL interface
 ---------------------
-The COMPTEL response handling is now based on GCaldb functionnalities. The
-COMPTEL calibration database has been restructured for this purpose and a
-calibration database index has been added.
+None
