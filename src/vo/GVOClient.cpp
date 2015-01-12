@@ -175,11 +175,16 @@ GVOClient* GVOClient::clone(void) const
  ***************************************************************************/
 void GVOClient::connect(void)
 {
-    // Register to Hub
-    register_to_hub();
+    // Continue only if we have a Hub
+    if (has_hub()) {
+    
+        // Register to Hub
+        register_to_hub();
 
-    // Send meta data
-    send_metadata();
+        // Send meta data
+        send_metadata();
+
+    } // endif: we had a Hub
 
     // Return
     return;
@@ -194,14 +199,19 @@ void GVOClient::connect(void)
  ***************************************************************************/
 void GVOClient::disconnect(void)
 {
-    // Unregister from Hub
-    unregister_from_hub();
+    // Continue only if we have a Hub
+    if (has_hub()) {
 
-    // Close socket
-    if (m_socket != -1) {
-        close(m_socket);
-        m_socket = -1;
-    }
+        // Unregister from Hub
+        unregister_from_hub();
+
+        // Close socket
+        if (m_socket != -1) {
+            close(m_socket);
+            m_socket = -1;
+        }
+
+    } // endif: we had a Hub
 
     // Return
     return;

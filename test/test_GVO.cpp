@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GVO.hpp - Test VO module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,7 +69,7 @@ void TestGVO::test_GVOClient(void)
     test_try("GVOClient empty constructor");
     try {
         GVOClient client;
-        std::cout << client << std::endl;
+        //std::cout << client << std::endl;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -81,9 +81,9 @@ void TestGVO::test_GVOClient(void)
     try {
         GVOClient client;
         client.connect();
-        std::cout << client << std::endl;
+        //std::cout << client << std::endl;
         client.disconnect();
-        std::cout << client << std::endl;
+        //std::cout << client << std::endl;
         test_try_success();
     }
     catch (std::exception &e) {
