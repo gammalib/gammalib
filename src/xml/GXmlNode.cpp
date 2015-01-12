@@ -564,12 +564,20 @@ GXmlElement* GXmlNode::element(const std::string& name)
         std::string tag   = gammalib::strip_whitespace(tags[i]);
         int         index = extract_index(tag);
 
+        // Break if the requested node does not exist
+        int n = current->elements(tag);
+        if (n < 1 || index < 0 || index >= n) {
+            element = NULL;
+            break;
+        }
+
         // Get node
         element = current->element(tag, index);
         current = element;
 
         // Break if node has not been found
         if (current == NULL) {
+            element = NULL;
             break;
         }
         
@@ -618,12 +626,20 @@ const GXmlElement* GXmlNode::element(const std::string& name) const
         std::string tag   = gammalib::strip_whitespace(tags[i]);
         int         index = extract_index(tag);
 
+        // Break if the requested node does not exist
+        int n = current->elements(tag);
+        if (n < 1 || index < 0 || index >= n) {
+            element = NULL;
+            break;
+        }
+
         // Get node
         element = current->element(tag, index);
         current = element;
 
         // Break if node has not been found
         if (current == NULL) {
+            element = NULL;
             break;
         }
         
