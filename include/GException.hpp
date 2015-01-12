@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GException.hpp - Exception handler                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -107,6 +107,13 @@ public:
 
 
     // --- RUNTIME EXCEPTIONS (not testable by client) ---
+
+    // Runtime error
+    class runtime_error : public GExceptionHandler {
+    public:
+        runtime_error(const std::string& origin,
+                      const std::string& message = "");
+    };
 
     //underflow_error
 
