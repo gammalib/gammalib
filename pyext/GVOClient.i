@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GVOClient.i - VO client class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,13 +42,13 @@ public:
     virtual ~GVOClient(void);
 
     // Methods
-    void       clear(void);
-    GVOClient* clone(void) const;
-    void       connect(void);
-    void       disconnect(void);
-    bool       has_hub(void) const;
-    bool       is_connected(void) const;
-    GXml       response(void) const;
+    void        clear(void);
+    GVOClient*  clone(void) const;
+    std::string classname(void) const;
+    void        connect(void);
+    void        disconnect(void);
+    bool        has_hub(void) const;
+    GXml        execute(const std::string& request) const;
 };
 
 

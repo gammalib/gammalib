@@ -223,33 +223,26 @@ bool GVOClient::has_hub(void) const
 
 
 /***********************************************************************//**
- * @brief Signals if client is connected to Hub
+ * @brief Execute function on server
  *
- * @return True if client is connected to Hub, false otherwise.
- *
- * Checks if a client is connected to Hub.
+ * @param[in] request XML request string
+ * @return XML response
  ***************************************************************************/
-bool GVOClient::is_connected(void) const
+GXml GVOClient::execute(const std::string& request) const
 {
-    // Return
-    return false;
-}
-
-
-/***********************************************************************//**
- * @brief Returns Hub response a XML object
- *
- * @return Hub response.
- ***************************************************************************/
-GXml GVOClient::response(void) const
-{
-    // Declare empty XML document
+    // Initialise response
     GXml xml;
+
+    // Connect to hub
+    connect_to_hub();
 
     // Continue only if connection has been established
     if (m_socket != -1) {
 
-        // Receive a string
+        // Post request
+        post_string(request);
+
+        // Receive response
         std::string response = receive_string();
 
         // Find start of XML text
@@ -262,7 +255,7 @@ GXml GVOClient::response(void) const
 
     } // endif: connection has been established
 
-    // Return XML document
+    // Return response
     return xml;
 }
 
@@ -521,6 +514,150 @@ bool GVOClient::find_hub(void)
 
 
 /***********************************************************************//**
+ * @brief Register client at SAMP Hub
+ *
+ * @exception GException::invalid_value
+ *            Unable to connect to Hub.
+ ***************************************************************************/
+void GVOClient::register_to_hub(void)
+{
+    // Declare request
+    std::string request;
+
+    // Set metadata header
+    request.append("<?xml version=\"1.0\"?>\n");
+    request.append("<methodCall>\n");
+    request.append("  <methodName>samp.hub.register</methodName>\n");
+    request.append("  <params>\n");
+    request.append("    <param><value><string>"+m_secret+"</string></value></param>\n");
+    request.append("  </params>\n");
+    request.append("</methodCall>\n");
+
+    // Execute request
+    GXml xml = execute(request);
+
+    // If no error occured, extract hub and client identifiers
+    if (response_is_valid(xml)) {
+        m_client_key = get_response_value(xml, "samp.private-key");
+        m_hub_id     = get_response_value(xml, "samp.hub-id");
+        m_client_id  = get_response_value(xml, "samp.self-id");
+    }
+
+    // ... otherwise signal an error
+    else {
+        std::string msg = "Unable to connect to Hub (" +
+                          response_error_message(xml) + ", code=" +
+                          gammalib::str(response_error_code(xml)) + ").";
+        throw GException::runtime_error(G_REGISTER_TO_HUB, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Unregister client from SAMP Hub
+ ***************************************************************************/
+void GVOClient::unregister_from_hub(void)
+{
+    // Declare request
+    std::string request;
+
+    // Set metadata header
+    request.append("<?xml version=\"1.0\"?>\n");
+    request.append("<methodCall>\n");
+    request.append("<methodName>samp.hub.unregister</methodName>\n");
+    request.append("<params>\n");
+    request.append("<param><value><string>"+m_client_key+"</string></value></param>\n");
+    request.append("</params>\n");
+    request.append("</methodCall>\n");
+
+    // Execute request
+    execute(request);
+
+    // Reset Hub and client identifiers
+    m_client_key.clear();
+    m_hub_id.clear();
+    m_client_id.clear();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Send client metadata to SAMP Hub
+ ***************************************************************************/
+void GVOClient::send_metadata(void) const
+{
+    // Declare request
+    std::string request;
+
+    // Set metadata header
+    request.append("<?xml version=\"1.0\"?>\n");
+    request.append("<methodCall>\n");
+    request.append("<methodName>samp.hub.declareMetadata</methodName>\n");
+    request.append("<params>\n");
+    request.append("<param><value><string>"+m_client_key+"</string></value></param>\n");
+    request.append("<param><value><struct>\n");
+
+    // Set SAMP name
+    request.append("<member>\n");
+    request.append("<name>samp.name</name>\n");
+    request.append("<value><string>"+m_name+"</string></value>\n");
+    request.append("</member>\n");
+
+    // Set SAMP description text
+    request.append("<member>\n");
+    request.append("<name>samp.description.text</name>\n");
+    request.append("<value><string>GammaLib client</string></value>\n");
+    request.append("</member>\n");
+
+    // Set SAMP icon URL
+    request.append("<member>\n");
+    request.append("<name>samp.icon.url</name>\n");
+    request.append("<value><string>http://a.fsdn.com/allura/p/gammalib/icon</string></value>\n");
+    request.append("</member>\n");
+
+    // Set author affiliation
+    request.append("<member>\n");
+    request.append("<name>author.affiliation</name>\n");
+    request.append("<value><string>IRAP, Toulouse, France</string></value>\n");
+    request.append("</member>\n");
+
+    // Set author e-mail
+    request.append("<member>\n");
+    request.append("<name>author.email</name>\n");
+    request.append("<value><string>jurgen.knodlseder@irap.omp.eu</string></value>\n");
+    request.append("</member>\n");
+
+    // Set author name
+    request.append("<member>\n");
+    request.append("<name>author.name</name>\n");
+    request.append("<value><string>Juergen Knoedlseder</string></value>\n");
+    request.append("</member>\n");
+
+    // Set metadata trailer
+    request.append("</struct></value></param>\n");
+    request.append("</params>\n");
+    request.append("</methodCall>\n");
+
+    // Execute request
+    execute(request);
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                        Low-level private methods                        =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
  * @brief Connect to SAMP Hub
  *
  * Connects to Hub by creating a socket and connecting to this socket. The
@@ -533,7 +670,7 @@ bool GVOClient::find_hub(void)
  * If the method is successful, m_socket will contain on exit a non-negative
  * number. If any failure occurs, m_socket will be set to -1.
  ***************************************************************************/
-void GVOClient::connect_to_hub(void)
+void GVOClient::connect_to_hub(void) const
 {
     // Close any existing socket
     if (m_socket != -1) {
@@ -573,6 +710,9 @@ void GVOClient::connect_to_hub(void)
                         m_socket = -1;
                     }
                 }
+                else {
+                    break;
+                }
 
             } // endfor: looped through all results
 
@@ -586,175 +726,95 @@ void GVOClient::connect_to_hub(void)
 
 
 /***********************************************************************//**
- * @brief Register client at SAMP Hub
+ * @brief Post string content to Hub
  *
- * @exception GException::invalid_value
- *            Unable to connect to Hub.
+ * @param[in] content String content to post
+ *
+ * Posts the content of a string to the Hub.
+ *
+ * The method does nothing if no Hub connection has been established.
  ***************************************************************************/
-void GVOClient::register_to_hub(void)
+void GVOClient::post_string(const std::string& content) const
 {
-    // Connect to Hub
-    connect_to_hub();
-
     // Continue only if Hub connection has been established
     if (m_socket != -1) {
 
-        // Declare message
-        std::string msg = "";
+        // Determine content length
+        int length = content.length();
 
-        // Set metadata header
-        msg.append("<?xml version=\"1.0\"?>\n");
-        msg.append("<methodCall>\n");
-        msg.append("  <methodName>samp.hub.register</methodName>\n");
-        msg.append("  <params>\n");
-        msg.append("    <param><value><string>"+m_secret+"</string></value></param>\n");
-        msg.append("  </params>\n");
-        msg.append("</methodCall>\n");
+        // Set prefix
+        std::string prefix = "POST /"+m_hub_path+" HTTP/1.0\n"
+                             "User-Agent: GammaLib\n"
+                             "Content-Type: text/xml\n"
+                             "Content-Length: "+gammalib::str(length)+"\n\n";
 
-        // Post message
-        post_string(msg);
+        // Build post string
+        std::string post = prefix + content;
 
-        // Get Hub response
-        GXml xml = response();
+        // Debug option: show posted message
+        #if defined(G_SHOW_MESSAGE)
+        std::cout << post << std::endl;
+        #endif
 
-        // If no error occured, extract hub and client identifiers
-        if (response_is_valid(xml)) {
-            m_client_key = get_response_value(xml, "samp.private-key");
-            m_hub_id     = get_response_value(xml, "samp.hub-id");
-            m_client_id  = get_response_value(xml, "samp.self-id");
-        }
+        // Send content to socket
+        bool done = false;
+        do {
+            int length      = post.length() + 1; // +1 for terminating 0
+            int sent_length = send(m_socket, post.c_str(), length+1, 0);
+            if (sent_length < length) {
+                post = post.substr(sent_length, std::string::npos);
+            }
+            else {
+                done = true;
+            }
+        } while (!done);
 
-        // ... otherwise signal an error
-        else {
-            std::string msg = "Unable to connect to Hub (" +
-                              response_error_message(xml) + ", code=" +
-                              gammalib::str(response_error_code(xml)) + ").";
-            throw GException::runtime_error(G_REGISTER_TO_HUB, msg);
-        }
-
-    } // endif: Hub connection has been established
-
+    } // endif: Hub connection had been established
+    
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Unregister client from SAMP Hub
+ * @brief Receive string content from Hub
+ *
+ * @return String received from Hub.
+ *
+ * Reads information sent by Hub into a string.
+ * 
+ * The method does nothing if no Hub connection has been established.
  ***************************************************************************/
-void GVOClient::unregister_from_hub(void)
+std::string GVOClient::receive_string(void) const
 {
-    // Connect to Hub
-    connect_to_hub();
+    // Initialise empty string
+    std::string result = "";
 
     // Continue only if Hub connection has been established
     if (m_socket != -1) {
 
-        // Declare message
-        std::string msg = "";
+        // Define buffer
+        char buffer[1001];
 
-        // Set metadata header
-        msg.append("<?xml version=\"1.0\"?>\n");
-        msg.append("<methodCall>\n");
-        msg.append("<methodName>samp.hub.unregister</methodName>\n");
-        msg.append("<params>\n");
-        msg.append("<param><value><string>"+m_client_key+"</string></value></param>\n");
-        msg.append("</params>\n");
-        msg.append("</methodCall>\n");
+        // Read buffer until it is empty
+        int n = 0;
+        do {
+            n = recv(m_socket, buffer, 1000, 0);
+            if (n > 0) {
+                buffer[n] = '\0';
+                result.append(std::string(buffer));
+            }
+        } while (n > 0);
 
-        // Post message
-        post_string(msg);
+        // Debug option: show received message
+        #if defined(G_SHOW_MESSAGE)
+        std::cout << result << std::endl;
+        #endif
 
-        // Get Hub response
-        GXml xml = response();
+    } // endif: Hub connection had been established
 
-        // Reset Hub and client identifiers
-        m_client_key.clear();
-        m_hub_id.clear();
-        m_client_id.clear();
-
-    } // endif: Hub connection has been established
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Send client metadata to Hub
- ***************************************************************************/
-void GVOClient::send_metadata(void)
-{
-    // Connect to Hub. This was needed to post the metadata to the Hub.
-    // Apparently, the connection is lost after each write/read cycle.
-    // Maybe this is socket standard?
-    connect_to_hub();
-
-    // Continue only if Hub connection has been established
-    if (m_socket != -1) {
-
-        // Declare message
-        std::string msg = "";
-
-        // Set metadata header
-        msg.append("<?xml version=\"1.0\"?>\n");
-        msg.append("<methodCall>\n");
-        msg.append("<methodName>samp.hub.declareMetadata</methodName>\n");
-        msg.append("<params>\n");
-        msg.append("<param><value><string>"+m_client_key+"</string></value></param>\n");
-        msg.append("<param><value><struct>\n");
-
-        // Set SAMP name
-        msg.append("<member>\n");
-        msg.append("<name>samp.name</name>\n");
-        msg.append("<value><string>"+m_name+"</string></value>\n");
-        msg.append("</member>\n");
-
-        // Set SAMP description text
-        msg.append("<member>\n");
-        msg.append("<name>samp.description.text</name>\n");
-        msg.append("<value><string>GammaLib client</string></value>\n");
-        msg.append("</member>\n");
-
-        // Set SAMP icon URL
-        msg.append("<member>\n");
-        msg.append("<name>samp.icon.url</name>\n");
-        msg.append("<value><string>http://a.fsdn.com/allura/p/gammalib/icon</string></value>\n");
-        msg.append("</member>\n");
-
-        // Set author affiliation
-        msg.append("<member>\n");
-        msg.append("<name>author.affiliation</name>\n");
-        msg.append("<value><string>IRAP, Toulouse, France</string></value>\n");
-        msg.append("</member>\n");
-
-        // Set author e-mail
-        msg.append("<member>\n");
-        msg.append("<name>author.email</name>\n");
-        msg.append("<value><string>jurgen.knodlseder@irap.omp.eu</string></value>\n");
-        msg.append("</member>\n");
-
-        // Set author name
-        msg.append("<member>\n");
-        msg.append("<name>author.name</name>\n");
-        msg.append("<value><string>Juergen Knoedlseder</string></value>\n");
-        msg.append("</member>\n");
-
-        // Set metadata trailer
-        msg.append("</struct></value></param>\n");
-        msg.append("</params>\n");
-        msg.append("</methodCall>\n");
-
-        // Post message
-        post_string(msg);
-
-        // Get Hub response
-        GXml xml = response();
-
-    } // endif: Hub connection has been established
-
-    // Return
-    return;
+    // Return result
+    return result;
 }
 
 
@@ -838,99 +898,6 @@ void GVOClient::get_name_value_pair(const GXmlNode* node,
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Post string content to Hub
- *
- * @param[in] content String content to post
- *
- * Posts the content of a string to the Hub.
- *
- * The method does nothing if no Hub connection has been established.
- ***************************************************************************/
-void GVOClient::post_string(const std::string& content) const
-{
-    // Continue only if Hub connection has been established
-    if (m_socket != -1) {
-
-        // Determine content length
-        int length = content.length();
-
-        // Set prefix
-        std::string prefix = "POST /"+m_hub_path+" HTTP/1.0\n"
-                             "User-Agent: GammaLib\n"
-                             "Content-Type: text/xml\n"
-                             "Content-Length: "+gammalib::str(length)+"\n\n";
-
-        // Build post string
-        std::string post = prefix + content;
-
-        // Debug option: show posted message
-        #if defined(G_SHOW_MESSAGE)
-        std::cout << post << std::endl;
-        #endif
-
-        // Send content to socket
-        bool done = false;
-        do {
-            int length      = post.length();
-            int sent_length = send(m_socket, post.c_str(), length, 0);
-            if (sent_length < length) {
-                post = post.substr(sent_length, std::string::npos);
-            }
-            else {
-                done = true;
-            }
-        } while (!done);
-
-    } // endif: Hub connection had been established
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Receive string content from Hub
- *
- * @return String received from Hub.
- *
- * Reads information sent by Hub into a string.
- * 
- * The method does nothing if no Hub connection has been established.
- ***************************************************************************/
-std::string GVOClient::receive_string(void) const
-{
-    // Initialise empty string
-    std::string result = "";
-
-    // Continue only if Hub connection has been established
-    if (m_socket != -1) {
-
-        // Define buffer
-        char buffer[1001];
-
-        // Read buffer until it is empty
-        int n = 0;
-        do {
-            n = recv(m_socket, buffer, 1000, 0);
-            if (n > 0) {
-                buffer[n+1] = '\0';
-                result.append(std::string(buffer));
-            }
-        } while (n > 0);
-
-        // Debug option: show received message
-        #if defined(G_SHOW_MESSAGE)
-        std::cout << result << std::endl;
-        #endif
-
-    } // endif: Hub connection had been established
-
-    // Return result
-    return result;
 }
 
 

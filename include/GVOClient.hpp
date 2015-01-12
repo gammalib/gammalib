@@ -67,8 +67,7 @@ public:
     void        connect(void);
     void        disconnect(void);
     bool        has_hub(void) const;
-    bool        is_connected(void) const;
-    GXml        response(void) const;
+    GXml        execute(const std::string& request) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -77,12 +76,12 @@ protected:
     void        copy_members(const GVOClient& client);
     void        free_members(void);
     bool        find_hub(void);
-    void        connect_to_hub(void);
     void        register_to_hub(void);
     void        unregister_from_hub(void);
-    void        send_metadata(void);
+    void        send_metadata(void) const;
     
     // Low-level methods
+    void        connect_to_hub(void) const;
     void        post_string(const std::string& string) const;
     std::string receive_string(void) const;
     std::string get_response_value(const GXml& xml, const std::string& name) const;
@@ -103,7 +102,7 @@ protected:
     std::string m_client_key;  //!< Private client key
     std::string m_hub_id;      //!< Hub identifier
     std::string m_client_id;   //!< Client identifier
-    int         m_socket;      //!< Hub socket
+    mutable int m_socket;      //!< Hub socket
 };
 
 
