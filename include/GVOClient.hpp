@@ -98,6 +98,7 @@ protected:
     std::string m_hub_url;     //!< The XML-RPC endpoint for communication with the hub
     std::string m_hub_host;    //!< Hub host (extracted from XML-RPC endpoint)
     std::string m_hub_port;    //!< Hub port (extracted from XML-RPC endpoint)
+    std::string m_hub_path;    //!< Hub path (extracted from XML-RPC endpoint)
     std::string m_version;     //!< The version of the SAMP Standard Profile implemented by the hub
     std::string m_client_key;  //!< Private client key
     std::string m_hub_id;      //!< Hub identifier

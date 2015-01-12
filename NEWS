@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-09-01
+New Features and Important Changes in GammaLib 00-09-02
 
 Author(s) : Juergen Knoedlseder
 
-7 January 2015
+12 January 2015
 
 
 1. Introduction
@@ -78,7 +78,9 @@ None
 
 15. VO module
 -------------
-None
+The XMLRPC path name as found in the .samp lockfile is now used to compose
+the http POST message. This solves a problem when trying to connect to some
+VO tool hubs.
 
 
 16. Xspec module
@@ -103,8 +105,7 @@ None
 
 20. CTA interface
 -----------------
-Corrected bug #1383 that led to a unit test failure for the CTA energy dispersion
-computation on recent gcc compiler versions.
+None
 
 
 21. COMPTEL interface

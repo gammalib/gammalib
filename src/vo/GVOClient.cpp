@@ -291,8 +291,9 @@ std::string GVOClient::print(const GChatter& chatter) const
         if (has_hub()) {
             result.append("\n"+gammalib::parformat("Hub key")+m_secret);
             result.append("\n"+gammalib::parformat("Hub URL")+m_hub_url);
-            result.append("\n"+gammalib::parformat("Hub host (port)"));
-            result.append(m_hub_host+" ("+m_hub_port+")");
+            result.append("\n"+gammalib::parformat("Hub host")+m_hub_host);
+            result.append("\n"+gammalib::parformat("Hub port")+m_hub_port);
+            result.append("\n"+gammalib::parformat("Hub path")+m_hub_path);
             result.append("\n"+gammalib::parformat("SAMP protocol version"));
             result.append(m_version);
             result.append("\n"+gammalib::parformat("Hub connection"));
@@ -340,6 +341,7 @@ void GVOClient::init_members(void)
     m_hub_url.clear();
     m_hub_host.clear();
     m_hub_port.clear();
+    m_hub_path.clear();
     m_version.clear();
     m_client_key.clear();
     m_hub_id.clear();
@@ -364,6 +366,7 @@ void GVOClient::copy_members(const GVOClient& client)
     m_hub_url    = client.m_hub_url;
     m_hub_host   = client.m_hub_host;
     m_hub_port   = client.m_hub_port;
+    m_hub_path   = client.m_hub_path;
     m_version    = client.m_version;
     m_client_key = client.m_client_key;
     m_hub_id     = client.m_hub_id;
@@ -463,11 +466,12 @@ bool GVOClient::find_hub(void)
             // Close SAMP lockfile
             fclose(fptr);
 
-            // Extract host and port from Hub URL
+            // Extract host, port and path from Hub URL
             if (m_hub_url.compare(0, 7, "http://") == 0) {
                 size_t length;
                 size_t start = 7;
                 size_t stop  = m_hub_url.find(":", start);
+                size_t end   = std::string::npos;
                 if (stop != std::string::npos) {
                     length = stop - start;
                 }
@@ -476,8 +480,8 @@ bool GVOClient::find_hub(void)
                 }
                 m_hub_host = m_hub_url.substr(start, length);
                 if (stop != std::string::npos) {
-                    stop = stop + 1;
-                    size_t end = m_hub_url.find("/", stop);
+                    stop++;
+                    end  = m_hub_url.find("/", stop);
                     if (end != std::string::npos) {
                         length = end - stop;
                     }
@@ -485,6 +489,11 @@ bool GVOClient::find_hub(void)
                         length = std::string::npos;
                     }
                     m_hub_port = m_hub_url.substr(stop, length);
+                }
+                if (end != std::string::npos) {
+                    end++;
+                    length     = m_hub_url.length() - end;
+                    m_hub_path = m_hub_url.substr(end, length);
                 }
             }
 
@@ -850,7 +859,7 @@ void GVOClient::post_string(const std::string& content) const
         int length = content.length();
 
         // Set prefix
-        std::string prefix = "POST /xmlrpc HTTP/1.0\n"
+        std::string prefix = "POST /"+m_hub_path+" HTTP/1.0\n"
                              "User-Agent: GammaLib\n"
                              "Content-Type: text/xml\n"
                              "Content-Length: "+gammalib::str(length)+"\n\n";
