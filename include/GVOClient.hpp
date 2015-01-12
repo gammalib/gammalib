@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.hpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -88,6 +88,9 @@ protected:
     std::string get_response_value(const GXml& xml, const std::string& name) const;
     void        get_name_value_pair(const GXmlNode* node, std::string& name, std::string& value) const;
     std::string get_hub_lockfile(void) const;
+    bool        response_is_valid(const GXml& xml) const;
+    int         response_error_code(const GXml& xml) const;
+    std::string response_error_message(const GXml& xml) const;
 
     // Protected data area
     std::string m_name;        //!< Client name

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.hpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,12 +39,14 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_REGISTER_TO_HUB                      "GVOClient::register_to_hub()"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_SHOW_MESSAGE               //!< Show posted and received messages
 
 
 /*==========================================================================
@@ -395,7 +397,7 @@ void GVOClient::free_members(void)
 /***********************************************************************//**
  * @brief Find SAMP Hub
  *
- * @return True of SAMP Hub has been found, false otherwise.
+ * @return True if SAMP Hub has been found, false otherwise.
  *
  * Search a valid SAMP Hub and retrieve all mandatory token for this Hub.
  * The manadtory tokens are
@@ -576,6 +578,9 @@ void GVOClient::connect_to_hub(void)
 
 /***********************************************************************//**
  * @brief Register client at SAMP Hub
+ *
+ * @exception GException::invalid_value
+ *            Unable to connect to Hub.
  ***************************************************************************/
 void GVOClient::register_to_hub(void)
 {
@@ -591,10 +596,10 @@ void GVOClient::register_to_hub(void)
         // Set metadata header
         msg.append("<?xml version=\"1.0\"?>\n");
         msg.append("<methodCall>\n");
-        msg.append("<methodName>samp.hub.register</methodName>\n");
-        msg.append("<params>\n");
-        msg.append("<param><value><string>"+m_secret+"</string></value></param>\n");
-        msg.append("</params>\n");
+        msg.append("  <methodName>samp.hub.register</methodName>\n");
+        msg.append("  <params>\n");
+        msg.append("    <param><value><string>"+m_secret+"</string></value></param>\n");
+        msg.append("  </params>\n");
         msg.append("</methodCall>\n");
 
         // Post message
@@ -603,10 +608,20 @@ void GVOClient::register_to_hub(void)
         // Get Hub response
         GXml xml = response();
 
-        // Extract Hub and client identifiers
-        m_client_key = get_response_value(xml, "samp.private-key");
-        m_hub_id     = get_response_value(xml, "samp.hub-id");
-        m_client_id  = get_response_value(xml, "samp.self-id");
+        // If no error occured, extract hub and client identifiers
+        if (response_is_valid(xml)) {
+            m_client_key = get_response_value(xml, "samp.private-key");
+            m_hub_id     = get_response_value(xml, "samp.hub-id");
+            m_client_id  = get_response_value(xml, "samp.self-id");
+        }
+
+        // ... otherwise signal an error
+        else {
+            std::string msg = "Unable to connect to Hub (" +
+                              response_error_message(xml) + ", code=" +
+                              gammalib::str(response_error_code(xml)) + ").";
+            throw GException::runtime_error(G_REGISTER_TO_HUB, msg);
+        }
 
     } // endif: Hub connection has been established
 
@@ -752,34 +767,6 @@ std::string GVOClient::get_response_value(const GXml&        xml,
     std::string value = "";
 
     // Search for value of specified member
-    /*
-    const GXmlNode* node = xml.element("methodResponse", 0);
-    if (node != NULL) {
-        node = node->element("params", 0);
-        if (node != NULL) {
-            node = node->element("param", 0);
-            if (node != NULL) {
-                node = node->element("value", 0);
-                if (node != NULL) {
-                    node = node->element("struct", 0);
-                    if (node != NULL) {
-                        int num = node->elements("member");
-                        for (int i = 0; i < num; ++i) {
-                            const GXmlNode* member = node->element("member", i);
-                            std::string one_name;
-                            std::string one_value;
-                            get_name_value_pair(member, one_name, one_value);
-                            if (one_name == name) {
-                                value = one_value;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    */
     const GXmlNode* node = xml.element("methodResponse > params > param > value > struct");
     if (node != NULL) {
         int num = node->elements("member");
@@ -871,6 +858,11 @@ void GVOClient::post_string(const std::string& content) const
         // Build post string
         std::string post = prefix + content;
 
+        // Debug option: show posted message
+        #if defined(G_SHOW_MESSAGE)
+        std::cout << post << std::endl;
+        #endif
+
         // Send content to socket
         bool done = false;
         do {
@@ -920,6 +912,11 @@ std::string GVOClient::receive_string(void) const
                 result.append(std::string(buffer));
             }
         } while (n > 0);
+
+        // Debug option: show received message
+        #if defined(G_SHOW_MESSAGE)
+        std::cout << result << std::endl;
+        #endif
 
     } // endif: Hub connection had been established
 
@@ -976,4 +973,73 @@ std::string GVOClient::get_hub_lockfile(void) const
 
     // Return URL
     return url;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if response is valid
+ *
+ * @return True if response is valid, false otherwise.
+ ***************************************************************************/
+bool GVOClient::response_is_valid(const GXml& xml) const
+{
+    // Initialise validity flag
+    bool valid = true;
+
+    // Check for data
+    const GXmlNode* node = xml.element("methodResponse > params > param > value > struct");
+    if (node == NULL) {
+        valid = false;
+    }
+
+    // Return validity
+    return valid;
+}
+
+
+/***********************************************************************//**
+ * @brief Return response error code
+ *
+ * @return Response error core (0 if no error occured).
+ ***************************************************************************/
+int GVOClient::response_error_code(const GXml& xml) const
+{
+    // Initialise error code
+    int error_code = 0;
+
+    // Extract error code
+    const GXmlNode* node = xml.element("methodResponse > fault > value > struct");
+    if (node != NULL) {
+        const GXmlNode* code = node->element("member[0] > value > int");
+        if (code != NULL) {
+            error_code = gammalib::toint(static_cast<const GXmlText*>((*code)[0])->text());
+        }
+    }
+
+    // Return error code
+    return error_code;
+}
+
+
+/***********************************************************************//**
+ * @brief Return response error message
+ *
+ * @return Response error message (blank if no error occured).
+ ***************************************************************************/
+std::string GVOClient::response_error_message(const GXml& xml) const
+{
+    // Initialise error message
+    std::string error_message;
+
+    // Extract error message
+    const GXmlNode* node = xml.element("methodResponse > fault > value > struct");
+    if (node != NULL) {
+        const GXmlNode* msg  = node->element("member[1] > value");
+        if (msg != NULL) {
+            error_message = static_cast<const GXmlText*>((*msg)[0])->text();
+        }
+    }
+
+    // Return error message
+    return error_message;
 }
