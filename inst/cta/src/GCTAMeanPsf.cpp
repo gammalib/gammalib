@@ -108,7 +108,19 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string& filename)
     return;
 }
 
-GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax, const int& ndbins)
+
+/***********************************************************************//**
+ * @brief Event cube constructor
+ *
+ * @param[in] cube Event cube.
+ * @param[in] dmax Maximum delta (deg).
+ * @param[in] ndbins Number of delta bins.
+ *
+ * Construct PSF cube using the same binning and sky projection that is
+ * used for the event cube.
+ ***************************************************************************/
+GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax,
+                         const int& ndbins)
 {
     // Initialise class members
     init_members();
@@ -120,7 +132,6 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax, const in
     set_eng_axis();
 
     // Set delta node array
-
     m_deltas.clear();
     for (int i = 0; i < ndbins; ++i) {
         #if defined(G_QUADRATIC_BINNING)
@@ -137,17 +148,15 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax, const in
     // Compute number of sky maps
     int nmaps = m_ebounds.size() * m_deltas.size();
 
+    // Set PSF cube to event cube
+    m_cube = cube.map();
 
-    // Create sky map
-    const GWcs* wcs = dynamic_cast<const GWcs*>(cube.map().projection());// reg.alloc(cube.map().projection()->code());
+    // Set appropriate number of skymaps
+    m_cube.nmaps(nmaps);
 
-    std::string coordsys = wcs->coordsys();
-    std::string proj = wcs->code();
-    double xref = wcs->crval(0);
-    double yref = wcs->crval(1);
-    double xbinsz = wcs->cdelt(0);
-    double ybinsz = wcs->cdelt(1);
-    m_cube = GSkymap(proj, coordsys, xref, yref, xbinsz, ybinsz, cube.map().nx(), cube.map().ny(), nmaps);
+    // Set all PSF cube pixels to zero as we want to have a clean map
+    // upon construction
+    m_cube = 0.0;
 
     // Return
     return;
