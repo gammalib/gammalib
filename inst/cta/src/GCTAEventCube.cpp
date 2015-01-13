@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,26 @@ GCTAEventCube::GCTAEventCube(void) : GEventCube()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File name constructor
+ *
+ * @param[in] filename Counts cube filename.
+ *
+ * Construct instance of events cube a counts cube file.
+ ***************************************************************************/
+GCTAEventCube::GCTAEventCube(const std::string& filename) : GEventCube()
+{
+    // Initialise members
+    init_members();
+
+    // Load counts cube
+    load(filename);
 
     // Return
     return;
