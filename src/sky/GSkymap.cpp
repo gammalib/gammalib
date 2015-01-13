@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkymap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@
 #define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
 #define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
 #define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
+#define G_NMAPS                                        "GSkymap::nmaps(int&)"
 #define G_INX2DIR                                    "GSkymap::inx2dir(int&)"
 #define G_PIX2DIR                              "GSkymap::pix2dir(GSkyPixel&)"
 #define G_DIR2INX                                "GSkymap::dir2inx(GSkyDir&)"
@@ -820,6 +821,70 @@ void GSkymap::clear(void)
 GSkymap* GSkymap::clone(void) const
 {
     return new GSkymap(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of maps
+ *
+ * @param[in] nmaps Number of maps.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid number of maps specified.
+ *
+ * Redefines the number of maps in an GSkymap object. If the number of maps
+ * is increased with respect to the existing number, additional maps with
+ * pixel values of zero are append to the object. Existing map pixel values
+ * are kept. If the number of maps is decreases with respect to the existing
+ * number, the excedent maps are dropped. The remaining map pixel values are
+ * kept.
+ ***************************************************************************/
+void GSkymap::nmaps(const int& nmaps)
+{
+    // Throw an exception if less than 1 map is required
+    if (nmaps < 1) {
+        std::string msg = "At least one map is required in an GSkymap object."
+                          " Please specify an argument >=1.";
+        throw GException::invalid_argument(G_NMAPS, msg);
+    }
+
+    // If the map has pixels and if the number of maps changes then set a new
+    // number of maps. Copy over any existing information.
+    if (m_num_pixels > 0 && nmaps != m_num_maps) {
+
+        // Compute new skymap size
+        int new_size = m_num_pixels * nmaps;
+
+        // Allocate memory for new map
+        double* pixels = new double[new_size];
+
+        // Copy over existing pixels
+        int num_copy = (nmaps > m_num_maps) ? m_num_maps : nmaps;
+        num_copy    *= m_num_pixels;
+        for (int i = 0; i < num_copy; ++i) {
+            pixels[i] = m_pixels[i];
+        }
+
+        // Set any additional pixels to zero
+        if (nmaps > m_num_maps) {
+            for (int i = num_copy; i < new_size; ++i) {
+                pixels[i] = 0.0;
+            }
+        }
+
+        // Free existing pixels
+        if (m_pixels != NULL) delete [] m_pixels;
+
+        // Set pointer to stacked pixels
+        m_pixels = pixels;
+
+        // Set number of maps
+        m_num_maps = nmaps;
+
+    } // endif: map had pixels
+
+    // Return
+    return;
 }
 
 
