@@ -35,6 +35,8 @@
 #include "GCTAExposure.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
+#include "GWcsRegistry.hpp"
+#include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                            "GCTAMeanPsf::set(GCTAObservation&)"
@@ -104,6 +106,61 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string& filename)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Event cube constructor
+ *
+ * @param[in] cube Event cube.
+ * @param[in] dmax Maximum delta (deg).
+ * @param[in] ndbins Number of delta bins.
+ *
+ * Construct PSF cube using the same binning and sky projection that is
+ * used for the event cube.
+ ***************************************************************************/
+GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax,
+                         const int& ndbins)
+{
+    // Initialise class members
+    init_members();
+
+    // Store energy boundaries
+    m_ebounds = cube.ebounds();
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
+    // Set delta node array
+    m_deltas.clear();
+    for (int i = 0; i < ndbins; ++i) {
+        #if defined(G_QUADRATIC_BINNING)
+        double binsize = std::sqrt(dmax) / double(ndbins);
+        double delta   = binsize * (double(i) + 0.5); // avoid central singularity
+        delta         *= delta;
+        #else
+        double binsize = dmax / double(ndbins);
+        double delta   = binsize * (double(i) + 0.5); // avoid central singularity
+        #endif
+        m_deltas.append(delta);
+    }
+
+    // Compute number of sky maps
+    int nmaps = m_ebounds.size() * m_deltas.size();
+
+    // Set PSF cube to event cube
+    m_cube = cube.map();
+
+    // Set appropriate number of skymaps
+    m_cube.nmaps(nmaps);
+
+    // Set all PSF cube pixels to zero as we want to have a clean map
+    // upon construction
+    m_cube = 0.0;
+
+    // Return
+    return;
+
 }
 
 
@@ -431,7 +488,7 @@ void GCTAMeanPsf::fill(const GObservations& obs)
 
                                 // Set map index
                                 int imap = offset(idelta, iebin);
-                
+
                                 // Add on PSF cube
                                 m_cube(pixel, imap) +=
                                     rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -887,6 +887,28 @@ void TestGSky::test_GSkymap(void)
     }
 	test_value(total_stacked, total_src, 1.0e-3, "Test stack_maps() method");
 	test_value(map_stacked.nmaps(), 1, "Test stack_maps() method");    
+
+    // Test map number changing
+    GSkymap map_more = map_src;
+    map_more.nmaps(4);
+    double total_more = 0.0;
+    for (int k = 0; k < map_more.nmaps(); ++k) {
+        for (int pix = 0; pix < map_more.npix(); ++pix) {
+            total_more += map_more(pix,k);
+        }
+    }
+	test_value(total_more, total_src, 1.0e-3, "Test nmaps() method with more maps");
+	test_value(map_more.nmaps(), 4, "Test nmaps() method with more maps");    
+    GSkymap map_less = map_src;
+    map_less.nmaps(1);
+    double total_less = 0.0;
+    for (int k = 0; k < map_less.nmaps(); ++k) {
+        for (int pix = 0; pix < map_less.npix(); ++pix) {
+            total_less += map_less(pix,k);
+        }
+    }
+	test_value(total_less, 0.5*total_src, 1.0e-3, "Test nmaps() method with less maps");
+	test_value(map_less.nmaps(), 1, "Test nmaps() method with less maps");    
 
     // Exit test
     return;

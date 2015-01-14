@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkymap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -121,6 +121,7 @@ public:
     const int&            nx(void) const;
     const int&            ny(void) const;
     const int&            nmaps(void) const;
+    void                  nmaps(const int& nmaps);
     GSkyPixel             inx2pix(const int& index) const;
     GSkyDir               inx2dir(const int& index) const;
     GSkyDir               pix2dir(const GSkyPixel& pixel) const;

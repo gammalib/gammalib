@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAExposure.cpp - CTA exposure cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Chia-Chun Lu                                     *
+ *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -102,6 +102,38 @@ GCTAExposure::GCTAExposure(const std::string& filename)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Event cube constructor
+ *
+ * @param[in] cube Event cube.
+ *
+ * Construct exposure cube using the same binning and sky projection that is
+ * used for the event cube.
+ ***************************************************************************/
+GCTAExposure::GCTAExposure(const GCTAEventCube& cube)
+{
+    // Initialise class members
+    init_members();
+
+    // Store energy boundaries
+    m_ebounds = cube.ebounds();
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
+    // Set exposure cube to event cube
+    m_cube = cube.map();
+
+    // Set all exposure cube pixels to zero as we want to have a clean map
+    // upon construction
+    m_cube = 0.0;
+
+    // Return
+    return;
+
 }
 
 
