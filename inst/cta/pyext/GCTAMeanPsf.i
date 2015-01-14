@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAMeanPsf.i - CTA mean point spread function cube class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Chia-Chun Lu                                     *
+ *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,7 +47,7 @@ public:
    
     // Constructors and destructors
     GCTAMeanPsf(void);
-    GCTAMeanPsf(const GCTAMeanPsf& cube);
+    explicit GCTAMeanPsf(const GCTAMeanPsf& cube);
     explicit GCTAMeanPsf(const std::string& filename);
     GCTAMeanPsf(const GCTAEventCube& cube,
                 const double& dmax, const int& ndbins);
@@ -72,6 +72,7 @@ public:
     // Methods
     void               clear(void);
     GCTAMeanPsf*       clone(void) const;
+    std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs);
     const GSkymap&     map(void) const;

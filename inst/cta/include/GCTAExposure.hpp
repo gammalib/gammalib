@@ -52,7 +52,7 @@ public:
    
     // Constructors and destructors
     GCTAExposure(void);
-    GCTAExposure(const GCTAExposure& cube);
+    explicit GCTAExposure(const GCTAExposure& cube);
     explicit GCTAExposure(const std::string& filename);
     GCTAExposure(const GCTAEventCube& cube);
     GCTAExposure(const std::string&   wcs,

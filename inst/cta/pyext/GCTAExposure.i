@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAExposure.i - CTA exposure cube class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Chia-Chun Lu                                     *
+ *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@ class GCTAExposure : public GBase {
 public:   
     // Constructors and destructors
     GCTAExposure(void);
-    GCTAExposure(const GCTAExposure& cube);
+    explicit GCTAExposure(const GCTAExposure& cube);
     explicit GCTAExposure(const std::string& filename);
     GCTAExposure(const GCTAEventCube& cube);
     GCTAExposure(const std::string&   wcs,
@@ -64,6 +64,7 @@ public:
     // Methods
     void              clear(void);
     GCTAExposure*     clone(void) const;
+    std::string       classname(void) const;
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs);
     const GSkymap&    cube(void) const;

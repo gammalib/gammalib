@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-02
 
 Author(s) : Juergen Knoedlseder
 
-12 January 2015
+14 January 2015
 
 
 1. Introduction
@@ -105,7 +105,8 @@ None
 
 20. CTA interface
 -----------------
-None
+Add a filename constructor to GCTAEventCube, and event cube constructors
+to GCTAMeanPsf and GCTAExposure.
 
 
 21. COMPTEL interface
