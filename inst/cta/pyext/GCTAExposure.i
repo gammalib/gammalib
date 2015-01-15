@@ -44,9 +44,9 @@ class GCTAExposure : public GBase {
 public:   
     // Constructors and destructors
     GCTAExposure(void);
-    explicit GCTAExposure(const GCTAExposure& cube);
+    GCTAExposure(const GCTAExposure& cube);
     explicit GCTAExposure(const std::string& filename);
-    GCTAExposure(const GCTAEventCube& cube);
+    explicit GCTAExposure(const GCTAEventCube& cube);
     GCTAExposure(const std::string&   wcs,
                  const std::string&   coords,
                  const double&        x,

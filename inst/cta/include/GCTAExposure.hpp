@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAExposure.hpp - CTA exposure cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Chia-Chun Lu                                     *
+ *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,9 +52,9 @@ public:
    
     // Constructors and destructors
     GCTAExposure(void);
-    explicit GCTAExposure(const GCTAExposure& cube);
+    GCTAExposure(const GCTAExposure& cube);
     explicit GCTAExposure(const std::string& filename);
-    GCTAExposure(const GCTAEventCube& cube);
+    explicit GCTAExposure(const GCTAEventCube& cube);
     GCTAExposure(const std::string&   wcs,
                  const std::string&   coords,
                  const double&        x,
