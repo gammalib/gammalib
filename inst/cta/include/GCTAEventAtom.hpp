@@ -106,6 +106,7 @@ protected:
     float         m_hil_msw_err;    //!< Hillas MSW error
     float         m_hil_msl;        //!< Hillas MSL
     float         m_hil_msl_err;    //!< Hillas MSL error
+    float         m_pulse_phase; //!< optional pulsar phase
 };
 
 

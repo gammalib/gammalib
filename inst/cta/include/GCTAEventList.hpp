@@ -103,6 +103,8 @@ protected:
     // IRF cache for diffuse models
     mutable std::vector<std::string>          m_irf_names;  //!< Model names
     mutable std::vector<std::vector<double> > m_irf_values; //!< IRF values
+
+    bool                m_has_phase; //!< Flag to signal if pulsar phase is available
 };
 
 

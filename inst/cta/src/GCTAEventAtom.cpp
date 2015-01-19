@@ -227,6 +227,7 @@ void GCTAEventAtom::init_members(void)
     m_hil_msw_err = 0.0;
     m_hil_msl     = 0.0;
     m_hil_msl_err = 0.0;
+    m_pulse_phase = 0.0;
 
     // Return
     return;
@@ -264,6 +265,7 @@ void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
     m_hil_msw_err = atom.m_hil_msw_err;
     m_hil_msl     = atom.m_hil_msl;
     m_hil_msl_err = atom.m_hil_msl_err;
+    m_pulse_phase = atom.m_pulse_phase;
 
     // Return
     return;
