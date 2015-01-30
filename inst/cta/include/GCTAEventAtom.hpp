@@ -72,9 +72,11 @@ public:
     // Other methods
     const int&           index(void) const;
     const unsigned long& event_id(void) const;
-    const unsigned long& obs_id(void)   const;
+    const unsigned long& obs_id(void) const;
+    const float&         phase(void) const;
     void                 event_id(const unsigned long& id);
     void                 obs_id(const unsigned long& id);
+    void                 phase(const float& phase);
 
 protected:
     // Protected methods
@@ -236,6 +238,18 @@ const unsigned long& GCTAEventAtom::obs_id(void) const
 
 
 /***********************************************************************//**
+ * @brief Return event phase
+ *
+ * @return Event phase.
+ ***************************************************************************/
+inline
+const float& GCTAEventAtom::phase(void) const
+{
+    return (m_phase);
+}
+
+
+/***********************************************************************//**
  * @brief Set event identifier
  *
  * @param[in] id Event identifier.
@@ -257,6 +271,19 @@ inline
 void GCTAEventAtom::obs_id(const unsigned long& id)
 {
     m_obs_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set event phase
+ *
+ * @param[in] phase Event phase.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::phase(const float& phase)
+{
+    m_phase = phase;
     return;
 }
 
