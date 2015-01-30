@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventAtom.hpp - CTA event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,9 +72,11 @@ public:
     // Other methods
     const int&           index(void) const;
     const unsigned long& event_id(void) const;
-    const unsigned long& obs_id(void)   const;
+    const unsigned long& obs_id(void) const;
+    const float&         phase(void) const;
     void                 event_id(const unsigned long& id);
     void                 obs_id(const unsigned long& id);
+    void                 phase(const float& phase);
 
 protected:
     // Protected methods
@@ -106,6 +108,7 @@ protected:
     float         m_hil_msw_err;    //!< Hillas MSW error
     float         m_hil_msl;        //!< Hillas MSL
     float         m_hil_msl_err;    //!< Hillas MSL error
+    float         m_phase;          //!< Optional phase
 };
 
 
@@ -235,6 +238,18 @@ const unsigned long& GCTAEventAtom::obs_id(void) const
 
 
 /***********************************************************************//**
+ * @brief Return event phase
+ *
+ * @return Event phase.
+ ***************************************************************************/
+inline
+const float& GCTAEventAtom::phase(void) const
+{
+    return (m_phase);
+}
+
+
+/***********************************************************************//**
  * @brief Set event identifier
  *
  * @param[in] id Event identifier.
@@ -256,6 +271,19 @@ inline
 void GCTAEventAtom::obs_id(const unsigned long& id)
 {
     m_obs_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set event phase
+ *
+ * @param[in] phase Event phase.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::phase(const float& phase)
+{
+    m_phase = phase;
     return;
 }
 

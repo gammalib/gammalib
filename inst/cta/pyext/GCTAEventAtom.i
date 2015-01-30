@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventAtom.i - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     // Implemented pure virtual base class methods
     void               clear(void);
     GCTAEventAtom*     clone(void) const;
+    std::string        classname(void) const;
     const GCTAInstDir& dir(void) const;
     const GEnergy&     energy(void) const;
     const GTime&       time(void) const;
@@ -54,9 +55,11 @@ public:
     // Other methods
     const int&           index(void) const;
     const unsigned long& event_id(void) const;
-    const unsigned long& obs_id(void)   const;
+    const unsigned long& obs_id(void) const;
+    const float&         phase(void) const;
     void                 event_id(const unsigned long& id);
     void                 obs_id(const unsigned long& id);
+    void                 phase(const float& phase);
 };
 
 

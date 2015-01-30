@@ -113,6 +113,12 @@ None
 Add a filename constructor to GCTAEventCube, and event cube constructors
 to GCTAMeanPsf and GCTAExposure.
 
+CTA event lists can now handle optional event phase information stored in a
+column named PHASE. GCTAEventList takes care about bookeeping the existence
+of such information while GCTAEventAtom actually holds the information.
+phase() methods have been added to GCTAEventAtom to manipulate the phase
+information.
+
 
 21. COMPTEL interface
 ---------------------

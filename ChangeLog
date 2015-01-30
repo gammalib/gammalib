@@ -3,6 +3,7 @@
         * Bug fix version 0.9.2 released
         ================================
 
+        Add optional PHASE information to CTA event lists
         Use URL path informtion in GVOClient connection to Hub
         Ignore empty string parameters in GModel::is_valid()
         Add some constructors

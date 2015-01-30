@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.cpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -529,6 +529,7 @@ void GCTAEventList::init_members(void)
     // Initialise members
     m_roi.clear();
     m_events.clear();
+    m_has_phase = false;
 
     // Initialise cache
     m_irf_names.clear();
@@ -547,8 +548,9 @@ void GCTAEventList::init_members(void)
 void GCTAEventList::copy_members(const GCTAEventList& list)
 {
     // Copy members
-    m_roi    = list.m_roi;
-    m_events = list.m_events;
+    m_roi       = list.m_roi;
+    m_events    = list.m_events;
+    m_has_phase = list.m_has_phase;
 
     // Copy cache
     m_irf_names  = list.m_irf_names;
@@ -652,6 +654,16 @@ void GCTAEventList::read_events_v0(const GFitsTable& table)
         const GFitsTableCol* ptr_energy      = table["ENERGY"];
         const GFitsTableCol* ptr_energy_err  = table["ENERGY_ERR"];
 
+        // Check for phase column
+        const GFitsTableCol* ptr_phase;
+        if (table.contains("PHASE")) {
+            m_has_phase = true;
+            ptr_phase   = table["PHASE"];
+        }
+        else {
+            m_has_phase = false;
+        }
+
         // Copy data from columns into GCTAEventAtom objects
         GCTAEventAtom event;
         for (int i = 0; i < num; ++i) {
@@ -676,6 +688,12 @@ void GCTAEventList::read_events_v0(const GFitsTable& table)
             event.m_shwidth     = 0.0;
             event.m_shlength    = 0.0;
             event.m_energy_err  = ptr_energy_err->real(i);
+
+            // Set pulse phase if available
+            if (m_has_phase) {
+                event.m_phase = ptr_phase->real(i);
+            }
+
             m_events.push_back(event);
         }
 
@@ -731,6 +749,16 @@ void GCTAEventList::read_events_v1(const GFitsTable& table)
         const GFitsTableCol* ptr_energy      = table["ENERGY"];
         const GFitsTableCol* ptr_energy_err  = table["ENERGY_ERR"];
 
+        // Check for phase column
+        const GFitsTableCol* ptr_phase;
+        if (table.contains("PHASE")) {
+            m_has_phase = true;
+            ptr_phase   = table["PHASE"];
+        }
+        else {
+            m_has_phase = false;
+        }
+
         // Copy data from columns into GCTAEventAtom objects
         GCTAEventAtom event;
         for (int i = 0; i < num; ++i) {
@@ -755,6 +783,12 @@ void GCTAEventList::read_events_v1(const GFitsTable& table)
             event.m_shwidth     = ptr_shw->real(i);
             event.m_shlength    = ptr_shl->real(i);
             event.m_energy_err  = ptr_energy_err->real(i);
+
+            // Set phase if available
+            if (m_has_phase) {
+                event.m_phase = ptr_phase->real(i);
+            }
+
             m_events.push_back(event);
         }
 
@@ -874,6 +908,12 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
         GFitsTableFloatCol  col_hil_msl     = GFitsTableFloatCol("HIL_MSL", size());
         GFitsTableFloatCol  col_hil_msl_err = GFitsTableFloatCol("HIL_MSL_ERR", size());
 
+        // Create phase column if required
+        GFitsTableFloatCol  col_phase;
+        if (m_has_phase) {
+            col_phase = GFitsTableFloatCol("PHASE", size());
+        }
+
         // Fill columns
         for (int i = 0; i < size(); ++i) {
             col_eid(i)         = m_events[i].m_event_id;
@@ -902,6 +942,12 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
             col_hil_msw_err(i) = m_events[i].m_hil_msw_err;
             col_hil_msl(i)     = m_events[i].m_hil_msl;
             col_hil_msl_err(i) = m_events[i].m_hil_msl_err;
+
+            // Optionally fill pulse phase column
+            if (m_has_phase) {
+                col_phase(i) = m_events[i].m_phase;
+            }
+
         } // endfor: looped over rows
 
         // Append columns to table
@@ -931,6 +977,11 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
         hdu.append(col_hil_msw_err);
         hdu.append(col_hil_msl);
         hdu.append(col_hil_msl_err);
+
+        // Optionally write phase column
+        if (m_has_phase) {
+            hdu.append(col_phase);
+        }
 
     } // endif: there were events to write
 
