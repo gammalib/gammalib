@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.hpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,14 +97,13 @@ protected:
     int          irf_cache_index(const std::string& name) const;
 
     // Protected members
-    GCTARoi                    m_roi;     //!< Region of interest
-    std::vector<GCTAEventAtom> m_events;  //!< Events
+    GCTARoi                    m_roi;       //!< Region of interest
+    std::vector<GCTAEventAtom> m_events;    //!< Events
+    bool                       m_has_phase; //!< Signal presence of phase
 
     // IRF cache for diffuse models
     mutable std::vector<std::string>          m_irf_names;  //!< Model names
     mutable std::vector<std::vector<double> > m_irf_values; //!< IRF values
-
-    bool                m_has_phase; //!< Flag to signal if pulsar phase is available
 };
 
 

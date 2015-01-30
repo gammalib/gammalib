@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventAtom.hpp - CTA event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -106,7 +106,7 @@ protected:
     float         m_hil_msw_err;    //!< Hillas MSW error
     float         m_hil_msl;        //!< Hillas MSL
     float         m_hil_msl_err;    //!< Hillas MSL error
-    float         m_pulse_phase; //!< optional pulsar phase
+    float         m_phase;          //!< Optional phase
 };
 
 
