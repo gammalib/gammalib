@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -96,6 +96,9 @@ void TestGModel::set(void)
 
     // Append temporal model tests
     append(static_cast<pfunction>(&TestGModel::test_temp_const), "Test GModelTemporalConst");
+
+    // Append genereric model tests
+    append(static_cast<pfunction>(&TestGModel::test_model), "Test GModel");
 
     // Append model container tests
     append(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
@@ -2129,6 +2132,71 @@ void TestGModel::test_spectral_model(void)
     test_xml_model("GModelSpectralLogParabola",  m_xml_model_point_logparabola);
     test_xml_model("GModelSpectralNodes",        m_xml_model_point_nodes);
     test_xml_model("GModelSpectralFunc",         m_xml_model_point_filefct);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test model base class functions
+ ***************************************************************************/
+void TestGModel::test_model(void)
+{
+    // Setup some models (use the sky model for that)
+    GModelSky model;
+
+    // Test instruments setting
+    model.instruments("CTA");
+    test_assert(model.instruments() == "CTA",
+                "Expected \"CTA\" instruments, found \""+
+                model.instruments()+"\".");
+    test_assert(model.is_valid("CTA", ""), "Model is not a \"CTA\" model.");
+    test_assert(model.is_valid("CTA", "123"), "Model ID selection error.");
+    model.instruments("CTA,LAT");
+    test_assert(model.instruments() == "CTA,LAT",
+                "Expected \"CTA,LAT\" instruments, found \""+
+                model.instruments()+"\".");
+    test_assert(model.is_valid("CTA", ""), "Model is not a \"CTA\" model.");
+    test_assert(model.is_valid("LAT", ""), "Model is not a \"LAT\" model.");
+    test_assert(model.is_valid("CTA", "123"), "Model ID selection error.");
+    test_assert(model.is_valid("LAT", "123"), "Model ID selection error.");
+
+    // Test ID setting
+    model.clear();
+    model.ids("123");
+    test_assert(model.ids() == "123",
+                "Expected ID \"123\" instruments, found \""+model.ids()+"\".");
+    test_assert(model.is_valid("", "123"), "Model ID is not \"123\".");
+    test_assert(model.is_valid("CTA", "123"), "Model instrument selection error.");
+    model.ids("123,456");
+    test_assert(model.ids() == "123,456",
+                "Expected ID \"123,456\" instruments, found \""+
+                model.ids()+"\".");
+    test_assert(model.is_valid("", "123"), "Model ID is not \"123\".");
+    test_assert(model.is_valid("", "456"), "Model ID is not \"456\".");
+    test_assert(model.is_valid("CTA", "123"), "Model instrument selection error.");
+    test_assert(model.is_valid("CTA", "456"), "Model instrument selection error.");
+
+    // Test instrument and ID setting
+    model.clear();
+    model.instruments("CTA");
+    model.ids("123");
+    test_assert(model.instruments() == "CTA",
+                "Expected \"CTA\" instruments, found \""+
+                model.instruments()+"\".");
+    test_assert(model.ids() == "123",
+                "Expected ID \"123\" instruments, found \""+model.ids()+"\".");
+    test_assert(model.is_valid("CTA", "123"), "Test model instrument and ID.");
+    test_assert(!model.is_valid("CTAx", "123"), "Test failure mode.");
+    test_assert(!model.is_valid("CTA", "123x"), "Test failure mode.");
+    model.instruments("CTA,LAT");
+    model.ids("123,456");
+    test_assert(model.is_valid("", ""), "Test model instrument and ID.");
+    test_assert(model.is_valid("CTA", "123"), "Test model instrument and ID.");
+    test_assert(model.is_valid("LAT", "123"), "Test model instrument and ID.");
+    test_assert(model.is_valid("CTA", "456"), "Test model instrument and ID.");
+    test_assert(model.is_valid("LAT", "456"), "Test model instrument and ID.");
 
     // Return
     return;

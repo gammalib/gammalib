@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp - Test model module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,6 +70,7 @@ public:
     void                test_filefct(void);
     void                test_spectral_model(void);
     void                test_temp_const(void);
+    void                test_model(void);
     void                test_models(void);
     void                test_model_registry(void);
 

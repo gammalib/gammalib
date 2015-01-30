@@ -1,9 +1,10 @@
-2015-01-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-01-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix version 0.9.2 released
         ================================
 
         Use URL path informtion in GVOClient connection to Hub
+        Ignore empty string parameters in GModel::is_valid()
         Add some constructors
 
 

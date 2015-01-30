@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.cpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -493,6 +493,12 @@ void GModel::ids(const std::string& ids)
  * If the list of applicable instruments is empty, the model applies to all
  * possible instruments. If the list of applicable observation identifiers
  * is empty, the model applies to all identifiers.
+ *
+ * If an empty string is provided as @p instrument parameter, the check for
+ * instrument validity will be skipped. Similarily, if an empty string is
+ * provided as @p id parameter, the identifier check will be skipped. This
+ * allows for example to check for models of a given identifier whatever the
+ * instrument, or for models for a given instrument, whatever the identifier.
  ***************************************************************************/
 bool GModel::is_valid(const std::string& instrument,
                       const std::string& id) const
@@ -501,7 +507,7 @@ bool GModel::is_valid(const std::string& instrument,
     bool valid = true;
 
     // Check if model applies to instrument
-    if (!m_instruments.empty()) {
+    if (!m_instruments.empty() && !instrument.empty()) {
 
         // Initialise validity flag
         valid = false;
@@ -517,7 +523,7 @@ bool GModel::is_valid(const std::string& instrument,
     }
 
     // Check if model applies to observation identifier
-    if (valid && !m_ids.empty()) {
+    if (valid && !m_ids.empty() && !id.empty()) {
 
         // Initialise validity flag
         valid = false;

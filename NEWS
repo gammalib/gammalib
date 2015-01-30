@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-02
 
 Author(s) : Juergen Knoedlseder
 
-14 January 2015
+30 January 2015
 
 
 1. Introduction
@@ -43,7 +43,12 @@ None
 
 8. Model module
 ---------------
-None
+The GModel::is_valid() method now allows specifying empty strings for the
+instrument and id parameters that will skip the specific model validity
+check. This allows to check for models of a given identifier whatever the
+instrument, or for models for a given instrument, whatever the identifier.
+
+Added unit tests for GModel base class methods.
 
 
 9. Numerics module
