@@ -75,6 +75,26 @@ GCTAEventList::GCTAEventList(void) : GEventList()
 
 
 /***********************************************************************//**
+ * @brief File name constructor
+ *
+ * @param[in] filename Counts cube filename.
+ *
+ * Construct event list object by loading the events from a FITS file.
+ ***************************************************************************/
+GCTAEventList::GCTAEventList(const std::string& filename) : GEventList()
+{
+    // Initialise members
+    init_members();
+
+    // Load event list
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] list Event list.

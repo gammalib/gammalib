@@ -39,6 +39,7 @@ class GCTAEventList : public GEventList {
 public:
     // Constructors and destructors
     GCTAEventList(void);
+    explicit GCTAEventList(const std::string& filename);
     GCTAEventList(const GCTAEventList& list);
     virtual ~GCTAEventList(void);
 
