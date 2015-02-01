@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,6 +64,26 @@ GLATEventCube::GLATEventCube(void) : GEventCube()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File name constructor
+ *
+ * @param[in] filename Counts cube filename.
+ *
+ * Construct event cube object by loading the events from a FITS file.
+ ***************************************************************************/
+GLATEventCube::GLATEventCube(const std::string& filename) : GEventCube()
+{
+    // Initialise members
+    init_members();
+
+    // Load counts cube
+    load(filename);
 
     // Return
     return;

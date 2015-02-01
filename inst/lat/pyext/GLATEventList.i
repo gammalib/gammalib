@@ -39,6 +39,7 @@ class GLATEventList : public GEventList {
 public:
     // Constructors and destructors
     GLATEventList(void);
+    explicit GLATEventList(const std::string& filename);
     GLATEventList(const GLATEventList& list);
     virtual ~GLATEventList(void);
 

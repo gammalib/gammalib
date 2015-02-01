@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventList.cpp - Fermi/LAT event list class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,26 @@ GLATEventList::GLATEventList(void) : GEventList()
 {
     // Initialise class members for clean destruction
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief File name constructor
+ *
+ * @param[in] filename Counts cube filename.
+ *
+ * Construct event list object by loading the events from a FITS file.
+ ***************************************************************************/
+GLATEventList::GLATEventList(const std::string& filename) : GEventList()
+{
+    // Initialise members
+    init_members();
+
+    // Load event list
+    load(filename);
 
     // Return
     return;

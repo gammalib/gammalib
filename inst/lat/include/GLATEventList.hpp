@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventList.hpp - Fermi/LAT event list class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ class GLATEventList : public GEventList {
 public:
     // Constructors and destructors
     GLATEventList(void);
+    explicit GLATEventList(const std::string& filename);
     GLATEventList(const GLATEventList& list);
     virtual ~GLATEventList(void);
 

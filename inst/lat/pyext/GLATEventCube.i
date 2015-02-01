@@ -39,6 +39,7 @@ class GLATEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GLATEventCube(void);
+    explicit GLATEventCube(const std::string& filename);
     GLATEventCube(const GLATEventCube& cube);
     virtual ~GLATEventCube(void);
 

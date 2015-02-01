@@ -453,6 +453,10 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
     int nevents = ft1.table("EVENTS")->nrows();
     ft1.close();
 
+    // Try loading event list
+    GLATEventList list(lat_ft1);
+    test_value(list.number(), nevents, "Test number of events in list.");
+
     // Load unbinned LAT observation
     test_try("Load unbinned LAT observation");
     try {
@@ -533,6 +537,10 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
         nevents += image->pixel(i);
     }
     cntmap.close();
+
+    // Try loading event list
+    GLATEventCube cube(lat_cntmap);
+    test_value(cube.number(), nevents, "Test number of events in cube.");
 
     // Load LAT binned observation from counts map
     test_try("Load LAT binned observation");
