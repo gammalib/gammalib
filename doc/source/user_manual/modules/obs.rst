@@ -22,7 +22,7 @@ gamma-ray observation. A gamma-ray observation is defined for a single
 specific instrument, and describes a time period during which the
 instrument is in a given stable configuration that can be characterized
 by a single specific response function. Each gamma-ray observation is
-composed of events, a response function and a pointing.
+composed of events and a response function.
 
 Observations are collected in the C++ container class :doxy:`GObservations`
 which is composed of a list of :doxy:`GObservation` elements (the list is of
