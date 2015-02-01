@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-09-02
 
 Author(s) : Juergen Knoedlseder
 
-30 January 2015
+1 February 2015
 
 
 1. Introduction
@@ -13,7 +13,7 @@ changes made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-None
+classname() methods have now been added to the Python interface.
 
 
 3. Configuration
