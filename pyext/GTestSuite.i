@@ -279,5 +279,6 @@ public:
     // Methods
     void              set(void);
     GPythonTestSuite* clone(void) const;
+    std::string       classname(void) const;
     void              append(PyObject* function, const std::string& name);
 };
