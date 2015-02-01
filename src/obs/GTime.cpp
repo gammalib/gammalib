@@ -694,7 +694,7 @@ void GTime::free_members(void)
  * @return Number of lead seconds.
  *
  * Return the number of leap seconds for a given MJD specified in the UTC
- * time system. This method returns valid number if leap seconds for the
+ * time system. This method returns valid number of leap seconds for the
  * years 1972-2015.
  *
  * See http://www.nist.gov/pml/div688/grp50/leapsecond.cfm for a table of
@@ -730,13 +730,14 @@ double GTime::leap_seconds(const double& mjd) const
                                51178,  // 1998-12-31
                                53735,  // 2005-12-31
                                54831,  // 2008-12-31
-                               56108}; // 2012-06-30
+                               56108,  // 2012-06-30
+                               57204}; // 2015-07-01
     const double leapsecs[] = {10.0, 11.0, 12.0, 13.0, 14.0,
                                15.0, 16.0, 17.0, 18.0, 19.0,
                                20.0, 21.0, 22.0, 23.0, 24.0,
                                25.0, 26.0, 27.0, 28.0, 29.0,
                                30.0, 31.0, 32.0, 33.0, 34.0,
-                               35.0};
+                               35.0, 36.0};
     const int    n_leapsecs = sizeof(leapsmjd)/sizeof(long);
 
     // Extract MJD day and MJD fraction
