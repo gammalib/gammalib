@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GXmlElement.i - XML element node class definition           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlElement.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -46,6 +45,7 @@ public:
     // Methods
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
+    virtual std::string  classname(void) const;
     const std::string&   name(void) const;
     void                 name(const std::string& name);
     std::string          attribute(const std::string& name) const;

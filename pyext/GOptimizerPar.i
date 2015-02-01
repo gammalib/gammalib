@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GOptimizerPar.i - Optimizer parameter class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -91,6 +91,7 @@ public:
     // Other methods
     void               clear(void);
     GOptimizerPar*     clone(void) const;
+    std::string        classname(void) const;
     const std::string& name(void) const;
     const std::string& unit(void) const;
     void               name(const std::string& name);

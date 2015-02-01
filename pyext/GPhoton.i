@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GPhoton.i - Photon class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@ public:
     // Methods
     void           clear(void);
     GPhoton*       clone(void) const;
+    std::string    classname(void) const;
     const GSkyDir& dir(void) const;
     const GEnergy& energy(void) const;
     const GTime&   time(void) const;

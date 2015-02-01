@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GCOMInstDir.i  -  COMPTEL instrument direction class           *
+ *           GCOMInstDir.i - COMPTEL instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,12 +44,13 @@ public:
     // Methods
     virtual void         clear(void);
     virtual GCOMInstDir* clone(void) const;
+    virtual std::string  classname(void) const;
 
     // Other methods
-    void    dir(const GSkyDir& dir);
-    GSkyDir dir(void) const;
-    void    phibar(const double& phibar);
-    double  phibar(void) const;
+    void           dir(const GSkyDir& dir);
+    const GSkyDir& dir(void) const;
+    void           phibar(const double& phibar);
+    const double&  phibar(void) const;
 };
 
 

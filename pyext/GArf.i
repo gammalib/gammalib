@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.i - XSPEC Auxiliary Response File class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,7 @@ public:
     // Methods
     void            clear(void);
     GArf*           clone(void) const;
+    std::string     classname(void) const;
     int             size(void) const;
     double&         at(const int& index);
     const GEbounds& ebounds(void) const;

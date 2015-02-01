@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralGauss.i - Spectral gaussian model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
+ *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,8 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpectralGauss.hpp"
-#include "GTools.hpp"
-#include "GEnergy.hpp"
 %}
 
 
@@ -50,6 +48,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralGauss* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GEnergy& srcEng,
                                       const GTime& srcTime) const;

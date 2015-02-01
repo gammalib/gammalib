@@ -47,7 +47,7 @@ class GFitsAsciiTable : public GFitsTable {
 public:
     // Constructors and destructors
     GFitsAsciiTable(void);
-    GFitsAsciiTable(const int& nrows);
+    explicit GFitsAsciiTable(const int& nrows);
     GFitsAsciiTable(const GFitsAsciiTable& table);
     virtual ~GFitsAsciiTable(void);
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModels.i - Model container class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ public:
     // Methods
     void           clear(void);
     GModels*       clone(void) const;
+    std::string    classname(void) const;
     GModel*        at(const int& index);
     int            size(void) const;
     bool           is_empty(void) const;

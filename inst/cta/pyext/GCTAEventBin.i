@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTAEventBin.i - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void               clear(void);
     virtual GCTAEventBin*      clone(void) const;
+    virtual std::string        classname(void) const;
     virtual double             size(void) const;
     virtual const GCTAInstDir& dir(void) const;
     virtual const GEnergy&     energy(void) const;

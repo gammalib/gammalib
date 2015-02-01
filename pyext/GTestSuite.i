@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuite.i - Abstract test suite base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2015 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GTestSuite.hpp"
-#include "GTools.hpp"
 #include "GException.hpp"
 
 
@@ -205,6 +204,7 @@ public:
 
     // Pure virtual methods
     virtual GTestSuite*       clone(void) const = 0;
+    virtual std::string       classname(void) const = 0;
     virtual void              set(void) = 0;
 
     // Methods

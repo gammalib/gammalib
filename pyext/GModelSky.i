@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GModelSky.i - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,6 +76,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GModelSky*  clone(void) const;
+    virtual std::string classname(void) const;
     virtual std::string type(void) const;
     virtual bool        is_constant(void) const;
     virtual double      eval(const GEvent& event,

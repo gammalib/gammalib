@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATResponse.i - Fermi/LAT Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GLATResponse* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual bool          use_edisp(void) const;
     virtual bool          use_tdisp(void) const;
     virtual double        irf(const GEvent&       event,

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GSkyDir.i - Sky direction class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GSkyDir.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -46,6 +45,7 @@ public:
     // Methods
     void          clear(void);
     GSkyDir*      clone(void) const;
+    std::string   classname(void) const;
     void          radec(const double& ra, const double& dec);
     void          radec_deg(const double& ra, const double& dec);
     void          lb(const double& l, const double& b);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GApplicationPars.i - Application parameter container          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,7 @@ public:
     // Methods
     void              clear(void);
     GApplicationPars* clone(void) const;
+    std::string       classname(void) const;
     GApplicationPar&  at(const int& index);
     int               size(void) const;
     bool              is_empty(void) const;

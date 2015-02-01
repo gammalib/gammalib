@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GXmlAttribute.i - XML attribute class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlAttribute.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -39,13 +38,14 @@ class GXmlAttribute : public GBase {
 public:
     // Constructors and destructors
     GXmlAttribute(void);
-    explicit GXmlAttribute(const GXmlAttribute& attr);
-    explicit GXmlAttribute(const std::string& name, const std::string& value);
+    GXmlAttribute(const GXmlAttribute& attr);
+    GXmlAttribute(const std::string& name, const std::string& value);
     virtual ~GXmlAttribute(void);
 
     // Methods
     void               clear(void);
     GXmlAttribute*     clone(void) const;
+    std::string        classname(void) const;
     void               write(GUrl& url) const;
     const std::string& name(void) const;
     std::string        value(void) const;
@@ -58,4 +58,7 @@ public:
  * @brief GXmlAttribute class extension
  ***************************************************************************/
 %extend GXmlAttribute {
+    GXmlAttribute copy() {
+        return (*self);
+    }
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GMatrixSparse.i - Sparse matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GMatrixSparse* clone(void) const;
+    virtual std::string    classname(void) const;
     virtual double&        at(const int& row, const int& column);
     virtual GVector        row(const int& row) const;
     virtual void           row(const int& row, const GVector& vector);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GDerivative.i - Derivative class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@ public:
     // Methods
     void             clear(void);
     GDerivative*     clone(void) const;
+    std::string      classname(void) const;
     void             max_iter(const int& max_iter);
     void             eps(const double& eps);
     void             step_frac(const double& fraction);

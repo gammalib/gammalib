@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlAttribute.hpp - XML attribute class definition            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,8 +56,8 @@ class GXmlAttribute : public GBase {
 public:
     // Constructors and destructors
     GXmlAttribute(void);
-    explicit GXmlAttribute(const GXmlAttribute& attr);
-    explicit GXmlAttribute(const std::string& name, const std::string& value);
+    GXmlAttribute(const GXmlAttribute& attr);
+    GXmlAttribute(const std::string& name, const std::string& value);
     virtual ~GXmlAttribute(void);
 
     // Operators

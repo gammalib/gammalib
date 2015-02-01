@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GUrlString.i - String URL class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GUrlString.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -46,6 +45,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GUrlString* clone(void) const;
+    virtual std::string classname(void) const;
     virtual void        open(const std::string& string, const std::string& mode = "");
     virtual void        close(void);
     virtual int         get_char(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAModelRadialRegistry.i - Radial model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ public:
     virtual ~GCTAModelRadialRegistry(void);
 
     // Methods
+    std::string      classname(void) const;
     int              size(void) const;
     GCTAModelRadial* alloc(const std::string& name) const;
     std::string      name(const int& index) const;

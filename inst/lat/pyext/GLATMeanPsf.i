@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GLATMeanPsf.i - Fermi/LAT mean PSF class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,7 @@ public:
     // Methods
     void               clear(void);
     GLATMeanPsf*       clone(void) const;
+    std::string        classname(void) const;
     int                size(void) const;
     void               set(const GSkyDir& dir, const GLATObservation& obs);
     int                noffsets(void) const;

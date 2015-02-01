@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GWcsCAR.hpp - Plate carree (CAR) projection class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,15 +45,15 @@ class GWcsCAR : public GWcs {
 public:
     // Constructors and destructors
     GWcsCAR(void);
-    explicit GWcsCAR(const std::string& coords,
-                     const double& crval1, const double& crval2,
-                     const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2);
+    GWcsCAR(const std::string& coords,
+            const double& crval1, const double& crval2,
+            const double& crpix1, const double& crpix2,
+            const double& cdelt1, const double& cdelt2);
     GWcsCAR(const GWcsCAR& wcs);
     virtual ~GWcsCAR(void);
 
     // Operators
-    GWcsCAR& operator= (const GWcsCAR& wcs);
+    GWcsCAR& operator=(const GWcsCAR& wcs);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);

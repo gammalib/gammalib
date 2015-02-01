@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAPsfKing.i - King profile CTA point spread function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     // Implemented pure virtual methods
     void         clear(void);
     GCTAPsfKing* clone(void) const;
+    std::string  classname(void) const;
     void         load(const std::string& filename);
     std::string  filename(void) const;
     double       mc(GRan&         ran,

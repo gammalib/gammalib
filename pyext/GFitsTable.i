@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsTable.i - FITS abstract table base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -116,6 +116,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GFitsTable* clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual HDUType     exttype(void) const = 0;
 
     // Implemented Methods

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GBase.i - GammaLib base class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@
  *
  * clone() Creates a deep copy of the object
  *
- * print() Print content of object
+ * classname() Returns the mane of the class
  ***************************************************************************/
 class GBase {
 public:
@@ -52,8 +52,9 @@ public:
     virtual ~GBase(void);
  
     // Methods
-    virtual void   clear(void) = 0;
-    virtual GBase* clone(void) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GBase*      clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
 };
 
 

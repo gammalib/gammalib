@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GWcs.i - Abstract world coordinate system base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,10 +38,10 @@ class GWcs : public GSkyProjection {
 public:
     // Constructors and destructors
     GWcs(void);
-    explicit GWcs(const std::string& coords,
-                  const double& crval1, const double& crval2,
-                  const double& crpix1, const double& crpix2,
-                  const double& cdelt1, const double& cdelt2);
+    GWcs(const std::string& coords,
+         const double& crval1, const double& crval2,
+         const double& crpix1, const double& crpix2,
+         const double& cdelt1, const double& cdelt2);
     explicit GWcs(const GFitsHDU& hdu);
     GWcs(const GWcs& wcs);
     virtual ~GWcs(void);
@@ -49,6 +49,7 @@ public:
     // Pure virtual methods (not implemented)
     virtual void        clear(void) = 0;
     virtual GWcs*       clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual std::string code(void) const = 0;
     virtual std::string name(void) const = 0;
     

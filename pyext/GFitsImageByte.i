@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GFitsImageByte.i - FITS Byte image class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,7 @@ public:
     // Methods
     void            clear(void);
     GFitsImageByte* clone(void) const;
+    std::string     classname(void) const;
     double          pixel(const int& ix) const;
     double          pixel(const int& ix, const int& iy) const;
     double          pixel(const int& ix, const int& iy, const int& iz) const;

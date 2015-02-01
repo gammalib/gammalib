@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GIntegral.i - Integration class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GIntegral.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -50,6 +49,7 @@ public:
     // Methods
     void               clear(void);
     GIntegral*         clone(void) const;
+    std::string        classname(void) const;
     void               max_iter(const int& iter);
     const int&         max_iter(void) const;
     void               fixed_iter(const int& iter);

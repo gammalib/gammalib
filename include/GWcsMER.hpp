@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GWcsMER.hpp - Mercator's (MER) projection class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,10 +45,10 @@ class GWcsMER : public GWcs {
 public:
     // Constructors and destructors
     GWcsMER(void);
-    explicit GWcsMER(const std::string& coords,
-                     const double& crval1, const double& crval2,
-                     const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2);
+    GWcsMER(const std::string& coords,
+            const double& crval1, const double& crval2,
+            const double& crpix1, const double& crpix2,
+            const double& cdelt1, const double& cdelt2);
     GWcsMER(const GWcsMER& wcs);
     virtual ~GWcsMER(void);
 

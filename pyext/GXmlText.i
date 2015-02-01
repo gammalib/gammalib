@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GXmlText.i - XML text node class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlText.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -46,6 +45,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GXmlText*   clone(void) const;
+    virtual std::string classname(void) const;
     virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const;
 

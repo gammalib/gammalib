@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.i - Observations container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GObservations.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -46,6 +45,7 @@ public:
     // Methods
     void           clear(void);
     GObservations* clone(void) const;
+    std::string    classname(void) const;
     int            size(void) const;
     bool           is_empty(void) const;
     GObservation*  set(const int& index, const GObservation& obs);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralSuperExpPlaw.i - Super exp. cut off power law model    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Michael Mayer                                    *
+ *  copyright (C) 2014-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@ public:
     // Implemented pure virtual methods
     virtual void                        clear(void);
     virtual GModelSpectralSuperExpPlaw* clone(void) const;
+    virtual std::string                 classname(void) const;
     virtual std::string                 type(void) const;
     virtual double                      eval(const GEnergy& srcEng,
                                              const GTime&   srcTime) const;

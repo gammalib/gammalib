@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GHorizDir.i - Horizontal direction class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Karl Kosack                                      *
+ *  copyright (C) 2014-2015 by Karl Kosack                                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     // Methods
     void          clear(void);
     GHorizDir*    clone(void) const;
+    std::string   classname(void) const;
     void          altaz(const double& alt, const double& az);
     void          altaz_deg(const double& alt, const double& az);
     void          celvector(const GVector& vector);

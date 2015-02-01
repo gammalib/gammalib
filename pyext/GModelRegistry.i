@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GModelRegistry.i - Model registry class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,7 +45,8 @@ public:
     virtual ~GModelRegistry(void);
 
     // Methods
-    int         size(void) const { return m_number; }
+    std::string classname(void) const;
+    int         size(void) const;
     GModel*     alloc(const std::string& name) const;
     std::string name(const int& index) const;
 };

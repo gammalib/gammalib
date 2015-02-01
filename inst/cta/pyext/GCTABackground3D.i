@@ -51,6 +51,7 @@ public:
     // Implemented pure virtual methods
     void                       clear(void);
     GCTABackground3D*          clone(void) const;
+    std::string                classname(void) const;
     void                       load(const std::string& filename);
     std::string                filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,

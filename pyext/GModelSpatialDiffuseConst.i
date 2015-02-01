@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseConst.i - Spatial isotropic model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpatialDiffuseConst.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -47,6 +46,7 @@ public:
     // Implemented pure virtual methods
     virtual void                       clear(void);
     virtual GModelSpatialDiffuseConst* clone(void) const;
+    virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
     virtual double                     eval(const GPhoton& photon) const;
     virtual double                     eval_gradients(const GPhoton& photon) const;

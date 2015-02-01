@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCOMModelDRBFitting.i  -  COMPTEL DRB model fitting class        *
+ *         GCOMModelDRBFitting.i - COMPTEL DRB model fitting class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ public:
     // Implemented pure virtual methods
     virtual void                 clear(void);
     virtual GCOMModelDRBFitting* clone(void) const;
+    virtual std::string          classname(void) const;
     virtual std::string          type(void) const;
     virtual bool                 is_constant(void) const;
     virtual double               eval(const GEvent& event,

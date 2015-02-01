@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GRoi.i - Abstract Region of interest base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,9 +48,10 @@ public:
     virtual ~GRoi(void);
 
     // Pure virtual methods
-    virtual void  clear(void) = 0;
-    virtual GRoi* clone(void) const = 0;
-    virtual bool  contains(const GEvent& event) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GRoi*       clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
+    virtual bool        contains(const GEvent& event) const = 0;
 };
 
 

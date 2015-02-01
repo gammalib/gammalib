@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralRegistry.i - Spectral model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpectralRegistry.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -45,7 +44,8 @@ public:
     virtual ~GModelSpectralRegistry(void);
 
     // Methods
-    int             size(void) const { return m_number; }
+    std::string     classname(void) const;
+    int             size(void) const;
     GModelSpectral* alloc(const std::string& name) const;
     std::string     name(const int& index) const;
 };
@@ -55,7 +55,4 @@ public:
  * @brief GModelSpectralRegistry class extension
  ***************************************************************************/
 %extend GModelSpectralRegistry {
-    char *__str__() {
-        return gammalib::tochar(self->print());
-    }
 };

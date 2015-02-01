@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEdispRmf.i - CTA RMF energy dispersion class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
+ *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,6 +54,7 @@ public:
     // Implemented pure virtual methods
     void          clear(void);
     GCTAEdispRmf* clone(void) const;
+    std::string   classname(void) const;
     void          load(const std::string& filename);
     std::string   filename(void) const;
     GEnergy       mc(GRan& ran,

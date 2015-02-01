@@ -55,6 +55,7 @@ public:
     // Implemented pure virtual methods
     void         clear(void);
     GCTAAeffArf* clone(void) const;
+    std::string  classname(void) const;
     void         load(const std::string& filename);
     std::string  filename(void) const;
 

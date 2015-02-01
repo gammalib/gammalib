@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GMWLSpectrum.i - Multi-wavelength spectrum class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GMWLSpectrum* clone(void) const;
+    virtual std::string   classname(void) const;
     virtual int           size(void) const;
     virtual int           dim(void) const;
     virtual int           naxis(const int& axis) const;

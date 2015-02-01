@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpectralBrokenPlaw.i - Broken power law spectrum class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Anneli Schulz                                    *
+ *  copyright (C) 2013-2015 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,7 @@ public:
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpectralBrokenPlaw* clone(void) const;
+    virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
     virtual double                    eval(const GEnergy& srcEng,
                                            const GTime&   srcTime) const;

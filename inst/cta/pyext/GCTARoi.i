@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTARoi.i - CTA region of interest class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2015 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GCTARoi*    clone(void) const;
+    virtual std::string classname(void) const;
     virtual bool        contains(const GEvent& event) const;
 
     // Other methods

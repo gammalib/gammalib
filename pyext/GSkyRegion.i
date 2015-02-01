@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyRegion.i - Sky region class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GSkyRegion.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -45,6 +44,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GSkyRegion* clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual void        read(const std::string& regstring) = 0;
     virtual std::string write(void) const = 0;
 	virtual bool        contains(const GSkyDir& dir) const = 0;
@@ -61,3 +61,5 @@ public:
 /***********************************************************************//**
  * @brief GSkyRegion class extension
  ***************************************************************************/
+%extend GSkyRegion {
+};

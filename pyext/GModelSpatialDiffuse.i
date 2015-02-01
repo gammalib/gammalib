@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialDiffuse.i - Abstract diffuse spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     // Pure virtual base class methods
     virtual void                  clear(void) = 0;
     virtual GModelSpatialDiffuse* clone(void) const = 0;
+    virtual std::string           classname(void) const = 0;
     virtual std::string           type(void) const = 0;
     virtual double                eval(const GPhoton& photon) const = 0;
     virtual double                eval_gradients(const GPhoton& photon) const = 0;

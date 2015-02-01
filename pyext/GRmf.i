@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GRmf.i - XSPEC Redistribution Matrix File class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GRmf.hpp"
-#include "GTools.hpp"
 %}
 
 /* __ Includes ___________________________________________________________ */
@@ -50,6 +49,7 @@ public:
     // Methods
     void                 clear(void);
     GRmf*                clone(void) const;
+    std::string          classname(void) const;
     int                  size(void) const;
     int                  ntrue(void) const;
     int                  nmeasured(void) const;

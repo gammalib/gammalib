@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlDocument.i - XML document node class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlDocument.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -43,18 +42,19 @@ public:
     virtual ~GXmlDocument(void);
 
     // Implemented pure virtual base class methods
-    void          clear(void);
-    GXmlDocument* clone(void) const;
-    void          write(GUrl& url, const int& indent = 0) const;
-    NodeType      type(void) const;
+    virtual void          clear(void);
+    virtual GXmlDocument* clone(void) const;
+    virtual std::string   classname(void) const;
+    virtual void          write(GUrl& url, const int& indent = 0) const;
+    virtual NodeType      type(void) const;
 
     // Methods
-    std::string   version(void) const;
-    std::string   encoding(void) const;
-    std::string   standalone(void) const;
-    void          version(const std::string& version);
-    void          encoding(const std::string& encoding);
-    void          standalone(const std::string& standalone);
+    std::string version(void) const;
+    std::string encoding(void) const;
+    std::string standalone(void) const;
+    void        version(const std::string& version);
+    void        encoding(const std::string& encoding);
+    void        standalone(const std::string& standalone);
 };
 
 

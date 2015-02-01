@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCsv.i - Column separated values table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -94,6 +94,7 @@ public:
     // Methods
     void        clear(void);
     GCsv*       clone(void) const;
+    std::string classname(void) const;
     int         size(void) const;
     const int&  ncols(void) const;
     const int&  nrows(void) const;

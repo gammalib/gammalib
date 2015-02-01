@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAOnOffObservations.i - CTA on-off observation container class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Pierrick Martin                                  *
+ *  copyright (C) 2013-2015 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ public:
     // Methods
     void                   clear(void);
     GCTAOnOffObservations* clone(void) const;
+    std::string            classname(void) const;
     GCTAOnOffObservation*  at(const int& index);
     int                    size(void) const;
     bool                   is_empty(void) const;

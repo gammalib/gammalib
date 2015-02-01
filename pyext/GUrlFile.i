@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GUrlFile.i - File URL class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GUrlFile.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -44,12 +43,13 @@ public:
     virtual ~GUrlFile(void);
 
     // Implemented pure virtual base class methods
-    virtual void      clear(void);
-    virtual GUrlFile* clone(void) const;
-    virtual void      open(const std::string& url, const std::string& mode);
-    virtual void      close(void);
-    virtual int       get_char(void) const;
-    virtual void      put_char(const int& character);
+    virtual void        clear(void);
+    virtual GUrlFile*   clone(void) const;
+    virtual std::string classname(void) const;
+    virtual void        open(const std::string& url, const std::string& mode);
+    virtual void        close(void);
+    virtual int         get_char(void) const;
+    virtual void        put_char(const int& character);
 };
 
 

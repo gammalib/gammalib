@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GTimeReference.i - Time reference class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GTimeReference.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -55,6 +54,7 @@ public:
     // Methods
     void               clear(void);
     GTimeReference*    clone(void) const;
+    std::string        classname(void) const;
     void               read(const GFitsHDU& hdu);
     void               write(GFitsHDU& hdu) const;
     void               set(const double&      mrdref,

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlNode.i - Abstract XML node base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,12 +26,8 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlNode.hpp"
-#include "GXmlElement.hpp"
-#include "GXmlComment.hpp"
-#include "GXmlDocument.hpp"
-#include "GXmlPI.hpp"
-#include "GXmlText.hpp"
-#include "GTypemaps.hpp"
+#include "GTools.hpp"
+#include "GException.hpp"
 %}
 
 
@@ -60,24 +56,25 @@ public:
     };
 
     // Methods
-    virtual void               clear(void) = 0;
-    virtual GXmlNode*          clone(void) const = 0;
-    virtual int                size(void) const;
-    virtual bool               is_empty(void) const;
-    virtual GXmlNode*          set(const int& index, const GXmlNode& node);
-    virtual GXmlNode*          append(const GXmlNode& node);
-    virtual GXmlElement*       append(const std::string& segment);
-    virtual GXmlNode*          insert(const int& index, const GXmlNode& node);
-    virtual void               remove(const int& index);
-    virtual void               reserve(const int& num);
-    virtual void               extend(const GXmlNode& node);
-    virtual int                elements(void) const;
-    virtual int                elements(const std::string& name) const;
-    virtual GXmlElement*       element(const int& index);
-    virtual GXmlElement*       element(const std::string& name);
-    virtual GXmlElement*       element(const std::string& name, const int& index);
-    virtual void               write(GUrl& url, const int& indent) const = 0;
-    virtual NodeType           type(void) const = 0;
+    virtual void         clear(void) = 0;
+    virtual GXmlNode*    clone(void) const = 0;
+    virtual std::string  classname(void) const = 0;
+    virtual int          size(void) const;
+    virtual bool         is_empty(void) const;
+    virtual GXmlNode*    set(const int& index, const GXmlNode& node);
+    virtual GXmlNode*    append(const GXmlNode& node);
+    virtual GXmlElement* append(const std::string& segment);
+    virtual GXmlNode*    insert(const int& index, const GXmlNode& node);
+    virtual void         remove(const int& index);
+    virtual void         reserve(const int& num);
+    virtual void         extend(const GXmlNode& node);
+    virtual int          elements(void) const;
+    virtual int          elements(const std::string& name) const;
+    virtual GXmlElement* element(const int& index);
+    virtual GXmlElement* element(const std::string& name);
+    virtual GXmlElement* element(const std::string& name, const int& index);
+    virtual void         write(GUrl& url, const int& indent) const = 0;
+    virtual NodeType     type(void) const = 0;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsAsciiTable.i - FITS ASCII table class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,14 +39,15 @@ class GFitsAsciiTable : public GFitsTable {
 public:
     // Constructors and destructors
     GFitsAsciiTable(void);
-    GFitsAsciiTable(int nrows);
+    explicit GFitsAsciiTable(const int& nrows);
     GFitsAsciiTable(const GFitsAsciiTable& table);
     virtual ~GFitsAsciiTable(void);
 
     // Methods
     virtual void             clear(void);
     virtual GFitsAsciiTable* clone(void) const;
-    HDUType                  exttype(void) const { return HT_ASCII_TABLE; }
+    virtual std::string      classname(void) const;
+    HDUType                  exttype(void) const;
 };
 
 

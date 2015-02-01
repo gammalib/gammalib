@@ -48,10 +48,10 @@ class GWcs : public GSkyProjection {
 public:
     // Constructors and destructors
     GWcs(void);
-    explicit GWcs(const std::string& coords,
-                  const double& crval1, const double& crval2,
-                  const double& crpix1, const double& crpix2,
-                  const double& cdelt1, const double& cdelt2);
+    GWcs(const std::string& coords,
+         const double& crval1, const double& crval2,
+         const double& crpix1, const double& crpix2,
+         const double& cdelt1, const double& cdelt2);
     explicit GWcs(const GFitsHDU& hdu);
     GWcs(const GWcs& wcs);
     virtual ~GWcs(void);

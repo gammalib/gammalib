@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventBin.i - Fermi/LAT event bin class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void               clear(void);
     virtual GLATEventBin*      clone(void) const;
+    virtual std::string        classname(void) const;
     virtual double             size(void) const;
     virtual const GLATInstDir& dir(void) const;
     virtual const GEnergy&     energy(void) const;

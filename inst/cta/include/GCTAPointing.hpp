@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.hpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,13 +65,10 @@ public:
     // Operators
     virtual GCTAPointing& operator=(const GCTAPointing& pnt);
 
-    // Implemented pure virtual methods
-    virtual void          clear(void);
-    virtual GCTAPointing* clone(void) const;
-    virtual std::string   classname(void) const;
-    virtual std::string   print(const GChatter& chatter = NORMAL) const;
-
-    // Other methods
+    // Methods
+    void           clear(void);
+    GCTAPointing*  clone(void) const;
+    std::string    classname(void) const;
     const GSkyDir& dir(void) const;
     void           dir(const GSkyDir& dir);
     GCTAInstDir    instdir(const GSkyDir& skydir) const;
@@ -85,6 +82,7 @@ public:
     void           load(const std::string& filename,
                         const std::string& extname = "POINTING");
     void           read(const GFitsTable& table);
+    std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

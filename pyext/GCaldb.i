@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCaldb.i - Calibration database class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@ public:
     // Methods
     void        clear(void);
     GCaldb*     clone(void) const;
+    std::string classname(void) const;
     int         size(void) const;
     std::string rootdir(void) const;
     void        rootdir(const std::string& pathname);

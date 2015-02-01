@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GEnergies.i - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,22 +47,23 @@ public:
     virtual ~GEnergies(void);
  
     // Methods
-    void       clear(void);
-    GEnergies* clone(void) const;
-    GEnergy&   at(const int& index);
-    int        size(void) const;
-    bool       is_empty(void) const;
-    GEnergy&   append(const GEnergy& energy);
-    GEnergy&   insert(const int& index, const GEnergy& energy);
-    void       remove(const int& index);
-    void       reserve(const int& num);
-    void       extend(const GEnergies& energies);
-    void       load(const std::string& filename,
-                    const std::string& extname = "ENERGIES");
-    void       save(const std::string& filename, const bool& clobber = false,
-                    const std::string& extname = "ENERGIES") const;
-    void       read(const GFitsTable& table);
-    void       write(GFits& file, const std::string& extname = "ENERGIES") const;
+    void        clear(void);
+    GEnergies*  clone(void) const;
+    std::string classname(void) const;
+    GEnergy&    at(const int& index);
+    int         size(void) const;
+    bool        is_empty(void) const;
+    GEnergy&    append(const GEnergy& energy);
+    GEnergy&    insert(const int& index, const GEnergy& energy);
+    void        remove(const int& index);
+    void        reserve(const int& num);
+    void        extend(const GEnergies& energies);
+    void        load(const std::string& filename,
+                     const std::string& extname = "ENERGIES");
+    void        save(const std::string& filename, const bool& clobber = false,
+                     const std::string& extname = "ENERGIES") const;
+    void        read(const GFitsTable& table);
+    void        write(GFits& file, const std::string& extname = "ENERGIES") const;
 };
 
 

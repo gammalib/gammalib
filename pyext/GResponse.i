@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.i - Abstract response base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GResponse.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -44,15 +43,16 @@ public:
     virtual ~GResponse(void);
 
     // Pure virtual methods
-    virtual void       clear(void) = 0;
-    virtual GResponse* clone(void) const = 0;
-    virtual bool       use_edisp(void) const = 0;
-    virtual bool       use_tdisp(void) const = 0;
-    virtual double     irf(const GEvent&       event,
-                           const GPhoton&      photon,
-                           const GObservation& obs) const = 0;
-    virtual double     npred(const GPhoton&      photon,
+    virtual void        clear(void) = 0;
+    virtual GResponse*  clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
+    virtual bool        use_edisp(void) const = 0;
+    virtual bool        use_tdisp(void) const = 0;
+    virtual double      irf(const GEvent&       event,
+                            const GPhoton&      photon,
                             const GObservation& obs) const = 0;
+    virtual double      npred(const GPhoton&      photon,
+                              const GObservation& obs) const = 0;
 
     // Virtual methods
     virtual double   irf(const GEvent&       event,

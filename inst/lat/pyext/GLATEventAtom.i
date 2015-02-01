@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventAtom.i - Fermi/LAT event atom class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     // Implemented pure virtual base class methods
     void               clear(void);
     GLATEventAtom*     clone(void) const;
+    std::string        classname(void) const;
     const GLATInstDir& dir(void) const;
     const GEnergy&     energy(void) const;
     const GTime&       time(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAResponseTable.i - CTA response table class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -133,6 +133,7 @@ public:
     // Methods
     void               clear(void);
     GCTAResponseTable* clone(void) const;
+    std::string        classname(void) const;
     int                size(void) const;
     const int&         elements(void) const;
     const int&         axes(void) const;

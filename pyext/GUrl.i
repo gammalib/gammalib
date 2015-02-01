@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GUrl.i - Abstract URL base class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GUrl.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -43,12 +42,13 @@ public:
     virtual ~GUrl(void);
 
     // Pure virtual methods
-    virtual void  clear(void) = 0;
-    virtual GUrl* clone(void) const = 0;
-    virtual void  open(const std::string& url, const std::string& mode) = 0;
-    virtual void  close(void) = 0;
-    virtual int   get_char(void) const = 0;
-    virtual void  put_char(const int& character) = 0;
+    virtual void        clear(void) = 0;
+    virtual GUrl*       clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
+    virtual void        open(const std::string& url, const std::string& mode) = 0;
+    virtual void        close(void) = 0;
+    virtual int         get_char(void) const = 0;
+    virtual void        put_char(const int& character) = 0;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAPsf2D.i - CTA 2D point spread function class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,6 +56,7 @@ public:
     // Implemented pure virtual methods
     void        clear(void);
     GCTAPsf2D*  clone(void) const;
+    std::string classname(void) const;
     void        load(const std::string& filename);
     std::string filename(void) const;
     double      mc(GRan&         ran,

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelPar.i - Model parameter class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,9 +45,10 @@ public:
     virtual ~GModelPar(void);
 
     // Methods
-    GModelPar* clone(void) const;
-    void       read(const GXmlElement& xml);
-    void       write(GXmlElement& xml) const;
+    GModelPar*  clone(void) const;
+    std::string classname(void) const;
+    void        read(const GXmlElement& xml);
+    void        write(GXmlElement& xml) const;
 };
 
 

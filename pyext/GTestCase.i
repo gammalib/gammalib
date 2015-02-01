@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GTestCase.i - Test case class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2015 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     // Methods
     void               clear(void);
     GTestCase*         clone(void) const;
+    std::string        classname(void) const;
     const std::string& name(void) const;
     void               name(const std::string& name);
     const std::string& message(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GWcsAIT.hpp - Aitoff (AIT) projection class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,10 +45,10 @@ class GWcsAIT : public GWcs {
 public:
     // Constructors and destructors
     GWcsAIT(void);
-    explicit GWcsAIT(const std::string& coords,
-                     const double& crval1, const double& crval2,
-                     const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2);
+    GWcsAIT(const std::string& coords,
+            const double& crval1, const double& crval2,
+            const double& crpix1, const double& crpix2,
+            const double& cdelt1, const double& cdelt2);
     GWcsAIT(const GWcsAIT& wcs);
     virtual ~GWcsAIT(void);
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GTimes.i - Time container class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -27,7 +27,6 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GTimes.hpp"
 #include "GException.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -45,15 +44,16 @@ public:
     virtual ~GTimes(void);
  
     // Methods
-    void    clear(void);
-    GTimes* clone(void) const;
-    int     size(void) const;
-    bool    is_empty(void) const;
-    void    append(const GTime& time);
-    void    insert(const int& index, const GTime& time);
-    void    remove(const int& index);
-    void    reserve(const int& num);
-    void    extend(const GTimes& times);
+    void        clear(void);
+    GTimes*     clone(void) const;
+    std::string classname(void) const;
+    int         size(void) const;
+    bool        is_empty(void) const;
+    void        append(const GTime& time);
+    void        insert(const int& index, const GTime& time);
+    void        remove(const int& index);
+    void        reserve(const int& num);
+    void        extend(const GTimes& times);
 };
 
 

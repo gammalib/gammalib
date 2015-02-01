@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GRegistry.i - Interface class for registries              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,6 +58,7 @@ public:
     virtual ~GRegistry(void);
  
     // Methods
+    virtual std::string classname(void) const = 0;
     virtual int         size(void) const = 0;
     virtual std::string name(const int& index) const = 0;
 };

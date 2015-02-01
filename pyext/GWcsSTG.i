@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GWcsSTG.i - Stereographic (STG) projection class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,16 +38,17 @@ class GWcsSTG : public GWcs {
 public:
     // Constructors and destructors
     GWcsSTG(void);
-    explicit GWcsSTG(const std::string& coords,
-                     const double& crval1, const double& crval2,
-                     const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2);
+    GWcsSTG(const std::string& coords,
+            const double& crval1, const double& crval2,
+            const double& crpix1, const double& crpix2,
+            const double& cdelt1, const double& cdelt2);
     GWcsSTG(const GWcsSTG& wcs);
     virtual ~GWcsSTG(void);
 
     // Implemented pure virtual methods
     virtual void        clear(void);
     virtual GWcsSTG*    clone(void) const;
+    virtual std::string classname(void) const;
     virtual std::string code(void) const;
     virtual std::string name(void) const;
 };

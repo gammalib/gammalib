@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSource.i - Source class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GSource.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -39,16 +38,15 @@ class GSource : public GBase {
 public:
     // Constructors and destructors
     GSource(void);
-    explicit GSource(const std::string& name,
-                     GModelSpatial*     model,
-                     const GEnergy&     energy,
-                     const GTime&       time);
+    GSource(const std::string& name, GModelSpatial* model,
+            const GEnergy& energy, const GTime& time);
     GSource(const GSource& src);
     virtual ~GSource(void);
 
     // Methods
     void                 clear(void);
     GSource*             clone(void) const;
+    std::string          classname(void) const;
     const std::string&   name(void) const;
     const GModelSpatial* model(void) const;
     const GEnergy&       energy(void) const;

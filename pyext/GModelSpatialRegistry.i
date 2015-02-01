@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatialRegistry.i - Spatial model registry class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpatialRegistry.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -45,7 +44,8 @@ public:
     virtual ~GModelSpatialRegistry(void);
 
     // Methods
-    int            size(void) const { return m_number; }
+    std::string    classname(void) const;
+    int            size(void) const;
     GModelSpatial* alloc(const std::string& name) const;
     std::string    name(const int& index) const;
 };
@@ -55,7 +55,4 @@ public:
  * @brief GModelSpatialRegistry class extension
  ***************************************************************************/
 %extend GModelSpatialRegistry {
-    char *__str__() {
-        return gammalib::tochar(self->print());
-    }
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GRan.i - Random number generator class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GRan.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -49,6 +48,7 @@ public:
     // Methods
     void                   clear(void);
     GRan*                  clone(void) const;
+    std::string            classname(void) const;
     void                   seed(unsigned long long int seed);
     unsigned long long int seed(void) const;
     unsigned long int      int32(void);

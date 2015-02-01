@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAOnOffObservation.i - CTA on-off observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,7 @@ public:
     // Methods
     void                  clear(void);
     GCTAOnOffObservation* clone(void) const;
+    std::string           classname(void) const;
     void                  name(const std::string& name);
     void                  instrument(const std::string& instrument);
     void                  id(const std::string& id);

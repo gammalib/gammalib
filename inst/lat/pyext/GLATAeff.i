@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATAeff.i - Fermi/LAT effective area class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     // Methods
     void         clear(void);
     GLATAeff*    clone(void) const;
+    std::string  classname(void) const;
     void         load(const std::string filename);
     void         save(const std::string filename,
                       const bool& clobber = false);

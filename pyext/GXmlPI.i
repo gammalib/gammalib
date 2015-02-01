@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlPI.i - XML PI node class definition                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlPI.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -44,10 +43,11 @@ public:
     virtual ~GXmlPI(void);
 
     // Implemented pure virtual base class methods
-    virtual void       clear(void);
-    virtual GXmlPI*    clone(void) const;
-    virtual void       write(GUrl& url, const int& indent = 0) const;
-    virtual NodeType   type(void) const;
+    virtual void        clear(void);
+    virtual GXmlPI*     clone(void) const;
+    virtual std::string classname(void) const;
+    virtual void        write(GUrl& url, const int& indent = 0) const;
+    virtual NodeType    type(void) const;
 
     // Other methods
     const std::string& pi(void) const;

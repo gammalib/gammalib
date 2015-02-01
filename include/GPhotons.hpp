@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class GPhotons
  *
- * @brief Photons container class
+ * @brief Photon container class
  *
  * This class is a container for photons. Photons are implemented by the
  * GPhoton class which stores the physical attributes of a photon such as the

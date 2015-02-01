@@ -53,6 +53,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GCTAEdisp*  clone(void) const = 0;
+    virtual std::string classname(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
     virtual GEnergy     mc(GRan&         ran,

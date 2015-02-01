@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralLogParabola.i - Log parabola spectral model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Michael Mayer                               *
+ *  copyright (C) 2012-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpectralLogParabola.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -50,6 +49,7 @@ public:
     // Implemented pure virtual methods
     virtual void                       clear(void);
     virtual GModelSpectralLogParabola* clone(void) const;
+    virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
     virtual double                     eval(const GEnergy& srcEng,
                                             const GTime&   srcTime) const;

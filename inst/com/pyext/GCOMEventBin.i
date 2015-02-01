@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMEventBin.i  -  COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void               clear(void);
     virtual GCOMEventBin*      clone(void) const;
+    virtual std::string        classname(void) const;
     virtual double             size(void) const;
     virtual const GCOMInstDir& dir(void) const;
     virtual const GEnergy&     energy(void) const;

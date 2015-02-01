@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GHealpix.i - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2015 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,6 +48,7 @@ public:
     // Implemented pure virtual methods
     virtual void        clear(void);
     virtual GHealpix*   clone(void) const;
+    virtual std::string classname(void) const;
     virtual int         size(void) const;
     virtual std::string code(void) const;
     virtual std::string name(void) const;

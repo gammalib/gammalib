@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GLATInstDir.i - Fermi/LAT instrument direction class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,6 +45,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void         clear(void);
     virtual GLATInstDir* clone(void) const;
+    virtual std::string  classname(void) const;
 
     // Other methods
     void     dir(const GSkyDir& dir);

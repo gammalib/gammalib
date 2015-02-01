@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GSkyRegionCircle.cpp - Circular sky region class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,7 +71,7 @@ GSkyRegionCircle::GSkyRegionCircle(void)
  * @param[in] centre Centre sky direction.
  * @param[in] radius Region radius [deg].
  ***************************************************************************/
-GSkyRegionCircle::GSkyRegionCircle(GSkyDir& centre, const double& radius)
+GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre, const double& radius)
 {
     // Initialise members
 	init_members();

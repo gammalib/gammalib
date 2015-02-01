@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -27,7 +27,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GVector.hpp"
-#include "GTools.hpp"
+#include "GException.hpp"
 %}
 
 
@@ -58,11 +58,12 @@ public:
     GVector  operator-(void) const;
 
     // Vector functions
-    void          clear(void);
-    GVector*      clone(void) const;
-    const int&    size(void) const;
-    double&       at(const int& index);
-    int           non_zeros(void) const;
+    void        clear(void);
+    GVector*    clone(void) const;
+    std::string classname(void) const;
+    const int&  size(void) const;
+    double&     at(const int& index);
+    int         non_zeros(void) const;
 };
 
 
