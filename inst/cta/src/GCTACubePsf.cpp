@@ -142,6 +142,9 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
         m_deltas.append(delta);
     }
 
+    // Set delta node array for computation
+    set_delta_axis();
+
     // Compute number of sky maps
     int nmaps = m_ebounds.size() * m_deltas.size();
 
@@ -213,6 +216,9 @@ GCTACubePsf::GCTACubePsf(const std::string&   wcs,
         #endif
         m_deltas.append(delta);
     }
+
+    // Set delta node array for computation
+    set_delta_axis();
 
     // Compute number of sky maps
     int nmaps = m_ebounds.size() * m_deltas.size();
