@@ -1,20 +1,25 @@
-2015-02-01  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-02-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
-        * Bug fix version 0.9.2 released
-        ================================
+        * Version 1.0.0 released
+        ========================
 
         Add optional PHASE information to CTA event lists
         Use URL path informtion in GVOClient connection to Hub
         Ignore empty string parameters in GModel::is_valid()
         Add some constructors
         Add classname methods to Python interface (#1321)
+        Rename CTA cube analysis classes (#1269)
 
+
+2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix version 0.9.1 released
         ================================
 
         Fixed bug #1383 (unit test error with recent gcc compiler)
 
+
+2014-11-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.9.0 released
         ========================
