@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GCTAMeanPsf.hpp - CTA point spread function cube class       *
+ *     GCTACubePsf.hpp - CTA cube analysis point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Chia-Chun Lu                                     *
+ *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAMeanPsf.hpp
- * @brief CTA point spread function cube class definition
+ * @file GCTACubePsf.hpp
+ * @brief CTA cube analysis point spread function class definition
  * @author Chia-Chun Lu
  */
 
-#ifndef GCTAMEANPSF_HPP
-#define GCTAMEANPSF_HPP
+#ifndef GCTACUBEPSF_HPP
+#define GCTACUBEPSF_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -39,26 +39,26 @@
 
 
 /***********************************************************************//**
- * @class GCTAMeanPsf
+ * @class GCTACubePsf
  *
- * @brief class for the CTA point spread function
+ * @brief CTA point spread function for cube analysis
  *
  * This class implements a mean CTA point spread function which provides the
- * average point spread function for binned analysis as function of sky
+ * average point spread function for cube analysis as function of sky
  * position, log10 energy and delta angle between true and measured photon
  * direction.
  ***************************************************************************/
-class GCTAMeanPsf : public GBase {
+class GCTACubePsf : public GBase {
 
 public:
    
     // Constructors and destructors
-    GCTAMeanPsf(void);
-    GCTAMeanPsf(const GCTAMeanPsf& cube);
-    explicit GCTAMeanPsf(const std::string& filename);
-    explicit GCTAMeanPsf(const GCTAEventCube& cube,
+    GCTACubePsf(void);
+    GCTACubePsf(const GCTACubePsf& cube);
+    explicit GCTACubePsf(const std::string& filename);
+    GCTACubePsf(const GCTAEventCube& cube,
                 const double& dmax, const int& ndbins);
-    GCTAMeanPsf(const std::string&   wcs,
+    GCTACubePsf(const std::string&   wcs,
                 const std::string&   coords,
                 const double&        x,
                 const double&        y,
@@ -69,17 +69,17 @@ public:
                 const GEbounds&      ebounds,
                 const double&        dmax,
                 const int&           ndbins);
-    virtual ~GCTAMeanPsf(void);
+    virtual ~GCTACubePsf(void);
 
     // Operators
-    GCTAMeanPsf& operator=(const GCTAMeanPsf& cube);
+    GCTACubePsf& operator=(const GCTACubePsf& cube);
     double       operator()(const GSkyDir& dir, 
                             const double&  delta,
                             const GEnergy& energy) const;
 
     // Methods
     void               clear(void);
-    GCTAMeanPsf*       clone(void) const;
+    GCTACubePsf*       clone(void) const;
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs);
@@ -99,7 +99,7 @@ public:
 protected:
     // Methods
     void init_members(void);
-    void copy_members(const GCTAMeanPsf& cube);
+    void copy_members(const GCTACubePsf& cube);
     void free_members(void);
     void clear_cube(void);
     void update(const double& delta, const double& logE) const;
@@ -132,12 +132,12 @@ private:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GCTAMeanPsf").
+ * @return String containing the class name ("GCTACubePsf").
  ***************************************************************************/
 inline
-std::string GCTAMeanPsf::classname(void) const
+std::string GCTACubePsf::classname(void) const
 {
-    return ("GCTAMeanPsf");
+    return ("GCTACubePsf");
 }
 
 
@@ -146,12 +146,12 @@ std::string GCTAMeanPsf::classname(void) const
  *
  * @return psf cube sky map.
  *
- * The GCTAMeanPsf represents the psf cube as a sky map. This methods
- * returns the sky map that is stored internally by GCTAMeanPsf as psf
+ * The GCTACubePsf represents the psf cube as a sky map. This methods
+ * returns the sky map that is stored internally by GCTACubePsf as psf
  * cube.
  ***************************************************************************/
 inline
-const GSkymap& GCTAMeanPsf::map(void) const
+const GSkymap& GCTACubePsf::map(void) const
 {
     return (m_cube);
 }
@@ -163,7 +163,7 @@ const GSkymap& GCTAMeanPsf::map(void) const
  * @return Energy boundaris
  ***************************************************************************/
 inline
-const GEbounds& GCTAMeanPsf::ebounds(void) const
+const GEbounds& GCTACubePsf::ebounds(void) const
 {
     return (m_ebounds);
 }
@@ -175,7 +175,7 @@ const GEbounds& GCTAMeanPsf::ebounds(void) const
  * @return Offset angles between true and measured photon direction
  ***************************************************************************/
 inline
-const GNodeArray& GCTAMeanPsf::deltas(void) const
+const GNodeArray& GCTACubePsf::deltas(void) const
 {
     return (m_deltas);
 }
@@ -187,7 +187,7 @@ const GNodeArray& GCTAMeanPsf::deltas(void) const
  * @return Maximum delta value (radians).
  ***************************************************************************/
 inline
-double GCTAMeanPsf::delta_max(void) const
+double GCTACubePsf::delta_max(void) const
 {
     // Get maximum delta value
     double delta_max = (m_deltas.size() > 0) ? m_deltas[m_deltas.size()-1] : 0.0;
@@ -203,7 +203,7 @@ double GCTAMeanPsf::delta_max(void) const
  * @return Arithmetic mean of log10 energies.
  ***************************************************************************/
 inline
-const GNodeArray& GCTAMeanPsf::elogmeans(void) const
+const GNodeArray& GCTACubePsf::elogmeans(void) const
 {
     return (m_elogmeans);
 }
@@ -218,7 +218,7 @@ const GNodeArray& GCTAMeanPsf::elogmeans(void) const
  * the exposure cube has been saved.
  ***************************************************************************/
 inline
-const std::string& GCTAMeanPsf::filename(void) const
+const std::string& GCTACubePsf::filename(void) const
 {
     return (m_filename);
 }
@@ -230,9 +230,9 @@ const std::string& GCTAMeanPsf::filename(void) const
  * @return Map offset.
  ***************************************************************************/
 inline
-int GCTAMeanPsf::offset(const int& idelta, const int& iebin) const
+int GCTACubePsf::offset(const int& idelta, const int& iebin) const
 {
     return (idelta + iebin*m_deltas.size());
 }
 
-#endif /* GCTAMEANPSF_HPP */
+#endif /* GCTACUBEPSF_HPP */

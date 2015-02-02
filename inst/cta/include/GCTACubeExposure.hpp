@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GCTAExposure.hpp - CTA exposure cube class               *
+ *          GCTACubeExposure.hpp - CTA cube analysis exposure class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAExposure.hpp
- * @brief CTA exposure cube class definition
+ * @file GCTACubeExposure.hpp
+ * @brief CTA cube analysis exposure class definition
  * @author Chia-Chun Lu
  */
 
@@ -38,7 +38,7 @@
 
 
 /***********************************************************************//**
- * @class GCTAExposure
+ * @class GCTACubeExposure
  *
  * @brief CTA exposure cube class
  *
@@ -46,33 +46,33 @@
  * exposure for binned analysis as function of sky position and log10
  * energy.
  ***************************************************************************/
-class GCTAExposure : public GBase {
+class GCTACubeExposure : public GBase {
 
 public:
    
     // Constructors and destructors
-    GCTAExposure(void);
-    GCTAExposure(const GCTAExposure& cube);
-    explicit GCTAExposure(const std::string& filename);
-    explicit GCTAExposure(const GCTAEventCube& cube);
-    GCTAExposure(const std::string&   wcs,
-                 const std::string&   coords,
-                 const double&        x,
-                 const double&        y,
-                 const double&        dx,
-                 const double&        dy,
-                 const int&           nx,
-                 const int&           ny,
-                 const GEbounds&      ebounds);
-    virtual ~GCTAExposure(void);
+    GCTACubeExposure(void);
+    GCTACubeExposure(const GCTACubeExposure& cube);
+    explicit GCTACubeExposure(const std::string& filename);
+    explicit GCTACubeExposure(const GCTAEventCube& cube);
+    GCTACubeExposure(const std::string&   wcs,
+                     const std::string&   coords,
+                     const double&        x,
+                     const double&        y,
+                     const double&        dx,
+                     const double&        dy,
+                     const int&           nx,
+                     const int&           ny,
+                     const GEbounds&      ebounds);
+    virtual ~GCTACubeExposure(void);
 
     // Operators
-    GCTAExposure& operator=(const GCTAExposure& exp);
-    double        operator()(const GSkyDir& dir, const GEnergy& energy) const;
+    GCTACubeExposure& operator=(const GCTACubeExposure& exp);
+    double            operator()(const GSkyDir& dir, const GEnergy& energy) const;
 
     // Methods
     void               clear(void);
-    GCTAExposure*      clone(void) const;
+    GCTACubeExposure*  clone(void) const;
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs);
@@ -90,7 +90,7 @@ public:
 protected:
     // Methods
     void init_members(void);
-    void copy_members(const GCTAExposure& exp);
+    void copy_members(const GCTACubeExposure& exp);
     void free_members(void);
     void clear_cube(void);
     void update(const double& logE) const;
@@ -114,12 +114,12 @@ private:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GCTAExposure").
+ * @return String containing the class name ("GCTACubeExposure").
  ***************************************************************************/
 inline
-std::string GCTAExposure::classname(void) const
+std::string GCTACubeExposure::classname(void) const
 {
-    return ("GCTAExposure");
+    return ("GCTACubeExposure");
 }
 
 
@@ -132,7 +132,7 @@ std::string GCTAExposure::classname(void) const
  * information.
  ***************************************************************************/
 inline
-const GSkymap& GCTAExposure::cube(void) const
+const GSkymap& GCTACubeExposure::cube(void) const
 {
     return (m_cube);
 }
@@ -144,7 +144,7 @@ const GSkymap& GCTAExposure::cube(void) const
  * @return Energy boundaries
  ***************************************************************************/
 inline
-const GEbounds& GCTAExposure::ebounds(void) const
+const GEbounds& GCTACubeExposure::ebounds(void) const
 {
     return (m_ebounds);
 }
@@ -156,7 +156,7 @@ const GEbounds& GCTAExposure::ebounds(void) const
  * @return Arithmetic mean of log10 energies.
  ***************************************************************************/
 inline
-const GNodeArray& GCTAExposure::elogmeans(void) const
+const GNodeArray& GCTACubeExposure::elogmeans(void) const
 {
     return (m_elogmeans);
 }
@@ -171,7 +171,7 @@ const GNodeArray& GCTAExposure::elogmeans(void) const
  * the exposure cube has been saved.
  ***************************************************************************/
 inline
-const std::string& GCTAExposure::filename(void) const
+const std::string& GCTACubeExposure::filename(void) const
 {
     return (m_filename);
 }

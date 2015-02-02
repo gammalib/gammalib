@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GCTAResponseCube.i - CTA cube-style response function class       *
+ *      GCTAResponseCube.i - CTA cube analysis response function class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAResponseCube.i
- * @brief CTA cube-style response function class definition
+ * @brief CTA cube analysis response function class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
-    GCTAResponseCube(const GCTAExposure& exposure, const GCTAMeanPsf& psf);
+    GCTAResponseCube(const GCTACubeExposure& exposure, const GCTACubePsf& psf);
     virtual ~GCTAResponseCube(void);
 
     // Implement pure virtual base class methods
@@ -59,11 +59,28 @@ public:
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;
 
+    // Overload base class methods
+    virtual double irf(const GEvent&       event,
+                       const GSource&      source,
+                       const GObservation& obs) const;
+    virtual double irf_ptsrc(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+    virtual double irf_radial(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
+    virtual double irf_elliptical(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+
     // Other Methods
-    const GCTAExposure&       exposure(void) const;
-    void                      exposure(const GCTAExposure& exposure);
-    const GCTAMeanPsf&        psf(void) const;
-    void                      psf(const GCTAMeanPsf& psf);
+    const GCTACubeExposure& exposure(void) const;
+    void                    exposure(const GCTACubeExposure& exposure);
+    const GCTACubePsf&      psf(void) const;
+    void                    psf(const GCTACubePsf& psf);
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -308,8 +308,8 @@ void TestGCTAResponse::test_response(void)
     }
     test_try("Test CTA cube response constructor");
     try {
-        GCTAExposure exposure;
-        GCTAMeanPsf psf;
+        GCTACubeExposure exposure;
+        GCTACubePsf      psf;
         GCTAResponseCube rsp(exposure, psf);
         test_try_success();
     }
@@ -715,7 +715,7 @@ void TestGCTAResponse::test_response_expcube(void)
     // Test exposure cube constructors
     test_try("CTA exposure cube void constructor");
     try {
-        GCTAExposure cube;
+        GCTACubeExposure cube;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -723,8 +723,8 @@ void TestGCTAResponse::test_response_expcube(void)
     }
     test_try("CTA exposure cube map constructor");
     try {
-        GEbounds     ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-        GCTAExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
+        GEbounds         ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -735,8 +735,8 @@ void TestGCTAResponse::test_response_expcube(void)
     GCTAObservation obs_cta;
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
-    GEbounds     ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTAExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
+    GEbounds         ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
     cube.set(obs_cta);
     cube.save("test_cta_expcube_one.fits", true);
 
@@ -762,7 +762,7 @@ void TestGCTAResponse::test_response_psfcube(void)
     // Test PSF cube constructors
     test_try("CTA PSF cube void constructor");
     try {
-        GCTAMeanPsf cube;
+        GCTACubePsf cube;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -771,7 +771,7 @@ void TestGCTAResponse::test_response_psfcube(void)
     test_try("CTA PSF cube map constructor");
     try {
         GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-        GCTAMeanPsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+        GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -783,7 +783,7 @@ void TestGCTAResponse::test_response_psfcube(void)
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
     GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTAMeanPsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+    GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
     cube.set(obs_cta);
     cube.save("test_cta_psfcube_one.fits", true);
 

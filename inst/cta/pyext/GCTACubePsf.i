@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GCTAMeanPsf.i - CTA mean point spread function cube class       *
+ *      GCTACubePsf.i - CTA cube analysis point spread function class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
@@ -19,39 +19,39 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAMeanPsf.hpp
- * @brief CCTA point spread function cube class definition
+ * @file GCTACubePsf.i
+ * @brief CTA cube analysis point spread function class definition
  * @author Chia-Chun Lu
  */
 
 %{
 /* __ Includes ___________________________________________________________ */
-#include "GCTAMeanPsf.hpp"
+#include "GCTACubePsf.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTAMeanPsf
+ * @class GCTACubePsf
  *
- * @brief class for the CTA point spread function
+ * @brief CTA point spread function for cube analysis
  *
  * This class implements a mean CTA point spread function which provides the
  * average point spread function for binned analysis as function of sky
  * position, log10 energy and delta angle between true and measured photon
  * direction.
  ***************************************************************************/
-class GCTAMeanPsf : public GBase {
+class GCTACubePsf : public GBase {
 
 public:
    
     // Constructors and destructors
-    GCTAMeanPsf(void);
-    GCTAMeanPsf(const GCTAMeanPsf& cube);
-    explicit GCTAMeanPsf(const std::string& filename);
-    explicit GCTAMeanPsf(const GCTAEventCube& cube,
+    GCTACubePsf(void);
+    GCTACubePsf(const GCTACubePsf& cube);
+    explicit GCTACubePsf(const std::string& filename);
+    GCTACubePsf(const GCTAEventCube& cube,
                 const double& dmax, const int& ndbins);
-    GCTAMeanPsf(const std::string&   wcs,
+    GCTACubePsf(const std::string&   wcs,
                 const std::string&   coords,
                 const double&        x,
                 const double&        y,
@@ -62,7 +62,7 @@ public:
                 const GEbounds&      ebounds,
                 const double&        dmax,
                 const int&           ndbins);
-    virtual ~GCTAMeanPsf(void);
+    virtual ~GCTACubePsf(void);
 
     // Interpolation operator
     double operator()(const GSkyDir& dir, 
@@ -71,7 +71,7 @@ public:
 
     // Methods
     void               clear(void);
-    GCTAMeanPsf*       clone(void) const;
+    GCTACubePsf*       clone(void) const;
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs);
@@ -90,7 +90,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GCTAMeanPsf class extension
+ * @brief GCTACubePsf class extension
  ***************************************************************************/
-%extend GCTAMeanPsf {
+%extend GCTACubePsf {
+    GCTACubePsf copy() {
+        return (*self);
+    }
 };

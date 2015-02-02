@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GCTAResponseCube.hpp - CTA cube-style response function class      *
+ *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,8 +31,8 @@
 #include <string>
 #include <vector>
 #include "GCTAResponse.hpp"
-#include "GCTAExposure.hpp"
-#include "GCTAMeanPsf.hpp"
+#include "GCTACubeExposure.hpp"
+#include "GCTACubePsf.hpp"
 #include "GCTASourceCube.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -58,7 +58,7 @@ public:
     // Constructors and destructors
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
-    GCTAResponseCube(const GCTAExposure& exposure, const GCTAMeanPsf& psf);
+    GCTAResponseCube(const GCTACubeExposure& exposure, const GCTACubePsf& psf);
     virtual ~GCTAResponseCube(void);
 
     // Operators
@@ -100,10 +100,10 @@ public:
                                const GObservation& obs) const;
 
     // Other Methods
-    const GCTAExposure& exposure(void) const;
-    void                exposure(const GCTAExposure& exposure);
-    const GCTAMeanPsf&  psf(void) const;
-    void                psf(const GCTAMeanPsf& psf);
+    const GCTACubeExposure& exposure(void) const;
+    void                    exposure(const GCTACubeExposure& exposure);
+    const GCTACubePsf&      psf(void) const;
+    void                    psf(const GCTACubePsf& psf);
 
 private:
     // Private methods
@@ -124,9 +124,9 @@ private:
                           const GTime&                   srcTime) const;
 
     // Private data members
-    GCTAExposure m_exposure;    //!< Exposure cube
-    GCTAMeanPsf  m_psf;         //!< Mean point spread function
-    mutable bool m_apply_edisp; //!< Apply energy dispersion
+    GCTACubeExposure m_exposure;    //!< Exposure cube
+    GCTACubePsf      m_psf;         //!< Mean point spread function
+    mutable bool     m_apply_edisp; //!< Apply energy dispersion
 
     // Response cache
     mutable std::vector<GCTASourceCube*> m_cache; //!< Response cache
@@ -150,7 +150,7 @@ std::string GCTAResponseCube::classname(void) const
  *
  * @return True if response is valid
  *
- * @todo: To be implemented (check if GCTAExposure and GCTAMeanPsf is loaded)
+ * @todo: To be implemented (check if GCTACubeExposure and GCTACubePsf is loaded)
  ***************************************************************************/
 inline
 bool GCTAResponseCube::is_valid(void) const
@@ -217,9 +217,9 @@ void GCTAResponseCube::apply_edisp(const bool& apply_edisp) const
  * @return Reference to exposure cube.
  ***************************************************************************/
 inline
-const GCTAExposure& GCTAResponseCube::exposure(void) const
+const GCTACubeExposure& GCTAResponseCube::exposure(void) const
 {
-    return m_exposure;
+    return (m_exposure);
 }
 
 
@@ -229,7 +229,7 @@ const GCTAExposure& GCTAResponseCube::exposure(void) const
  * @param[in] exposure Exposure cube.
  ***************************************************************************/
 inline
-void GCTAResponseCube::exposure(const GCTAExposure& exposure)
+void GCTAResponseCube::exposure(const GCTACubeExposure& exposure)
 {
     m_exposure = exposure;
     return;
@@ -237,24 +237,24 @@ void GCTAResponseCube::exposure(const GCTAExposure& exposure)
 
 
 /***********************************************************************//**
- * @brief Return point spread function cube
+ * @brief Return cube analysis point spread function
  *
- * @return Reference to point spread function cube.
+ * @return Reference to cube analysis point spread function.
  ***************************************************************************/
 inline
-const GCTAMeanPsf& GCTAResponseCube::psf(void) const
+const GCTACubePsf& GCTAResponseCube::psf(void) const
 {
-    return m_psf;
+    return (m_psf);
 }
 
 
 /***********************************************************************//**
- * @brief Set pointer to point spread function cube
+ * @brief Set cube analysis point spread function cube
  *
- * @param[in] psf Pointer to point spread function cube.
+ * @param[in] psf Cube analysis point spread function.
  ***************************************************************************/
 inline
-void GCTAResponseCube::psf(const GCTAMeanPsf& psf)
+void GCTAResponseCube::psf(const GCTACubePsf& psf)
 {
     m_psf = psf;
     return;

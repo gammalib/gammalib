@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GCTAExposure.cpp - CTA exposure cube class               *
+ *          GCTACubeExposure.cpp - CTA cube analysis exposure class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAExposure.cpp
- * @brief CTA exposure cube class implementation
+ * @file GCTACubeExposure.cpp
+ * @brief CTA cube analysis exposure class implementation
  * @author Chia-Chun Lu
  */
 
@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GCTAExposure.hpp"
+#include "GCTACubeExposure.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTAEventList.hpp"
@@ -36,7 +36,7 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET                           "GCTAExposure::set(GCTAObservation&)"
+#define G_SET                       "GCTACubeExposure::set(GCTAObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -56,7 +56,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAExposure::GCTAExposure(void)
+GCTACubeExposure::GCTACubeExposure(void)
 {
     // Initialise class members
     init_members();
@@ -71,7 +71,7 @@ GCTAExposure::GCTAExposure(void)
  *
  * @param[in] cube Exposure cube.
  ***************************************************************************/
-GCTAExposure::GCTAExposure(const GCTAExposure& cube)
+GCTACubeExposure::GCTACubeExposure(const GCTACubeExposure& cube)
 {
     // Initialise class members
     init_members();
@@ -92,7 +92,7 @@ GCTAExposure::GCTAExposure(const GCTAExposure& cube)
  * Construct exposure cube by loading the information from an exposure cube
  * file.
  ***************************************************************************/
-GCTAExposure::GCTAExposure(const std::string& filename)
+GCTACubeExposure::GCTACubeExposure(const std::string& filename)
 {
     // Initialise class members
     init_members();
@@ -113,7 +113,7 @@ GCTAExposure::GCTAExposure(const std::string& filename)
  * Construct exposure cube using the same binning and sky projection that is
  * used for the event cube.
  ***************************************************************************/
-GCTAExposure::GCTAExposure(const GCTAEventCube& cube)
+GCTACubeExposure::GCTACubeExposure(const GCTAEventCube& cube)
 {
     // Initialise class members
     init_members();
@@ -153,15 +153,15 @@ GCTAExposure::GCTAExposure(const GCTAEventCube& cube)
  * Constructs an exposure cube by specifying the sky map grid and the energy
  * boundaries.
  ***************************************************************************/
-GCTAExposure::GCTAExposure(const std::string&   wcs,
-                           const std::string&   coords,
-                           const double&        x,
-                           const double&        y,
-                           const double&        dx,
-                           const double&        dy,
-                           const int&           nx,
-                           const int&           ny,
-                           const GEbounds&      ebounds)
+GCTACubeExposure::GCTACubeExposure(const std::string&   wcs,
+                                   const std::string&   coords,
+                                   const double&        x,
+                                   const double&        y,
+                                   const double&        dx,
+                                   const double&        dy,
+                                   const int&           nx,
+                                   const int&           ny,
+                                   const GEbounds&      ebounds)
 {
     // Initialise class members
     init_members();
@@ -183,7 +183,7 @@ GCTAExposure::GCTAExposure(const std::string&   wcs,
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAExposure::~GCTAExposure(void)
+GCTACubeExposure::~GCTACubeExposure(void)
 {
     // Free members
     free_members();
@@ -202,10 +202,10 @@ GCTAExposure::~GCTAExposure(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube exposure cube
+ * @param[in] cube Exposure cube
  * @return Exposure cube.
  ***************************************************************************/
-GCTAExposure& GCTAExposure::operator= (const GCTAExposure& cube)
+GCTACubeExposure& GCTACubeExposure::operator=(const GCTACubeExposure& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -233,7 +233,7 @@ GCTAExposure& GCTAExposure::operator= (const GCTAExposure& cube)
  * @param[in] energy Energy of the true photon.
  * @return Exposure (in units of cm2 s)
  ***************************************************************************/
-double GCTAExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
+double GCTACubeExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
 { 
     // Set indices and weighting factors for interpolation
     update(energy.log10TeV());
@@ -263,7 +263,7 @@ double GCTAExposure::operator()(const GSkyDir& dir, const GEnergy& energy) const
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GCTAExposure::clear(void)
+void GCTACubeExposure::clear(void)
 {
     // Free class members
     free_members();
@@ -281,9 +281,9 @@ void GCTAExposure::clear(void)
  *
  * @return Deep copy of exposure cube instance.
  ***************************************************************************/
-GCTAExposure* GCTAExposure::clone(void) const
+GCTACubeExposure* GCTACubeExposure::clone(void) const
 {
-    return new GCTAExposure(*this);
+    return new GCTACubeExposure(*this);
 }
 
 
@@ -297,7 +297,7 @@ GCTAExposure* GCTAExposure::clone(void) const
  *
  * @todo: Throw an exception if response is not valid
  ***************************************************************************/
-void GCTAExposure::set(const GCTAObservation& obs)
+void GCTACubeExposure::set(const GCTAObservation& obs)
 {
     // Clear exposure cube
     clear_cube();
@@ -368,7 +368,7 @@ void GCTAExposure::set(const GCTAObservation& obs)
  * an observation container. The cube pixel values are computed as the sum
  * over the products of the effective area and the livetime.
  ***************************************************************************/
-void GCTAExposure::fill(const GObservations& obs)
+void GCTACubeExposure::fill(const GObservations& obs)
 {
     // Clear exposure cube
     clear_cube();
@@ -437,7 +437,7 @@ void GCTAExposure::fill(const GObservations& obs)
  *
  * Read the exposure cube from a FITS object.
  ***************************************************************************/
-void GCTAExposure::read(const GFits& fits)
+void GCTACubeExposure::read(const GFits& fits)
 {
     // Clear object
     clear();
@@ -465,7 +465,7 @@ void GCTAExposure::read(const GFits& fits)
  *
  * @param[in] fits FITS file.
  ***************************************************************************/
-void GCTAExposure::write(GFits& fits) const
+void GCTACubeExposure::write(GFits& fits) const
 {
     // Write cube
     m_cube.write(fits);
@@ -485,7 +485,7 @@ void GCTAExposure::write(GFits& fits) const
  *
  * Loads the exposure cube from a FITS file into the object.
  ***************************************************************************/
-void GCTAExposure::load(const std::string& filename)
+void GCTACubeExposure::load(const std::string& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -514,7 +514,7 @@ void GCTAExposure::load(const std::string& filename)
  *
  * @todo Implement method
  ***************************************************************************/
-void GCTAExposure::save(const std::string& filename, const bool& clobber) const
+void GCTACubeExposure::save(const std::string& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
@@ -541,7 +541,7 @@ void GCTAExposure::save(const std::string& filename, const bool& clobber) const
  *
  * @todo Add content
  ***************************************************************************/
-std::string GCTAExposure::print(const GChatter& chatter) const
+std::string GCTACubeExposure::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -550,7 +550,7 @@ std::string GCTAExposure::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTAExposure ===");
+        result.append("=== GCTACubeExposure ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
@@ -583,7 +583,7 @@ std::string GCTAExposure::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAExposure::init_members(void)
+void GCTACubeExposure::init_members(void)
 {
     // Initialise members
     m_filename.clear();
@@ -607,7 +607,7 @@ void GCTAExposure::init_members(void)
  *
  * @param[in] cube Exposure cube
  ***************************************************************************/
-void GCTAExposure::copy_members(const GCTAExposure& cube)
+void GCTACubeExposure::copy_members(const GCTACubeExposure& cube)
 {
     // Copy members
     m_filename  = cube.m_filename;
@@ -628,7 +628,7 @@ void GCTAExposure::copy_members(const GCTAExposure& cube)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAExposure::free_members(void)
+void GCTACubeExposure::free_members(void)
 {
     // Return
     return;
@@ -638,7 +638,7 @@ void GCTAExposure::free_members(void)
 /***********************************************************************//**
  * @brief Clear all pixels in the exposure cube
  ***************************************************************************/
-void GCTAExposure::clear_cube(void)
+void GCTACubeExposure::clear_cube(void)
 {
     // Loop over all exposure cube energy bins
     for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
@@ -669,7 +669,7 @@ void GCTAExposure::clear_cube(void)
  *
  * @todo Write down formula
  ***************************************************************************/
-void GCTAExposure::update(const double& logE) const
+void GCTACubeExposure::update(const double& logE) const
 {
     // Set value for node array
     m_elogmeans.set_value(logE);
@@ -699,7 +699,7 @@ void GCTAExposure::update(const double& logE) const
  *
  * @todo Check that none of the axis boundaries is non-positive.
  ***************************************************************************/
-void GCTAExposure::set_eng_axis(void)
+void GCTACubeExposure::set_eng_axis(void)
 {
     // Get number of bins
     int bins = m_ebounds.size();

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GCTAExposure.i - CTA exposure cube class                *
+ *           GCTACubeExposure.i - CTA cube analysis exposure class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
@@ -19,20 +19,19 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAExposure.hpp
- * @brief CTA exposure cube class definition
+ * @file GCTACubeExposure.i
+ * @brief CTA cube analysis exposure class definition
  * @author Chia-Chun Lu
  */
 
 %{
 /* __ Includes ___________________________________________________________ */
-#include "GCTAExposure.hpp"
-#include "GTools.hpp"
+#include "GCTACubeExposure.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GCTAExposure
+ * @class GCTACubeExposure
  *
  * @brief CTA exposure cube class
  *
@@ -40,30 +39,31 @@
  * exposure for binned analysis as function of sky position and log10
  * energy.
  ***************************************************************************/
-class GCTAExposure : public GBase {
+class GCTACubeExposure : public GBase {
+
 public:   
     // Constructors and destructors
-    GCTAExposure(void);
-    GCTAExposure(const GCTAExposure& cube);
-    explicit GCTAExposure(const std::string& filename);
-    explicit GCTAExposure(const GCTAEventCube& cube);
-    GCTAExposure(const std::string&   wcs,
-                 const std::string&   coords,
-                 const double&        x,
-                 const double&        y,
-                 const double&        dx,
-                 const double&        dy,
-                 const int&           nx,
-                 const int&           ny,
-                 const GEbounds&      ebounds);
-    virtual ~GCTAExposure(void);
+    GCTACubeExposure(void);
+    GCTACubeExposure(const GCTACubeExposure& cube);
+    explicit GCTACubeExposure(const std::string& filename);
+    explicit GCTACubeExposure(const GCTAEventCube& cube);
+    GCTACubeExposure(const std::string&   wcs,
+                     const std::string&   coords,
+                     const double&        x,
+                     const double&        y,
+                     const double&        dx,
+                     const double&        dy,
+                     const int&           nx,
+                     const int&           ny,
+                     const GEbounds&      ebounds);
+    virtual ~GCTACubeExposure(void);
     
     // Interpolation Operator
     double operator()(const GSkyDir& dir, const GEnergy& energy) const;
 
     // Methods
     void              clear(void);
-    GCTAExposure*     clone(void) const;
+    GCTACubeExposure* clone(void) const;
     std::string       classname(void) const;
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs);
@@ -78,7 +78,10 @@ public:
 };
 
 /***********************************************************************//**
- * @brief GCTAExposure class extension
+ * @brief GCTACubeExposure class extension
  ***************************************************************************/
-%extend GCTAExposure {
+%extend GCTACubeExposure {
+    GCTACubeExposure copy() {
+        return (*self);
+    }
 };

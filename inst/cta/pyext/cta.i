@@ -1,7 +1,7 @@
 /***************************************************************************
  *                cta.i - Cherenkov Telescope Array module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -168,6 +168,8 @@
 %include "GCTAEventBin.i"
 %include "GCTAEventAtom.i"
 %include "GCTAPointing.i"
+%include "GCTAInstDir.i"
+%include "GCTARoi.i"
 %include "GCTAResponse.i"
 %include "GCTAResponseIrf.i"
 %include "GCTAResponseCube.i"
@@ -187,8 +189,8 @@
 %include "GCTABackground.i"
 %include "GCTABackground3D.i"
 %include "GCTABackgroundPerfTable.i"
-%include "GCTAInstDir.i"
-%include "GCTARoi.i"
+%include "GCTACubeExposure.i"
+%include "GCTACubePsf.i"
 %include "GCTAModelCubeBackground.i"
 %include "GCTAModelIrfBackground.i"
 %include "GCTAModelRadial.i"
@@ -197,6 +199,4 @@
 %include "GCTAModelRadialPolynom.i"
 %include "GCTAModelRadialProfile.i"
 %include "GCTAModelRadialAcceptance.i"
-%include "GCTAMeanPsf.i"
-%include "GCTAExposure.i"
 

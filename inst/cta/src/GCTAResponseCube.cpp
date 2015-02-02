@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GCTAResponseCube.cpp - CTA cube-style response function class      *
+ *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -117,14 +117,14 @@ GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) :
 /***********************************************************************//**
  * @brief Response constructor
  *
- * @param[in] exposure CTA exposure.
- * @param[in] psf CTA mean point spread function.
+ * @param[in] exposure CTA cube analysis exposure.
+ * @param[in] psf CTA cube analysis point spread function.
  *
- * Constructs CTA cube-style response from a CTA exposure and a mean point
- * spread function.
+ * Constructs CTA cube analysis response from a cube analysis exposure and
+ * point spread function.
  **************************************************************************/
-GCTAResponseCube::GCTAResponseCube(const GCTAExposure& exposure,
-                                   const GCTAMeanPsf&  psf) :
+GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure& exposure,
+                                   const GCTACubePsf&      psf) :
                   GCTAResponse()
 {
     // Initialise members

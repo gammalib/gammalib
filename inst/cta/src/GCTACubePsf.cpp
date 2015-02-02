@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAMeanPsf.cpp - CTA mean point spread function cube class       *
+ *     GCTACubePsf.cpp - CTA cube analysis point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Chia-Chun Lu                                     *
+ *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAMeanPsf.cpp
- * @brief CTA mean point spread function class cube implementation
+ * @file GCTACubePsf.cpp
+ * @brief CTA cube analysis point spread function class implementation
  * @author Chia-Chun Lu
  */
 
@@ -28,18 +28,15 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GCTAMeanPsf.hpp"
+#include "GCTACubePsf.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTAEventList.hpp"
-#include "GCTAExposure.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
-#include "GWcsRegistry.hpp"
-#include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET                            "GCTAMeanPsf::set(GCTAObservation&)"
+#define G_SET                            "GCTACubePsf::set(GCTAObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -61,7 +58,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(void)
+GCTACubePsf::GCTACubePsf(void)
 {
     // Initialise class members
     init_members();
@@ -76,7 +73,7 @@ GCTAMeanPsf::GCTAMeanPsf(void)
  *
  * @param[in] cube Point spread function.
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
+GCTACubePsf::GCTACubePsf(const GCTACubePsf& cube)
 {
     // Initialise class members
     init_members();
@@ -96,7 +93,7 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAMeanPsf& cube)
  *
  * Construct PSF cube by loading the information from a PSF cube file.
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(const std::string& filename)
+GCTACubePsf::GCTACubePsf(const std::string& filename)
 {
     // Initialise class members
     init_members();
@@ -119,7 +116,7 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string& filename)
  * Construct PSF cube using the same binning and sky projection that is
  * used for the event cube.
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax,
+GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
                          const int& ndbins)
 {
     // Initialise class members
@@ -182,7 +179,7 @@ GCTAMeanPsf::GCTAMeanPsf(const GCTAEventCube& cube, const double& dmax,
  * Constructs a mean PSF cube by computing the mean PSF from all CTA
  * observations found in the observation container.
  ***************************************************************************/
-GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
+GCTACubePsf::GCTACubePsf(const std::string&   wcs,
                          const std::string&   coords,
                          const double&        x,
                          const double&        y,
@@ -231,7 +228,7 @@ GCTAMeanPsf::GCTAMeanPsf(const std::string&   wcs,
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTAMeanPsf::~GCTAMeanPsf(void)
+GCTACubePsf::~GCTACubePsf(void)
 {
     // Free members
     free_members();
@@ -253,7 +250,7 @@ GCTAMeanPsf::~GCTAMeanPsf(void)
  * @param[in] cube Mean PSF cube.
  * @return Mean PSF cube.
  ***************************************************************************/
-GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
+GCTACubePsf& GCTACubePsf::operator= (const GCTACubePsf& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -286,7 +283,7 @@ GCTAMeanPsf& GCTAMeanPsf::operator= (const GCTAMeanPsf& cube)
  * Returns the point spread function for a given angular separation in units
  * of sr^-1 for a given energy and coordinate.
  ***************************************************************************/
-double GCTAMeanPsf::operator()(const GSkyDir& dir, 
+double GCTACubePsf::operator()(const GSkyDir& dir, 
                                const double&  delta,
                                const GEnergy& energy) const
 {
@@ -320,7 +317,7 @@ double GCTAMeanPsf::operator()(const GSkyDir& dir,
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GCTAMeanPsf::clear(void)
+void GCTACubePsf::clear(void)
 {
     // Free class members
     free_members();
@@ -338,9 +335,9 @@ void GCTAMeanPsf::clear(void)
  *
  * @return Deep copy of mean PSF instance.
  ***************************************************************************/
-GCTAMeanPsf* GCTAMeanPsf::clone(void) const
+GCTACubePsf* GCTACubePsf::clone(void) const
 {
-    return new GCTAMeanPsf(*this);
+    return new GCTACubePsf(*this);
 }
 
 
@@ -349,7 +346,7 @@ GCTAMeanPsf* GCTAMeanPsf::clone(void) const
  *
  * @param[in] obs CTA observation.
  ***************************************************************************/
-void GCTAMeanPsf::set(const GCTAObservation& obs)
+void GCTACubePsf::set(const GCTAObservation& obs)
 {
     // Clear PSF cube
     clear_cube();
@@ -429,7 +426,7 @@ void GCTAMeanPsf::set(const GCTAObservation& obs)
  * @param[in] obs Observation container.
  * @param[in] dispose Dispose events
  ***************************************************************************/
-void GCTAMeanPsf::fill(const GObservations& obs)
+void GCTACubePsf::fill(const GObservations& obs)
 {
     // Clear PSF cube
     clear_cube();
@@ -543,7 +540,7 @@ void GCTAMeanPsf::fill(const GObservations& obs)
  *
  * Read the PSF cube from a FITS object.
  ***************************************************************************/
-void GCTAMeanPsf::read(const GFits& fits)
+void GCTACubePsf::read(const GFits& fits)
 {
     // Clear object
     clear();
@@ -585,7 +582,7 @@ void GCTAMeanPsf::read(const GFits& fits)
  *
  * Write the CTA PSF cube into a FITS object.
  ***************************************************************************/
-void GCTAMeanPsf::write(GFits& fits) const
+void GCTACubePsf::write(GFits& fits) const
 {
     // Write cube
     m_cube.write(fits);
@@ -611,7 +608,7 @@ void GCTAMeanPsf::write(GFits& fits) const
  *
  * Loads the PSF cube from a FITS file into the object.
  ***************************************************************************/
-void GCTAMeanPsf::load(const std::string& filename)
+void GCTACubePsf::load(const std::string& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -638,7 +635,7 @@ void GCTAMeanPsf::load(const std::string& filename)
  *
  * Save the PSF cube into a FITS file.
  ***************************************************************************/
-void GCTAMeanPsf::save(const std::string& filename, const bool& clobber) const
+void GCTACubePsf::save(const std::string& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
@@ -663,7 +660,7 @@ void GCTAMeanPsf::save(const std::string& filename, const bool& clobber) const
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing PSF cube information.
  ***************************************************************************/
-std::string GCTAMeanPsf::print(const GChatter& chatter) const
+std::string GCTACubePsf::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -672,7 +669,7 @@ std::string GCTAMeanPsf::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTAMeanPsf ===");
+        result.append("=== GCTACubePsf ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
@@ -721,7 +718,7 @@ std::string GCTAMeanPsf::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTAMeanPsf::init_members(void)
+void GCTACubePsf::init_members(void)
 {
     // Initialise members
     m_filename.clear();
@@ -752,7 +749,7 @@ void GCTAMeanPsf::init_members(void)
  *
  * @param[in] cube PSF cube.
  ***************************************************************************/
-void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
+void GCTACubePsf::copy_members(const GCTACubePsf& cube)
 {
     // Copy members
     m_filename          = cube.m_filename;
@@ -780,7 +777,7 @@ void GCTAMeanPsf::copy_members(const GCTAMeanPsf& cube)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTAMeanPsf::free_members(void)
+void GCTACubePsf::free_members(void)
 {
     // Return
     return;
@@ -790,7 +787,7 @@ void GCTAMeanPsf::free_members(void)
 /***********************************************************************//**
  * @brief Clear all pixels in the PSF cube
  ***************************************************************************/
-void GCTAMeanPsf::clear_cube(void)
+void GCTACubePsf::clear_cube(void)
 {
     // Loop over all maps
     for (int imap = 0; imap < m_cube.nmaps(); ++imap) {
@@ -818,7 +815,7 @@ void GCTAMeanPsf::clear_cube(void)
  *
  * This method updates the PSF parameter cache.
  ***************************************************************************/
-void GCTAMeanPsf::update(const double& delta, const double& logE) const
+void GCTACubePsf::update(const double& delta, const double& logE) const
 {
     // Set node array for delta interpolation
     if (m_quadratic_binning) {
@@ -857,7 +854,7 @@ void GCTAMeanPsf::update(const double& delta, const double& logE) const
  *
  * @todo Check that none of the axis boundaries is non-positive.
  ***************************************************************************/
-void GCTAMeanPsf::set_delta_axis(void)
+void GCTACubePsf::set_delta_axis(void)
 {
     // Initialise computation members
     m_deltas_cache.clear();
@@ -914,7 +911,7 @@ void GCTAMeanPsf::set_delta_axis(void)
  *
  * @todo Check that none of the axis boundaries is non-positive.
  ***************************************************************************/
-void GCTAMeanPsf::set_eng_axis(void)
+void GCTACubePsf::set_eng_axis(void)
 {
     // Get number of bins
     int bins = m_ebounds.size();
@@ -941,7 +938,7 @@ void GCTAMeanPsf::set_eng_axis(void)
  * Zero padding of the last delta bins assures that the Psf goes to zero
  * without any step at the last delta value.
  ***************************************************************************/
-void GCTAMeanPsf::set_to_smooth(void)
+void GCTACubePsf::set_to_smooth(void)
 {
     // Continue only if there are delta bins
     if (m_deltas.size() > 2) {

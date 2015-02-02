@@ -37,8 +37,8 @@ sources = src/GCTASupport.cpp \
           src/GCTABackground.cpp \
           src/GCTABackgroundPerfTable.cpp \
           src/GCTABackground3D.cpp \
-          src/GCTAExposure.cpp \
-          src/GCTAMeanPsf.cpp \
+          src/GCTACubeExposure.cpp \
+          src/GCTACubePsf.cpp \
           src/GCTASourceCube.cpp \
           src/GCTASourceCubePointSource.cpp \
           src/GCTASourceCubeDiffuse.cpp \
@@ -86,8 +86,8 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTABackground.hpp \
                      include/GCTABackgroundPerfTable.hpp \
                      include/GCTABackground3D.hpp \
-                     include/GCTAExposure.hpp \
-                     include/GCTAMeanPsf.hpp \
+                     include/GCTACubeExposure.hpp \
+                     include/GCTACubePsf.hpp \
                      include/GCTASourceCube.hpp \
                      include/GCTASourceCubePointSource.hpp \
                      include/GCTASourceCubeDiffuse.hpp \
