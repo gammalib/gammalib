@@ -7,8 +7,8 @@ Author(s) : Juergen Knoedlseder
 
 1. Introduction
 ---------------
-This document briefly summarizes module by module the most important
-changes made since the last release of GammaLib.
+This document briefly summarizes module by module the most important changes
+made since the last release of GammaLib.
 
 
 2. Public interface modifications
@@ -30,7 +30,10 @@ None
 
 4. Application module
 ---------------------
-None
+The GApplication::log_parameters() method does no longer dump values for
+parameters that have not yet been queried. The actual value of these parameters
+is not yet know, and likely they will not be used in an application. The
+method thus dumps [not queried] instead of a parameter value (#1349).
 
 
 5. Base module

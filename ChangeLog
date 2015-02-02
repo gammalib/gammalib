@@ -9,6 +9,7 @@
         Add some constructors
         Add classname methods to Python interface (#1321)
         Rename CTA cube analysis classes (#1269)
+        Do not dump unqueried parameters (#1349)
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

@@ -465,18 +465,29 @@ void GApplication::log_trailer(void)
 /***********************************************************************//**
  * @brief Write application parameters in log file
  *
- * Writes all application parameters in the log file.
+ * Writes all application parameters in the log file. For parameters that
+ * have not yet been queried the method does not write the current value
+ * but signals [not queried].
  ***************************************************************************/
 void GApplication::log_parameters(void)
 {
     // Write header
     log.header1("Parameters");
 
+    // Count number of written parameters
+    int written = 0;
+
     // Write parameters in logger
     for (int i = 0; i < m_pars.size(); ++i) {
 
+        // Skip all parameters that still need to be queried as we
+        // do not yet know their value
+        //if (m_pars.m_pars[i].is_query()) {
+        //    continue;
+        //}
+
         // Add line feed
-        if (i > 0) {
+        if (written > 0) {
             log << std::endl;
         }
 
@@ -485,7 +496,15 @@ void GApplication::log_parameters(void)
         name = name + gammalib::fill(".", 28-name.length()) + ": ";
 
         // Write parameter
-        log << name << m_pars.m_pars[i].m_value;
+        if (m_pars.m_pars[i].is_query()) {
+            log << name << "[not queried]";
+        }
+        else {
+            log << name << m_pars.m_pars[i].m_value;
+        }
+
+        // Increment number of written parameters
+        written++;
 
     }
 
