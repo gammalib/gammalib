@@ -33,7 +33,7 @@
 #include "GCTAResponse.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTACubePsf.hpp"
-#include "GCTASourceCube.hpp"
+#include "GCTACubeSource.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -129,7 +129,7 @@ private:
     mutable bool     m_apply_edisp; //!< Apply energy dispersion
 
     // Response cache
-    mutable std::vector<GCTASourceCube*> m_cache; //!< Response cache
+    mutable std::vector<GCTACubeSource*> m_cache; //!< Response cache
 };
 
 

@@ -33,8 +33,9 @@
 #include "GTools.hpp"
 #include "GCTAResponseCube.hpp"
 #include "GCTAResponse_helpers.hpp"
-#include "GCTASourceCubePointSource.hpp"
-#include "GCTASourceCubeDiffuse.hpp"
+#include "GCTACubeSourceDiffuse.hpp"
+#include "GCTAInstDir.hpp"
+#include "GCTAEventBin.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
@@ -47,8 +48,6 @@
 #include "GTime.hpp"
 #include "GIntegral.hpp"
 #include "GObservation.hpp"
-#include "GCTAInstDir.hpp"
-#include "GCTAEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF        "GCTAResponseCube::irf(GEvent&, GPhoton& GObservation&)"
@@ -604,12 +603,12 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     // with the source name. If no model was found we initialise a new
     // cache entry for that model. Otherwise, we simply return the actual
     // cache entry.
-    GCTASourceCubeDiffuse* cache(NULL);
+    GCTACubeSourceDiffuse* cache(NULL);
     int index = cache_index(source.name());
     if (index == -1) {
     
         // No cache entry was found, thus allocate and initialise a new one
-        cache = new GCTASourceCubeDiffuse;
+        cache = new GCTACubeSourceDiffuse;
         cache->set(source.name(), *source.model(), obs);
         m_cache.push_back(cache);
 
@@ -617,13 +616,13 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     else {
     
         // Check that the cache entry is of the expected type
-        if (m_cache[index]->code() != GCTA_SOURCE_CUBE_DIFFUSE) {
+        if (m_cache[index]->code() != GCTA_CUBE_SOURCE_DIFFUSE) {
             std::string msg = "Cached model \""+source.name()+"\" is not "
                               "an extended source model. This method only "
                               "applies to extended source models.";
             throw GException::invalid_value(G_IRF_DIFFUSE, msg);
         }
-        cache = static_cast<GCTASourceCubeDiffuse*>(m_cache[index]);
+        cache = static_cast<GCTACubeSourceDiffuse*>(m_cache[index]);
 
     } // endelse: there was a cache entry for this model
 

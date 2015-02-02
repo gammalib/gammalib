@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTASourceCubePointSource.cpp - CTA point source cube class       *
+ *      GCTACubeSourcePoint.cpp - CTA cube analysis point source class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTASourceCubePointSource.cpp
- * @brief CTA point source cube class implementation
+ * @file GCTACubeSourcePoint.cpp
+ * @brief CTA cube analysis point source class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GCTASourceCubePointSource.hpp"
+#include "GCTACubeSourcePoint.hpp"
 #include "GTools.hpp"
 #include "GModelSpatial.hpp"
 #include "GObservation.hpp"
@@ -37,7 +37,7 @@
 #include "GCTAResponseCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET "GCTASourceCubePointSource::set(GModelSpatial&, GObservation&)"
+#define G_SET       "GCTACubeSourcePoint::set(GModelSpatial&, GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -57,7 +57,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTASourceCubePointSource::GCTASourceCubePointSource(void) : GCTASourceCube()
+GCTACubeSourcePoint::GCTACubeSourcePoint(void) : GCTACubeSource()
 {
     // Initialise class members
     init_members();
@@ -70,16 +70,16 @@ GCTASourceCubePointSource::GCTASourceCubePointSource(void) : GCTASourceCube()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Point source cube.
+ * @param[in] source Point source cube.
  ***************************************************************************/
-GCTASourceCubePointSource::GCTASourceCubePointSource(const GCTASourceCubePointSource& cube) :
-                           GCTASourceCube(cube)
+GCTACubeSourcePoint::GCTACubeSourcePoint(const GCTACubeSourcePoint& source) :
+                     GCTACubeSource(source)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(cube);
+    copy_members(source);
 
     // Return
     return;
@@ -89,7 +89,7 @@ GCTASourceCubePointSource::GCTASourceCubePointSource(const GCTASourceCubePointSo
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTASourceCubePointSource::~GCTASourceCubePointSource(void)
+GCTACubeSourcePoint::~GCTACubeSourcePoint(void)
 {
     // Free members
     free_members();
@@ -108,16 +108,16 @@ GCTASourceCubePointSource::~GCTASourceCubePointSource(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Point source cube.
+ * @param[in] source Point source cube.
  * @return Point source cube.
  ***************************************************************************/
-GCTASourceCubePointSource& GCTASourceCubePointSource::operator=(const GCTASourceCubePointSource& cube)
+GCTACubeSourcePoint& GCTACubeSourcePoint::operator=(const GCTACubeSourcePoint& source)
 {
     // Execute only if object is not identical
-    if (this != &cube) {
+    if (this != &source) {
 
         // Copy base class members
-        this->GCTASourceCube::operator=(cube);
+        this->GCTACubeSource::operator=(source);
 
         // Free members
         free_members();
@@ -126,7 +126,7 @@ GCTASourceCubePointSource& GCTASourceCubePointSource::operator=(const GCTASource
         init_members();
 
         // Copy members
-        copy_members(cube);
+        copy_members(source);
 
     } // endif: object was not identical
 
@@ -146,14 +146,14 @@ GCTASourceCubePointSource& GCTASourceCubePointSource::operator=(const GCTASource
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GCTASourceCubePointSource::clear(void)
+void GCTACubeSourcePoint::clear(void)
 {
     // Free class members
     free_members();
-    this->GCTASourceCube::free_members();
+    this->GCTACubeSource::free_members();
 
     // Initialise members
-    this->GCTASourceCube::init_members();
+    this->GCTACubeSource::init_members();
     init_members();
 
     // Return
@@ -166,10 +166,10 @@ void GCTASourceCubePointSource::clear(void)
  *
  * @return Deep copy of point source cube.
  ***************************************************************************/
-GCTASourceCubePointSource* GCTASourceCubePointSource::clone(void) const
+GCTACubeSourcePoint* GCTACubeSourcePoint::clone(void) const
 {
     // Return deep copy
-    return new GCTASourceCubePointSource(*this);
+    return new GCTACubeSourcePoint(*this);
 }
 
 
@@ -179,7 +179,7 @@ GCTASourceCubePointSource* GCTASourceCubePointSource::clone(void) const
  * @param[in] model Spatial model.
  * @param[in] obs Observation.
  ***************************************************************************/
-void GCTASourceCubePointSource::set(const std::string&   name,
+void GCTACubeSourcePoint::set(const std::string&   name,
                                     const GModelSpatial& model,
                                     const GObservation&  obs)
 {
@@ -284,7 +284,7 @@ void GCTASourceCubePointSource::set(const std::string&   name,
  * @param[in] delta Distance between true and measured photon direction
  *                  (radians).
  ***************************************************************************/
-double GCTASourceCubePointSource::psf(const int& ieng, const double& delta) const
+double GCTACubeSourcePoint::psf(const int& ieng, const double& delta) const
 {
     // Set node array interpolation values
     m_deltas.set_value(delta);
@@ -312,7 +312,7 @@ double GCTASourceCubePointSource::psf(const int& ieng, const double& delta) cons
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing point source cube information.
  ***************************************************************************/
-std::string GCTASourceCubePointSource::print(const GChatter& chatter) const
+std::string GCTACubeSourcePoint::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -321,7 +321,7 @@ std::string GCTASourceCubePointSource::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTASourceCubePointSource ===");
+        result.append("=== GCTACubeSourcePoint ===");
         result.append("\n"+gammalib::parformat("Source name") + name());
 
     } // endif: chatter was not silent
@@ -340,7 +340,7 @@ std::string GCTASourceCubePointSource::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTASourceCubePointSource::init_members(void)
+void GCTACubeSourcePoint::init_members(void)
 {
     // Initialise members
     m_dir.clear();
@@ -357,16 +357,16 @@ void GCTASourceCubePointSource::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube Point source cube.
+ * @param[in] source Point source cube.
  ***************************************************************************/
-void GCTASourceCubePointSource::copy_members(const GCTASourceCubePointSource& cube)
+void GCTACubeSourcePoint::copy_members(const GCTACubeSourcePoint& source)
 {
     // Copy members
-    m_dir       = cube.m_dir;
-    m_aeff      = cube.m_aeff;
-    m_delta_map = cube.m_delta_map;
-    m_psf       = cube.m_psf;
-    m_deltas    = cube.m_deltas;
+    m_dir       = source.m_dir;
+    m_aeff      = source.m_aeff;
+    m_delta_map = source.m_delta_map;
+    m_psf       = source.m_psf;
+    m_deltas    = source.m_deltas;
 
     // Return
     return;
@@ -375,7 +375,7 @@ void GCTASourceCubePointSource::copy_members(const GCTASourceCubePointSource& cu
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTASourceCubePointSource::free_members(void)
+void GCTACubeSourcePoint::free_members(void)
 {
     // Return
     return;

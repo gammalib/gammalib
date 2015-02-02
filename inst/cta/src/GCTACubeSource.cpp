@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTASourceCube.cpp - Abstract CTA source cube base class         *
+ *    GCTACubeSource.cpp - Abstract CTA cube analysis source base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTASourceCube.cpp
- * @brief Abstract CTA source cube base class implementation
+ * @file GCTACubeSource.cpp
+ * @brief Abstract CTA cube analysis source base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,14 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GCTASourceCube.hpp"
-/*
-#include "GModelSpatial.hpp"
-#include "GObservation.hpp"
-#include "GModelSpatialPointSource.hpp"
-#include "GCTAEventCube.hpp"
-#include "GCTAResponseCube.hpp"
-*/
+#include "GCTACubeSource.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -57,7 +50,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTASourceCube::GCTASourceCube(void)
+GCTACubeSource::GCTACubeSource(void)
 {
     // Initialise class members
     init_members();
@@ -70,15 +63,15 @@ GCTASourceCube::GCTASourceCube(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Source cube.
+ * @param[in] source Cube analysis source.
  ***************************************************************************/
-GCTASourceCube::GCTASourceCube(const GCTASourceCube& cube)
+GCTACubeSource::GCTACubeSource(const GCTACubeSource& source)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(cube);
+    copy_members(source);
 
     // Return
     return;
@@ -88,7 +81,7 @@ GCTASourceCube::GCTASourceCube(const GCTASourceCube& cube)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTASourceCube::~GCTASourceCube(void)
+GCTACubeSource::~GCTACubeSource(void)
 {
     // Free members
     free_members();
@@ -107,13 +100,13 @@ GCTASourceCube::~GCTASourceCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Source cube.
- * @return Source cube.
+ * @param[in] source Cube analysis source.
+ * @return Cube analysis source.
  ***************************************************************************/
-GCTASourceCube& GCTASourceCube::operator=(const GCTASourceCube& cube)
+GCTACubeSource& GCTACubeSource::operator=(const GCTACubeSource& source)
 {
     // Execute only if object is not identical
-    if (this != &cube) {
+    if (this != &source) {
 
         // Free members
         free_members();
@@ -122,7 +115,7 @@ GCTASourceCube& GCTASourceCube::operator=(const GCTASourceCube& cube)
         init_members();
 
         // Copy members
-        copy_members(cube);
+        copy_members(source);
 
     } // endif: object was not identical
 
@@ -147,7 +140,7 @@ GCTASourceCube& GCTASourceCube::operator=(const GCTASourceCube& cube)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTASourceCube::init_members(void)
+void GCTACubeSource::init_members(void)
 {
     // Initialise members
     m_name.clear();
@@ -160,12 +153,12 @@ void GCTASourceCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube Source cube.
+ * @param[in] source Cube analysis source.
  ***************************************************************************/
-void GCTASourceCube::copy_members(const GCTASourceCube& cube)
+void GCTACubeSource::copy_members(const GCTACubeSource& source)
 {
     // Copy members
-    m_name = cube.m_name;
+    m_name = source.m_name;
 
     // Return
     return;
@@ -174,7 +167,7 @@ void GCTASourceCube::copy_members(const GCTASourceCube& cube)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTASourceCube::free_members(void)
+void GCTACubeSource::free_members(void)
 {
     // Return
     return;

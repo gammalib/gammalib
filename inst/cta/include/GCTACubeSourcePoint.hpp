@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTASourceCubePointSource.hpp - CTA point source cube class       *
+ *      GCTACubeSourcePoint.hpp - CTA cube analysis point source class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,19 +19,19 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTASourceCubePointSource.hpp
- * @brief CTA point source cube class definition
+ * @file GCTACubeSourcePoint.hpp
+ * @brief CTA cube analysis point source class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCTASOURCECUBEPOINTSOURCE_HPP
-#define GCTASOURCECUBEPOINTSOURCE_HPP
+#ifndef GCTACUBESOURCEPOINT_HPP
+#define GCTACUBESOURCEPOINT_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
 #include "GSkyDir.hpp"
-#include "GCTASourceCube.hpp"
+#include "GCTACubeSource.hpp"
 #include "GNodeArray.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -42,34 +42,34 @@ class GObservation;
 
 
 /***********************************************************************//**
- * @class GCTASourceCubePointSource
+ * @class GCTACubeSourcePoint
  *
  * @brief CTA source cube base class
  *
  * This class handles pre-computed response information for a point source
- * in a cube-style analysis. It derives from the abstract GCTASourceCube
+ * in a cube-style analysis. It derives from the abstract GCTACubeSource
  * class.
  ***************************************************************************/
-class GCTASourceCubePointSource : public GCTASourceCube {
+class GCTACubeSourcePoint : public GCTACubeSource {
 
 public:
     // Constructors and destructors
-    GCTASourceCubePointSource(void);
-    GCTASourceCubePointSource(const GCTASourceCubePointSource& cube);
-    virtual ~GCTASourceCubePointSource(void);
+    GCTACubeSourcePoint(void);
+    GCTACubeSourcePoint(const GCTACubeSourcePoint& source);
+    virtual ~GCTACubeSourcePoint(void);
 
     // Operators
-    GCTASourceCubePointSource& operator=(const GCTASourceCubePointSource & cube);
+    GCTACubeSourcePoint& operator=(const GCTACubeSourcePoint & source);
 
     // Implemented pure virtual methods
-    void                       clear(void);
-    GCTASourceCubePointSource* clone(void) const;
-    std::string                classname(void) const;
-    GCTAClassCode              code(void) const;
-    void                       set(const std::string&   name,
-                                   const GModelSpatial& model,
-                                   const GObservation&  obs);
-    std::string                print(const GChatter& chatter = NORMAL) const;
+    void                 clear(void);
+    GCTACubeSourcePoint* clone(void) const;
+    std::string          classname(void) const;
+    GCTAClassCode        code(void) const;
+    void                 set(const std::string&   name,
+                             const GModelSpatial& model,
+                             const GObservation&  obs);
+    std::string          print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     double         aeff(const int& index) const;
@@ -80,7 +80,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GCTASourceCubePointSource& cube);
+    void copy_members(const GCTACubeSourcePoint& source);
     void free_members(void);
 
     // Data members
@@ -95,12 +95,12 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GCTASourceCubePointSource").
+ * @return String containing the class name ("GCTACubeSourcePoint").
  ***************************************************************************/
 inline
-std::string GCTASourceCubePointSource::classname(void) const
+std::string GCTACubeSourcePoint::classname(void) const
 {
-    return ("GCTASourceCubePointSource");
+    return ("GCTACubeSourcePoint");
 }
 
 
@@ -109,12 +109,12 @@ std::string GCTASourceCubePointSource::classname(void) const
  *
  * @return GCTA_SOURCE_CUBE_POINT_SOURCE.
  *
- * Returns the class type code GCTA_SOURCE_CUBE_POINT_SOURCE.
+ * Returns the class type code GCTA_CUBE_SOURCE_POINT.
  ***************************************************************************/
 inline
-GCTAClassCode GCTASourceCubePointSource::code(void) const
+GCTAClassCode GCTACubeSourcePoint::code(void) const
 {
-    return (GCTA_SOURCE_CUBE_POINT_SOURCE);
+    return (GCTA_CUBE_SOURCE_POINT);
 }
 
 
@@ -127,7 +127,7 @@ GCTAClassCode GCTASourceCubePointSource::code(void) const
  * Returns the deadtime corrected effective area.
  ***************************************************************************/
 inline
-double GCTASourceCubePointSource::aeff(const int& index) const
+double GCTACubeSourcePoint::aeff(const int& index) const
 {
     double aeff = (index >= 0 && index < (int)m_aeff.size()) ? m_aeff[index] : 0.0;
     return (aeff);
@@ -145,7 +145,7 @@ double GCTASourceCubePointSource::aeff(const int& index) const
  * is returned.
  ***************************************************************************/
 inline
-double GCTASourceCubePointSource::delta(const int& index) const
+double GCTACubeSourcePoint::delta(const int& index) const
 {
     double delta = (index >= 0 && index < (int)m_delta_map.size())
                    ? m_delta_map[index] : 99.9;
@@ -159,9 +159,9 @@ double GCTASourceCubePointSource::delta(const int& index) const
  * @return Point source sky direction.
  ***************************************************************************/
 inline
-const GSkyDir& GCTASourceCubePointSource::dir(void) const
+const GSkyDir& GCTACubeSourcePoint::dir(void) const
 {
     return (m_dir);
 }
 
-#endif /* GCTASOURCECUBEPOINTSOURCE_HPP */
+#endif /* GCTACUBESOURCEPOINT_HPP */

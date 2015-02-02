@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTASourceCubeDiffuse.hpp - CTA diffuse source cube class        *
+ *   GCTACubeSourceDiffuse.hpp - CTA cube analysis diffuse source class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,18 +19,18 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTASourceCubeDiffuse.hpp
- * @brief CTA diffuse source cube class definition
+ * @file GCTACubeSourceDiffuse.hpp
+ * @brief CTA cube analysis diffuse source class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCTASOURCECUBEDIFFUSE_HPP
-#define GCTASOURCECUBEDIFFUSE_HPP
+#ifndef GCTACUBESOURCEDIFFUSE_HPP
+#define GCTACUBESOURCEDIFFUSE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GCTASourceCube.hpp"
+#include "GCTACubeSource.hpp"
 #include "GSkymap.hpp"
 #include "GFunction.hpp"
 #include "GCTAResponseCube.hpp"
@@ -47,28 +47,28 @@ class GTime;
 
 
 /***********************************************************************//**
- * @class GCTASourceCubeDiffuse
+ * @class GCTACubeSourceDiffuse
  *
  * @brief CTA diffuse source cube class
  *
  * This class handles pre-computed response information for a diffuse source
- * in a stacked cube analysis. It derives from the abstract GCTASourceCube
+ * in a stacked cube analysis. It derives from the abstract GCTACubeSource
  * class.
  ***************************************************************************/
-class GCTASourceCubeDiffuse : public GCTASourceCube {
+class GCTACubeSourceDiffuse : public GCTACubeSource {
 
 public:
     // Constructors and destructors
-    GCTASourceCubeDiffuse(void);
-    GCTASourceCubeDiffuse(const GCTASourceCubeDiffuse& cube);
-    virtual ~GCTASourceCubeDiffuse(void);
+    GCTACubeSourceDiffuse(void);
+    GCTACubeSourceDiffuse(const GCTACubeSourceDiffuse& source);
+    virtual ~GCTACubeSourceDiffuse(void);
 
     // Operators
-    GCTASourceCubeDiffuse& operator=(const GCTASourceCubeDiffuse & cube);
+    GCTACubeSourceDiffuse& operator=(const GCTACubeSourceDiffuse & source);
 
     // Implemented pure virtual methods
     void                   clear(void);
-    GCTASourceCubeDiffuse* clone(void) const;
+    GCTACubeSourceDiffuse* clone(void) const;
     std::string            classname(void) const;
     GCTAClassCode          code(void) const;
     void                   set(const std::string&   name,
@@ -88,7 +88,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GCTASourceCubeDiffuse& cube);
+    void copy_members(const GCTACubeSourceDiffuse& source);
     void free_members(void);
 
     // Data members
@@ -99,12 +99,12 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GCTASourceCubeDiffuse").
+ * @return String containing the class name ("GCTACubeSourceDiffuse").
  ***************************************************************************/
 inline
-std::string GCTASourceCubeDiffuse::classname(void) const
+std::string GCTACubeSourceDiffuse::classname(void) const
 {
-    return ("GCTASourceCubeDiffuse");
+    return ("GCTACubeSourceDiffuse");
 }
 
 
@@ -113,12 +113,12 @@ std::string GCTASourceCubeDiffuse::classname(void) const
  *
  * @return GCTA_SOURCE_CUBE_DIFFUSE.
  *
- * Returns the class type code GCTA_SOURCE_CUBE_DIFFUSE.
+ * Returns the class type code GCTA_CUBE_SOURCE_DIFFUSE.
  ***************************************************************************/
 inline
-GCTAClassCode GCTASourceCubeDiffuse::code(void) const
+GCTAClassCode GCTACubeSourceDiffuse::code(void) const
 {
-    return (GCTA_SOURCE_CUBE_DIFFUSE);
+    return (GCTA_CUBE_SOURCE_DIFFUSE);
 }
 
 
@@ -132,9 +132,9 @@ GCTAClassCode GCTASourceCubeDiffuse::code(void) const
  * Returns the instrument response function.
  ***************************************************************************/
 inline
-double GCTASourceCubeDiffuse::irf(const int& pixel, const int& iebin) const
+double GCTACubeSourceDiffuse::irf(const int& pixel, const int& iebin) const
 {
     return (m_cube(pixel, iebin));
 }
 
-#endif /* GCTASOURCECUBEDIFFUSE_HPP */
+#endif /* GCTACUBESOURCEDIFFUSE_HPP */

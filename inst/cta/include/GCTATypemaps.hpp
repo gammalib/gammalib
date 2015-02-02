@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTATypemaps.hpp - GammaLib CTA typemaps                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,8 +31,8 @@
 
 /* __ Class code enumerations (used primarily to avoid dynamic casting) __ */
 typedef enum {
-    GCTA_SOURCE_CUBE_POINT_SOURCE,
-    GCTA_SOURCE_CUBE_DIFFUSE
+    GCTA_CUBE_SOURCE_POINT,
+    GCTA_CUBE_SOURCE_DIFFUSE
 } GCTAClassCode;
 
 /* __ Typemaps ___________________________________________________________ */

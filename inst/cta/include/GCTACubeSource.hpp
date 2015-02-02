@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTASourceCube.hpp - Abstract CTA source cube base class         *
+ *    GCTACubeSource.hpp - Abstract CTA cube analysis source base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTASourceCube.hpp
- * @brief Abstract CTA source cube base class definition
+ * @file GCTACubeSource.hpp
+ * @brief Abstract CTA cube analysis source base class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCTASOURCECUBE_HPP
-#define GCTASOURCECUBE_HPP
+#ifndef GCTACUBESOURCE_HPP
+#define GCTACUBESOURCE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -40,27 +40,27 @@ class GObservation;
 
 
 /***********************************************************************//**
- * @class GCTASourceCube
+ * @class GCTACubeSource
  *
  * @brief CTA source cube base class
  *
  * This class provides an abstract base class for handling of pre-computed
  * response information in a cube-style analysis.
  ***************************************************************************/
-class GCTASourceCube : public GBase {
+class GCTACubeSource : public GBase {
 
 public:
     // Constructors and destructors
-    GCTASourceCube(void);
-    GCTASourceCube(const GCTASourceCube& cube);
-    virtual ~GCTASourceCube(void);
+    GCTACubeSource(void);
+    GCTACubeSource(const GCTACubeSource& source);
+    virtual ~GCTACubeSource(void);
 
     // Operators
-    virtual GCTASourceCube& operator=(const GCTASourceCube & cube);
+    virtual GCTACubeSource& operator=(const GCTACubeSource & source);
 
     // Pure virtual methods
     virtual void            clear(void) = 0;
-    virtual GCTASourceCube* clone(void) const = 0;
+    virtual GCTACubeSource* clone(void) const = 0;
     virtual std::string     classname(void) const = 0;
     virtual GCTAClassCode   code(void) const = 0;
     virtual void            set(const std::string&   name,
@@ -75,7 +75,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GCTASourceCube& cube);
+    void copy_members(const GCTACubeSource& source);
     void free_members(void);
 
     // Data members
@@ -90,7 +90,7 @@ protected:
  * @return Source name.
  ***************************************************************************/
 inline
-const std::string& GCTASourceCube::name(void) const
+const std::string& GCTACubeSource::name(void) const
 {
     return (m_name);
 }
@@ -102,7 +102,7 @@ const std::string& GCTASourceCube::name(void) const
  * @param[in] name Source name.
  ***************************************************************************/
 inline
-void GCTASourceCube::name(const std::string& name)
+void GCTACubeSource::name(const std::string& name)
 {
     m_name = name;
     return;

@@ -39,9 +39,9 @@ sources = src/GCTASupport.cpp \
           src/GCTABackground3D.cpp \
           src/GCTACubeExposure.cpp \
           src/GCTACubePsf.cpp \
-          src/GCTASourceCube.cpp \
-          src/GCTASourceCubePointSource.cpp \
-          src/GCTASourceCubeDiffuse.cpp \
+          src/GCTACubeSource.cpp \
+          src/GCTACubeSourcePoint.cpp \
+          src/GCTACubeSourceDiffuse.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -88,9 +88,9 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTABackground3D.hpp \
                      include/GCTACubeExposure.hpp \
                      include/GCTACubePsf.hpp \
-                     include/GCTASourceCube.hpp \
-                     include/GCTASourceCubePointSource.hpp \
-                     include/GCTASourceCubeDiffuse.hpp \
+                     include/GCTACubeSource.hpp \
+                     include/GCTACubeSourcePoint.hpp \
+                     include/GCTACubeSourceDiffuse.hpp \
                      include/GCTAModelCubeBackground.hpp \
                      include/GCTAModelIrfBackground.hpp \
                      include/GCTAModelRadialRegistry.hpp \

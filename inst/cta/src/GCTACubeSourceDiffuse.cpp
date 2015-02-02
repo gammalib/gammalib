@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTASourceCubeDiffuse.cpp - CTA diffuse source cube class        *
+ *   GCTACubeSourceDiffuse.cpp - CTA cube analysis diffuse source class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTASourceCubeDiffuse.cpp
- * @brief CTA diffuse source cube class implementation
+ * @file GCTACubeSourceDiffuse.cpp
+ * @brief CTA cube analysis diffuse source class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -29,7 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
-#include "GCTASourceCubeDiffuse.hpp"
+#include "GCTACubeSourceDiffuse.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GObservation.hpp"
 #include "GSkyDir.hpp"
@@ -46,7 +46,7 @@
 #endif
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET     "GCTASourceCubeDiffuse::set(GModelSpatial&, GObservation&)"
+#define G_SET     "GCTACubeSourceDiffuse::set(GModelSpatial&, GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -68,7 +68,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTASourceCubeDiffuse::GCTASourceCubeDiffuse(void) : GCTASourceCube()
+GCTACubeSourceDiffuse::GCTACubeSourceDiffuse(void) : GCTACubeSource()
 {
     // Initialise class members
     init_members();
@@ -81,16 +81,16 @@ GCTASourceCubeDiffuse::GCTASourceCubeDiffuse(void) : GCTASourceCube()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Diffuse source cube.
+ * @param[in] source Diffuse source cube.
  ***************************************************************************/
-GCTASourceCubeDiffuse::GCTASourceCubeDiffuse(const GCTASourceCubeDiffuse& cube) :
-                       GCTASourceCube(cube)
+GCTACubeSourceDiffuse::GCTACubeSourceDiffuse(const GCTACubeSourceDiffuse& source) :
+                       GCTACubeSource(source)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(cube);
+    copy_members(source);
 
     // Return
     return;
@@ -100,7 +100,7 @@ GCTASourceCubeDiffuse::GCTASourceCubeDiffuse(const GCTASourceCubeDiffuse& cube) 
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GCTASourceCubeDiffuse::~GCTASourceCubeDiffuse(void)
+GCTACubeSourceDiffuse::~GCTACubeSourceDiffuse(void)
 {
     // Free members
     free_members();
@@ -119,16 +119,16 @@ GCTASourceCubeDiffuse::~GCTASourceCubeDiffuse(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Diffuse source cube.
+ * @param[in] source Diffuse source cube.
  * @return Diffuse source cube.
  ***************************************************************************/
-GCTASourceCubeDiffuse& GCTASourceCubeDiffuse::operator=(const GCTASourceCubeDiffuse& cube)
+GCTACubeSourceDiffuse& GCTACubeSourceDiffuse::operator=(const GCTACubeSourceDiffuse& source)
 {
     // Execute only if object is not identical
-    if (this != &cube) {
+    if (this != &source) {
 
         // Copy base class members
-        this->GCTASourceCube::operator=(cube);
+        this->GCTACubeSource::operator=(source);
 
         // Free members
         free_members();
@@ -137,7 +137,7 @@ GCTASourceCubeDiffuse& GCTASourceCubeDiffuse::operator=(const GCTASourceCubeDiff
         init_members();
 
         // Copy members
-        copy_members(cube);
+        copy_members(source);
 
     } // endif: object was not identical
 
@@ -157,14 +157,14 @@ GCTASourceCubeDiffuse& GCTASourceCubeDiffuse::operator=(const GCTASourceCubeDiff
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GCTASourceCubeDiffuse::clear(void)
+void GCTACubeSourceDiffuse::clear(void)
 {
     // Free class members
     free_members();
-    this->GCTASourceCube::free_members();
+    this->GCTACubeSource::free_members();
 
     // Initialise members
-    this->GCTASourceCube::init_members();
+    this->GCTACubeSource::init_members();
     init_members();
 
     // Return
@@ -177,10 +177,10 @@ void GCTASourceCubeDiffuse::clear(void)
  *
  * @return Deep copy of diffuse source cube.
  ***************************************************************************/
-GCTASourceCubeDiffuse* GCTASourceCubeDiffuse::clone(void) const
+GCTACubeSourceDiffuse* GCTACubeSourceDiffuse::clone(void) const
 {
     // Return deep copy
-    return new GCTASourceCubeDiffuse(*this);
+    return new GCTACubeSourceDiffuse(*this);
 }
 
 
@@ -194,14 +194,14 @@ GCTASourceCubeDiffuse* GCTASourceCubeDiffuse::clone(void) const
  * a negligible variation of the effective area over the size of the
  * point spread function.
  ***************************************************************************/
-void GCTASourceCubeDiffuse::set(const std::string&   name,
+void GCTACubeSourceDiffuse::set(const std::string&   name,
                                 const GModelSpatial& model,
                                 const GObservation&  obs)
 {
     // Debug option: initialise statistics
     #if defined(G_DEBUG_SET)
     int n_pixels_computed = 0;
-    std::cout << "GCTASourceCubeDiffuse::set entred." << std::endl;
+    std::cout << "GCTACubeSourceDiffuse::set entred." << std::endl;
     #ifdef _OPENMP
     double t_start = omp_get_wtime();
     #else
@@ -289,7 +289,7 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
     std::cout << "  Maximum theta ................: " << theta_max << " radians" << std::endl;
     std::cout << "  Number of spatial pixels used : " << n_pixels_computed << std::endl;
     std::cout << "  CPU usage ....................: " << t_elapse << " sec" << std::endl;
-    std::cout << "GCTASourceCubeDiffuse::set exit." << std::endl;
+    std::cout << "GCTACubeSourceDiffuse::set exit." << std::endl;
     #endif
 
     // Return
@@ -322,7 +322,7 @@ void GCTASourceCubeDiffuse::set(const std::string&   name,
  * \f${\rm PSF}(\delta)\f$ is the azimuthally symmetric point spread
  * function.
  ***************************************************************************/
-double GCTASourceCubeDiffuse::psf(const GCTAResponseCube* rsp,
+double GCTACubeSourceDiffuse::psf(const GCTAResponseCube* rsp,
                                   const GModelSpatial*    model,
                                   const GSkyDir&          obsDir,
                                   const GEnergy&          srcEng,
@@ -374,7 +374,7 @@ double GCTASourceCubeDiffuse::psf(const GCTAResponseCube* rsp,
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing diffuse source cube information.
  ***************************************************************************/
-std::string GCTASourceCubeDiffuse::print(const GChatter& chatter) const
+std::string GCTACubeSourceDiffuse::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -383,7 +383,7 @@ std::string GCTASourceCubeDiffuse::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GCTASourceCubeDiffuse ===");
+        result.append("=== GCTACubeSourceDiffuse ===");
         result.append("\n"+gammalib::parformat("Source name") + name());
 
     } // endif: chatter was not silent
@@ -402,7 +402,7 @@ std::string GCTASourceCubeDiffuse::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GCTASourceCubeDiffuse::init_members(void)
+void GCTACubeSourceDiffuse::init_members(void)
 {
     // Initialise members
     m_cube.clear();
@@ -415,12 +415,12 @@ void GCTASourceCubeDiffuse::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube Point diffuse cube.
+ * @param[in] source Point diffuse cube.
  ***************************************************************************/
-void GCTASourceCubeDiffuse::copy_members(const GCTASourceCubeDiffuse& cube)
+void GCTACubeSourceDiffuse::copy_members(const GCTACubeSourceDiffuse& source)
 {
     // Copy members
-    m_cube = cube.m_cube;
+    m_cube = source.m_cube;
 
     // Return
     return;
@@ -429,7 +429,7 @@ void GCTASourceCubeDiffuse::copy_members(const GCTASourceCubeDiffuse& cube)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GCTASourceCubeDiffuse::free_members(void)
+void GCTACubeSourceDiffuse::free_members(void)
 {
     // Return
     return;
