@@ -24,8 +24,8 @@
  * @author Chia-Chun Lu
  */
 
-#ifndef GCTAEXPOSURE_HPP
-#define GCTAEXPOSURE_HPP
+#ifndef GCTACUBEEXPOSURE_HPP
+#define GCTACUBEEXPOSURE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -176,4 +176,4 @@ const std::string& GCTACubeExposure::filename(void) const
     return (m_filename);
 }
 
-#endif /* GCTAEXPOSURE_HPP */
+#endif /* GCTACUBEEXPOSURE_HPP */
