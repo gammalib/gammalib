@@ -175,8 +175,8 @@ def observation(ra=83.6331, dec=22.0145, emin=0.1, emax=100.0,
 
     # Set response
     #obs.response("cta_dummy_irf", GCaldb("../caldb"))
-    exposure = gammalib.GCTAExposure("data/expcube.fits")
-    psf      = gammalib.GCTAMeanPsf("data/psfcube.fits")
+    exposure = gammalib.GCTACubeExposure("data/expcube.fits")
+    psf      = gammalib.GCTACubePsf("data/psfcube.fits")
     obs.response(exposure, psf)
 
     # Set pointing

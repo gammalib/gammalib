@@ -113,9 +113,9 @@ if __name__ == '__main__':
     #                      GCaldb("../caldb/data/cta/e/bcf/IFAE20120510_50h"))
     #rsp = GCTAResponseIrf("cta_dummy_irf",
     #                      GCaldb("../caldb"))
-    exposure = gammalib.GCTAExposure("data/expcube.fits")
-    #psf      = gammalib.GCTAMeanPsf("data/psfcube.fits")
-    psf      = gammalib.GCTAMeanPsf("psfcube.fits")
+    exposure = gammalib.GCTACubeExposure("data/expcube.fits")
+    #psf      = gammalib.GCTACubePsf("data/psfcube.fits")
+    psf      = gammalib.GCTACubePsf("psfcube.fits")
     rsp      = gammalib.GCTAResponseCube(exposure, psf)
 
     # Show PSF

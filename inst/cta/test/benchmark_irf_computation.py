@@ -132,8 +132,8 @@ def stacked_irf(model, cntmap, expcube, psfcube, cntref):
     obs.load(cntmap)
 
     # Specify response for CTA observation
-    exposure = gammalib.GCTAExposure(expcube)
-    psf      = gammalib.GCTAMeanPsf(psfcube)
+    exposure = gammalib.GCTACubeExposure(expcube)
+    psf      = gammalib.GCTACubePsf(psfcube)
     obs.response(exposure, psf)
 
     # Load model to describe the data from XML file

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAObservation.i - CTA Observation class interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,8 +74,8 @@ public:
                              const bool& clobber = false) const;
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
-    void                response(const GCTAExposure& expcube,
-                                 const GCTAMeanPsf&  psf);
+    void                response(const GCTACubeExposure& expcube,
+                                 const GCTACubePsf&      psfcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     GCTARoi             roi(void) const;

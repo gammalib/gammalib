@@ -141,8 +141,8 @@ def stacked_analysis(model, cntmap, expcube, psfcube):
     cta_obs.load(cntmap)
 
     # Specify response for CTA observation
-    exposure = gammalib.GCTAExposure(expcube)
-    psf      = gammalib.GCTAMeanPsf(psfcube)
+    exposure = gammalib.GCTACubeExposure(expcube)
+    psf      = gammalib.GCTACubePsf(psfcube)
     cta_obs.response(exposure, psf)
 
     # Append CTA observation to observation container
