@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GHealpix.hpp - Healpix projection class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
+#include "GBilinear.hpp"
 
 
 /***********************************************************************//**
@@ -70,6 +71,7 @@ public:
     virtual double      solidangle(const GSkyPixel& pixel) const;
     virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
     virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
+    virtual GBilinear   interpolator(const GSkyDir& dir) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -84,22 +86,38 @@ private:
     void         copy_members(const GHealpix& wcs);
     void         free_members(void);
     virtual bool compare(const GSkyProjection& proj) const;
-    int          nside2order(int nside);
+
+    // Low-level HealPix methods
+    int          compress_bits(const int& value) const;
+    int          spread_bits(const int& value) const;
+    void         nest2xyf(const int& pix, int* ix, int* iy, int* face) const;
+    void         ring2xyf(const int& pix, int* ix, int* iy, int* face) const;
+    int          xyf2nest(const int& ix, const int& iy, const int& face) const;
+    int          xyf2ring(const int& ix, const int& iy, const int& face) const;
+    int          nside2order(const int& nside) const;
+    int          nest2ring(const int& pix) const;
+    int          ring2nest(const int& pix) const;
     void         pix2xy(const int& ipix, int* x, int* y) const;
     int          xy2pix(int x, int y) const;
     void         pix2ang_ring(int ipix, double* theta, double* phi) const;
     void         pix2ang_nest(int ipix, double* theta, double* phi) const;
     int          ang2pix_z_phi_ring(double z, double phi) const;
     int          ang2pix_z_phi_nest(double z, double phi) const;
+    int          ring_above(const double& z) const;
+    void         get_ring_info(const int& ring, int* startpix, int* ringpix,
+                               bool* shifted) const;
+    void         get_ring_info(const int& ring, int* startpix, int* ringpix,
+                               double* theta, bool* shifted) const;
+    GBilinear    interpolator(const double& theta, const double& phi) const;
     unsigned int isqrt(unsigned int arg) const;
 
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)
     int      m_npface;       //!<
-    int      m_ncap;         //!<
+    int      m_ncap;         //!< Number of pixels in polar cap
     int      m_order;        //!< Order
     int      m_ordering;     //!< Pixel ordering (0=ring, 1=nested, -1=?)
-    int      m_num_pixels;   //!< Number of pixels
+    int      m_num_pixels;   //!< Number of pixels in projection
     double   m_fact1;        //!<
     double   m_fact2;        //!<
     double   m_solidangle;   //!< Solid angle of pixel

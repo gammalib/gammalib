@@ -57,6 +57,7 @@ public:
     virtual double      solidangle(const GSkyPixel& pixel) const;
     virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
     virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
+    virtual GBilinear   interpolator(const GSkyDir& dir) const;
 
     // Other methods
     const int&   npix(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GHealpix.cpp - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,9 +39,12 @@
 #define G_READ                                    "GHealpix::read(GFitsHDU&)"
 #define G_XY2DIR                               "GHealpix::xy2dir(GSkyPixel&)"
 #define G_DIR2XY2                                "GHealpix::dir2xy(GSkyDir&)"
+#define G_NEST2RING                               "GHealpix::nest2ring(int&)"
+#define G_RING2NEST                               "GHealpix::ring2nest(int&)"
 #define G_PIX2ANG_RING        "GHealpix::pix2ang_ring(int, double*, double*)"
 #define G_PIX2ANG_NEST        "GHealpix::pix2ang_nest(int, double*, double*)"
 #define G_ORDERING_SET                     "GHealpix::ordering(std::string&)"
+#define G_INTERPOLATOR             "GHealpix::interpolator(double&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -272,26 +275,32 @@ void GHealpix::read(const GFitsHDU& hdu)
         throw GException::wcs(G_READ, "HDU does not contain Healpix data");
     }
 
-    // Get pixel ordering
-    std::string order = hdu.string("ORDERING");
+    // Get pixel ordering. First search for the ORDERING keyword, then
+    // search for the ORDER keyword
+    std::string ordering;
+    if (hdu.has_card("ORDERING")) {
+        ordering = hdu.string("ORDERING");
+    }
+    else if (hdu.has_card("ORDER")) {
+        ordering = hdu.string("ORDER");
+    }
 
-    // Get coordinate system.
-    // First search for HIER_CRD keyword (this has been used in older
-    // versions of LAT exposure cubes). If not found then search for standard
-    // COORDSYS keyword.
-    std::string coords;
+    // Get coordinate system. First search for HIER_CRD keyword (this has been
+    // used in older versions of LAT exposure cubes). If not found then search
+    // for standard COORDSYS keyword.
+    std::string coordsys;
     if (hdu.has_card("HIER_CRD")) {
-        coords = hdu.string("HIER_CRD");
+        coordsys = hdu.string("HIER_CRD");
     }
     else if (hdu.has_card("COORDSYS")) {
-        coords = hdu.string("COORDSYS");
+        coordsys = hdu.string("COORDSYS");
     }
 
     // Set coordinate system
-    coordsys(coords);
+    this->coordsys(coordsys);
 
     // Set pixel ordering
-    ordering(order);
+    this->ordering(ordering);
 
     // Get Healpix resolution and determine number of pixels and solid angle
     m_nside      = hdu.integer("NSIDE");
@@ -433,26 +442,65 @@ GSkyPixel GHealpix::dir2pix(const GSkyDir& dir) const
 
 
 /***********************************************************************//**
+ * @brief Return interpolator for given sky direction
+ *
+ * @param[in] dir Sky direction
+ ***************************************************************************/
+GBilinear GHealpix::interpolator(const GSkyDir& dir) const
+{
+    // Compute coordinate system dependent theta and phi (in radians)
+    double theta = 0;
+    double phi   = 0;
+    switch (m_coordsys) {
+    case 0:
+        theta = gammalib::pihalf - dir.dec();
+        phi   = dir.ra();
+        break;
+    case 1:
+        theta = gammalib::pihalf - dir.b();
+        phi   = dir.l();
+        break;
+    default:
+        break;
+    }
+
+    // Normalize theta and phi value
+    theta = gammalib::modulo(theta, gammalib::twopi);
+    if (theta > gammalib::pi) {
+        phi  += gammalib::pi;
+        theta = gammalib::twopi - theta;
+    }
+    phi = gammalib::modulo(phi, gammalib::twopi);
+
+    // Get interpolator
+    GBilinear interpolator = this->interpolator(theta, phi);
+
+    // Return interpolator
+    return (interpolator);
+}
+
+
+/***********************************************************************//**
  * @brief Returns ordering parameter.
  ***************************************************************************/
 std::string GHealpix::ordering(void) const
 {
     // Set pixel ordering type
-    std::string s_ordering;
+    std::string ordering;
     switch (m_ordering) {
     case 0:
-        s_ordering = "RING";
+        ordering = "RING";
         break;
     case 1:
-        s_ordering = "NESTED";
+        ordering = "NESTED";
         break;
     default:
-        s_ordering = "UNKNOWN";
+        ordering = "UNKNOWN";
         break;
     }
 
     // Return ordering
-    return s_ordering;
+    return ordering;
 }
 
 
@@ -538,7 +586,6 @@ std::string GHealpix::print(const GChatter& chatter) const
 void GHealpix::init_members(void)
 {
     // Initialise members
-    //m_type        = "HPX";
     m_nside       = 0;
     m_npface      = 0;
     m_ncap        = 0;
@@ -626,12 +673,226 @@ bool GHealpix::compare(const GSkyProjection& proj) const
 }
 
 
+
+/*==========================================================================
+ =                                                                         =
+ =                         Low-level Healpix methods                       =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Compress Bits
+ *
+ * @param[in] value Value.
+ * @return Compressed Bits.
+ *
+ * This method has been adapted from the compress_bits() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+int GHealpix::compress_bits(const int& value) const
+{
+    // Compress Bits
+    int raw        = (value & 0x5555) | ((value & 0x55550000) >> 15);
+    int compressed = ctab[raw & 0xff] | (ctab[raw >> 8] << 4);
+
+    // Return compressed value
+    return compressed;
+}
+
+
+/***********************************************************************//**
+ * @brief Spread Bits
+ *
+ * @param[in] value Compressed value.
+ * @return Spread Bits.
+ *
+ * This method has been adapted from the spread_bits() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+int GHealpix::spread_bits(const int& value) const
+{
+    // Spread bits
+    int spread = utab[value & 0xff] | (utab[(value >> 8) & 0xff] << 16);
+
+    // Return spread value
+    return spread;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert pixel number in nested scheme to (x,y,face) tuple
+ *
+ * @param[in] pix Pixel number in nested scheme
+ * @param[out] ix X index.
+ * @param[out] iy Y index.
+ * @param[out] face Face number.
+ *
+ * This method has been adapted from the nest2xyf() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+void GHealpix::nest2xyf(const int& pix, int* ix, int* iy, int* face) const
+{
+    // Compute face number
+    *face = pix >> (2 * m_order);
+
+    // Compute pixel
+    int pixel = pix & (m_npface - 1);
+
+    // Compute (x,y)
+    *ix = compress_bits(pixel);
+    *iy = compress_bits(pixel >> 1);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert pixel number in ring scheme to (x,y,face) tuple
+ *
+ * @param[in] pix Pixel number in ring scheme
+ * @param[out] ix X index.
+ * @param[out] iy Y index.
+ * @param[out] face Face number.
+ *
+ * This method has been adapted from the ring2xyf() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+void GHealpix::ring2xyf(const int& pix, int* ix, int* iy, int* face) const
+{
+    // Declare some variables
+    int nl2 = 2*m_nside;
+    int iring;
+    int iphi;
+    int kshift;
+    int nr;
+
+    // Handle pixel in the North Polar cap
+    if (pix < m_ncap) {
+        iring  = (1+isqrt(1+2*pix)) >> 1;    // Counted from North pole
+        iphi   = (pix+1) - 2*iring*(iring-1);
+        kshift = 0;
+        nr     = iring;
+        *face  = (iphi-1)/nr;
+    }
+
+    // Handle pixel in equatorial region
+    else if (pix < (m_num_pixels-m_ncap)) {
+        int ip   = pix - m_ncap;
+        int tmp  = (m_order>=0) ? ip >> (m_order+2) : ip/(4*m_nside);
+        iring    = tmp + m_nside;
+        iphi     = ip - tmp * 4 * m_nside + 1;
+        kshift   = (iring + m_nside) & 1;
+        nr       = m_nside;
+        int ire  = iring - m_nside + 1;
+        int irm  = nl2 + 2 - ire;
+        int ifm  = iphi - ire/2 + m_nside - 1;
+        int ifp  = iphi - irm/2 + m_nside - 1;
+        if (m_order >= 0) {
+            ifm >>= m_order;
+            ifp >>= m_order;
+        }
+        else {
+            ifm /= m_nside;
+            ifp /= m_nside;
+        }
+        *face = (ifp==ifm) ? (ifp|4) : ((ifp<ifm) ? ifp : (ifm+8));
+    }
+    
+    // Handle pixel in the South Polar cap
+    else {
+        int ip = m_num_pixels - pix;
+        iring  = (1+isqrt(2*ip-1))>>1; // Counted from South pole
+        iphi   = 4 * iring + 1 - (ip - 2*iring*(iring-1));
+        kshift = 0;
+        nr     = iring;
+        iring  = 2 * nl2 - iring;
+        *face  = 8 + (iphi-1)/nr;
+    }
+
+    // Now compute the (ix,iy) values
+    int irt = iring    - (jrll[*face] * m_nside) + 1;
+    int ipt = 2 * iphi -  jpll[*face] * nr - kshift -1;
+    if (ipt >= nl2) {
+        ipt -= 8*m_nside;
+    }
+    *ix =  (ipt-irt) >> 1;
+    *iy = (-ipt-irt) >> 1;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert (x,y,face) tuple to pixel number in nested scheme
+ *
+ * @param[in] ix X index
+ * @param[in] iy Y index
+ * @param[in] face Face number
+ * @return Pixel number if nested scheme
+ *
+ * This method has been adapted from the xyf2nest() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+int GHealpix::xyf2nest(const int& ix, const int& iy, const int& face) const
+{
+    // Computed pixel number
+    int pix = (int(face) << (2 * m_order)) +
+              spread_bits(ix) + (spread_bits(iy) << 1);
+
+    // Return pixel number
+    return pix;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert (x,y,face) tuple to pixel number in ring scheme
+ *
+ * @param[in] ix X index
+ * @param[in] iy Y index
+ * @param[in] face Face number
+ * @return Pixel number if ring scheme
+ *
+ * This method has been adapted from the xyf2ring() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+int GHealpix::xyf2ring(const int& ix, const int& iy, const int& face) const
+{
+    // Compute ring number
+    int nl4 = 4 * m_nside;
+    int jr  = (jrll[face]*m_nside) - ix - iy  - 1;
+
+    // Get information about that ring
+    int  n_before;
+    int  nr;
+    bool shifted;
+    get_ring_info(jr, &n_before, &nr, &shifted);
+    
+    // Compute pixel number
+    nr   >>= 2;
+    int kshift = 1-shifted;
+    int jp = (jpll[face]*nr + ix - iy + 1 + kshift) / 2;
+
+    //planck_assert(jp<=4*nr,"must not happen");
+    
+    // Assumption: if this triggers, then nl4==4*nr
+    if (jp < 1) {
+        jp += nl4;
+    }
+
+    // Return pixel number
+    return (n_before + jp - 1);
+}
+
+
 /***********************************************************************//**
  * @brief Convert nside to order
  *
  * @param[in] nside Number of sides.
+ * @return Order of HealPix projection.
  ***************************************************************************/
-int GHealpix::nside2order(int nside)
+int GHealpix::nside2order(const int& nside) const
 {
     // Initialise order
     int order = -1;
@@ -649,6 +910,74 @@ int GHealpix::nside2order(int nside)
 
     // Return order
     return order;
+}
+
+
+/***********************************************************************//**
+ * @brief Converts pixel number in nested indexing scheme to ring scheme
+ *
+ * @param[in] pix Pixel number in nested indexing scheme.
+ * @return Pixel number in ring indexing scheme.
+ *
+ * @exception GException::invalid_value
+ *            Healpix projection does not represent a hiearachical map.
+ *
+ * This method has been adapted from the nest2ring() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+int GHealpix::nest2ring(const int& pix) const
+{
+    // Throw an exception if map is not a hierachical map
+    if (m_order < 0) {
+        std::string msg = "A hierarchical map projection is required.";
+        throw GException::invalid_value(G_NEST2RING, msg);
+    }
+
+    // Convert nested index to (x,y,face) tuple
+    int ix;
+    int iy;
+    int face;
+    nest2xyf(pix, &ix, &iy, &face);
+
+    // Convert (x,y,face) tuple to ring index
+    int iring = xyf2ring(ix, iy, face);
+
+    // Return ring index
+    return iring;
+}
+
+
+/***********************************************************************//**
+ * @brief Converts pixel number in ring indexing scheme to nested scheme
+ *
+ * @param[in] pix Pixel number in ring indexing scheme.
+ * @return Pixel number in nested indexing scheme.
+ *
+ * @exception GException::invalid_value
+ *            Healpix projection does not represent a hiearachical map.
+ *
+ * This method has been adapted from the ring2nest() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+int GHealpix::ring2nest(const int& pix) const
+{
+    // Throw an exception if map is not a hierachical map
+    if (m_order < 0) {
+        std::string msg = "A hierarchical map projection is required.";
+        throw GException::invalid_value(G_RING2NEST, msg);
+    }
+
+    // Convert nested index to (x,y,face) tuple
+    int ix;
+    int iy;
+    int face;
+    ring2xyf(pix, &ix, &iy, &face);
+
+    // Convert (x,y,face) tuple to ring index
+    int iring = xyf2nest(ix, iy, face);
+
+    // Return ring index
+    return iring;
 }
 
 
@@ -700,8 +1029,9 @@ int GHealpix::xy2pix(int x, int y) const
 void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
-    if (ipix < 0 || ipix >= m_num_pixels)
+    if (ipix < 0 || ipix >= m_num_pixels) {
         throw  GException::out_of_range(G_PIX2ANG_RING, ipix, 0, m_num_pixels-1);
+    }
 
     // Handle North Polar cap
     if (ipix < m_ncap) {
@@ -749,8 +1079,9 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi) const
 void GHealpix::pix2ang_nest(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
-    if (ipix < 0 || ipix >= m_num_pixels)
+    if (ipix < 0 || ipix >= m_num_pixels) {
         throw GException::out_of_range(G_PIX2ANG_NEST, ipix, 0, m_num_pixels-1);
+    }
 
     // Get face number and index in face
     int nl4      = 4 * m_nside;
@@ -806,7 +1137,7 @@ void GHealpix::pix2ang_nest(int ipix, double* theta, double* phi) const
 
 
 /***********************************************************************//**
- * @brief Returns pixels which contains angular coordinates (z,phi)
+ * @brief Returns pixel which contains angular coordinates (z,phi)
  *
  * @param[in] z Cosine of zenith angle - cos(theta).
  * @param[in] phi Azimuth angle in radians.
@@ -854,7 +1185,7 @@ int GHealpix::ang2pix_z_phi_ring(double z, double phi) const
 
 
 /***********************************************************************//**
- * @brief Returns pixels which contains angular coordinates (z,phi)
+ * @brief Returns pixel which contains angular coordinates (z,phi)
  *
  * @param[in] z Cosine of zenith angle - cos(theta).
  * @param[in] phi Azimuth angle in radians.
@@ -917,11 +1248,272 @@ int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
 
 
 /***********************************************************************//**
+ * @brief Get ring index north of cos(theta)
+ *
+ * @param[in] costheta Cosine of colatitude theta
+ *
+ * Returns the number of the next ring to the north of @a cos(theta). It may
+ * return 0; in this case @a costheta lies north of all rings.
+ *
+ * This method has been adapted from the ring_above() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+int GHealpix::ring_above(const double& costheta) const
+{
+    // Initialise ring index
+    int iring;
+
+    // Get absolute cosine
+    double acostheta = std::abs(costheta);
+
+    // Are we in the equatorial region
+    if (acostheta <= gammalib::twothird) {
+        iring = int(m_nside * (2.0 - 1.5 * costheta));
+    }
+
+    // ... otherwise we're in the pole region
+    else {
+        iring = int(m_nside * std::sqrt(3.0 * (1.0 - acostheta)));
+        if (costheta <= 0.0) {
+            iring = 4 * m_nside - iring - 1;
+        }
+    }
+
+    // Return
+    return iring;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns useful information about a given ring of the projection
+ *
+ * @param[in] ring The ring number (the number of the first ring is 1)
+ * @param[out] startpix The number of the first pixel in the ring
+ * @param[out] ringpix The number of pixels in the ring
+ * @param[out] shifted If @a true, the center of the first pixel is not at
+ *                     @a phi=0
+ *
+ * This method has been adapted from the get_ring_info_small() function
+ * located in the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+void GHealpix::get_ring_info(const int& ring,
+                             int*       startpix,
+                             int*       ringpix,
+                             bool*      shifted) const
+{
+    // Handle ring in North polar cap
+    if (ring < m_nside) {
+        *shifted  = true;
+        *ringpix  = 4 * ring;
+        *startpix = 2 * ring * (ring-1);
+    }
+    
+    // Handle ring in equatorial region
+    else if (ring < 3*m_nside) {
+        *shifted  = ((ring-m_nside) & 1) == 0;
+        *ringpix  = 4 * m_nside;
+        *startpix = m_ncap + (ring-m_nside) * *ringpix;
+    }
+
+    // Handle ring in South polar cap
+    else {
+        int nr    = 4 * m_nside - ring;
+        *shifted  = true;
+        *ringpix  = 4 * nr;
+        *startpix = m_num_pixels - 2 * nr * (nr+1);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns useful information about a given ring of the projection
+ *
+ * @param[in] ring The ring number (the number of the first ring is 1)
+ * @param[out] startpix The number of the first pixel in the ring
+ * @param[out] ringpix The number of pixels in the ring
+ * @param[out] theta (radians)
+ * @param[out] shifted If @a true, the center of the first pixel is not at
+ *                     @a phi=0
+ *
+ * This method has been adapted from the get_ring_info2() function
+ * located in the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+void GHealpix::get_ring_info(const int& ring,
+                             int*       startpix,
+                             int*       ringpix,
+                             double*    theta,
+                             bool*      shifted) const
+{
+    //
+    int northring = (ring > 2 * m_nside) ? 4 * m_nside - ring : ring;
+
+    // Are we in the North?
+    if (northring < m_nside) {
+        double tmp      = northring * northring * m_fact2;
+        double costheta = 1.0 - tmp;
+        double sintheta = std::sqrt(tmp * (2.0-tmp));
+        *startpix       = 2 * northring * (northring - 1);
+        *ringpix        = 4 * northring;
+        *theta          = std::atan2(sintheta, costheta);
+        *shifted        = true;
+    }
+    else {
+        *theta    = std::acos((2.0 * m_nside-northring) * m_fact1);
+        *ringpix  = 4 * m_nside;
+        *shifted  = ((northring - m_nside) & 1) == 0;
+        *startpix = m_ncap + (northring - m_nside) * *ringpix;
+    }
+    
+    // Are we in the southern hemisphere?
+    if (northring != ring) {
+        *theta    = gammalib::pi - *theta;
+        *startpix = m_num_pixels - *startpix - *ringpix;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return interpolator
+ *
+ * @param[in] theta Colatitude of direction (radian, the North pole is at theta=0)
+ * @param[in] phi Longitude of direction (radians)
+ *
+ * @exception GException::invalid_argument
+ *            Invalid @p theta argument
+ *
+ * Returns a bilinear pixel interpolator for a given sky direction.
+ *
+ * This method has been adapted from the get_interpol() function
+ * located in the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+GBilinear GHealpix::interpolator(const double& theta, const double& phi) const
+{
+    // Allocate interpolator
+    GBilinear interpolator;
+
+    // Check that theta is valid
+    if (theta < 0.0 || theta > gammalib::pi) {
+        std::string msg = "Colatitude "+gammalib::str(theta)+" is outside "
+                          "valid range [0,pi].";
+        throw GException::invalid_argument(G_INTERPOLATOR, msg);
+    }
+
+    // Prepare computation
+    double costheta = std::cos(theta);
+    int    ir1      = ring_above(costheta); // Ring above actual colatitude
+    int    ir2      = ir1 + 1;              // Ring below actual colatitude
+    int    sp;                              // Start pixel in ring
+    int    nr;                              // Number of pixels in ring
+    double theta1;                          // Colatitude of ring above
+    double theta2;                          // Colatitude of ring below
+    bool   shift;
+
+    // Compute interpolating pixels and phi weights if the colatitude is not
+    // North of all rings (if we're North of all rings, ir1=0)
+    if (ir1 > 0) {
+        get_ring_info(ir1, &sp, &nr, &theta1, &shift);
+        double dphi = gammalib::twopi / nr;  // Phi spacing of pixels
+        double tmp  = (phi/dphi - 0.5*shift);
+        int    i1   = (tmp < 0.0) ? int(tmp)-1 : int(tmp);
+        double w1   = (phi - (i1+0.5*shift)*dphi) / dphi;
+        int    i2   = i1 + 1;
+        if (i1 < 0) {
+            i1 += nr;
+        }
+        if (i2 >= nr) {
+            i2 -= nr;
+        }
+        interpolator.index1()  = sp + i1;
+        interpolator.index2()  = sp + i2;
+        interpolator.weight1() = 1.0 - w1;
+        interpolator.weight2() = w1;
+    }
+    
+    // Compute interpolating pixels and phi weights is the colatitude is not
+    // South of all rings (if we're South of all rings, ir2=4*m_nside)
+    if (ir2 < (4*m_nside)) {
+        get_ring_info(ir2, &sp, &nr, &theta2, &shift);
+        double dphi = gammalib::twopi / nr;  // Phi spacing of pixels
+        double tmp  = (phi/dphi - 0.5*shift);
+        int    i1   = (tmp < 0.0) ? int(tmp)-1 : int(tmp);
+        double w1   = (phi - (i1+0.5*shift)*dphi) / dphi;
+        int    i2   = i1 + 1;
+        if (i1 < 0) {
+            i1 += nr;
+        }
+        if (i2 >= nr) {
+            i2 -= nr;
+        }
+        interpolator.index3()  = sp + i1;
+        interpolator.index4()  = sp + i2;
+        interpolator.weight3() = 1.0 - w1;
+        interpolator.weight4() = w1;
+    }
+
+    // Now handle the special case that the colatitude is  North of all
+    // rings
+    if (ir1 == 0) {
+        double wtheta = theta/theta2;
+        interpolator.weight3() *= wtheta;
+        interpolator.weight4() *= wtheta;
+        double fac              = (1.0-wtheta)*0.25;
+        interpolator.weight1()  = fac;
+        interpolator.weight2()  = fac;
+        interpolator.weight3() += fac;
+        interpolator.weight4() += fac;
+        interpolator.index1()   = (interpolator.index3() + 2) & 3;
+        interpolator.index2()   = (interpolator.index4() + 2) & 3;
+    }
+
+    // ... and now the case that the colatitude is South of all rings
+    else if (ir2 == 4*m_nside) {
+        double wtheta = (theta-theta1) / (gammalib::pi-theta1);
+        interpolator.weight1()  *= (1.0 - wtheta);
+        interpolator.weight2()  *= (1.0 - wtheta);
+        double fac              = wtheta*0.25;
+        interpolator.weight1() += fac;
+        interpolator.weight2() += fac;
+        interpolator.weight3()  = fac;
+        interpolator.weight4()  = fac;
+        interpolator.index3()   = ((interpolator.index1() + 2) & 3) + m_num_pixels - 4;
+        interpolator.index4()   = ((interpolator.index2() + 2) & 3) + m_num_pixels - 4;
+    }
+    
+    // ... and now multiply-in the theta weights for the general case
+    else {
+        double wtheta = (theta-theta1) / (theta2-theta1);
+        interpolator.weight1() *= (1.0 - wtheta);
+        interpolator.weight2() *= (1.0 - wtheta);
+        interpolator.weight3() *= wtheta;
+        interpolator.weight4() *= wtheta;
+    }
+
+    // If we have a nested pixel scheme then convert now the ring
+    // indices into nested indices
+    if (m_ordering == 1) {
+        interpolator.index1() = ring2nest(interpolator.index1());
+        interpolator.index2() = ring2nest(interpolator.index2());
+        interpolator.index3() = ring2nest(interpolator.index3());
+        interpolator.index4() = ring2nest(interpolator.index4());
+    }
+
+    // Return interpolator
+    return interpolator;
+}
+
+
+/***********************************************************************//**
  * @brief Integer n that fulfills n*n <= arg < (n+1)*(n+1)
  *
  * @param[in] arg Argument.
  *
- * Returns the integer \a n, which fulfills \a n*n <= arg < (n+1)*(n+1).
+ * Returns the integer @a n, which fulfills @a n*n <= arg < (n+1)*(n+1).
  ***************************************************************************/
 unsigned int GHealpix::isqrt(unsigned int arg) const
 {

@@ -399,17 +399,29 @@ double gammalib::erfcc(const double& arg) {
 
 
 /***********************************************************************//**
- * @brief Returns the remainder of the division \a v1/v2.
+ * @brief Returns the remainder of the division
  *
- * @param[in] v1 Argument 1.
- * @param[in] v2 Argument 2.
+ * @param[in] v1 Nominator.
+ * @param[in] v2 Denominator.
+ * @return Remainder of division
  *
- * Returns the remainder of the division \a v1/v2.
- * The result is non-negative.
- * \a v1 can be positive or negative; \a v2 must be positive.
+ * Returns the remainder of the division @a v1/v2. The result is non-negative.
+ * @a v1 can be positive or negative; @a v2 must be positive.
  ***************************************************************************/
 double gammalib::modulo(const double& v1, const double& v2)
 {
-    // Return
-    return (v1 >= 0) ? ((v1 < v2) ? v1 : std::fmod(v1,v2)) : (std::fmod(v1,v2)+v2);
+    // Declare result
+    double result;
+
+    //
+    if (v1 >= 0.0) {
+        result = (v1 < v2) ? v1 : std::fmod(v1,v2);
+    }
+    else {
+        double tmp = std::fmod(v1,v2) + v2;
+        result     = (tmp == v2) ? 0.0 : tmp;
+    }
+
+    // Return result
+    return result;
 }
