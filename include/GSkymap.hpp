@@ -40,6 +40,7 @@
 #include "GFitsImageDouble.hpp"
 #include "GMatrix.hpp"
 #include "GVector.hpp"
+#include "GBilinear.hpp"
 
 
 /***********************************************************************//**
@@ -160,25 +161,18 @@ private:
     GFitsImageDouble* create_wcs_hdu(void) const;
 
     // Private data area
-    int             m_num_pixels; //!< Number of pixels (used for pixel allocation)
-    int             m_num_maps;   //!< Number of maps (used for pixel allocation)
-    int             m_num_x;      //!< Number of pixels in x direction (only 2D)
-    int             m_num_y;      //!< Number of pixels in y direction (only 2D)
-    GSkyProjection* m_proj;       //!< Pointer to sky projection
-    double*         m_pixels;     //!< Pointer to skymap pixels
+    int               m_num_pixels; //!< Number of pixels (used for pixel allocation)
+    int               m_num_maps;   //!< Number of maps (used for pixel allocation)
+    int               m_num_x;      //!< Number of pixels in x direction (only 2D)
+    int               m_num_y;      //!< Number of pixels in y direction (only 2D)
+    GSkyProjection*   m_proj;       //!< Pointer to sky projection
+    double*           m_pixels;     //!< Pointer to skymap pixels
 
     // Computation cache
-    mutable bool    m_hascache;   //!< Cache is valid
-    mutable bool    m_contained;  //!< Direction contained in map
-    mutable GSkyDir m_last_dir;   //!< Last sky direction
-    mutable int     m_inx1;       //!< Interpolation index 1
-    mutable int     m_inx2;       //!< Interpolation index 2
-    mutable int     m_inx3;       //!< Interpolation index 3
-    mutable int     m_inx4;       //!< Interpolation index 4
-    mutable double  m_wgt1;       //!< Interpolation weight 1
-    mutable double  m_wgt2;       //!< Interpolation weight 2
-    mutable double  m_wgt3;       //!< Interpolation weight 3
-    mutable double  m_wgt4;       //!< Interpolation weight 4
+    mutable bool      m_hascache;   //!< Cache is valid
+    mutable bool      m_contained;  //!< Sky direction is contained in map
+    mutable GSkyDir   m_last_dir;   //!< Last sky direction
+    mutable GBilinear m_interpol;   //!< Bilinear interpolator
 };
 
 

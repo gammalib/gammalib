@@ -670,6 +670,7 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
  *
  * @param[in] dir Sky direction.
  * @param[in] map Map index [0,...,nmaps()-1].
+ * @return Sky intensity.
  *
  * @exception GException::out_of_range
  *            Map index lies outside valid range.
@@ -678,13 +679,10 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
  * interpolation of the neighbouring pixels. If the sky direction falls
  * outside the area covered by the skymap, a value of 0 is returned.
  *
- * The method implements a computation cache that avoid recomputation of
+ * The method implements a computation cache that avoids recomputation of
  * interpolation indices and weights in case that the same sky direction
  * is requested several times. This speeds up use cases where skymap values
  * for various map indices have to be returned for the same sky direction.
- *
- * @todo The actual method only works on 2D images. It will fail for Healpix
- *       pixelisations.
  ***************************************************************************/
 double GSkymap::operator()(const GSkyDir& dir, const int& map) const
 {
@@ -700,89 +698,92 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
     // Initialise intensity
     double intensity = 0.0;
 
-    // If the sky direction is the same as during the last call, use the
-    // cached interpolation indices and weights for the computation ...
-    if (m_hascache && (dir == m_last_dir)) {
+    // If the pre-computation cache has not been set or if the sky direction
+    // has changed then compute the bilinear interpolator
+    if (!m_hascache || (dir != m_last_dir)) {
 
-        // Compute only if direction is contained
-        if (m_contained) {
+        // Perform computation for HealPix map
+        if (m_proj->size() == 1)  {
 
-            // Compute map offset
-            int offset = m_num_pixels * map;
+            // Get Healpix interpolator
+            m_interpol = static_cast<GHealpix*>(m_proj)->interpolator(dir);
 
-            // Compute interpolated skymap value
-            intensity = m_wgt1 * m_pixels[m_inx1 + offset] +
-                        m_wgt2 * m_pixels[m_inx2 + offset] +
-                        m_wgt3 * m_pixels[m_inx3 + offset] +
-                        m_wgt4 * m_pixels[m_inx4 + offset];
+            // Set containment flag and store actual sky direction as last
+            // direction
+            m_hascache  = true;
+            m_contained = true;
+            m_last_dir  = dir;
 
-        } // endif: direction was contained in map
+        } // endif: we had a Healpix projection
 
-    }
+        // ... otherwise perform computation for WCS map
+        else {
 
-    // ... otherwise compute the interpolation indices and weights
-    else {
+            // Determine sky pixel
+            GSkyPixel pixel = dir2pix(dir);
 
-        // Determine sky pixel
-        GSkyPixel pixel = dir2pix(dir);
+            // Set containment flag and store actual sky direction as last
+            // direction
+            m_hascache  = true;
+            m_contained = contains(pixel);
+            m_last_dir  = dir;
 
-        // Set containment flag and store actual sky direction as last
-        // direction
-        m_hascache  = true;
-        m_contained = contains(pixel);
-        m_last_dir  = dir;
+            // Continue only if pixel is within the map
+            if (m_contained) {
 
-        // Continue only if pixel is within the map
-        if (m_contained) {
+                // Set left indices for interpolation. The left index is
+                // comprised between 0 and npixels-2. By definition, the
+                // right index is then the left index + 1
+                int inx_x = int(pixel.x());
+                int inx_y = int(pixel.y());
+                if (inx_x < 0) {
+                    inx_x = 0;
+                }
+                else if (inx_x > m_num_x-2) {
+                    inx_x = m_num_x - 2;
+                }
+                if (inx_y < 0) {
+                    inx_y = 0;
+                }
+                else if (inx_y > m_num_y-2) {
+                    inx_y = m_num_y - 2;
+                }
 
-            // Set left indices for interpolation. The left index is
-            // comprised between 0 and npixels-2. By definition, the
-            // right index is then the left index + 1
-            int inx_x = int(pixel.x());
-            int inx_y = int(pixel.y());
-            if (inx_x < 0) {
-                inx_x = 0;
-            }
-            else if (inx_x > m_num_x-2) {
-                inx_x = m_num_x - 2;
-            }
-            if (inx_y < 0) {
-                inx_y = 0;
-            }
-            else if (inx_y > m_num_y-2) {
-                inx_y = m_num_y - 2;
-            }
+                // Set weighting factors for interpolation
+                double wgt_x_right = (pixel.x() - inx_x);
+                double wgt_x_left  = 1.0 - wgt_x_right;
+                double wgt_y_right = (pixel.y() - inx_y);
+                double wgt_y_left  = 1.0 - wgt_y_right;
 
-            // Set weighting factors for interpolation
-            double wgt_x_right = (pixel.x() - inx_x);
-            double wgt_x_left  = 1.0 - wgt_x_right;
-            double wgt_y_right = (pixel.y() - inx_y);
-            double wgt_y_left  = 1.0 - wgt_y_right;
+                // Compute skymap pixel indices for bi-linear interpolation
+                m_interpol.index1() = inx_x + inx_y * m_num_x;
+                m_interpol.index2() = m_interpol.index1() + m_num_x;
+                m_interpol.index3() = m_interpol.index1() + 1;
+                m_interpol.index4() = m_interpol.index2() + 1;
 
-            // Compute skymap pixel indices for bi-linear interpolation
-            m_inx1 = inx_x + inx_y * m_num_x;
-            m_inx2 = m_inx1 + m_num_x;
-            m_inx3 = m_inx1 + 1;
-            m_inx4 = m_inx2 + 1;
+                // Compute weighting factors for bi-linear interpolation
+                m_interpol.weight1() = wgt_x_left  * wgt_y_left;
+                m_interpol.weight2() = wgt_x_left  * wgt_y_right;
+                m_interpol.weight3() = wgt_x_right * wgt_y_left;
+                m_interpol.weight4() = wgt_x_right * wgt_y_right;
 
-            // Compute weighting factors for bi-linear interpolation
-            m_wgt1 = wgt_x_left  * wgt_y_left;
-            m_wgt2 = wgt_x_left  * wgt_y_right;
-            m_wgt3 = wgt_x_right * wgt_y_left;
-            m_wgt4 = wgt_x_right * wgt_y_right;
+            } // endif: pixel was contained in map
+    
+        } // endelse: we had a WCS map
 
-            // Compute map offset
-            int offset = m_num_pixels * map;
+    } // endif: computation of the bi-linear interpolater was required
 
-            // Compute interpolated skymap value
-            intensity = m_wgt1 * m_pixels[m_inx1 + offset] +
-                        m_wgt2 * m_pixels[m_inx2 + offset] +
-                        m_wgt3 * m_pixels[m_inx3 + offset] +
-                        m_wgt4 * m_pixels[m_inx4 + offset];
+    // Compute the interpolated intensity if the pixel is contained in
+    // the map
+    if (m_contained) {
 
-        } // endif: pixel was within map
+        // Compute map offset
+        int offset = m_num_pixels * map;
 
-    } // endelse: interpolation indices and weights were computed
+        // Compute interpolated skymap value
+        intensity = m_interpol(m_pixels+offset);
+
+    } // endif: direction was contained in map
 
     // Return intensity
     return intensity;
@@ -1552,14 +1553,7 @@ void GSkymap::init_members(void)
     m_hascache  = false;
     m_contained = false;
     m_last_dir.clear();
-    m_inx1 = 0;
-    m_inx2 = 0;
-    m_inx3 = 0;
-    m_inx4 = 0;
-    m_wgt1 = 0.0;
-    m_wgt2 = 0.0;
-    m_wgt3 = 0.0;
-    m_wgt4 = 0.0;
+    m_interpol.clear();
 
     // Return
     return;
@@ -1607,14 +1601,7 @@ void GSkymap::copy_members(const GSkymap& map)
     m_hascache  = map.m_hascache;
     m_contained = map.m_contained;
     m_last_dir  = map.m_last_dir;
-    m_inx1      = map.m_inx1;
-    m_inx2      = map.m_inx2;
-    m_inx3      = map.m_inx3;
-    m_inx4      = map.m_inx4;
-    m_wgt1      = map.m_wgt1;
-    m_wgt2      = map.m_wgt2;
-    m_wgt3      = map.m_wgt3;
-    m_wgt4      = map.m_wgt4;
+    m_interpol  = map.m_interpol;
 
     // Clone sky projection if it is valid
     if (map.m_proj != NULL) m_proj = map.m_proj->clone();
