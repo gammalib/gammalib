@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.cpp - Spatial map model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GModelSpatialDiffuseMap.hpp"
 #include "GModelSpatialRegistry.hpp"
 
@@ -327,8 +328,12 @@ double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
  * number, this cache array is scanned using a bi-section method to determine
  * the skymap pixel for which the position should be returned. To avoid
  * binning problems, the exact position within the pixel is set by a uniform
- * random number generator (neglecting thus pixel distortions). The
- * fractional skymap pixel is then converted into a sky direction.
+ * random number generator. In case of a 2D map, this is done by randomizing
+ * the skymap pixel values (neglecting thus pixel distortions). In case of a
+ * HealPix map, this is done by selecing a random sky position within the
+ * HealPix map.
+ *
+ * @todo: Improve HealPix randomization
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
                                     const GTime&   time,
@@ -349,12 +354,36 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
     	// Convert sky map index to sky map pixel
     	GSkyPixel pixel = m_map.inx2pix(index);
 
-    	//Randomize pixel
-        pixel.x(pixel.x() + ran.uniform() - 0.5);
-        pixel.y(pixel.y() + ran.uniform() - 0.5);
+    	// If we have a 2D pixel then randomize pixel values and convert them
+        // into a sky direction
+        if (pixel.is_2D()) {
+            pixel.x(pixel.x() + ran.uniform() - 0.5);
+            pixel.y(pixel.y() + ran.uniform() - 0.5);
+            dir = m_map.pix2dir(pixel);
+        }
 
-        // Get sky direction
-        dir = m_map.pix2dir(pixel);
+        // ... otherwise convert pixel into sky direction and randomize
+        // position. We use here a kluge to compute the radius that contains
+        // a HealPix pixel by setting this radius to twice the half angle
+        // subtended by the solid angle of the pixel. We then use a while
+        // loop to randomize the position within that circle and to retain
+        // only directions that result in the same pixel index.
+        else {
+            dir = m_map.pix2dir(pixel);
+            GSkyDir randomized_dir;
+            int     randomized_index = -1;
+            double  radius           = 2.0 * std::acos(1.0 - m_map.solidangle(index)/gammalib::twopi);
+            double  cosrad           = std::cos(radius);
+            while (randomized_index != index) {
+                randomized_dir = dir;
+                double theta   = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * gammalib::rad2deg;
+                double phi     = 360.0 * ran.uniform();
+                randomized_dir.rotate_deg(phi, theta);
+                randomized_index = m_map.dir2inx(randomized_dir);
+//std::cout << radius << " " << randomized_index << " " << index << " " << randomized_dir << std::endl;
+            }
+            dir = randomized_dir;
+        }
 
     } // endif: there were pixels in sky map
 
