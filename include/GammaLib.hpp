@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GammaLib.hpp - Gamma-Ray Astronomy Library Header file         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,7 @@
 /* __ Common tools _______________________________________________________ */
 #include "GException.hpp"
 #include "GNodeArray.hpp"
+#include "GBilinear.hpp"
 #include "GCsv.hpp"
 #include "GRan.hpp"
 #include "GUrl.hpp"

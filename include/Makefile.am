@@ -6,6 +6,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GRegistry.hpp \
                      GException.hpp \
                      GNodeArray.hpp \
+                     GBilinear.hpp \
                      GTools.hpp \
                      GCsv.hpp \
                      GRan.hpp \

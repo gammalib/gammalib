@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GSupport.hpp - test support module                  *
+ *                 GBilinear.i - Bilinear interpolator class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2015 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,44 +19,52 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GSupport.hpp
- * @brief Testing of support module
- * @author Jean-Baptiste Cayrou
+ * @file GBilinear.i
+ * @brief Bilinear interpolator class interface definition
+ * @author Juergen Knoedlseder
  */
-
-#ifndef TEST_GSUPPORT_HPP
-#define TEST_GSUPPORT_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GBilinear.hpp"
+%}
 
 
 /***********************************************************************//**
- * @class TestGSupport
+ * @class GBilinear
  *
- * @brief Test suite for support module
+ * @brief Bilinear interpolator class
  ***************************************************************************/
-class TestGSupport : public GTestSuite {
+class GBilinear : public GBase {
 
 public:
     // Constructors and destructors
-    TestGSupport(void) : GTestSuite() { }
-    virtual ~TestGSupport(void) { }
+    GBilinear(void);
+    GBilinear(const GBilinear& interpolator);
+    virtual ~GBilinear(void);
+
+    // Operators
+    double operator()(const double* array);
 
     // Methods
-    virtual void          set(void);
-    virtual TestGSupport* clone(void) const;
-    virtual std::string   classname(void) const { return "TestGSupport"; }
-    void                  test_expand_env(void);
-    void                  test_node_array(void);
-    void                  test_bilinear(void);
-    void                  test_url_file(void);
-    void                  test_url_string(void);
-    void                  test_tools(void);
-
-private:
-    // Private methods
-    void test_node_array_interpolation(const int& num, const double* nodes);
+    void        clear(void);
+    GBilinear*  clone(void) const;
+    std::string classname(void) const;
+    int&        index1(void);
+    int&        index2(void);
+    int&        index3(void);
+    int&        index4(void);
+    double&     weight1(void);
+    double&     weight2(void);
+    double&     weight3(void);
+    double&     weight4(void);
 };
 
-#endif /* TEST_GSUPPORT_HPP */
+
+/***********************************************************************//**
+ * @brief GBilinear class extension
+ ***************************************************************************/
+%extend GBilinear {
+    GBilinear copy() {
+        return (*self);
+    }
+};

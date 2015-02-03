@@ -9,6 +9,7 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GException.cpp \
           GTools.cpp \
           GNodeArray.cpp \
+          GBilinear.cpp \
           GCsv.cpp \
           GRan.cpp \
           GUrl.cpp \

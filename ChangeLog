@@ -1,4 +1,4 @@
-2015-02-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-02-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -10,6 +10,7 @@
         Add classname methods to Python interface (#1321)
         Rename CTA cube analysis classes (#1269)
         Do not dump unqueried parameters (#1349)
+        Add GBilinear class
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

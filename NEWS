@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-2 February 2015
+3 February 2015
 
 
 1. Introduction
@@ -83,7 +83,11 @@ None
 
 13. Support module
 ------------------
-None
+The GBilinear class has been added to support bilinear interpolations. The
+class holds the four indices and weights for the bilinear corner points. It
+provides an interpolation operator that allows bilinear interpolation of a
+linear double precision array. This class is essentially a helper class for
+bilinear interpolations within GammaLib.
 
 
 14. XML module

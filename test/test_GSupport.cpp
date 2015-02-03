@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,6 +52,7 @@ void TestGSupport::set(void){
     append(static_cast<pfunction>(&TestGSupport::test_tools), "Test GTools");
     append(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
     append(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
+    append(static_cast<pfunction>(&TestGSupport::test_bilinear), "Test GBilinear");
     append(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
     append(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
 
@@ -407,6 +408,59 @@ void TestGSupport::test_node_array_interpolation(const int&    num,
         double result   = array.interpolate(value, values);
         test_value(result, expected);
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GBilinear class
+ *
+ * Test the GBilinear class.
+ ***************************************************************************/
+void TestGSupport::test_bilinear(void)
+{
+    // Test constructor
+    GBilinear interpolator;
+
+    // Test value setting and retrieving
+    interpolator.index1()  = 1;
+    interpolator.index2()  = 2;
+    interpolator.index3()  = 3;
+    interpolator.index4()  = 4;
+    interpolator.weight1() = 1.0;
+    interpolator.weight2() = 2.0;
+    interpolator.weight3() = 3.0;
+    interpolator.weight4() = 4.0;
+    test_value(interpolator.index1(), 1);
+    test_value(interpolator.index2(), 2);
+    test_value(interpolator.index3(), 3);
+    test_value(interpolator.index4(), 4);
+    test_value(interpolator.weight1(), 1.0);
+    test_value(interpolator.weight2(), 2.0);
+    test_value(interpolator.weight3(), 3.0);
+    test_value(interpolator.weight4(), 4.0);
+
+    // Test copy constructor
+    GBilinear interpolator2(interpolator);
+    test_value(interpolator2.index1(), 1);
+    test_value(interpolator2.index2(), 2);
+    test_value(interpolator2.index3(), 3);
+    test_value(interpolator2.index4(), 4);
+    test_value(interpolator2.weight1(), 1.0);
+    test_value(interpolator2.weight2(), 2.0);
+    test_value(interpolator2.weight3(), 3.0);
+    test_value(interpolator2.weight4(), 4.0);
+
+    // Test interpolator
+    double array[5]  = {1.0, 2.0, 3.0, 4.0, 5.0};
+    double reference = 1.0 * array[1] +
+                       2.0 * array[2] +
+                       3.0 * array[3] +
+                       4.0 * array[4];
+    test_value(interpolator(array), reference);
+    test_value(interpolator2(array), reference);
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      support.i - Support module                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2015 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,7 @@
 %include "GException.i"
 %include "GTools.i"
 %include "GNodeArray.i"
+%include "GBilinear.i"
 %include "GCsv.i"
 %include "GRan.i"
 %include "GUrl.i"
