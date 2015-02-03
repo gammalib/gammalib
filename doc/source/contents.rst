@@ -12,4 +12,5 @@ Documentation
    installation
    quickstart
    user_manual/index
+   howto/index
    coding/index
