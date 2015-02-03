@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GIntegral.cpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1123,6 +1123,7 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double* dy)
  *
  * @param[in] a Left integration boundary.
  * @param[in] b Right integration boundary.
+ * @param[in] eps Precision.
  * @param[in] S Integral of last computation.
  * @param[in] fa Function value at left integration boundary.
  * @param[in] fb Function value at right integration boundary.

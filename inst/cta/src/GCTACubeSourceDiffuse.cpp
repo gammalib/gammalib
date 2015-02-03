@@ -187,6 +187,7 @@ GCTACubeSourceDiffuse* GCTACubeSourceDiffuse::clone(void) const
 /***********************************************************************//**
  * @brief Set diffuse source cube for a given observation
  *
+ * @param[in] name Model name.
  * @param[in] model Spatial model.
  * @param[in] obs Observation.
  *

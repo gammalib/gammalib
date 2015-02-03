@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCsv.cpp - Column separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -446,7 +446,7 @@ void GCsv::load(const std::string& filename, const std::string& sep)
  *
  * @param[in] filename Filename.
  * @param[in] sep Column separator (default: whitespace).
- * @param[in] bool Overwrite existing file? (default: false).
+ * @param[in] clobber Overwrite existing file? (default: false).
  *
  * @exception GException::invalid_value
  *            Attempt to overwrite existing file.

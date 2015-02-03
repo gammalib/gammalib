@@ -176,12 +176,13 @@ GCTACubeSourcePoint* GCTACubeSourcePoint::clone(void) const
 /***********************************************************************//**
  * @brief Set point source cube for a given observation
  *
+ * @param[in] name Model name.
  * @param[in] model Spatial model.
  * @param[in] obs Observation.
  ***************************************************************************/
 void GCTACubeSourcePoint::set(const std::string&   name,
-                                    const GModelSpatial& model,
-                                    const GObservation&  obs)
+                              const GModelSpatial& model,
+                              const GObservation&  obs)
 {
     // Get pointer to model source model
     const GModelSpatialPointSource* ptsrc = dynamic_cast<const GModelSpatialPointSource*>(&model);

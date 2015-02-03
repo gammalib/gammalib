@@ -1057,7 +1057,6 @@ std::string GCTAModelCubeBackground::print(const GChatter& chatter) const
  *
  * @param[in] obs CTA observation.
  * @param[in] filename Background table filename.
- * @param[in] spectral Spectral model component.
  * @param[in] nx_sky Number of bins in x direction (optional).
  * @param[in] ny_sky Number of bins in y direction (optional).
  * @param[in] n_energy Number of energy bins (optional).
