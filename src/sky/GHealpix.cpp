@@ -1037,7 +1037,7 @@ void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi) const
     if (ipix < m_ncap) {
         int iring = int(0.5*(1+isqrt(1+2*ipix))); // counted from North pole
         int iphi  = (ipix+1) - 2*iring*(iring-1);
-        *theta    = acos(1.0 - (iring*iring) * m_fact2);
+        *theta    = std::acos(1.0 - (iring*iring) * m_fact2);
         *phi      = (iphi - 0.5) * gammalib::pi/(2.0*iring);
     }
 
@@ -1128,7 +1128,7 @@ void GHealpix::pix2ang_nest(int ipix, double* theta, double* phi) const
     if (jp <   1) jp += nl4;
 
     // Computes Theta and Phi
-    *theta = acos(z);
+    *theta = std::acos(z);
     *phi   = (jp - (kshift+1)*0.5) * (gammalib::pihalf / nr);
 
     // Return
