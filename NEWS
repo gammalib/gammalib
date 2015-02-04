@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-3 February 2015
+4 February 2015
 
 
 1. Introduction
@@ -78,7 +78,8 @@ None
 
 12. Sky module
 --------------
-None
+The following WCS projections have been added:
+* GWcsMOL (Mollweide's projection)
 
 
 13. Support module

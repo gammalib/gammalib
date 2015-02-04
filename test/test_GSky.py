@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012-2014 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ class Test(GPythonTestSuite):
         self.append(self.test_skymap_azp, "Test AZP projection map")
         self.append(self.test_skymap_car, "Test CAR projection map")
         self.append(self.test_skymap_mer, "Test MER projection map")
+        self.append(self.test_skymap_mol, "Test MOL projection map")
         self.append(self.test_skymap_stg, "Test STG projection map")
         self.append(self.test_skymap_tan, "Test TAN projection map")
         self.append(self.test_fk5_to_galactic, "Test FK5 to Galactic coordinate conversion")
@@ -228,6 +229,17 @@ class Test(GPythonTestSuite):
         """
         # Execute generic test
         self.test_skymap_proj("MER")
+
+        # Return
+        return
+
+    # Test MOL projection
+    def test_skymap_mol(self):
+        """
+        Test MOL projection.
+        """
+        # Execute generic test
+        self.test_skymap_proj("MOL")
 
         # Return
         return

@@ -21,6 +21,7 @@ sources = GSkyDir.cpp \
           GWcsAZP.cpp \
           GWcsCAR.cpp \
           GWcsMER.cpp \
+          GWcsMOL.cpp \
           GWcsTAN.cpp \
           GWcsSTG.cpp \
           GException_sky.cpp

@@ -112,7 +112,7 @@ double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1,
         for (int iy = -ny; iy <= ny; ++iy) {
 
             // Set y value
-            double    y = double(iy) + crpix2;
+            double y = double(iy) + crpix2;
 
             // Skip pixels outside valid range (they are not expected to
             // transform bijectively)
@@ -138,7 +138,8 @@ double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1,
             #if defined(G_WCS_FORTH_BACK_PIXEL_DEBUG)
             if (dist > 0.001) {
                 std::cout << std::endl;
-                std::cout << "dist=" << dist;
+                std::cout << wcs->code() << ":";
+                std::cout << " dist=" << dist;
                 std::cout << " dx=" << dx;
                 std::cout << " dy=" << dy;
                 std::cout << " pix_in=" << pix_in;

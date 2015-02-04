@@ -151,6 +151,7 @@
 #include "GWcsAZP.hpp"
 #include "GWcsCAR.hpp"
 #include "GWcsMER.hpp"
+#include "GWcsMOL.hpp"
 #include "GWcsTAN.hpp"
 #include "GWcsSTG.hpp"
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          sky.i - Sky module                             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2015 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -113,5 +113,6 @@
 %include "GWcsAZP.i"
 %include "GWcsCAR.i"
 %include "GWcsMER.i"
+%include "GWcsMOL.i"
 %include "GWcsTAN.i"
 %include "GWcsSTG.i"

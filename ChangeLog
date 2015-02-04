@@ -1,4 +1,4 @@
-2015-02-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-02-04  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -11,6 +11,7 @@
         Rename CTA cube analysis classes (#1269)
         Do not dump unqueried parameters (#1349)
         Add GBilinear class
+        Add WCS projections (MOL)
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
