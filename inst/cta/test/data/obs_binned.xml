@@ -1,5 +1,5 @@
 <observation_list title="observation library">
   <observation name="Crab" id="00001" instrument="CTA">
-    <parameter name="CountsMap" file="$(PACKAGE_SOURCE)/inst/cta/test/data/crab_cntmap.fits"/>
+    <parameter name="CountsCube" file="$(PACKAGE_SOURCE)/inst/cta/test/data/crab_cntmap.fits"/>
   </observation>
 </observation_list>

@@ -106,7 +106,7 @@ for an unbinned observation and:
 .. code-block:: xml
 
     <observation name="..." id="..." instrument="...">
-        <parameter name="CountsMap"           file="..."/>
+        <parameter name="CountsCube"          file="..."/>
         <parameter name="EffectiveArea"       file="..."/>
         <parameter name="PointSpreadFunction" file="..."/>
         <parameter name="EnergyDispersion"    file="..."/>
@@ -118,7 +118,7 @@ specifies the filename for a specific file that is needed for the analysis.
 The difference between an unbinned and a binned observation is that the 
 first uses an event list (requiring a parameter with name ``EventList``)
 while the latter uses an event cube  (requiring a parameter with name
-``CountsMap``). The ``EffectiveArea``, ``PointSpreadFunction`` and
+``CountsCube``). The ``EffectiveArea``, ``PointSpreadFunction`` and
 ``EnergyDispersion`` parameters provide the filenames of the instrument
 specific response function components for each observation 
 (see :ref:`sec_cta_response`). Note that for compatibility reasons,

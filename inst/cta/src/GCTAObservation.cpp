@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -634,7 +634,7 @@ GEbounds GCTAObservation::ebounds(void) const
  * for an unbinned observation and
  *
  *     <observation name="..." id="..." instrument="...">
- *       <parameter name="CountsMap" file="..."/>
+ *       <parameter name="CountsCube" file="..."/>
  *       ...
  *     </observation>
  *
@@ -680,9 +680,9 @@ void GCTAObservation::read(const GXmlElement& xml)
         // Get parameter element
         const GXmlElement* par = xml.element("parameter", i);
 
-        // Handle EventList or CountsMap
+        // Handle EventList or CountsCube
         if ((par->attribute("name") == "EventList") ||
-            (par->attribute("name") == "CountsMap")) {
+            (par->attribute("name") == "CountsCube")) {
 
             // Store event type
             m_eventtype = par->attribute("name");
@@ -728,7 +728,7 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Verify that all required parameters were found
     if (npar[0] != 1) {
         throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"EventList\" or \"CountsMap\" parameters.");
+              "Require \"EventList\" or \"CountsCube\" parameters.");
     }
 
     // Determine response type as function of the information that is
@@ -815,7 +815,7 @@ void GCTAObservation::read(const GXmlElement& xml)
  * for an unbinned observation and
  *
  *     <observation name="..." id="..." instrument="...">
- *       <parameter name="CountsMap" file="..."/>
+ *       <parameter name="CountsCube" file="..."/>
  *       ...
  *     </observation>
  *
@@ -829,8 +829,9 @@ void GCTAObservation::read(const GXmlElement& xml)
 void GCTAObservation::write(GXmlElement& xml) const
 {
     // Throw an exception if m_eventtype is neither "EventList" nor
-    // "CountsMap"
-    if ((m_eventtype != "EventList") && (m_eventtype != "CountsMap")) {
+    // "CountsCube"
+    if ((m_eventtype != "EventList") &&
+        (m_eventtype != "CountsCube")) {
         std::string msg;
         if (m_eventtype.length() == 0) {
             msg = "The observation does not contain any events, hence "
@@ -839,7 +840,7 @@ void GCTAObservation::write(GXmlElement& xml) const
         else {
             msg = "The observation contains an unknown event type \""+
                   m_eventtype+"\". The event type needs to be either "
-                  "\"EventList\" or \"CountsMap\".";
+                  "\"EventList\" or \"CountsCube\".";
         }
         throw GException::invalid_value(G_WRITE, msg);
     }
@@ -885,7 +886,7 @@ void GCTAObservation::write(GXmlElement& xml) const
     // Verify that all required parameters are present
     if (npar[0] != 1) {
         throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"EventList\" or \"CountsMap\" parameters.");
+              "Require \"EventList\" or \"CountsCube\" parameters.");
     }
 
     // Write response information
@@ -1495,7 +1496,7 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
  * set the event type to
  *
  *     "EventList" if m_events is of type GCTAEventList
- *     "CountsMap" if m_events is of type GCTAEventCube
+ *     "CountsCube" if m_events is of type GCTAEventCube
  *     "Events" if m_events is not NULL but neither GCTAEventList nor GCTAEventCube
  *     "" if m_events is NULL
  *
@@ -1515,7 +1516,7 @@ void GCTAObservation::set_event_type(void)
         else {
             GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(m_events);
             if (cube != NULL) {
-                m_eventtype = "CountsMap";
+                m_eventtype = "CountsCube";
             }
 
             // Case C: we don't know what we have
