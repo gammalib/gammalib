@@ -448,7 +448,7 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
             // Compute Theta
             double t = z*yj/m_r0;
             if (std::abs(t) > 1.0) {
-                if (fabs(t) > 1.0+tol) {
+                if (std::abs(t) > 1.0+tol) {
                     if (istat == 0) {
                         istat  = 1;
                         status = 3;
