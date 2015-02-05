@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GContainer.i - Container interface class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,7 +37,7 @@
 class GContainer : public GBase {
 public:
     // Constructors and destructors
-    virtual ~GContainer(void) {}
+    virtual ~GContainer(void);
 
     // Pure virtual methods
     virtual int  size(void) const = 0;
