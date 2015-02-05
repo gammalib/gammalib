@@ -748,7 +748,8 @@ void GCTAObservation::read(const GXmlElement& xml)
             (par->attribute("name") == "PSF") ||
             (par->attribute("name") == "EnergyDispersion") ||
             (par->attribute("name") == "RMF") ||
-            (par->attribute("name") == "Background")) {
+            (par->attribute("name") == "Background") ||
+            (par->attribute("name") == "Calibration")) {
             if (response_type == 2) {
                 throw GException::xml_invalid_parnames(G_READ, xml,
                       "Incompatible parameter names encountered in the "

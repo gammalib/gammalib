@@ -583,19 +583,28 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
         if (par->attribute("name") == "Calibration") {
 
             // Read database and response
-            m_xml_caldb   = gammalib::strip_whitespace(par->attribute("database"));
-            m_xml_rspname = gammalib::strip_whitespace(par->attribute("response"));
+            std::string xml_caldb   = gammalib::strip_whitespace(par->attribute("database"));
+            std::string xml_rspname = gammalib::strip_whitespace(par->attribute("response"));
 
-            // Set response
+            // Set calibration database
             GCaldb caldb;
-            if (gammalib::dir_exists(m_xml_caldb)) {
-                caldb.rootdir(m_xml_caldb);
+            if (gammalib::dir_exists(xml_caldb)) {
+                caldb.rootdir(xml_caldb);
             }
             else {
-                caldb.open("cta", m_xml_caldb);
+                caldb.open("cta", xml_caldb);
             }
             this->caldb(caldb);
-            load(m_xml_rspname);
+
+            // Load response
+            this->load(xml_rspname);
+
+            // Store database and response names (we do this now since the
+            // load() method results the object, except of the calibration
+            // database)
+            m_xml_caldb   = xml_caldb;
+            m_xml_rspname = xml_rspname;
+
         }
 
         // Handle effective area
