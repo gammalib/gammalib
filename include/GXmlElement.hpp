@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GXmlElement.hpp - XML element node class definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,15 +61,16 @@ public:
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
     virtual std::string  classname(void) const;
-    const std::string&   name(void) const { return m_name; }
-    void                 name(const std::string& name) { m_name=name; }
+    const std::string&   name(void) const;
+    void                 name(const std::string& name);
     std::string          attribute(const std::string& name) const;
     void                 attribute(const std::string& name, const std::string& value);
+    bool                 has_attribute(const std::string& name) const;
     void                 remove_attribute(const std::string& name);
-    GXmlNode*            parent(void) const { return m_parent; }
-    void                 parent(GXmlNode* node) { m_parent = node; }
+    GXmlNode*            parent(void) const;
+    void                 parent(GXmlNode* parent);
     virtual void         write(GUrl& url, const int& indent = 0) const;
-    virtual NodeType     type(void) const { return NT_ELEMENT; }
+    virtual NodeType     type(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL,
                                const int&     indent = 0) const;
 
@@ -98,6 +99,68 @@ inline
 std::string GXmlElement::classname(void) const
 {
     return ("GXmlElement");
+}
+
+
+/***********************************************************************//**
+ * @brief Return XML element name
+ *
+ * @return XML element name.
+ ***************************************************************************/
+inline
+const std::string& GXmlElement::name(void) const
+{
+    return (m_name);
+}
+
+
+/***********************************************************************//**
+ * @brief Set XML element name
+ *
+ * @param[in] name XML element name.
+ ***************************************************************************/
+inline
+void GXmlElement::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return parent of XML element
+ *
+ * @return Parent of XML element.
+ ***************************************************************************/
+inline
+GXmlNode* GXmlElement::parent(void) const
+{
+    return (m_parent);
+}
+
+
+/***********************************************************************//**
+ * @brief Set parent of XML element
+ *
+ * @param[in] node Parent of XML element.
+ ***************************************************************************/
+inline
+void GXmlElement::parent(GXmlNode* parent)
+{
+    m_parent = parent;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return XML node type
+ *
+ * @return XML node type (NT_ELEMENT).
+ ***************************************************************************/
+inline
+GXmlNode::NodeType GXmlElement::type(void) const
+{
+    return (NT_ELEMENT);
 }
 
 #endif /* GXMLELEMENT_HPP */

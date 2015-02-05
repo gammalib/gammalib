@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GXmlElement.cpp - XML element node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -260,6 +260,33 @@ void GXmlElement::attribute(const std::string& name, const std::string& value)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if element has a given attribute
+ *
+ * @param[in] name Attribute name.
+ * @return True if attribute exists, false otherwise.
+ *
+ * Checks whether the element contains an attribute with @p name. If the
+ * attribute was found true is returned, false otherwise.
+ ***************************************************************************/
+bool GXmlElement::has_attribute(const std::string& name) const
+{
+    // Initialise found flag
+    bool found = false;
+
+    // Search attribute value in list of attributes
+    for (int i = 0; i < m_attr.size(); ++i) {
+        if (m_attr[i]->name() == name) {
+            found = true;
+            break;
+        }
+    }
+
+    // Return found flag
+    return found;
 }
 
 

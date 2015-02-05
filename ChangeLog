@@ -1,4 +1,4 @@
-2015-02-04  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-02-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -12,6 +12,7 @@
         Do not dump unqueried parameters (#1349)
         Add GBilinear class
         Add WCS projections (MOL)
+        Add GXmlElement::has_attribute() method
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

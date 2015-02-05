@@ -50,9 +50,10 @@ public:
     void                 name(const std::string& name);
     std::string          attribute(const std::string& name) const;
     void                 attribute(const std::string& name, const std::string& value);
+    bool                 has_attribute(const std::string& name) const;
     void                 remove_attribute(const std::string& name);
     GXmlNode*            parent(void) const;
-    void                 parent(GXmlNode* node);
+    void                 parent(GXmlNode* parent);
     virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const;
 };

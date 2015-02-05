@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-4 February 2015
+5 February 2015
 
 
 1. Introduction
@@ -93,7 +93,8 @@ bilinear interpolations within GammaLib.
 
 14. XML module
 --------------
-None
+The method GXmlElement::has_attribute() has been added to check whether an
+XML element contains a given attribute.
 
 
 15. VO module
