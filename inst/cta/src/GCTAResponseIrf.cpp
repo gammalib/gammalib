@@ -1009,7 +1009,7 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
     }
 
     // Record Aeff file name
-    m_xml_aeff = filename;
+    //m_xml_aeff = filename;
 
     // Return
     return;
@@ -1087,7 +1087,7 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
     }
     
     // Record PSF filename
-    m_xml_psf = filename;
+    //m_xml_psf = filename;
 
     // Return
     return;
@@ -1133,7 +1133,7 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
     }
 
     // Record energy dispersion filename
-    m_xml_edisp = filename;
+    //m_xml_edisp = filename;
 
     // Return
     return;
@@ -1162,7 +1162,7 @@ void GCTAResponseIrf::load_background(const std::string& filename)
     }
     
     // Record background filename
-    m_xml_background = filename;
+    //m_xml_background = filename;
 
     // Return
     return;
