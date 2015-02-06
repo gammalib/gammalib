@@ -662,6 +662,9 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
  * The method also applies a deadtime correction using a Monte Carlo process,
  * taking into account temporal deadtime variations. For this purpose, the
  * method makes use of the time dependent GObservation::deadc method.
+ *
+ * @todo Compute DETX and DETY coordinates (is this possible for a background
+ * cube???)
  ***************************************************************************/
 GCTAEventList* GCTAModelCubeBackground::mc(const GObservation& obs, GRan& ran) const
 {

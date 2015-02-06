@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialProfile.cpp - Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -343,6 +343,16 @@ GCTAInstDir GCTAModelRadialProfile::mc(const GCTAInstDir& dir, GRan& ran) const
     // Rotate pointing direction by offset and azimuth angle
     GCTAInstDir mc_dir = dir;
     mc_dir.dir().rotate_deg(phi, offset);
+
+    // Compute DETX and DETY coordinates
+    double detx(0.0);
+    double dety(0.0);
+	if (offset > 0.0 ) {
+		detx = offset*gammalib::deg2rad * std::cos(phi*gammalib::deg2rad);
+		dety = offset*gammalib::deg2rad * std::sin(phi*gammalib::deg2rad);
+	}
+	mc_dir.detx(detx);
+	mc_dir.dety(dety);
 
     // Return MC direction
     return mc_dir;
