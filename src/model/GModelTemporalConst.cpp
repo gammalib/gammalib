@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelTemporalConst.cpp - Temporal constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,8 @@ const GModelTemporalConst    g_temporal_const_seed;
 const GModelTemporalRegistry g_temporal_const_registry(&g_temporal_const_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ                      "GModelTemporalConst::read(GXmlElement&)"
+#define G_WRITE                    "GModelTemporalConst::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,6 +67,31 @@ GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs constant temporal model by extracting information from an XML
+ * element. See the read() method for more information about the expected
+ * structure of the XML element.
+ ***************************************************************************/
+GModelTemporalConst::GModelTemporalConst(const GXmlElement& xml) :
+                     GModelTemporal()
+{
+    // Initialise members
+    init_members();
+
+    // Read information from XML element
+    read(xml);
+
+    // Return
+    return;
+}
+
+
 
 
 /***********************************************************************//**
@@ -305,10 +332,39 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
  *
  * @param[in] xml XML element.
  *
- * @todo To be implemented.
+ * @exception GExpection::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Writes the temporal information from an XML element having the format
+ *
+ *     <temporalModel type="Constant">
+ *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
+ *     </temporalModel>
  ***************************************************************************/
 void GModelTemporalConst::read(const GXmlElement& xml)
 {
+    // Verify that XML element has exactly 1 parameter
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
+        std::string msg = "Constant temporal model requires exactly 1 "
+                          "<parameter> tag but "+
+                          gammalib::str(xml.elements("parameter"))+
+                          " <parameter> tags were found.";
+        throw GException::invalid_value(G_READ, msg);
+    }
+
+    // Get parameter element
+    const GXmlElement* par = xml.element("parameter", 0);
+
+    // Get value
+    if (par->attribute("name") == "Normalization") {
+        m_norm.read(*par);
+    }
+    else {
+        std::string msg = "Constant temporal model parameter "
+                          "\"Normalization\" not found in XML element.";
+        throw GException::invalid_value(G_READ, msg);
+    }
+
     // Return
     return;
 }
@@ -319,10 +375,56 @@ void GModelTemporalConst::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @todo To be implemented.
+ * @exception GExpection::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Writes the temporal information into an XML element in the format
+ *
+ *     <temporalModel type="Constant">
+ *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="1"/>
+ *     </temporalModel>
  ***************************************************************************/
 void GModelTemporalConst::write(GXmlElement& xml) const
 {
+    // Set model type
+    if (xml.attribute("type") == "") {
+        xml.attribute("type", "Constant");
+    }
+
+    // Verify model type
+    if (xml.attribute("type") != "Constant") {
+        std::string msg = "Temporal model of type "+xml.attribute("type")+
+                          " encountered while \"Constant\" was expected.";
+        throw GException::invalid_value(G_WRITE, msg);
+    }
+
+    // If XML element has 0 nodes then append parameter node.
+    if (xml.elements() == 0) {
+        xml.append(GXmlElement("parameter name=\"Normalization\""));
+    }
+
+    // Verify that XML element has exactly 1 parameter
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
+        std::string msg = "Constant temporal model requires exactly 1 "
+                          "<parameter> tag but "+
+                          gammalib::str(xml.elements("parameter"))+
+                          " <parameter> tags were found.";
+        throw GException::invalid_value(G_WRITE, msg);
+    }
+
+    // Get parameter element
+    GXmlElement* par = xml.element("parameter", 0);
+
+    // Set parameyter
+    if (par->attribute("name") == "Normalization") {
+        m_norm.write(*par);
+    }
+    else {
+        std::string msg = "Constant temporal model parameter "
+                          "\"Normalization\" not found in XML element.";
+        throw GException::invalid_value(G_WRITE, msg);
+    }
+
     // Return
     return;
 }
@@ -372,7 +474,7 @@ void GModelTemporalConst::init_members(void)
 {
     // Initialise normalisation parameter
     m_norm.clear();
-    m_norm.name("Constant");
+    m_norm.name("Normalization");
     m_norm.unit("(relative value)");
     m_norm.value(1.0);
     m_norm.fix();

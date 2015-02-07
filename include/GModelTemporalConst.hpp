@@ -57,6 +57,7 @@ class GModelTemporalConst : public GModelTemporal {
 public:
     // Constructors and destructors
     GModelTemporalConst(void);
+    explicit GModelTemporalConst(const GXmlElement& xml);
     explicit GModelTemporalConst(const double& norm);
     GModelTemporalConst(const GModelTemporalConst& model);
     virtual ~GModelTemporalConst(void);
