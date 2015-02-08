@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-5 February 2015
+8 February 2015
 
 
 1. Introduction
@@ -80,6 +80,9 @@ None
 --------------
 The following WCS projections have been added:
 * GWcsMOL (Mollweide's projection)
+
+Scaling operators operator*=(double) and operator/=(double) have been added
+to GSkymap to allow scaling of all pixel values by a given value.
 
 
 13. Support module

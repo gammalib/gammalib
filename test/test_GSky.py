@@ -332,31 +332,45 @@ class Test(GPythonTestSuite):
         
         # Addition operator
         map += map_b
-        self.test_value(map[0], 2.0);
-        self.test_value(map[1], 4.0);
-        self.test_value(map[2], 6.0);
-        self.test_value(map[3], 8.0);
+        self.test_value(map[0], 2.0)
+        self.test_value(map[1], 4.0)
+        self.test_value(map[2], 6.0)
+        self.test_value(map[3], 8.0)
 
         # Multiplication operator
         map *= map_b
-        self.test_value(map[0],  2.0);
-        self.test_value(map[1],  8.0);
-        self.test_value(map[2], 18.0);
-        self.test_value(map[3], 32.0);
+        self.test_value(map[0],  2.0)
+        self.test_value(map[1],  8.0)
+        self.test_value(map[2], 18.0)
+        self.test_value(map[3], 32.0)
 
         # Subtraction operator
         map -= map_b
-        self.test_value(map[0],  1.0);
-        self.test_value(map[1],  6.0);
-        self.test_value(map[2], 15.0);
-        self.test_value(map[3], 28.0);
+        self.test_value(map[0],  1.0)
+        self.test_value(map[1],  6.0)
+        self.test_value(map[2], 15.0)
+        self.test_value(map[3], 28.0)
 
         # Division operator
         map /= map_b
-        self.test_value(map[0], 1.0);
-        self.test_value(map[1], 3.0);
-        self.test_value(map[2], 5.0);
-        self.test_value(map[3], 7.0);
+        self.test_value(map[0], 1.0)
+        self.test_value(map[1], 3.0)
+        self.test_value(map[2], 5.0)
+        self.test_value(map[3], 7.0)
+
+        # Scaling operator
+        map *= 2.0
+        self.test_value(map[0],  2.0)
+        self.test_value(map[1],  6.0)
+        self.test_value(map[2], 10.0)
+        self.test_value(map[3], 14.0)
+
+        # Division operator
+        map /= 2.0
+        self.test_value(map[0], 1.0)
+        self.test_value(map[1], 3.0)
+        self.test_value(map[2], 5.0)
+        self.test_value(map[3], 7.0)
         
         # Return
         return

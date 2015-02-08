@@ -357,7 +357,7 @@ GSkymap& GSkymap::operator+=(const GSkymap& map)
         
     } // endfor: looped over all pixels
 
-    // Return present sky map
+    // Return this object
     return *this;
 }
 
@@ -408,7 +408,7 @@ GSkymap& GSkymap::operator-=(const GSkymap& map)
         
     } // endfor: looped over all pixels
 
-    // Return present sky map
+    // Return this object
     return *this;
 }
 
@@ -458,7 +458,31 @@ GSkymap& GSkymap::operator*=(const GSkymap& map)
 
     } // endfor: looped over all pixels
 
-    // Return present sky map
+    // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Sky map scaling operator
+ *
+ * @param[in] factor Scale factor.
+ * @return Sky map.
+ *
+ * Multiplies all pixels of the sky map by the given scale @p factor.
+ ***************************************************************************/
+GSkymap& GSkymap::operator*=(const double& factor)
+{
+    // Compute total number of pixels
+    int n = npix() * nmaps();
+
+    // Loop over all pixels
+    double* pixel = m_pixels;
+    for (int i = 0; i < n; ++i) {
+        *pixel++ *= factor;
+    }
+
+    // Return this object
     return *this;
 }
 
@@ -517,7 +541,41 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
 
     } // endfor: looped over all pixels
 
-    // Return present sky map
+    // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Sky map division operator
+ *
+ * @param[in] factor Scale factor.
+ * @return Sky map.
+ *
+ * @exception GException::invalid_argument
+ *            Division by zero error.
+ *
+ * Divides all pixels of the sky map by the given @p factor.
+ ***************************************************************************/
+#define G_OP_UNARY_DIV2                        "GSkymap::operator/=(double&)"
+GSkymap& GSkymap::operator/=(const double& factor)
+{
+    // Check for division by zero
+    if (factor == 0.0) {
+        std::string msg = "Trying to divide sky map pixels by zero.";
+        throw GException::invalid_argument(G_OP_UNARY_DIV2, msg);
+    }
+
+    // Compute total number of pixels
+    int n = npix() * nmaps();
+
+    // Loop over all pixels
+    double* pixel = m_pixels;
+    for (int i = 0; i < n; ++i) {
+        *pixel++ /= factor;
+    }
+
+    // Return this object
     return *this;
 }
 

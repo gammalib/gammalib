@@ -131,6 +131,7 @@ public:
     GSkymap& operator+=(const GSkymap& map);
     GSkymap& operator-=(const GSkymap& map);
     GSkymap& operator*=(const GSkymap& map);
+    GSkymap& operator*=(const double& factor);
 
     // Methods
     void                  clear(void);
@@ -209,6 +210,16 @@ public:
     // Python 3.x operator/=
     GSkymap __itruediv__(const GSkymap& map) {
         self->operator/=(map);
+        return (*self);
+    }
+    // Python 2.x operator/=
+    GSkymap __idiv__(const double& factor) {
+        self->operator/=(factor);
+        return (*self);
+    }
+    // Python 3.x operator/=
+    GSkymap __itruediv__(const double& factor) {
+        self->operator/=(factor);
         return (*self);
     }
 };
