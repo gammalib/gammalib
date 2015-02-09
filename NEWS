@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-8 February 2015
+9 February 2015
 
 
 1. Introduction
@@ -34,6 +34,10 @@ The GApplication::log_parameters() method does no longer dump values for
 parameters that have not yet been queried. The actual value of these parameters
 is not yet know, and likely they will not be used in an application. The
 method thus dumps [not queried] instead of a parameter value (#1349).
+
+Range and option checking has now been implement for the GApplicationPar class.
+Exceptions are now thrown if a parameter is outside the valid parameter range
+or if a parameter does not correspond to one of the possible options.
 
 
 5. Base module

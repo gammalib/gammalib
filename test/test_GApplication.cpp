@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_GApplication.cpp - test GApplication classes            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -159,41 +159,190 @@ void TestGApplication::test_GApplicationPar(void)
         test_try_failure(e);
     }
 
+    // Test integer parameter validity
+    test_try("Integer parameter in valid range");
+    try {
+        GApplicationPar par("name", "i", "a", "1", "0", "2", "Parameter name");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Integer parameter outside valid range");
+    try {
+        GApplicationPar par("name", "i", "a", "3", "0", "2", "Parameter name");
+        test_try_failure("Integer parameter outside validity range shall throw"
+                         " an exception.");
+    }
+    catch (GException::invalid_value &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Integer parameter with valid option");
+    try {
+        GApplicationPar par("name", "i", "a", "1", "0|1|2", "", "Parameter name");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Integer parameter with invalid option");
+    try {
+        GApplicationPar par("name", "i", "a", "3", "0|1|2", "", "Parameter name");
+        test_try_failure("Integer parameter outside validity range shall throw"
+                         " an exception.");
+    }
+    catch (GException::invalid_value &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test real parameter validity
+    test_try("Real parameter in valid range");
+    try {
+        GApplicationPar par("name", "r", "a", "1.0", "0.0", "2.0", "Parameter name");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Real parameter outside valid range");
+    try {
+        GApplicationPar par("name", "r", "a", "3.0", "0.0", "2.0", "Parameter name");
+        test_try_failure("Real parameter outside validity range shall throw"
+                         " an exception.");
+    }
+    catch (GException::invalid_value &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Real parameter with valid option");
+    try {
+        GApplicationPar par("name", "r", "a", "1.0", "0.0|1.0|2.0", "", "Parameter name");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("Real parameter with invalid option");
+    try {
+        GApplicationPar par("name", "r", "a", "3.0", "0.0|1.0|2.0", "", "Parameter name");
+        test_try_failure("Real parameter outside validity range shall throw"
+                         " an exception.");
+    }
+    catch (GException::invalid_value &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test string parameter validity
+    test_try("String parameter with valid option");
+    try {
+        GApplicationPar par("name", "s", "a", "WaN", "Obi|Wan|Joda", "", "Parameter name");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("String parameter with invalid option");
+    try {
+        GApplicationPar par("name", "s", "a", "Kenobi", "Obi|Wan|Joda", "", "Parameter name");
+        test_try_failure("String parameter outside validity range shall throw"
+                         " an exception.");
+    }
+    catch (GException::invalid_value &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test filename parameter validity
+    test_try("String parameter with valid option");
+    try {
+        GApplicationPar par("name", "f", "a", "Wan", "Obi|Wan|Joda", "", "Parameter name");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("String parameter with invalid option");
+    try {
+        GApplicationPar par("name", "f", "a", "WaN", "Obi|Wan|Joda", "", "Parameter name");
+        test_try_failure("String parameter outside validity range shall throw"
+                         " an exception.");
+    }
+    catch (GException::invalid_value &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    test_try("String parameter with invalid option");
+    try {
+        GApplicationPar par("name", "f", "a", "Kenobi", "Obi|Wan|Joda", "", "Parameter name");
+        test_try_failure("String parameter outside validity range shall throw"
+                         " an exception.");
+    }
+    catch (GException::invalid_value &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Test integer parameter exceptions
     GApplicationPar par;
-    par = GApplicationPar("name", "i", "a", "INDEF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "i", "a", "INDEF", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter INDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GApplicationPar("name", "i", "a", "NONE", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "i", "a", "NONE", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter NONE.",
                 par.value()+" found instead of undefined value.");
-    par = GApplicationPar("name", "i", "a", "UNDEF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "i", "a", "UNDEF", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter UNDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GApplicationPar("name", "i", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "i", "a", "UNDEFINED", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check integer parameter UNDEFINED.",
                 par.value()+" found instead of undefined value.");
+    par = GApplicationPar("name", "i", "a", "INF", "", "", "Parameter name");
+    test_assert(par.is_valid(), "Check integer point parameter INF.",
+                par.value()+" found instead of infinite value.");
+    par = GApplicationPar("name", "i", "a", "INFINITY", "", "", "Parameter name");
+    test_assert(par.is_valid(), "Check integer point parameter INFINITY.",
+                par.value()+" found instead of infinite value.");
+    par = GApplicationPar("name", "i", "a", "NAN", "", "", "Parameter name");
+    test_assert(par.is_valid(), "Check integer point parameter NAN.",
+                par.value()+" found instead of not a number.");
 
     // Test floating point parameter exceptions
-    par = GApplicationPar("name", "r", "a", "INDEF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "INDEF", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter INDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GApplicationPar("name", "r", "a", "NONE", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "NONE", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter NONE.",
                 par.value()+" found instead of undefined value.");
-    par = GApplicationPar("name", "r", "a", "UNDEF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "UNDEF", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter UNDEF.",
                 par.value()+" found instead of undefined value.");
-    par = GApplicationPar("name", "r", "a", "UNDEFINED", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "UNDEFINED", "", "", "Parameter name");
     test_assert(par.is_undefined(), "Check floating point parameter UNDEFINED.",
                 par.value()+" found instead of undefined value.");
-    par = GApplicationPar("name", "r", "a", "INF", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "INF", "", "", "Parameter name");
     test_assert(par.is_notanumber(), "Check floating point parameter INF.",
                 par.value()+" found instead of infinite value.");
-    par = GApplicationPar("name", "r", "a", "INFINITY", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "INFINITY", "", "", "Parameter name");
     test_assert(par.is_notanumber(), "Check floating point parameter INFINITY.",
                 par.value()+" found instead of infinite value.");
-    par = GApplicationPar("name", "r", "a", "NAN", "0.0", "2.0", "Parameter name");
+    par = GApplicationPar("name", "r", "a", "NAN", "", "", "Parameter name");
     test_assert(par.is_notanumber(), "Check floating point parameter NAN.",
                 par.value()+" found instead of not a number.");
 

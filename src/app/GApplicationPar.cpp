@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPar.cpp - Application parameter               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,9 @@
 #define G_CHECK_TYPE               "GApplicationPar::check_type(std::string)"
 #define G_CHECK_MODE               "GApplicationPar::check_mode(std::string)"
 #define G_CHECK_VALUE_BOOL   "GApplicationPar::check_value_bool(std::string)"
+#define G_CHECK_VALUE_INT    "GApplicationPar::check_value_int(std::string&)"
+#define G_CHECK_VALUE_REAL  "GApplicationPar::check_value_real(std::string&)"
+#define G_CHECK_OPTIONS        "GApplicationPar::check_options(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -218,7 +221,7 @@ GApplicationPar* GApplicationPar::clone(void) const
  *
  * @param[in] type Parameter type.
  *
- * Valid parameter types are: b,i,r,s,f,fr,fw,fe,fn.
+ * Sets the parameter type. Valid parameter types are: b,i,r,s,f,fr,fw,fe,fn.
  ***************************************************************************/
 void GApplicationPar::type(const std::string& type)
 {
@@ -238,7 +241,7 @@ void GApplicationPar::type(const std::string& type)
  *
  * @param[in] mode Parameter mode.
  *
- * Valid parameter modes are: a,h,l,q,hl,ql,lh,lq.
+ * Sets the parameter model. Valid parameter modes are: a,h,l,q,hl,ql,lh,lq.
  ***************************************************************************/
 void GApplicationPar::mode(const std::string& mode)
 {
@@ -258,15 +261,13 @@ void GApplicationPar::mode(const std::string& mode)
  *
  * @param[in] value Parameter value.
  *
- * This method sets the parameter value dependent on the parameter type.
+ * Sets the parameter value dependent on the parameter type.
+ *
  * It is a parser method that verifies that the given parameter value is
  * compatible with the parameter type.
  ***************************************************************************/
 void GApplicationPar::value(const std::string& value)
 {
-    // Verify that value is valid
-    check_value(value);
-
     // Set value
     set_value(value);
 
@@ -280,7 +281,7 @@ void GApplicationPar::value(const std::string& value)
  *
  * @param[in] value Parameter value.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of string type.
  *
  * This method sets a string parameter. The method only applies to parameters
@@ -290,13 +291,10 @@ void GApplicationPar::string(const std::string& value)
 {
     // Check if parameter is a string parameter
     if (m_type != "s") {
-        throw GException::par_error(G_STRING_SET, name(),
-              "attempted to set "+par_type_string(m_type)+
-              " parameter with string value.");
+        std::string msg = "Attempt to set "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" with string value.";
+        throw GException::invalid_value(G_STRING_SET, msg);
     }
-
-    // Verify that value is a valid string
-    check_value_string(value);
 
     // Set value
     set_value(value);
@@ -311,7 +309,7 @@ void GApplicationPar::string(const std::string& value)
  *
  * @param[in] value Parameter value.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of filename type.
  *
  * This method sets a filename parameter. The method only applies to filename
@@ -321,13 +319,10 @@ void GApplicationPar::filename(const std::string& value)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
-        throw GException::par_error(G_FILENAME_SET, name(),
-              "attempted to set "+par_type_string(m_type)+
-              " parameter with filename.");
+        std::string msg = "Attempt to set "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" with filename value.";
+        throw GException::invalid_value(G_FILENAME_SET, msg);
     }
-
-    // Verify that value is a valid filename
-    check_value_filename(value);
 
     // Set value
     set_value(value);
@@ -342,7 +337,7 @@ void GApplicationPar::filename(const std::string& value)
  *
  * @param[in] value Parameter value.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of boolean type.
  *
  * This method sets a boolean parameter. The method only applies to parameters
@@ -352,9 +347,9 @@ void GApplicationPar::boolean(const bool& value)
 {
     // Check if parameter is boolean
     if (m_type != "b") {
-        throw GException::par_error(G_BOOLEAN_SET, name(),
-              "attempted to set "+par_type_string(m_type)+
-              " parameter with boolean value.");
+        std::string msg = "Attempt to set "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" with boolean value.";
+        throw GException::invalid_value(G_BOOLEAN_SET, msg);
     }
 
     // Set value string
@@ -373,7 +368,7 @@ void GApplicationPar::boolean(const bool& value)
  *
  * @param[in] value Parameter value.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of integer type.
  *
  * This method sets an integer parameter. The method only applies to
@@ -383,9 +378,9 @@ void GApplicationPar::integer(const int& value)
 {
     // Check if parameter is integer
     if (m_type != "i") {
-        throw GException::par_error(G_INTEGER_SET, name(),
-              "attempted to set "+par_type_string(m_type)+
-              " parameter with integer value.");
+        std::string msg = "Attempt to set "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" with integer value.";
+        throw GException::invalid_value(G_INTEGER_SET, msg);
     }
 
     // Set value string
@@ -404,7 +399,7 @@ void GApplicationPar::integer(const int& value)
  *
  * @param[in] value Parameter value.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of real type.
  *
  * This method sets a real parameter. The method only applies to parameters
@@ -414,9 +409,9 @@ void GApplicationPar::real(const double& value)
 {
     // Check if parameter is boolean
     if (m_type != "r") {
-        throw GException::par_error(G_REAL_SET, name(),
-              "attempted to set "+par_type_string(m_type)+
-              " parameter with real value.");
+        std::string msg = "Attempt to set "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" with real value.";
+        throw GException::invalid_value(G_REAL_SET, msg);
     }
 
     // Set value string at highest precision
@@ -459,7 +454,7 @@ std::string GApplicationPar::value(void)
 /***********************************************************************//**
  * @brief Returns string parameter value
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of string type.
  *
  * This method queries and returns a string parameter. The method only
@@ -470,9 +465,9 @@ std::string GApplicationPar::string(void)
 {
     // Check if parameter is a string parameter
     if (m_type != "s") {
-        throw GException::par_error(G_STRING_GET, name(),
-              "attempted reading "+par_type_string(m_type)+
-              " parameter as a string value.");
+        std::string msg = "Attempt to read "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" as a string value.";
+        throw GException::invalid_value(G_STRING_GET, msg);
     }
 
     // Query parameter
@@ -480,9 +475,10 @@ std::string GApplicationPar::string(void)
 
     // Check if parameter is valid
     if (m_status != ST_VALID) {
-        throw GException::par_error(G_STRING_GET, name(),
-              "is "+par_status_string()+". Please specify"
-              " a valid parameter value.");
+        std::string msg = "Parameter \""+m_name+"\" is "+
+                          par_status_string()+". Please specify a valid"
+                          " parameter value.";
+        throw GException::invalid_value(G_STRING_GET, msg);
     }
 
     // Return value
@@ -493,7 +489,7 @@ std::string GApplicationPar::string(void)
 /***********************************************************************//**
  * @brief Returns filename parameter value
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of filename type.
  *
  * This method queries and returns a filename parameter. The method only
@@ -505,9 +501,9 @@ std::string GApplicationPar::filename(void)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
-        throw GException::par_error(G_FILENAME_GET, name(),
-              "attempted reading "+par_type_string(m_type)+
-              " parameter as a filename.");
+        std::string msg = "Attempt to read "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" as a filename value.";
+        throw GException::invalid_value(G_FILENAME_GET, msg);
     }
 
     // Query parameter
@@ -515,9 +511,10 @@ std::string GApplicationPar::filename(void)
     
     // Check if parameter is valid
     if (m_status != ST_VALID) {
-        throw GException::par_error(G_FILENAME_GET, name(),
-              "is "+par_status_string()+". Please specify"
-              " a valid parameter value.");
+        std::string msg = "Parameter \""+m_name+"\" is "+
+                          par_status_string()+". Please specify a valid"
+                          " parameter value.";
+        throw GException::invalid_value(G_FILENAME_GET, msg);
     }
 
     // Return value
@@ -528,7 +525,7 @@ std::string GApplicationPar::filename(void)
 /***********************************************************************//**
  * @brief Returns boolean
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of boolean type.
  *
  * This method queries and returns a boolean parameter. The method only
@@ -539,9 +536,9 @@ bool GApplicationPar::boolean(void)
 {
     // Check if parameter is boolean
     if (m_type != "b") {
-        throw GException::par_error(G_BOOLEAN_GET, name(),
-              "attempted reading "+par_type_string(m_type)+
-              " parameter as a boolean value.");
+        std::string msg = "Attempt to read "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" as a boolean value.";
+        throw GException::invalid_value(G_BOOLEAN_GET, msg);
     }
 
     // Query parameter
@@ -549,9 +546,10 @@ bool GApplicationPar::boolean(void)
 
     // Check if parameter is valid
     if (m_status != ST_VALID) {
-        throw GException::par_error(G_BOOLEAN_GET, name(),
-              "is "+par_status_string()+". Please specify"
-              " a valid parameter value.");
+        std::string msg = "Parameter \""+m_name+"\" is "+
+                          par_status_string()+". Please specify a valid"
+                          " parameter value.";
+        throw GException::invalid_value(G_BOOLEAN_GET, msg);
     }
 
     // Convert boolean value to upper case
@@ -569,7 +567,7 @@ bool GApplicationPar::boolean(void)
 /***********************************************************************//**
  * @brief Returns integer
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of integer type.
  *
  * This method queries and returns an integer parameter. The method only
@@ -580,9 +578,9 @@ int GApplicationPar::integer(void)
 {
     // Check if parameter is integer
     if (m_type != "i") {
-        throw GException::par_error(G_INTEGER_GET, name(),
-              "attempted reading "+par_type_string(m_type)+
-              " parameter as an integer value.");
+        std::string msg = "Attempt to read "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" as a integer value.";
+        throw GException::invalid_value(G_INTEGER_GET, msg);
     }
 
     // Query parameter
@@ -590,9 +588,10 @@ int GApplicationPar::integer(void)
 
     // Check if parameter is valid
     if (m_status != ST_VALID) {
-        throw GException::par_error(G_INTEGER_GET, name(),
-              "is "+par_status_string()+". Please specify"
-              " a valid parameter value.");
+        std::string msg = "Parameter \""+m_name+"\" is "+
+                          par_status_string()+". Please specify a valid"
+                          " parameter value.";
+        throw GException::invalid_value(G_INTEGER_GET, msg);
     }
 
     // Set result
@@ -606,7 +605,7 @@ int GApplicationPar::integer(void)
 /***********************************************************************//**
  * @brief Returns real
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Parameter is not of real type.
  *
  * This method queries and returns a real parameter. The method only
@@ -617,9 +616,9 @@ double GApplicationPar::real(void)
 {
     // Check if parameter is integer
     if (m_type != "r") {
-        throw GException::par_error(G_REAL_GET, name(),
-              "attempted reading "+par_type_string(m_type)+
-              " parameter as a real value.");
+        std::string msg = "Attempt to read "+par_type_string(m_type)+
+                          " parameter \""+m_name+"\" as a real value.";
+        throw GException::invalid_value(G_REAL_GET, msg);
     }
 
     // Query parameter
@@ -627,9 +626,10 @@ double GApplicationPar::real(void)
 
     // Check if parameter is valid
     if (m_status != ST_VALID) {
-        throw GException::par_error(G_REAL_GET, name(),
-              "is "+par_status_string()+". Please specify"
-              " a valid parameter value.");
+        std::string msg = "Parameter \""+m_name+"\" is "+
+                          par_status_string()+". Please specify a valid"
+                          " parameter value.";
+        throw GException::invalid_value(G_REAL_GET, msg);
     }
 
     // Set result
@@ -734,10 +734,6 @@ bool GApplicationPar::is_notanumber(void)
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing parameter information.
- *
- * @todo Implement writing of parameter options. I guess that parameter
- *       options occur if there is only a minimum but not a maximum
- *       parameter. Check IRAF documentation.
  ***************************************************************************/
 std::string GApplicationPar::print(const GChatter& chatter) const
 {
@@ -774,10 +770,7 @@ std::string GApplicationPar::print(const GChatter& chatter) const
             result.append(" ("+min()+"-"+max()+")");
         }
         else if (min().length() > 0) {
-            result.append(" (>"+min()+")");
-        }
-        else if (max().length() > 0) {
-            result.append(" (<"+max()+")");
+            result.append(" ("+min()+")");
         }
 
         // Write type information
@@ -855,7 +848,7 @@ void GApplicationPar::free_members(void)
  *
  * @param[in] type Type string.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Invalid parameter type.
  *
  * The parameter type has to be one of b,i,r,s,f,fr,fw,fe,fn. 
@@ -868,8 +861,9 @@ void GApplicationPar::check_type(const std::string& type) const
     if (type != "b"  && type != "i"  && type != "r"  && type != "s" &&
         type != "f"  && type != "fr" && type != "fw" && type != "fe" &&
         type != "fn") {
-        throw GException::par_error(G_CHECK_TYPE, name(),
-              "invalid parameter type \""+type+"\"");
+        std::string msg = "Invalid parameter type \""+type+"\" encountered"
+                          " for parameter \""+m_name+"\".";
+        throw GException::invalid_value(G_CHECK_TYPE, msg);
     }
 
     // Return
@@ -882,7 +876,7 @@ void GApplicationPar::check_type(const std::string& type) const
  *
  * @param[in] mode Mode string.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Invalid parameter mode.
  *
  * The parameter mode has to be one of a,h,l,q,hl,ql,lh,lq.
@@ -892,8 +886,9 @@ void GApplicationPar::check_mode(const std::string& mode) const
     // Check of mode is valid
     if (mode != "a"  && mode != "h"  && mode != "q" && mode != "hl" &&
         mode != "ql" && mode != "lh" && mode != "lq") {
-        throw GException::par_error(G_CHECK_MODE, name(),
-              "invalid parameter mode \""+mode+"\"");
+        std::string msg = "Invalid parameter mode \""+mode+"\" encountered"
+                          " for parameter \""+m_name+"\".";
+        throw GException::invalid_value(G_CHECK_MODE, msg);
     }
 
     // Return
@@ -938,7 +933,7 @@ void GApplicationPar::check_value(const std::string& value) const
  *
  * @param[in] value Value string.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_value
  *            Boolean value string is not valid.
  *
  * The Boolean value string has to be one of y,yes,true,t or n,no,false,f
@@ -952,8 +947,10 @@ void GApplicationPar::check_value_bool(const std::string& value) const
     // Test for validity
     if (lvalue != "y" && lvalue != "yes" && lvalue != "true"  && lvalue != "t" &&
         lvalue != "n" && lvalue != "no"  && lvalue != "false" && lvalue != "f") {
-        throw GException::par_error(G_CHECK_VALUE_BOOL, name(),
-              "invalid Boolean value \""+value+"\"; use y/n/yes/no/true/false");
+        std::string msg = "Invalid boolean value \""+value+"\" encountered"
+                          " for parameter \""+m_name+"\". Use"
+                          " y/n/yes/no/true/false";
+        throw GException::invalid_value(G_CHECK_VALUE_BOOL, msg);
     }
 
     // Return
@@ -962,19 +959,55 @@ void GApplicationPar::check_value_bool(const std::string& value) const
 
 
 /***********************************************************************//**
- * @brief Test validity of integer value string
+ * @brief Test validity of integer parameter value
  *
- * @param[in] value Value string.
+ * @param[in] value Parameter value.
  *
- * Requires that m_type, m_min and m_max are set. The method does not verify
- * if m_type is valid.
+ * @exception GException::invalid_value
+ *            Integer parameter value outside validity range
  *
- * @todo Implement method.
+ * If either options or a validity range has been specified, check if the
+ * integer parameter value satisfies the validity constraints.
+ *
+ * Requires that m_type, m_status, m_min and m_max are set. The method does
+ * not verify if m_type is valid.
  ***************************************************************************/
 void GApplicationPar::check_value_int(const std::string& value) const
 {
-    // Convert value to integer
-    //int ivalue = toint(value);
+    // Check only if value is not undefined
+    if (m_status != ST_UNDEFINED) {
+
+        // Check for options
+        bool has_options = check_options(value);
+
+        // If no options check has been done and if there is a m_min and
+        // m_max value then perform an integer check
+        if (!has_options && m_min.length() > 0 && m_max.length()) {
+
+            // Throw an exception if we have a NAN parameter
+            if (m_status == ST_NAN) {
+                std::string msg = "Parameter \""+m_name+"\" value \""+value+
+                                  "\" outside validity range ["+m_min+","+
+                                  m_max+"].";
+                throw GException::invalid_value(G_CHECK_VALUE_INT, msg);
+            }
+
+            // Convert value and range to integers
+            int ivalue = gammalib::toint(value);
+            int imin   = gammalib::toint(m_min);
+            int imax   = gammalib::toint(m_max);
+
+            // Check if value is outside range
+            if (imin > ivalue || imax < ivalue) {
+                std::string msg = "Parameter \""+m_name+"\" value \""+value+
+                                  "\" outside validity range ["+m_min+","+
+                                  m_max+"].";
+                throw GException::invalid_value(G_CHECK_VALUE_INT, msg);
+            }
+
+        } // endif: there was no options check and there was a range specified
+
+    } // endif: value was not undefined
 
     // Return
     return;
@@ -982,17 +1015,55 @@ void GApplicationPar::check_value_int(const std::string& value) const
 
 
 /***********************************************************************//**
- * @brief Test validity of real value string
+ * @brief Test validity of real parameter value
  *
- * @param[in] value Value string.
+ * @param[in] value Parameter value.
  *
- * Requires that m_type, m_min and m_max are set. The method does not verify
- * if m_type is valid.
+ * @exception GException::invalid_value
+ *            Real parameter value outside validity range
  *
- * @todo Implement method.
+ * If either options or a validity range has been specified, check if the
+ * real parameter value satisfies the validity constraints.
+ *
+ * Requires that m_type, m_status, m_min and m_max are set. The method does
+ * not verify if m_type is valid.
  ***************************************************************************/
 void GApplicationPar::check_value_real(const std::string& value) const
 {
+    // Check only if value is not undefined
+    if (m_status != ST_UNDEFINED) {
+
+        // Check for options
+        bool has_options = check_options(value);
+
+        // If no options check has been done and if there is a m_min and
+        // m_max value then perform an integer check
+        if (!has_options && m_min.length() > 0 && m_max.length()) {
+
+            // Throw an exception if we have a NAN parameter
+            if (m_status == ST_NAN) {
+                std::string msg = "Parameter \""+m_name+"\" value \""+value+
+                                  "\" outside validity range ["+m_min+","+
+                                  m_max+"].";
+                throw GException::invalid_value(G_CHECK_VALUE_REAL, msg);
+            }
+
+            // Convert value and range to doubles
+            double dvalue = gammalib::todouble(value);
+            double dmin   = gammalib::todouble(m_min);
+            double dmax   = gammalib::todouble(m_max);
+
+            // Check if value is outside range
+            if (dmin > dvalue || dmax < dvalue) {
+                std::string msg = "Parameter \""+m_name+"\" value \""+value+
+                                  "\" outside validity range ["+m_min+","+
+                                  m_max+"].";
+                throw GException::invalid_value(G_CHECK_VALUE_REAL, msg);
+            }
+
+        } // endif: there was no options check and there was a range specified
+
+    } // endif: value was not undefined
 
     // Return
     return;
@@ -1000,17 +1071,20 @@ void GApplicationPar::check_value_real(const std::string& value) const
 
 
 /***********************************************************************//**
- * @brief Test validity of string value string
+ * @brief Test validity of string parameter value
  *
- * @param[in] value Value string.
+ * @param[in] value Parameter value.
+ *
+ * If options have been specified, check if the string parameter value
+ * satisfies the options.
  *
  * Requires that m_type, m_min and m_max are set. The method does not verify
  * if m_type is valid.
- *
- * @todo Implement method.
  ***************************************************************************/
 void GApplicationPar::check_value_string(const std::string& value) const
 {
+    // Check for options
+    bool has_options = check_options(value);
 
     // Return
     return;
@@ -1018,21 +1092,172 @@ void GApplicationPar::check_value_string(const std::string& value) const
 
 
 /***********************************************************************//**
- * @brief Test validity of filename value string
+ * @brief Test validity of filename parameter value
  *
- * @param[in] value Value string.
+ * @param[in] value Parameter value.
+ *
+ * If options have been specified, check if the filename parameter value
+ * satisfies the options.
  *
  * Requires that m_type, m_min and m_max are set. The method does not verify
  * if m_type is valid.
  *
- * @todo Implement method.
  * @todo NONE is equivalent to an empty string.
  ***************************************************************************/
 void GApplicationPar::check_value_filename(const std::string& value) const
 {
+    // Check for options
+    bool has_options = check_options(value);
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test if parameter value satisfies possible options
+ *
+ * @param[in] value Parameter value.
+ * @return True if there were options, false otherwise.
+ *
+ * @exception GException::invalid_value
+ *            Value does not satisfy one of the possible options.
+ *
+ * In case that the parameter has different options (m_max field not set and
+ * at least one character chain in m_min field, multiple chains separated by
+ * pipe symbol), check that the parameter value corresponds to one of the
+ * values in the m_min field. For strings, and for strings only, the
+ * parameter check is case insensitive.
+ ***************************************************************************/
+bool GApplicationPar::check_options(const std::string& value) const
+{
+    // Initialise options flags
+    bool has_options = false;
+
+    // Continue only if the m_max field is not set
+    if (m_max.length() == 0) {
+
+        // Get parameter options
+        std::vector<std::string> options = gammalib::split(m_min, "|");
+
+        // Determine number of options
+        int num_options = options.size();
+
+        // Continue only if there are options
+        if (num_options > 0) {
+
+            // Signal that there were options
+            has_options = true;
+
+            // Initalise found flag
+            bool found = false;
+
+            // Strip whitespace from all options, and for strings, convert
+            // to upper case
+            for (int i = 0; i < num_options; ++i) {
+                options[i] = gammalib::strip_whitespace(options[i]);
+                if (m_type == "s") {
+                    options[i] = gammalib::toupper(options[i]);
+                }
+            }
+
+            // Set parameter value
+            std::string v = (m_type == "s") ? gammalib::toupper(value) : value;
+
+            // Now check if we can find one of the options
+            for (int i = 0; i < num_options; ++i) {
+                if (options[i] == v) {
+                    found = true;
+                    break;
+                }
+            }
+
+            // If no option was found then throw exception
+            if (!found) {
+                std::string msg = "Parameter \""+m_name+"\" value \""+value+
+                                  "\" invalid. Must be one of \""+m_min+"\".";
+                throw GException::invalid_value(G_CHECK_OPTIONS, msg);
+            }
+
+        } // endif: there were parameter options
+
+    } // endif: the m_max field was not set
+
+    // Return options flag
+    return has_options;
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameter status
+ *
+ * @param[in] value Parameter value.
+ * @return Updated parameter value.
+ *
+ * Set parameter status depending on the content of the value field.
+ *
+ * For an integer parameter, INDEF, NONE, UNDEF or UNDEFINED will result in
+ * a status of "undefined". INF, INFINITY or NAN will be transformed in the
+ * maximum long number.
+ *
+ * For a real parameter, INDEF, NONE, UNDEF or UNDEFINED will result in a
+ * status of "undefined", while INF, INFINITY or NAN will result in a status
+ * of "nan".
+ ***************************************************************************/
+std::string GApplicationPar::set_status(const std::string& value)
+{
+    // Initialise result value
+    std::string result = value;
+
+    // Set integer status. Catch the special values that signal that a
+    // parameter is undefined. Any infinity or nan is set to the maximum
+    // long value (APE standard)
+    if (m_type == "i") {
+        std::string lvalue = gammalib::tolower(value);
+        if (lvalue == "indef" ||
+            lvalue == "none"  ||
+            lvalue == "undef" ||
+            lvalue == "undefined") {
+            m_status = ST_UNDEFINED;
+        }
+        else if (lvalue == "inf" ||
+                 lvalue == "infinity" ||
+                 lvalue == "nan") {
+            result   = gammalib::str(LONG_MAX);
+            m_status = ST_VALID;
+        }
+        else {
+            m_status = ST_VALID;
+        }
+    }
+
+    // Set real status. Catch the special values that signal that a
+    // parameter is undefined, infinity or nan (APE standard).
+    else if (m_type == "r") {
+        std::string lvalue = gammalib::tolower(value);
+        if (lvalue == "indef" ||
+            lvalue == "none"  ||
+            lvalue == "undef" ||
+            lvalue == "undefined") {
+            m_status = ST_UNDEFINED;
+        }
+        else if (lvalue == "inf" ||
+                 lvalue == "infinity" ||
+                 lvalue == "nan") {
+            m_status = ST_NAN;
+        }
+        else {
+            m_status = ST_VALID;
+        }
+    }
+
+    // Set other status
+    else {
+        m_status = ST_VALID;
+    }
+
+    // Return result value
+    return result;
 }
 
 
@@ -1042,71 +1267,17 @@ void GApplicationPar::check_value_filename(const std::string& value) const
  * @param[in] value Parameter value.
  *
  * Set parameter value, signal it for update and disable parameter querying.
- *
- * The method also sets the parameter status, depending on the content of the
- * value field. In case that we deal with an integer parameter, INDEF, NONE,
- * UNDEF or UNDEFINED will result in a status of "undefined". INF, INFINITY
- * or NAN will be transformed in the maximum long number. In case we dead
- * with a floating point parameter, INDEF, NONE, UNDEF or UNDEFINED will
- * result in a status of "undefined", while INF, INFINITY or NAN will result
- * in a status of "nan".
- *
- * @todo Implement parameter verification (min, max, options)
  ***************************************************************************/
 void GApplicationPar::set_value(const std::string& value)
 {
-    // Set integer value. Catch the special values that signal that a
-    // parameter is undefined. Any infinity or nan is set to the maximum
-    // long value (APE standard)
-    if (m_type == "i") {
-        std::string lvalue = gammalib::tolower(value);
-        if (lvalue == "indef" ||
-            lvalue == "none"  ||
-            lvalue == "undef" ||
-            lvalue == "undefined") {
-            m_value  = value;
-            m_status = ST_UNDEFINED;
-        }
-        else if (lvalue == "inf" ||
-                 lvalue == "infinity" ||
-                 lvalue == "nan") {
-            m_value  = gammalib::str(LONG_MAX);
-            m_status = ST_VALID;
-        }
-        else {
-            m_value  = value;
-            m_status = ST_VALID;
-        }
-    }
+    // Set parameter status
+    std::string par_value = set_status(value);
 
-    // Set real value. Catch the special values that signal that a
-    // parameter is undefined, infinity or nan (APE standard).
-    else if (m_type == "r") {
-        std::string lvalue = gammalib::tolower(value);
-        if (lvalue == "indef" ||
-            lvalue == "none"  ||
-            lvalue == "undef" ||
-            lvalue == "undefined") {
-            m_value  = value;
-            m_status = ST_UNDEFINED;
-        }
-        else if (lvalue == "inf" ||
-                 lvalue == "infinity" ||
-                 lvalue == "nan") {
-            m_value  = value;
-            m_status = ST_NAN;
-        }
-        else {
-            m_value  = value;
-            m_status = ST_VALID;
-        }
-    }
+    // Check parameter value
+    check_value(par_value);
 
-    // Set other value
-    else {
-        m_value  = value;
-        m_status = ST_VALID;
-    }
+    // Set parameter value
+    m_value = par_value;
 
     // Signal update
     m_update = true;

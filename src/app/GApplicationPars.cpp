@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPars.cpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1253,7 +1253,7 @@ void GApplicationPars::parse(void)
         if (quotes != 0) {
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     gammalib::strip_chars(line,"\n"),
-                                                "quotes are not balanced");
+                                                    "quotes are not balanced");
         }
 
         // Throw an error if line has not 7 fields
@@ -1273,8 +1273,8 @@ void GApplicationPars::parse(void)
         // Add parameter
         try {
             m_pars.push_back(GApplicationPar(fields[0], fields[1], fields[2],
-                                  fields[3], fields[4], fields[5],
-                                  fields[6]));
+                                             fields[3], fields[4], fields[5],
+                                             fields[6]));
             m_line.push_back(i);
             m_vstart.push_back(vstart);
             m_vstop.push_back(vstop);
