@@ -36,7 +36,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                 "GXmlNode::operator[](int&)"
 #define G_SET                                "GXmlNode::set(int&, GXmlNode&)"
-#define G_APPEND                                "GXmlNode::append(GXmlNode&)"
+#define G_APPEND1                            "GXmlNode::append(std::string&)"
+#define G_APPEND2                               "GXmlNode::append(GXmlNode&)"
 #define G_INSERT                          "GXmlNode::insert(int&, GXmlNode&)"
 #define G_REMOVE                                     "GXmlNode::remove(int&)"
 #define G_ELEMENT1                        "GXmlNode* GXmlNode::element(int&)"
@@ -266,7 +267,7 @@ GXmlNode* GXmlNode::append(const GXmlNode& node)
         std::string msg = "Invalid attempt to append root note (GXmlDocument)"
                           " to a XML node. There can only be one root node in"
                           " an XML document.";
-        throw GException::invalid_argument(G_APPEND, msg);
+        throw GException::invalid_argument(G_APPEND2, msg);
     }
 
     // Make sure that the current node is not a text node as nothing can be
@@ -274,7 +275,7 @@ GXmlNode* GXmlNode::append(const GXmlNode& node)
     if (this->type() == NT_TEXT) {
         std::string msg = "Invalid attempt to append a XML node to a text node"
                           " (GXmlText). Nothing can be appended to a text node.";
-        throw GException::invalid_value(G_APPEND, msg);
+        throw GException::invalid_value(G_APPEND2, msg);
     }
 
     // Clone child node
@@ -301,6 +302,15 @@ GXmlNode* GXmlNode::append(const GXmlNode& node)
  ***************************************************************************/
 GXmlElement* GXmlNode::append(const std::string& segment)
 {
+    // Make sure that the current node is not a text node as nothing can be
+    // appended to a text node.
+    if (this->type() == NT_TEXT) {
+        std::string msg = "Invalid attempt to append the text segment \""+
+                          segment+"\" to a text node (GXmlText). Nothing can"
+                          " be appended to a text node.";
+        throw GException::invalid_value(G_APPEND1, msg);
+    }
+
     // Create a new XML child element from the text segment
     GXmlElement* ptr = new GXmlElement(segment);
 
