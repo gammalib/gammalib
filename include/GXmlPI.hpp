@@ -57,13 +57,13 @@ public:
     virtual GXmlPI*     clone(void) const;
     virtual std::string classname(void) const;
     virtual void        write(GUrl& url, const int& indent = 0) const;
-    virtual NodeType    type(void) const { return NT_PI; }
+    virtual NodeType    type(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL,
                               const int&      indent = 0) const;
 
     // Other methods
-    const std::string&  pi(void) const { return m_pi; }
-    void                pi(const std::string& pi) { m_pi=pi; }
+    const std::string&  pi(void) const;
+    void                pi(const std::string& pi);
 
 protected:
     // Protected methods
@@ -86,6 +86,43 @@ inline
 std::string GXmlPI::classname(void) const
 {
     return ("GXmlPI");
+}
+
+
+/***********************************************************************//**
+ * @brief Return Processing Instruction
+ *
+ * @return Processing Instruction string.
+ ***************************************************************************/
+inline
+const std::string& GXmlPI::pi(void) const
+{
+    return (m_pi);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Processing Instruction
+ *
+ * @param[in] pi Processing Instruction string.
+ ***************************************************************************/
+inline
+void GXmlPI::pi(const std::string& pi)
+{
+    m_pi = pi;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return XML node type
+ *
+ * @return XML node type (NT_PI).
+ ***************************************************************************/
+inline
+GXmlNode::NodeType GXmlPI::type(void) const
+{
+    return (NT_PI);
 }
 
 #endif /* GXMLPI_HPP */

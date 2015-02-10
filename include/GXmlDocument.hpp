@@ -63,17 +63,17 @@ public:
     virtual GXmlDocument* clone(void) const;
     virtual std::string   classname(void) const;
     virtual void          write(GUrl& url, const int& indent = 0) const;
-    virtual NodeType      type(void) const { return NT_DOCUMENT; }
+    virtual NodeType      type(void) const;
     virtual std::string   print(const GChatter& chatter = NORMAL,
                                 const int&      indent = 0) const;
 
     // Methods
-    std::string   version(void) const { return m_version.value(); }
-    std::string   encoding(void) const { return m_encoding.value(); }
-    std::string   standalone(void) const { return m_standalone.value(); }
-    void          version(const std::string& version) { m_version.value(version); }
-    void          encoding(const std::string& encoding) { m_encoding.value(encoding); }
-    void          standalone(const std::string& standalone) { m_standalone.value(standalone); }
+    std::string   version(void) const;
+    std::string   encoding(void) const;
+    std::string   standalone(void) const;
+    void          version(const std::string& version);
+    void          encoding(const std::string& encoding);
+    void          standalone(const std::string& standalone);
 
 protected:
     // Protected methods
@@ -97,6 +97,93 @@ inline
 std::string GXmlDocument::classname(void) const
 {
     return ("GXmlDocument");
+}
+
+
+/***********************************************************************//**
+ * @brief Return version
+ *
+ * @return Version string.
+ ***************************************************************************/
+inline
+std::string GXmlDocument::version(void) const
+{
+    return (m_version.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return encoding
+ *
+ * @return Encoding string.
+ ***************************************************************************/
+inline
+std::string GXmlDocument::encoding(void) const
+{
+    return (m_encoding.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return standalone
+ *
+ * @return Standalone value string.
+ ***************************************************************************/
+inline
+std::string GXmlDocument::standalone(void) const
+{
+    return (m_standalone.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set version
+ *
+ * @param[in] version Version string.
+ ***************************************************************************/
+inline
+void GXmlDocument::version(const std::string& version)
+{
+    m_version.value(version);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set encoding
+ *
+ * @param[in] encoding Encoding string.
+ ***************************************************************************/
+inline
+void GXmlDocument::encoding(const std::string& encoding)
+{
+    m_encoding.value(encoding);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set standalone
+ *
+ * @param[in] standalone Standalone value string.
+ ***************************************************************************/
+inline
+void GXmlDocument::standalone(const std::string& standalone)
+{
+    m_standalone.value(standalone);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return XML node type
+ *
+ * @return XML node type (NT_DOCUMENT).
+ ***************************************************************************/
+inline
+GXmlNode::NodeType GXmlDocument::type(void) const
+{
+    return (NT_DOCUMENT);
 }
 
 #endif /* GXMLDOCUMENT_HPP */

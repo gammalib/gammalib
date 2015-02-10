@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GXmlText.hpp - XML text node class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,13 +57,13 @@ public:
     virtual GXmlText*   clone(void) const;
     virtual std::string classname(void) const;
     virtual void        write(GUrl& url, const int& indent = 0) const;
-    virtual NodeType    type(void) const { return NT_TEXT; }
+    virtual NodeType    type(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL,
                               const int&      indent = 0) const;
 
     // Other methods
-    const std::string&  text(void) const { return m_text; }
-    void                text(const std::string& text) { m_text=text; }
+    const std::string&  text(void) const;
+    void                text(const std::string& text);
 
 protected:
     // Protected methods
@@ -85,6 +85,43 @@ inline
 std::string GXmlText::classname(void) const
 {
     return ("GXmlText");
+}
+
+
+/***********************************************************************//**
+ * @brief Return text
+ *
+ * @return Text string.
+ ***************************************************************************/
+inline
+const std::string& GXmlText::text(void) const
+{
+    return (m_text);
+}
+
+
+/***********************************************************************//**
+ * @brief Set text
+ *
+ * @param[in] text Text string.
+ ***************************************************************************/
+inline
+void GXmlText::text(const std::string& text)
+{
+    m_text = text;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return XML node type
+ *
+ * @return XML node type (NT_TEXT).
+ ***************************************************************************/
+inline
+GXmlNode::NodeType GXmlText::type(void) const
+{
+    return (NT_TEXT);
 }
 
 #endif /* GXMLTEXT_HPP */

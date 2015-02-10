@@ -58,13 +58,13 @@ public:
     virtual GXmlComment* clone(void) const;
     virtual std::string  classname(void) const;
     virtual void         write(GUrl& url, const int& indent = 0) const;
-    virtual NodeType     type(void) const { return NT_COMMENT; }
+    virtual NodeType     type(void) const;
     virtual std::string  print(const GChatter& chatter = NORMAL,
                                const int&      indent = 0) const;
 
     // Other methods
-    const std::string&   comment(void) const { return m_comment; }
-    void                 comment(const std::string& comment) { m_comment=comment; }
+    const std::string&   comment(void) const;
+    void                 comment(const std::string& comment);
 
 protected:
     // Protected methods
@@ -87,6 +87,43 @@ inline
 std::string GXmlComment::classname(void) const
 {
     return ("GXmlComment");
+}
+
+
+/***********************************************************************//**
+ * @brief Return comment
+ *
+ * @return Comment string.
+ ***************************************************************************/
+inline
+const std::string& GXmlComment::comment(void) const
+{
+    return (m_comment);
+}
+
+
+/***********************************************************************//**
+ * @brief Set comment
+ *
+ * @param[in] comment Comment string.
+ ***************************************************************************/
+inline
+void GXmlComment::comment(const std::string& comment)
+{
+    m_comment = comment;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return XML node type
+ *
+ * @return XML node type (NT_COMMENT).
+ ***************************************************************************/
+inline
+GXmlNode::NodeType GXmlComment::type(void) const
+{
+    return (NT_COMMENT);
 }
 
 #endif /* GXMLCOMMENT_HPP */
