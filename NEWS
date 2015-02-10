@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-9 February 2015
+10 February 2015
 
 
 1. Introduction
@@ -102,6 +102,14 @@ bilinear interpolations within GammaLib.
 --------------
 The method GXmlElement::has_attribute() has been added to check whether an
 XML element contains a given attribute.
+
+It is now forbidden to append to a GXmlText, GXmlComment and GXmlPI node.
+Before appending was allowed yet the element was not visible. As appending
+is not allowed by the XML syntax, the XML module now throws an exception
+if an attempt of invalid node appending is made.
+
+The XML parser now strips all linefeeds so that no extra linefeeds appears
+in text nodes.
 
 
 15. VO module

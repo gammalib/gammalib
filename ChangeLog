@@ -1,4 +1,4 @@
-2015-02-09  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-02-10  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -15,6 +15,8 @@
         Add GXmlElement::has_attribute() method
         Add GSkymap scaling operators (#1296)
         Implement GApplicationPar range checking (#285)
+        Forbid appending to text, comment and PI XML nodes (#804)
+
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
