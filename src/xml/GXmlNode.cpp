@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,7 +36,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                 "GXmlNode::operator[](int&)"
 #define G_SET                                "GXmlNode::set(int&, GXmlNode&)"
-#define G_APPEND                                "GXmlNode::append(GXmlNode*)"
+#define G_APPEND                                "GXmlNode::append(GXmlNode&)"
 #define G_INSERT                          "GXmlNode::insert(int&, GXmlNode&)"
 #define G_REMOVE                                     "GXmlNode::remove(int&)"
 #define G_ELEMENT1                        "GXmlNode* GXmlNode::element(int&)"
@@ -197,8 +197,10 @@ const GXmlNode* GXmlNode::operator[](const int& index) const
  * @param[in] node XML child node.
  * @return Pointer to deep copy of child node
  *
- * @exception GException::xml_bad_node_type
- *            Not allowed to append document node.
+ * @exception GException::invalid_argument
+ *            Not allowed to append root node.
+ * @exception GException::invalid_value
+ *            Not allowed to append to a text node.
  * @exception GException::out_of_range
  *            Child node index is out of range.
  *
@@ -207,11 +209,21 @@ const GXmlNode* GXmlNode::operator[](const int& index) const
  ***************************************************************************/
 GXmlNode* GXmlNode::set(const int& index, const GXmlNode& node)
 {
-    // Make sure that node is not a document (only the root document is
-    // allowed to exist in a XML document
+    // Make sure that node to append is not a root node as only one root node
+    // is allowed to exist in a document.
     if (node.type() == NT_DOCUMENT) {
-        throw GException::xml_bad_node_type(G_SET, "GXmlDocument",
-                          "Only the root node is of type GXmlDocument.");
+        std::string msg = "Invalid attempt to append root note (GXmlDocument)"
+                          " to a XML node. There can only be one root node in"
+                          " an XML document.";
+        throw GException::invalid_argument(G_SET, msg);
+    }
+
+    // Make sure that the current node is not a text node as nothing can be
+    // appended to a text node.
+    if (this->type() == NT_TEXT) {
+        std::string msg = "Invalid attempt to append a XML node to a text node"
+                          " (GXmlText). Nothing can be appended to a text node.";
+        throw GException::invalid_value(G_SET, msg);
     }
 
     // Compile option: raise exception if index is out of range
@@ -238,19 +250,31 @@ GXmlNode* GXmlNode::set(const int& index, const GXmlNode& node)
  * @param[in] node XML child node.
  * @return Pointer to appended child node
  *
- * @exception GException::xml_bad_node_type
- *            Not allowed to append document node.
+ * @exception GException::invalid_argument
+ *            Not allowed to append root node.
+ * @exception GException::invalid_value
+ *            Not allowed to append to a text node.
  *
  * Appends XML child node by making a deep copy of the node and storing its
  * pointer.
  ***************************************************************************/
 GXmlNode* GXmlNode::append(const GXmlNode& node)
 {
-    // Make sure that node is not a document (only the root document is
-    // allowed to exist in a XML document
+    // Make sure that node to append is not a root node as only one root node
+    // is allowed to exist in a document.
     if (node.type() == NT_DOCUMENT) {
-        throw GException::xml_bad_node_type(G_APPEND, "GXmlDocument",
-                          "Only the root node is of type GXmlDocument.");
+        std::string msg = "Invalid attempt to append root note (GXmlDocument)"
+                          " to a XML node. There can only be one root node in"
+                          " an XML document.";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+
+    // Make sure that the current node is not a text node as nothing can be
+    // appended to a text node.
+    if (this->type() == NT_TEXT) {
+        std::string msg = "Invalid attempt to append a XML node to a text node"
+                          " (GXmlText). Nothing can be appended to a text node.";
+        throw GException::invalid_value(G_APPEND, msg);
     }
 
     // Clone child node
@@ -295,8 +319,10 @@ GXmlElement* GXmlNode::append(const std::string& segment)
  * @param[in] node XML child node.
  * @return Pointer to inserted child node
  *
- * @exception GException::xml_bad_node_type
- *            Not allowed to append document node.
+ * @exception GException::invalid_argument
+ *            Not allowed to append root node.
+ * @exception GException::invalid_value
+ *            Not allowed to append to a text node.
  * @exception GException::out_of_range
  *            Child node index is out of range.
  *
@@ -306,11 +332,21 @@ GXmlElement* GXmlNode::append(const std::string& segment)
  ***************************************************************************/
 GXmlNode* GXmlNode::insert(const int& index, const GXmlNode& node)
 {
-    // Make sure that node is not a document (only the root document is
-    // allowed to exist in a XML document
+    // Make sure that node to append is not a root node as only one root node
+    // is allowed to exist in a document.
     if (node.type() == NT_DOCUMENT) {
-        throw GException::xml_bad_node_type(G_INSERT, "GXmlDocument",
-                          "Only the root node is of type GXmlDocument.");
+        std::string msg = "Invalid attempt to append root note (GXmlDocument)"
+                          " to a XML node. There can only be one root node in"
+                          " an XML document.";
+        throw GException::invalid_argument(G_INSERT, msg);
+    }
+
+    // Make sure that the current node is not a text node as nothing can be
+    // appended to a text node.
+    if (this->type() == NT_TEXT) {
+        std::string msg = "Invalid attempt to append a XML node to a text node"
+                          " (GXmlText). Nothing can be appended to a text node.";
+        throw GException::invalid_value(G_INSERT, msg);
     }
 
     // Compile option: raise exception if index is out of range
