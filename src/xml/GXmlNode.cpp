@@ -201,7 +201,7 @@ const GXmlNode* GXmlNode::operator[](const int& index) const
  * @exception GException::invalid_argument
  *            Not allowed to append root node.
  * @exception GException::invalid_value
- *            Not allowed to append to a text node.
+ *            Not allowed to append to a text, comment or PI node.
  * @exception GException::out_of_range
  *            Child node index is out of range.
  *
@@ -224,6 +224,24 @@ GXmlNode* GXmlNode::set(const int& index, const GXmlNode& node)
     if (this->type() == NT_TEXT) {
         std::string msg = "Invalid attempt to append a XML node to a text node"
                           " (GXmlText). Nothing can be appended to a text node.";
+        throw GException::invalid_value(G_SET, msg);
+    }
+
+    // Make sure that the current node is not a PI node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_PI) {
+        std::string msg = "Invalid attempt to append a XML node to a processing"
+                          " instruction node (GXmlPI). Nothing can be appended"
+                          " to a processing instruction node.";
+        throw GException::invalid_value(G_SET, msg);
+    }
+
+    // Make sure that the current node is not a comment node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_COMMENT) {
+        std::string msg = "Invalid attempt to append a XML node to a comment"
+                          " node (GXmlComment). Nothing can be appended"
+                          " to a processing instruction node.";
         throw GException::invalid_value(G_SET, msg);
     }
 
@@ -254,7 +272,7 @@ GXmlNode* GXmlNode::set(const int& index, const GXmlNode& node)
  * @exception GException::invalid_argument
  *            Not allowed to append root node.
  * @exception GException::invalid_value
- *            Not allowed to append to a text node.
+ *            Not allowed to append to a text, comment or PI node.
  *
  * Appends XML child node by making a deep copy of the node and storing its
  * pointer.
@@ -278,6 +296,24 @@ GXmlNode* GXmlNode::append(const GXmlNode& node)
         throw GException::invalid_value(G_APPEND2, msg);
     }
 
+    // Make sure that the current node is not a PI node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_PI) {
+        std::string msg = "Invalid attempt to append a XML node to a processing"
+                          " instruction node (GXmlPI). Nothing can be appended"
+                          " to a processing instruction node.";
+        throw GException::invalid_value(G_APPEND2, msg);
+    }
+
+    // Make sure that the current node is not a comment node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_COMMENT) {
+        std::string msg = "Invalid attempt to append a XML node to a comment"
+                          " node (GXmlComment). Nothing can be appended"
+                          " to a processing instruction node.";
+        throw GException::invalid_value(G_APPEND2, msg);
+    }
+
     // Clone child node
     GXmlNode* ptr = node.clone();
 
@@ -295,6 +331,9 @@ GXmlNode* GXmlNode::append(const GXmlNode& node)
  * @param[in] segment XML child node.
  * @return Pointer to appended child node
  *
+ * @exception GException::invalid_value
+ *            Not allowed to append to a text, comment or PI node.
+ *
  * Appends XML element that is constructed from a text @p segment. The text
  * segment is parsed and the element name and attributes are extracted using
  * the GXmlElement::parse_start() method. The method returns a pointer to the
@@ -308,6 +347,24 @@ GXmlElement* GXmlNode::append(const std::string& segment)
         std::string msg = "Invalid attempt to append the text segment \""+
                           segment+"\" to a text node (GXmlText). Nothing can"
                           " be appended to a text node.";
+        throw GException::invalid_value(G_APPEND1, msg);
+    }
+
+    // Make sure that the current node is not a PI node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_PI) {
+        std::string msg = "Invalid attempt to append a XML node to a processing"
+                          " instruction node (GXmlPI). Nothing can be appended"
+                          " to a processing instruction node.";
+        throw GException::invalid_value(G_APPEND1, msg);
+    }
+
+    // Make sure that the current node is not a comment node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_COMMENT) {
+        std::string msg = "Invalid attempt to append a XML node to a comment"
+                          " node (GXmlComment). Nothing can be appended"
+                          " to a processing instruction node.";
         throw GException::invalid_value(G_APPEND1, msg);
     }
 
@@ -332,7 +389,7 @@ GXmlElement* GXmlNode::append(const std::string& segment)
  * @exception GException::invalid_argument
  *            Not allowed to append root node.
  * @exception GException::invalid_value
- *            Not allowed to append to a text node.
+ *            Not allowed to append to a text, comment or PI node.
  * @exception GException::out_of_range
  *            Child node index is out of range.
  *
@@ -356,6 +413,24 @@ GXmlNode* GXmlNode::insert(const int& index, const GXmlNode& node)
     if (this->type() == NT_TEXT) {
         std::string msg = "Invalid attempt to append a XML node to a text node"
                           " (GXmlText). Nothing can be appended to a text node.";
+        throw GException::invalid_value(G_INSERT, msg);
+    }
+
+    // Make sure that the current node is not a PI node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_PI) {
+        std::string msg = "Invalid attempt to append a XML node to a processing"
+                          " instruction node (GXmlPI). Nothing can be appended"
+                          " to a processing instruction node.";
+        throw GException::invalid_value(G_INSERT, msg);
+    }
+
+    // Make sure that the current node is not a comment node as nothing can be
+    // appended to a PI node.
+    if (this->type() == NT_COMMENT) {
+        std::string msg = "Invalid attempt to append a XML node to a comment"
+                          " node (GXmlComment). Nothing can be appended"
+                          " to a processing instruction node.";
         throw GException::invalid_value(G_INSERT, msg);
     }
 
