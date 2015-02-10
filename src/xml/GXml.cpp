@@ -725,6 +725,11 @@ void GXml::parse(const GUrl& url)
             }
         }
 
+        // Skip all linefeeds (to avoid extra linefeeds in text segments)
+        if (c == '\x0a') {
+            continue;
+        }
+
         // If we are not within a markup and if a markup is reached then add
         // the text segment to the nodes and switch to in_markup mode
         if (in_markup == false) {
