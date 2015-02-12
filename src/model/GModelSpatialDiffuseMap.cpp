@@ -404,6 +404,9 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
  *
  * Read the skymap information from an XML element. The XML element is
  * required to have 1 parameter named either "Normalization" or "Prefactor".
+ *
+ * If the attribute @a normalize="0" or @ normalize="false" is present the
+ * diffuse map will not be normalised to unity flux upon loading.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
 {
@@ -428,12 +431,14 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
     }
 
     // Get optional normalization attribute
-    std::string arg = xml.attribute("normalize");
-    if (arg == "" || arg == "1" || gammalib::tolower(arg) == "true") {
-        m_normalize = true;
-    }
-    else {
-        m_normalize = false;
+    m_normalize     = true;
+    m_has_normalize = false;
+    if (xml.has_attribute("normalize")) {
+        m_has_normalize = true;
+        std::string arg = xml.attribute("normalize");
+        if (arg == "0" || gammalib::tolower(arg) == "false") {
+            m_normalize = false;
+        }
     }
 
     // Load skymap
@@ -505,8 +510,13 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
     }
 
     // Set optional normalization attribute
-    if (!normalize()) {
-        xml.attribute("normalize", "0");
+    if (m_has_normalize || !m_normalize) {
+        if (m_normalize) {
+            xml.attribute("normalize", "1");
+        }
+        else {
+            xml.attribute("normalize", "0");
+        }
     }
 
     // Return
@@ -610,8 +620,9 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_map.clear();
     m_filename.clear();
     m_mc_cache.clear();
-    m_normalize = true;
-    m_norm      = 0.0;
+    m_normalize     = true;
+    m_has_normalize = false;
+    m_norm          = 0.0;
 
     // Return
     return;
@@ -626,12 +637,13 @@ void GModelSpatialDiffuseMap::init_members(void)
 void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
 {
     // Copy members
-    m_value     = model.m_value;
-    m_map       = model.m_map;
-    m_filename  = model.m_filename;
-    m_mc_cache  = model.m_mc_cache;
-    m_normalize = model.m_normalize;
-    m_norm      = model.m_norm;
+    m_value         = model.m_value;
+    m_map           = model.m_map;
+    m_filename      = model.m_filename;
+    m_mc_cache      = model.m_mc_cache;
+    m_normalize     = model.m_normalize;
+    m_has_normalize = model.m_has_normalize;
+    m_norm          = model.m_norm;
 
     // Set parameter pointer(s)
     m_pars.clear();

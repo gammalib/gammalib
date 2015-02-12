@@ -96,12 +96,13 @@ protected:
     void prepare_map(void);
 
     // Protected members
-    GModelPar           m_value;      //!< Value
-    GSkymap             m_map;        //!< Skymap
-    std::string         m_filename;   //!< Name of skymap
-    std::vector<double> m_mc_cache;   //!< Monte Carlo cache
-    bool                m_normalize;  //!< Normalize map (default: true)
-    double              m_norm;       //!< Map normalization
+    GModelPar           m_value;         //!< Value
+    GSkymap             m_map;           //!< Skymap
+    std::string         m_filename;      //!< Name of skymap
+    std::vector<double> m_mc_cache;      //!< Monte Carlo cache
+    bool                m_normalize;     //!< Normalize map (default: true)
+    bool                m_has_normalize; //!< XML has normalize attribute
+    double              m_norm;          //!< Map normalization
 };
 
 
@@ -207,7 +208,7 @@ void GModelSpatialDiffuseMap::map(const GSkymap& map)
 /***********************************************************************//**
  * @brief Return normalization flag
  *
- * @return True is the map has been normalized, false otherwise.
+ * @return True if the map has been normalized, false otherwise.
  *
  * Signals whether a map has been normalized or not.
  ***************************************************************************/
