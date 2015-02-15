@@ -2384,9 +2384,9 @@ double GCTAResponseIrf::npred_diffuse(const GSource& source,
 {
     // Set number of iterations for Romberg integration.
     // These values have been determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1299
-    static const int iter_rho = 6;
-    static const int iter_phi = 6;
+    // https://cta-redmine.irap.omp.eu/issues/1248
+    static const int iter_rho = 7;
+    static const int iter_phi = 7;
 
     // Initialise Npred value
     double npred     = 0.0;
