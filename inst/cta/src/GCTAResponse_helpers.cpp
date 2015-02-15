@@ -1429,7 +1429,7 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
         // Integrate over phi
         GIntegral integral(&integrand);
         integral.fixed_iter(m_iter);
-        npred = integral.romberg(0.0, gammalib::twopi) * sin_theta;
+        npred = integral.romberg(0.0, gammalib::twopi, m_iter) * sin_theta;
         #if defined(G_DEBUG_INTEGRAL)
         if (!integral.isvalid()) {
             std::cout << "cta_npred_diffuse_kern_theta(theta=";
