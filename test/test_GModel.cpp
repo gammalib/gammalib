@@ -65,6 +65,7 @@ void TestGModel::set(void)
     m_xml_model_radial_gauss      = "data/model_radial_gauss.xml";
     m_xml_model_radial_shell      = "data/model_radial_shell.xml";
     m_xml_model_elliptical_disk   = "data/model_elliptical_disk.xml";
+    m_xml_model_elliptical_gauss   = "data/model_elliptical_gauss.xml";
 
     // Append tests
     append(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
@@ -76,6 +77,7 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
     append(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
     append(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
+    append(static_cast<pfunction>(&TestGModel::test_elliptical_gauss), "Test GModelSpatialEllipticalGauss");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
     append(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
@@ -1138,6 +1140,105 @@ void TestGModel::test_elliptical_disk(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test GModelSpatialEllipticalGauss class
+ ***************************************************************************/
+void TestGModel::test_elliptical_gauss(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialEllipticalGauss model;
+        test_assert(model.type() == "EllipticalGauss",
+                                    "Model type \"EllipticalGauss\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        GModelSpatialEllipticalGauss model(dir, 3.0, 2.0, 45.0);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.posangle(), 45.0);
+        test_value(model.semimajor(), 3.0);
+        test_value(model.semiminor(), 2.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML constructor and attribute methods
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                        xml(m_xml_model_elliptical_gauss);
+        GXmlElement*                element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialEllipticalGauss model(*element);
+        test_value(model.size(), 5);
+        test_assert(model.type() == "EllipticalGauss", "Expected \"EllipticalGauss\"");
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.posangle(), 45.0);
+        test_value(model.semimajor(), 2.0);
+        test_value(model.semiminor(), 0.5);
+
+        // Test ra method
+        model.ra(100.0);
+        test_value(model.ra(), 100.0);
+
+        // Test dec method
+        model.dec(10.0);
+        test_value(model.dec(), 10.0);
+
+        // Test dir method
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        model.dir(dir);
+        test_assert(model.dir() == dir, "Test sky direction");
+
+        // Test posangle method
+        model.posangle(3.9);
+        test_value(model.posangle(), 3.9);
+
+        // Test semimajor method
+        model.semimajor(3.9);
+        test_value(model.semimajor(), 3.9);
+
+        // Test semiminor method
+        model.semiminor(3.9);
+        test_value(model.semiminor(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"RA", "DEC", "PA", "MinorRadius", "MajorRadius"};
+        for (int i = 0; i < 5; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
 
 /***********************************************************************//**
  * @brief Test GModelSpectralConst class
@@ -2108,6 +2209,7 @@ void TestGModel::test_spatial_model(void)
     test_xml_model("GModelSpatialRadialGauss",    m_xml_model_radial_gauss);
     test_xml_model("GModelSpatialRadialShell",    m_xml_model_radial_shell);
     test_xml_model("GModelSpatialEllipticalDisk", m_xml_model_elliptical_disk);
+    test_xml_model("GModelSpatialEllipticalGauss", m_xml_model_elliptical_gauss);
     test_xml_model("GModelSpatialDiffuseConst",   m_xml_model_diffuse_const);
     test_xml_model("GModelSpatialDiffuseMap",     m_xml_model_diffuse_map);
     test_xml_model("GModelSpatialDiffuseCube",    m_xml_model_diffuse_cube);
