@@ -55,11 +55,12 @@ public:
     void                      test_response_npsf(void);
     void                      test_response_edisp(void);
     void                      test_response_edispRMF(void);
+    void                      test_response_edisp2D(void);
     void                      test_response_irf_diffuse(void);
     void                      test_response_npred_diffuse(void);
     void                      test_response_expcube(void);
     void                      test_response_psfcube(void);
-    void 					  test_energy_integration(GCTAResponseIrf rsp);
+    void                      test_energy_integration(GCTAResponseIrf rsp);
 };
 
 

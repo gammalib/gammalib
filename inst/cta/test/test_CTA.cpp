@@ -485,12 +485,12 @@ void TestGCTAResponse::test_response_npsf(void)
 void TestGCTAResponse::test_response_edisp(void)
 {
     // Load response
-	GCTAResponseIrf rsp;
+    GCTAResponseIrf rsp;
 
-	test_energy_integration(rsp);
+    test_energy_integration(rsp);
 
-	// Return
-	return;
+    // Return
+    return;
 }
 
 
@@ -549,6 +549,52 @@ void TestGCTAResponse::test_response_edispRMF(void)
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp(std::log10(1.0),std::log10(30.0)), 0.0);
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test CTA Edisp 2D computation
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edisp2D(void)
+{
+    // Load response
+    GCTAResponseIrf rsp;
+    rsp.caldb(GCaldb(cta_caldb));
+
+    // Test if Energy Dispersion is available
+    test_energy_integration(rsp);
+
+    // Test void constructor
+    test_try("GCTAEdisp2D void constructor");
+    try {
+        GCTAEdisp2D edisp2D;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GCTAEdisp2D copy constructor
+    test_try("GCTAEdisp2D copy constructor");
+    try {
+        GCTAEdisp2D edisp2D_2(edisp2D);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GCTAEdisp2D file constructor
+    test_try("GCTAEdisp2D file constructor");
+    try {
+        GCTAEdisp2D edisp2D_3(cta_irf_king);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Return
     return;
