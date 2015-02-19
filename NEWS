@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-10 February 2015
+19 February 2015
 
 
 1. Introduction
@@ -149,6 +149,10 @@ column named PHASE. GCTAEventList takes care about bookeeping the existence
 of such information while GCTAEventAtom actually holds the information.
 phase() methods have been added to GCTAEventAtom to manipulate the phase
 information.
+
+The precision for the diffuse model Npred computation was increased in
+GCTAResponseIrf to remove an observed mis-estimation of diffuse model
+flux values (#1248).
 
 
 21. COMPTEL interface

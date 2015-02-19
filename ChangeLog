@@ -1,4 +1,4 @@
-2015-02-10  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-02-19  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -16,6 +16,7 @@
         Add GSkymap scaling operators (#1296)
         Implement GApplicationPar range checking (#285)
         Forbid appending to text, comment and PI XML nodes (#804)
+        Increase precision for diffuse model Npred computation (#1248)
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
