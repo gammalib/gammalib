@@ -78,7 +78,9 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp2D), "Test energy dispersion 2D computation");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispRMF), "Test energy dispersion RMF computation");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispPerfTable), "Test energy dispersion Performance Table computation");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
