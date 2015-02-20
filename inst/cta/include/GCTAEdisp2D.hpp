@@ -61,7 +61,7 @@ public:
 
     // Implemented methods
     void        clear(void);
-    GCTAEdisp*  clone(void) const;
+    GCTAEdisp2D*  clone(void) const;
     std::string classname(void) const;
     void        load(const std::string& filename);
     std::string filename(void) const;
@@ -107,6 +107,8 @@ private:
     mutable double m_par_theta;
     mutable double m_norm;
     mutable double m_EobsOnEsrc;   //!< linear ratio Eobs/Esrc
+    mutable double m_eres;
+    mutable double m_ebias;
 };
 
 /***********************************************************************//**

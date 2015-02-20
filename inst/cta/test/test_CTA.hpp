@@ -56,6 +56,7 @@ public:
     void                      test_response_edisp(void);
     void                      test_response_edispRMF(void);
     void                      test_response_edisp2D(void);
+    void                      test_response_edispPerfTable(void);
     void                      test_response_irf_diffuse(void);
     void                      test_response_npred_diffuse(void);
     void                      test_response_expcube(void);

@@ -36,6 +36,7 @@
 #include "GTools.hpp"
 #include "GNodeArray.hpp"
 #include "test_CTA.hpp"
+#include "GCTAEdisp2D.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -59,6 +60,7 @@ const std::string cta_irf_king     = "irf_file.fits";
 const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
 const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
 const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
+const std::string cta_irf_matrix   = PACKAGE_SOURCE"inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits";
 
 
 /***********************************************************************//**
@@ -576,27 +578,26 @@ void TestGCTAResponse::test_response_edisp2D(void)
         test_try_failure(e);
     }
 
-    // Test GCTAEdisp2D copy constructor
-    test_try("GCTAEdisp2D copy constructor");
-    try {
-        GCTAEdisp2D edisp2D_2(edisp2D);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
     // Test GCTAEdisp2D file constructor
     test_try("GCTAEdisp2D file constructor");
     try {
-        GCTAEdisp2D edisp2D_3(cta_irf_king);
+        GCTAEdisp2D edisp2D_2(cta_irf_matrix);
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+    
     // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test CTA Edisp Performance Table computation
+ ***************************************************************************/
+void test_response_edispPerfTable(void)
+{
+
     return;
 }
 
