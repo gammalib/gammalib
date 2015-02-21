@@ -490,10 +490,10 @@ void GCTAPointing::read(const GFitsTable& table)
  * @exception GException::invalid_value
  *            Invalid XML format encountered.
  *
- * Reads pointing information from an XML element. The following XML format
- * is expected
+ * Read pointing parameter from an XML element. The format of the pointing
+ * parameter is
  *
- *     <pointing ra="83.0" dec="22.1"/>
+ *     <parameter name="Pointing" ra="83.0" dec="22.1"/>
  *
  ***************************************************************************/
 void GCTAPointing::read(const GXmlElement& xml)
@@ -502,35 +502,51 @@ void GCTAPointing::read(const GXmlElement& xml)
     clear();
 
     // Determine number of pointing elements in XML element
-    int nelements = xml.elements("pointing");
+    int nelements = xml.elements("parameter");
 
-    // Verify that XML element has exactly one pointing elements
-    if (nelements != 1) {
-        std::string msg = "There are "+gammalib::str(nelements)+" <pointing />"
-                          " elements in the XML element while exactly one"
-                          " element is expected. Please correct the XML"
-                          " definition."; 
+    // Extract pointing parameter
+    int npar[] = {0};
+    for (int i = 0; i < nelements; ++i) {
+
+        // Get parameter element
+        const GXmlElement* par = xml.element("parameter", i);
+
+        // Handle prefactor
+        if (par->attribute("name") == "Pointing") {
+
+            // Extract position attributes
+            if (par->has_attribute("ra") && par->has_attribute("dec")) {
+                double ra  = gammalib::todouble(par->attribute("ra"));
+                double dec = gammalib::todouble(par->attribute("dec"));
+                m_dir.radec_deg(ra,dec);
+            }
+            else if (par->has_attribute("lon") && par->has_attribute("lat")) {
+                double lon = gammalib::todouble(par->attribute("lon"));
+                double lat = gammalib::todouble(par->attribute("lat"));
+                m_dir.lb_deg(lon,lat);
+            }
+            else {
+                std::string msg = "Did not find attributes (ra,dec) or"
+                                  " (lon,lat) in XML parameter element."
+                                  " Please verify the XML format.";
+                throw GException::invalid_value(G_READ_XML, msg);
+            }
+
+            // Signal that we found parameter
+            npar[0]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Verify that parameter was found
+    if (npar[0] < 1) {
+        std::string msg = "Did not find \"Pointing\" parameter in XML file."
+                          " Please verify the XML format.";
         throw GException::invalid_value(G_READ_XML, msg);
     }
-
-    // Get pointing element
-    const GXmlElement* element = xml.element("pointing", 0);
-
-    // Extract position attributes
-    if (element->has_attribute("ra") && element->has_attribute("dec")) {
-        double ra  = gammalib::todouble(xml.attribute("ra"));
-        double dec = gammalib::todouble(xml.attribute("dec"));
-        m_dir.radec_deg(ra,dec);
-    }
-    else if (element->has_attribute("lon") && element->has_attribute("lat")) {
-        double lon = gammalib::todouble(xml.attribute("lon"));
-        double lat = gammalib::todouble(xml.attribute("lat"));
-        m_dir.lb_deg(lon,lat);
-    }
-    else {
-        std::string msg = "Did not find attributes (ra,dec) or (lon,lat) in"
-                          " XML pointing element. Please correct the XML"
-                          " definition.";
+    else if (npar[0] > 1) {
+        std::string msg = "Multiple \"Pointing\" parameters found in XML file."
+                          " Please verify the XML format.";
         throw GException::invalid_value(G_READ_XML, msg);
     }
 
@@ -544,38 +560,44 @@ void GCTAPointing::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * Writes pointing information into an XML element.  The following XML format
- * is written
+ * Writes pointing parameter into an XML element. The format of the pointing
+ * parameter is
  *
- *     <pointing ra="83.0" dec="22.1"/>
+ *     <parameter name="Pointing" ra="83.0" dec="22.1"/>
  *
  ***************************************************************************/
 void GCTAPointing::write(GXmlElement& xml) const
 {
-    // Determine number of pointing elements in XML element
-    int nelements = xml.elements("pointing");
+    // Determine number of parameter elements in XML element
+    int nelements = xml.elements("parameter");
 
-    // If XML element has 0 pointing elements then add one
+    // If XML element has 0 parameter elements then add one
     if (nelements == 0) {
-        xml.append(GXmlElement("pointing"));
+        xml.append(GXmlElement("parameter name=\"Pointing\""));
         nelements++;
     }
 
-    // Verify that XML element has exactly one pointing elements
-    if (nelements != 1) {
-        std::string msg = "There are "+gammalib::str(nelements)+" <pointing />"
-                          " elements in the XML element while exactly one"
-                          " element is expected. Please correct the XML"
-                          " definition."; 
+    // Set or update model parameter attributes
+    int npar[] = {0};
+    for (int i = 0; i < nelements; ++i) {
+
+        // Get parameter element
+        GXmlElement* par = xml.element("parameter", i);
+
+        // Handle prefactor
+        if (par->attribute("name") == "Pointing") {
+            par->attribute("ra",  gammalib::str(m_dir.ra_deg()));
+            par->attribute("dec", gammalib::str(m_dir.dec_deg()));
+            npar[0]++;
+        }
+
+    } // endfor: looped over all parameters
+
+    // Check of all required parameters are present
+    if (npar[0] != 1) {
+        std::string msg = "Require \"Pointing\" parameter.";
         throw GException::invalid_value(G_WRITE_XML, msg);
     }
-
-    // Get pointing element
-    GXmlElement* element = xml.element("pointing", 0);
-
-    // Set attributes
-    element->attribute("ra",  gammalib::str(m_dir.ra_deg()));
-    element->attribute("dec", gammalib::str(m_dir.dec_deg()));
 
     // Return
     return;
