@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.cpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_DIR_HORIZ                         "GCTAPointing::dir_horiz(GTime&)"
+#define G_READ_XML                         "GCTAPointing::read(GXmlElement&)"
+#define G_WRITE_XML                       "GCTAPointing::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -474,6 +476,106 @@ void GCTAPointing::read(const GFitsTable& table)
 
     // Signal that table is available
     m_has_table = true;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read pointing from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Reads pointing information from an XML element. The following XML format
+ * is expected
+ *
+ *     <pointing ra="83.0" dec="22.1"/>
+ *
+ ***************************************************************************/
+void GCTAPointing::read(const GXmlElement& xml)
+{
+    // Clear pointing
+    clear();
+
+    // Determine number of pointing elements in XML element
+    int nelements = xml.elements("pointing");
+
+    // Verify that XML element has exactly one pointing elements
+    if (nelements != 1) {
+        std::string msg = "There are "+gammalib::str(nelements)+" <pointing />"
+                          " elements in the XML element while exactly one"
+                          " element is expected. Please correct the XML"
+                          " definition."; 
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+
+    // Get pointing element
+    const GXmlElement* element = xml.element("pointing", 0);
+
+    // Extract position attributes
+    if (element->has_attribute("ra") && element->has_attribute("dec")) {
+        double ra  = gammalib::todouble(xml.attribute("ra"));
+        double dec = gammalib::todouble(xml.attribute("dec"));
+        m_dir.radec_deg(ra,dec);
+    }
+    else if (element->has_attribute("lon") && element->has_attribute("lat")) {
+        double lon = gammalib::todouble(xml.attribute("lon"));
+        double lat = gammalib::todouble(xml.attribute("lat"));
+        m_dir.lb_deg(lon,lat);
+    }
+    else {
+        std::string msg = "Did not find attributes (ra,dec) or (lon,lat) in"
+                          " XML pointing element. Please correct the XML"
+                          " definition.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write pointing information into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * Writes pointing information into an XML element.  The following XML format
+ * is written
+ *
+ *     <pointing ra="83.0" dec="22.1"/>
+ *
+ ***************************************************************************/
+void GCTAPointing::write(GXmlElement& xml) const
+{
+    // Determine number of pointing elements in XML element
+    int nelements = xml.elements("pointing");
+
+    // If XML element has 0 pointing elements then add one
+    if (nelements == 0) {
+        xml.append(GXmlElement("pointing"));
+        nelements++;
+    }
+
+    // Verify that XML element has exactly one pointing elements
+    if (nelements != 1) {
+        std::string msg = "There are "+gammalib::str(nelements)+" <pointing />"
+                          " elements in the XML element while exactly one"
+                          " element is expected. Please correct the XML"
+                          " definition."; 
+        throw GException::invalid_value(G_WRITE_XML, msg);
+    }
+
+    // Get pointing element
+    GXmlElement* element = xml.element("pointing", 0);
+
+    // Set attributes
+    element->attribute("ra",  gammalib::str(m_dir.ra_deg()));
+    element->attribute("dec", gammalib::str(m_dir.dec_deg()));
 
     // Return
     return;

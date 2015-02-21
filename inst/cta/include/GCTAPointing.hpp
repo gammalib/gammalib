@@ -38,6 +38,9 @@
 #include "GFitsTable.hpp"
 #include "GCTAInstDir.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GXmlElement;
+
 
 /***********************************************************************//**
  * @class GCTAPointing
@@ -82,6 +85,8 @@ public:
     void           load(const std::string& filename,
                         const std::string& extname = "POINTING");
     void           read(const GFitsTable& table);
+    void           read(const GXmlElement& xml);
+    void           write(GXmlElement& xml) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:

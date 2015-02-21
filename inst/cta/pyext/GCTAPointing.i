@@ -61,6 +61,8 @@ public:
     void           load(const std::string& filename,
                         const std::string& extname = "POINTING");
     void           read(const GFitsTable& table);
+    void           read(const GXmlElement& xml);
+    void           write(GXmlElement& xml) const;
 };
 
 

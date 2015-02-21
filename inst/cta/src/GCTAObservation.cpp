@@ -854,41 +854,56 @@ void GCTAObservation::write(GXmlElement& xml) const
         xml.attribute("emax", gammalib::str(m_hi_user_thres));
     }
 
-    // If XML element has 0 nodes then add the required parameter nodes
-    if (xml.elements() == 0) {
-        std::string text = "parameter name=\""+m_eventtype+"\"";
-        xml.append(GXmlElement(text));
-    }
+    // If there is a filename then write the events to the XML file
+    if (m_eventfile.length() > 0) {
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
+        // Determine number of parameter nodes in XML element
+        int npars = xml.elements("parameter");
 
-    // Verify that XML element has at least 1 parameter
-    if (xml.elements() < 1 || npars < 1) {
-        throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "CTA observation requires at least 1 parameter.");
-    }
-
-    // Set or update parameter attributes
-    int npar[] = {0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Eventlist and Countsmap
-        if (par->attribute("name") == m_eventtype) {
-            par->attribute("file", m_eventfile);
-            npar[0]++;
+        // If there is no parameter node than add one
+        if (npars == 0) {
+            std::string text = "parameter name=\""+m_eventtype+"\"";
+            xml.append(GXmlElement(text));
+            npars++;
         }
 
-    } // endfor: looped over all parameters
+        // Verify that XML element has at least 1 parameter
+        if (npars < 1) {
+            std::string msg = "No <parameter> element found in XML file."
+                              " Please correct the XML definition.";
+            throw GException::invalid_value(G_WRITE, msg);
+        }
 
-    // Verify that all required parameters are present
-    if (npar[0] != 1) {
-        throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"EventList\" or \"CountsCube\" parameters.");
+        // Set or update parameter attributes
+        int npar[] = {0};
+        for (int i = 0; i < npars; ++i) {
+
+            // Get parameter element
+            GXmlElement* par = xml.element("parameter", i);
+
+            // Handle Eventlist and Countsmap
+            if (par->attribute("name") == m_eventtype) {
+                par->attribute("file", m_eventfile);
+                npar[0]++;
+            }
+
+        } // endfor: looped over all parameters
+
+        // Verify that all required parameters are present
+        if (npar[0] != 1) {
+            throw GException::xml_invalid_parnames(G_WRITE, xml,
+                  "Require \"EventList\" or \"CountsCube\" parameters.");
+        }
+        
     }
+
+    // ... otherwise write the observation definition information to the
+    // XML file
+    else {
+        // Write information
+        m_pointing.write(xml);
+    }
+
 
     // Write response information
     if (m_response != NULL) {
