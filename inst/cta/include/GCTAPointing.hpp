@@ -60,6 +60,7 @@ public:
     // Constructors and destructors
     GCTAPointing(void);
     explicit GCTAPointing(const GSkyDir& dir);
+    explicit GCTAPointing(const GXmlElement& xml);
     GCTAPointing(const std::string& filename,
                  const std::string& extname = "POINTING");
     GCTAPointing(const GCTAPointing& pnt);

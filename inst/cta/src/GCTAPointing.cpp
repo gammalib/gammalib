@@ -87,6 +87,26 @@ GCTAPointing::GCTAPointing(const GSkyDir& dir)
 
 
 /***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Construct CTA pointing from XML element.
+ ***************************************************************************/
+GCTAPointing::GCTAPointing(const GXmlElement& xml)
+{
+    // Initialise members
+    init_members();
+
+    // Read information from XML element
+    read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Pointing table constructor
  *
  * @param[in] filename Pointing table file.
@@ -505,7 +525,7 @@ void GCTAPointing::read(const GXmlElement& xml)
     int nelements = xml.elements("parameter");
 
     // Extract pointing parameter
-    int npar[] = {0};
+    int n_pointing = 0;
     for (int i = 0; i < nelements; ++i) {
 
         // Get parameter element
@@ -533,22 +553,13 @@ void GCTAPointing::read(const GXmlElement& xml)
             }
 
             // Signal that we found parameter
-            npar[0]++;
+            n_pointing++;
         }
 
     } // endfor: looped over all parameters
 
     // Verify that parameter was found
-    if (npar[0] < 1) {
-        std::string msg = "Did not find \"Pointing\" parameter in XML file."
-                          " Please verify the XML format.";
-        throw GException::invalid_value(G_READ_XML, msg);
-    }
-    else if (npar[0] > 1) {
-        std::string msg = "Multiple \"Pointing\" parameters found in XML file."
-                          " Please verify the XML format.";
-        throw GException::invalid_value(G_READ_XML, msg);
-    }
+    gammalib::xml_parcheck(G_READ_XML, "Pointing", n_pointing);
 
     // Return
     return;
