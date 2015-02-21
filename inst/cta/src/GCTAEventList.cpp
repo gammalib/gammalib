@@ -479,6 +479,17 @@ std::string GCTAEventList::print(const GChatter& chatter) const
                               "not defined");
             }
         }
+        else {
+            result.append("\n"+gammalib::parformat("Energy interval"));
+            if (ebounds().size() > 0) {
+                result.append(gammalib::str(emin().TeV()));
+                result.append(" - ");
+                result.append(gammalib::str(emax().TeV())+" TeV");
+            }
+            else {
+                result.append("not defined");
+            }
+        }
 
         // Append ROI
         if (gammalib::reduce(chatter) > SILENT) {
@@ -490,6 +501,18 @@ std::string GCTAEventList::print(const GChatter& chatter) const
                               "not defined");
             }
         }
+        else {
+            result.append("\n"+gammalib::parformat("Region of interest"));
+            if (roi().radius() > 0) {
+                result.append(roi().centre().print());
+                result.append(" Radius=");
+                result.append(gammalib::str(roi().radius())+" deg");
+            }
+            else {
+                result.append("not defined");
+            }
+        }
+
 
         // EXPLICIT: Append IRF cache
         if (chatter >= EXPLICIT) {

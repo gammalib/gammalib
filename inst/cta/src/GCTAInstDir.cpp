@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAInstDir.cpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -202,7 +202,7 @@ std::string GCTAInstDir::print(const GChatter& chatter) const
         std::string msg = "RA=" + gammalib::str(m_dir.ra_deg()) +
                           ", DEC=" + gammalib::str(m_dir.dec_deg()) +
                           " [" + gammalib::str(m_detx) +
-                          ", " + gammalib::str(m_dety) + "]";
+                          "," + gammalib::str(m_dety) + "]";
         result.append(msg);
 
     } // endif: chatter was not silent
