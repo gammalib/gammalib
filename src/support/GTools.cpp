@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1204,4 +1204,40 @@ std::string gammalib::str2xml(const std::string& arg)
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks whether a parameter has occured once
+ *
+ * @param[in] origin Method performing the check.
+ * @param[in] name Parameter name.
+ * @param[in] number Number of occurences of parameter.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Throws an exception if a given parameter has not exactly occured once.
+ * The exception text is adapted to the case that none or multiple parameters
+ * have been found.
+ ***************************************************************************/
+void gammalib::xml_parcheck(const std::string& origin,
+                            const std::string& name,
+                            const int&         number)
+{
+    // Throw case dependent exception
+    if (number < 1) {
+        std::string msg = "Parameter \""+name+"\" not found in XML element."
+                          " Please verify the XML format.";
+         throw GException::invalid_value(origin, msg);
+    }
+    else if (number > 1) {
+        std::string msg = "Parameter \""+name+"\" found "+
+                          gammalib::str(number)+" times in XML element."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(origin, msg);
+    }
+
+    // Return
+    return;
 }
