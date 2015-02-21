@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,6 +71,7 @@
 #define G_NPRED          "GCTAResponseIrf::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC   "GCTAResponseIrf::mc(double&, GPhoton&, GObservation&, GRan&)"
+#define G_WRITE                        "GCTAResponseIrf::write(GXmlElement&)"
 #define G_IRF_RADIAL         "GCTAResponseIrf::irf_radial(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_IRF_ELLIPTICAL "GCTAResponseIrf::irf_elliptical(GEvent&, GSource&,"\
@@ -751,7 +752,7 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
     // If we have a calibration database and response name, then set
     // the information ...
     if (!m_xml_caldb.empty() || !m_xml_rspname.empty()) {
-        GXmlElement* par = gammalib::parameter(xml, "Calibration");
+        GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "Calibration");
         par->attribute("database", m_xml_caldb);
         par->attribute("response", m_xml_rspname);
     }
@@ -764,7 +765,7 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
             if (!(m_xml_aeff.empty())) {
 
                 // Get pointer to effective area
-                GXmlElement* par = gammalib::parameter(xml, "EffectiveArea");
+                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "EffectiveArea");
 
                 // Initialise attributes
                 double thetacut = 0.0;
@@ -803,39 +804,24 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
         // Add PSF if it exists
         if (psf() != NULL) {
             if (!(m_xml_psf.empty())) {
-
-                // Get pointer to PSD
-                GXmlElement* par = gammalib::parameter(xml, "PointSpreadFunction");
-
-                // Write PSF filename
+                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "PointSpreadFunction");
                 par->attribute("file", m_xml_psf);
-
             }
         }
 
         // Add Edisp if it exists
         if (edisp() != NULL) {
             if (!(m_xml_edisp.empty())) {
-
-                // Get pointer to energy dispersion
-                GXmlElement* par = gammalib::parameter(xml, "EnergyDispersion");
-
-                // Write Edisp filename
-                par->attribute("file", m_xml_edisp);
-                
+                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "EnergyDispersion");
+                par->attribute("file", m_xml_edisp);                
             }
         }
 
         // Add background if it exists
         if (background() != NULL) {
             if (!(m_xml_background.empty())) {
-
-                // Get pointer to energy dispersion
-                GXmlElement* par = gammalib::parameter(xml, "Background");
-
-                // Write background filename
+                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "Background");
                 par->attribute("file", m_xml_background);
-
             }
         }
 

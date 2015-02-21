@@ -753,19 +753,20 @@ void GCTAResponseCube::read(const GXmlElement& xml)
  *      </observation>
  *
  ***************************************************************************/
+#define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
 void GCTAResponseCube::write(GXmlElement& xml) const
 {
     // Add exposure cube filename
     std::string filename = gammalib::strip_whitespace(m_exposure.filename());
     if (!(filename.empty())) {
-        GXmlElement* par = gammalib::parameter(xml, "ExposureCube");
+        GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "ExposureCube");
         par->attribute("file", filename);
     }
 
     // Add PSF cube filename
     filename = gammalib::strip_whitespace(m_psf.filename());
     if (!(filename.empty())) {
-        GXmlElement* par = gammalib::parameter(xml, "PsfCube");
+        GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "PsfCube");
         par->attribute("file", filename);
     }
 

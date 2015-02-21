@@ -991,42 +991,6 @@ void gammalib::warning(const std::string& origin,
 
 
 /***********************************************************************//**
- * @brief Return pointer to parameter with given name in XML element
- *
- * @param[in] xml XML element.
- * @param[in] name Parameter name.
- *
- * Returns pointer to parameter with given name in XML element. If the
- * parameter does not exist it is added.
- ***************************************************************************/
-GXmlElement* gammalib::parameter(GXmlElement& xml, const std::string& name)
-{
-    // Initialize XML element pointer
-    GXmlElement* par = NULL;
-
-    // Signal that name has not been found
-    bool found = false;
-
-    // Search for parameter with given name
-    for (int i = 0; i < xml.elements("parameter"); ++i) {
-        par = xml.element("parameter", i);
-        if (par->attribute("name") == name) {
-            found = true;
-            break;
-        }
-    }
-
-    // If not found, add it now
-    if (!found) {
-        par = static_cast<GXmlElement*>(xml.append(GXmlElement("parameter name=\""+name+"\"")));
-    }
-
-    // Return
-    return par;
-}
-
-
-/***********************************************************************//**
  * @brief Convert XML character references in string to characters
  *
  * @param[in] arg String containing XML character references.
@@ -1204,6 +1168,99 @@ std::string gammalib::str2xml(const std::string& arg)
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to parameter with given name in XML element
+ *
+ * @param[in] origin Method requesting parameter.
+ * @param[in] xml XML element.
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Returns pointer to parameter with given @p name in XML element. If the
+ * @p name is not found, a parameter with the given @p name is added. In
+ * that respect the method differs from xml_getpar which does not add a
+ * parameter element.
+ *
+ * The method checks for multiple occurences of a parameter and throws an
+ * exception in case that more than one parameter with a given name is found.
+ ***************************************************************************/
+GXmlElement* gammalib::xml_needpar(const std::string& origin,
+                                   GXmlElement&       xml,
+                                   const std::string& name)
+{
+    // Initialize XML element pointer
+    GXmlElement* par = NULL;
+
+    // Number of elements
+    int number = 0;
+
+    // Search for parameter with given name
+    for (int i = 0; i < xml.elements("parameter"); ++i) {
+        GXmlElement* element = xml.element("parameter", i);
+        if (element->attribute("name") == name) {
+            par = element;
+            number++;
+        }
+    }
+
+    // Create parameter if none was found
+    if (number == 0) {
+        par = static_cast<GXmlElement*>(xml.append(GXmlElement("parameter name=\""+name+"\"")));
+        number++;
+    }
+
+    // Check that there are no multiple parameters
+    gammalib::xml_parcheck(origin, name, number);
+
+    // Return
+    return par;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to parameter with given name in XML element
+ *
+ * @param[in] origin Method requesting parameter.
+ * @param[in] xml XML element.
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Returns pointer to parameter with given @p name in XML element. The method
+ * checks whether the parameter has been found and throws an exception if
+ * no parameter or multiple occurences of a parameter with given @p name
+ * are found.
+ ***************************************************************************/
+const GXmlElement* gammalib::xml_getpar(const std::string& origin,
+                                        const GXmlElement& xml,
+                                        const std::string& name)
+{
+    // Initialize XML element pointer
+    const GXmlElement* par = NULL;
+
+    // Number of elements
+    int number = 0;
+
+    // Search for parameter with given name
+    for (int i = 0; i < xml.elements("parameter"); ++i) {
+        const GXmlElement* element = xml.element("parameter", i);
+        if (element->attribute("name") == name) {
+            par = element;
+            number++;
+        }
+    }
+
+    // Check that there are no multiple parameters
+    gammalib::xml_parcheck(origin, name, number);
+
+    // Return
+    return par;
 }
 
 
