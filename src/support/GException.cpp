@@ -57,7 +57,7 @@ GException::invalid_value::invalid_value(const std::string& origin,
     // Set message string
     m_message = "Invalid value.";
     if (message.length() > 0) {
-        m_message += ("\n" + message);
+        m_message += (" " + message);
     }
 
     // Return
@@ -80,7 +80,7 @@ GException::invalid_argument::invalid_argument(const std::string& origin,
     // Set message string
     m_message = "Invalid argument.";
     if (message.length() > 0) {
-        m_message += ("\n" + message);
+        m_message += (" " + message);
     }
 
     // Return
@@ -122,7 +122,7 @@ GException::out_of_range::out_of_range(const std::string& origin,
                     " " + gammalib::str(index) + ".";
     }
     if (message.length() > 0) {
-        m_message += ("\n" + message);
+        m_message += (" " + message);
     }
 
     // Return
@@ -145,7 +145,7 @@ GException::runtime_error::runtime_error(const std::string& origin,
     // Set message string
     m_message = "Runtime error.";
     if (message.length() > 0) {
-        m_message += ("\n" + message);
+        m_message += (" " + message);
     }
 
     // Return
@@ -168,7 +168,7 @@ GException::file_error::file_error(const std::string& origin,
     // Set message string
     m_message = "File error.";
     if (message.length() > 0) {
-        m_message += ("\n" + message);
+        m_message += (" " + message);
     }
 
     // Return
