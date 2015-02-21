@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.cpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,9 +35,12 @@
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableDoubleCol.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_REMOVE                                         "GGti::remove(int&)"
+#define G_READ_XML                                 "GGti::read(GXmlElement&)"
+#define G_WRITE_XML                               "GGti::write(GXmlElement&)"
 #define G_TSTART                                         "GGti::tstart(int&)"
 #define G_TSTOP                                           "GGti::tstop(int&)"
 
@@ -79,6 +82,26 @@ GGti::GGti(const GGti& gti)
 
     // Copy members
     copy_members(gti);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML element constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs Good Time Intervals from an XML element.
+ ***************************************************************************/
+GGti::GGti(const GXmlElement& xml)
+{
+    // Initialise members
+    init_members();
+
+    // Read Good Time Intervals from XML element
+    read(xml);
 
     // Return
     return;
@@ -659,6 +682,85 @@ void GGti::write(GFits& file, const std::string& extname) const
 
     // Free table
     delete table;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read Good Time Intervals from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Read Good Time Intervals from an XML element. The format of the Good Time
+ * Intervals is
+ *
+ *     <parameter name="GoodTimeIntervals" tmin="..." tmax="..."/>
+ *
+ * The units of the @a tmin and @a tmax parameters are seconds.
+ *
+ * Note that the method also expects that the time reference is provided
+ * as parameter in the @p xml element.
+ ***************************************************************************/
+void GGti::read(const GXmlElement& xml)
+{
+    // Clear energy boundaries
+    clear();
+
+    // Read time reference
+    m_reference.read(xml);
+
+    // Get energy boundaries parameter
+    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "GoodTimeIntervals");
+
+    // Extract tmin and tmax attributes
+    if (par->has_attribute("tmin") && par->has_attribute("tmax")) {
+        double tmin = gammalib::todouble(par->attribute("tmin"));
+        double tmax = gammalib::todouble(par->attribute("tmax"));
+        append(GTime(tmin, m_reference), GTime(tmax, m_reference));
+    }
+    else {
+        std::string msg = "Attributes \"tmin\" and/or \"tmax\" not found"
+                          " in XML parameter \"GoodTimeIntervals\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write Good Time Intervals into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * Writes Good Time Intervals into an XML element. The format of the Good
+ * Time Intervals is
+ *
+ *     <parameter name="GoodTimeIntervals" tmin="..." tmax="..."/>
+ *
+ * The units of the @a tmin and @a tmax parameters are seconds.
+ *
+ * The method also writes the time reference as parameter in the @p xml
+ * element.
+ ***************************************************************************/
+void GGti::write(GXmlElement& xml) const
+{
+    // Get parameter
+    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "GoodTimeIntervals");
+
+    // Write time interval
+    par->attribute("tmin", gammalib::str(tstart().convert(m_reference)));           
+    par->attribute("tmax", gammalib::str(tstop().convert(m_reference)));           
+
+    // Write time reference
+    m_reference.write(xml);
 
     // Return
     return;

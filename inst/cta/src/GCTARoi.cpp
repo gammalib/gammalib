@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTARoi.cpp - CTA region of interest class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,8 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ                                  "GCTARoi::read(GXmlElement&)"
+#define G_WRITE                                "GCTARoi::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -55,6 +57,26 @@ GCTARoi::GCTARoi(void) : GRoi()
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML element constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs region of interest from an XML element.
+ ***************************************************************************/
+GCTARoi::GCTARoi(const GXmlElement& xml)
+{
+    // Initialise members
+    init_members();
+
+    // Read region of interest from XML element
+    read(xml);
 
     // Return
     return;
@@ -206,6 +228,80 @@ bool GCTARoi::contains(const GEvent& event) const
 
     // Return containment flag
     return contains;
+}
+
+
+/***********************************************************************//**
+ * @brief Read region of interest from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Read region of interest from an XML element. The format of the region
+ * of interest is
+ *
+ *     <parameter name="RegionOfInterest" ra="..." dec="..." rad="..."/>
+ *
+ * The units are deg.
+ ***************************************************************************/
+void GCTARoi::read(const GXmlElement& xml)
+{
+    // Clear region of interest
+    clear();
+
+    // Get region of interest parameter
+    const GXmlElement* par = gammalib::xml_getpar(G_READ, xml, "RegionOfInterest");
+
+    // Extract position attributes
+    if (par->has_attribute("ra") &&
+        par->has_attribute("dec") &&
+        par->has_attribute("rad")) {
+        double ra  = gammalib::todouble(par->attribute("ra"));
+        double dec = gammalib::todouble(par->attribute("dec"));
+        double rad = gammalib::todouble(par->attribute("rad"));
+        GSkyDir centre;
+        centre.radec_deg(ra,dec);
+        this->centre(GCTAInstDir(centre));
+        this->radius(rad);
+    }
+    else {
+        std::string msg = "Attributes \"ra\", \"dec\" and/or \"rad\" not found"
+                          " in XML parameter \"RegionOfInterest\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ, msg);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write region of interest into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * Writes region of interest into an XML element. The format of the region
+ * of interest is
+ *
+ *     <parameter name="RegionOfInterest" ra="..." dec="..." rad="..."/>
+ *
+ * The units are deg.
+ ***************************************************************************/
+void GCTARoi::write(GXmlElement& xml) const
+{
+    // Get parameter
+    GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "RegionOfInterest");
+
+    // Write attributes
+    par->attribute("ra",  gammalib::str(m_centre.dir().ra_deg()));           
+    par->attribute("dec", gammalib::str(m_centre.dir().dec_deg()));           
+    par->attribute("rad", gammalib::str(m_radius));           
+
+    // Return
+    return;
 }
 
 

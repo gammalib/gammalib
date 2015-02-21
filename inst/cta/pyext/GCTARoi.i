@@ -39,6 +39,7 @@ class GCTARoi : public GRoi {
 public:
     // Constructors and destructors
     GCTARoi(void);
+    explicit GCTARoi(const GXmlElement& xml);
     GCTARoi(const GCTAInstDir& centre, const double& radius);
     GCTARoi(const GCTARoi& roi);
     virtual ~GCTARoi(void);
@@ -54,6 +55,8 @@ public:
     const double&       radius(void) const;
     void                centre(const GCTAInstDir& centre);
     void                radius(const double& radius);
+    void                read(const GXmlElement& xml);
+    void                write(GXmlElement& xml) const;
 };
 
 

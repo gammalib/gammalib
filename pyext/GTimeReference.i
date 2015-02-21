@@ -57,6 +57,8 @@ public:
     std::string        classname(void) const;
     void               read(const GFitsHDU& hdu);
     void               write(GFitsHDU& hdu) const;
+    void               read(const GXmlElement& xml);
+    void               write(GXmlElement& xml) const;
     void               set(const double&      mrdref,
                            const std::string& timeunit,
                            const std::string& timesys = "TT",

@@ -40,6 +40,7 @@ public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
+    explicit GEbounds(const GXmlElement& xml);
     GEbounds(const GEnergy& emin, const GEnergy& emax);
     GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
              const bool& log = true);
@@ -72,6 +73,8 @@ public:
     void           write(GFits& file,
                          const std::string& extname = "EBOUNDS",
                          const std::string& unit = "keV") const;
+    void           read(const GXmlElement& xml);
+    void           write(GXmlElement& xml) const;
     int            index(const GEnergy& eng) const;
     const GEnergy& emin(void) const;
     const GEnergy& emax(void) const;

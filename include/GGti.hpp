@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.hpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,10 +30,13 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GContainer.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GXmlElement;
+class GFits;
+class GFitsTable;
 
 
 /***********************************************************************//**
@@ -56,6 +59,7 @@ public:
     // Constructors and destructors
     GGti(void);
     GGti(const GGti& gti);
+    explicit GGti(const GXmlElement& xml);
     explicit GGti(const GTimeReference& ref);
     virtual ~GGti(void);
 
@@ -84,6 +88,8 @@ public:
     void                  read(const GFitsTable& table);
     void                  write(GFits& file,
                                 const std::string& extname = "GTI") const;
+    void                  read(const GXmlElement& xml);
+    void                  write(GXmlElement& xml) const;
     const GTime&          tstart(void) const;
     const GTime&          tstop(void) const;
     const GTime&          tstart(const int& index) const;

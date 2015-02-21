@@ -40,6 +40,7 @@ public:
     // Constructors and destructors
     GGti(void);
     GGti(const GGti& gti);
+    explicit GGti(const GXmlElement& xml);
     explicit GGti(const GTimeReference& ref);
     virtual ~GGti(void);
 
@@ -65,6 +66,8 @@ public:
     void                  read(const GFitsTable& table);
     void                  write(GFits& file,
                                 const std::string& extname = "GTI") const;
+    void                  read(const GXmlElement& xml);
+    void                  write(GXmlElement& xml) const;
     const GTime&          tstart(void) const;
     const GTime&          tstop(void) const;
     const GTime&          tstart(const int& index) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GTimeReference.cpp - Time reference class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,11 +31,15 @@
 #include "GTimeReference.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFitsHDU.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                              "GTimeReference::read(GFitsHDU&)"
+#define G_READ_XML                       "GTimeReference::read(GXmlElement&)"
+#define G_WRITE_XML                     "GTimeReference::write(GXmlElement&)"
 #define G_SET     "GTimeReference::set(double&, std::string&, std::string&, "\
                                                               "std::string&)"
 
@@ -325,6 +329,120 @@ void GTimeReference::write(GFitsHDU& hdu) const
        hdu.card("TIMESYS",  timesys(),  "Time system");
        hdu.card("TIMEREF",  timeref(),  "Time reference");
    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read time reference from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Reads the time reference from an XML element. The format of the time
+ * reference is
+ *
+ *     <parameter name="TimeReference" mjdrefi="..." mjdreff="..."
+ *                timeunit="..." timesys="..." timeref="..."/>
+ *
+ ***************************************************************************/
+void GTimeReference::read(const GXmlElement& xml)
+{
+    // Clear energy boundaries
+    clear();
+
+    // Get energy boundaries parameter
+    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "TimeReference");
+
+    // Initialise reference values
+    int         mjdrefi;
+    double      mjdreff;
+    std::string timeunit;
+    std::string timesys;
+    std::string timeref;
+
+    // Extract attributes
+    if (par->has_attribute("mjdrefi")) {
+        mjdrefi = gammalib::toint(par->attribute("mjdrefi"));
+    }
+    else {
+        std::string msg = "Attribute \"mjdrefi\" not found in XML parameter"
+                          " \"TimeReference\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+    if (par->has_attribute("mjdreff")) {
+        mjdreff = gammalib::todouble(par->attribute("mjdreff"));
+    }
+    else {
+        std::string msg = "Attribute \"mjdreff\" not found in XML parameter"
+                          " \"TimeReference\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+    if (par->has_attribute("timeunit")) {
+        timeunit = par->attribute("timeunit");
+    }
+    else {
+        std::string msg = "Attribute \"timeunit\" not found in XML parameter"
+                          " \"TimeReference\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+    if (par->has_attribute("timesys")) {
+        timesys = par->attribute("timesys");
+    }
+    else {
+        std::string msg = "Attribute \"timesys\" not found in XML parameter"
+                          " \"TimeReference\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+    if (par->has_attribute("timeref")) {
+        timeref = par->attribute("timeref");
+    }
+    else {
+        std::string msg = "Attribute \"timeref\" not found in XML parameter"
+                          " \"TimeReference\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+
+    // Set time reference
+    set(mjdrefi, mjdreff, timeunit, timesys, timeref);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write time reference into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * Writes the time reference into an XML element. The format of the time
+ * reference is
+ *
+ *     <parameter name="TimeReference" mjdrefi="..." mjdreff="..."
+ *                timeunit="..." timesys="..." timeref="..."/>
+ *
+ ***************************************************************************/
+void GTimeReference::write(GXmlElement& xml) const
+{
+    // Get parameter
+    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "TimeReference");
+
+    // Write time reference
+    par->attribute("mjdrefi", gammalib::str(mjdrefi()));           
+    par->attribute("mjdreff", gammalib::str(mjdreff()));           
+    par->attribute("timeunit", timeunit());           
+    par->attribute("timesys", timesys());           
+    par->attribute("timeref", timeref());           
 
     // Return
     return;

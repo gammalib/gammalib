@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTARoi.hpp - CTA region of interest class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@ class GCTARoi : public GRoi {
 public:
     // Constructors and destructors
     GCTARoi(void);
+    explicit GCTARoi(const GXmlElement& xml);
     GCTARoi(const GCTAInstDir& centre, const double& radius);
     GCTARoi(const GCTARoi& roi);
     virtual ~GCTARoi(void);
@@ -69,6 +70,8 @@ public:
     const double&       radius(void) const;
     void                centre(const GCTAInstDir& centre);
     void                radius(const double& radius);
+    void                read(const GXmlElement& xml);
+    void                write(GXmlElement& xml) const;
 
 protected:
     // Protected methods

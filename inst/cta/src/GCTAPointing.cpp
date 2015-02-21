@@ -521,45 +521,26 @@ void GCTAPointing::read(const GXmlElement& xml)
     // Clear pointing
     clear();
 
-    // Determine number of pointing elements in XML element
-    int nelements = xml.elements("parameter");
+    // Get pointing parameter
+    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "Pointing");
 
-    // Extract pointing parameter
-    int n_pointing = 0;
-    for (int i = 0; i < nelements; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Pointing") {
-
-            // Extract position attributes
-            if (par->has_attribute("ra") && par->has_attribute("dec")) {
-                double ra  = gammalib::todouble(par->attribute("ra"));
-                double dec = gammalib::todouble(par->attribute("dec"));
-                m_dir.radec_deg(ra,dec);
-            }
-            else if (par->has_attribute("lon") && par->has_attribute("lat")) {
-                double lon = gammalib::todouble(par->attribute("lon"));
-                double lat = gammalib::todouble(par->attribute("lat"));
-                m_dir.lb_deg(lon,lat);
-            }
-            else {
-                std::string msg = "Did not find attributes (ra,dec) or"
-                                  " (lon,lat) in XML parameter element."
-                                  " Please verify the XML format.";
-                throw GException::invalid_value(G_READ_XML, msg);
-            }
-
-            // Signal that we found parameter
-            n_pointing++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that parameter was found
-    gammalib::xml_parcheck(G_READ_XML, "Pointing", n_pointing);
+    // Extract position attributes
+    if (par->has_attribute("ra") && par->has_attribute("dec")) {
+        double ra  = gammalib::todouble(par->attribute("ra"));
+        double dec = gammalib::todouble(par->attribute("dec"));
+        m_dir.radec_deg(ra,dec);
+    }
+    else if (par->has_attribute("lon") && par->has_attribute("lat")) {
+        double lon = gammalib::todouble(par->attribute("lon"));
+        double lat = gammalib::todouble(par->attribute("lat"));
+        m_dir.lb_deg(lon,lat);
+    }
+    else {
+        std::string msg = "Attributes \"ra\" and \"dec\" or \"lon\" and"
+                          " \"lat\"not found in XML parameter \"Pointing\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
 
     // Return
     return;
@@ -579,36 +560,12 @@ void GCTAPointing::read(const GXmlElement& xml)
  ***************************************************************************/
 void GCTAPointing::write(GXmlElement& xml) const
 {
-    // Determine number of parameter elements in XML element
-    int nelements = xml.elements("parameter");
+    // Get parameter
+    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "Pointing");
 
-    // If XML element has 0 parameter elements then add one
-    if (nelements == 0) {
-        xml.append(GXmlElement("parameter name=\"Pointing\""));
-        nelements++;
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0};
-    for (int i = 0; i < nelements; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Pointing") {
-            par->attribute("ra",  gammalib::str(m_dir.ra_deg()));
-            par->attribute("dec", gammalib::str(m_dir.dec_deg()));
-            npar[0]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1) {
-        std::string msg = "Require \"Pointing\" parameter.";
-        throw GException::invalid_value(G_WRITE_XML, msg);
-    }
+    // Write attributes
+    par->attribute("ra",  gammalib::str(m_dir.ra_deg()));
+    par->attribute("dec", gammalib::str(m_dir.dec_deg()));
 
     // Return
     return;

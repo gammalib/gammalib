@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,8 +37,11 @@
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableDoubleCol.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ_XML                             "GEbounds::read(GXmlElement&)"
+#define G_WRITE_XML                           "GEbounds::write(GXmlElement&)"
 #define G_REMOVE                                     "GEbounds::remove(int&)"
 #define G_EMIN                                         "GEbounds::emin(int&)"
 #define G_EMAX                                         "GEbounds::emax(int&)"
@@ -91,6 +94,26 @@ GEbounds::GEbounds(const GEbounds& ebds)
 
 
 /***********************************************************************//**
+ * @brief XML element constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs energy bounds from an XML element.
+ ***************************************************************************/
+GEbounds::GEbounds(const GXmlElement& xml)
+{
+    // Initialise members
+    init_members();
+
+    // Read energy boundaries from XML element
+    read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Single energy band constructor
  *
  * @param[in] emin Minimum energy of the interval.
@@ -103,7 +126,10 @@ GEbounds::GEbounds(const GEnergy& emin, const GEnergy& emax)
     // Initialise members
     init_members();
 
+    // Append energies
     append(emin, emax);
+
+    // Set attribues
     set_attributes();
 
     // Return
@@ -717,6 +743,76 @@ void GEbounds::write(GFits&             file,
 
     // Free table
     delete table;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read energy boundaries from XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * @exception GException::invalid_value
+ *            Invalid XML format encountered.
+ *
+ * Read energy boundaries from an XML element. The format of the energy
+ * boundaries is
+ *
+ *     <parameter name="EnergyBoundaries" emin="0.1" emax="10.0"/>
+ *
+ * The units of the @a emin and @a emax parameters are MeV.
+ ***************************************************************************/
+void GEbounds::read(const GXmlElement& xml)
+{
+    // Clear energy boundaries
+    clear();
+
+    // Get energy boundaries parameter
+    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "EnergyBoundaries");
+
+    // Extract position attributes
+    if (par->has_attribute("emin") && par->has_attribute("emax")) {
+        double emin = gammalib::todouble(par->attribute("emin"));
+        double emax = gammalib::todouble(par->attribute("emax"));
+        append(GEnergy(emin, "MeV"), GEnergy(emax, "MeV"));
+    }
+    else {
+        std::string msg = "Attributes \"emin\" and/or \"emax\" not found"
+                          " in XML parameter \"EnergyBoundaries\"."
+                          " Please verify the XML format.";
+        throw GException::invalid_value(G_READ_XML, msg);
+    }
+
+    // Set attribues
+    set_attributes();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write energy boundaries into XML element
+ *
+ * @param[in] xml XML element.
+ *
+ * Writes energy boundaries into an XML element. The format of the energy
+ * boundaries is
+ *
+ *     <parameter name="EnergyBoundaries" emin="0.1" emax="10.0"/>
+ *
+ * The units of the @a emin and @a emax parameters are MeV.
+ ***************************************************************************/
+void GEbounds::write(GXmlElement& xml) const
+{
+    // Get parameter
+    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "EnergyBoundaries");
+
+    // Write attributes
+    par->attribute("emin", gammalib::str(emin().MeV()));           
+    par->attribute("emax", gammalib::str(emax().MeV()));           
 
     // Return
     return;

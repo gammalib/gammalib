@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GTimeReference.hpp - Time reference class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,7 +30,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GFitsHDU.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GXmlElement;
+class GFitsHDU;
 
 
 /***********************************************************************//**
@@ -77,6 +80,8 @@ public:
     std::string        classname(void) const;
     void               read(const GFitsHDU& hdu);
     void               write(GFitsHDU& hdu) const;
+    void               read(const GXmlElement& xml);
+    void               write(GXmlElement& xml) const;
     void               set(const double&      mrdref,
                            const std::string& timeunit,
                            const std::string& timesys = "TT",
