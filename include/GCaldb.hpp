@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCaldb.hpp - Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,26 +76,28 @@ public:
     GCaldb& operator=(const GCaldb& caldb);
 
     // Methods
-    void        clear(void);
-    GCaldb*     clone(void) const;
-    std::string classname(void) const;
-    int         size(void) const;
-    std::string rootdir(void) const;
-    void        rootdir(const std::string& pathname);
-    std::string path(const std::string& mission,
-                     const std::string& instrument = "");
-    std::string cifname(const std::string& mission,
-                        const std::string& instrument = "");
-    void        open(const std::string& mission,
-                     const std::string& instrument = "");
-    void        close(void);
-    std::string filename(const std::string& detector,
-                         const std::string& filter,
-                         const std::string& codename,
-                         const std::string& date,
-                         const std::string& time,
-                         const std::string& expr);
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GCaldb*            clone(void) const;
+    std::string        classname(void) const;
+    int                size(void) const;
+    std::string        rootdir(void) const;
+    void               rootdir(const std::string& pathname);
+    std::string        path(const std::string& mission,
+                            const std::string& instrument = "");
+    std::string        cifname(const std::string& mission,
+                               const std::string& instrument = "");
+    void               open(const std::string& mission,
+                            const std::string& instrument = "");
+    void               close(void);
+    std::string        filename(const std::string& detector,
+                                const std::string& filter,
+                                const std::string& codename,
+                                const std::string& date,
+                                const std::string& time,
+                                const std::string& expr);
+    const std::string& mission(void) const;
+    const std::string& instrument(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -122,6 +124,30 @@ inline
 std::string GCaldb::classname(void) const
 {
     return ("GCaldb");
+}
+
+
+/***********************************************************************//**
+ * @brief Return mission
+ *
+ * @return String containing the mission.
+ ***************************************************************************/
+inline
+const std::string& GCaldb::mission(void) const
+{
+    return (m_mission);
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument
+ *
+ * @return String containing the instrument.
+ ***************************************************************************/
+inline
+const std::string& GCaldb::instrument(void) const
+{
+    return (m_instrument);
 }
 
 #endif /* GCALDB_HPP */

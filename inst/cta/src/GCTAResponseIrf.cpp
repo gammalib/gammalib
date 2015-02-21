@@ -1234,6 +1234,8 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
         result.append("=== GCTAResponseIrf ===");
 
         // Append response information
+        result.append("\n"+gammalib::parformat("Caldb mission")+m_caldb.mission());
+        result.append("\n"+gammalib::parformat("Caldb instrument")+m_caldb.instrument());
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
         result.append("\n"+gammalib::parformat("Energy dispersion"));
         if (use_edisp()) {
@@ -1270,27 +1272,33 @@ std::string GCTAResponseIrf::print(const GChatter& chatter) const
             result.append("undefined");
         }
 
-        // Append calibration database
-        result.append("\n"+m_caldb.print(chatter));
+        // Append detailed information
+        GChatter reduced_chatter = gammalib::reduce(chatter);
+        if (reduced_chatter > SILENT) {
 
-        // Append effective area information
-        if (m_aeff != NULL) {
-            result.append("\n"+m_aeff->print(chatter));
-        }
+            // Append calibration database
+            result.append("\n"+m_caldb.print(reduced_chatter));
 
-        // Append point spread function information
-        if (m_psf != NULL) {
-            result.append("\n"+m_psf->print(chatter));
-        }
+            // Append effective area information
+            if (m_aeff != NULL) {
+                result.append("\n"+m_aeff->print(reduced_chatter));
+            }
 
-        // Append energy dispersion information
-        if (m_edisp != NULL) {
-            result.append("\n"+m_edisp->print(chatter));
-        }
+            // Append point spread function information
+            if (m_psf != NULL) {
+                result.append("\n"+m_psf->print(reduced_chatter));
+            }
 
-        // Append background information
-        if (m_background != NULL) {
-            result.append("\n"+m_background->print(chatter));
+            // Append energy dispersion information
+            if (m_edisp != NULL) {
+                result.append("\n"+m_edisp->print(reduced_chatter));
+            }
+
+            // Append background information
+            if (m_background != NULL) {
+                result.append("\n"+m_background->print(reduced_chatter));
+            }
+
         }
 
         // EXPLICIT: Append Npred cache information
