@@ -252,7 +252,7 @@ void GCTARoi::read(const GXmlElement& xml)
     clear();
 
     // Get region of interest parameter
-    const GXmlElement* par = gammalib::xml_getpar(G_READ, xml, "RegionOfInterest");
+    const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "RegionOfInterest");
 
     // Extract position attributes
     if (par->has_attribute("ra") &&
@@ -289,16 +289,24 @@ void GCTARoi::read(const GXmlElement& xml)
  *     <parameter name="RegionOfInterest" ra="..." dec="..." rad="..."/>
  *
  * The units are deg.
+ *
+ * This method does nothing if the region of interest is not valid (signaled
+ * by a radius of 0 deg).
  ***************************************************************************/
 void GCTARoi::write(GXmlElement& xml) const
 {
-    // Get parameter
-    GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "RegionOfInterest");
+    // Continue only if the ROI is valid
+    if (m_radius > 0.0) {
 
-    // Write attributes
-    par->attribute("ra",  gammalib::str(m_centre.dir().ra_deg()));           
-    par->attribute("dec", gammalib::str(m_centre.dir().dec_deg()));           
-    par->attribute("rad", gammalib::str(m_radius));           
+        // Get parameter
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "RegionOfInterest");
+
+        // Write attributes
+        par->attribute("ra",  gammalib::str(m_centre.dir().ra_deg()));
+        par->attribute("dec", gammalib::str(m_centre.dir().dec_deg()));
+        par->attribute("rad", gammalib::str(m_radius));
+
+    } // endif: ROI was valid
 
     // Return
     return;

@@ -770,7 +770,7 @@ void GEbounds::read(const GXmlElement& xml)
     clear();
 
     // Get energy boundaries parameter
-    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "EnergyBoundaries");
+    const GXmlElement* par = gammalib::xml_get_par(G_READ_XML, xml, "EnergyBoundaries");
 
     // Extract position attributes
     if (par->has_attribute("emin") && par->has_attribute("emax")) {
@@ -804,16 +804,23 @@ void GEbounds::read(const GXmlElement& xml)
  *     <parameter name="EnergyBoundaries" emin="0.1" emax="10.0"/>
  *
  * The units of the @a emin and @a emax parameters are MeV.
+ *
+ * This method does nothing if the energy boundaries are empty.
  ***************************************************************************/
 void GEbounds::write(GXmlElement& xml) const
 {
-    // Get parameter
-    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "EnergyBoundaries");
+    // Continue only if there are energy boundaries
+    if (!is_empty()) {
 
-    // Write attributes
-    par->attribute("emin", gammalib::str(emin().MeV()));           
-    par->attribute("emax", gammalib::str(emax().MeV()));           
+        // Get parameter
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE_XML, xml, "EnergyBoundaries");
 
+        // Write attributes
+        par->attribute("emin", gammalib::str(emin().MeV()));
+        par->attribute("emax", gammalib::str(emax().MeV()));
+
+    } // endif: energy boundaries were not empty
+        
     // Return
     return;
 }

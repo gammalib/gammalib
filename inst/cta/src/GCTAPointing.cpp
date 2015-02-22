@@ -522,7 +522,7 @@ void GCTAPointing::read(const GXmlElement& xml)
     clear();
 
     // Get pointing parameter
-    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "Pointing");
+    const GXmlElement* par = gammalib::xml_get_par(G_READ_XML, xml, "Pointing");
 
     // Extract position attributes
     if (par->has_attribute("ra") && par->has_attribute("dec")) {
@@ -561,7 +561,7 @@ void GCTAPointing::read(const GXmlElement& xml)
 void GCTAPointing::write(GXmlElement& xml) const
 {
     // Get parameter
-    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "Pointing");
+    GXmlElement* par = gammalib::xml_need_par(G_WRITE_XML, xml, "Pointing");
 
     // Write attributes
     par->attribute("ra",  gammalib::str(m_dir.ra_deg()));

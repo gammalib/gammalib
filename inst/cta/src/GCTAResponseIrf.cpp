@@ -71,6 +71,7 @@
 #define G_NPRED          "GCTAResponseIrf::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC   "GCTAResponseIrf::mc(double&, GPhoton&, GObservation&, GRan&)"
+#define G_READ                          "GCTAResponseIrf::read(GXmlElement&)"
 #define G_WRITE                        "GCTAResponseIrf::write(GXmlElement&)"
 #define G_IRF_RADIAL         "GCTAResponseIrf::irf_radial(GEvent&, GSource&,"\
                                                             " GObservation&)"
@@ -587,50 +588,48 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
  *       <parameter name="Background"          file="..."/>
  *     </observation>
  *
- * @todo Still supports old ARF, PSF and RMF parameter names.
  ***************************************************************************/
 void GCTAResponseIrf::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
+    // First check for "Calibration" parameter
+    if (gammalib::xml_has_par(xml, "Calibration")) {
 
-    // Extract parameters
-    for (int i = 0; i < npars; ++i) {
+        // Get parameter
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Calibration");
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
+        // Read database and response
+        std::string xml_caldb   = gammalib::strip_whitespace(par->attribute("database"));
+        std::string xml_rspname = gammalib::strip_whitespace(par->attribute("response"));
 
-        // Handle Calibration
-        if (par->attribute("name") == "Calibration") {
-
-            // Read database and response
-            std::string xml_caldb   = gammalib::strip_whitespace(par->attribute("database"));
-            std::string xml_rspname = gammalib::strip_whitespace(par->attribute("response"));
-
-            // Set calibration database
-            GCaldb caldb;
-            if (gammalib::dir_exists(xml_caldb)) {
-                caldb.rootdir(xml_caldb);
-            }
-            else {
-                caldb.open("cta", xml_caldb);
-            }
-            this->caldb(caldb);
-
-            // Load response
-            this->load(xml_rspname);
-
-            // Store database and response names (we do this now since the
-            // load() method results the object, except of the calibration
-            // database)
-            m_xml_caldb   = xml_caldb;
-            m_xml_rspname = xml_rspname;
-
+        // Set calibration database
+        GCaldb caldb;
+        if (gammalib::dir_exists(xml_caldb)) {
+            caldb.rootdir(xml_caldb);
         }
+        else {
+            caldb.open("cta", xml_caldb);
+        }
+        this->caldb(caldb);
+
+        // Load response
+        this->load(xml_rspname);
+
+        // Store database and response names (we do this now since the
+        // load() method results the object, except of the calibration
+        // database)
+        m_xml_caldb   = xml_caldb;
+        m_xml_rspname = xml_rspname;
+
+    } // endif: "Calibration" parameter found
+
+    // ... otherwise check for components
+    else {
 
         // Handle effective area
-        else if ((par->attribute("name") == "EffectiveArea") ||
-                 (par->attribute("name") == "ARF")) {
+        if (gammalib::xml_has_par(xml, "EffectiveArea")) {
+
+            // Get parameter
+            const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "EffectiveArea");
 
             // Get filename
             m_xml_aeff = gammalib::strip_whitespace(par->attribute("file"));
@@ -680,11 +679,13 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
 
             } // endif: effective area filename was valid
 
-        }
+        } // endif: handled effective area
 
         // Handle PSF
-        else if ((par->attribute("name") == "PointSpreadFunction") ||
-                 (par->attribute("name") == "PSF")) {
+        if (gammalib::xml_has_par(xml, "PointSpreadFunction")) {
+
+            // Get parameter
+            const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "PointSpreadFunction");
 
             // Get filename
             m_xml_psf = gammalib::strip_whitespace(par->attribute("file"));
@@ -694,12 +695,13 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
                 load_psf(m_xml_psf);
             }
 
-        }
+        } // endif: handled PSF
 
+        // Handle energy dispersion
+        if (gammalib::xml_has_par(xml, "EnergyDispersion")) {
 
-        // Handle RMF
-        else if ((par->attribute("name") == "EnergyDispersion") ||
-                 (par->attribute("name") == "RMF")) {
+            // Get parameter
+            const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "EnergyDispersion");
 
             // Get filename
             m_xml_edisp = gammalib::strip_whitespace(par->attribute("file"));
@@ -709,10 +711,13 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
                 load_edisp(m_xml_edisp);
             }
 
-        }
+        } // endif: handled energy dispersion
 
-        // Handle background model
-        else if (par->attribute("name") == "Background") {
+        // Handle Background
+        if (gammalib::xml_has_par(xml, "Background")) {
+
+            // Get parameter
+            const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Background");
 
             // Get filename
             m_xml_background = gammalib::strip_whitespace(par->attribute("file"));
@@ -724,7 +729,7 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
 
         }
 
-    } // endfor: looped over all parameters
+    } // endelse: handled components
 
     // If we have an ARF then remove thetacut if necessary
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(aeff()));
@@ -772,7 +777,7 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
     // If we have a calibration database and response name, then set
     // the information ...
     if (!m_xml_caldb.empty() || !m_xml_rspname.empty()) {
-        GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "Calibration");
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Calibration");
         par->attribute("database", m_xml_caldb);
         par->attribute("response", m_xml_rspname);
     }
@@ -785,7 +790,7 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
             if (!(m_xml_aeff.empty())) {
 
                 // Get pointer to effective area
-                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "EffectiveArea");
+                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EffectiveArea");
 
                 // Initialise attributes
                 double thetacut = 0.0;
@@ -824,7 +829,7 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
         // Add PSF if it exists
         if (psf() != NULL) {
             if (!(m_xml_psf.empty())) {
-                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "PointSpreadFunction");
+                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "PointSpreadFunction");
                 par->attribute("file", m_xml_psf);
             }
         }
@@ -832,7 +837,7 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
         // Add Edisp if it exists
         if (edisp() != NULL) {
             if (!(m_xml_edisp.empty())) {
-                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "EnergyDispersion");
+                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EnergyDispersion");
                 par->attribute("file", m_xml_edisp);                
             }
         }
@@ -840,7 +845,7 @@ void GCTAResponseIrf::write(GXmlElement& xml) const
         // Add background if it exists
         if (background() != NULL) {
             if (!(m_xml_background.empty())) {
-                GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "Background");
+                GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Background");
                 par->attribute("file", m_xml_background);
             }
         }

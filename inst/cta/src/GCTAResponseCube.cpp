@@ -711,11 +711,11 @@ void GCTAResponseCube::read(const GXmlElement& xml)
     clear();
 
     // Get exposure cube information and load cube
-    const GXmlElement* exppar  = gammalib::xml_getpar(G_READ, xml, "ExposureCube");
+    const GXmlElement* exppar  = gammalib::xml_get_par(G_READ, xml, "ExposureCube");
     std::string        expname = gammalib::strip_whitespace(exppar->attribute("file"));
 
     // Get PSF cube information and load cube
-    const GXmlElement* psfpar  = gammalib::xml_getpar(G_READ, xml, "PsfCube");
+    const GXmlElement* psfpar  = gammalib::xml_get_par(G_READ, xml, "PsfCube");
     std::string        psfname = gammalib::strip_whitespace(psfpar->attribute("file"));
 
     // Load cubes
@@ -747,14 +747,14 @@ void GCTAResponseCube::write(GXmlElement& xml) const
     // Add exposure cube filename
     std::string filename = gammalib::strip_whitespace(m_exposure.filename());
     if (!(filename.empty())) {
-        GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "ExposureCube");
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "ExposureCube");
         par->attribute("file", filename);
     }
 
     // Add PSF cube filename
     filename = gammalib::strip_whitespace(m_psf.filename());
     if (!(filename.empty())) {
-        GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "PsfCube");
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "PsfCube");
         par->attribute("file", filename);
     }
 

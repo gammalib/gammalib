@@ -352,11 +352,11 @@ void GTimeReference::write(GFitsHDU& hdu) const
  ***************************************************************************/
 void GTimeReference::read(const GXmlElement& xml)
 {
-    // Clear energy boundaries
+    // Clear time reference
     clear();
 
-    // Get energy boundaries parameter
-    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "TimeReference");
+    // Get time reference parameter
+    const GXmlElement* par = gammalib::xml_get_par(G_READ_XML, xml, "TimeReference");
 
     // Initialise reference values
     int         mjdrefi;
@@ -435,7 +435,7 @@ void GTimeReference::read(const GXmlElement& xml)
 void GTimeReference::write(GXmlElement& xml) const
 {
     // Get parameter
-    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "TimeReference");
+    GXmlElement* par = gammalib::xml_need_par(G_WRITE_XML, xml, "TimeReference");
 
     // Write time reference
     par->attribute("mjdrefi", gammalib::str(mjdrefi()));           

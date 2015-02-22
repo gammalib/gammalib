@@ -1172,6 +1172,34 @@ std::string gammalib::str2xml(const std::string& arg)
 
 
 /***********************************************************************//**
+ * @brief Checks if parameter with given name in XML element exists
+ *
+ * @param[in] xml XML element.
+ * @param[in] name Parameter name.
+ * @return True if parameter exists, false otherwise.
+ *
+ * Checks whether a parameter with given @p name exists in XML element.
+ ***************************************************************************/
+bool gammalib::xml_has_par(const GXmlElement& xml, const std::string& name)
+{
+    // Initialize flag
+    bool found = false;
+
+    // Search for parameter with given name
+    for (int i = 0; i < xml.elements("parameter"); ++i) {
+        const GXmlElement* element = xml.element("parameter", i);
+        if (element->attribute("name") == name) {
+            found = true;
+            break;
+        }
+    }
+
+    // Return
+    return found;
+}
+
+
+/***********************************************************************//**
  * @brief Return pointer to parameter with given name in XML element
  *
  * @param[in] origin Method requesting parameter.
@@ -1189,9 +1217,9 @@ std::string gammalib::str2xml(const std::string& arg)
  * The method checks for multiple occurences of a parameter and throws an
  * exception in case that more than one parameter with a given name is found.
  ***************************************************************************/
-GXmlElement* gammalib::xml_needpar(const std::string& origin,
-                                   GXmlElement&       xml,
-                                   const std::string& name)
+GXmlElement* gammalib::xml_need_par(const std::string& origin,
+                                    GXmlElement&       xml,
+                                    const std::string& name)
 {
     // Initialize XML element pointer
     GXmlElement* par = NULL;
@@ -1215,7 +1243,7 @@ GXmlElement* gammalib::xml_needpar(const std::string& origin,
     }
 
     // Check that there are no multiple parameters
-    gammalib::xml_parcheck(origin, name, number);
+    gammalib::xml_check_par(origin, name, number);
 
     // Return
     return par;
@@ -1237,9 +1265,9 @@ GXmlElement* gammalib::xml_needpar(const std::string& origin,
  * no parameter or multiple occurences of a parameter with given @p name
  * are found.
  ***************************************************************************/
-const GXmlElement* gammalib::xml_getpar(const std::string& origin,
-                                        const GXmlElement& xml,
-                                        const std::string& name)
+const GXmlElement* gammalib::xml_get_par(const std::string& origin,
+                                         const GXmlElement& xml,
+                                         const std::string& name)
 {
     // Initialize XML element pointer
     const GXmlElement* par = NULL;
@@ -1256,8 +1284,9 @@ const GXmlElement* gammalib::xml_getpar(const std::string& origin,
         }
     }
 
-    // Check that there are no multiple parameters
-    gammalib::xml_parcheck(origin, name, number);
+    // Check that there is at least one parameter and that there are no
+    // multiple parameters
+    gammalib::xml_check_par(origin, name, number);
 
     // Return
     return par;
@@ -1278,9 +1307,9 @@ const GXmlElement* gammalib::xml_getpar(const std::string& origin,
  * The exception text is adapted to the case that none or multiple parameters
  * have been found.
  ***************************************************************************/
-void gammalib::xml_parcheck(const std::string& origin,
-                            const std::string& name,
-                            const int&         number)
+void gammalib::xml_check_par(const std::string& origin,
+                             const std::string& name,
+                             const int&         number)
 {
     // Throw case dependent exception
     if (number < 1) {

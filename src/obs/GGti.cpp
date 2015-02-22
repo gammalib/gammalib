@@ -715,7 +715,7 @@ void GGti::read(const GXmlElement& xml)
     m_reference.read(xml);
 
     // Get energy boundaries parameter
-    const GXmlElement* par = gammalib::xml_getpar(G_READ_XML, xml, "GoodTimeIntervals");
+    const GXmlElement* par = gammalib::xml_get_par(G_READ_XML, xml, "GoodTimeIntervals");
 
     // Extract tmin and tmax attributes
     if (par->has_attribute("tmin") && par->has_attribute("tmax")) {
@@ -749,18 +749,25 @@ void GGti::read(const GXmlElement& xml)
  *
  * The method also writes the time reference as parameter in the @p xml
  * element.
+ *
+ * This method does nothing if the Good Time Intervals are empty.
  ***************************************************************************/
 void GGti::write(GXmlElement& xml) const
 {
-    // Get parameter
-    GXmlElement* par = gammalib::xml_needpar(G_WRITE_XML, xml, "GoodTimeIntervals");
+    // Continue only if there are GTIs
+    if (!is_empty()) {
 
-    // Write time interval
-    par->attribute("tmin", gammalib::str(tstart().convert(m_reference)));           
-    par->attribute("tmax", gammalib::str(tstop().convert(m_reference)));           
+        // Get parameter
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE_XML, xml, "GoodTimeIntervals");
 
-    // Write time reference
-    m_reference.write(xml);
+        // Write time interval
+        par->attribute("tmin", gammalib::str(tstart().convert(m_reference)));
+        par->attribute("tmax", gammalib::str(tstop().convert(m_reference)));
+
+        // Write time reference
+        m_reference.write(xml);
+
+    } // endif: GTIs were not empty
 
     // Return
     return;

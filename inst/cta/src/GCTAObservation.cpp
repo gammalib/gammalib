@@ -769,31 +769,72 @@ void GCTAObservation::read(const GXmlElement& xml)
     // If we have an event file then verify that all required parameters
     // were found
     if (has_evfile) {
-        gammalib::xml_parcheck(G_READ, "EventList\" or \"CountsCube", n_evfile);
+        gammalib::xml_check_par(G_READ, "EventList\" or \"CountsCube", n_evfile);
     }
 
     // ... otherwise extract information from observation definition parameters
     else {
 
-        // Create an empty event list
-        GCTAEventList events;
+        // Initialise event list definition
+        GEbounds ebounds;
+        GGti     gti;
+        GCTARoi  roi;
+        bool     has_ebounds = false;
+        bool     has_gti     = false;
+        bool     has_roi     = false;
 
-        // Extract observation parameters
-        m_pointing.read(xml);
-        events.ebounds(GEbounds(xml));
-        events.gti(GGti(xml));
-        events.roi(GCTARoi(xml));
+        // Extract parameters (do nothing if parameter does not exist)
+        if (gammalib::xml_has_par(xml, "Pointing")) {
+            m_pointing.read(xml);
+        }
+        if (gammalib::xml_has_par(xml, "EnergyBoundaries")) {
+            ebounds.read(xml);
+            has_ebounds = true;
+        }
+        if (gammalib::xml_has_par(xml, "GoodTimeIntervals")) {
+            gti.read(xml);
+            has_gti = true;
+        }
+        if (gammalib::xml_has_par(xml, "RegionOfInterest")) {
+            roi.read(xml);
+            has_roi = true;
+        }
+        if (gammalib::xml_has_par(xml, "Deadtime")) {
+            const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Deadtime");
+            m_deadc                = gammalib::todouble(par->attribute("deadc"));
+        }
+        else {
+            m_deadc = 1.0;
+        }
 
-        // Read deadtime correction
-        const GXmlElement* par = gammalib::xml_getpar(G_READ, xml, "Deadtime");
-        m_deadc                = gammalib::todouble(par->attribute("deadc"));
+        // If we have at least one event list definition then create event
+        // list and attach it to the observation
+        if (has_ebounds || has_gti || has_roi) {
 
-        // Attach event list
-        this->events(events);
+            // Create an empty event list
+            GCTAEventList events;
 
-        // Set observation ontime and livetime
-        ontime(events.gti().ontime());
-        livetime(events.gti().ontime()*m_deadc);
+            // Handle energy boundaries
+            if (has_ebounds) {
+                events.ebounds(ebounds);
+            }
+
+            // Handle GTIs
+            if (has_gti) {
+                events.gti(gti);
+                ontime(gti.ontime());
+                livetime(gti.ontime() * m_deadc);
+            }
+
+            // Handle ROIs
+            if (has_roi) {
+                events.roi(roi);
+            }
+
+            // Attach event list
+            this->events(events);
+
+        } // endif: handled event list information
 
     } // endelse: extracted information from observation definition
 
@@ -956,44 +997,11 @@ void GCTAObservation::write(GXmlElement& xml) const
         xml.attribute("emax", gammalib::str(m_hi_user_thres));
     }
 
-    // If there is a filename then write the events to the XML file
+    // If there is a filename then write the event information to the
+    // XML file
     if (m_eventfile.length() > 0) {
-
-        // Determine number of parameter nodes in XML element
-        int npars = xml.elements("parameter");
-
-        // If there is no parameter node than add one
-        if (npars == 0) {
-            std::string text = "parameter name=\""+m_eventtype+"\"";
-            xml.append(GXmlElement(text));
-            npars++;
-        }
-
-        // Verify that XML element has at least 1 parameter
-        if (npars < 1) {
-            std::string msg = "No <parameter> element found in XML file."
-                              " Please correct the XML definition.";
-            throw GException::invalid_value(G_WRITE, msg);
-        }
-
-        // Set or update parameter attributes
-        int npar[] = {0};
-        for (int i = 0; i < npars; ++i) {
-
-            // Get parameter element
-            GXmlElement* par = xml.element("parameter", i);
-
-            // Handle Eventlist and Countsmap
-            if (par->attribute("name") == m_eventtype) {
-                par->attribute("file", m_eventfile);
-                npar[0]++;
-            }
-
-        } // endfor: looped over all parameters
-
-        // Verify that all required parameters are present
-        gammalib::xml_parcheck(G_WRITE, "EventList\" or \"CountsCube", npar[0]);
-        
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_eventtype);
+        par->attribute("file", m_eventfile);
     }
 
     // ... otherwise write the observation definition information
@@ -1011,7 +1019,7 @@ void GCTAObservation::write(GXmlElement& xml) const
         }
 
         // Write deadtime correction factor
-        GXmlElement* par = gammalib::xml_needpar(G_WRITE, xml, "Deadtime");
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Deadtime");
         par->attribute("deadc",  gammalib::str(m_deadc));
     }
 
