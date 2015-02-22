@@ -59,6 +59,7 @@
                                                             " GObservation&)"
 #define G_NPRED            "GCTAResponseCube::npred(GPhoton&, GObservation&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
+#define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -107,6 +108,26 @@ GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) :
 
     // Copy members
     copy_members(rsp);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Construct CTA response from XML element.
+ ***************************************************************************/
+GCTAResponseCube::GCTAResponseCube(const GXmlElement& xml) : GCTAResponse()
+{
+    // Initialise members
+    init_members();
+
+    // Read information from XML element
+    read(xml);
 
     // Return
     return;
@@ -674,10 +695,7 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
- *
- * Reads response information from an Xml element. The Exposure and Psf cubes
+ * Reads response information from an XML element. The Exposure and Psf cubes
  * are specified using
  *
  *      <observation name="..." id="..." instrument="...">
@@ -689,49 +707,20 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
  ***************************************************************************/
 void GCTAResponseCube::read(const GXmlElement& xml)
 {
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
+    // Clear response
+    clear();
 
-    // Extract parameters
-    int npar[] = {0,0};
-    for (int i = 0; i < npars; ++i) {
+    // Get exposure cube information and load cube
+    const GXmlElement* exppar  = gammalib::xml_getpar(G_READ, xml, "ExposureCube");
+    std::string        expname = gammalib::strip_whitespace(exppar->attribute("file"));
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
+    // Get PSF cube information and load cube
+    const GXmlElement* psfpar  = gammalib::xml_getpar(G_READ, xml, "PsfCube");
+    std::string        psfname = gammalib::strip_whitespace(psfpar->attribute("file"));
 
-        // Handle ExposureCube
-        if (par->attribute("name") == "ExposureCube") {
-
-            // Get filename
-            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
-
-            // Load exposure cube
-            m_exposure.load(filename);
-
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-        // Handle PsfCube
-        else if (par->attribute("name") == "PsfCube") {
-
-            // Get filename
-            std::string filename = gammalib::strip_whitespace(par->attribute("file"));
-
-            // Load PSF cube
-            m_psf.load(filename);
-
-            // Increment parameter counter
-            npar[1]++;
-        }
-
-    } // endfor: looped over observation parameters
-
-    // Verify that all required parameters were found
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"ExposureCube\" and \"PsfCube\" parameters.");
-    }
+    // Load cubes
+    m_exposure.load(expname);
+    m_psf.load(psfname);
 
     // Return
     return;
@@ -753,7 +742,6 @@ void GCTAResponseCube::read(const GXmlElement& xml)
  *      </observation>
  *
  ***************************************************************************/
-#define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
 void GCTAResponseCube::write(GXmlElement& xml) const
 {
     // Add exposure cube filename

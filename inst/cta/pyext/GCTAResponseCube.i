@@ -39,6 +39,7 @@ public:
     // Constructors and destructors
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
+    explicit GCTAResponseCube(const GXmlElement& xml);
     GCTAResponseCube(const GCTACubeExposure& exposure, const GCTACubePsf& psf);
     virtual ~GCTAResponseCube(void);
 
