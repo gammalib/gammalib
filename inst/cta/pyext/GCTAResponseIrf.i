@@ -95,6 +95,7 @@ public:
     // Constructors and destructors
     GCTAResponseIrf(void);
     GCTAResponseIrf(const GCTAResponseIrf& rsp);
+    explicit GCTAResponseIrf(const GXmlElement& xml);
     GCTAResponseIrf(const std::string& rspname, const GCaldb& caldb);
     virtual ~GCTAResponseIrf(void);
 

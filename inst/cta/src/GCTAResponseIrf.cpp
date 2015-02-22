@@ -156,6 +156,26 @@ GCTAResponseIrf::GCTAResponseIrf(const GCTAResponseIrf& rsp) : GCTAResponse(rsp)
 
 
 /***********************************************************************//**
+ * @brief XML constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Construct CTA response from XML element.
+ ***************************************************************************/
+GCTAResponseIrf::GCTAResponseIrf(const GXmlElement& xml) : GCTAResponse()
+{
+    // Initialise members
+    init_members();
+
+    // Read information from XML element
+    read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Response constructor
  *
  * @param[in] rspname Response file name.
