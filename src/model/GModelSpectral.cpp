@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectral.cpp - Abstract spectral model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -230,6 +230,33 @@ const GModelPar& GModelSpectral::at(const int& index) const
 
     // Return reference
     return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if parameter name exists
+ *
+ * @param[in] name Parameter name.
+ * @return True if parameter with specified @p name exists.
+ *
+ * Searches all parameter names for a match with the specified @p name. If
+ * the specified name has been found, true is returned.
+ ***************************************************************************/
+bool GModelSpectral::has_par(const std::string& name) const
+{
+    // Default found flag to false
+    bool found = false;
+
+    // Search for parameter name
+    for (int i = 0; i < size(); ++i) {
+        if (m_pars[i]->name() == name) {
+            found = true;
+            break;
+        }
+    }
+
+    // Return
+    return found;
 }
 
 

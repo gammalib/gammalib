@@ -273,7 +273,7 @@ const GModelPar& GModel::at(const int& index) const
 
 
 /***********************************************************************//**
- * @brief Signals if parameter name exists
+ * @brief Checks if parameter name exists
  *
  * @param[in] name Parameter name.
  * @return True if parameter with specified @p name exists.

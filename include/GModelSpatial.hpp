@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatial.hpp - Spatial model abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,6 +100,7 @@ public:
     // Methods
     GModelPar&       at(const int& index);
     const GModelPar& at(const int& index) const;
+    bool             has_par(const std::string& name) const;
     int              size(void) const;
     void             autoscale(void);
 

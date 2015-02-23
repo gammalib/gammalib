@@ -400,6 +400,19 @@ void TestGModel::test_sky_model(void)
         test_try_failure(e);
     }
 
+    // Get test sky model
+    GXml         xml(m_xml_file);
+    GXmlElement* element = xml.element(0)->element(0);
+    GModelSky    sky(*element);
+
+    // Test has_par methods
+    test_assert(sky.spatial()->has_par("RA"), "Expect \"RA\" parameter in spatial component");
+    test_assert(!sky.spatial()->has_par("RAX"), "Do not expect \"RAX\" parameter in spatial component");
+    test_assert(sky.spectral()->has_par("Prefactor"), "Expect \"Prefactor\" parameter in spectral component");
+    test_assert(!sky.spectral()->has_par("Prefactors"), "Do not expect \"Prefactors\" parameter in spectral component");
+    test_assert(sky.temporal()->has_par("Normalization"), "Expect \"Normalization\" parameter in temporal component");
+    test_assert(!sky.temporal()->has_par("Normalizations"), "Do not expect \"Normalizations\" parameter in temporal component");
+
     // Exit test
     return;
 }

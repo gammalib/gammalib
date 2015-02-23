@@ -62,6 +62,7 @@ public:
 
     // Methods
     GModelPar& at(const int& index);
+    bool       has_par(const std::string& name) const;
     int        size(void) const;
     void       autoscale(void);
 };
