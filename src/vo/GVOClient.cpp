@@ -174,11 +174,15 @@ GVOClient* GVOClient::clone(void) const
 void GVOClient::connect(void)
 {
     // Register to Hub
+    printf("Sending registration to hub\n");
+    fflush(stdout);
     register_to_hub();
-
+    printf("Registration to hub sent\n");
+    fflush(stdout);
     // Send meta data
     send_metadata();
-
+    printf("Metadata sent\n");
+    fflush(stdout);
     // Return
     return;
 }
@@ -246,7 +250,8 @@ GXml GVOClient::response(void) const
 
     // Continue only if connection has been established
     if (m_socket != -1) {
-
+	printf("Socket identified, receive string\n");
+	fflush(stdout);
         // Receive a string
         std::string response = receive_string();
 
@@ -261,6 +266,8 @@ GXml GVOClient::response(void) const
     } // endif: connection has been established
 
     // Return XML document
+    printf("End of response function\n");
+    fflush(stdout);
     return xml;
 }
 
@@ -599,10 +606,14 @@ void GVOClient::register_to_hub(void)
 
         // Post message
         post_string(msg);
-
+	printf("Waiting for Hub response\n");
+	fflush(stdout);
         // Get Hub response
         GXml xml = response();
 
+	printf("Hub response received");
+	fflush(stdout);
+	
         // Extract Hub and client identifiers
         m_client_key = get_response_value(xml, "samp.private-key");
         m_hub_id     = get_response_value(xml, "samp.hub-id");
@@ -666,6 +677,8 @@ void GVOClient::send_metadata(void)
     // Maybe this is socket standard?
     connect_to_hub();
 
+    printf("send metadata function \n");
+    fflush(stdout);
     // Continue only if Hub connection has been established
     if (m_socket != -1) {
 
@@ -847,7 +860,7 @@ void GVOClient::post_string(const std::string& content) const
         int length = content.length();
 
         // Set prefix
-        std::string prefix = "POST /xmlrpc HTTP/1.0\n"
+        std::string prefix = "POST /xmlrpc-1 HTTP/1.0\n"
                              "User-Agent: GammaLib\n"
                              "Content-Type: text/xml\n"
                              "Content-Length: "+gammalib::str(length)+"\n\n";
@@ -897,13 +910,17 @@ std::string GVOClient::receive_string(void) const
 
         // Read buffer until it is empty
         int n = 0;
-        do {
+        //do {
+	    printf("receive socket instruction\n");
+	    fflush(stdout);
             n = recv(m_socket, buffer, 1000, 0);
+	    printf("data received: %s\n",buffer);
+	    fflush(stdout);
             if (n > 0) {
                 buffer[n+1] = '\0';
                 result.append(std::string(buffer));
             }
-        } while (n > 0);
+        //} while (n > 0);
 
     } // endif: Hub connection had been established
 

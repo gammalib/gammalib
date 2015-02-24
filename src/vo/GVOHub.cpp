@@ -27,6 +27,7 @@
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
+#include <errno.h>
 #endif
 #include <cstdlib>         // std::getenv() function
 #include <cstdio>          // std::fopen(), etc. functions
@@ -186,7 +187,7 @@ void GVOHub::start(void)
  *
  *
  ***************************************************************************/
-void GVOHub::register_service(const socklen_t& sock)
+void GVOHub::ping_service(const socklen_t& sock)
 {
     printf("Registration request received\n");
     // Declare message
@@ -195,11 +196,47 @@ void GVOHub::register_service(const socklen_t& sock)
     // Set methodResponse elts
     msg.append("<?xml version=\"1.0\"?>\n");
     msg.append("<methodResponse>\n");
-    msg.append("<params>\n");
-    msg.append("<param><value><struct>\n");
+    msg.append("</methodResponse>\n");
+    int length = msg.length();
+    
+    int n = write(sock,msg.c_str(),length);
+    if (n < 0) {
+	printf("Could not write socket buffer.\n");
+        std::string msg = "Could not write socket buffer.";
+        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
+    }
+
+    printf("Response message sent\n");
+    //Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief 
+ *
+ *
+ ***************************************************************************/
+void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
+{
+    printf("Registration request received\n");
+    // Declare message
+    std::string msg = "";
+    std::string translator = "http://localhost:8001/";
+    //std::string client_name = get_response_value(xml, "samp.name");
+    
+    //Clients[m_nb_clients].client_name = get_response_value(xml, "samp.name");
+    //printf("Client name %s",Clients[m_nb_clients].client_name.c_str());
+    //m_nb_clients ++;
+    
+    // Set methodResponse elts
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
     msg.append("<member><name>samp.private-key</name><value><string>client-key:" + m_hub_id + "</string></value></member>\n");
-    msg.append("<member><name>samp.hub-id</name><value><string>client-id:" + m_hub_id + "</string></value></member>\n");
+    msg.append("<member><name>samp.hub-id</name><value><string>hub-id:" + m_hub_id + "</string></value></member>\n");
     msg.append("<member><name>samp.self-id</name><value><string>client-id:" + m_client_id + "</string></value></member>\n");
+    msg.append("<member><name>samp.url-translator</name><value><string>" + translator + "</string></value></member>\n");
     msg.append("</struct></value></param>\n");
     msg.append("</params>\n");
     msg.append("</methodResponse>\n");
@@ -208,10 +245,12 @@ void GVOHub::register_service(const socklen_t& sock)
     
     int n = write(sock,msg.c_str(),length);
     if (n < 0) {
+	printf("Could not write socket buffer.\n");
         std::string msg = "Could not write socket buffer.";
         throw GException::invalid_value(G_HANDLE_REQUEST, msg);
     }
 
+    printf("Response message sent\n");
     //Return
     return;
 }
@@ -222,10 +261,10 @@ void GVOHub::register_service(const socklen_t& sock)
  *
  *
  ***************************************************************************/
-void GVOHub::unregister(void)
+void GVOHub::unregister(const socklen_t& sock)
 {
 
-    // Return
+    close(sock);
     return;
 }
 
@@ -234,13 +273,33 @@ void GVOHub::unregister(void)
  *
  *
  ***************************************************************************/
-void GVOHub::register_metadata(const GXml& xml)
+void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
 {
     printf("Client Metadata received\n");
     // Search for metadata values to store
     std::string client_name = get_response_value(xml, "samp.name");
-    //printf("Client Metadata : \n" + client_name.c_str());
-    // Return
+    //std::cout("Client Metadata : \n" + client_name.c_str());
+    printf("\nClient Metadata : Name %s\n", client_name.c_str());
+    fflush(stdout);
+    // Declare message
+    std::string msg = "";
+
+    // Set methodResponse elts
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("</methodResponse>\n");
+
+    int length = msg.length();
+    
+    int n = write(sock,msg.c_str(),length);
+    if (n < 0) {
+	printf("Could not write socket buffer.\n");
+        std::string msg = "Could not write socket buffer.";
+        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
+    }
+
+    printf("Response message sent\n");
+    //Return
     return;
 }
 
@@ -316,8 +375,10 @@ void GVOHub::init_members(void)
     m_hub_id   = "b79884e0";
     m_client_id.clear();
     m_socket   = -1;         // Signals no socket
-
+    m_nb_clients = 0;	    //  No registered clients at initialization
+    //client_metadata * Clients = new client_metadata[5];
     // Return
+    Clients = new client_metadata[5];
     return;
 }
 
@@ -460,14 +521,14 @@ std::string GVOHub::get_hub_lockfile(void) const
 void GVOHub::handle_request(const socklen_t& sock)
 {
     // Initialize buffer
-    char buffer[1024];
-    bzero(buffer,1024);
+    char buffer[4096];
+    bzero(buffer,4096);
    
     // Declare empty XML document
     GXml xml;
     
     // Read buffer
-    int n = read(sock,buffer,1024);
+    int n = read(sock,buffer,4096);
     if (n < 0) {
         std::string msg = "Could not read socket buffer.";
         throw GException::invalid_value(G_HANDLE_REQUEST, msg);
@@ -480,6 +541,10 @@ void GVOHub::handle_request(const socklen_t& sock)
     // If found then convert text into XML document
     if (start != std::string::npos) {
         xml = GXml(response.substr(start, std::string::npos));
+    } else {
+      //No XML tag found.
+      return;
+      
     }
     
     std::string method_called = "";
@@ -495,13 +560,49 @@ void GVOHub::handle_request(const socklen_t& sock)
     // endif: connection has been established
     //std::string method_called = get_response_value(xml, "methodName");
     if (method_called.compare("samp.hub.register") == 0) {
-        register_service(sock);
+        register_service(xml, sock);
     }
     if (method_called.compare("samp.hub.unregister") == 0) {
-        unregister();
+        unregister(sock);
     }
     if (method_called.compare("samp.hub.declareMetadata") == 0) {
-        register_metadata(xml);
+        register_metadata(xml,sock);
+    }
+    if (method_called.compare("samp.hub.ping") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.getMetadata") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.declareSubscriptions") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.getSubscriptions") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.getRegisteredClients") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.getSubscribedClients") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.notify") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.notifyAll") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.call") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.callAll") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.callAndWait") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.reply") == 0) {
+        ping_service(sock);
     }
     // Return
     return;
@@ -517,18 +618,37 @@ void GVOHub::handle_request(const socklen_t& sock)
 void GVOHub::start_hub(void)
 {
     struct sockaddr_in serv_addr,cli_addr;
-    int portno,pid;
-    socklen_t hub_socket,newsocket,sockfd,clilen;
-
+    int max_sd, portno,pid,max_clients = 10, i,activity,addrlen;
+    socklen_t hub_socket,newsocket,sockfd,clilen, client_socket[10];
+    int opt = 1;
     // Prepare TCP/IP structure
     bzero((char *) &serv_addr, sizeof(serv_addr));
     portno                    = 8001;
     serv_addr.sin_family      = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port        = htons(portno);
+    
+    //set of socket descriptors
+    fd_set readfds;
+    
+    //initialise all client_socket[] to 0 so not checked
+    for (i = 0; i < max_clients; i++)
+    {
+        client_socket[i] = 0;
+    }
+    
     hub_socket                = socket(AF_INET, SOCK_STREAM, 0);
+    
+    //Creation of hub main socket
     if (hub_socket < 0) {
         std::string msg = "Socket could not be created.";
+        throw GException::invalid_value(G_START_HUB, msg);
+    }
+    
+    //set hub main socket to allow multiple connections
+    if( setsockopt(hub_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 )
+    {
+        std::string msg = "Socket could not be set to multiple connetcions.";
         throw GException::invalid_value(G_START_HUB, msg);
     }
     
@@ -538,15 +658,21 @@ void GVOHub::start_hub(void)
         throw GException::invalid_value(G_START_HUB, msg);
     }
 
-    // Now start listening for the clients: 5 requests simultaneously maximum
-    listen(hub_socket,5);
+    // Now start listening for the clients: 5 requests simultaneously pending maximum
+    if (listen(hub_socket,5) < 0)
+    {
+	std::string msg = "Main hub socket couldn't start litening";
+        throw GException::invalid_value(G_START_HUB, msg);
+    }
+     
     clilen = sizeof(cli_addr);
+      
     while (1) {
+      
+        
+    	// Accept connection from the client 
 
-    	// Accept actual connection from the client 
-//std::cout << "Now accept connection the socket" << std::endl;
     	newsocket = accept(hub_socket, (struct sockaddr *)&cli_addr, &clilen);
-//std::cout << "Connection accepted" << std::endl;
     	if (newsocket < 0) {
             std::string msg = "Client connection to socket not accepted.";
             throw GException::invalid_value(G_START_HUB, msg);
@@ -554,7 +680,7 @@ void GVOHub::start_hub(void)
 
     	// Create child process to handle the request
         pid = fork();
-//std::cout << "Called fork " << pid << std::endl;
+
         if (pid < 0) {
             std::string msg = "Not child process created.";
             throw GException::invalid_value(G_START_HUB, msg);
@@ -565,9 +691,9 @@ void GVOHub::start_hub(void)
             exit(0);
         }
         else {
-//std::cout << "Now close the socket" << std::endl;
+
             close(newsocket);
-//std::cout << "Socket closed" << std::endl;
+
         }
 
     }
@@ -605,11 +731,13 @@ std::string GVOHub::get_response_value(const GXml&        xml,
 		if (node != NULL) {
 		  int num = node->elements("member");            
                     for (int i = 0; i < num; ++i) {
+			   std::cout << i << std::endl;
+			   std::cout << *(node->element("member", i)) << std::cout;
                             const GXmlNode* member = node->element("member", i);
-                            const GXmlNode* member_name = member->element("name", 0);
+                            //const GXmlNode* member_name = member->element("name", 0);
 			    std::string one_name;
                             std::string one_value;
-                            get_name_value_pair(member_name, one_name, one_value);
+                            get_name_value_pair(member, one_name, one_value);
                             if (one_name == name) {
                                 value = one_value;
                                 break;

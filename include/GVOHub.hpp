@@ -74,10 +74,11 @@ protected:
     void        start_hub(void);
     //bool        find_hub(void);
     //void        connect_to_hub(void);
-    void        register_service(const socklen_t& sock);
-    void        unregister(void);
+    void        register_service(const GXml& xml,const socklen_t& sock);
+    void        ping_service(const socklen_t& sock);
+    void        unregister(const socklen_t& sock);
     void 	handle_request(const socklen_t& sock);
-    void        register_metadata(const GXml& xml);
+    void        register_metadata(const GXml& xml,const socklen_t& sock);
     
     // Low-level methods
     void        post_string(const std::string& string) const;
@@ -97,6 +98,12 @@ protected:
     std::string m_hub_id;      //!< Hub identifier
     std::string m_client_id;   //!< Client identifier
     int         m_socket;      //!< Hub socket
+    int 	m_nb_clients;  //!< Number of already registered clients
+    struct client_metadata {
+      std::string client_id;
+      std::string client_name;
+    };
+    static client_metadata * Clients; //Array of structure containing clients id and names
 };
 
 #endif /* GVOHUB_HPP */
