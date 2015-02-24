@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GMath.i - Mathematical functions                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,5 +69,6 @@ namespace gammalib {
     // Other functions
     double gammln(const double& arg);
     double erfcc(const double& arg);
+    double erfinv(const double& arg);
     double modulo(const double& v1, const double& v2);
 }

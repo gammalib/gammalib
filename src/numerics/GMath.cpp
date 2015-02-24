@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GMath.cpp - Mathematical functions                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -381,20 +381,79 @@ double gammalib::gammln(const double& arg) {
  *
  * Reference: http://en.wikipedia.org/wiki/Complementary_error_function
  ***************************************************************************/
-double gammalib::erfcc(const double& arg) {
-   /* (C) Copr. 1986-92 Numerical Recipes Software 0@.1Y.. */
-  // Copied from Gaussian.cxx in the Fermi ScienceTools software
-   double t, z, ans;
+double gammalib::erfcc(const double& arg)
+{
+    // Copied from Gaussian.cxx in the Fermi ScienceTools software
+    double t, z, ans;
 
-   z = std::abs(arg);
-   t = 1.0/(1.0+0.5*z);
-   ans = t*std::exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
-         t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
-         t*(-0.82215223+t*0.17087277)))))))));
-   double result = arg >= 0.0 ? ans : 2.0-ans;
+    z = std::abs(arg);
+    t = 1.0/(1.0+0.5*z);
+    ans = t*std::exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
+          t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
+          t*(-0.82215223+t*0.17087277)))))))));
+    double result = arg >= 0.0 ? ans : 2.0-ans;
 
-   // Return result
-   return result;
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes inverse error function
+ *
+ * @param[in] arg Argument.
+ * @return Inverse error function.
+ ***************************************************************************/
+double gammalib::erfinv(const double& arg)
+{
+    // Define constants
+    static const double a[4] = { 0.886226899, -1.645349621,  0.914624893,
+                                -0.140543331};
+    static const double b[4] = {-2.118377725,  1.442710462, -0.329097515,
+                                 0.012229801};
+    static const double c[4] = {-1.970840454, -1.624906493,  3.429567803,
+                                 1.641345311};
+    static const double d[2] = { 3.543889200,  1.637067800};
+    static const double e    = 2.0/std::sqrt(gammalib::pi);
+
+    // Allocate result
+    double result;
+
+    // Return NAN if out of range
+    if (std::abs(arg > 1.0)) {
+        result = std::atof("NAN");
+    }
+    
+    // Return maximum double if at range limit
+    else if (std::abs(arg == 1.0)) {
+        result = copysign(1.0, arg) * DBL_MAX;
+    }
+
+    // Otherwise compute inverse of error function
+    else {
+
+        // Compute a rational approximation of the inverse error function
+        if (std::abs(arg) <= 0.7) { 
+            double z   = arg * arg;
+            double num = (((a[3]*z + a[2])*z + a[1])*z + a[0]);
+            double dem = ((((b[3]*z + b[2])*z + b[1])*z +b[0])*z + 1.0);
+            result     = arg * num/dem;
+        }
+        else {
+            double z   = std::sqrt(-std::log((1.0-std::abs(arg))/2.0));
+            double num = ((c[3]*z + c[2])*z + c[1])*z + c[0];
+            double dem = (d[1]*z + d[0])*z + 1.0;
+            result     = (copysign(1.0, arg)) * num/dem;
+        }
+
+        // Now do two steps of Newton-Raphson correction
+        result -= (erf(result) - arg) / (e * std::exp(-result*result));
+        result -= (erf(result) - arg) / (e * std::exp(-result*result));
+
+    }
+
+    // Return result
+    return result;
 }
 
 
