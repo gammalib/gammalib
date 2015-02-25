@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <cmath>
+#include <vector>
 #include "GTools.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
@@ -175,19 +176,9 @@ double GCTAEdisp2D::operator()(const double& logEobs,
 {
     // Initalize edisp
     double edisp = 0.0;
-    /*
-    // Update cache
-    update(logEobs, logEsrc, theta);
-
-    // Continue if normalization is positive
-    if(m_norm > 0.0)
-    {
-        // Compute edisp
-        edisp = std::exp(-(m_EobsOnEsrc - m_ebias)*(m_EobsOnEsrc - m_ebias) / (m_eres*m_eres)) * m_norm;
-    }
-    */
     
-    edisp = m_edisp(0, logEsrc, logEobs - logEsrc, theta);
+    // Compute edisp
+    edisp = m_edisp(0, logEsrc, Eobs / Esrc, theta);
     
     // Return
     return edisp;
@@ -256,6 +247,26 @@ void GCTAEdisp2D::load(const std::string& filename)
 }
 
 /***********************************************************************//**
+ * @brief Return response table
+ *
+ * @return String containing the class name ("GCTAEdisp2D").
+ ***************************************************************************/
+const GCTAResponseTable& GCTAEdisp2D::table(void) const
+{
+    return m_edisp;
+}
+
+/***********************************************************************//**
+ * @brief Set response table
+ *
+ * @param[in] Response table.
+ ***************************************************************************/
+void GCTAEdisp2D::table(const GCTAResponseTable& table)
+{
+    m_edisp = table;
+}
+
+/***********************************************************************//**
  * @brief Write CTA energy dispersion table into FITS binary table object.
  *
  * @param[in] hdu FITS binary table.
@@ -318,33 +329,25 @@ void GCTAEdisp2D::read(const GFits& fits)
     // Read energy dispersion table
     m_edisp.read(table);
 
-    int i_etrue = 0;
-    int i_migra = 0;
-    int i_theta = 0;
-    double sum = 0.0;
-    double deltaE = 0.0;
+    int etrue_size = m_edisp.axis(0);
+    int migra_size = m_edisp.axis(1);
+    int theta_size = m_edisp.axis(2);
     
-    double etrue_size = e_disp.axis(0);
-    double migra_size = e_disp.axis(1);
-    double theta_size = e_disp.axis(2);
-    
-    // Normalize vectors of migration matrix for all ETRUE and THETA
-    for(i_etrue = 0; i_etrue < etrue_size; ++i_etrue)
-    {
-        deltaE = e_disp.axis_hi(0, i_etrue) - e_disp.axis_lo(0, i_etrue);
-        for(i_theta = 0; i_theta < theta_size; ++i_theta)
-        {
+    // Normalize vectors of migration matrix for all etrue and theta
+    for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
+        double EobsOnEtrue  = 0.5 * (m_edisp.axis_hi(1, i_etrue) + m_edisp.axis_lo(1, i_etrue));
+        for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
             // Compute sum
-            sum = 0.0;
-            for(i_migra = 0; i_migra < migra_size; ++i_migra)
-            {
-                sum += m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) * deltaE;
+            double sum = 0.0;
+            for (int i_migra = 0; i_migra < migra_size; ++i_migra) {
+                // Compute delta(Eobs/Etrue)
+                double delta = m_edisp.axis_hi(1, i_migra) - m_edisp.axis_lo(1, i_migra);
+                sum += m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) * delta / EobsOnEtrue;
             }
-            if(sum > 0.0)
-            {
-                for(i_migra = 0; i_migra < migra_size; ++i_migra)
-                {
-                    m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) *= 1.0 / sum;
+            if (sum > 0.0) {
+                for (int i_migra = 0; i_migra < migra_size; ++i_migra) {
+                    // Normalize by sum
+                    m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) /= sum;
                 }
             }
         }
@@ -383,15 +386,48 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
                         const double& zenith,
                         const double& azimuth) const
 {
-    // Update the parameter cache
-    update(m_par_logEobs, logEsrc, m_par_theta);
+    // Vector representing cumulative probability distribution
+    std::vector<std::pair<double, double> > cumul;
 
-    // Draw log observed energy in TeV
-    double logEobs = m_eres * ran.normal() + logEsrc;
-
+    const double deltaLogE = 0.01;
+    double logEobs = 0.01;
+    double sum = 0.0;
+    // Loop through Eobs
+    for(int i = 0; i < 3.0 / deltaLogE; ++i) {
+        // Increment Eobs
+        logEobs += deltaLogE;
+        
+        // Compute cumulated probability
+        sum += GCTAEdisp2D::operator()(logEobs, logEsrc, theta) * deltaLogE;
+        
+        // Create pair containing Eobs/Esrc and cumulated probability
+        std::pair<double, double> pair(std::exp((logEobs - logEsrc) * std::log(10.0)), sum);
+        
+        // Add to vector
+        cumul.push_back(pair);
+    }
+    
+    // Draw random number between 0 and 1
+    double p = ran.uniform();
+    
+    // Find right index
+    int index = 0;
+    while(index < 3.0 / deltaLogE - 1.0 && cumul[index+1].second < p) {
+        index++;
+    } // index found
+    
+    // Compute result Eobs/Esrc value
+    double result =   (cumul[index+1].second - p)*cumul[index].first
+                    + (p - cumul[index].second)*cumul[index+1].first;
+    result       *=   (cumul[index+1].second - cumul[index].second);
+    
+    
+    // Final result
+    double logEnergy = std::log10(result) + logEsrc;
+    
     // Set energy
     GEnergy energy;
-    energy.log10TeV(logEobs);
+    energy.log10TeV(logEnergy);
 
     // Return energy
     return energy;

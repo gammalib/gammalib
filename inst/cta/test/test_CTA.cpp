@@ -37,6 +37,7 @@
 #include "GNodeArray.hpp"
 #include "test_CTA.hpp"
 #include "GCTAEdisp2D.hpp"
+#include "GCTAResponseTable.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -60,7 +61,7 @@ const std::string cta_irf_king     = "irf_file.fits";
 const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
 const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
 const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
-const std::string cta_irf_matrix   = PACKAGE_SOURCE"inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits";
+const std::string cta_irf_matrix   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits";
 
 
 /***********************************************************************//**
@@ -589,6 +590,44 @@ void TestGCTAResponse::test_response_edisp2D(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
+
+    // Test normalization
+    try {
+    GCTAEdisp2D edisp2D_2(cta_irf_matrix);
+    
+    GCTAResponseTable m_edisp = edisp2D_2.table();
+    int etrue_size = m_edisp.axis(0);
+    int migra_size = m_edisp.axis(1);
+    int theta_size = m_edisp.axis(2);
+    
+    for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
+        double EobsOnEtrue  = 0.5 * (m_edisp.axis_hi(1, i_etrue) + m_edisp.axis_lo(1, i_etrue));
+        for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
+            // Compute sum
+            double sum = 0.0;
+            for (int i_migra = 0; i_migra < migra_size; ++i_migra) {
+                // Compute delta(Eobs/Etrue)
+                double delta = m_edisp.axis_hi(1, i_migra) - m_edisp.axis_lo(1, i_migra);
+                sum += m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) * delta / EobsOnEtrue;
+            }
+         std::cout << sum << std::endl;
+        }
+    }
+    
+    
+    const double deltaLogE = 0.01;
+    for(double logEsrc = -1.0; logEsrc < 2.0; logEsrc += deltaLogE) {
+    double sum = 0.0;
+        for(double logEobs = -1.0; logEobs < 2.0; logEobs += deltaLogE) {
+            sum += edisp2D_2(logEobs, logEsrc) * deltaLogE;
+        }
+    std::cout << sum << std::endl;
+    } 
+    
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
     
     // Return
     return;
@@ -597,7 +636,7 @@ void TestGCTAResponse::test_response_edisp2D(void)
 /***********************************************************************//**
  * @brief Test CTA Edisp Performance Table computation
  ***************************************************************************/
-void test_response_edispPerfTable(void)
+void TestGCTAResponse::test_response_edispPerfTable(void)
 {
 
     return;

@@ -53,7 +53,8 @@ sources = src/GCTASupport.cpp \
           src/GCTAModelRadialGauss.cpp \
           src/GCTAModelRadialPolynom.cpp \
           src/GCTAModelRadialProfile.cpp \
-          src/GCTAModelRadialAcceptance.cpp
+          src/GCTAModelRadialAcceptance.cpp \
+          test/test_CTA.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTATypemaps.hpp \
@@ -101,7 +102,8 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAModelRadialPolynom.hpp \
                      include/GCTAModelRadialProfile.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
-                     include/GCTALib.hpp
+                     include/GCTALib.hpp \
+                     test/test_CTA.hpp
 
 # Calibration files to distribute
 caldb_pinx = caldb/caldb.indx
