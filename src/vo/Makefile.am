@@ -7,7 +7,8 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GVOClient.cpp \
-          GVOHub.cpp
+          GVOHub.cpp \
+          GVOApp.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libvo.la

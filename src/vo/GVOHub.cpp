@@ -189,7 +189,7 @@ void GVOHub::start(void)
  ***************************************************************************/
 void GVOHub::ping_service(const socklen_t& sock)
 {
-    printf("Registration request received\n");
+    printf("ping call received\n");
     // Declare message
     std::string msg = "";
 
@@ -218,15 +218,20 @@ void GVOHub::ping_service(const socklen_t& sock)
  ***************************************************************************/
 void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
 {
-    printf("Registration request received\n");
+    
+    printf("Registration request called\n");
+    
     // Declare message
     std::string msg = "";
+    char buffer[124];
     std::string translator = "http://localhost:8001/";
-    //std::string client_name = get_response_value(xml, "samp.name");
+    printf("Message composition\n");
+    //m_client_id.push_back(m_nb_clients);
     
-    //Clients[m_nb_clients].client_name = get_response_value(xml, "samp.name");
-    //printf("Client name %s",Clients[m_nb_clients].client_name.c_str());
-    //m_nb_clients ++;
+    printf("Message composition 2 \n");
+    sprintf(buffer,"<member><name>samp.self-id</name><value><string>client-id:%d</string></value></member>\n",m_nb_clients);
+    printf(buffer);
+    m_nb_clients ++;
     
     // Set methodResponse elts
     msg.append("<?xml version=\"1.0\"?>\n");
@@ -234,15 +239,16 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     msg.append("\t<params>\n");
     msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
     msg.append("<member><name>samp.private-key</name><value><string>client-key:" + m_hub_id + "</string></value></member>\n");
-    msg.append("<member><name>samp.hub-id</name><value><string>hub-id:" + m_hub_id + "</string></value></member>\n");
-    msg.append("<member><name>samp.self-id</name><value><string>client-id:" + m_client_id + "</string></value></member>\n");
+    msg.append("<member><name>samp.hub-id</name><value><string>client-id:" + m_hub_id + "</string></value></member>\n");
+    msg.append(buffer);
     msg.append("<member><name>samp.url-translator</name><value><string>" + translator + "</string></value></member>\n");
     msg.append("</struct></value></param>\n");
     msg.append("</params>\n");
     msg.append("</methodResponse>\n");
 
     int length = msg.length();
-    
+    printf("Sending message %s\n",msg.c_str());
+    fflush(stdout);
     int n = write(sock,msg.c_str(),length);
     if (n < 0) {
 	printf("Could not write socket buffer.\n");
@@ -275,12 +281,48 @@ void GVOHub::unregister(const socklen_t& sock)
  ***************************************************************************/
 void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
 {
+    char buffer[124];
     printf("Client Metadata received\n");
     // Search for metadata values to store
     std::string client_name = get_response_value(xml, "samp.name");
     //std::cout("Client Metadata : \n" + client_name.c_str());
     printf("\nClient Metadata : Name %s\n", client_name.c_str());
+    sprintf(buffer,"Client number: %d\n",m_nb_clients);
+    printf(buffer);
     fflush(stdout);
+    //m_client_name.push_back(client_name.c_str());
+    // Declare message
+    std::string msg = "";
+
+    //The hub response to Metadata declaration has no usefull content and can be discarded by the client.
+    // Set methodResponse elts
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("</methodResponse>\n");
+
+    int length = msg.length();
+    
+    int n = write(sock,msg.c_str(),length);
+    if (n < 0) {
+	printf("Could not write socket buffer.\n");
+        std::string msg = "Could not write socket buffer.";
+        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
+    }
+
+    printf("Response message sent\n");
+    //Return
+    return;
+}
+/***********************************************************************//**
+ * @brief 
+ *
+ *
+ ***************************************************************************/
+void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
+{
+    printf("Declare Subscriptions\n");
+    std::string client_subscriptions = get_response_value(xml, "samp.hub.event.subscriptions");
+    printf("\nClient subscriptions: %s\n", client_subscriptions.c_str());
     // Declare message
     std::string msg = "";
 
@@ -302,7 +344,6 @@ void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
     //Return
     return;
 }
-
 /***********************************************************************//**
  * @brief Print VO hub information
  *
@@ -336,7 +377,7 @@ std::string GVOHub::print(const GChatter& chatter) const
         }
         else {
             if (!m_client_key.empty()) {
-                result.append("registered as \""+m_client_id);
+                //result.append("registered as \""+m_client_id);
                 result.append("\" on Hub \""+m_hub_id);
                 result.append("\" via socket "+gammalib::str(m_socket));
             }
@@ -373,12 +414,10 @@ void GVOHub::init_members(void)
     m_version  = "1.3";
     m_client_key.clear();
     m_hub_id   = "b79884e0";
-    m_client_id.clear();
+    //m_client_id.clear();
     m_socket   = -1;         // Signals no socket
     m_nb_clients = 0;	    //  No registered clients at initialization
-    //client_metadata * Clients = new client_metadata[5];
     // Return
-    Clients = new client_metadata[5];
     return;
 }
 
@@ -399,7 +438,7 @@ void GVOHub::copy_members(const GVOHub& hub)
     m_version    = hub.m_version;
     m_client_key = hub.m_client_key;
     m_hub_id     = hub.m_hub_id;
-    m_client_id  = hub.m_client_id;
+    //m_client_id  = hub.m_client_id;
     m_socket     = hub.m_socket;
 
     // Return
@@ -575,7 +614,7 @@ void GVOHub::handle_request(const socklen_t& sock)
         ping_service(sock);
     }
     if (method_called.compare("samp.hub.declareSubscriptions") == 0) {
-        ping_service(sock);
+        declare_subscriptions(xml,sock);
     }
     if (method_called.compare("samp.hub.getSubscriptions") == 0) {
         ping_service(sock);
