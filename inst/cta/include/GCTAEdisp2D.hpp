@@ -100,15 +100,6 @@ private:
     // Members
     std::string m_filename;     //!< Name of Edisp response file
     GCTAResponseTable m_edisp;  //!< Edisp response table
-
-    // Precomputation cache
-    mutable double m_par_logEobs;
-    mutable double m_par_logEsrc;
-    mutable double m_par_theta;
-    mutable double m_norm;
-    mutable double m_EobsOnEsrc;   //!< linear ratio Eobs/Esrc
-    mutable double m_eres;
-    mutable double m_ebias;
 };
 
 /***********************************************************************//**

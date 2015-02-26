@@ -37,7 +37,9 @@
 #include "GNodeArray.hpp"
 #include "test_CTA.hpp"
 #include "GCTAEdisp2D.hpp"
+#include "GCTAEdispPerfTable.hpp"
 #include "GCTAResponseTable.hpp"
+#include "GMath.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -590,45 +592,60 @@ void TestGCTAResponse::test_response_edisp2D(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+    
     // Test normalization
+    test_try("GCTAEdisp2D normalization");
     try {
-    GCTAEdisp2D edisp2D_2(cta_irf_matrix);
-    
-    GCTAResponseTable m_edisp = edisp2D_2.table();
-    int etrue_size = m_edisp.axis(0);
-    int migra_size = m_edisp.axis(1);
-    int theta_size = m_edisp.axis(2);
-    
-    for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
-        double EobsOnEtrue  = 0.5 * (m_edisp.axis_hi(1, i_etrue) + m_edisp.axis_lo(1, i_etrue));
-        for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
-            // Compute sum
-            double sum = 0.0;
-            for (int i_migra = 0; i_migra < migra_size; ++i_migra) {
-                // Compute delta(Eobs/Etrue)
-                double delta = m_edisp.axis_hi(1, i_migra) - m_edisp.axis_lo(1, i_migra);
-                sum += m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) * delta / EobsOnEtrue;
+        GCTAEdisp2D edisp2D_2(cta_irf_matrix);
+        //std::cout << "TEST NORM 2D" << std::endl;
+
+        const double deltaLogE = 0.01;
+        for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogE) {
+        double sum = 0.0;
+            for(double logEobs = -3.0; logEobs < 7.0; logEobs += deltaLogE) {
+                sum += edisp2D_2(logEobs, logEsrc) * deltaLogE;
             }
-         std::cout << sum << std::endl;
-        }
-    }
-    
-    
-    const double deltaLogE = 0.01;
-    for(double logEsrc = -1.0; logEsrc < 2.0; logEsrc += deltaLogE) {
-    double sum = 0.0;
-        for(double logEobs = -1.0; logEobs < 2.0; logEobs += deltaLogE) {
-            sum += edisp2D_2(logEobs, logEsrc) * deltaLogE;
-        }
-    std::cout << sum << std::endl;
-    } 
-    
+        //std::cout << sum << std::endl;
+        } 
+        
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
     
+    // Test ebounds_obs and ebounds_src methods
+    test_try("GCTAEdisp2D ebounds_src and ebounds_obs methods");
+    try {
+        GCTAEdisp2D edisp2D_3(cta_irf_matrix);
+        //std::cout << "TEST EBOUNDS 2D" << std::endl;
+        // ebounds_obs (for a given logEsrc)
+        //std::cout << edisp2D_3.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
+        // ebounds_src (for a given logEobs)
+        //std::cout << edisp2D_3.ebounds_src(2.0).print(EXPLICIT) << std::endl;
+        
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test mc method
+    test_try("GCTAEdisp2D mc method");
+    try {
+        GCTAEdisp2D edisp2D_4(cta_irf_matrix);
+        GRan ran;
+        //std::cout << "TEST MC 2D" << std::endl;
+        for (int i = 0; i < 20; ++i) {
+            //std::cout << edisp2D_4.mc(ran, -1.0).GeV() << std::endl;
+        }
+        
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Return
     return;
 }
@@ -638,7 +655,77 @@ void TestGCTAResponse::test_response_edisp2D(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edispPerfTable(void)
 {
+    /// /// TO DO
+    
+    // Load response
+    GCTAResponseIrf rsp;
+    rsp.caldb(GCaldb(cta_caldb));
 
+    // Test Energy Dispersion
+    test_energy_integration(rsp);
+    
+    
+    // Test GCTAEdispPerfTable constructor
+    test_try("GCTAEdispPerfTable constructor");
+    try {
+        GCTAEdispPerfTable test(cta_caldb+"/"+cta_irf+".dat");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    GCTAEdispPerfTable test2(cta_caldb+"/"+cta_irf+".dat");
+    
+    // Test ebounds_obs and ebounds_src methods
+    test_try("GCTAEdispPerfTable ebounds_obs and ebounds_src methods");
+    try {
+        //std::cout << "TEST EBOUNDS PERFTABLE" << std::endl;
+        // ebounds_obs (for a given logEsrc)
+        //std::cout << test2.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
+        // ebounds_src (for a given logEobs)
+        //std::cout << test2.ebounds_src(2.0).print(EXPLICIT) << std::endl;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test mc method
+    test_try("GCTAEdispPerfTable mc method");
+    try {
+        GRan ran;
+        //std::cout << "TEST MC PERFTABLE" << std::endl;
+        for (int i = 0; i < 20; ++i) {
+            //std::cout << test2.mc(ran, -1.0).GeV() << std::endl;
+        }
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test normalization
+    test_try("GCTAEdispPerfTable normalization");
+    try {
+        //std::cout << "TEST NORM PERFTABLE" << std::endl;
+        const double deltaLogE = 0.01;
+        for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogE) {
+        double sum = 0.0;
+            for(double logEobs = -3.0; logEobs < 7.0; logEobs += deltaLogE) {
+                sum += test2(logEobs, logEsrc) * deltaLogE;
+            }
+        //std::cout << sum << std::endl;
+        } 
+        
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+
+    // Return
     return;
 }
 
