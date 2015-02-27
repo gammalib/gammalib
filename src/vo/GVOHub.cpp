@@ -39,6 +39,7 @@
 #include "GVOClient.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GVOApp.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_HANDLE_REQUEST                  "GVOHub::handle_request(socklen_t)"
@@ -226,6 +227,10 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     char buffer[124];
     std::string translator = "http://localhost:8001/";
     printf("Message composition\n");
+    
+    GVOApp* new_app = new GVOApp();
+    new_app -> m_id = m_nb_clients;
+    m_connected_apps.push_front(new_app);
     //m_client_id.push_back(m_nb_clients);
     
     printf("Message composition 2 \n");

@@ -34,10 +34,10 @@
 #include <cstring>         // std::memset() function
 #include <unistd.h>        // close() function
 #include "GVOApp.hpp"
+#include "GException.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_HANDLE_REQUEST                  "GVOApp::handle_request(socklen_t)"
-#define G_START_HUB                                     "GVOApp::start_hub()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -158,6 +158,47 @@ GVOApp* GVOApp::clone(void) const
     return new GVOApp(*this);
 }
 
+/*==========================================================================
+ =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GVOApp::init_members(void)
+{
+    // Initialise members
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] app registered in Hub.
+ ***************************************************************************/
+void GVOApp::copy_members(const GVOApp& app)
+{
+    // Copy members
+    
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GVOApp::free_members(void)
+{
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Creates nex application container
@@ -166,7 +207,6 @@ void GVOApp::start_app(void)
 {
     // Creates Hub
     printf("Creating new application Container\n");
-    init_app();
 
     // Return
     return;

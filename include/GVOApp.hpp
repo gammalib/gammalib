@@ -59,6 +59,9 @@ public:
     GVOApp*     clone(void) const;
     void        start(void);
     std::string print(const GChatter& chatter = NORMAL) const;
+    std::string m_name;        //!< Client name
+    std::string m_id; //!< Id assigned to client by the hub
+    std::list <std::string> registered_calls; //!< calls for which is registered the application.
     //void        connect(void);
     //void        disconnect(void);
     //bool        has_hub(void) const;
@@ -78,9 +81,7 @@ protected:
     void        get_name_value_pair(const GXmlNode* node, std::string& name, std::string& value) const;
 
     // Protected data area
-    std::string m_name;        //!< Client name
-    std::string m__id; //!< Id assigned to client by the hub
-    std::list <std::string> registered_calls; //!< calls for which is registered the application.
+    
     
 };
 
