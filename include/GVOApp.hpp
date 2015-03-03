@@ -45,6 +45,8 @@
  ***************************************************************************/
 class GVOApp : public GBase {
 
+friend class GVOHub;
+
 public:
     // Constructors and destructors
     GVOApp(void);
