@@ -560,17 +560,6 @@ void TestGCTAResponse::test_response_edispRMF(void)
     // Test normalization
     test_try("GRmf normalization");
     try {
-        const double deltaLogEsrc = 0.01;
-        const double deltaLogEobs = 0.001;
-
-        for(double logEsrc = -0.52; logEsrc < 1.88; logEsrc += deltaLogEsrc) {
-
-            double sum = 0.0;
-
-
-    // Test normalization
-    test_try("GRmf normalization");
-    try {
         std::cout << "TEST RMF NORM" << std::endl;
         const double deltaLogEsrc = 0.01;
         const double deltaLogEobs = 0.01;
@@ -630,13 +619,13 @@ void TestGCTAResponse::test_response_edisp2D(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-    
+/*
     // Test normalization
     test_try("GCTAEdisp2D normalization");
     try {
         GCTAEdisp2D edisp2D_2(cta_irf_matrix);
         std::cout << "TEST EDISP2D NORM" << std::endl;
-/*
+
         const double deltaLogE = 0.01;
         for(double logEsrc = -2.1; logEsrc < 4.0; logEsrc += deltaLogE) {
             double sum = 0.0;
@@ -646,30 +635,13 @@ void TestGCTAResponse::test_response_edisp2D(void)
             }
         std::cout << sum << std::endl;
         }
-*/
-        const double deltaLogEsrc = 0.01;
-        const double deltaLogEobs = 0.01;
 
-        for(double logEsrc = -1.0; logEsrc < 3.0; logEsrc += deltaLogEsrc) {
-
-            double sum = 0.0;
-
-            for(double logEobs = edisp2D_2.ebounds_obs(logEsrc).emin().log10TeV();
-                logEobs < edisp2D_2.ebounds_obs(logEsrc).emax().log10TeV();
-                logEobs += deltaLogEobs) {
-                double deltaEobs =    std::exp(logEobs*std::log(10.0))
-                                   * (std::exp(deltaLogEobs * std::log(10.0)) - 1);
-                sum += edisp2D_2(logEobs, logEsrc) * deltaEobs;
-            }
-
-            std::cout << sum << std::endl;
-        }
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+*/
     // Test ebounds_obs and ebounds_src methods
     test_try("GCTAEdisp2D ebounds_src and ebounds_obs methods");
     try {
@@ -758,12 +730,12 @@ void TestGCTAResponse::test_response_edispPerfTable(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+/*
     // Test normalization
     test_try("GCTAEdispPerfTable normalization");
     try {
         std::cout << "TEST PERFTABLE NORM" << std::endl;
-/*
+
         const double deltaLogE = 0.01;
         for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogE) {
         double sum = 0.0;
@@ -772,30 +744,13 @@ void TestGCTAResponse::test_response_edispPerfTable(void)
             }
         std::cout << sum << std::endl;
         }
-*/
-        const double deltaLogEsrc = 0.01;
-        const double deltaLogEobs = 0.01;
 
-        for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogEsrc) {
-
-            double sum = 0.0;
-
-            for(double logEobs = test2.ebounds_obs(logEsrc).emin().log10TeV();
-                logEobs < test2.ebounds_obs(logEsrc).emax().log10TeV();
-                logEobs += deltaLogEobs) {
-                double deltaEobs =    std::exp(logEobs*std::log(10.0))
-                                   * (std::exp(deltaLogEobs * std::log(10.0)) - 1);
-                sum += test2(logEobs, logEsrc) * deltaEobs;
-            }
-
-            std::cout << sum << std::endl;
-        }
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+*/
 
     // Return
     return;
