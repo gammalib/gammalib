@@ -568,8 +568,10 @@ void TestGCTAResponse::test_response_edispRMF(void)
             double sum = 0.0;
 
             for(double logEobs = edisp.ebounds_obs(logEsrc).emin().log10TeV();
-                logEobs < edisp.ebounds_obs(logEsrc).emax().log10TeV(); logEobs += deltaLogEobs) {
-                double deltaEobs = std::exp(logEobs*std::log(10.0)) * (std::exp(deltaLogEobs * std::log(10.0)) - 1);
+                logEobs < edisp.ebounds_obs(logEsrc).emax().log10TeV();
+                logEobs += deltaLogEobs) {
+                double deltaEobs =    std::exp(logEobs*std::log(10.0))
+                                   * (std::exp(deltaLogEobs * std::log(10.0)) - 1);
                 sum += edisp(logEobs, logEsrc) * deltaEobs;
             }
 
