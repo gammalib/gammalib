@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    vo.i - Virtual Observatory module                    *
+ *                       GVOApp.i - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015 by Thierry Louge                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -17,36 +17,48 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall vo.i                                            *
  ***************************************************************************/
 /**
- * @file vo.i
- * @brief Virtual Observatory module
- * @author Juergen Knoedlseder
+ * @file GVOApp.i
+ * @brief SAMP hub class interface definition
+ * @author Thierry Louge
  */
-%module vo
-%feature("autodoc", "1");
-
-/* __ Headers needed for compilation _____________________________________ */
 %{
-#include <stddef.h>
-#include "GException.hpp"
-#include "GTools.hpp"
+/* Put headers and other declarations here that are needed for compilation */
+#include "GVOApp.hpp"
 %}
 
-/* __ Include standard typemaps for vectors and strings __________________ */
-//%include stl.i
 
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-//%import(module="gammalib.base") "GContainer.i";
+/***********************************************************************//**
+ * @class GVOApp
+ *
+ * @brief VO Hub class
+ ***************************************************************************/
+class GVOApp : public GBase {
 
-/* __ Make sure that exceptions are catched ______________________________ */
-//%import(module="gammalib.support") "GException.i";
+public:
+    // Constructors and destructors
+    GVOApp(void);
+    GVOApp(const GVOApp& hub);
+    virtual ~GVOApp(void);
 
-/* __ Virtual Observatory module _________________________________________ */
-%include "GVOClient.i"
-%include "GVOHub.i"
-%include "GVOApp.i"
+    // Operators
+    GVOApp& operator=(const GVOApp& hub);
+
+    // Methods
+    void    clear(void);
+    GVOApp* clone(void) const;
+    void    start(void);
+};
+
+
+/***********************************************************************//**
+ * @brief GVOApp class extension
+ ***************************************************************************/
+%extend GVOApp {
+    GVOApp copy() {
+        return (*self);
+    }
+};
+
+
