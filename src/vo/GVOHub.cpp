@@ -349,6 +349,8 @@ void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
     //Return
     return;
 }
+
+
 /***********************************************************************//**
  * @brief Print VO hub information
  *

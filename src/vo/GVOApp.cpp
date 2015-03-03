@@ -158,6 +158,31 @@ GVOApp* GVOApp::clone(void) const
     return new GVOApp(*this);
 }
 
+
+/***********************************************************************//**
+ * @brief Print VO hub information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing VO hub information
+ ***************************************************************************/
+std::string GVOApp::print(const GChatter& chatter) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GVOApp ===");
+
+    } // endif: chatter was not silent
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -211,4 +236,3 @@ void GVOApp::start_app(void)
     // Return
     return;
 }
-
