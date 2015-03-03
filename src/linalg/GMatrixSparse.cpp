@@ -788,19 +788,138 @@ GVector GMatrixSparse::row(const int& row) const
 
 
 /***********************************************************************//**
- * @brief Set row in matrix
+ * @brief Set matrix row
  *
- * @todo To be implemented.
+ * @param[in] row Row index [0,...,rows()-1].
+ * @param[in] vector Vector.
+ *
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Matrix dimension mismatches the vector size.
+ *
+ * Inserts the content of a vector into a matrix row. Any previous
+ * content in the matrix row will be overwritted.
+ *
+ * This is the main driver routine to insert data into a matrix.
  ***************************************************************************/
 void GMatrixSparse::row(const int& row, const GVector& vector)
 {
+/*
+    // Debug header
+    #if defined(G_DEBUG_SPARSE_INSERTION)
+    std::cout << "GMatrixSparse::row(";
+    std::cout << row << ", [" << vector << "]):" << std::endl;
+    std::cout << " In Data : ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_data[i] << " ";
+    }
+    std::cout << std::endl << " In Row .: ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_rowinx[i] << " ";
+    }
+    std::cout << std::endl << " In Col .: ";
+    for (int i = 0; i < m_cols+1; ++i) {
+        std::cout << m_colstart[i] << " ";
+    }
+    std::cout << std::endl;
+    #endif
+    
     // Raise an exception if the row index is invalid
     #if defined(G_RANGE_CHECK)
     if (row < 0 || row >= m_rows) {
         throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
     }
     #endif
+    
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_cols != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_SET_ROW, vector.size(),
+                                                 m_rows, m_cols);
+    }
+    
+    // If there is a pending element for this row then delete it since
+    // the vector overwrites this element
+    if (m_fill_val != 0.0 && m_fill_row == row) {
+        #if defined(G_DEBUG_SPARSE_PENDING)
+        std::cout << G_SET_ROW << ": pending value " << m_fill_val << 
+                     " for location (" << m_fill_row << "," << m_fill_col << 
+                     ") became obsolete" << std::endl;
+        #endif
+        m_fill_val = 0.0;
+        m_fill_row = 0;
+        m_fill_col = 0;
+    }
+    
+    // Determine the number of non-zero elements in the vector
+    int n_vector = 0;
+    for (int column = 0; column < m_cols; ++column) {
+        if (vector[column] != 0.0) {
+            n_vector++;
+        }
+    }
+    
+    // Get the start and stop indices of the actual row and compute
+    // the number of exisiting elements in the row
+    int i_start = m_rowstart[row];
+    int i_stop  = m_rowstart[row+1];
+    int n_exist = i_stop - i_start;
+    
+    // Compute the size difference for the new matrix. It is positive if
+    // the number of non-zero entries in the vector is larger than the
+    // number of non-zero entries in the matrix (in this case we have to
+    // increase the matrix size).
+    int n_diff = n_vector - n_exist;
+    
+    // If we need space then allocate it, if we have to much space then free it
+    if (n_diff > 0) {
+        alloc_elements(i_start, n_diff);
+        #if defined(G_DEBUG_SPARSE_INSERTION)
+        std::cout << " Insert .: " << n_diff << " elements at index " << i_start << std::endl;
+        #endif
+    }
+    else if (n_diff < 0) {
+        free_elements(i_start, -n_diff);
+        #if defined(G_DEBUG_SPARSE_INSERTION)
+        std::cout << " Remove .: " << -n_diff << " elements at index " << i_start << std::endl;
+        #endif
+    }
+    
+    // Insert the vector elements in the matrix
+    if (n_vector > 0) {
+        for (int column = 0, i = i_start; column < m_cols; ++column) {
+            if (vector[column] != 0.0) {
+                m_data[i]   = vector[column];
+                m_colinx[i] = row;
+                i++;
+            }
+        }
+    }
+    
+    // Update row start indices
+    for (int i = row+1; i <= m_rows; ++i) {
+        m_rowstart[i] += n_diff;
+    }
+    
+    // Debugging: show sparse matrix after insertion
+    #if defined(G_DEBUG_SPARSE_INSERTION)
+    std::cout << " Out Data: ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_data[i] << " ";
+    }
+    std::cout << std::endl << " Out Row : ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_rowinx[i] << " ";
+    }
+    std::cout << endl << " Out Col : ";
+    for (int i = 0; i < m_cols+1; ++i) {
+        std::cout << m_colstart[i] << " ";
+    }
+    std::cout << std::endl;
+    #endif
 
+*/
     // Return
     return;
 }

@@ -76,18 +76,18 @@ void TestGCTAResponse::set(void)
 
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGCTAResponse::test_response), "Test response");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff), "Test effective area");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff), "Test effective area");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp2D), "Test energy dispersion 2D computation");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispRMF), "Test energy dispersion RMF computation");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispPerfTable), "Test energy dispersion Performance Table computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
+    //append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
 
     // Return
     return;
@@ -506,6 +506,7 @@ void TestGCTAResponse::test_response_edisp(void)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edispRMF(void)
 {
+
     // Load response
     GCTAResponseIrf rsp;
     rsp.caldb(GCaldb(cta_caldb));
@@ -545,7 +546,6 @@ void TestGCTAResponse::test_response_edispRMF(void)
         test_try_failure(e);
     }
 
-    //
     GCTAEdispRmf edisp(cta_edisp_rmf);
 
     // Test if non-diagonal element (below diagonal) is zero
@@ -556,7 +556,31 @@ void TestGCTAResponse::test_response_edispRMF(void)
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp(std::log10(1.0),std::log10(30.0)), 0.0);
+/*
+    // Test normalization
+    test_try("GRmf normalization");
+    try {
+        const double deltaLogEsrc = 0.01;
+        const double deltaLogEobs = 0.001;
 
+        for(double logEsrc = -0.52; logEsrc < 1.88; logEsrc += deltaLogEsrc) {
+
+            double sum = 0.0;
+
+            for(double logEobs = edisp.ebounds_obs(logEsrc).emin().log10TeV();
+                logEobs < edisp.ebounds_obs(logEsrc).emax().log10TeV(); logEobs += deltaLogEobs) {
+                double deltaEobs = std::exp(logEobs*std::log(10.0)) * (std::exp(deltaLogEobs * std::log(10.0)) - 1);
+                sum += edisp(logEobs, logEsrc) * deltaEobs;
+            }
+
+            std::cout << sum << std::endl;
+        }
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+*/
     // Return
     return;
 }
@@ -598,16 +622,17 @@ void TestGCTAResponse::test_response_edisp2D(void)
     try {
         GCTAEdisp2D edisp2D_2(cta_irf_matrix);
         //std::cout << "TEST NORM 2D" << std::endl;
-
+/*
         const double deltaLogE = 0.01;
-        for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogE) {
-        double sum = 0.0;
-            for(double logEobs = -3.0; logEobs < 7.0; logEobs += deltaLogE) {
+        for(double logEsrc = -2.1; logEsrc < 4.0; logEsrc += deltaLogE) {
+            double sum = 0.0;
+            for(double logEobs = edisp2D_2.ebounds_obs(logEsrc).emin().log10TeV();
+                logEobs < edisp2D_2.ebounds_obs(logEsrc).emax().log10TeV(); logEobs += deltaLogE) {
                 sum += edisp2D_2(logEobs, logEsrc) * deltaLogE;
             }
         //std::cout << sum << std::endl;
         } 
-        
+ */       
         test_try_success();
     }
     catch (std::exception &e) {

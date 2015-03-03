@@ -33,6 +33,7 @@
 #include "GRmf.hpp"
 #include "GVector.hpp"
 #include "GCTAEdisp.hpp"
+#include "GNodeArray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
@@ -97,6 +98,7 @@ private:
     void copy_members(const GCTAEdispRmf& psf);
     void free_members(void);
     void set_mc_cache(void);
+    void update(const double& arg1, const double& arg2) const;
 
     // Members
     std::string m_filename;  //!< Name of response file
@@ -105,6 +107,15 @@ private:
     // Monte Carlo cache
     mutable std::vector<int>     m_mc_measured_start;
     mutable std::vector<GVector> m_mc_measured_cdf;
+    
+    mutable int    m_itrue1;
+    mutable int    m_itrue2;
+    mutable int    m_imeas1;
+    mutable int    m_imeas2;
+    mutable double m_wgt1;            //!< Weight of lower left node
+    mutable double m_wgt2;            //!< Weight of upper left node
+    mutable double m_wgt3;            //!< Weight of lower right node
+    mutable double m_wgt4;            //!< Weight of upper right node
 };
 
 

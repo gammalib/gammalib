@@ -274,7 +274,7 @@ GEbounds GRmf::etrue(const GEnergy& emeasured) const
     // Initialise empty energy boundaries
     GEbounds ebounds;
 
-    // Determine matrix column that corresponds to specified measued energy
+    // Determine matrix column that corresponds to specified measured energy
     int column = m_ebds_measured.index(emeasured);
 
     // If matrix column was found then determine the boundaries for this
@@ -386,6 +386,25 @@ void GRmf::load(const std::string& filename)
 
     // Close FITS file
     file.close();
+    
+    // Normalize matrix
+    GMatrixSparse scaled_matrix = m_matrix.transpose();
+    
+    for (int itrue = 0; itrue < this->ntrue(); ++itrue) {
+        double sum = 0.0;
+
+        for (int imeasured = 0; imeasured < this->nmeasured(); ++imeasured) {
+            double deltaBin = this->emeasured().ewidth(imeasured).TeV();
+            sum += m_matrix(itrue, imeasured) * deltaBin;
+        }
+
+        // Scale row (transpose + column used because row method not implemented)
+        if (sum > 0.0) {
+            scaled_matrix.column(itrue, scaled_matrix.column(itrue) / sum);
+        }
+    }
+
+    m_matrix = scaled_matrix.transpose();
 
     // Store filename
     m_filename = filename;
@@ -464,7 +483,7 @@ void GRmf::read(const GFitsTable& table)
             // Get start column index and number of columns
             int imeasured = f_chan->integer(itrue, igroup);
             int nvalues   = n_chan->integer(itrue, igroup);
-
+            
             // Get values
             for (int i = 0; i < nvalues; ++i, ++imeasured, ++icolumn) {
                 m_matrix(itrue, imeasured) = matrix->real(itrue, icolumn);

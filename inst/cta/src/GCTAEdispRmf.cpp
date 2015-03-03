@@ -165,7 +165,7 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * Returns the energy resolution, i.e. the probability density in observed
  * photon energy at a given (log10(E_src), log10(E_obs)).
  * To be precise: energy dispersion = dP / d(log10(E_obs)).
- * 
+ *
  * @todo Implement interpolation method
  * @todo So far the operator returns a matrix element and not a density!!!
  ***************************************************************************/
@@ -176,21 +176,38 @@ double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& zenith,
                                 const double& azimuth) const
 {
-    // Set true energy
-    GEnergy etrue;
-    etrue.log10TeV(logEsrc);
 
     // Set measured energy
     GEnergy emeasured;
     emeasured.log10TeV(logEobs);
 
+    // Set true energy
+    GEnergy etrue;
+    etrue.log10TeV(logEsrc);
+
     // Get indices for observed and true energy 
-	int itrue     = m_rmf.etrue().index(etrue);
-	int imeasured = m_rmf.emeasured().index(emeasured);
+    //int itrue     = m_rmf.etrue().index(etrue);
+    //int imeasured = m_rmf.emeasured().index(emeasured);
 
     // Extract matrix element
-	double edisp = m_rmf.matrix()(itrue, imeasured);
-    
+    //double edisp = m_rmf.matrix()(itrue, imeasured);
+
+    // Update indexes and weighting factors for interpolation
+    update(logEobs, logEsrc);
+
+    // Perform interpolation
+    /*std::cout << m_wgt1 << ", ";
+    std::cout << m_wgt2 << ", ";
+    std::cout << m_wgt3 << ", ";
+    std::cout << m_wgt4 << std::endl;*/
+
+    double edisp =  m_wgt1 * m_rmf(m_itrue1, m_imeas1) +
+                    m_wgt2 * m_rmf(m_itrue2, m_imeas1) +
+                    m_wgt3 * m_rmf(m_itrue1, m_imeas2) +
+                    m_wgt4 * m_rmf(m_itrue2, m_imeas2);
+
+    //std::cout << "EDISP=" << edisp << std::endl;
+
     // Return energy dispersion
     return edisp;
 }
@@ -245,13 +262,27 @@ void GCTAEdispRmf::load(const std::string& filename)
     // Load RMF file
     m_rmf.load(filename);
 
+/*
+    // Check normalization
+    for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
+        double sum = 0.0;
+
+        for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+            double deltaBin = m_rmf.emeasured().ewidth(imeasured).TeV();
+            sum += m_rmf(itrue, imeasured) * deltaBin;
+        }
+
+        std::cout << "Sum = " << sum << std::endl;
+    }
+*/
+
     // Store the filename
     m_filename = filename;
 
     // Set Monte Carlo cache
     set_mc_cache();
 
-	// Return
+    // Return
     return;
 }
 
@@ -307,8 +338,8 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
 
     } // endif: there was redistribution information
 
-	// Return energy
-	return energy;
+    // Return energy
+    return energy;
 }
 
 
@@ -424,6 +455,14 @@ void GCTAEdispRmf::init_members(void)
     // Initialise cache
     m_mc_measured_start.clear();
     m_mc_measured_cdf.clear();
+    m_itrue1      = 0;
+    m_itrue2      = 0;
+    m_imeas1      = 0;
+    m_imeas2      = 0;
+    m_wgt1      = 0.0;
+    m_wgt2      = 0.0;
+    m_wgt3      = 0.0;
+    m_wgt4      = 0.0;
 
     // Return
     return;
@@ -536,5 +575,52 @@ void GCTAEdispRmf::set_mc_cache(void)
     } // endfor: looped over all true energies
 
     // Return
-	return;
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Update cache
+ *
+ * @param[in] arg1 Argument for first axis.
+ * @param[in] arg2 Argument for second axis.
+ *
+ * Updates the interpolation cache. The interpolation cache is composed
+ * of four indices and weights that define 4 data values of the RMF matrix
+ * that are used for bilinear interpolation.
+ *
+ ***************************************************************************/
+void GCTAEdispRmf::update(const double& arg1, const double& arg2) const
+{
+    // Set node arrays for emeasured and etrue axes
+    GNodeArray* nodes1 = new GNodeArray(); // emeas
+    GNodeArray* nodes2 = new GNodeArray(); // etrue
+
+    for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+        nodes1->append(m_rmf.emeasured().emean(imeasured).log10TeV());
+    }
+
+    for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
+        nodes2->append(m_rmf.etrue().emean(itrue).log10TeV());
+    }
+
+    // Set values for node arrays
+    nodes1->set_value(arg1);
+    nodes2->set_value(arg2);
+
+    // Set indices for bi-linear interpolation
+    m_imeas1 = nodes1->inx_left();
+    m_imeas2 = nodes1->inx_right();
+    m_itrue1 = nodes2->inx_left();
+    m_itrue2 = nodes2->inx_right();
+
+    // Set weighting factors for bi-linear interpolation
+    m_wgt1 = nodes1->wgt_left()  * nodes2->wgt_left();
+    m_wgt2 = nodes1->wgt_left()  * nodes2->wgt_right();
+    m_wgt3 = nodes1->wgt_right() * nodes2->wgt_left();
+    m_wgt4 = nodes1->wgt_right() * nodes2->wgt_right();
+
+    delete nodes1, nodes2;
+
+    // Return
+    return;
 }

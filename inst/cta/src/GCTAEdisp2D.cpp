@@ -179,7 +179,6 @@ double GCTAEdisp2D::operator()(const double& logEobs,
     
     // Compute edisp
     edisp = m_edisp(0, logEsrc, std::exp((logEobs-logEsrc)*std::log(10.0)), theta);
-
     
     // Return
     return edisp;
