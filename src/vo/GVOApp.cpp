@@ -160,6 +160,19 @@ GVOApp* GVOApp::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief TBD
+ *
+ ***************************************************************************/
+void GVOApp::start(void)
+{
+    // Does nothing
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print VO hub information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
