@@ -594,9 +594,22 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
         m_par_sigma  = pars[1];
         m_par_sigma2 = m_par_sigma * m_par_sigma;
 
-        // Determine normalisation for given parameters
-        m_par_norm = 1.0 / gammalib::twopi * (1.0 - 1.0 / m_par_gamma) /
-                     m_par_sigma2;
+        // Check for parameter sanity
+        if (m_par_gamma <= 0.0 || m_par_sigma <= 0.0) {
+            m_par_norm = 0.0;
+            std::string msg = " King function parameters m_par_gamma and"
+                              " m_par_sigma are zero (for "
+                              " parameter space logE=" +
+                              gammalib::str(logE) + " and theta=" + 
+                              gammalib::str(theta) + 
+                              "), setting normalization m_norm to zero."; 
+            gammalib::warning(G_UPDATE, msg);
+        }
+        else {   
+            // Determine normalisation for given parameters
+            m_par_norm = 1.0 / gammalib::twopi * (1.0 - 1.0 / m_par_gamma) /
+                         m_par_sigma2;
+        }
 
         // Optionally correct for fixed delta_max
         #if defined(G_FIX_DELTA_MAX)
