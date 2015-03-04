@@ -176,10 +176,10 @@ double GCTAEdisp2D::operator()(const double& logEobs,
 {
     // Initalize edisp
     double edisp = 0.0;
-    
+
     // Compute edisp
     edisp = m_edisp(0, logEsrc, std::exp((logEobs-logEsrc)*std::log(10.0)), theta);
-    
+
     // Return
     return edisp;
 }
@@ -332,7 +332,7 @@ void GCTAEdisp2D::read(const GFits& fits)
     int etrue_size = m_edisp.axis(0);
     int migra_size = m_edisp.axis(1);
     int theta_size = m_edisp.axis(2);
-    
+
     // Normalize vectors of migration matrix for all etrue and theta
     for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
         for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
@@ -353,7 +353,7 @@ void GCTAEdisp2D::read(const GFits& fits)
             }
         }
     }
-    
+
     // Set true energy axis to logarithmic scale
     m_edisp.axis_log10(0);
 
@@ -392,21 +392,20 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
 
     // Loop through EobsOnEtrue
     for (int i = 0; i < m_edisp.axis(1); ++i) {
-/*
+
+        if (sum == 1.0) {
+            break;
+        }
+
         // Compute delta(Eobs/Etrue) and Eobs/Etrue values
         double delta = m_edisp.axis_hi(1, i) - m_edisp.axis_lo(1, i);
         double EobsOnEtrue = 0.5 * (m_edisp.axis_hi(1, i) + m_edisp.axis_lo(1, i));
 
-        // Compute cumulated probability
-        sum += m_edisp(0, logEsrc, EobsOnEtrue, theta) * delta;
-*/
+        // Compute cumulative probability (can't be higher than 1)
+        double add = m_edisp(0, logEsrc, EobsOnEtrue, theta) * delta / EobsOnEtrue / std::log(10.0);
+        sum = sum+add >= 1.0 ? 1.0 : sum+add;
 
-        double EobsOnEtrue  = 0.5 * (m_edisp.axis_hi(1, i) + m_edisp.axis_lo(1, i));
-        double logEobs      = std::log10(EobsOnEtrue) + logEsrc;
-        double deltaLogEobs = std::log10(m_edisp.axis_hi(1, i)) - std::log10(m_edisp.axis_lo(1, i));
-
-        // Compute cumulated probability
-        sum += GCTAEdisp2D::operator()(logEsrc, logEobs, theta, phi, zenith, azimuth) * deltaLogEobs;
+        //std::cout << "sum = " << sum << std::endl;
 
         // Create pair containing EobsOnEtrue and cumulated probability
         std::pair<double, double> pair(EobsOnEtrue, sum);
@@ -417,14 +416,14 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
 
     // Draw random number between 0 and 1 from uniform distribution
     double p = ran.uniform();
-    std::cout << "P = " << p << std::endl;
+    //std::cout << "P = " << p << std::endl;
 
     // Find right index
     int index = 0;
-    while(index < m_edisp.axis(1) - 1 && cumul[index+1].second < p) {
+    while(index < m_edisp.axis(1) - 2 && cumul[index+1].second < p) {
         index++;
     } // index found
-    std::cout << "index = " << index << std::endl;
+    //std::cout << "index = " << index << " / " << m_edisp.axis(1) << std::endl;
 
     // Compute result EobsOnEtrue value
     double result =   (cumul[index+1].second - p)*cumul[index].first

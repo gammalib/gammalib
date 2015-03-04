@@ -667,8 +667,8 @@ void TestGCTAResponse::test_response_edisp2D(void)
     try {
         GCTAEdisp2D edisp2D_4(cta_irf_matrix);
         GRan ran;
-        //std::cout << "TEST MC 2D" << std::endl;
-        //for (int i = 0; i < 20; ++i) {
+        std::cout << "TEST MC 2D" << std::endl;
+        //for (int i = 0; i < 10; ++i) {
             std::cout << edisp2D_4.mc(ran, 1.0).TeV() << std::endl;
         //}
 
