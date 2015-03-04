@@ -64,6 +64,7 @@ public:
 
     // Other methods
     bool                has_response(void) const;
+    bool                has_events(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits) const;
     void                load(const std::string& filename);

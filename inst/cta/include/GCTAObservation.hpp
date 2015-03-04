@@ -91,6 +91,7 @@ public:
 
     // Other methods
     bool                has_response(void) const;
+    bool                has_events(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits) const;
     void                load(const std::string& filename);
@@ -225,6 +226,18 @@ inline
 bool GCTAObservation::has_response(void) const
 {
     return ((m_response != NULL) && (m_response->is_valid()));
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if CTA observation contains events
+ *
+ * @return True if CTA observation contains events.
+ ***************************************************************************/
+inline
+bool GCTAObservation::has_events(void) const
+{
+    return ((m_events != NULL) || (m_eventfile.length() > 0));
 }
 
 
