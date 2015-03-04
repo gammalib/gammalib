@@ -643,7 +643,7 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
                 // Optional attributes
                 double thetacut = 0.0;
                 double scale    = 1.0;
-                double sigma    = 0.0;
+                double sigma    = 3.0;
 
                 // Optionally extract thetacut (0.0 if no thetacut)
                 std::string s_thetacut = par->attribute("thetacut");
@@ -657,7 +657,7 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
                     scale = gammalib::todouble(s_scale);
                 }
 
-                // Optionally extract sigma (0.0 if no sigma)
+                // Optionally extract sigma (3.0 if no sigma)
                 std::string s_sigma = par->attribute("sigma");
                 if (s_sigma.length() > 0) {
                     sigma = gammalib::todouble(s_sigma);
@@ -725,6 +725,21 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
             // If filename is not empty then load background model
             if (!m_xml_background.empty()) {
                 load_background(m_xml_background);
+            }
+
+            // Optional attributes
+            double sigma = 3.0;
+
+            // Optionally extract sigma (3.0 if no sigma)
+            std::string s_sigma = par->attribute("sigma");
+            if (s_sigma.length() > 0) {
+                sigma = gammalib::todouble(s_sigma);
+            }
+
+            // If we have a performance table then set attributes
+            GCTABackgroundPerfTable* bgm = const_cast<GCTABackgroundPerfTable*>(dynamic_cast<const GCTABackgroundPerfTable*>(background()));
+            if (bgm != NULL) {
+                bgm->sigma(sigma);
             }
 
         }
