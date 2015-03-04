@@ -88,9 +88,10 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
         print(sum)
 
         # Normalize
-        for i in range(ebins):
-            exp_edisp[i] *= nmc;
-            exp_edisp[i] /= sum;
+        if sum != 0.0:
+            for i in range(ebins):
+                exp_edisp[i] *= nmc;
+                exp_edisp[i] /= sum;
 
         # Plot simulated data
         plt.plot(eobs_axis, counts, 'ro')
@@ -135,4 +136,4 @@ if __name__ == '__main__':
     edisp = GCTAEdisp2D("../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits")
 
     # Simulate Edisp
-    sim_edisp(edisp, 20.0)
+    sim_edisp(edisp, 1.0)

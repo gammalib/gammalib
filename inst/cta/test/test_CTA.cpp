@@ -556,7 +556,7 @@ void TestGCTAResponse::test_response_edispRMF(void)
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp(std::log10(1.0),std::log10(30.0)), 0.0);
-/*
+
     // Test normalization
     test_try("GRmf normalization");
     try {
@@ -571,9 +571,8 @@ void TestGCTAResponse::test_response_edispRMF(void)
             for(double logEobs = edisp.ebounds_obs(logEsrc).emin().log10TeV();
                 logEobs < edisp.ebounds_obs(logEsrc).emax().log10TeV();
                 logEobs += deltaLogEobs) {
-                double deltaEobs =    std::exp(logEobs*std::log(10.0))
-                                   * (std::exp(deltaLogEobs * std::log(10.0)) - 1);
-                sum += edisp(logEobs, logEsrc) * deltaEobs;
+                sum +=   edisp(logEobs, logEsrc) * std::log(10.0)
+                       * std::exp(logEobs*std::log(10.0)) * deltaLogEobs;
             }
 
             std::cout << sum << std::endl;
@@ -583,7 +582,7 @@ void TestGCTAResponse::test_response_edispRMF(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-*/
+
     // Return
     return;
 }
@@ -626,14 +625,20 @@ void TestGCTAResponse::test_response_edisp2D(void)
         GCTAEdisp2D edisp2D_2(cta_irf_matrix);
         std::cout << "TEST EDISP2D NORM" << std::endl;
 
-        const double deltaLogE = 0.01;
-        for(double logEsrc = -2.1; logEsrc < 4.0; logEsrc += deltaLogE) {
+        const double deltaLogEsrc = 0.01;
+        const double deltaLogEobs = 0.01;
+
+        for(double logEsrc = -2.1; logEsrc < 4.0; logEsrc += deltaLogEsrc) {
+
             double sum = 0.0;
+
             for(double logEobs = edisp2D_2.ebounds_obs(logEsrc).emin().log10TeV();
-                logEobs < edisp2D_2.ebounds_obs(logEsrc).emax().log10TeV(); logEobs += deltaLogE) {
-                sum += edisp2D_2(logEobs, logEsrc) * deltaLogE;
+                logEobs < edisp2D_2.ebounds_obs(logEsrc).emax().log10TeV(); logEobs += deltaLogEobs) {
+                sum += edisp2D_2(logEobs, logEsrc) * deltaLogEobs;
             }
-        std::cout << sum << std::endl;
+
+            std::cout << sum << std::endl;
+
         }
 
         test_try_success();
@@ -736,13 +741,19 @@ void TestGCTAResponse::test_response_edispPerfTable(void)
     try {
         std::cout << "TEST PERFTABLE NORM" << std::endl;
 
-        const double deltaLogE = 0.01;
-        for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogE) {
-        double sum = 0.0;
-            for(double logEobs = -3.0; logEobs < 7.0; logEobs += deltaLogE) {
-                sum += test2(logEobs, logEsrc) * deltaLogE;
+        const double deltaLogEsrc = 0.01;
+        const double deltaLogEobs = 0.01;
+
+        for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogEsrc) {
+
+            double sum = 0.0;
+
+            for(double logEobs = -3.0; logEobs < 7.0; logEobs += deltaLogEobs) {
+                sum += test2(logEobs, logEsrc) * deltaLogEobs;
             }
-        std::cout << sum << std::endl;
+
+            std::cout << sum << std::endl;
+
         }
 
         test_try_success();

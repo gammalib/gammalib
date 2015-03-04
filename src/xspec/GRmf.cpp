@@ -391,6 +391,7 @@ void GRmf::load(const std::string& filename)
     GMatrixSparse scaled_matrix = m_matrix.transpose();
     
     for (int itrue = 0; itrue < this->ntrue(); ++itrue) {
+
         double sum = 0.0;
 
         for (int imeasured = 0; imeasured < this->nmeasured(); ++imeasured) {
@@ -399,7 +400,7 @@ void GRmf::load(const std::string& filename)
         }
 
         // Scale row (transpose + column used because row method not implemented)
-        if (sum > 0.0) {
+        if (sum != 0.0) {
             scaled_matrix.column(itrue, scaled_matrix.column(itrue) / sum);
         }
     }

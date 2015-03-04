@@ -185,28 +185,15 @@ double GCTAEdispRmf::operator()(const double& logEobs,
     GEnergy etrue;
     etrue.log10TeV(logEsrc);
 
-    // Get indices for observed and true energy 
-    //int itrue     = m_rmf.etrue().index(etrue);
-    //int imeasured = m_rmf.emeasured().index(emeasured);
-
-    // Extract matrix element
-    //double edisp = m_rmf.matrix()(itrue, imeasured);
-
     // Update indexes and weighting factors for interpolation
     update(logEobs, logEsrc);
 
     // Perform interpolation
-    /*std::cout << m_wgt1 << ", ";
-    std::cout << m_wgt2 << ", ";
-    std::cout << m_wgt3 << ", ";
-    std::cout << m_wgt4 << std::endl;*/
 
     double edisp =  m_wgt1 * m_rmf(m_itrue1, m_imeas1) +
                     m_wgt2 * m_rmf(m_itrue2, m_imeas1) +
                     m_wgt3 * m_rmf(m_itrue1, m_imeas2) +
                     m_wgt4 * m_rmf(m_itrue2, m_imeas2);
-
-    //std::cout << "EDISP=" << edisp << std::endl;
 
     // Return energy dispersion
     return edisp;
@@ -262,7 +249,7 @@ void GCTAEdispRmf::load(const std::string& filename)
     // Load RMF file
     m_rmf.load(filename);
 
-/*
+
     // Check normalization
     for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
         double sum = 0.0;
@@ -274,7 +261,7 @@ void GCTAEdispRmf::load(const std::string& filename)
 
         std::cout << "Sum = " << sum << std::endl;
     }
-*/
+
 
     // Store the filename
     m_filename = filename;

@@ -345,7 +345,7 @@ void GCTAEdisp2D::read(const GFits& fits)
                 // Add dispersion to sum
                 sum += m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) * delta / EobsOnEtrue;
             }
-            if (sum > 0.0) {
+            if (sum != 0.0) {
                 for (int i_migra = 0; i_migra < migra_size; ++i_migra) {
                     // Normalize by sum/log(10.0)
                     m_edisp(0, i_etrue + (i_migra + i_theta*migra_size)*etrue_size) /= sum / std::log(10.0);

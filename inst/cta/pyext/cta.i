@@ -186,6 +186,7 @@
 %include "GCTAEdisp.i"
 %include "GCTAEdispRmf.i"
 %include "GCTAEdispPerfTable.i"
+%include "GCTAEdisp2D.i"
 %include "GCTABackground.i"
 %include "GCTABackground3D.i"
 %include "GCTABackgroundPerfTable.i"
