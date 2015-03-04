@@ -556,7 +556,7 @@ void TestGCTAResponse::test_response_edispRMF(void)
 
     // Test if non-diagonal element (above diagonal) is zero
     test_value(edisp(std::log10(1.0),std::log10(30.0)), 0.0);
-
+/*
     // Test normalization
     test_try("GRmf normalization");
     try {
@@ -571,8 +571,7 @@ void TestGCTAResponse::test_response_edispRMF(void)
             for(double logEobs = edisp.ebounds_obs(logEsrc).emin().log10TeV();
                 logEobs < edisp.ebounds_obs(logEsrc).emax().log10TeV();
                 logEobs += deltaLogEobs) {
-                sum +=   edisp(logEobs, logEsrc) * std::log(10.0)
-                       * std::exp(logEobs*std::log(10.0)) * deltaLogEobs;
+                sum +=   edisp(logEobs, logEsrc) * deltaLogEobs;
             }
 
             std::cout << sum << std::endl;
@@ -582,7 +581,7 @@ void TestGCTAResponse::test_response_edispRMF(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+*/
     // Return
     return;
 }
@@ -669,9 +668,9 @@ void TestGCTAResponse::test_response_edisp2D(void)
         GCTAEdisp2D edisp2D_4(cta_irf_matrix);
         GRan ran;
         //std::cout << "TEST MC 2D" << std::endl;
-        for (int i = 0; i < 20; ++i) {
-            //std::cout << edisp2D_4.mc(ran, -1.0).GeV() << std::endl;
-        }
+        //for (int i = 0; i < 20; ++i) {
+            std::cout << edisp2D_4.mc(ran, 1.0).TeV() << std::endl;
+        //}
 
         test_try_success();
     }

@@ -80,7 +80,8 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
         for i in range(ebins):
             eobs     = eobs_axis[i]
             if eobs <= edisp.ebounds_obs(logEtrue).emax().TeV():
-                value = edisp(log10(eobs), logEtrue) * dEobs
+                dLogEobs = log10(eobs_axis[i]) - log10(eobs_axis[i-1])
+                value = edisp(log10(eobs), logEtrue) * dLogEobs * nmc
             else:
                 value = 0.0
             sum += value
@@ -88,10 +89,9 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
         print(sum)
 
         # Normalize
-        if sum != 0.0:
-            for i in range(ebins):
-                exp_edisp[i] *= nmc;
-                exp_edisp[i] /= sum;
+        #if sum != 0.0:
+        #    for i in range(ebins):
+        #        exp_edisp[i] /= sum;
 
         # Plot simulated data
         plt.plot(eobs_axis, counts, 'ro')
@@ -131,9 +131,9 @@ if __name__ == '__main__':
     print("******************************")
 
     # Load edisp
-    #edisp = GCTAEdispRmf("./caldb/dc1/rmf.fits")
-    #edisp = GCTAEdispPerfTable("../caldb/cta_dummy_irf.dat")
-    edisp = GCTAEdisp2D("../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits")
+    #edisp = GCTAEdispRmf("./caldb/dc1/rmf.fits")                                          # OK !
+    #edisp = GCTAEdispPerfTable("../caldb/cta_dummy_irf.dat")                              # OK !
+    edisp = GCTAEdisp2D("../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits")  # ?
 
     # Simulate Edisp
     sim_edisp(edisp, 1.0)

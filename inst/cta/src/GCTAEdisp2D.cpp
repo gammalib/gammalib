@@ -389,42 +389,51 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
 
     // Initialize cumulative probability
     double sum = 0.0;
-    
+
     // Loop through EobsOnEtrue
     for (int i = 0; i < m_edisp.axis(1); ++i) {
-    
+/*
         // Compute delta(Eobs/Etrue) and Eobs/Etrue values
         double delta = m_edisp.axis_hi(1, i) - m_edisp.axis_lo(1, i);
         double EobsOnEtrue = 0.5 * (m_edisp.axis_hi(1, i) + m_edisp.axis_lo(1, i));
-        
+
         // Compute cumulated probability
         sum += m_edisp(0, logEsrc, EobsOnEtrue, theta) * delta;
-        
+*/
+
+        double EobsOnEtrue  = 0.5 * (m_edisp.axis_hi(1, i) + m_edisp.axis_lo(1, i));
+        double logEobs      = std::log10(EobsOnEtrue) + logEsrc;
+        double deltaLogEobs = std::log10(m_edisp.axis_hi(1, i)) - std::log10(m_edisp.axis_lo(1, i));
+
+        // Compute cumulated probability
+        sum += GCTAEdisp2D::operator()(logEsrc, logEobs, theta, phi, zenith, azimuth) * deltaLogEobs;
+
         // Create pair containing EobsOnEtrue and cumulated probability
         std::pair<double, double> pair(EobsOnEtrue, sum);
-        
+
         // Add to vector
         cumul.push_back(pair);
     }
-    
+
     // Draw random number between 0 and 1 from uniform distribution
     double p = ran.uniform();
-    
+    std::cout << "P = " << p << std::endl;
+
     // Find right index
     int index = 0;
     while(index < m_edisp.axis(1) - 1 && cumul[index+1].second < p) {
         index++;
     } // index found
-    
+    std::cout << "index = " << index << std::endl;
+
     // Compute result EobsOnEtrue value
     double result =   (cumul[index+1].second - p)*cumul[index].first
                     + (p - cumul[index].second)*cumul[index+1].first;
     result       /=   (cumul[index+1].second - cumul[index].second);
-    
-    
+
     // Final result
     double logEnergy = std::log10(result) + logEsrc;
-    
+
     // Set energy
     GEnergy energy;
     energy.log10TeV(logEnergy);

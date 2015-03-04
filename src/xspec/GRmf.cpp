@@ -396,7 +396,8 @@ void GRmf::load(const std::string& filename)
 
         for (int imeasured = 0; imeasured < this->nmeasured(); ++imeasured) {
             double deltaBin = this->emeasured().ewidth(imeasured).TeV();
-            sum += m_matrix(itrue, imeasured) * deltaBin;
+            double Eobs     = this->emeasured().emean(imeasured).TeV();
+            sum += m_matrix(itrue, imeasured) * deltaBin / std::log(10.0) / Eobs;
         }
 
         // Scale row (transpose + column used because row method not implemented)

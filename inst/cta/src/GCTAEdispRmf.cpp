@@ -249,19 +249,20 @@ void GCTAEdispRmf::load(const std::string& filename)
     // Load RMF file
     m_rmf.load(filename);
 
-
+/*
     // Check normalization
     for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
         double sum = 0.0;
 
         for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
             double deltaBin = m_rmf.emeasured().ewidth(imeasured).TeV();
-            sum += m_rmf(itrue, imeasured) * deltaBin;
+            double Eobs = m_rmf.emeasured().emean(imeasured).TeV();
+            sum += m_rmf(itrue, imeasured) * deltaBin / std::log(10.0) / Eobs;
         }
 
         std::cout << "Sum = " << sum << std::endl;
     }
-
+*/
 
     // Store the filename
     m_filename = filename;
