@@ -582,6 +582,23 @@ void TestGCTAResponse::test_response_edispRMF(void)
         test_try_failure(e);
     }
 */
+/*
+    // Test mc method
+    test_try("GCTAEdispRmf mc method");
+    try {
+        GRan ran;
+        std::cout << "TEST MC RMF" << std::endl;
+        for (int i = 0; i < 10; ++i) {
+            std::cout << edisp.mc(ran, 20.0).TeV() << std::endl;
+        }
+
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+*/
+
     // Return
     return;
 }
@@ -661,23 +678,23 @@ void TestGCTAResponse::test_response_edisp2D(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+/*
     // Test mc method
     test_try("GCTAEdisp2D mc method");
     try {
         GCTAEdisp2D edisp2D_4(cta_irf_matrix);
         GRan ran;
         std::cout << "TEST MC 2D" << std::endl;
-        //for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 10; ++i) {
             std::cout << edisp2D_4.mc(ran, 1.0).TeV() << std::endl;
-        //}
+        }
 
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
+*/
     // Return
     return;
 }

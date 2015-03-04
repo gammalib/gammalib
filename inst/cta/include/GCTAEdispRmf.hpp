@@ -99,6 +99,11 @@ private:
     void free_members(void);
     void set_mc_cache(void);
     void update(const double& arg1, const double& arg2) const;
+    void update_cumul(const double& logEsrc,
+                      const double& theta = 0.0,
+                      const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0) const;
 
     // Members
     std::string m_filename;  //!< Name of response file
@@ -107,7 +112,10 @@ private:
     // Monte Carlo cache
     mutable std::vector<int>     m_mc_measured_start;
     mutable std::vector<GVector> m_mc_measured_cdf;
-    
+    mutable double m_logEsrc;
+    mutable double m_theta;
+    mutable std::vector<std::pair<double, double> > m_cumul;
+
     mutable int    m_itrue1;
     mutable int    m_itrue2;
     mutable int    m_imeas1;

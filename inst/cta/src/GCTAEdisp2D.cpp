@@ -405,8 +405,6 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
         double add = m_edisp(0, logEsrc, EobsOnEtrue, theta) * delta / EobsOnEtrue / std::log(10.0);
         sum = sum+add >= 1.0 ? 1.0 : sum+add;
 
-        //std::cout << "sum = " << sum << std::endl;
-
         // Create pair containing EobsOnEtrue and cumulated probability
         std::pair<double, double> pair(EobsOnEtrue, sum);
 
@@ -416,14 +414,12 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
 
     // Draw random number between 0 and 1 from uniform distribution
     double p = ran.uniform();
-    //std::cout << "P = " << p << std::endl;
 
     // Find right index
     int index = 0;
     while(index < m_edisp.axis(1) - 2 && cumul[index+1].second < p) {
         index++;
     } // index found
-    //std::cout << "index = " << index << " / " << m_edisp.axis(1) << std::endl;
 
     // Compute result EobsOnEtrue value
     double result =   (cumul[index+1].second - p)*cumul[index].first

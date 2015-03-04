@@ -294,10 +294,78 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& zenith,
                          const double& azimuth) const
 {
+
+    // Draw random number between 0 and 1 from uniform distribution
+    double p = ran.uniform();
+
+    // Update cumulative probability
+    update_cumul(logEsrc, theta, phi, zenith, azimuth);
+
+    // Find right index
+    int index = 0;
+    while(index < m_rmf.nmeasured() - 2 && m_cumul[index+1].second < p) {
+        index++;
+    } // index found
+
+    // Interpolate result Eobs value
+    double result =   (m_cumul[index+1].second - p)*m_cumul[index].first
+                    + (p - m_cumul[index].second)*m_cumul[index+1].first;
+    result       /=   (m_cumul[index+1].second - m_cumul[index].second);
+
+    // Final result
+    double logEnergy = std::log10(result);
+
+    // Set energy
+    GEnergy energy;
+    energy.log10TeV(logEnergy);
+
+
+/*
     // Set true energy
     GEnergy energy;
     energy.log10TeV(logEsrc);
 
+
+    // Divide bin into n sub-bins
+    const int n = 4;
+
+    // Determine true energy index
+    int itrue = m_rmf.etrue().index(energy);
+
+    if (itrue != -1) {
+
+        // Determine true energy sub-index
+        int isub          = -1;
+        double etruemin   = m_rmf.etrue().emin(itrue).log10TeV();
+        double etruewidth = m_rmf.etrue().emax(itrue).log10TeV() - etruemin;
+
+        while (++isub < n && energy.log10TeV() >= etruemin + (isub+1)*etruewidth/n);
+
+        if (isub != -1) {
+
+            // Get offset in measured energy. Continue only if offset is valid
+            int offset = m_mc_measured_start[itrue];
+            if (offset != -1) {
+
+                // Determine measured energy index from Monte-Carlo cache
+                int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
+
+                // Get log10 energy minimum and bin width
+                double emin   = m_rmf.emeasured().emin(imeasured).log10TeV();
+                double ewidth = m_rmf.emeasured().emax(imeasured).log10TeV() - emin;
+
+                // Draw a random energy from this interval
+                double e = emin + (isub + ran.uniform())*ewidth/n;
+
+                // Set interval
+                energy.log10TeV(e);
+            }
+
+        }
+
+    }
+*/
+/*
     // Determine true energy index
     int itrue = m_rmf.etrue().index(energy);
 
@@ -321,10 +389,11 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
 
             // Set interval
             energy.log10TeV(e);
-        
+
         } // endif: offset was valid
 
     } // endif: there was redistribution information
+*/
 
     // Return energy
     return energy;
@@ -447,10 +516,12 @@ void GCTAEdispRmf::init_members(void)
     m_itrue2      = 0;
     m_imeas1      = 0;
     m_imeas2      = 0;
-    m_wgt1      = 0.0;
-    m_wgt2      = 0.0;
-    m_wgt3      = 0.0;
-    m_wgt4      = 0.0;
+    m_wgt1        = 0.0;
+    m_wgt2        = 0.0;
+    m_wgt3        = 0.0;
+    m_wgt4        = 0.0;
+    m_logEsrc  = -30.0;
+    m_theta    = 0.0;
 
     // Return
     return;
@@ -608,6 +679,59 @@ void GCTAEdispRmf::update(const double& arg1, const double& arg2) const
     m_wgt4 = nodes1->wgt_right() * nodes2->wgt_right();
 
     delete nodes1, nodes2;
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Update Monte-Carlo cache
+ *
+ * @param[in] arg1 Argument for first axis.
+ * @param[in] arg2 Argument for second axis.
+ *
+ * Updates the interpolation cache. The interpolation cache is composed
+ * of four indices and weights that define 4 data values of the RMF matrix
+ * that are used for bilinear interpolation.
+ *
+ ***************************************************************************/
+void GCTAEdispRmf::update_cumul(const double& logEsrc,
+                                const double& theta,
+                                const double& phi,
+                                const double& zenith,
+                                const double& azimuth) const
+{
+    if (logEsrc != m_logEsrc || theta != m_theta) {
+
+        m_logEsrc = logEsrc;
+        m_theta = theta;
+
+        // Initialize cumulative probability
+        double sum = 0.0;
+
+        // Loop through Eobs
+        for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+
+            if (sum == 1.0) {
+                break;
+            }
+
+            // Compute deltaEobs and logEobs values
+            double deltaEobs   = m_rmf.emeasured().ewidth(imeasured).TeV();
+            double Eobs        = m_rmf.emeasured().emean(imeasured).TeV();
+
+            // Compute cumulative probability (can't be higher than 1)
+            double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta)*deltaEobs/Eobs/std::log(10.0);
+            sum = sum+add >= 1.0 ? 1.0 : sum+add;
+
+            // Create pair containing Eobs and cumulated probability
+            std::pair<double, double> pair(Eobs, sum);
+
+            // Add to vector
+            m_cumul.push_back(pair);
+
+        }
+    }
 
     // Return
     return;
