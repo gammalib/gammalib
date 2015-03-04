@@ -1266,14 +1266,14 @@ const GEvents* GCTAObservation::events(void) const
         // Try loading the events from FITS file. Catch any exception. Put
         // the code into a critical zone as it might be called from within
         // a parallelized thread.
+        #pragma omp critical
+        {
         try {
-            #pragma omp critical
-            {
                 const_cast<GCTAObservation*>(this)->load(m_eventfile);
-            }
         }
-        catch (std::exception &e) {
+        catch (...) {
             ;
+        }
         }
 
         // Throw an exception if the event container is still not valid
