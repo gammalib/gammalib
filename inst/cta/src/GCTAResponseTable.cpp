@@ -1673,13 +1673,11 @@ void GCTAResponseTable::read_pars(const GFitsTable& hdu)
  * that are used for linear interpolation.
  *
  * @todo Write down formula
- *
- * @todo Makes GNodeArray::set_value method const and use mutable members
  ***************************************************************************/
 void GCTAResponseTable::update(const double& arg) const
 {
-    // Get pointer to node array (circumvent const correctness)
-    GNodeArray* nodes = const_cast<GNodeArray*>(&(m_axis_nodes[0]));
+    // Get pointer to node array
+    const GNodeArray* nodes = &(m_axis_nodes[0]);
 
     // Set value for node array
     nodes->set_value(arg);
@@ -1706,14 +1704,12 @@ void GCTAResponseTable::update(const double& arg) const
  * that are used for bilinear interpolation.
  *
  * @todo Write down formula
- *
- * @todo Makes GNodeArray::set_value method const and use mutable members
  ***************************************************************************/
 void GCTAResponseTable::update(const double& arg1, const double& arg2) const
 {
-    // Get pointers to node arrays (circumvent const correctness)
-    GNodeArray* nodes1 = const_cast<GNodeArray*>(&(m_axis_nodes[0]));
-    GNodeArray* nodes2 = const_cast<GNodeArray*>(&(m_axis_nodes[1]));
+    // Get pointers to node arrays
+    const GNodeArray* nodes1 = &(m_axis_nodes[0]);
+    const GNodeArray* nodes2 = &(m_axis_nodes[1]);
 
     // Set values for node arrays
     nodes1->set_value(arg1);
@@ -1753,16 +1749,14 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2) const
  * that are used for bilinear interpolation.
  *
  * @todo Write down formula
- *
- * @todo Makes GNodeArray::set_value method const and use mutable members
  ***************************************************************************/
 void GCTAResponseTable::update(const double& arg1, const double& arg2,
                                const double& arg3) const
 {
     // Get pointers to node arrays (circumvent const correctness)
-    GNodeArray* nodes1 = const_cast<GNodeArray*>(&(m_axis_nodes[0]));
-    GNodeArray* nodes2 = const_cast<GNodeArray*>(&(m_axis_nodes[1]));
-    GNodeArray* nodes3 = const_cast<GNodeArray*>(&(m_axis_nodes[2]));
+    const GNodeArray* nodes1 = &(m_axis_nodes[0]);
+    const GNodeArray* nodes2 = &(m_axis_nodes[1]);
+    const GNodeArray* nodes3 = &(m_axis_nodes[2]);
 
     // Set values for node arrays
     nodes1->set_value(arg1);
