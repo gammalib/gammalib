@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.cpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,12 +29,14 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GException.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ                               "GCTABackground3D::read(GFits&)"
 #define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -305,6 +307,9 @@ GCTABackground3D* GCTABackground3D::clone(void) const
  *
  * @param[in] fits FITS file pointer.
  *
+ * @exception GException::invalid_value
+ *            FITS file format differs from expectation.
+ *
  * Reads the background from the FITS file extension "BACKGROUND". The data
  * are stored in m_background which is of type GCTAResponseTable. The DETX
  * and DETY axes will be set to radians, the energy axis will be set to
@@ -320,6 +325,29 @@ void GCTABackground3D::read(const GFits& fits)
 
     // Read background table
     m_background.read(table);
+
+    // Check that axis names comply to format
+    if (m_background.axis_lo_name(0) != "DETX_LO" ||
+        m_background.axis_hi_name(0) != "DETX_HI") {
+        std::string msg = "Background response table does not contain"
+                          " \"DETX_LO\" and \"DETX_HI\" columns as the"
+                          " first axis.";
+        throw GException::invalid_value(G_READ, msg);
+    }
+    if (m_background.axis_lo_name(1) != "DETY_LO" ||
+        m_background.axis_hi_name(1) != "DETY_HI") {
+        std::string msg = "Background response table does not contain"
+                          " \"DETY_LO\" and \"DETY_HI\" columns as the"
+                          " second axis.";
+        throw GException::invalid_value(G_READ, msg);
+    }
+    if (m_background.axis_lo_name(2) != "ENERG_LO" ||
+        m_background.axis_hi_name(2) != "ENERG_HI") {
+        std::string msg = "Background response table does not contain"
+                          " \"ENERG_LO\" and \"ENERG_HI\" columns as the"
+                          " third axis.";
+        throw GException::invalid_value(G_READ, msg);
+    }
 
     // Set DETX and DETY axis to radians
     m_background.axis_radians(0);

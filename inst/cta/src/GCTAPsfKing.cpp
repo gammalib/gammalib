@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.cpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
+#include "GException.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
@@ -37,6 +38,7 @@
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ                                    "GCTAPsfKing::read(GFits&)"
 #define G_UPDATE                      "GCTAPsfKing::update(double&, double&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -275,8 +277,11 @@ GCTAPsfKing* GCTAPsfKing::clone(void) const
  *
  * @param[in] fits FITS file pointer.
  *
- * Reads the PSF from the FITS file extension "POINT SPREAD FUNCTION". The data
- * are stored in m_psf which is of type GCTAResponseTable. 
+ * @exception GException::invalid_value
+ *            FITS file format differs from expectation.
+ *
+ * Reads the PSF from the FITS file extension "POINT SPREAD FUNCTION". The
+ * data are stored in m_psf which is of type GCTAResponseTable. 
  * The energy axis will be set to log10. The offset angle axis and 
  * sigma parameter columns will be set to radians.
  ***************************************************************************/
@@ -290,6 +295,22 @@ void GCTAPsfKing::read(const GFits& fits)
 
     // Read PSF table
     m_psf.read(table);
+
+    // Check that axis names comply to format
+    if (m_psf.axis_lo_name(0) != "ENERG_LO" ||
+        m_psf.axis_hi_name(0) != "ENERG_HI") {
+        std::string msg = "Point spread function response table does not"
+                          " contain \"ENERG_LO\" and \"ENERG_HI\" columns"
+                          " as the first axis.";
+        throw GException::invalid_value(G_READ, msg);
+    }
+    if (m_psf.axis_lo_name(1) != "THETA_LO" ||
+        m_psf.axis_hi_name(1) != "THETA_HI") {
+        std::string msg = "Point spread function response table does not"
+                          " contain \"THETA_LO\" and \"THETA_HI\" columns"
+                          " as the second axis.";
+        throw GException::invalid_value(G_READ, msg);
+    }
 
     // Set energy axis to logarithmic scale
     m_psf.axis_log10(0);
