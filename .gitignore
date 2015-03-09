@@ -5,6 +5,7 @@ depcomp
 pyext/build/
 .libs
 .deps
+test/*.fits
 inst/cta/test/*.xml
 inst/cta/test/*.fits
 inst/cta/test/*.fits.gz
@@ -36,8 +37,8 @@ m4/lt~obsolete.m4
 .DS_Store
 .libs
 .deps
-*.fits
-*.cpp~
+*.fits~
+*.cpp~ 
 *.hpp~
 *.i~
 *.xml~
