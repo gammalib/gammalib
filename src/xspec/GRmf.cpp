@@ -28,9 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
+#include "GMath.hpp"
 #include "GRmf.hpp"
 #include "GException.hpp"
-#include "GTools.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
@@ -274,7 +275,7 @@ GEbounds GRmf::etrue(const GEnergy& emeasured) const
     // Initialise empty energy boundaries
     GEbounds ebounds;
 
-    // Determine matrix column that corresponds to specified measued energy
+    // Determine matrix column that corresponds to specified measured energy
     int column = m_ebds_measured.index(emeasured);
 
     // If matrix column was found then determine the boundaries for this
@@ -464,7 +465,7 @@ void GRmf::read(const GFitsTable& table)
             // Get start column index and number of columns
             int imeasured = f_chan->integer(itrue, igroup);
             int nvalues   = n_chan->integer(itrue, igroup);
-
+            
             // Get values
             for (int i = 0; i < nvalues; ++i, ++imeasured, ++icolumn) {
                 m_matrix(itrue, imeasured) = matrix->real(itrue, icolumn);

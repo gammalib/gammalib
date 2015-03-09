@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdispRmf.cpp - CTA RMF energy dispersion class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
+ *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_OLD_MC_CODE
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -165,9 +166,7 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * Returns the energy resolution, i.e. the probability density in observed
  * photon energy at a given (log10(E_src), log10(E_obs)).
  * To be precise: energy dispersion = dP / d(log10(E_obs)).
- * 
- * @todo Implement interpolation method
- * @todo So far the operator returns a matrix element and not a density!!!
+ *
  ***************************************************************************/
 double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& logEsrc,
@@ -176,21 +175,15 @@ double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& zenith,
                                 const double& azimuth) const
 {
-    // Set true energy
-    GEnergy etrue;
-    etrue.log10TeV(logEsrc);
+    // Update indexes and weighting factors for interpolation
+    update(logEobs, logEsrc);
 
-    // Set measured energy
-    GEnergy emeasured;
-    emeasured.log10TeV(logEobs);
+    // Perform interpolation
+    double edisp =  m_wgt1 * m_matrix(m_itrue1, m_imeas1) +
+                    m_wgt2 * m_matrix(m_itrue1, m_imeas2) +
+                    m_wgt3 * m_matrix(m_itrue2, m_imeas1) +
+                    m_wgt4 * m_matrix(m_itrue2, m_imeas2);
 
-    // Get indices for observed and true energy 
-	int itrue     = m_rmf.etrue().index(etrue);
-	int imeasured = m_rmf.emeasured().index(emeasured);
-
-    // Extract matrix element
-	double edisp = m_rmf.matrix()(itrue, imeasured);
-    
     // Return energy dispersion
     return edisp;
 }
@@ -248,10 +241,14 @@ void GCTAEdispRmf::load(const std::string& filename)
     // Store the filename
     m_filename = filename;
 
-    // Set Monte Carlo cache
+    // Set matrix
+    set_matrix();
+
+    // Set cache
+    set_cache();
     set_mc_cache();
 
-	// Return
+    // Return
     return;
 }
 
@@ -267,7 +264,13 @@ void GCTAEdispRmf::load(const std::string& filename)
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  *
  * Draws observed energy value from RMF matrix.
+ *
+ * @todo The new method is very computation intensitive as the cumulative
+ *       distributions are computed for every event. The old method is
+ *       more efficient. Either implement a rejection method for smoothness
+ *       or introduce subsampling for CDF cache.
  ***************************************************************************/
+#if defined(G_OLD_MC_CODE)
 GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& logEsrc,
                          const double& theta,
@@ -307,9 +310,48 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
 
     } // endif: there was redistribution information
 
-	// Return energy
-	return energy;
+    // Return energy
+    return energy;
 }
+#else
+GEnergy GCTAEdispRmf::mc(GRan&         ran,
+                         const double& logEsrc,
+                         const double& theta,
+                         const double& phi,
+                         const double& zenith,
+                         const double& azimuth) const
+{
+
+    // Update cumul
+    update_cumul(logEsrc, theta, phi, zenith, azimuth);
+
+    // Draw random number between 0 and 1 from uniform distribution
+    double p = ran.uniform();
+
+    // Find right index
+    // TODO: This can lead to index = m_edisp.axis(1) on axit, which
+    //       leads to an array indexing problem in the interpolation.
+    //       Also, a bisection search would be more efficient.
+    int index = 0;
+    while(index < m_cumul.size() - 2 && m_cumul[index+1].second < p) {
+        index++;
+    } // index found
+
+    // Interpolate Eobs value
+    double Eobs =   (m_cumul[index+1].second - p)*m_cumul[index].first
+                  + (p - m_cumul[index].second)*m_cumul[index+1].first;
+    Eobs       /=   (m_cumul[index+1].second - m_cumul[index].second);
+
+
+    // Set energy
+    GEnergy energy;
+    energy.TeV(Eobs);
+
+
+    // Return energy
+    return energy;
+}
+#endif
 
 
 /***********************************************************************//**
@@ -420,10 +462,28 @@ void GCTAEdispRmf::init_members(void)
     // Initialise members
     m_filename.clear();
     m_rmf.clear();
+    m_matrix.clear();
 
-    // Initialise cache
+    // Initialise interpolation cache
+    m_etrue.clear();
+    m_emeasured.clear();
+    m_last_etrue     = 9999.0;
+    m_last_emeasured = 9999.0;
+    m_itrue1         = 0;
+    m_itrue2         = 0;
+    m_imeas1         = 0;
+    m_imeas2         = 0;
+    m_wgt1           = 0.0;
+    m_wgt2           = 0.0;
+    m_wgt3           = 0.0;
+    m_wgt4           = 0.0;
+
+    // Initialise Monte Carlo cache
     m_mc_measured_start.clear();
     m_mc_measured_cdf.clear();
+    m_logEsrc     = -30.0;
+    m_theta       = 0.0;
+    m_cumul.clear();
 
     // Return
     return;
@@ -440,10 +500,28 @@ void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
     // Copy members
     m_filename = edisp.m_filename;
     m_rmf      = edisp.m_rmf;
+    m_matrix   = edisp.m_matrix;
 
-    // Copy cache
+    // Copy interpolation cache
+    m_etrue          = edisp.m_etrue;
+    m_emeasured      = edisp.m_emeasured;
+    m_last_etrue     = edisp.m_last_etrue;
+    m_last_emeasured = edisp.m_last_emeasured;
+    m_itrue1         = edisp.m_itrue1;
+    m_itrue2         = edisp.m_itrue2;
+    m_imeas1         = edisp.m_imeas1;
+    m_imeas2         = edisp.m_imeas2;
+    m_wgt1           = edisp.m_wgt1;
+    m_wgt2           = edisp.m_wgt2;
+    m_wgt3           = edisp.m_wgt3;
+    m_wgt4           = edisp.m_wgt4;
+
+    // Copy Monte Carlo cache
     m_mc_measured_start = edisp.m_mc_measured_start;
     m_mc_measured_cdf   = edisp.m_mc_measured_cdf;
+    m_logEsrc           = edisp.m_logEsrc;
+    m_theta             = edisp.m_theta;
+    m_cumul             = edisp.m_cumul;
 
     // Return
     return;
@@ -461,16 +539,82 @@ void GCTAEdispRmf::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Set redistribution matrix
+ ***************************************************************************/
+void GCTAEdispRmf::set_matrix(void)
+{
+    // Determine matrix rows and columns
+    int rows    = m_rmf.ntrue();
+    int columns = m_rmf.nmeasured();
+
+    // Initialize matrix
+    m_matrix = GMatrixSparse(rows, columns);
+
+    // Set matrix elements
+    for (int itrue = 0; itrue < rows; ++itrue) {
+
+        // Initialise sum
+        double sum = 0.0;
+
+        // Sum all measured energy bins
+        for (int imeasured = 0; imeasured < columns; ++imeasured) {
+            double ewidth = m_rmf.emeasured().ewidth(imeasured).TeV();
+            double emean  = m_rmf.emeasured().emean(imeasured).TeV();
+            sum          += m_rmf(itrue, imeasured) *
+                            ewidth / (gammalib::ln10 * emean);
+        }
+
+        // If sum is positive then scale all measured energy bins
+        if (sum > 0.0) {
+            for (int imeasured = 0; imeasured < columns; ++imeasured) {
+                m_matrix(itrue, imeasured) = m_rmf(itrue, imeasured) / sum;
+            }
+        }
+
+    } // endfor: looped over all true energies
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set interpolation cache
+ *
+ * Sets the interpolation cache.
+ ***************************************************************************/
+void GCTAEdispRmf::set_cache(void) const
+{
+    // Clear node arrays
+    m_etrue.clear();
+    m_emeasured.clear();
+
+    // Set log10(Etrue) nodes
+    for (int i = 0; i < m_rmf.ntrue(); ++i) {
+        m_etrue.append(m_rmf.etrue().emean(i).log10TeV());
+    }
+
+    // Set log10(Emeasured) nodes
+    for (int i = 0; i < m_rmf.nmeasured(); ++i) {
+        m_emeasured.append(m_rmf.emeasured().emean(i).log10TeV());
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Update the Monte-Carlo cache values
  *
  * Sets the following private class members:
  *
- *      m_mc_measured_start: start index in emeasured boundaries for each true energy
- *      m_mc_measured_stop:  stop index in emeasured boundaries for each true energy
+ *      m_mc_measured_start: start index in emeasured boundaries for each
+ *                           true energy
  *      m_mc_measured_cdf:   CDF for each true energy
  *
  ***************************************************************************/
-void GCTAEdispRmf::set_mc_cache(void)
+void GCTAEdispRmf::set_mc_cache(void) const
 {
     // Clear MC cache
     m_mc_measured_start.clear();
@@ -532,9 +676,104 @@ void GCTAEdispRmf::set_mc_cache(void)
 
         // Push vector on cache
         m_mc_measured_cdf.push_back(vector);
-    
+
     } // endfor: looped over all true energies
 
     // Return
-	return;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update cache
+ *
+ * @param[in] etrue True energy.
+ * @param[in] emeasured Measured energy.
+ *
+ * Updates the interpolation cache. The interpolation cache is composed
+ * of four indices and weights that define 4 data values of the RMF matrix
+ * that are used for bilinear interpolation.
+ ***************************************************************************/
+void GCTAEdispRmf::update(const double& etrue, const double& emeasured) const
+{
+    // Update cache only of arguments have changed
+    if (etrue != m_last_etrue || emeasured != m_last_emeasured) {
+
+        // Store actual values
+        m_last_etrue     = etrue;
+        m_last_emeasured = emeasured;
+
+        // Set values for node arrays
+        m_etrue.set_value(etrue);
+        m_emeasured.set_value(emeasured);
+
+        // Set indices for bi-linear interpolation
+        m_itrue1 = m_etrue.inx_left();
+        m_itrue2 = m_etrue.inx_right();
+        m_imeas1 = m_emeasured.inx_left();
+        m_imeas2 = m_emeasured.inx_right();
+
+        // Set weighting factors for bi-linear interpolation
+        m_wgt1 = m_etrue.wgt_left()  * m_emeasured.wgt_left();
+        m_wgt2 = m_etrue.wgt_left()  * m_emeasured.wgt_right();
+        m_wgt3 = m_etrue.wgt_right() * m_emeasured.wgt_left();
+        m_wgt4 = m_etrue.wgt_right() * m_emeasured.wgt_right();
+
+    } // endif: update requested
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update cumulative probability
+ *
+ ***************************************************************************/
+void GCTAEdispRmf::update_cumul(const double& logEsrc,
+                                const double& theta,
+                                const double& phi,
+                                const double& zenith,
+                                const double& azimuth) const
+{
+    if (logEsrc != m_logEsrc || theta != m_theta) {
+
+        m_logEsrc = logEsrc;
+        m_theta = theta;
+
+        // Initialize cumulative probability
+        double sum = 0.0;
+
+        // Divide bin into n sub-bins
+        const int n = 10;
+
+        // Loop through Eobs
+        for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
+
+            // Compute deltaEobs and logEobs values
+            double deltaEobs   = m_rmf.emeasured().ewidth(imeasured).TeV();
+            double Eobsmin     = m_rmf.emeasured().emin(imeasured).TeV();
+
+            for (int i = 0; i < n; ++i) {
+
+                double Eobs = Eobsmin+i*deltaEobs/n;
+
+                // Compute cumulative probability
+                double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta) * deltaEobs / n / Eobs / std::log(10.0);
+
+                //sum = sum+add/n >= 1.0 ? 1.0 : sum+add/n;
+                sum = sum+add >= 1.0 ? 1.0 : sum+add;
+
+                // Create pair containing Eobs and cumulative probability
+                std::pair<double, double> pair(Eobs, sum);
+
+                // Add to vector
+                m_cumul.push_back(pair);
+            }
+
+        }
+    }
+
+    // Return
+    return;
 }

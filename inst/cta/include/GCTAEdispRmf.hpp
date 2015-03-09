@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEdispRmf.hpp - CTA RMF energy dispersion class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
+ *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,10 +29,10 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GRan.hpp"
 #include "GRmf.hpp"
 #include "GVector.hpp"
 #include "GCTAEdisp.hpp"
+#include "GNodeArray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
@@ -96,15 +96,41 @@ private:
     void init_members(void);
     void copy_members(const GCTAEdispRmf& psf);
     void free_members(void);
-    void set_mc_cache(void);
+    void set_matrix(void);
+    void set_cache(void) const;
+    void set_mc_cache(void) const;
+    void update(const double& arg1, const double& arg2) const;
+    void update_cumul(const double& logEsrc,
+                      const double& theta = 0.0,
+                      const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0) const;
 
     // Members
-    std::string m_filename;  //!< Name of response file
-    GRmf        m_rmf;       //!< Redistribution matrix file
+    std::string   m_filename;  //!< Name of response file
+    GRmf          m_rmf;       //!< Redistribution matrix file
+    GMatrixSparse m_matrix;    //!< Normalised redistribution matrix
+
+    // Interpolation cache
+    mutable GNodeArray m_etrue;          //!< Array of log10(Etrue)
+    mutable GNodeArray m_emeasured;      //!< Array of log10(Emeasured)
+    mutable double     m_last_etrue;     //!< Last log10(Etrue)
+    mutable double     m_last_emeasured; //!< Last log10(Emeasured)
+    mutable int        m_itrue1;         //!< Index of left Etrue
+    mutable int        m_itrue2;         //!< Index of right Etrue
+    mutable int        m_imeas1;         //!< Index of left Emeasured
+    mutable int        m_imeas2;         //!< Index of right Emeasured
+    mutable double     m_wgt1;           //!< Weight of lower left node
+    mutable double     m_wgt2;           //!< Weight of upper left node
+    mutable double     m_wgt3;           //!< Weight of lower right node
+    mutable double     m_wgt4;           //!< Weight of upper right node
 
     // Monte Carlo cache
-    mutable std::vector<int>     m_mc_measured_start;
-    mutable std::vector<GVector> m_mc_measured_cdf;
+    mutable std::vector<int>                        m_mc_measured_start;
+    mutable std::vector<GVector>                    m_mc_measured_cdf;
+    mutable double                                  m_logEsrc;
+    mutable double                                  m_theta;
+    mutable std::vector<std::pair<double, double> > m_cumul;
 };
 
 
@@ -128,19 +154,19 @@ std::string GCTAEdispRmf::classname(void) const
 inline
 std::string GCTAEdispRmf::filename(void) const
 {
-    return m_filename;
+    return (m_filename);
 }
 
 
 /***********************************************************************//**
  * @brief Return Redistribution Matrix File
  *
- * @return Returns Redistribution Matrix File.
+ * @return Reference to Redistribution Matrix File.
  ***************************************************************************/
 inline
 const GRmf& GCTAEdispRmf::rmf(void) const
 {
-    return m_rmf;
+    return (m_rmf);
 }
 
 #endif /* GCTAEDISPRMF_HPP */

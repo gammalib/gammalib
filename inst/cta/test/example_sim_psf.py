@@ -88,14 +88,14 @@ def sim_psf(response, energy, r_max=0.8, rbins=1000, nmc=1000000):
         print(sum)
 
         # Plot simulated data
-        #plt.plot(delta, counts, 'ro')
-        #plt.errorbar(delta, counts, error, fmt=None, ecolor='r')
+        plt.plot(delta, counts, 'ro')
+        plt.errorbar(delta, counts, error, fmt=None, ecolor='r')
 
         # Plot PSF
         plt.plot(delta, psf, 'b-')
         #plt.semilogy(delta, psf, 'b-')
-        plt.xlim([0.4,0.45])
-        plt.ylim([0,1.0])
+        #plt.xlim([0.4,0.45])
+        #plt.ylim([0,1.0])
         
         # Set axes
         plt.xlabel("Offset angle (degrees)")

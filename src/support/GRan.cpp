@@ -383,7 +383,7 @@ double GRan::chisq2(void)
 
 
 /***********************************************************************//**
- * @brief Random sampling from a cummulative density function
+ * @brief Random sampling from a cumulative density function
  *
  * @param[in] cdf Array containing cumulative density function
  ***************************************************************************/
@@ -412,7 +412,7 @@ int GRan::cdf(const std::vector<double>& cdf)
 
 
 /***********************************************************************//**
- * @brief Random sampling from a cummulative density function
+ * @brief Random sampling from a cumulative density function
  *
  * @param[in] cdf Vector containing cumulative density function
  *
