@@ -45,10 +45,6 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
     # Continue only if matplotlib is available
     if has_matplotlib:
 
-        # Create figure
-        plt.figure(1)
-        plt.title("MC simulated Energy dispersion (true photon energy "+str(etrue)+" TeV)")
-
         # Set log10(etrue)
         logEtrue = log10(etrue)
 
@@ -77,6 +73,7 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
         # Get expected energy dispersion
         sum = 0.0
         exp_edisp = []
+        cumul = []
         for i in range(ebins):
             eobs     = eobs_axis[i]
             if eobs <= edisp.ebounds_obs(logEtrue).emax().TeV():
@@ -86,26 +83,36 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
                 value = 0.0
             sum += value
             exp_edisp.append(value)
+            cumul.append(sum/nmc)
         print(sum)
 
+        # Create figure
+        fig, ax1 = plt.subplots()
+
         # Plot simulated data
-        plt.plot(eobs_axis, counts, 'ro')
-        plt.errorbar(eobs_axis, counts, error, fmt=None, ecolor='g')
+        ax1.plot(eobs_axis, counts, 'ro')
+        ax1.errorbar(eobs_axis, counts, error, fmt=None, ecolor='g')
 
         # Plot energy dispersion
-        plt.plot(eobs_axis, exp_edisp, 'b-')
-        #plt.semilogy(eobs_axis, psf, 'b-')
-        #plt.xlim([0.4,0.45])
-        #plt.ylim([0,1.0])
+        ax1.plot(eobs_axis, exp_edisp, 'b-')
 
         # Set axes
-        plt.xlabel("Observed energy (TeV)")
-        plt.ylabel("Number of counts")
+        ax1.set_xlabel("Observed energy (TeV)")
+        ax1.set_ylabel("Number of counts")
+
+        ax2 = ax1.twinx()
+
+        # Plot cumulative dispersion
+        ax2.plot(eobs_axis, cumul, 'm')
+
+        # Set axis
+        ax2.set_ylabel("Cumulative probability")
 
         # Notify
         print("PLEASE CLOSE WINDOW TO CONTINUE ...")
 
         # Show plot
+        plt.title("MC simulated Energy dispersion (true photon energy "+str(etrue)+" TeV)")
         plt.show()
 
     # Return
@@ -126,9 +133,9 @@ if __name__ == '__main__':
     print("******************************")
 
     # Load edisp
-    edisp = GCTAEdispRmf("./caldb/dc1/rmf.fits")                                          # OK !
-    #edisp = GCTAEdispPerfTable("../caldb/cta_dummy_irf.dat")                              # OK !
-    #edisp = GCTAEdisp2D("../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits")  # OK !
+    edisp = GCTAEdispRmf("./caldb/dc1/rmf.fits")
+    #edisp = GCTAEdispPerfTable("../caldb/cta_dummy_irf.dat")
+    #edisp = GCTAEdisp2D("../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits")
 
     # Simulate Edisp
     sim_edisp(edisp, 20.0)

@@ -166,8 +166,6 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * photon energy at a given (log10(E_src), log10(E_obs)).
  * To be precise: energy dispersion = dP / d(log10(E_obs)).
  *
- * @todo Implement interpolation method
- * @todo So far the operator returns a matrix element and not a density!!!
  ***************************************************************************/
 double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& logEsrc,
@@ -189,11 +187,11 @@ double GCTAEdispRmf::operator()(const double& logEobs,
     update(logEobs, logEsrc);
 
     // Perform interpolation
-
     double edisp =  m_wgt1 * m_rmf(m_itrue1, m_imeas1) +
                     m_wgt2 * m_rmf(m_itrue2, m_imeas1) +
                     m_wgt3 * m_rmf(m_itrue1, m_imeas2) +
                     m_wgt4 * m_rmf(m_itrue2, m_imeas2);
+
 
     // Return energy dispersion
     return edisp;
@@ -295,82 +293,37 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& azimuth) const
 {
 
+    // Update cumul
+    update_cumul(logEsrc, theta, phi, zenith, azimuth);
+
     // Draw random number between 0 and 1 from uniform distribution
     double p = ran.uniform();
 
-    // Update cumulative probability
-    update_cumul(logEsrc, theta, phi, zenith, azimuth);
-
     // Find right index
     int index = 0;
-    while(index < m_rmf.nmeasured() - 2 && m_cumul[index+1].second < p) {
+    while(index < m_cumul.size() - 2 && m_cumul[index+1].second < p) {
         index++;
     } // index found
 
-    // Interpolate result Eobs value
-    double result =   (m_cumul[index+1].second - p)*m_cumul[index].first
-                    + (p - m_cumul[index].second)*m_cumul[index+1].first;
-    result       /=   (m_cumul[index+1].second - m_cumul[index].second);
+    // Interpolate Eobs value
+    double Eobs =   (m_cumul[index+1].second - p)*m_cumul[index].first
+                  + (p - m_cumul[index].second)*m_cumul[index+1].first;
+    Eobs       /=   (m_cumul[index+1].second - m_cumul[index].second);
 
-    // Final result
-    double logEnergy = std::log10(result);
 
     // Set energy
     GEnergy energy;
-    energy.log10TeV(logEnergy);
+    energy.TeV(Eobs);
 
 
-/*
+/* PREVIOUS VERSION
     // Set true energy
     GEnergy energy;
     energy.log10TeV(logEsrc);
 
-
-    // Divide bin into n sub-bins
-    const int n = 4;
-
     // Determine true energy index
     int itrue = m_rmf.etrue().index(energy);
 
-    if (itrue != -1) {
-
-        // Determine true energy sub-index
-        int isub          = -1;
-        double etruemin   = m_rmf.etrue().emin(itrue).log10TeV();
-        double etruewidth = m_rmf.etrue().emax(itrue).log10TeV() - etruemin;
-
-        while (++isub < n && energy.log10TeV() >= etruemin + (isub+1)*etruewidth/n);
-
-        if (isub != -1) {
-
-            // Get offset in measured energy. Continue only if offset is valid
-            int offset = m_mc_measured_start[itrue];
-            if (offset != -1) {
-
-                // Determine measured energy index from Monte-Carlo cache
-                int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
-
-                // Get log10 energy minimum and bin width
-                double emin   = m_rmf.emeasured().emin(imeasured).log10TeV();
-                double ewidth = m_rmf.emeasured().emax(imeasured).log10TeV() - emin;
-
-                // Draw a random energy from this interval
-                double e = emin + (isub + ran.uniform())*ewidth/n;
-
-                // Set interval
-                energy.log10TeV(e);
-            }
-
-        }
-
-    }
-*/
-/*
-    // Determine true energy index
-    int itrue = m_rmf.etrue().index(energy);
-
-    // Continue only if the true energy index lies within a true energy
-    // boundary of the redistribution matrix file
     if (itrue != -1) {
 
         // Get offset in measured energy. Continue only if offset is valid
@@ -382,17 +335,17 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
 
             // Get log10 energy minimum and bin width
             double emin   = m_rmf.emeasured().emin(imeasured).log10TeV();
-            double ewidth = m_rmf.emeasured().emax(imeasured).log10TeV() - emin;
+            double emax   = m_rmf.emeasured().emax(imeasured).log10TeV();
+            double ewidth = emax - emin;
 
             // Draw a random energy from this interval
-            double e = emin + ewidth * ran.uniform();
+            double e = emin + ran.uniform()*ewidth;
 
             // Set interval
             energy.log10TeV(e);
+        }
 
-        } // endif: offset was valid
-
-    } // endif: there was redistribution information
+    }
 */
 
     // Return energy
@@ -520,8 +473,9 @@ void GCTAEdispRmf::init_members(void)
     m_wgt2        = 0.0;
     m_wgt3        = 0.0;
     m_wgt4        = 0.0;
-    m_logEsrc  = -30.0;
-    m_theta    = 0.0;
+    m_logEsrc     = -30.0;
+    m_theta       = 0.0;
+    m_cumul.clear();
 
     // Return
     return;
@@ -630,7 +584,7 @@ void GCTAEdispRmf::set_mc_cache(void)
 
         // Push vector on cache
         m_mc_measured_cdf.push_back(vector);
-    
+
     } // endfor: looped over all true energies
 
     // Return
@@ -685,14 +639,7 @@ void GCTAEdispRmf::update(const double& arg1, const double& arg2) const
 }
 
 /***********************************************************************//**
- * @brief Update Monte-Carlo cache
- *
- * @param[in] arg1 Argument for first axis.
- * @param[in] arg2 Argument for second axis.
- *
- * Updates the interpolation cache. The interpolation cache is composed
- * of four indices and weights that define 4 data values of the RMF matrix
- * that are used for bilinear interpolation.
+ * @brief Update cumulative probability
  *
  ***************************************************************************/
 void GCTAEdispRmf::update_cumul(const double& logEsrc,
@@ -709,26 +656,39 @@ void GCTAEdispRmf::update_cumul(const double& logEsrc,
         // Initialize cumulative probability
         double sum = 0.0;
 
+        const int n = 10;
+
         // Loop through Eobs
         for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
 
-            if (sum == 1.0) {
-                break;
-            }
-
             // Compute deltaEobs and logEobs values
             double deltaEobs   = m_rmf.emeasured().ewidth(imeasured).TeV();
-            double Eobs        = m_rmf.emeasured().emean(imeasured).TeV();
+            //double Eobs        = m_rmf.emeasured().emean(imeasured).TeV();
+            double Eobsmin     = m_rmf.emeasured().emin(imeasured).TeV();
 
-            // Compute cumulative probability (can't be higher than 1)
-            double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta)*deltaEobs/Eobs/std::log(10.0);
-            sum = sum+add >= 1.0 ? 1.0 : sum+add;
+            // Compute cumulative probability
+            //double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta)
+            //             * deltaEobs / Eobs / std::log(10.0);
 
-            // Create pair containing Eobs and cumulated probability
-            std::pair<double, double> pair(Eobs, sum);
+            for (int i = 0; i < n; ++i) {
 
-            // Add to vector
-            m_cumul.push_back(pair);
+                double Eobs = Eobsmin+i*deltaEobs/n;
+
+                // Compute cumulative probability
+                double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta) * deltaEobs / n / Eobs / std::log(10.0);
+
+                //sum = sum+add/n >= 1.0 ? 1.0 : sum+add/n;
+                sum = sum+add >= 1.0 ? 1.0 : sum+add;
+
+                // Create pair containing Eobs and cumulative probability
+                std::pair<double, double> pair(Eobs, sum);
+                //std::pair<double, double> pair(Eobsmin+i*deltaEobs/n, sum);
+                std::cout << "cumul=" << sum << ", Eobs=" << Eobs << std::endl;
+                //std::cout << "cumul=" << sum << ", Eobs=" << Eobsmin+i*deltaEobs/n << std::endl;
+
+                // Add to vector
+                m_cumul.push_back(pair);
+            }
 
         }
     }

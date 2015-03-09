@@ -407,7 +407,7 @@ int GRan::cdf(const std::vector<double>& cdf)
     }
 
     // Return index
-	return low;
+    return low;
 }
 
 

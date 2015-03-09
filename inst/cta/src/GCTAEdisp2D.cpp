@@ -421,7 +421,7 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
         index++;
     } // index found
 
-    // Compute result EobsOnEtrue value
+    // Interpolate EobsOnEtrue value
     double result =   (cumul[index+1].second - p)*cumul[index].first
                     + (p - cumul[index].second)*cumul[index+1].first;
     result       /=   (cumul[index+1].second - cumul[index].second);
