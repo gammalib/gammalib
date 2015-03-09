@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCTAEdisp2D.hpp - CTA 2D energy dispersion class                *
+ *            GCTAEdisp2D.hpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015 by Florent Forest                                   *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -24,22 +24,27 @@
  * @author Florent Forest
  */
 
-/* __ Includes ___________________________________________________________ */
 #ifndef GCTAEDISP2D_HPP
 #define GCTAEDISP2D_HPP
 
+/* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GFits.hpp"
+//#include "GFits.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAResponseTable.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GFits;
+class GFitsBinTable;
+
 
 /***********************************************************************//**
  * @class GCTAEdisp2D
  *
  * @brief CTA 2D energy dispersion class
  *
- * This class implements the class for the CTA 2D energy
- * dispersion response.
+ * This class implements the energy dispersion for the CTA 2D response.
  ***************************************************************************/
 class GCTAEdisp2D : public GCTAEdisp {
 
@@ -60,28 +65,28 @@ public:
                       const double& azimuth = 0.0) const;
 
     // Implemented methods
-    void        clear(void);
-    GCTAEdisp2D*  clone(void) const;
-    std::string classname(void) const;
-    void        load(const std::string& filename);
-    std::string filename(void) const;
-    GEnergy     mc(GRan&         ran,
-                   const double& logE,
-                   const double& theta = 0.0,
-                   const double& phi = 0.0,
-                   const double& zenith = 0.0,
-                   const double& azimuth = 0.0) const;
-    GEbounds    ebounds_obs(const double& logEsrc,
-                            const double& theta = 0.0,
-                            const double& phi = 0.0,
-                            const double& zenith = 0.0,
-                            const double& azimuth = 0.0) const;
-    GEbounds    ebounds_src(const double& logEobs,
-                            const double& theta = 0.0,
-                            const double& phi = 0.0,
-                            const double& zenith = 0.0,
-                            const double& azimuth = 0.0) const;
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void         clear(void);
+    GCTAEdisp2D* clone(void) const;
+    std::string  classname(void) const;
+    void         load(const std::string& filename);
+    std::string  filename(void) const;
+    GEnergy      mc(GRan&         ran,
+                    const double& logE,
+                    const double& theta = 0.0,
+                    const double& phi = 0.0,
+                    const double& zenith = 0.0,
+                    const double& azimuth = 0.0) const;
+    GEbounds     ebounds_obs(const double& logEsrc,
+                             const double& theta = 0.0,
+                             const double& phi = 0.0,
+                             const double& zenith = 0.0,
+                             const double& azimuth = 0.0) const;
+    GEbounds     ebounds_src(const double& logEobs,
+                             const double& theta = 0.0,
+                             const double& phi = 0.0,
+                             const double& zenith = 0.0,
+                             const double& azimuth = 0.0) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Methods
     const GCTAResponseTable& table(void) const;
@@ -95,12 +100,15 @@ private:
     void init_members(void);
     void copy_members(const GCTAEdisp2D& edisp);
     void free_members(void);
-    void update(const double& logEobs, const double& logEsrc, const double& theta) const;
+    void update(const double& logEobs,
+                const double& logEsrc,
+                const double& theta) const;
 
     // Members
-    std::string m_filename;     //!< Name of Edisp response file
-    GCTAResponseTable m_edisp;  //!< Edisp response table
+    std::string       m_filename;  //!< Name of Edisp response file
+    GCTAResponseTable m_edisp;     //!< Edisp response table
 };
+
 
 /***********************************************************************//**
  * @brief Return class name
@@ -117,13 +125,38 @@ std::string GCTAEdisp2D::classname(void) const
 /***********************************************************************//**
  * @brief Return filename
  *
- * @return Returns filename from which energy dispersion was loaded
+ * @return Name of FITS file from which energy dispersion was loaded.
  ***************************************************************************/
 inline
 std::string GCTAEdisp2D::filename(void) const
 {
     // Return filename
-    return m_filename;
+    return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Return response table
+ *
+ * @return Reference to response table.
+ ***************************************************************************/
+inline
+const GCTAResponseTable& GCTAEdisp2D::table(void) const
+{
+    return (m_edisp);
+}
+
+
+/***********************************************************************//**
+ * @brief Set response table
+ *
+ * @param[in] Response table.
+ ***************************************************************************/
+inline
+void GCTAEdisp2D::table(const GCTAResponseTable& table)
+{
+    m_edisp = table;
+    return;
 }
 
 #endif /* GCTAEDISP2D_HPP */
