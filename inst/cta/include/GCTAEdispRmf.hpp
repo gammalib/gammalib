@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-//#include "GRan.hpp"
 #include "GRmf.hpp"
 #include "GVector.hpp"
 #include "GCTAEdisp.hpp"
@@ -97,6 +96,7 @@ private:
     void init_members(void);
     void copy_members(const GCTAEdispRmf& psf);
     void free_members(void);
+    void set_matrix(void);
     void set_cache(void) const;
     void set_mc_cache(void) const;
     void update(const double& arg1, const double& arg2) const;
@@ -107,8 +107,9 @@ private:
                       const double& azimuth = 0.0) const;
 
     // Members
-    std::string m_filename;  //!< Name of response file
-    GRmf        m_rmf;       //!< Redistribution matrix file
+    std::string   m_filename;  //!< Name of response file
+    GRmf          m_rmf;       //!< Redistribution matrix file
+    GMatrixSparse m_matrix;    //!< Normalised redistribution matrix
 
     // Interpolation cache
     mutable GNodeArray m_etrue;          //!< Array of log10(Etrue)

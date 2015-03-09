@@ -179,10 +179,10 @@ double GCTAEdispRmf::operator()(const double& logEobs,
     update(logEobs, logEsrc);
 
     // Perform interpolation
-    double edisp =  m_wgt1 * m_rmf(m_itrue1, m_imeas1) +
-                    m_wgt2 * m_rmf(m_itrue1, m_imeas2) +
-                    m_wgt3 * m_rmf(m_itrue2, m_imeas1) +
-                    m_wgt4 * m_rmf(m_itrue2, m_imeas2);
+    double edisp =  m_wgt1 * m_matrix(m_itrue1, m_imeas1) +
+                    m_wgt2 * m_matrix(m_itrue1, m_imeas2) +
+                    m_wgt3 * m_matrix(m_itrue2, m_imeas1) +
+                    m_wgt4 * m_matrix(m_itrue2, m_imeas2);
 
     // Return energy dispersion
     return edisp;
@@ -240,6 +240,9 @@ void GCTAEdispRmf::load(const std::string& filename)
 
     // Store the filename
     m_filename = filename;
+
+    // Set matrix
+    set_matrix();
 
     // Set cache
     set_cache();
@@ -459,6 +462,7 @@ void GCTAEdispRmf::init_members(void)
     // Initialise members
     m_filename.clear();
     m_rmf.clear();
+    m_matrix.clear();
 
     // Initialise interpolation cache
     m_etrue.clear();
@@ -496,6 +500,7 @@ void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
     // Copy members
     m_filename = edisp.m_filename;
     m_rmf      = edisp.m_rmf;
+    m_matrix   = edisp.m_matrix;
 
     // Copy interpolation cache
     m_etrue          = edisp.m_etrue;
@@ -528,6 +533,46 @@ void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
  ***************************************************************************/
 void GCTAEdispRmf::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set redistribution matrix
+ ***************************************************************************/
+void GCTAEdispRmf::set_matrix(void)
+{
+    // Determine matrix rows and columns
+    int rows    = m_rmf.ntrue();
+    int columns = m_rmf.nmeasured();
+
+    // Initialize matrix
+    m_matrix = GMatrixSparse(rows, columns);
+
+    // Set matrix elements
+    for (int itrue = 0; itrue < rows; ++itrue) {
+
+        // Initialise sum
+        double sum = 0.0;
+
+        // Sum all measured energy bins
+        for (int imeasured = 0; imeasured < columns; ++imeasured) {
+            double ewidth = m_rmf.emeasured().ewidth(imeasured).TeV();
+            double emean  = m_rmf.emeasured().emean(imeasured).TeV();
+            sum          += m_rmf(itrue, imeasured) *
+                            ewidth / (gammalib::ln10 * emean);
+        }
+
+        // If sum is positive then scale all measured energy bins
+        if (sum > 0.0) {
+            for (int imeasured = 0; imeasured < columns; ++imeasured) {
+                m_matrix(itrue, imeasured) = m_rmf(itrue, imeasured) / sum;
+            }
+        }
+
+    } // endfor: looped over all true energies
+
     // Return
     return;
 }
