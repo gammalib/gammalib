@@ -28,9 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
+#include "GMath.hpp"
 #include "GRmf.hpp"
 #include "GException.hpp"
-#include "GTools.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
@@ -386,27 +387,6 @@ void GRmf::load(const std::string& filename)
 
     // Close FITS file
     file.close();
-    
-    // Normalize matrix
-    GMatrixSparse scaled_matrix = m_matrix.transpose();
-    
-    for (int itrue = 0; itrue < this->ntrue(); ++itrue) {
-
-        double sum = 0.0;
-
-        for (int imeasured = 0; imeasured < this->nmeasured(); ++imeasured) {
-            double deltaBin = this->emeasured().ewidth(imeasured).TeV();
-            double Eobs     = this->emeasured().emean(imeasured).TeV();
-            sum += m_matrix(itrue, imeasured) * deltaBin / std::log(10.0) / Eobs;
-        }
-
-        // Scale row (transpose + column used because row method not implemented)
-        if (sum != 0.0) {
-            scaled_matrix.column(itrue, scaled_matrix.column(itrue) / sum);
-        }
-    }
-
-    m_matrix = scaled_matrix.transpose();
 
     // Store filename
     m_filename = filename;
