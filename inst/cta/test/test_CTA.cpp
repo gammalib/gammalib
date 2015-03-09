@@ -62,7 +62,7 @@ const std::string cta_caldb_king   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/b
 const std::string cta_irf_king     = "irf_file.fits";
 const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
 const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
-const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits";
+const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits";
 const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
 const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
 
