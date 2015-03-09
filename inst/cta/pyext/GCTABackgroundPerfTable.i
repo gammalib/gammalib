@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTABackgroundPerfTable.i - CTA performance table background class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
  * @brief CTA performance table background class
  ***************************************************************************/
 class GCTABackgroundPerfTable : public GCTABackground {
+
 public:
     // Constructors and destructors
     GCTABackgroundPerfTable(void);
@@ -45,8 +46,7 @@ public:
     // Implemented pure virtual operators
     virtual double operator()(const double& logE, 
                               const double& detx, 
-                              const double& dety,
-                              const bool&   etrue = false) const;
+                              const double& dety) const;
 
     // Implemented pure virtual methods
     void                       clear(void);

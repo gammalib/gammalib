@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.hpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -53,8 +53,7 @@ public:
     // Implemented pure virtual operators
     virtual double operator()(const double& logE, 
                               const double& detx, 
-                              const double& dety,
-                              const bool&   etrue = false) const;
+                              const double& dety) const;
 
     // Operators
     GCTABackgroundPerfTable& operator=(const GCTABackgroundPerfTable& bgd);

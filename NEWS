@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-21 February 2015
+9 March 2015
 
 
 1. Introduction
@@ -21,6 +21,9 @@ The following classes have been renamed:
 * GCTASourceCube             => GCTACubeSource
 * GCTASourceCubeDiffuse      => GCTACubeSourceDiffuse
 * GCTASourceCubePointSource  => GCTACubeSourcePoint
+
+The etrue flag has been removed from the GCTABackground class access operator.
+Background histograms are always given as function of reconstructued energy.
 
 
 3. Configuration

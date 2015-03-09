@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTABackgroundPerfTable.cpp - CTA performance table background class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -164,21 +164,14 @@ GCTABackgroundPerfTable& GCTABackgroundPerfTable::operator=(const GCTABackground
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] detx Tangential coord in nominal sys (rad).
  * @param[in] dety Tangential coord in nominal sys (rad).
- * @param[in] etrue Use true energy (true/false) (not used).
  *
  * Returns the background rate in units of events/s/MeV/sr for a given energy
  * and detector coordinates. The method assures that the background rate
  * never becomes negative.
- *
- * The method supports true and reconstructed energies for logE. To access
- * the background rate as function of true energy, specify etrue=true
- * (this is the default). The obtained the background rate as function of
- * reconstructed energy, specify etrue=false.
  ***************************************************************************/
 double GCTABackgroundPerfTable::operator()(const double& logE, 
                                            const double& detx, 
-                                           const double& dety,
-                                           const bool&   etrue) const
+                                           const double& dety) const
 {
     // Get background rate
     double rate = m_logE.interpolate(logE, m_background);

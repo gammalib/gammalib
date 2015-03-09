@@ -165,28 +165,18 @@ GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] detx Tangential coord in nominal sys (rad).
  * @param[in] dety Tangential coord in nominal sys (rad).
- * @param[in] etrue Use true energy (true/false). Defaults to false.
  *
  * Returns the background rate in units of events/s/MeV/sr for a given energy
  * and detector coordinates. The method assures that the background rate
  * never becomes negative.
- *
- * The method supports true and reconstructed energies for logE. To access
- * the background rate as function of true energy, specify etrue=true
- * (this is the default). The obtained the background rate as function of
- * reconstructed energy, specify etrue=false.
  *
  * The method interpolates linearly in DETX and DETY, and logarithmically
  * in the energy direction.
  ***************************************************************************/
 double GCTABackground3D::operator()(const double& logE, 
                                     const double& detx, 
-                                    const double& dety,
-                                    const bool&   etrue) const
+                                    const double& dety) const
 {
-    // Set parameter index
-    int index = (etrue) ? 0 : 1;
-
     // Get background rate
     #if defined(G_LOG_INTERPOLATION)
     // Retrieve node arrays
@@ -231,14 +221,14 @@ double GCTABackground3D::operator()(const double& logE,
 
     // Bi-linear interpolation the rates in both energy layers
     double rate(0.0);
-    double rate_emin = wgt_ll * m_background(index, inx_ll + offset_emin) +
-                       wgt_lr * m_background(index, inx_lr + offset_emin) +
-                       wgt_rl * m_background(index, inx_rl + offset_emin) +
-                       wgt_rr * m_background(index, inx_rr + offset_emin);
-    double rate_emax = wgt_ll * m_background(index, inx_ll + offset_emax) +
-                       wgt_lr * m_background(index, inx_lr + offset_emax) +
-                       wgt_rl * m_background(index, inx_rl + offset_emax) +
-                       wgt_rr * m_background(index, inx_rr + offset_emax);
+    double rate_emin = wgt_ll * m_background(0, inx_ll + offset_emin) +
+                       wgt_lr * m_background(0, inx_lr + offset_emin) +
+                       wgt_rl * m_background(0, inx_rl + offset_emin) +
+                       wgt_rr * m_background(0, inx_rr + offset_emin);
+    double rate_emax = wgt_ll * m_background(0, inx_ll + offset_emax) +
+                       wgt_lr * m_background(0, inx_lr + offset_emax) +
+                       wgt_rl * m_background(0, inx_rl + offset_emax) +
+                       wgt_rr * m_background(0, inx_rr + offset_emax);
 
     // If both rates are positive then perform a logarithmic
     // interpolation in energy
@@ -252,7 +242,7 @@ double GCTABackground3D::operator()(const double& logE,
         rate = wgt_emin * rate_emin + wgt_emax * rate_emax;
     }
     #else
-    double rate = m_background(index, detx, dety, logE);
+    double rate = m_background(0, detx, dety, logE);
     #endif
 
     // Make sure that background rate is not negative
@@ -371,15 +361,6 @@ void GCTABackground3D::write(GFitsBinTable& hdu) const
 {
     // Write background table
     m_background.write(hdu);
-
-    // Set additional keywords
-    // hdu.card("HDUCLAS1","RESPONSE", "");
-    //   hdu.card("HDUCLAS2","BGD", "");
-    //   hdu.card("CDEC0001","CTA background", "");
-    //  hdu.card("TDIM7","(14,14,15)", "");
-    // hdu.card("TDIM8","(14,14,15)", "");
-    //   hdu.card("TELESCOP", "CTA", "");
-    //    hdu.card("INSTRUME", "CTA", "");
 
     // Return
     return;
@@ -671,8 +652,6 @@ void GCTABackground3D::free_members(void)
 /***********************************************************************//**
  * @brief Initialise Monte Carlo cache
  *
- * @param[in] etrue Use true energy flag (true=yes, false=no)
- *
  * Initialises the cache for Monte Carlo sampling. The method uses the
  * members m_mc_max_bin and m_mc_max_logE to enforce an internal rebinning
  * in case that the provided background model information is coarsely
@@ -682,7 +661,7 @@ void GCTABackground3D::free_members(void)
  * @todo Verify assumption made about the solid angles of the response table
  *       elements.
  ***************************************************************************/
-void GCTABackground3D::init_mc_cache(const bool& etrue) const
+void GCTABackground3D::init_mc_cache(void) const
 {
     // Initialise cache
     m_mc_cache.clear();
@@ -765,7 +744,7 @@ void GCTABackground3D::init_mc_cache(const bool& etrue) const
             for (int ix = 0; ix < m_mc_nx; ++ix, detx += xbin) {
                 double dety = ymin + 0.5 * ybin;
                 for (int iy = 0; iy < m_mc_ny; ++iy, dety += ybin) {
-                    double rate = (*this)(logE, detx, dety, etrue) * solidangle;
+                    double rate = (*this)(logE, detx, dety) * solidangle;
                     if (rate > 0.0) {
                         total_rate += rate;
                     }

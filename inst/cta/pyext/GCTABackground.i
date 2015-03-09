@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTABackground.i - CTA background model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
  * @brief Abstract base class for the CTA background model
  ***************************************************************************/
 class GCTABackground : public GBase {
+
 public:
     // Constructors and destructors
     GCTABackground(void);
@@ -44,8 +45,7 @@ public:
     // Pure virtual operators
     virtual double operator()(const double& logE, 
                               const double& detx, 
-                              const double& dety,
-                              const bool&   etrue = false) const = 0;
+                              const double& dety) const = 0;
 
     // Pure virtual methods
     virtual void                       clear(void) = 0;

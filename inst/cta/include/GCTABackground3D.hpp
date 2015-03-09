@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.hpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,8 +54,7 @@ public:
     // Implemented pure virtual operators
     virtual double operator()(const double& logE, 
                               const double& detx, 
-                              const double& dety,
-                              const bool&   etrue = false) const;
+                              const double& dety) const;
 
     // Operators
     GCTABackground3D& operator=(const GCTABackground3D& bgd);
@@ -85,7 +84,7 @@ private:
     void init_members(void);
     void copy_members(const GCTABackground3D& bgd);
     void free_members(void);
-    void init_mc_cache(const bool& etrue = false) const;
+    void init_mc_cache(void) const;
 
     // Members
     std::string       m_filename;    //!< Name of background response file

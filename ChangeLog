@@ -1,4 +1,4 @@
-2015-02-21  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-03-09  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -18,6 +18,7 @@
         Forbid appending to text, comment and PI XML nodes (#804)
         Increase precision for diffuse model Npred computation (#1248)
         Implement observation definition reader/writer (#1429)
+        Remove etrue flag from CTA background IRF (#1437)
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTABackground.hpp - CTA background model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,8 +52,7 @@ public:
     // Pure virtual operators
     virtual double operator()(const double& logE, 
                               const double& detx, 
-                              const double& dety,
-                              const bool&   etrue = false) const = 0;
+                              const double& dety) const = 0;
 
     // Operators
     GCTABackground& operator=(const GCTABackground& bgd);
