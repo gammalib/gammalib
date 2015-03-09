@@ -130,12 +130,19 @@ class Test(GPythonTestSuite):
             self.test_try_failure("Unable to allocate GCTAPsf2D from file.")
 
         # Test PSF values
-        self.test_value(psf(0.0, 0.0, 0.0), 71870.069895, 1.0e-6)
-        self.test_value(psf(0.001, 0.0, 0.0), 57344.19598, 1.0e-6)
-        self.test_value(psf(0.0, 1.0, 0.0), 270343.322467, 1.0e-6)
-        self.test_value(psf(0.001, 1.0, 0.0), 115627.748759, 1.0e-6)
-        self.test_value(psf(0.0, 1.0, 0.01745), 190115.060762, 1.0e-6)
-        self.test_value(psf(0.001, 1.0, 0.01745), 104622.655773, 1.0e-6)
+        #self.test_value(psf(0.0, 0.0, 0.0), 71870.069895, 1.0e-6)
+        #self.test_value(psf(0.001, 0.0, 0.0), 57344.19598, 1.0e-6)
+        #self.test_value(psf(0.0, 1.0, 0.0), 270343.322467, 1.0e-6)
+        #self.test_value(psf(0.001, 1.0, 0.0), 115627.748759, 1.0e-6)
+        #self.test_value(psf(0.0, 1.0, 0.01745), 190115.060762, 1.0e-6)
+        #self.test_value(psf(0.001, 1.0, 0.01745), 104622.655773, 1.0e-6)
+        self.test_value(psf(0.0, 0.0, 0.0), 163782.469465, 1.0e-6)
+        self.test_value(psf(0.001, 0.0, 0.0), 97904.9307797, 1.0e-6)
+        self.test_value(psf(0.0, 1.0, 0.0), 616076.98558, 1.0e-6)
+        self.test_value(psf(0.001, 1.0, 0.0), 88932.681708, 1.0e-6)
+        self.test_value(psf(0.0, 1.0, 0.01745), 433247.309504, 1.0e-6)
+        self.test_value(psf(0.001, 1.0, 0.01745), 111075.0692681, 1.0e-6)
+
 
         # Load King profile PSF
         self.test_try("Test GCTAPsfKing file constructor")
