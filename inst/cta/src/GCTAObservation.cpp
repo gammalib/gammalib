@@ -623,23 +623,62 @@ GEbounds GCTAObservation::ebounds(void) const
  * @exception GException::xml_invalid_parnames
  *            Invalid parameter names found in XML element.
  *
- * Reads information for a CTA observation from an XML element.
- * The expected format of the XML element is
+ * Reads information for a CTA observation from an XML element. This method
+ * handles to variants: a first where an event list of counts cube is
+ * given and a second where the observation definition information is
+ * provided by parameter tags.
+ *
+ * The XML format for an event list is
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
  *       ...
  *     </observation>
  *
- * for an unbinned observation and
+ * and for a counts cube is
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsCube" file="..."/>
  *       ...
  *     </observation>
  *
- * for a binned observation. Optional user energy thresholds can be
- * specified by adding the emin and emax attributes:
+ * The second variant without event information has the following format
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="Pointing" ra="..." dec="..."/>
+ *       <parameter name="Deadtime" deadc="..."/>
+ *       ...
+ *     </observation>
+ *
+ * In addition, calibration information can be specified using the format
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="Calibration" database="..." response="..."/>
+ *     </observation>
+ *
+ * If even more control is required over the response, individual file names
+ * can be specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
+ *     </observation>
+ *
+ * In case that a @a CountsCube is handled, the stacked response can also be
+ * provided in the format
+ *
+ *      <observation name="..." id="..." instrument="...">
+ *        ...
+ *        <parameter name="ExposureCube" file="..."/>
+ *        <parameter name="PsfCube"      file="..."/>
+ *      </observation>
+ *   
+ * Optional user energy thresholds can be specified by adding the @a emin
+ * and @a emax attributes to the @p observation tag:
  *
  *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
  *
@@ -673,8 +712,8 @@ void GCTAObservation::read(const GXmlElement& xml)
               "CTA observation requires at least 1 parameter.");
     }
 
-    // Extract observation parameters
-    int npar[] = {0};
+    // First try to extract observation parameters for an event file
+    int n_evfile = 0;
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
@@ -702,7 +741,6 @@ void GCTAObservation::read(const GXmlElement& xml)
             else {
                 const GFitsHDU& hdu = *fits.at(0);
                 read_attributes(hdu);
-
             }
 
             // Close FITS file
@@ -712,7 +750,7 @@ void GCTAObservation::read(const GXmlElement& xml)
             m_eventfile = filename;
 
             // Increment parameter counter
-            npar[0]++;
+            n_evfile++;
         }
 
         // Read Background filename (needed by GCTAModelCubeBackground)
@@ -725,11 +763,80 @@ void GCTAObservation::read(const GXmlElement& xml)
 
     } // endfor: looped over observation parameters
 
-    // Verify that all required parameters were found
-    if (npar[0] != 1) {
-        throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"EventList\" or \"CountsCube\" parameters.");
+    // Analyse parameters
+    bool has_evfile = (n_evfile > 0);
+
+    // If we have an event file then verify that all required parameters
+    // were found
+    if (has_evfile) {
+        gammalib::xml_check_par(G_READ, "EventList\" or \"CountsCube", n_evfile);
     }
+
+    // ... otherwise extract information from observation definition parameters
+    else {
+
+        // Initialise event list definition
+        GEbounds ebounds;
+        GGti     gti;
+        GCTARoi  roi;
+        bool     has_ebounds = false;
+        bool     has_gti     = false;
+        bool     has_roi     = false;
+
+        // Extract parameters (do nothing if parameter does not exist)
+        if (gammalib::xml_has_par(xml, "Pointing")) {
+            m_pointing.read(xml);
+        }
+        if (gammalib::xml_has_par(xml, "EnergyBoundaries")) {
+            ebounds.read(xml);
+            has_ebounds = true;
+        }
+        if (gammalib::xml_has_par(xml, "GoodTimeIntervals")) {
+            gti.read(xml);
+            has_gti = true;
+        }
+        if (gammalib::xml_has_par(xml, "RegionOfInterest")) {
+            roi.read(xml);
+            has_roi = true;
+        }
+        if (gammalib::xml_has_par(xml, "Deadtime")) {
+            const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Deadtime");
+            m_deadc                = gammalib::todouble(par->attribute("deadc"));
+        }
+        else {
+            m_deadc = 1.0;
+        }
+
+        // If we have at least one event list definition then create event
+        // list and attach it to the observation
+        if (has_ebounds || has_gti || has_roi) {
+
+            // Create an empty event list
+            GCTAEventList events;
+
+            // Handle energy boundaries
+            if (has_ebounds) {
+                events.ebounds(ebounds);
+            }
+
+            // Handle GTIs
+            if (has_gti) {
+                events.gti(gti);
+                ontime(gti.ontime());
+                livetime(gti.ontime() * m_deadc);
+            }
+
+            // Handle ROIs
+            if (has_roi) {
+                events.roi(roi);
+            }
+
+            // Attach event list
+            this->events(events);
+
+        } // endif: handled event list information
+
+    } // endelse: extracted information from observation definition
 
     // Determine response type as function of the information that is
     // provided in the XML file. The response type is determined from the
@@ -800,29 +907,65 @@ void GCTAObservation::read(const GXmlElement& xml)
  *
  * @exception GException::invalid_value
  *            No valid events found in observation.
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
  *
- * Writes information for a CTA observation into an XML element. The expected
- * format of the XML element is
+ * Writes information for a CTA observation into an XML element. This method
+ * handles to variants: a first where an event list of counts cube is
+ * given and a second where the observation definition information is
+ * provided by parameter tags. Note that in both bases, a valid event
+ * type needs to be set (either @a EventList or @a CountsCube).
+ *
+ * The XML format for an event list is
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
  *       ...
  *     </observation>
  *
- * for an unbinned observation and
+ * and for a counts cube is
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsCube" file="..."/>
  *       ...
  *     </observation>
  *
- * for a binned observation. If user energy threshold are defined (i.e.
- * threshold values are >0) the additional emin and emax attributes will
- * be written to the file:
+ * The second variant without event information has the following format
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="Pointing" ra="..." dec="..."/>
+ *       <parameter name="Deadtime" deadc="..."/>
+ *       ...
+ *     </observation>
+ *
+ * In addition, calibration information can be specified using the format
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="Calibration" database="..." response="..."/>
+ *     </observation>
+ *
+ * If even more control is required over the response, individual file names
+ * can be specified using
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       ...
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
+ *       <parameter name="Background"          file="..."/>
+ *     </observation>
+ *
+ * In case that a @a CountsCube is handled, the stacked response can also be
+ * provided in the format
+ *
+ *      <observation name="..." id="..." instrument="...">
+ *        ...
+ *        <parameter name="ExposureCube" file="..."/>
+ *        <parameter name="PsfCube"      file="..."/>
+ *      </observation>
+ *   
+ * If user energy thresholds are defined (i.e. threshold values are >0) the
+ * additional @a emin and @a emax attributes will be written to the
+ * @p observation tag:
  *
  *     <observation name="..." id="..." instrument="..." emin="..." emax="...">
  *
@@ -854,41 +997,32 @@ void GCTAObservation::write(GXmlElement& xml) const
         xml.attribute("emax", gammalib::str(m_hi_user_thres));
     }
 
-    // If XML element has 0 nodes then add the required parameter nodes
-    if (xml.elements() == 0) {
-        std::string text = "parameter name=\""+m_eventtype+"\"";
-        xml.append(GXmlElement(text));
+    // If there is a filename then write the event information to the
+    // XML file
+    if (m_eventfile.length() > 0) {
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_eventtype);
+        par->attribute("file", m_eventfile);
     }
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
+    // ... otherwise write the observation definition information
+    else {
 
-    // Verify that XML element has at least 1 parameter
-    if (xml.elements() < 1 || npars < 1) {
-        throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "CTA observation requires at least 1 parameter.");
-    }
+        // Write pointing, energy bounds, GTIs and ROI
+        m_pointing.write(xml);
+        events()->ebounds().write(xml);
+        events()->gti().write(xml);
 
-    // Set or update parameter attributes
-    int npar[] = {0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Eventlist and Countsmap
-        if (par->attribute("name") == m_eventtype) {
-            par->attribute("file", m_eventfile);
-            npar[0]++;
+        // Write ROI
+        const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(events());
+        if (list != NULL) {
+            list->roi().write(xml);
         }
 
-    } // endfor: looped over all parameters
-
-    // Verify that all required parameters are present
-    if (npar[0] != 1) {
-        throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"EventList\" or \"CountsCube\" parameters.");
+        // Write deadtime correction factor
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Deadtime");
+        par->attribute("deadc",  gammalib::str(m_deadc));
     }
+
 
     // Write response information
     if (m_response != NULL) {
@@ -1134,12 +1268,12 @@ const GEvents* GCTAObservation::events(void) const
         // a parallelized thread.
         #pragma omp critical
         {
-            try {
-                    const_cast<GCTAObservation*>(this)->load(m_eventfile);
-            }
-            catch (std::exception &e) {
-                ;
-            }
+        try {
+                const_cast<GCTAObservation*>(this)->load(m_eventfile);
+        }
+        catch (...) {
+            ;
+        }
         }
 
         // Throw an exception if the event container is still not valid

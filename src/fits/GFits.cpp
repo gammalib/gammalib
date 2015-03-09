@@ -1054,7 +1054,7 @@ void GFits::open(const std::string& filename, const bool& create)
     // may occur if the file is opened with an expression
     if (status == 202) {
         throw GException::fits_open_error(G_OPEN, fname, status,
-                                          "Keyword not found when opening file.");
+                          "Keyword not found when opening file.");
     }
 
     // Throw any other error
