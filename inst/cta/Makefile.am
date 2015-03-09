@@ -33,8 +33,8 @@ sources = src/GCTASupport.cpp \
           src/GCTAPsfKing.cpp \
           src/GCTAEdisp.cpp \
           src/GCTAEdispPerfTable.cpp \
-          src/GCTAEdisp2D.cpp \
           src/GCTAEdispRmf.cpp \
+          src/GCTAEdisp2D.cpp \
           src/GCTABackground.cpp \
           src/GCTABackgroundPerfTable.cpp \
           src/GCTABackground3D.cpp \
@@ -83,8 +83,8 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAPsfKing.hpp \
                      include/GCTAEdisp.hpp \
                      include/GCTAEdispPerfTable.hpp \
-                     include/GCTAEdisp2D.hpp \
                      include/GCTAEdispRmf.hpp \
+                     include/GCTAEdisp2D.hpp \
                      include/GCTABackground.hpp \
                      include/GCTABackgroundPerfTable.hpp \
                      include/GCTABackground3D.hpp \
