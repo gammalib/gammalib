@@ -40,6 +40,7 @@
 #include <algorithm>
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFits.hpp"
 
 /* __ Compile options ____________________________________________________ */
 
@@ -273,7 +274,7 @@ std::string gammalib::filepath(const std::string& pathname,
     // Return the file path
     return filepath;
 }
-    
+
 
 /***********************************************************************//**
  * @brief Convert unsigned short integer value into string
@@ -940,6 +941,40 @@ bool gammalib::dir_exists(const std::string& dirname)
 
 
 /***********************************************************************//**
+ * @brief Checks if file is a FITS file
+ *
+ * @param[in] filename File name.
+ *
+ * Checks if the specified file is a FITS file.
+ ***************************************************************************/
+bool gammalib::is_fits(const std::string& filename)
+{
+    // Initialise result
+    bool result = false;
+
+    // Try opening file
+    try {
+
+        // Open file
+        GFits fits(filename);
+
+        // If we're still alive then close file and result result to true
+        fits.close();
+        result = true;
+
+    }
+
+    // Catch any exceptions
+    catch (...) {
+        ;
+    }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Checks if a substring is in a string
  *
  * @param[in] str string you want to search in.
@@ -954,7 +989,7 @@ bool gammalib::contains(const std::string& str, const std::string& substring)
 
     // checks if substring is in str
     if (str.find(substring) != std::string::npos){
-    	result = true;
+        result = true;
     }
 
     // Return result
@@ -984,7 +1019,7 @@ void gammalib::warning(const std::string& origin,
 
     // End of compile option
     #endif
-    
+
     // Return
     return;
 }
@@ -1035,7 +1070,7 @@ std::string gammalib::xml2str(const std::string& arg)
         else {
             stop = arg.find(";", pos);
             if (stop != std::string::npos) {
-                
+
                 // First attach leading string to the result
                 if (len > 0) {
                     result += arg.substr(start-len, len);
@@ -1117,7 +1152,7 @@ std::string gammalib::xml2str(const std::string& arg)
         len     = length - pos;
         result += arg.substr(pos, len);
     }
-    
+
     // Return result
     return result;
 }

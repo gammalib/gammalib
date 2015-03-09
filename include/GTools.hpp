@@ -99,6 +99,7 @@ namespace gammalib {
     bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);
     bool                     is_notanumber(const double& x);
+    bool                     is_fits(const std::string& filename);
     bool                     contains(const std::string& str,
                                       const std::string& substring);
     void                     warning(const std::string& origin,
