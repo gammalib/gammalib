@@ -247,21 +247,6 @@ void GCTAEdispRmf::load(const std::string& filename)
     // Load RMF file
     m_rmf.load(filename);
 
-/*
-    // Check normalization
-    for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
-        double sum = 0.0;
-
-        for (int imeasured = 0; imeasured < m_rmf.nmeasured(); ++imeasured) {
-            double deltaBin = m_rmf.emeasured().ewidth(imeasured).TeV();
-            double Eobs = m_rmf.emeasured().emean(imeasured).TeV();
-            sum += m_rmf(itrue, imeasured) * deltaBin / std::log(10.0) / Eobs;
-        }
-
-        std::cout << "Sum = " << sum << std::endl;
-    }
-*/
-
     // Store the filename
     m_filename = filename;
 
@@ -315,38 +300,6 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
     GEnergy energy;
     energy.TeV(Eobs);
 
-
-/* PREVIOUS VERSION
-    // Set true energy
-    GEnergy energy;
-    energy.log10TeV(logEsrc);
-
-    // Determine true energy index
-    int itrue = m_rmf.etrue().index(energy);
-
-    if (itrue != -1) {
-
-        // Get offset in measured energy. Continue only if offset is valid
-        int offset = m_mc_measured_start[itrue];
-        if (offset != -1) {
-
-            // Determine measured energy index from Monte-Carlo cache
-            int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
-
-            // Get log10 energy minimum and bin width
-            double emin   = m_rmf.emeasured().emin(imeasured).log10TeV();
-            double emax   = m_rmf.emeasured().emax(imeasured).log10TeV();
-            double ewidth = emax - emin;
-
-            // Draw a random energy from this interval
-            double e = emin + ran.uniform()*ewidth;
-
-            // Set interval
-            energy.log10TeV(e);
-        }
-
-    }
-*/
 
     // Return energy
     return energy;
@@ -656,6 +609,7 @@ void GCTAEdispRmf::update_cumul(const double& logEsrc,
         // Initialize cumulative probability
         double sum = 0.0;
 
+        // Divide bin into n sub-bins
         const int n = 10;
 
         // Loop through Eobs
@@ -663,12 +617,7 @@ void GCTAEdispRmf::update_cumul(const double& logEsrc,
 
             // Compute deltaEobs and logEobs values
             double deltaEobs   = m_rmf.emeasured().ewidth(imeasured).TeV();
-            //double Eobs        = m_rmf.emeasured().emean(imeasured).TeV();
             double Eobsmin     = m_rmf.emeasured().emin(imeasured).TeV();
-
-            // Compute cumulative probability
-            //double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta)
-            //             * deltaEobs / Eobs / std::log(10.0);
 
             for (int i = 0; i < n; ++i) {
 
@@ -682,9 +631,6 @@ void GCTAEdispRmf::update_cumul(const double& logEsrc,
 
                 // Create pair containing Eobs and cumulative probability
                 std::pair<double, double> pair(Eobs, sum);
-                //std::pair<double, double> pair(Eobsmin+i*deltaEobs/n, sum);
-                std::cout << "cumul=" << sum << ", Eobs=" << Eobs << std::endl;
-                //std::cout << "cumul=" << sum << ", Eobs=" << Eobsmin+i*deltaEobs/n << std::endl;
 
                 // Add to vector
                 m_cumul.push_back(pair);
