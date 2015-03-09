@@ -7,7 +7,7 @@
 #
 # --------------------------------------------------------------------------
 #
-# Copyright (C) 2013-2015 Juergen Knoedlseder
+# Copyright (C) 2015 Florent Forest
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
+import gammalib
+import math
 
 
 # ============== #
@@ -46,7 +46,7 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
     if has_matplotlib:
 
         # Set log10(etrue)
-        logEtrue = log10(etrue)
+        logEtrue = math.log10(etrue)
 
         # Create eobs axis
         eobs_axis = []
@@ -58,7 +58,7 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
         counts = [0.0 for i in range(ebins)]
 
         # Allocate random number generator
-        ran = GRan()
+        ran = gammalib.GRan()
 
         # Simulate observed energies
         for i in range(nmc):
@@ -68,17 +68,17 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
                 counts[index] += 1.0
 
         # Create error bars
-        error = [sqrt(c) for c in counts]
+        error = [math.sqrt(c) for c in counts]
 
         # Get expected energy dispersion
-        sum = 0.0
+        sum       = 0.0
         exp_edisp = []
-        cumul = []
+        cumul     = []
         for i in range(ebins):
             eobs     = eobs_axis[i]
             if eobs <= edisp.ebounds_obs(logEtrue).emax().TeV():
-                dLogEobs = log10(eobs_axis[i]) - log10(eobs_axis[i-1])
-                value = edisp(log10(eobs), logEtrue) * dLogEobs * nmc
+                dLogEobs = math.log10(eobs_axis[i]) - math.log10(eobs_axis[i-1])
+                value = edisp(math.log10(eobs), logEtrue) * dLogEobs * nmc
             else:
                 value = 0.0
             sum += value
@@ -91,7 +91,7 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
 
         # Plot simulated data
         ax1.plot(eobs_axis, counts, 'ro')
-        ax1.errorbar(eobs_axis, counts, error, fmt=None, ecolor='g')
+        ax1.errorbar(eobs_axis, counts, error, ecolor='g')
 
         # Plot energy dispersion
         ax1.plot(eobs_axis, exp_edisp, 'b-')
@@ -133,9 +133,10 @@ if __name__ == '__main__':
     print("******************************")
 
     # Load edisp
-    edisp = GCTAEdispRmf("./caldb/dc1/rmf.fits")
-    #edisp = GCTAEdispPerfTable("../caldb/cta_dummy_irf.dat")
-    #edisp = GCTAEdisp2D("../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits")
+    #edisp = gammalib.GCTAEdispRmf("./caldb/dc1/rmf.fits")
+    #edisp = gammalib.GCTAEdispPerfTable("../caldb/cta_dummy_irf.dat")
+    edisp = gammalib.GCTAEdisp2D("../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits")
 
     # Simulate Edisp
-    sim_edisp(edisp, 20.0)
+    #sim_edisp(edisp, 20.0) # Energy in TeV
+    sim_edisp(edisp, 1.0) # Energy in TeV
