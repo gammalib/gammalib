@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,14 +54,21 @@ public:
     void                      test_response_psf_king(void);
     void                      test_response_npsf(void);
     void                      test_response_edisp(void);
-    void                      test_response_edispRMF(void);
-    void                      test_response_edisp2D(void);
-    void                      test_response_edispPerfTable(void);
+    void                      test_response_edisp_PerfTable(void);
+    void                      test_response_edisp_RMF(void);
+    void                      test_response_edisp_2D(void);
     void                      test_response_irf_diffuse(void);
     void                      test_response_npred_diffuse(void);
     void                      test_response_expcube(void);
     void                      test_response_psfcube(void);
-    void                      test_energy_integration(GCTAResponseIrf rsp);
+
+    // Utility methods
+    void test_response_edisp_integration(const GCTAResponseIrf& rsp,
+                                         const double&          e_src_min = 0.1,
+                                         const double&          e_src_min = 10.0);
+    void test_edisp_integration(const GCTAEdisp& edisp,
+                                const double&    e_src_min = 0.1,
+                                const double&    e_src_min = 10.0);
 };
 
 

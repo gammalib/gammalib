@@ -60,10 +60,11 @@ const std::string cta_cube_bgd_xml = datadir+"/cta_model_cube_bgd.xml";
 const std::string cta_irf_bgd_xml  = datadir+"/cta_model_irf_bgd.xml";
 const std::string cta_caldb_king   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king     = "irf_file.fits";
+const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
 const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
+const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits";
 const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
 const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
-const std::string cta_irf_matrix   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file_matrix.fits";
 
 
 /***********************************************************************//**
@@ -81,9 +82,9 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp2D), "Test energy dispersion 2D computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispRMF), "Test energy dispersion RMF computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispPerfTable), "Test energy dispersion Performance Table computation");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_PerfTable), "Test energy dispersion Performance Table computation");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_RMF), "Test energy dispersion RMF computation");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_2D), "Test energy dispersion 2D computation");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
@@ -484,17 +485,18 @@ void TestGCTAResponse::test_response_npsf(void)
  * the edisp function. Integration is done in a rather simplistic way, by
  * stepping through the energy range. The integration is done for a set of
  * true energies from 0.1-10 TeV.
- *
- * Note: test_energy_integration is separated out so that it may be more easily
- * called in other tests where it is useful (e.g.test_response_edispRMF and
- * future additions)
  ***************************************************************************/
 void TestGCTAResponse::test_response_edisp(void)
 {
     // Load response
     GCTAResponseIrf rsp;
 
-    test_energy_integration(rsp);
+	// Set performance table response
+    rsp.caldb(GCaldb(cta_caldb));
+    rsp.load(cta_irf);
+
+    // Test energy dispersion integration
+    test_response_edisp_integration(rsp);
 
     // Return
     return;
@@ -502,18 +504,66 @@ void TestGCTAResponse::test_response_edisp(void)
 
 
 /***********************************************************************//**
- * @brief Test CTA Edisp RMF computation
+ * @brief Test CTA performance table energy dispersion class
  ***************************************************************************/
-void TestGCTAResponse::test_response_edispRMF(void)
+void TestGCTAResponse::test_response_edisp_PerfTable(void)
 {
+    // Test GCTAEdispPerfTable constructor
+    test_try("GCTAEdispPerfTable constructor");
+    try {
+        GCTAEdispPerfTable test(cta_edisp_perf);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-    // Load response
-    GCTAResponseIrf rsp;
-    rsp.caldb(GCaldb(cta_caldb));
+    // Load energy dispersion
+    GCTAEdispPerfTable edisp(cta_edisp_perf);
 
-    // Test Energy Dispersion
-    test_energy_integration(rsp);
+    // Test ebounds_obs and ebounds_src methods
+    test_try("GCTAEdispPerfTable ebounds_obs and ebounds_src methods");
+    try {
+        //std::cout << "TEST EBOUNDS PERFTABLE" << std::endl;
+        // ebounds_obs (for a given logEsrc)
+        //std::cout << edisp.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
+        // ebounds_src (for a given logEobs)
+        //std::cout << edisp.ebounds_src(2.0).print(EXPLICIT) << std::endl;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
+    // Test mc method
+    test_try("GCTAEdispPerfTable mc method");
+    try {
+        GRan ran;
+        //std::cout << "TEST MC PERFTABLE" << std::endl;
+        for (int i = 0; i < 20; ++i) {
+            //std::cout << edisp.mc(ran, -1.0).GeV() << std::endl;
+        }
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test normalisation
+    test_edisp_integration(edisp);
+
+    // Return
+    return;
+}
+
+
+
+
+/***********************************************************************//**
+ * @brief Test CTA RMF energy dispersion class
+ ***************************************************************************/
+void TestGCTAResponse::test_response_edisp_RMF(void)
+{
     // Test void constructor
     test_try("GRmf void constructor");
     try {
@@ -546,79 +596,34 @@ void TestGCTAResponse::test_response_edispRMF(void)
         test_try_failure(e);
     }
 
+    // Load RMF
     GCTAEdispRmf edisp(cta_edisp_rmf);
 
     // Test if non-diagonal element (below diagonal) is zero
-    test_value(edisp(std::log10(30.0),std::log10(1.0)), 0.0);
+    test_value(edisp(std::log10(30.0), std::log10(1.0)), 0.0);
 
     // Test that diagonal element is non-zero
     //test_value(edisp(std::log10(30.0),std::log10(30.0)), 0.354952753 ,1e-9);
 
     // Test if non-diagonal element (above diagonal) is zero
-    test_value(edisp(std::log10(1.0),std::log10(30.0)), 0.0);
-/*
-    // Test normalization
-    test_try("GRmf normalization");
-    try {
-        std::cout << "TEST RMF NORM" << std::endl;
-        const double deltaLogEsrc = 0.01;
-        const double deltaLogEobs = 0.01;
+    test_value(edisp(std::log10(1.0), std::log10(30.0)), 0.0);
 
-        for(double logEsrc = -0.52; logEsrc < 1.88; logEsrc += deltaLogEsrc) {
-
-            double sum = 0.0;
-
-            for(double logEobs = edisp.ebounds_obs(logEsrc).emin().log10TeV();
-                logEobs < edisp.ebounds_obs(logEsrc).emax().log10TeV();
-                logEobs += deltaLogEobs) {
-                sum +=   edisp(logEobs, logEsrc) * deltaLogEobs;
-            }
-
-            std::cout << sum << std::endl;
-        }
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-*/
-/*
-    // Test mc method
-    test_try("GCTAEdispRmf mc method");
-    try {
-        GRan ran;
-        std::cout << "TEST MC RMF" << std::endl;
-        for (int i = 0; i < 10; ++i) {
-            std::cout << edisp.mc(ran, 20.0).TeV() << std::endl;
-        }
-
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-*/
+    // Test normalisation
+    test_edisp_integration(edisp, 0.5, 10.0);
 
     // Return
     return;
 }
 
 /***********************************************************************//**
- * @brief Test CTA Edisp 2D computation
+ * @brief Test CTA 2D energy dispersion class
  ***************************************************************************/
-void TestGCTAResponse::test_response_edisp2D(void)
+void TestGCTAResponse::test_response_edisp_2D(void)
 {
-    // Load response
-    GCTAResponseIrf rsp;
-    rsp.caldb(GCaldb(cta_caldb));
-
-    // Test if Energy Dispersion is available
-    test_energy_integration(rsp);
-
     // Test void constructor
     test_try("GCTAEdisp2D void constructor");
     try {
-        GCTAEdisp2D edisp2D;
+        GCTAEdisp2D edisp;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -628,156 +633,28 @@ void TestGCTAResponse::test_response_edisp2D(void)
     // Test GCTAEdisp2D file constructor
     test_try("GCTAEdisp2D file constructor");
     try {
-        GCTAEdisp2D edisp2D_2(cta_irf_matrix);
+        GCTAEdisp2D edisp(cta_edisp_2D);
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-/*
-    // Test normalization
-    test_try("GCTAEdisp2D normalization");
-    try {
-        GCTAEdisp2D edisp2D_2(cta_irf_matrix);
-        std::cout << "TEST EDISP2D NORM" << std::endl;
 
-        const double deltaLogEsrc = 0.01;
-        const double deltaLogEobs = 0.01;
+    // Load 2D energy dispersion
+    GCTAEdisp2D edisp(cta_edisp_2D);
 
-        for(double logEsrc = -2.1; logEsrc < 4.0; logEsrc += deltaLogEsrc) {
+    // Test normalisation
+    test_edisp_integration(edisp);
 
-            double sum = 0.0;
-
-            for(double logEobs = edisp2D_2.ebounds_obs(logEsrc).emin().log10TeV();
-                logEobs < edisp2D_2.ebounds_obs(logEsrc).emax().log10TeV(); logEobs += deltaLogEobs) {
-                sum += edisp2D_2(logEobs, logEsrc) * deltaLogEobs;
-            }
-
-            std::cout << sum << std::endl;
-
-        }
-
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-*/
     // Test ebounds_obs and ebounds_src methods
     test_try("GCTAEdisp2D ebounds_src and ebounds_obs methods");
     try {
-        GCTAEdisp2D edisp2D_3(cta_irf_matrix);
-        //std::cout << "TEST EBOUNDS 2D" << std::endl;
-        // ebounds_obs (for a given logEsrc)
-        //std::cout << edisp2D_3.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
-        // ebounds_src (for a given logEobs)
-        //std::cout << edisp2D_3.ebounds_src(2.0).print(EXPLICIT) << std::endl;
-
+        GCTAEdisp2D edisp(cta_edisp_2D);
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-/*
-    // Test mc method
-    test_try("GCTAEdisp2D mc method");
-    try {
-        GCTAEdisp2D edisp2D_4(cta_irf_matrix);
-        GRan ran;
-        std::cout << "TEST MC 2D" << std::endl;
-        for (int i = 0; i < 10; ++i) {
-            std::cout << edisp2D_4.mc(ran, 1.0).TeV() << std::endl;
-        }
-
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-*/
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Test CTA Edisp Performance Table computation
- ***************************************************************************/
-void TestGCTAResponse::test_response_edispPerfTable(void)
-{
-
-    // Load response
-    GCTAResponseIrf rsp;
-    rsp.caldb(GCaldb(cta_caldb));
-
-    // Test Energy Dispersion
-    test_energy_integration(rsp);
-
-    // Test GCTAEdispPerfTable constructor
-    test_try("GCTAEdispPerfTable constructor");
-    try {
-        GCTAEdispPerfTable test(cta_caldb+"/"+cta_irf+".dat");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    GCTAEdispPerfTable test2(cta_caldb+"/"+cta_irf+".dat");
-
-    // Test ebounds_obs and ebounds_src methods
-    test_try("GCTAEdispPerfTable ebounds_obs and ebounds_src methods");
-    try {
-        //std::cout << "TEST EBOUNDS PERFTABLE" << std::endl;
-        // ebounds_obs (for a given logEsrc)
-        //std::cout << test2.ebounds_obs(-1.0).print(EXPLICIT) << std::endl;
-        // ebounds_src (for a given logEobs)
-        //std::cout << test2.ebounds_src(2.0).print(EXPLICIT) << std::endl;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test mc method
-    test_try("GCTAEdispPerfTable mc method");
-    try {
-        GRan ran;
-        //std::cout << "TEST MC PERFTABLE" << std::endl;
-        for (int i = 0; i < 20; ++i) {
-            //std::cout << test2.mc(ran, -1.0).GeV() << std::endl;
-        }
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-/*
-    // Test normalization
-    test_try("GCTAEdispPerfTable normalization");
-    try {
-        std::cout << "TEST PERFTABLE NORM" << std::endl;
-
-        const double deltaLogEsrc = 0.01;
-        const double deltaLogEobs = 0.01;
-
-        for(double logEsrc = -3.0; logEsrc < 4.0; logEsrc += deltaLogEsrc) {
-
-            double sum = 0.0;
-
-            for(double logEobs = -3.0; logEobs < 7.0; logEobs += deltaLogEobs) {
-                sum += test2(logEobs, logEsrc) * deltaLogEobs;
-            }
-
-            std::cout << sum << std::endl;
-
-        }
-
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-*/
 
     // Return
     return;
@@ -1032,18 +909,20 @@ void TestGCTAResponse::test_response_psfcube(void)
 
 /***********************************************************************//**
  * @brief Utility function for energy dispersion tests
+ *
+ * @param[in] rsp Response
+ * @param[in] e_src_min Minimum true energy (TeV) (default: 0.1)
+ * @param[in] e_src_max Maximum true energy (TeV) (default: 10.0)
  ***************************************************************************/
-void TestGCTAResponse::test_energy_integration(GCTAResponseIrf rsp) {
-
-	// Load response
-    rsp.caldb(GCaldb(cta_caldb));
-    rsp.load(cta_irf);
-
+void TestGCTAResponse::test_response_edisp_integration(const GCTAResponseIrf& rsp,
+                                                       const double&          e_src_min,
+                                                       const double&          e_src_max)
+{
 	// Continue only if energy dispersion is available
 	if (rsp.edisp() != NULL) {
 
-	    // Loop over source energies (0.1 TeV -> 10.0 TeV)
-	    for (double e_src = 0.1; e_src < 10.0; e_src *= 2.0) {
+	    // Loop over source energies
+        for (double e_src = e_src_min; e_src < e_src_max; e_src *= 2.0) {
 
 	        // Compute log10 of true energy
 	        double log10_e_src = std::log10(e_src);
@@ -1086,6 +965,63 @@ void TestGCTAResponse::test_energy_integration(GCTAResponseIrf rsp) {
 	    }
 
 	} // endif: energy dispersion was available
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Utility function for energy dispersion integration tests
+ *
+ * @param[in] edisp Energy dispersion
+ * @param[in] e_src_min Minimum true energy (TeV) (default: 0.1)
+ * @param[in] e_src_max Maximum true energy (TeV) (default: 10.0)
+ ***************************************************************************/
+void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
+                                              const double&    e_src_min,
+                                              const double&    e_src_max)
+{
+
+	// Loop over source energies
+	for (double e_src = e_src_min; e_src < e_src_max; e_src *= 2.0) {
+
+	    // Compute log10 of true energy
+	    double log10_e_src = std::log10(e_src);
+
+	    // Retrieve boundaries in observed energy
+	    GEbounds ebounds  = edisp.ebounds_obs(log10_e_src);
+
+        // Skip this energy if the boundaries are empty
+        if (ebounds.is_empty()) {
+            continue;
+        }
+
+        // Set measured energy range
+	    GEnergy  emin     = ebounds.emin();
+	    GEnergy  emax     = ebounds.emax();
+	    double   logE_min = std::log10(emin.TeV());
+	    double   logE_max = std::log10(emax.TeV());
+
+	    // Compute step size for numerical integration
+	    const int steps = 1000;
+	    double    dlogE = (logE_max-logE_min)/steps;
+
+	    // Perform numerical integration by summing
+	    double sum      = 0.0;
+	    double logE_obs = logE_min;
+	    for (int i = 0; i < steps; ++i) {
+	        double dp_dlogE = edisp(logE_obs, log10_e_src);
+	        sum            += dp_dlogE * dlogE;
+	        logE_obs       += dlogE;
+	    }
+
+        // Set message string
+	    GEnergy     eng(e_src, "TeV");
+        std::string msg = edisp.classname()+" integration for "+eng.print();
+	    test_value(sum, 1.0, 0.002, msg);
+
+	}
 
     // Return
     return;
