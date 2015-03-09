@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.cpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -597,7 +597,7 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
         // Check for parameter sanity
         if (m_par_gamma <= 0.0 || m_par_sigma <= 0.0) {
             m_par_norm = 0.0;
-            std::string msg = " King function parameters m_par_gamma and"
+            std::string msg = "King function parameters m_par_gamma and"
                               " m_par_sigma are zero (for "
                               " parameter space logE=" +
                               gammalib::str(logE) + " and theta=" + 
