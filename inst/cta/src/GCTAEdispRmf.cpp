@@ -40,7 +40,7 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-//#define G_OLD_MC_CODE
+#define G_OLD_MC_CODE
 #define G_MC_REJECTION
 
 /* __ Debug definitions __________________________________________________ */
@@ -315,6 +315,13 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                 fmax = fmin;
             }
 
+            // Add energy shift to account for the fact that the true energy
+            // for which the redistribution matrix is given is not the same
+            // as the specified true energy logEsrc.
+            double eshift = logEsrc - m_rmf.etrue().emean(itrue).log10TeV();
+            emin         += eshift;
+            emax         += eshift;
+
             // Find energy by rejection method
             double ewidth = emax - emin;
             double e      = emin;
@@ -365,7 +372,7 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
     double p = ran.uniform();
 
     // Find right index
-    // TODO: This can lead to index = m_edisp.axis(1) on axit, which
+    // TODO: This can lead to index = m_edisp.axis(1) on exit, which
     //       leads to an array indexing problem in the interpolation.
     //       Also, a bisection search would be more efficient.
     int index = 0;

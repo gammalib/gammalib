@@ -25,6 +25,7 @@
 # ==========================================================================
 import gammalib
 import math
+import time
 
 
 # ============== #
@@ -61,11 +62,15 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
         ran = gammalib.GRan()
 
         # Simulate observed energies
+        tstart = time.clock()
         for i in range(nmc):
-            eobs     = edisp.mc(ran, logEtrue).TeV()
+            #eobs     = edisp.mc(ran, logEtrue).TeV()
+            eobs     = edisp.mc(ran, logEtrue, float(i)).TeV()
             index    = int(eobs/dEobs)
             if (index < ebins):
                 counts[index] += 1.0
+        telapsed = (time.clock() - tstart)
+        print("Elapsed CPU time (sec) %f" % telapsed)
 
         # Create error bars
         error = [math.sqrt(c) for c in counts]
