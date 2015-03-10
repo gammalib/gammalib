@@ -65,10 +65,10 @@ public:
     // Utility methods
     void test_response_edisp_integration(const GCTAResponseIrf& rsp,
                                          const double&          e_src_min = 0.1,
-                                         const double&          e_src_min = 10.0);
+                                         const double&          e_src_max = 10.0);
     void test_edisp_integration(const GCTAEdisp& edisp,
                                 const double&    e_src_min = 0.1,
-                                const double&    e_src_min = 10.0);
+                                const double&    e_src_max = 10.0);
 };
 
 
