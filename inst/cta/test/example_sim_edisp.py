@@ -30,7 +30,7 @@ import math
 # ============== #
 # Simulate Edisp #
 # ============== #
-def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
+def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
     """
     Simulate Edisp and show results using matplotlib (if available).
     """
@@ -91,7 +91,7 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
 
         # Plot simulated data
         ax1.plot(eobs_axis, counts, 'ro')
-        ax1.errorbar(eobs_axis, counts, error, ecolor='g')
+        #ax1.errorbar(eobs_axis, counts, error, ecolor='g')
 
         # Plot energy dispersion
         ax1.plot(eobs_axis, exp_edisp, 'b-')

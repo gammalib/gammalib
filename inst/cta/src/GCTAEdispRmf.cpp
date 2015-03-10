@@ -41,6 +41,7 @@
 
 /* __ Coding definitions _________________________________________________ */
 //#define G_OLD_MC_CODE
+#define G_MC_REJECTION
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -293,6 +294,40 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
         int offset = m_mc_measured_start[itrue];
         if (offset != -1) {
 
+            #if defined(G_MC_REJECTION)
+            // Determine measured energy index from Monte-Carlo cache
+            int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
+
+            // Get boundaries for observed energy and the function values
+            // at the edges and the centre of the selected bin
+            double emin  = m_rmf.emeasured().emin(imeasured).log10TeV();
+            double emax  = m_rmf.emeasured().emax(imeasured).log10TeV();
+            double emean = m_rmf.emeasured().emean(imeasured).log10TeV();
+            double fmin  = operator()(emin,  logEsrc, theta, phi, zenith, azimuth);
+            double fmax  = operator()(emax,  logEsrc, theta, phi, zenith, azimuth);
+            double fmean = operator()(emean, logEsrc, theta, phi, zenith, azimuth);
+
+            // Get function maximum
+            if (fmean > fmax) {
+                fmax = fmean;
+            }
+            if (fmin > fmax) {
+                fmax = fmin;
+            }
+
+            // Find energy by rejection method
+            double ewidth = emax - emin;
+            double e      = emin;
+            double f      = 0.0;
+            double ftest  = 1.0;
+            while (ftest > f) {
+                e      = emin + ewidth * ran.uniform();
+                f      = operator()(e, logEsrc, theta, phi, zenith, azimuth);
+                ftest  = ran.uniform() * fmax;
+            }
+            energy.log10TeV(e);
+            
+            #else
             // Determine measured energy index from Monte-Carlo cache
             int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
 
@@ -305,6 +340,7 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
 
             // Set interval
             energy.log10TeV(e);
+            #endif
         
         } // endif: offset was valid
 
