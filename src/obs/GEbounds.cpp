@@ -29,7 +29,7 @@
 #include <config.h>
 #endif
 #include <cmath>
-#include <iostream>
+//#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GEbounds.hpp"
@@ -48,6 +48,7 @@
 #define G_EMEAN                                       "GEbounds::emean(int&)"
 #define G_ELOGMEAN                                 "GEbounds::elogmean(int&)"
 #define G_EWIDTH                                     "GEbounds::ewidth(int&)"
+#define G_INSERT_ENG         "GEbounds::insert_eng(int&, GEnergy&, GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -128,9 +129,6 @@ GEbounds::GEbounds(const GEnergy& emin, const GEnergy& emax)
 
     // Append energies
     append(emin, emax);
-
-    // Set attribues
-    set_attributes();
 
     // Return
     return;
@@ -274,19 +272,11 @@ GEbounds* GEbounds::clone(void) const
  *
  * Appends an energy interval to the end of the energy boundaries
  * container.
- *
- * The method does nothing if the energy interval is not valid
- * (i.e. @p emin >= @p emax).
  ***************************************************************************/
 void GEbounds::append(const GEnergy& emin, const GEnergy& emax)
 {
-    // Continue only if energy interval is valid
-    if (emax > emin) {
-
-        // Insert interval
-        insert_eng(m_num, emin, emax);
-
-    } // endif: Energy interval was valid
+    // Append interval at the end
+    insert_eng(m_num, emin, emax);
 
     // Return
     return;
@@ -303,26 +293,18 @@ void GEbounds::append(const GEnergy& emin, const GEnergy& emax)
  * boundary that has a minimum energy smaller than @p emin. The method
  * implicitely assumes that the intervals are ordered by increasing minimum
  * energy.
- *
- * The method does nothing if the energy interval is not valid
- * (i.e. @p emin >= @p emax).
  ***************************************************************************/
 void GEbounds::insert(const GEnergy& emin, const GEnergy& emax)
 {
-    // Continue only if energy interval is valid
-    if (emax > emin) {
+    // Determine index at which interval should be inserted
+    int inx = 0;
+    for (; inx < m_num; ++inx) {
+        if (emin < m_min[inx])
+            break;
+    }
 
-        // Determine index at which interval should be inserted
-        int inx = 0;
-        for (; inx < m_num; ++inx) {
-            if (emin < m_min[inx])
-                break;
-        }
-
-        // Insert interval
-        insert_eng(inx, emin, emax);
-
-    } // endif: Energy interval was valid
+    // Insert interval
+    insert_eng(inx, emin, emax);
 
     // Return
     return;
@@ -384,29 +366,21 @@ void GEbounds::merge(void)
  * boundary that has a minimum energy smaller than @p emin and then merges
  * any overlapping or connecting energy boundaries. The method implicitely
  * assumes that the intervals are ordered by increasing minimum energy.
- *
- * The method does nothing if the energy interval is not valid
- * (i.e. @p emin >= @p emax).
  ***************************************************************************/
 void GEbounds::merge(const GEnergy& emin, const GEnergy& emax)
 {
-    // Continue only if energy interval is valid
-    if (emax > emin) {
+    // Determine index at which interval should be inserted
+    int inx = 0;
+    for (; inx < m_num; ++inx) {
+        if (emin < m_min[inx])
+            break;
+    }
 
-        // Determine index at which interval should be inserted
-        int inx = 0;
-        for (; inx < m_num; ++inx) {
-            if (emin < m_min[inx])
-                break;
-        }
+    // Insert interval
+    insert_eng(inx, emin, emax);
 
-        // Insert interval
-        insert_eng(inx, emin, emax);
-
-        // Merge any overlapping energy intervals
-        merge();
-
-    } // endif: Energy interval was valid
+    // Merge any overlapping energy intervals
+    merge();
 
     // Return
     return;
@@ -770,7 +744,8 @@ void GEbounds::read(const GXmlElement& xml)
     clear();
 
     // Get energy boundaries parameter
-    const GXmlElement* par = gammalib::xml_get_par(G_READ_XML, xml, "EnergyBoundaries");
+    const GXmlElement* par = gammalib::xml_get_par(G_READ_XML, xml,
+                                                   "EnergyBoundaries");
 
     // Extract position attributes
     if (par->has_attribute("emin") && par->has_attribute("emax")) {
@@ -813,7 +788,8 @@ void GEbounds::write(GXmlElement& xml) const
     if (!is_empty()) {
 
         // Get parameter
-        GXmlElement* par = gammalib::xml_need_par(G_WRITE_XML, xml, "EnergyBoundaries");
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE_XML, xml,
+                                                  "EnergyBoundaries");
 
         // Write attributes
         par->attribute("emin", gammalib::str(emin().MeV()));
@@ -959,9 +935,7 @@ GEnergy GEbounds::elogmean(const int& index) const
 
     // Compute logarithmic mean energy
     GEnergy elogmean;
-    double  elogmin = std::log10(m_min[index].MeV());
-    double  elogmax = std::log10(m_max[index].MeV());
-    elogmean.MeV(std::pow(10.0, 0.5 * (elogmin + elogmax)));
+    elogmean.MeV(std::sqrt(m_min[index].MeV() * m_max[index].MeV()));
 
     // Return
     return elogmean;
@@ -1171,65 +1145,72 @@ void GEbounds::set_attributes(void)
  * @param[in] emin Minimum energy of interval.
  * @param[in] emax Maximum energy of interval.
  *
+ * @exception GException::invalid_argument
+ *            Minimum energy larger than maximum energy
+ *
  * Inserts an energy interval after the specified @p index in the energy
  * boundaries. The method does not reorder the intervals by energy, instead
  * the client needs to determine the approriate @p index.
  *
  * Invalid parameters do not produce any exception, but are handled
- * transparently. If the interval is invalid (i.e. @p emin >= @p emax) then
- * nothing is done. If the @p index is out of the valid range, the index
- * will be adjusted to either the first or the last element.
+ * transparently. If the interval is invalid (i.e. @p emin > @p emax) an
+ * exception is thrown. If the @p index is out of the valid range, the
+ * index will be adjusted to either the first or the last element.
  ***************************************************************************/
 void GEbounds::insert_eng(const int&     index,
                           const GEnergy& emin,
                           const GEnergy& emax)
 {
-    // Continue only if energy interval is valid
-    if (emax > emin) {
+    // Throw an exception if energy interval is invalid
+    if (emin > emax) {
+        std::string msg = "Invalid energy interval specified. Minimum"
+                          " energy "+emin.print(NORMAL)+" can not be"
+                          " larger than maximum energy "+
+                          emax.print(NORMAL)+".";
+        throw GException::invalid_argument(G_INSERT_ENG, msg);
+    }
 
-        // Set index
-        int inx = index;
+    // Set index
+    int inx = index;
 
-        // If inx is out of range then adjust it
-        if (inx < 0)     inx = 0;
-        if (inx > m_num) inx = m_num;
+    // If inx is out of range then adjust it
+    if (inx < 0)     inx = 0;
+    if (inx > m_num) inx = m_num;
 
-        // Allocate new intervals
-        int      num = m_num+1;
-        GEnergy* min = new GEnergy[num];
-        GEnergy* max = new GEnergy[num];
+    // Allocate new intervals
+    int      num = m_num+1;
+    GEnergy* min = new GEnergy[num];
+    GEnergy* max = new GEnergy[num];
 
-        // Copy intervals before index to be inserted
-        for (int i = 0; i < inx; ++i) {
-            min[i] = m_min[i];
-            max[i] = m_max[i];
-        }
+    // Copy intervals before index to be inserted
+    for (int i = 0; i < inx; ++i) {
+        min[i] = m_min[i];
+        max[i] = m_max[i];
+    }
 
-        // Insert interval
-        min[inx] = emin;
-        max[inx] = emax;
+    // Insert interval
+    min[inx] = emin;
+    max[inx] = emax;
 
-        // Copy intervals after index to be inserted
-        for (int i = inx+1; i < num; ++i) {
-            min[i] = m_min[i-1];
-            max[i] = m_max[i-1];
-        }
+    // Copy intervals after index to be inserted
+    for (int i = inx+1; i < num; ++i) {
+        min[i] = m_min[i-1];
+        max[i] = m_max[i-1];
+    }
 
-        // Free memory
-        if (m_min != NULL) delete [] m_min;
-        if (m_max != NULL) delete [] m_max;
+    // Free memory
+    if (m_min != NULL) delete [] m_min;
+    if (m_max != NULL) delete [] m_max;
 
-        // Set new memory
-        m_min = min;
-        m_max = max;
+    // Set new memory
+    m_min = min;
+    m_max = max;
 
-        // Set number of elements
-        m_num = num;
+    // Set number of elements
+    m_num = num;
 
-        // Set attributes
-        set_attributes();
-
-    } // endif: Energy interval was valid
+    // Set attributes
+    set_attributes();
 
     // Return
     return;

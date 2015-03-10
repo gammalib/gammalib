@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,20 +105,21 @@ void TestGObservation::test_ebounds(void)
 
     // Add empty interval
     ebds.append(GEnergy(1.0, "MeV"), GEnergy(1.0, "MeV"));
-    test_value(ebds.size(), 0, "GEbounds should have zero size.");
-    test_assert(ebds.is_empty(), "GEbounds should be empty.");
-    test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
-    test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
+    test_value(ebds.size(), 1, "GEbounds should have 1 element.");
+    test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 1.0, 1.0e-10, "Maximum energy should be 1.");
 
     // Add one interval
     ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
-    test_value(ebds.size(), 1, "GEbounds should have 1 element.");
+    test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
     test_assert(!ebds.is_empty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 10.0, 1.0e-10, "Maximum energy should be 10.");
 
-    // Remove interval
+    // Remove intervals
     ebds.remove(0);
+    ebds.remove(0); // Now old intervals 1 is interval 0
     test_value(ebds.size(), 0, "GEbounds should have zero size.");
     test_assert(ebds.is_empty(), "GEbounds should be empty.");
     test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
@@ -221,6 +222,25 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds.emax(2).MeV(), 1000.0, 1.0e-10, "Bin 1 maximum energy should be 1000.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
+
+    // Check emean, elogmean and ewidth methods
+    ebds.set_log(1, GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    test_value(ebds.emean(0).MeV(), 5.5, 1.0e-10, "Mean energy should be 5.5.");
+    test_value(ebds.elogmean(0).MeV(), 3.16227766017, 1.0e-10, "Log mean energy should be 3.16227766017.");
+    test_value(ebds.ewidth(0).MeV(), 9.0, 1.0e-10, "Energy width should be 9.0.");
+
+    // Check appending of invalid interval
+    test_try("Test appending of invalid interval");
+    try {
+        ebds.append(GEnergy(100.0, "MeV"), GEnergy(10.0, "MeV"));
+        test_try_failure("Appending an invalid interval shall throw an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Return
     return;
