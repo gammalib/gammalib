@@ -77,6 +77,7 @@ GCTAEdisp2D::GCTAEdisp2D(void) : GCTAEdisp()
  ***************************************************************************/
 GCTAEdisp2D::GCTAEdisp2D(const std::string& filename) : GCTAEdisp()
 {
+
     // Initialise class members
     init_members();
 
@@ -182,8 +183,6 @@ double GCTAEdisp2D::operator()(const double& logEobs,
     double EobsOverEsrc = std::exp((logEobs-logEsrc) * gammalib::ln10);
 
     // Compute edisp
-    //edisp = m_edisp(0, logEsrc, std::exp((logEobs-logEsrc)*std::log(10.0)),
-    //                theta);
     edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta);
 
     // Return
@@ -237,6 +236,7 @@ GCTAEdisp2D* GCTAEdisp2D::clone(void) const
  ***************************************************************************/
 void GCTAEdisp2D::load(const std::string& filename)
 {
+
     // Open FITS file
     GFits fits(filename);
 
@@ -269,6 +269,7 @@ void GCTAEdisp2D::load(const std::string& filename)
  ***************************************************************************/
 void GCTAEdisp2D::read(const GFits& fits)
 {
+
     // Clear response table
     m_edisp.clear();
 
@@ -310,10 +311,10 @@ void GCTAEdisp2D::read(const GFits& fits)
             if (sum != 0.0) {
                 for (int i_migra = 0, i = offset; i_migra < migra_size;
                      ++i_migra, i += etrue_size) {
-                    m_edisp(0, i) /= (sum / gammalib::ln10);
+                    m_edisp(0, i) *= (gammalib::ln10 / sum);
                 }
             }
-            
+
         } // endfor: looped over theta
     } // endfor: looped over Etrue
 
@@ -391,66 +392,32 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
                         const double& zenith,
                         const double& azimuth) const
 {
-    // Vector representing cumulative probability distribution
-    std::vector<std::pair<double, double> > cumul;
 
-    // Initialize cumulative probability
-    double sum = 0.0;
-
-    // Loop over EobsOverEsrc
-    // TODO: We should precompute the cumulative distributions for all
-    //       tabluated Esrc values and put them in a Monte Carlo cache.
-    //       It's probably sufficient to select the nearest vector and
-    //       use it to draw energies. Otherwise this method will be
-    //       very slow as it computes the individual vectors for each
-    //       call.
-    for (int i = 0; i < m_edisp.axis(1); ++i) {
-
-        // Stop if we have reached the maximum
-        if (sum == 1.0) {
-            break;
-        }
-
-        // Compute delta(Eobs/Etrue) and Eobs/Etrue values
-        double delta        = m_edisp.axis_hi(1, i) -
-                              m_edisp.axis_lo(1, i);
-        double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, i) +
-                                     m_edisp.axis_lo(1, i));
-
-        // Compute cumulative probability
-        double add = m_edisp(0, logEsrc, EobsOverEsrc, theta) *
-                     delta / EobsOverEsrc / gammalib::ln10;
-
-        // Limit cumulative probability to 1
-        sum += add;
-        if (sum > 1.0) {
-            sum = 1.0;
-        }
-
-        // Create pair containing EobsOverEsrc and cumulated probability
-        std::pair<double, double> pair(EobsOverEsrc, sum);
-
-        // Add to vector
-        cumul.push_back(pair);
-
-    } // endfor: looped over EobsOverEsrc
+    // Update cumul
+    update_cumul(logEsrc, theta, phi, zenith, azimuth);
 
     // Draw random number between 0 and 1 from uniform distribution
     double p = ran.uniform();
 
-    // Find right index
-    // TODO: This can lead to index = m_edisp.axis(1) on axit, which
-    //       leads to an array indexing problem in the interpolation.
-    //       Also, a bisection search would be more efficient.
-    int index = 0;
-    while(index < m_edisp.axis(1) - 2 && cumul[index+1].second < p) {
-        index++;
-    } // index found
+    // Find right index with bisection search
+    int low = 0;
+    int high = m_cumul.size();
+    while ((high-low) > 1) {
+        int mid = (low+high) / 2;
+        if (p < m_cumul[mid].second) {
+            high = mid;
+        }
+        else if (m_cumul[mid].second <= p) {
+            low = mid;
+        }
+    }
+    // Index found
+    int index = low;
 
     // Interpolate EobsOverEsrc value
-    double result =   (cumul[index+1].second - p)*cumul[index].first
-                    + (p - cumul[index].second)*cumul[index+1].first;
-    result       /=   (cumul[index+1].second - cumul[index].second);
+    double result =   (m_cumul[index+1].second - p)*m_cumul[index].first
+                    + (p - m_cumul[index].second)*m_cumul[index+1].first;
+    result       /=   (m_cumul[index+1].second - m_cumul[index].second);
 
     // Final result
     double logEnergy = std::log10(result) + logEsrc;
@@ -520,7 +487,7 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
         }
 
     } // endfor: looped over EobsOverEsrc
-    
+
     // If energy dispersion has never become negligible until end of loop,
     // reset logEobsMax
     if (!maxFound) {
@@ -566,7 +533,7 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
     double logEsrcMax =  30.0;
     bool   minFound   = false;
     bool   maxFound   = false;
-    
+
     // Find boundaries
     for (int i = 0; i < m_edisp.axis(0); ++i) {
 
@@ -580,7 +547,7 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
             minFound   = true;
             logEsrcMin = logEsrc;
         }
-        
+
         // Find last non-negligible matrix term
         else if (minFound && !maxFound &&
                  m_edisp(0, logEsrc, EobsOverEsrc, theta) < eps) {
@@ -593,15 +560,15 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
                  m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
             maxFound = false;
         }
-        
+
     } // endfor: looped over true energy
-    
+
     // If energy dispersion has never become negligible until end of loop,
     // reset logEobsMax
     if (!maxFound) {
         logEsrcMax = 30.0;
     }
-    
+
     // Compute energy boundaries
     GEnergy emin;
     GEnergy emax;
@@ -671,6 +638,11 @@ void GCTAEdisp2D::init_members(void)
     m_filename.clear();
     m_edisp.clear();
 
+    // Initialise Monte Carlo cache
+    m_logEsrc     = -30.0;
+    m_theta       = 0.0;
+    m_cumul.clear();
+
     // Return
     return;
 }
@@ -697,6 +669,58 @@ void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
  ***************************************************************************/
 void GCTAEdisp2D::free_members(void)
 {
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Update cumulative probability
+ *
+ * TODO : vector of vectors for each Esrc and select nearest vector in mc
+ *
+ ***************************************************************************/
+void GCTAEdisp2D::update_cumul(const double& logEsrc,
+                               const double& theta,
+                               const double& phi,
+                               const double& zenith,
+                               const double& azimuth) const
+{
+
+    if (logEsrc != m_logEsrc || theta != m_theta) {
+
+        m_cumul.clear();
+
+        m_logEsrc = logEsrc;
+        m_theta = theta;
+
+        // Initialize cumulative probability
+        double sum = 0.0;
+
+        for (int i = 0; i < m_edisp.axis(1); ++i) {
+
+            // Compute delta(Eobs/Etrue) and Eobs/Etrue values
+            double delta        = m_edisp.axis_hi(1, i) -
+                                  m_edisp.axis_lo(1, i);
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, i) +
+                                         m_edisp.axis_lo(1, i));
+
+            // Compute cumulative probability
+            double add = m_edisp(0, logEsrc, EobsOverEsrc, theta) *
+                         delta / EobsOverEsrc * gammalib::inv_ln10;
+
+            // Add to sum (and keep sum lower or equal to 1)
+            sum = sum+add >= 1.0 ? 1.0 : sum+add;
+
+            // Create pair containing EobsOverEsrc and cumulated probability
+            std::pair<double, double> pair(EobsOverEsrc, sum);
+            std::cout << "Eobs/Esrc = " << EobsOverEsrc << ", sum = " << sum << std::endl;
+
+            // Add to vector
+            m_cumul.push_back(pair);
+
+        } // endfor: looped over EobsOverEsrc
+    }
+
     // Return
     return;
 }

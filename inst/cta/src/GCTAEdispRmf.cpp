@@ -40,8 +40,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_OLD_MC_CODE
-#define G_MC_REJECTION
+//#define G_OLD_MC_CODE
+//#define G_MC_REJECTION
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -333,7 +333,7 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                 ftest  = ran.uniform() * fmax;
             }
             energy.log10TeV(e);
-            
+
             #else
             // Determine measured energy index from Monte-Carlo cache
             int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
@@ -348,7 +348,7 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
             // Set interval
             energy.log10TeV(e);
             #endif
-        
+
         } // endif: offset was valid
 
     } // endif: there was redistribution information
@@ -365,26 +365,46 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& azimuth) const
 {
 
-    // Update cumul
-    update_cumul(logEsrc, theta, phi, zenith, azimuth);
+    // Compute cumulative probability
+    compute_cumul(theta, phi, zenith, azimuth);
+
+    // Find right logEsrc index with bisection search
+    int low = 0;
+    int high = m_rmf.ntrue();
+    while ((high-low) > 1) {
+        int mid = (low+high) / 2;
+        if (logEsrc < m_rmf.etrue().elogmean(mid).log10TeV()) {
+            high = mid;
+        }
+        else {
+            low = mid;
+        }
+    }
+    // Index found
+    int isrc = low;
 
     // Draw random number between 0 and 1 from uniform distribution
     double p = ran.uniform();
 
-    // Find right index
-    // TODO: This can lead to index = m_edisp.axis(1) on exit, which
-    //       leads to an array indexing problem in the interpolation.
-    //       Also, a bisection search would be more efficient.
-    int index = 0;
-    while(index < m_cumul.size() - 2 && m_cumul[index+1].second < p) {
-        index++;
-    } // index found
+    // Find right index with bisection search
+    low = 0;
+    high = m_cumul[isrc].size();
+    while ((high-low) > 1) {
+        int mid = (low+high) / 2;
+        if (p < m_cumul[isrc][mid].second) {
+            high = mid;
+        }
+        else if (m_cumul[isrc][mid].second <= p) {
+            low = mid;
+        }
+    }
+    // Index found
+    int index = low;
 
     // Interpolate Eobs value
-    double Eobs =   (m_cumul[index+1].second - p)*m_cumul[index].first
-                  + (p - m_cumul[index].second)*m_cumul[index+1].first;
-    Eobs       /=   (m_cumul[index+1].second - m_cumul[index].second);
-
+    double Eobs =   (m_cumul[isrc][index+1].second - p)*m_cumul[isrc][index].first
+                  + (p - m_cumul[isrc][index].second)*m_cumul[isrc][index+1].first;
+    Eobs       /=   (m_cumul[isrc][index+1].second - m_cumul[isrc][index].second);
 
     // Set energy
     GEnergy energy;
@@ -524,8 +544,8 @@ void GCTAEdispRmf::init_members(void)
     // Initialise Monte Carlo cache
     m_mc_measured_start.clear();
     m_mc_measured_cdf.clear();
-    m_logEsrc     = -30.0;
-    m_theta       = 0.0;
+    m_cdf_computed   = false;
+    m_theta          = 0.0;
     m_cumul.clear();
 
     // Return
@@ -562,9 +582,9 @@ void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
     // Copy Monte Carlo cache
     m_mc_measured_start = edisp.m_mc_measured_start;
     m_mc_measured_cdf   = edisp.m_mc_measured_cdf;
-    m_logEsrc           = edisp.m_logEsrc;
     m_theta             = edisp.m_theta;
     m_cumul             = edisp.m_cumul;
+    m_cdf_computed      = edisp.m_cdf_computed;
 
     // Return
     return;
@@ -770,19 +790,29 @@ void GCTAEdispRmf::update(const double& etrue, const double& emeasured) const
 
 
 /***********************************************************************//**
- * @brief Update cumulative probability
+ * @brief Compute cumulative probability
  *
  ***************************************************************************/
-void GCTAEdispRmf::update_cumul(const double& logEsrc,
-                                const double& theta,
-                                const double& phi,
-                                const double& zenith,
-                                const double& azimuth) const
+void GCTAEdispRmf::compute_cumul(const double& theta,
+                                 const double& phi,
+                                 const double& zenith,
+                                 const double& azimuth) const
 {
-    if (logEsrc != m_logEsrc || theta != m_theta) {
+    // TODO ? compute also for each theta ??
 
-        m_logEsrc = logEsrc;
-        m_theta = theta;
+    if (!m_cdf_computed) {
+
+        m_cumul.clear();
+
+        //m_theta = theta;
+        m_cdf_computed = true;
+
+    // Loop over Esrc
+    for (int isrc = 0; isrc < m_rmf.ntrue(); ++isrc) {
+
+        m_cumul.push_back(std::vector<std::pair<double, double> >());
+
+        double logEsrc = m_rmf.etrue().elogmean(isrc).log10TeV();
 
         // Initialize cumulative probability
         double sum = 0.0;
@@ -802,21 +832,22 @@ void GCTAEdispRmf::update_cumul(const double& logEsrc,
                 double Eobs = Eobsmin+i*deltaEobs/n;
 
                 // Compute cumulative probability
-                double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta) * deltaEobs / n / Eobs / std::log(10.0);
+                double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta) * deltaEobs / (n * Eobs * gammalib::ln10);
 
-                //sum = sum+add/n >= 1.0 ? 1.0 : sum+add/n;
+                // Add to sum (and keep sum lower or equal to 1)
                 sum = sum+add >= 1.0 ? 1.0 : sum+add;
 
                 // Create pair containing Eobs and cumulative probability
                 std::pair<double, double> pair(Eobs, sum);
 
                 // Add to vector
-                m_cumul.push_back(pair);
+                m_cumul[isrc].push_back(pair);
             }
 
         }
     }
 
+    }
     // Return
     return;
 }

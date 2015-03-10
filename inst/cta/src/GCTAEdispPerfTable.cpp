@@ -190,7 +190,7 @@ double GCTAEdispPerfTable::operator()(const double& logEobs,
     // Compute energy dispersion value
     double delta = logEobs - logEsrc;
     double edisp = m_par_scale * std::exp(m_par_width * delta * delta);
-    
+
     // Return energy dispersion
     return edisp;
 }
@@ -249,8 +249,6 @@ GCTAEdispPerfTable* GCTAEdispPerfTable::clone(void) const
  ***************************************************************************/
 void GCTAEdispPerfTable::load(const std::string& filename)
 {
-    // Set conversion factor from RMS(ln(Eest/Etrue)) to RMS(log10(Eest/Etrue))
-    const double conv = 0.434294481903;
 
     // Clear arrays
     m_logE.clear();
@@ -292,7 +290,7 @@ void GCTAEdispPerfTable::load(const std::string& filename)
 
         // Push elements in node array and vector
         m_logE.append(gammalib::todouble(elements[0]));
-        m_sigma.push_back(gammalib::todouble(elements[4]) * conv);
+        m_sigma.push_back(gammalib::todouble(elements[4]) * gammalib::inv_ln10);
 
     } // endwhile: looped over lines
 
