@@ -275,19 +275,6 @@ int GCTAEventCube::size(void) const
 
 
 /***********************************************************************//**
- * @brief Return dimension of event cube
- ***************************************************************************/
-int GCTAEventCube::dim(void) const
-{
-    // Compute dimension from sky map
-    int dim = (m_map.nmaps() > 1) ? 3 : 2;
-
-    // Return dimension
-    return dim;
-}
-
-
-/***********************************************************************//**
  * @brief Return number of bins in axis
  *
  * @param[in] axis Axis [0,...,dim()-1]
@@ -489,9 +476,9 @@ const GEnergy& GCTAEventCube::energy(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= naxis(2)) {
+    if (index < 0 || index >= ebins()) {
         throw GException::out_of_range(G_ENERGY,
-              "CTA event cube energy axis", index, naxis(2));
+              "CTA event cube energy axis", index, ebins());
     }
     #endif
 

@@ -127,6 +127,19 @@ std::string GCTAEventCube::classname(void) const
 
 
 /***********************************************************************//**
+ * @brief Return dimension of event cube
+ *
+ * @return Dimension of event cube (always 3)
+ ***************************************************************************/
+inline
+int GCTAEventCube::dim(void) const
+{
+    // Return dimension
+    return (3);
+}
+
+
+/***********************************************************************//**
  * @brief Return event cube sky map
  *
  * @return Event cube sky map.
