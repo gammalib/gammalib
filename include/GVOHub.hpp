@@ -61,11 +61,7 @@ public:
     GVOHub*     clone(void) const;
     void        start(void);
     std::string print(const GChatter& chatter = NORMAL) const;
-    //void        connect(void);
-    //void        disconnect(void);
-    //bool        has_hub(void) const;
-    //bool        is_connected(void) const;
-    //GXml        response(void) const;
+    
 
 protected:
     // Protected methods
@@ -74,8 +70,6 @@ protected:
     void        free_members(void);
     void	init_hub(void);
     void        start_hub(void);
-    //bool        find_hub(void);
-    //void        connect_to_hub(void);
     void        register_service(const GXml& xml,const socklen_t& sock);
     void        ping_service(const socklen_t& sock);
     void        unregister(const socklen_t& sock);
@@ -86,6 +80,7 @@ protected:
     void        post_string(const std::string& string) const;
     std::string receive_string(void) const;
     std::string get_response_value(const GXml& xml, const std::string& name) const;
+    std::list<std::string> get_registrations(const GXml& xml, const std::string& name) const;
     void        get_name_value_pair(const GXmlNode* node, std::string& name, std::string& value) const;
     std::string get_hub_lockfile(void) const;
 
@@ -98,11 +93,8 @@ protected:
     std::string m_version;     //!< The version of the SAMP Standard Profile implemented by the hub
     std::string m_client_key;  //!< Private client key
     std::string m_hub_id;      //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
-    //std::string m_client_id;   //!< Client identifier
     int         m_socket;      //!< Hub socket
     int 	m_nb_clients;  //!< Number of already registered clients
-    //std::vector<int> m_client_id; //!< Id assigned to client by the hub.
-    //std::vector<std::string> m_client_name;
     std::list<GVOApp*> m_connected_apps; //!< list of apps connected to the hub
 };
 

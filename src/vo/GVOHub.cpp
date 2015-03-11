@@ -35,6 +35,7 @@
 #include <unistd.h>        // close() function
 #include <netdb.h>         // getaddrinfo() function
 #include <sys/socket.h>    // socket(), connect() functions
+#include <fstream>
 #include "GVOHub.hpp"
 #include "GVOClient.hpp"
 #include "GException.hpp"
@@ -225,16 +226,30 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     // Declare message
     std::string msg = "";
     char buffer[124];
+    char privatekey[124];
+    int i;
+    std::list<GVOApp*>::iterator q;
+    std::string content;
     std::string translator = "http://localhost:8001/";
     printf("Message composition\n");
     
     GVOApp* new_app = new GVOApp();
-    new_app -> m_id = m_nb_clients;
+    sprintf(new_app -> m_id,"client-key:%d",m_nb_clients);
+    std::cout<< "Nb. of current applications registered:" << std::endl;
+    std::cout<< m_connected_apps.size()<< std::endl;
     m_connected_apps.push_front(new_app);
-    //m_client_id.push_back(m_nb_clients);
+    std::cout<< new_app->m_id << std::endl;
+    std::cout<< "Nb. of current applications registered:" << std::endl;
+    std::cout<< m_connected_apps.size()<< std::endl;
+    for( i=0,q=m_connected_apps.begin(); i<m_connected_apps.size(); i++,q++ ) {
+      std::cout << "Displaying element of applications list:" << std::endl;
+      content = (*q)->print();
+      std::cout << content << std::endl;
+    }
     
     printf("Message composition 2 \n");
     sprintf(buffer,"<member><name>samp.self-id</name><value><string>client-id:%d</string></value></member>\n",m_nb_clients);
+    sprintf(privatekey,"<member><name>samp.private-key</name><value><string>client-key:%d</string></value></member>\n",m_nb_clients);
     printf(buffer);
     m_nb_clients ++;
     
@@ -243,7 +258,8 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     msg.append("<methodResponse>\n");
     msg.append("\t<params>\n");
     msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
-    msg.append("<member><name>samp.private-key</name><value><string>client-key:" + m_hub_id + "</string></value></member>\n");
+    //msg.append("<member><name>samp.private-key</name><value><string>client-key:" + m_hub_id + "</string></value></member>\n");
+    msg.append(privatekey);
     msg.append("<member><name>samp.hub-id</name><value><string>client-id:" + m_hub_id + "</string></value></member>\n");
     msg.append(buffer);
     msg.append("<member><name>samp.url-translator</name><value><string>" + translator + "</string></value></member>\n");
@@ -290,12 +306,10 @@ void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
     printf("Client Metadata received\n");
     // Search for metadata values to store
     std::string client_name = get_response_value(xml, "samp.name");
-    //std::cout("Client Metadata : \n" + client_name.c_str());
     printf("\nClient Metadata : Name %s\n", client_name.c_str());
     sprintf(buffer,"Client number: %d\n",m_nb_clients);
     printf(buffer);
     fflush(stdout);
-    //m_client_name.push_back(client_name.c_str());
     // Declare message
     std::string msg = "";
 
@@ -325,12 +339,44 @@ void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
  ***************************************************************************/
 void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
 {
+    std::list<std::string>::iterator p;
+    std::list<GVOApp*>::iterator q;
+    int i;
+    std::ofstream myfile;
+    std::string content;
     printf("Declare Subscriptions\n");
-    std::string client_subscriptions = get_response_value(xml, "samp.hub.event.subscriptions");
-    printf("\nClient subscriptions: %s\n", client_subscriptions.c_str());
-    // Declare message
+    std::list<std::string> client_subscriptions = get_registrations(xml, "samp.hub.declareSubscriptions");
+    
+    for( i=0,p=client_subscriptions.begin(); i<client_subscriptions.size()-1; i++,p++ ) {
+	 myfile.open ("registrations.txt", std::ios::out | std::ios::app);
+	 myfile << *p;
+	 myfile.close();
+	 std::cout << "Client registered to following methods calls:" << std::endl;
+         std::cout << *p << std::endl;
+	 
+    }
+    std::string method_called = "";
+    //const GXmlNode* node = xml.element("methodCall", 0);
+    const GXmlNode* ptr = xml.element("methodCall", 0)->element("params", 0)->element("param", 0)->element("value", 0);
+    if (ptr != NULL) {
+        const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
+        if (text != NULL) {
+            method_called = text->text();
+	    std::cout << "current app calling is:" << std::endl;
+	    std::cout << method_called << std::endl;
+        }
+    }
+    
+    std::cout<< "Nb. of current applications registered:" << std::endl;
+    std::cout<< m_connected_apps.size()<< std::endl;
+    for( i=0,q=m_connected_apps.begin(); i<m_connected_apps.size(); i++,q++ ) {
+      std::cout << "Displaying element of applications list:" << std::endl;
+      content = (*q)->print();
+      std::cout << content << std::endl;
+    }
+    
     std::string msg = "";
-
+    
     // Set methodResponse elts
     msg.append("<?xml version=\"1.0\"?>\n");
     msg.append("<methodResponse>\n");
@@ -617,13 +663,13 @@ void GVOHub::handle_request(const socklen_t& sock)
     if (method_called.compare("samp.hub.ping") == 0) {
         ping_service(sock);
     }
-    if (method_called.compare("samp.hub.getMetadata") == 0) {
-        ping_service(sock);
-    }
     if (method_called.compare("samp.hub.declareSubscriptions") == 0) {
         declare_subscriptions(xml,sock);
     }
     if (method_called.compare("samp.hub.getSubscriptions") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.setXmlrpcCallback") == 0) {
         ping_service(sock);
     }
     if (method_called.compare("samp.hub.getRegisteredClients") == 0) {
@@ -648,6 +694,9 @@ void GVOHub::handle_request(const socklen_t& sock)
         ping_service(sock);
     }
     if (method_called.compare("samp.hub.reply") == 0) {
+        ping_service(sock);
+    }
+    if (method_called.compare("samp.hub.getMetadata") == 0) {
         ping_service(sock);
     }
     // Return
@@ -777,8 +826,8 @@ std::string GVOHub::get_response_value(const GXml&        xml,
 		if (node != NULL) {
 		  int num = node->elements("member");            
                     for (int i = 0; i < num; ++i) {
-			   std::cout << i << std::endl;
-			   std::cout << *(node->element("member", i)) << std::cout;
+			   /*std::cout << i << std::endl;
+			   std::cout << *(node->element("member", i)) << std::cout;*/
                             const GXmlNode* member = node->element("member", i);
                             //const GXmlNode* member_name = member->element("name", 0);
 			    std::string one_name;
@@ -798,7 +847,59 @@ std::string GVOHub::get_response_value(const GXml&        xml,
     // Return value
     return value;
 }
+/***********************************************************************//**
+ * @brief Returns value for a SAMP client query parameter
+ *
+ * @param[in] xml client query XML document.
+ * @param[in] name Parameter name.
+ * @return Parameter value.
+ *
+ * Returns value for a SAMP client query parameter. If the specified
+ * parameter was not found or if the response structure is not compliant,
+ * an empty string is returned.
+ ***************************************************************************/
+std::list<std::string> GVOHub::get_registrations(const GXml&        xml,
+                                          const std::string& name) const                                         
+{
+    // Declare value
+    std::list<std::string> value;
+    
+    // Search for value of specified member
+    const GXmlNode* node = xml.element("methodCall", 0);
+    const GXmlNode* subnode;
+    const GXmlText* subtext;
+    if (node != NULL) {
+        node = node->element("params", 0);
+        if (node != NULL) {
+            node = node->element("param", 1);
+            if (node != NULL) {
+	      node = node->element("value", 0);
+	      if (node != NULL) {
+		node = node->element("struct", 0);
+		if (node != NULL) {
+		  int num = node->elements("member");
+                    for (int i = 0; i < num; ++i) {
+			   std::cout << i << std::endl;
+			   std::cout << "Affichage du membre\n";
+			   std::cout << *(node->element("member", i)) << std::cout;
+			   subnode = node->element("member", i);
+			   subnode = subnode->element("name", 0);
+			   std::cout << "\nsubnode" << std::endl;
+			   std::cout << node->element("member",i)->element("name", 0)->print(NORMAL,0) << std::cout;
+			   value.push_front(node->element("member",i)->element("name", 0)->print(NORMAL,0));
+			   std::cout << "\nFin Affichage du membre\n";
+                        }
+		      }
+		    }
+		
+		}
+		
+            }
+        }
 
+    // Return value
+    return value;
+}
 /***********************************************************************//**
  * @brief Extract name / value pair from XML node
  *

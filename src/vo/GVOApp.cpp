@@ -182,12 +182,22 @@ std::string GVOApp::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
-
+    std::list<std::string> temp;
+    temp = registered_calls;
+    
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
         // Append header
         result.append("=== GVOApp ===");
+	result.append(m_id);
+	result.append("%d",temp.size());
+	for (std::list<std::string>::iterator i = temp.begin(); i != temp.end(); ++i) {
+	  result.append("Method:\n");
+	  result.append(*i);
+	}
+	
+      
 
     } // endif: chatter was not silent
 
@@ -208,7 +218,7 @@ std::string GVOApp::print(const GChatter& chatter) const
 void GVOApp::init_members(void)
 {
     // Initialise members
-    
+    std::list<std::string> registeredMethods;
     // Return
     return;
 }
