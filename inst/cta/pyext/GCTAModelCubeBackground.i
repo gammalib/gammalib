@@ -40,15 +40,9 @@ public:
     // Constructors and destructors
     GCTAModelCubeBackground(void);
     explicit GCTAModelCubeBackground(const GXmlElement& xml);
-    GCTAModelCubeBackground(const GModelSpatial& spatial,
-                            const GModelSpectral& spectral);
+    explicit GCTAModelCubeBackground(const GModelSpectral& spectral);
     GCTAModelCubeBackground(const GCTAModelCubeBackground& model);
-    GCTAModelCubeBackground(const GCTAObservation& obs,
-                            const std::string&     filename,
-                            const GModelSpectral&  spectral,
-                            const int&             nx_sky   = 0,
-                            const int&             ny_sky   = 0,
-                            const int&             n_energy = 0);
+    
     virtual ~GCTAModelCubeBackground(void);
     
     // Implemented pure virtual methods
@@ -68,7 +62,6 @@ public:
     virtual void                     write(GXmlElement& xml) const;
     
     // Other methods
-    GModelSpatial*  spatial(void) const;
     GModelSpectral* spectral(void) const;
     GModelTemporal* temporal(void) const;
 };

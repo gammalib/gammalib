@@ -39,6 +39,7 @@ sources = src/GCTASupport.cpp \
           src/GCTABackgroundPerfTable.cpp \
           src/GCTABackground3D.cpp \
           src/GCTACubeExposure.cpp \
+          src/GCTACubeBackground.cpp \
           src/GCTACubePsf.cpp \
           src/GCTACubeSource.cpp \
           src/GCTACubeSourcePoint.cpp \
@@ -90,6 +91,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTABackground3D.hpp \
                      include/GCTACubeExposure.hpp \
                      include/GCTACubePsf.hpp \
+                     include/GCTACubeBackground.hpp \
                      include/GCTACubeSource.hpp \
                      include/GCTACubeSourcePoint.hpp \
                      include/GCTACubeSourceDiffuse.hpp \

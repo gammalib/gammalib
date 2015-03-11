@@ -129,13 +129,14 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const std::string& cntcube,
                                  const std::string& expcube,
-                                 const std::string& psfcube) : GObservation()
+                                 const std::string& psfcube,
+                                 const std::string& bgcube) : GObservation()
 {
     // Initialise members
     init_members();
 
     // Load data
-    load(cntcube, expcube, psfcube);
+    load(cntcube, expcube, psfcube, bgcube);
 
     // Return
     return;
@@ -348,14 +349,15 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  * exposure cube and the PSF cube.
  ***************************************************************************/
 void GCTAObservation::response(const GCTACubeExposure& expcube,
-                               const GCTACubePsf&      psfcube)
+                               const GCTACubePsf&      psfcube,
+                               const GCTACubeBackground& bgcube)
 {
     // Free response
     if (m_response != NULL) delete m_response;
     m_response = NULL;
 
     // Allocate fresh response function
-    GCTAResponseCube* rsp = new GCTAResponseCube(expcube, psfcube);
+    GCTAResponseCube* rsp = new GCTAResponseCube(expcube, psfcube, bgcube);
 
     // Store pointer
     m_response = rsp;
@@ -1174,7 +1176,8 @@ void GCTAObservation::load(const std::string& filename)
  ***************************************************************************/
 void GCTAObservation::load(const std::string& cntcube,
                            const std::string& expcube,
-                           const std::string& psfcube) {
+                           const std::string& psfcube,
+                           const std::string& bgcube) {
 
     // Load counts cube FITS file
     load(cntcube);
@@ -1192,8 +1195,11 @@ void GCTAObservation::load(const std::string& cntcube,
     // Load Psf cube
     GCTACubePsf psf(psfcube);
 
+    // Load background cube
+    GCTACubeBackground background(bgcube);
+
     // Attach exposure and Psf cube as response
-    response(exposure, psf);
+    response(exposure, psf, background);
  
     // Return
     return;

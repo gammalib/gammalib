@@ -139,12 +139,14 @@ GCTAResponseCube::GCTAResponseCube(const GXmlElement& xml) : GCTAResponse()
  *
  * @param[in] exposure CTA cube analysis exposure.
  * @param[in] psf CTA cube analysis point spread function.
+ * @param[in] background CTA cube background response.
  *
- * Constructs CTA cube analysis response from a cube analysis exposure and
- * point spread function.
+ * Constructs CTA cube analysis response from a cube analysis exposure,
+ * a point spread function cube and a background cube.
  **************************************************************************/
 GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure& exposure,
-                                   const GCTACubePsf&      psf) :
+                                   const GCTACubePsf&      psf,
+                                   const GCTACubeBackground& background) :
                   GCTAResponse()
 {
     // Initialise members
@@ -153,6 +155,7 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure& exposure,
     // Set members
     m_exposure = exposure;
     m_psf      = psf;
+    m_background = background;
 
     // Return
     return;
@@ -695,13 +698,14 @@ double GCTAResponseCube::npred(const GPhoton&      photon,
  *
  * @param[in] xml XML element.
  *
- * Reads response information from an XML element. The Exposure and Psf cubes
- * are specified using
+ * Reads response information from an XML element. The Exposure, Psf and
+ * background cubes are specified using
  *
  *      <observation name="..." id="..." instrument="...">
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="BgCube"      file="..."/>
  *      </observation>
  *
  ***************************************************************************/
@@ -718,9 +722,14 @@ void GCTAResponseCube::read(const GXmlElement& xml)
     const GXmlElement* psfpar  = gammalib::xml_get_par(G_READ, xml, "PsfCube");
     std::string        psfname = gammalib::strip_whitespace(psfpar->attribute("file"));
 
+    // Get background cube information and load cube
+    const GXmlElement* bgpar  = gammalib::xml_get_par(G_READ, xml, "BgCube");
+    std::string        bgname = gammalib::strip_whitespace(bgpar->attribute("file"));
+
     // Load cubes
     m_exposure.load(expname);
     m_psf.load(psfname);
+    m_background.load(bgname);
 
     // Return
     return;
@@ -732,13 +741,14 @@ void GCTAResponseCube::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * Writes response information into an Xml element. The Exposure and Psf
- * cubes are specified using
+ * Writes response information into an Xml element. The Exposure, Psf
+ * and background cubes are specified using
  *
  *      <observation name="..." id="..." instrument="...">
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="BgCube"      file="..."/>
  *      </observation>
  *
  ***************************************************************************/
@@ -755,6 +765,13 @@ void GCTAResponseCube::write(GXmlElement& xml) const
     filename = gammalib::strip_whitespace(m_psf.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "PsfCube");
+        par->attribute("file", filename);
+    }
+
+    // Add background cube filename
+    filename = gammalib::strip_whitespace(m_background.filename());
+    if (!(filename.empty())) {
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "BgCube");
         par->attribute("file", filename);
     }
 
@@ -800,6 +817,9 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
         // Append point spread function information
         result.append("\n"+m_psf.print(chatter));
 
+        // Append background information
+        result.append("\n"+m_background.print(chatter));
+
     } // endif: chatter was not silent
 
     // Return result
@@ -821,6 +841,7 @@ void GCTAResponseCube::init_members(void)
     // Initialise members
     m_exposure.clear();
     m_psf.clear();
+    m_background.clear();
     m_apply_edisp = false;
 
     // Initialise cache
@@ -841,6 +862,7 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
     // Copy members
     m_exposure    = rsp.m_exposure;
     m_psf         = rsp.m_psf;
+    m_background = rsp.m_background;
     m_apply_edisp = rsp.m_apply_edisp;
 
     // Copy cache

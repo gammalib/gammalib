@@ -63,6 +63,7 @@ const std::string cta_irf_king     = "irf_file.fits";
 const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
 const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
 const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
+const std::string cta_bgcube        = datadir+"/bkgcube.fits";
 const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
 const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
 
@@ -89,6 +90,7 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bgcube), "Test background cube");
 
     // Return
     return;
@@ -318,7 +320,8 @@ void TestGCTAResponse::test_response(void)
     try {
         GCTACubeExposure exposure;
         GCTACubePsf      psf;
-        GCTAResponseCube rsp(exposure, psf);
+        GCTACubeBackground      background;
+        GCTAResponseCube rsp(exposure, psf, background);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -908,6 +911,29 @@ void TestGCTAResponse::test_response_psfcube(void)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Test PSF cube handling
+ ***************************************************************************/
+void TestGCTAResponse::test_response_bgcube(void)
+{
+    // Test background cube constructors
+    test_try("CTA background cube void constructor");
+    try {
+        GCTACubeBackground cube;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    GCTACubeBackground cube;
+    cube.load(cta_bgcube);
+    cube.save("test_cta_bgcube.fits", true);
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Utility function for energy dispersion tests
@@ -1035,95 +1061,68 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
  ***************************************************************************/
 void TestGCTAModel::test_model_cube_bgd(void)
 {
-    // Test CTA background constuctor
-    test_try("Test CTA background constuctor");
+    // Test void constuctor
+    test_try("Test void constuctor");
     try {
-        // Setup spectral model
-        GEnergy energy(1.2, "TeV");
-        GModelSpectralPlaw spectrum(1.0, -1.5, energy);
-
-        // Load CTA event list
-        GCTAObservation obs ;
-        obs.load(cta_events);
-
-        // Load background model
-        GCTAModelCubeBackground bck(obs, cta_modbck_fit, spectrum);
+        GCTAModelCubeBackground model;
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Set reference value (~0.393469 result of a 2D Gaussian integrated 
-    // within one sigma)
-    const double ref = 1.0 - 1.0 / std::sqrt(std::exp(1.0));
+    // Test XML constuctor
+    test_try("Test XML constuctor");
+    try {
+        GXml xml(cta_cube_bgd_xml);
+        const GXmlElement& lib = *xml.element("source_library", 0);
+        const GXmlElement& src = *lib.element("source", 0);
+        GCTAModelCubeBackground model(src);
+        test_value(model["Prefactor"].value(), 1.0);
+        test_value(model["Index"].value(), 0.0);
+        test_value(model["PivotEnergy"].value(), 1.0e6);
+        test_assert(model.is_constant(), "Model is expected to be constant.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-    // Load models for Npred computation
+    // Test spectral constuctor
+    test_try("Test spectral constuctor");
+    try {
+        GModelSpectralPlaw plaw(1.0, 0.0, GEnergy(1.0, "TeV"));
+        GCTAModelCubeBackground model(plaw);
+        test_value(model["Prefactor"].value(), 1.0);
+        test_value(model["Index"].value(), 0.0);
+        test_value(model["PivotEnergy"].value(), 1.0e6);
+        test_assert(model.is_constant(), "Model is expected to be constant.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML loading of cube background
     GModels models(cta_cube_bgd_xml);
+    GModel* model = models["CTABackgroundModel"];
+    test_value((*model)["Prefactor"].value(), 1.0);
+    test_value((*model)["Index"].value(), 0.0);
+    test_value((*model)["PivotEnergy"].value(), 1.0e6);
+    test_assert(model->is_constant(), "Model is expected to be constant.");
 
-    // Get the GCTAModelCubeBackground
-    const GCTAModelCubeBackground* bck = dynamic_cast<const GCTAModelCubeBackground*>(models[0]);
+    // Test XML saving and reloading of cube background
+    models.save("test.xml");
+    models.load("test.xml");
+    model = models["CTABackgroundModel"];
+    test_value((*model)["Prefactor"].value(), 1.0);
+    test_value((*model)["Index"].value(), 0.0);
+    test_value((*model)["PivotEnergy"].value(), 1.0e6);
+    test_assert(model->is_constant(), "Model is expected to be constant.");
 
-    // Get the spectral and spatial components
-    const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
-    const GModelSpatialRadialGauss* spat = dynamic_cast<const GModelSpatialRadialGauss*>(bck->spatial());
+    // Return
+    return;
 
-    // Get Integration centre for ROI position
-    double src_ra  = spat->ra();
-    double src_dec = spat->dec();
-    double sigma   = spat->sigma();
-    test_value(sigma, 1.0, 1e-7, "Input value from cta_modelbck.xml - file");
-
-    // Set ROI to sigma of Gaussian
-    double roi_rad = sigma;
-
-    // Setup ROI centred on the Gaussian mean with a radius of 1sigma
-    GCTARoi     roi;
-    GCTAInstDir instDir;
-    instDir.dir().radec_deg(src_ra, src_dec);
-    roi.centre(instDir);
-    roi.radius(roi_rad);
-
-    // Setup pointing with the same centre as ROI
-    GSkyDir skyDir;
-    skyDir.radec_deg(src_ra, src_dec);
-    GCTAPointing pnt;
-    pnt.dir(skyDir);
-
-    // Setup dummy event list
-    GGti     gti;
-    GEbounds ebounds;
-    GTime    tstart(0.0);
-    GTime    tstop(1800.0);
-    GEnergy  emin(0.1, "TeV");
-    GEnergy  emax(100.0, "TeV");
-    gti.append(tstart, tstop);
-    ebounds.append(emin, emax);
-    GCTAEventList events;
-    events.roi(roi);
-    events.gti(gti);
-    events.ebounds(ebounds);
-
-    // Setup dummy CTA observation without deadtime
-    GCTAObservation obs;
-    obs.ontime(1800.0);
-    obs.livetime(1800.0);
-    obs.deadc(1.0);
-    obs.response(cta_irf, GCaldb(cta_caldb));
-    obs.events(events);
-    obs.pointing(pnt);
-
-    // Perform Npred computation
-    double npred = bck->npred(spec->pivot(),tstart,obs);
-
-    // Divide npred by spectral normalisation to true containment fraction
-    npred /= spec->prefactor();
-
-    // Test Npred against the reference value
-    test_value(npred, ref , 1.0e-5,  "Npred computation for CTA background model");
-	
-	// Return
-	return;
 }
 
 

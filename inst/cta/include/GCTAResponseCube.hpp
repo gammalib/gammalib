@@ -33,6 +33,7 @@
 #include "GCTAResponse.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTACubePsf.hpp"
+#include "GCTACubeBackground.hpp"
 #include "GCTACubeSource.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -59,7 +60,9 @@ public:
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
     explicit GCTAResponseCube(const GXmlElement& xml);
-    GCTAResponseCube(const GCTACubeExposure& exposure, const GCTACubePsf& psf);
+    GCTAResponseCube(const GCTACubeExposure& exposure,
+            const GCTACubePsf& psf,
+            const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
     // Operators
@@ -105,6 +108,8 @@ public:
     void                    exposure(const GCTACubeExposure& exposure);
     const GCTACubePsf&      psf(void) const;
     void                    psf(const GCTACubePsf& psf);
+    const GCTACubeBackground&      background(void) const;
+    void                    background(const GCTACubeBackground& background);
 
 private:
     // Private methods
@@ -127,6 +132,7 @@ private:
     // Private data members
     GCTACubeExposure m_exposure;    //!< Exposure cube
     GCTACubePsf      m_psf;         //!< Mean point spread function
+    GCTACubeBackground m_background; //!< background cube
     mutable bool     m_apply_edisp; //!< Apply energy dispersion
 
     // Response cache
@@ -259,6 +265,31 @@ void GCTAResponseCube::psf(const GCTACubePsf& psf)
 {
     m_psf = psf;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set cube analysis point spread function cube
+ *
+ * @param[in] psf Cube analysis point spread function.
+ ***************************************************************************/
+inline
+void GCTAResponseCube::background(const GCTACubeBackground& background)
+{
+    m_background = background;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return cube analysis point spread function
+ *
+ * @return Reference to cube analysis point spread function.
+ ***************************************************************************/
+inline
+const GCTACubeBackground& GCTAResponseCube::background(void) const
+{
+    return (m_background);
 }
 
 #endif /* GCTARESPONSECUBE_HPP */

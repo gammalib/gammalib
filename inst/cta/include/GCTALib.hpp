@@ -66,6 +66,7 @@
 #include "GCTABackgroundPerfTable.hpp"
 #include "GCTABackground3D.hpp"
 #include "GCTACubeExposure.hpp"
+#include "GCTACubeBackground.hpp"
 #include "GCTACubePsf.hpp"
 #include "GCTACubeSource.hpp"
 #include "GCTACubeSourcePoint.hpp"
