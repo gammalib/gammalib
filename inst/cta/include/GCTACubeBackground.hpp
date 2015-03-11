@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GCTACubeBackground.hpp - CTA cube background class             *
+ *             GCTACubeBackground.hpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Michael Mayer                     *
+ *  copyright (C) 2015 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,31 +54,32 @@ public:
 
     // Operators
     GCTACubeBackground& operator=(const GCTACubeBackground& bgd);
-    double            operator()(const GSkyDir& dir, const GEnergy& energy) const;
-
-    // Implemented pure virtual methods
-    void                       clear(void);
-    GCTACubeBackground*          clone(void) const;
-    std::string                classname(void) const;
-    void               set(const GSkymap& cube, const GEbounds& ebounds);
-    void                       load(const std::string& filename);
-    void                       read(const GFits& fits);
-    void                       write(GFits& file) const;
-    const std::string&                filename(void) const;
-    GSkyDir               mc(const GEnergy& energy,
-                                  const GTime& time,
-                                  GRan& ran) const;
-    const GModelSpectralNodes& spectrum(void) const;
-    std::string                print(const GChatter& chatter = NORMAL) const;
+    double              operator()(const GSkyDir& dir,
+                                   const GEnergy& energy) const;
 
     // Methods
-    const GSkymap&     cube(void) const;
-    const GEbounds&    ebounds(void) const;
-    const GNodeArray&  elogmeans(void) const;
+    void                       clear(void);
+    GCTACubeBackground*        clone(void) const;
+    std::string                classname(void) const;
+    void                       set(const GSkymap&  cube,
+                                   const GEbounds& ebounds);
+    void                       set_mc_cone(const GSkyDir& centre,
+                                           const double&  radius);
+    GSkyDir                    mc(const GEnergy& energy,
+                                  const GTime& time,
+                                  GRan& ran) const;
+    double                     integral(const double& logE) const;
+    void                       read(const GFits& fits);
+    void                       write(GFits& file) const;
+    void                       load(const std::string& filename);
     void                       save(const std::string& filename,
                                     const bool& clobber = false) const;
-    void                       set_mc_cone(const GSkyDir& centre, const double&  radius);
-    double                  integral(const double& logE) const;
+    const GSkymap&             cube(void) const;
+    const GEbounds&            ebounds(void) const;
+    const GNodeArray&          elogmeans(void) const;
+    const std::string&         filename(void) const;
+    const GModelSpectralNodes& spectrum(void) const;
+    std::string                print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
@@ -87,10 +88,10 @@ private:
     void free_members(void);
     void set_eng_axis(void);
     void update(const double& logE) const;
-    void init_mc_cache();
+    void init_mc_cache(void);
 
     // Members
-    mutable std::string       m_filename;    //!< Name of background response file
+    mutable std::string m_filename;  //!< Name of background response file
     GSkymap             m_cube;      //!< Background cube
     GEbounds            m_ebounds;   //!< Energy bounds for the Exposure cube
     GNodeArray          m_elogmeans; //!< Mean energy for the Exposure cube
@@ -111,7 +112,7 @@ private:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GCTCubeABackground").
+ * @return String containing the class name ("GCTACubeBackground").
  ***************************************************************************/
 inline
 std::string GCTACubeBackground::classname(void) const
@@ -121,11 +122,11 @@ std::string GCTACubeBackground::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return exposure cube
+ * @brief Return background cube
  *
- * @return Exposure cube.
+ * @return Sky map holding the background cube.
  *
- * Returns the GSkymap object that is used to store the exposure cube
+ * Returns the GSkymap object that is used to store the background cube
  * information.
  ***************************************************************************/
 inline
@@ -138,7 +139,7 @@ const GSkymap& GCTACubeBackground::cube(void) const
 /***********************************************************************//**
  * @brief Return energy boundaries
  *
- * @return Energy boundaries
+ * @return Energy boundaries.
  ***************************************************************************/
 inline
 const GEbounds& GCTACubeBackground::ebounds(void) const
@@ -148,9 +149,9 @@ const GEbounds& GCTACubeBackground::ebounds(void) const
 
 
 /***********************************************************************//**
- * @brief Return arithmetic mean of log10 energies
+ * @brief Return geometric mean of background cube energies
  *
- * @return Arithmetic mean of log10 energies.
+ * @return Node array of geometric mean of background cube energies.
  ***************************************************************************/
 inline
 const GNodeArray& GCTACubeBackground::elogmeans(void) const
@@ -160,12 +161,12 @@ const GNodeArray& GCTACubeBackground::elogmeans(void) const
 
 
 /***********************************************************************//**
- * @brief Return exposure cube filename
+ * @brief Return background cube filename
  *
- * @return Exposure cube filename.
+ * @return Background cube filename.
  *
- * Returns the filename from which the exposure cube was loaded or into which
- * the exposure cube has been saved.
+ * Returns the filename from which the background cube was loaded or into
+ * which the background cube has been saved.
  ***************************************************************************/
 inline
 const std::string& GCTACubeBackground::filename(void) const
@@ -173,13 +174,13 @@ const std::string& GCTACubeBackground::filename(void) const
     return (m_filename);
 }
 
+
 /***********************************************************************//**
- * @brief Return exposure cube filename
+ * @brief Return background cube spectrum
  *
- * @return Exposure cube filename.
+ * @return Background cube spectrum.
  *
- * Returns the filename from which the exposure cube was loaded or into which
- * the exposure cube has been saved.
+ * Returns the spectrum of the background cube as spectral nodes.
  ***************************************************************************/
 inline
 const GModelSpectralNodes& GCTACubeBackground::spectrum(void) const

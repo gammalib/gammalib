@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelCubeBackground.hpp - CTA cube background model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,26 +64,26 @@ public:
     virtual GCTAModelCubeBackground& operator=(const GCTAModelCubeBackground& model);
 
     // Implemented pure virtual methods
-   virtual void                    clear(void);
-   virtual GCTAModelCubeBackground* clone(void) const;
-   virtual std::string             classname(void) const;
-   virtual std::string             type(void) const;
-   virtual bool                    is_constant(void) const;
-   virtual double                  eval(const GEvent& event,
-                                        const GObservation& obs) const;
-   virtual double                  eval_gradients(const GEvent& event,
-                                                  const GObservation& obs) const;
-   virtual double                  npred(const GEnergy& obsEng,
-                                         const GTime& obsTime,
-                                         const GObservation& obs) const;
-   virtual GCTAEventList*          mc(const GObservation& obs, GRan& ran) const;
-   virtual void                    read(const GXmlElement& xml);
-   virtual void                    write(GXmlElement& xml) const;
-   virtual std::string             print(const GChatter& chatter = NORMAL) const;
-
-   // Other methods
-   GModelSpectral* spectral(void) const;
-   GModelTemporal* temporal(void) const;
+    virtual void                     clear(void);
+    virtual GCTAModelCubeBackground* clone(void) const;
+    virtual std::string              classname(void) const;
+    virtual std::string              type(void) const;
+    virtual bool                     is_constant(void) const;
+    virtual double                   eval(const GEvent& event,
+                                          const GObservation& obs) const;
+    virtual double                   eval_gradients(const GEvent& event,
+                                                    const GObservation& obs) const;
+    virtual double                   npred(const GEnergy& obsEng,
+                                           const GTime& obsTime,
+                                           const GObservation& obs) const;
+    virtual GCTAEventList*           mc(const GObservation& obs, GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
+    virtual std::string              print(const GChatter& chatter = NORMAL) const; 
+ 
+    // Other methods
+    GModelSpectral* spectral(void) const;
+    GModelTemporal* temporal(void) const;
 
 protected:
     // Methods

@@ -63,7 +63,7 @@ const std::string cta_irf_king     = "irf_file.fits";
 const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
 const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
 const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
-const std::string cta_bgcube        = datadir+"/bkgcube.fits";
+const std::string cta_bkgcube      = datadir+"/bkgcube.fits";
 const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
 const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
 
@@ -90,7 +90,7 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bgcube), "Test background cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube), "Test background cube");
 
     // Return
     return;
@@ -914,7 +914,7 @@ void TestGCTAResponse::test_response_psfcube(void)
 /***********************************************************************//**
  * @brief Test PSF cube handling
  ***************************************************************************/
-void TestGCTAResponse::test_response_bgcube(void)
+void TestGCTAResponse::test_response_bkgcube(void)
 {
     // Test background cube constructors
     test_try("CTA background cube void constructor");
@@ -927,8 +927,8 @@ void TestGCTAResponse::test_response_bgcube(void)
     }
 
     GCTACubeBackground cube;
-    cube.load(cta_bgcube);
-    cube.save("test_cta_bgcube.fits", true);
+    cube.load(cta_bkgcube);
+    cube.save("test_cta_bkgcube.fits", true);
 
     // Return
     return;

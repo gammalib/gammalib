@@ -60,9 +60,9 @@ public:
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
     explicit GCTAResponseCube(const GXmlElement& xml);
-    GCTAResponseCube(const GCTACubeExposure& exposure,
-            const GCTACubePsf& psf,
-            const GCTACubeBackground& background);
+    GCTAResponseCube(const GCTACubeExposure&   exposure,
+                     const GCTACubePsf&        psf,
+                     const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
     // Operators
@@ -104,12 +104,12 @@ public:
                                const GObservation& obs) const;
 
     // Other Methods
-    const GCTACubeExposure& exposure(void) const;
-    void                    exposure(const GCTACubeExposure& exposure);
-    const GCTACubePsf&      psf(void) const;
-    void                    psf(const GCTACubePsf& psf);
-    const GCTACubeBackground&      background(void) const;
-    void                    background(const GCTACubeBackground& background);
+    const GCTACubeExposure&   exposure(void) const;
+    void                      exposure(const GCTACubeExposure& exposure);
+    const GCTACubePsf&        psf(void) const;
+    void                      psf(const GCTACubePsf& psf);
+    const GCTACubeBackground& background(void) const;
+    void                      background(const GCTACubeBackground& background);
 
 private:
     // Private methods
@@ -130,10 +130,10 @@ private:
                           const GTime&                   srcTime) const;
 
     // Private data members
-    GCTACubeExposure m_exposure;    //!< Exposure cube
-    GCTACubePsf      m_psf;         //!< Mean point spread function
-    GCTACubeBackground m_background; //!< background cube
-    mutable bool     m_apply_edisp; //!< Apply energy dispersion
+    GCTACubeExposure   m_exposure;    //!< Exposure cube
+    GCTACubePsf        m_psf;         //!< Mean point spread function
+    GCTACubeBackground m_background;  //!< Background cube
+    mutable bool       m_apply_edisp; //!< Apply energy dispersion
 
     // Response cache
     mutable std::vector<GCTACubeSource*> m_cache; //!< Response cache
@@ -269,9 +269,9 @@ void GCTAResponseCube::psf(const GCTACubePsf& psf)
 
 
 /***********************************************************************//**
- * @brief Set cube analysis point spread function cube
+ * @brief Set cube analysis background cube
  *
- * @param[in] psf Cube analysis point spread function.
+ * @param[in] background Cube analysis background cube.
  ***************************************************************************/
 inline
 void GCTAResponseCube::background(const GCTACubeBackground& background)
@@ -282,9 +282,9 @@ void GCTAResponseCube::background(const GCTACubeBackground& background)
 
 
 /***********************************************************************//**
- * @brief Return cube analysis point spread function
+ * @brief Return cube analysis background cube
  *
- * @return Reference to cube analysis point spread function.
+ * @return Reference to cube analysis background cube.
  ***************************************************************************/
 inline
 const GCTACubeBackground& GCTAResponseCube::background(void) const

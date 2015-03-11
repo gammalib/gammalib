@@ -42,36 +42,34 @@ public:
     explicit GCTACubeBackground(const std::string& filename);
     GCTACubeBackground(const GCTACubeBackground& bgd);
     virtual ~GCTACubeBackground(void);
-    
+
     // Operators
     GCTACubeBackground& operator=(const GCTACubeBackground& bgd);
-    double            operator()(const GSkyDir& dir, const GEnergy& energy) const;
-    
-    
-    // Implemented pure virtual methods
-    void                       clear(void);
-    GCTACubeBackground*          clone(void) const;
-    std::string                classname(void) const;
-    void                       set(const GSkymap& cube, const GEbounds& ebounds);
-    void                       load(const std::string& filename);
-    void                       read(const GFits& fits);
-    void                       write(GFits& fits) const;
-    const std::string&                filename(void) const;
-    GSkyDir               mc(const GEnergy& energy,
-                             const GTime& time,
-                             GRan& ran) const;
-    const GModelSpectralNodes& spectrum(void) const;
-    std::string                print(const GChatter& chatter = NORMAL) const;
-    
+    double              operator()(const GSkyDir& dir,
+                                   const GEnergy& energy) const;
+
     // Methods
-    const GSkymap&     cube(void) const;
-    const GEbounds&    ebounds(void) const;
-    const GNodeArray&  elogmeans(void) const;
+    void                       clear(void);
+    GCTACubeBackground*        clone(void) const;
+    std::string                classname(void) const;
+    void                       set(const GSkymap&  cube,
+                                   const GEbounds& ebounds);
+    void                       set_mc_cone(const GSkyDir& centre,
+                                           const double&  radius);
+    GSkyDir                    mc(const GEnergy& energy,
+                                  const GTime& time,
+                                  GRan& ran) const;
+    double                     integral(const double& logE) const;
+    void                       read(const GFits& fits);
+    void                       write(GFits& file) const;
+    void                       load(const std::string& filename);
     void                       save(const std::string& filename,
                                     const bool& clobber = false) const;
-    
-    void                       set_mc_cone(const GSkyDir& centre, const double&  radius);
-    double                  integral(const double& logE) const;
+    const GSkymap&             cube(void) const;
+    const GEbounds&            ebounds(void) const;
+    const GNodeArray&          elogmeans(void) const;
+    const std::string&         filename(void) const;
+    const GModelSpectralNodes& spectrum(void) const;
 };
 
 

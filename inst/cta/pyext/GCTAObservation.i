@@ -42,7 +42,7 @@ public:
     GCTAObservation(const std::string& cntcube,
                     const std::string& expcube,
                     const std::string& psfcube,
-                    const std::string& bgcube);
+                    const std::string& bkgcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -72,14 +72,14 @@ public:
     void                load(const std::string& cntcube,
                              const std::string& expcube,
                              const std::string& psfcube,
-                             const std::string& bgcube);
+                             const std::string& bkgcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
     void                response(const GCTACubeExposure& expcube,
                                  const GCTACubePsf&      psfcube,
-                                 const GCTACubeBackground& bgcube);
+                                 const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     GCTARoi             roi(void) const;

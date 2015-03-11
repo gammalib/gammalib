@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTAModelCubeBackground - CTA cube background model class        *
+ *       GCTAModelCubeBackground.i - CTA cube background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,4 +70,7 @@ public:
 * @brief GCTAModelCubeBackground class extension
 ***************************************************************************/
 %extend GCTAModelCubeBackground {
+    GCTAModelCubeBackground copy() {
+        return (*self);
+    }
 };

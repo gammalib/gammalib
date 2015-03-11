@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GCTACubeBackground.cpp - CTA cube background class             *
+ *             GCTACubeBackground.cpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Michael Mayer                         *
+ *  copyright (C) 2015 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,8 +36,8 @@
 #include "GCTACubeBackground.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                               "GCTACubeBackground::read(GFits&)"
-#define G_MC                  "GCTACubeBackground::mc(GEnergy&, GTime&, GRan&)"
+#define G_READ                             "GCTACubeBackground::read(GFits&)"
+#define G_MC                "GCTACubeBackground::mc(GEnergy&, GTime&, GRan&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -130,8 +130,8 @@ GCTACubeBackground::~GCTACubeBackground(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] bgd Background.
- * @return Background.
+ * @param[in] bgd Background cube.
+ * @return Background cube.
  ***************************************************************************/
 GCTACubeBackground& GCTACubeBackground::operator=(const GCTACubeBackground& bgd)
 {
@@ -165,17 +165,20 @@ GCTACubeBackground& GCTACubeBackground::operator=(const GCTACubeBackground& bgd)
  * never becomes negative.
  *
  * The method interpolates logarithmically in the energy direction.
+ *
+ * @todo Check whether this should be a GSkyDir or rather a GInstDir object.
  ***************************************************************************/
-double GCTACubeBackground::operator()(const GSkyDir& dir, const GEnergy& energy) const
+double GCTACubeBackground::operator()(const GSkyDir& dir,
+                                      const GEnergy& energy) const
 {
     // Set indices and weighting factors for interpolation
     update(energy.log10TeV());
 
     // Perform interpolation
     double background = m_wgt_left  * m_cube(dir, m_inx_left) +
-                      m_wgt_right * m_cube(dir, m_inx_right);
+                        m_wgt_right * m_cube(dir, m_inx_right);
 
-    // Make sure that exposure does not become negative
+    // Make sure that background rate does not become negative
     if (background < 0.0) {
         background = 0.0;
     }
@@ -223,8 +226,8 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
 /***********************************************************************//**
  * @brief Set background cube from skymap and energy boundaries
  *
- * @param[in] map Sky map.
- * @param[in] ebds Energy boundaries.
+ * @param[in] cube Sky map.
+ * @param[in] ebounds Energy boundaries.
  *
  * Set this instance from sky map, energy boundaries
  ***************************************************************************/
@@ -252,339 +255,6 @@ void GCTACubeBackground::set(const GSkymap& cube, const GEbounds& ebounds)
 
 
 /***********************************************************************//**
- * @brief Load background from FITS file
- *
- * @param[in] filename FITS file.
- *
- * This method loads the background information from a FITS file.
- ***************************************************************************/
-void GCTACubeBackground::load(const std::string& filename)
-{
-    // Open FITS file
-    GFits fits(filename);
-
-    // Read PSF cube
-    read(fits);
-
-    // Close FITS file
-    fits.close();
-
-    // Store filename
-    m_filename = filename;
-
-    // Initialise Monte Carlo cache
-    init_mc_cache();
-
-    // Return
-    return;
-
-}
-
-/***********************************************************************//**
- * @brief Read background cube from FITS object
- *
- * @param[in] fits FITS object.
- *
- * Read the background cube from a FITS object.
- ***************************************************************************/
-void GCTACubeBackground::read(const GFits& fits)
-{
-    // Clear object
-    clear();
-
-    // Get HDUs
-    const GFitsImage& hdu_expcube = *fits.image("Primary");
-    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
-
-    // Read cube
-    m_cube.read(hdu_expcube);
-
-    // Read energy boundaries
-    m_ebounds.read(hdu_ebounds);
-
-    // Set energy node array
-    set_eng_axis();
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Write CTA background cube into FITS object.
- *
- * @param[in] fits FITS file.
- ***************************************************************************/
-void GCTACubeBackground::write(GFits& fits) const
-{
-    // Write cube
-    m_cube.write(fits);
-
-    // Write energy boundaries
-    m_ebounds.write(fits);
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Save background cube into FITS file
- *
- * @param[in] filename background cube FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
- *
- * Save the background cube into a FITS file.
- ***************************************************************************/
-void GCTACubeBackground::save(const std::string& filename, const bool& clobber) const
-{
-    // Create empty FITS file
-    GFits fits;
-
-    // Write background cube
-    write(fits);
-
-    // Save FITS file
-    fits.saveto(filename, clobber);
-
-    // Store filename
-    m_filename = filename;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns MC sky direction
- *
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @param[in,out] ran Random number generator.
- * @return Sky direction.
- ***************************************************************************/
-GSkyDir GCTACubeBackground::mc(const GEnergy& energy,
-                                 const GTime&   time,
-                                 GRan&          ran) const
-{
-
-    // Allocate sky direction
-    GSkyDir dir;
-
-    // Determine number of skymap pixels
-    int npix = m_cube.npix();
-
-    // Continue only if there are skymap pixels
-    if (npix > 0) {
-
-        // If no energy boundaries are defined, throw an exception
-        if (m_ebounds.size() < 1) {
-            std::string msg = "The energy boundaries of the maps in the cube"
-                              " have not been defined. Maybe the map cube file"
-                              " is missing the \"ENERGIES\" extension which"
-                              " defines the energy of each map in the cube.\n"
-                              "Please provide the energy information.";
-            throw GException::invalid_value(G_MC, msg);
-        }
-
-        // Determine the map that corresponds best to the specified energy.
-        // This is not 100% clean, as ideally some map interpolation should
-        // be done to the exact energy specified. However, as long as the map
-        // does not change drastically with energy, taking the closest map
-        // seems to be fine.
-        int i = m_ebounds.index(energy);
-        if (i < 0) {
-            if (energy <= m_ebounds.emin()) {
-                i = 0;
-            }
-            else if (energy >= m_ebounds.emax()) {
-                i = m_ebounds.size()-1;
-            }
-            else {
-                std::string msg = "The specified energy "+energy.print()+" does"
-                                  " not fall in any of the energy boundaries of"
-                                  " the map cube.\n"
-                                  "Please make sure that the map cube energies"
-                                  " are properly defined.";
-                throw GException::invalid_value(G_MC, msg);
-            }
-        }
-
-        // Get uniform random number
-        double u = ran.uniform();
-
-        // Get pixel index according to random number. We use a bi-section
-        // method to find the corresponding skymap pixel
-        int offset = i * (npix+1);
-        int low    = offset;
-        int high   = offset + npix;
-        while ((high - low) > 1) {
-            int mid = (low+high) / 2;
-            if (u < m_mc_cache[mid]) {
-                high = mid;
-            }
-            else if (m_mc_cache[mid] <= u) {
-                low = mid;
-            }
-        }
-
-        // Convert sky map index to sky map pixel
-        GSkyPixel pixel = m_cube.inx2pix(low-offset);
-
-        // Randomize pixel
-        pixel.x(pixel.x() + ran.uniform() - 0.5);
-        pixel.y(pixel.y() + ran.uniform() - 0.5);
-
-        // Get sky direction
-        dir = m_cube.pix2dir(pixel);
-
-    } // endif: there were pixels in sky map
-
-    // Return instrument direction
-    return dir;
-}
-
-
-/***********************************************************************//**
- * @brief Print background information
- *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing background information.
- ***************************************************************************/
-std::string GCTACubeBackground::print(const GChatter& chatter) const
-{
-    // Initialise result string
-     std::string result;
-
-     // Continue only if chatter is not silent
-     if (chatter != SILENT) {
-
-         // Append header
-         result.append("=== m_elogmeans ===");
-
-         // Append parameters
-         result.append("\n"+gammalib::parformat("Cube file")+m_filename);
-
-         // Append detailed information only if a map cube exists
-         if (m_cube.npix() > 0) {
-
-             // NORMAL: Append sky map
-             if (chatter >= NORMAL) {
-                 result.append("\n"+m_cube.print(chatter));
-             }
-
-             // EXPLICIT: Append energy nodes
-             if (chatter >= EXPLICIT && m_elogmeans.size() > 0) {
-                 result.append("\n"+gammalib::parformat("Cube energy values"));
-                 if (m_elogmeans.size() > 0) {
-                     for (int i = 0; i < m_elogmeans.size(); ++i) {
-                         result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
-                         result.append(gammalib::str(std::pow(10.0, m_elogmeans[i])));
-                         result.append(" MeV (log10E=");
-                         result.append(gammalib::str(m_elogmeans[i]));
-                         result.append(")");
-                         if (m_ebounds.size() == m_elogmeans.size()) {
-                             result.append(" [");
-                             result.append(m_ebounds.emin(i).print());
-                             result.append(", ");
-                             result.append(m_ebounds.emax(i).print());
-                             result.append("]");
-                         }
-                     }
-                 }
-                 else {
-                     result.append("not specified");
-                 }
-             }
-
-             // VERBOSE: Append MC cache
-             if (chatter >= VERBOSE) {
-                 result.append("\n"+gammalib::parformat("Map flux"));
-                 if (m_mc_spectrum.nodes() > 0) {
-                     for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
-                         result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
-                         result.append(gammalib::str(m_mc_spectrum.intensity(i)));
-                     }
-                 }
-                 else {
-                     result.append("not specified");
-                 }
-             }
-
-         } // endif: map cube exists
-
-     } // endif: chatter was not silent
-
-     // Return result
-     return result;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                            Private methods                              =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GCTACubeBackground::init_members(void)
-{
-    // Initialise members
-    m_filename.clear();
-    m_cube.clear();
-    m_ebounds.clear();
-    m_elogmeans.clear();
-
-    // Initialise MC cache
-    m_mc_cache.clear();
-    m_mc_spectrum.clear();
-    m_inx_left = 0;
-    m_inx_right = 0;
-    m_wgt_left = 0.0;
-    m_wgt_right = 0.0;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] bgd Background.
- ***************************************************************************/
-void GCTACubeBackground::copy_members(const GCTACubeBackground& bgd)
-{
-    // Copy members
-    m_filename    = bgd.m_filename;
-    m_cube  = bgd.m_cube;
-    m_ebounds = bgd.m_ebounds;
-    m_elogmeans = bgd.m_elogmeans;
-
-    // Copy MC cache
-    m_mc_cache    = bgd.m_mc_cache;
-    m_mc_spectrum = bgd.m_mc_spectrum;
-    m_inx_left = bgd.m_inx_left;
-    m_inx_right = bgd.m_inx_right;
-    m_wgt_left = bgd.m_wgt_left;
-    m_wgt_right = bgd.m_wgt_right;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GCTACubeBackground::free_members(void)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Set Monte Carlo simulation cone
  *
  * @param[in] centre Simulation cone centre.
@@ -592,9 +262,11 @@ void GCTACubeBackground::free_members(void)
  *
  * Sets the simulation cone centre and radius that defines the directions
  * that will be simulated using the mc() method.
+ *
+ * @todo Checks whether this is needed
  ***************************************************************************/
 void GCTACubeBackground::set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius)
+                                     const double&  radius)
 {
     // Initialise cache
     m_mc_cache.clear();
@@ -692,20 +364,346 @@ void GCTACubeBackground::set_mc_cone(const GSkyDir& centre,
 
 
 /***********************************************************************//**
- * @brief Initialise Monte Carlo cache
+ * @brief Returns MC sky direction
  *
- * @param[in] etrue Use true energy flag (true=yes, false=no)
- *
- * Initialises the cache for Monte Carlo sampling. The method uses the
- * members m_mc_max_bin and m_mc_max_logE to enforce an internal rebinning
- * in case that the provided background model information is coarsely
- * pixelised. This rebinning is needed to assure coherence between Monte
- * Carlo simulated data and the model.
- *
- * @todo Verify assumption made about the solid angles of the response table
- *       elements.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
+ * @return Sky direction.
  ***************************************************************************/
-void GCTACubeBackground::init_mc_cache()
+GSkyDir GCTACubeBackground::mc(const GEnergy& energy,
+                               const GTime&   time,
+                               GRan&          ran) const
+{
+
+    // Allocate sky direction
+    GSkyDir dir;
+
+    // Determine number of skymap pixels
+    int npix = m_cube.npix();
+
+    // Continue only if there are skymap pixels
+    if (npix > 0) {
+
+        // If no energy boundaries are defined, throw an exception
+        if (m_ebounds.size() < 1) {
+            std::string msg = "The energy boundaries of the maps in the cube"
+                              " have not been defined. Maybe the map cube file"
+                              " is missing the \"ENERGIES\" extension which"
+                              " defines the energy of each map in the cube.\n"
+                              "Please provide the energy information.";
+            throw GException::invalid_value(G_MC, msg);
+        }
+
+        // Determine the map that corresponds best to the specified energy.
+        // This is not 100% clean, as ideally some map interpolation should
+        // be done to the exact energy specified. However, as long as the map
+        // does not change drastically with energy, taking the closest map
+        // seems to be fine.
+        int i = m_ebounds.index(energy);
+        if (i < 0) {
+            if (energy <= m_ebounds.emin()) {
+                i = 0;
+            }
+            else if (energy >= m_ebounds.emax()) {
+                i = m_ebounds.size()-1;
+            }
+            else {
+                std::string msg = "The specified energy "+energy.print()+" does"
+                                  " not fall in any of the energy boundaries of"
+                                  " the map cube.\n"
+                                  "Please make sure that the map cube energies"
+                                  " are properly defined.";
+                throw GException::invalid_value(G_MC, msg);
+            }
+        }
+
+        // Get uniform random number
+        double u = ran.uniform();
+
+        // Get pixel index according to random number. We use a bi-section
+        // method to find the corresponding skymap pixel
+        int offset = i * (npix+1);
+        int low    = offset;
+        int high   = offset + npix;
+        while ((high - low) > 1) {
+            int mid = (low+high) / 2;
+            if (u < m_mc_cache[mid]) {
+                high = mid;
+            }
+            else if (m_mc_cache[mid] <= u) {
+                low = mid;
+            }
+        }
+
+        // Convert sky map index to sky map pixel
+        GSkyPixel pixel = m_cube.inx2pix(low-offset);
+
+        // Randomize pixel
+        pixel.x(pixel.x() + ran.uniform() - 0.5);
+        pixel.y(pixel.y() + ran.uniform() - 0.5);
+
+        // Get sky direction
+        dir = m_cube.pix2dir(pixel);
+
+    } // endif: there were pixels in sky map
+
+    // Return instrument direction
+    return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Read background cube from FITS object
+ *
+ * @param[in] fits FITS object.
+ *
+ * Read the background cube from a FITS object.
+ ***************************************************************************/
+void GCTACubeBackground::read(const GFits& fits)
+{
+    // Clear object
+    clear();
+
+    // Get HDUs
+    const GFitsImage& hdu_bgdcube = *fits.image("Primary");
+    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
+
+    // Read cube
+    m_cube.read(hdu_bgdcube);
+
+    // Read energy boundaries
+    m_ebounds.read(hdu_ebounds);
+
+    // Set energy node array
+    set_eng_axis();
+
+    // Initialise Monte Carlo cache
+    init_mc_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA background cube into FITS object.
+ *
+ * @param[in] fits FITS file.
+ ***************************************************************************/
+void GCTACubeBackground::write(GFits& fits) const
+{
+    // Write cube
+    m_cube.write(fits);
+
+    // Write energy boundaries
+    m_ebounds.write(fits);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load background cube from FITS file
+ *
+ * @param[in] filename FITS file.
+ *
+ * Loads the background cube from a FITS file.
+ ***************************************************************************/
+void GCTACubeBackground::load(const std::string& filename)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read background cube
+    read(fits);
+
+    // Close FITS file
+    fits.close();
+
+    // Store filename
+    m_filename = filename;
+
+    // Return
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Save background cube into FITS file
+ *
+ * @param[in] filename background cube FITS file name.
+ * @param[in] clobber Overwrite existing file? (default: false)
+ *
+ * Save the background cube into a FITS file.
+ ***************************************************************************/
+void GCTACubeBackground::save(const std::string& filename,
+                              const bool&        clobber) const
+{
+    // Create empty FITS file
+    GFits fits;
+
+    // Write background cube
+    write(fits);
+
+    // Save FITS file
+    fits.saveto(filename, clobber);
+
+    // Store filename
+    m_filename = filename;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print background information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing background information.
+ ***************************************************************************/
+std::string GCTACubeBackground::print(const GChatter& chatter) const
+{
+    // Initialise result string
+     std::string result;
+
+     // Continue only if chatter is not silent
+     if (chatter != SILENT) {
+
+         // Append header
+         result.append("=== GCTACubeBackground ===");
+
+         // Append parameters
+         result.append("\n"+gammalib::parformat("Cube file")+m_filename);
+
+         // Append detailed information only if a map cube exists
+         if (m_cube.npix() > 0) {
+
+             // NORMAL: Append sky map
+             if (chatter >= NORMAL) {
+                 result.append("\n"+m_cube.print(chatter));
+             }
+
+             // EXPLICIT: Append energy nodes
+             if (chatter >= EXPLICIT && m_elogmeans.size() > 0) {
+                 result.append("\n"+gammalib::parformat("Cube energy values"));
+                 if (m_elogmeans.size() > 0) {
+                     for (int i = 0; i < m_elogmeans.size(); ++i) {
+                         result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
+                         result.append(gammalib::str(std::pow(10.0, m_elogmeans[i])));
+                         result.append(" MeV (log10E=");
+                         result.append(gammalib::str(m_elogmeans[i]));
+                         result.append(")");
+                         if (m_ebounds.size() == m_elogmeans.size()) {
+                             result.append(" [");
+                             result.append(m_ebounds.emin(i).print());
+                             result.append(", ");
+                             result.append(m_ebounds.emax(i).print());
+                             result.append("]");
+                         }
+                     }
+                 }
+                 else {
+                     result.append("not specified");
+                 }
+             }
+
+             // VERBOSE: Append MC cache
+             if (chatter >= VERBOSE) {
+                 result.append("\n"+gammalib::parformat("Map flux"));
+                 if (m_mc_spectrum.nodes() > 0) {
+                     for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
+                         result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
+                         result.append(gammalib::str(m_mc_spectrum.intensity(i)));
+                     }
+                 }
+                 else {
+                     result.append("not specified");
+                 }
+             }
+
+         } // endif: map cube exists
+
+     } // endif: chatter was not silent
+
+     // Return result
+     return result;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                            Private methods                              =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GCTACubeBackground::init_members(void)
+{
+    // Initialise members
+    m_filename.clear();
+    m_cube.clear();
+    m_ebounds.clear();
+    m_elogmeans.clear();
+
+    // Initialise MC cache
+    m_mc_cache.clear();
+    m_mc_spectrum.clear();
+    m_inx_left  = 0;
+    m_inx_right = 0;
+    m_wgt_left  = 0.0;
+    m_wgt_right = 0.0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] bgd Background.
+ ***************************************************************************/
+void GCTACubeBackground::copy_members(const GCTACubeBackground& bgd)
+{
+    // Copy members
+    m_filename  = bgd.m_filename;
+    m_cube      = bgd.m_cube;
+    m_ebounds   = bgd.m_ebounds;
+    m_elogmeans = bgd.m_elogmeans;
+
+    // Copy MC cache
+    m_mc_cache    = bgd.m_mc_cache;
+    m_mc_spectrum = bgd.m_mc_spectrum;
+    m_inx_left    = bgd.m_inx_left;
+    m_inx_right   = bgd.m_inx_right;
+    m_wgt_left    = bgd.m_wgt_left;
+    m_wgt_right   = bgd.m_wgt_right;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GCTACubeBackground::free_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Initialise Monte Carlo cache
+ ***************************************************************************/
+void GCTACubeBackground::init_mc_cache(void)
 {
     // Set centre and radius to all sky
     GSkyDir centre;
@@ -717,7 +715,6 @@ void GCTACubeBackground::init_mc_cache()
     // Return
     return;
 }
-
 
 
 /***********************************************************************//**
@@ -754,41 +751,45 @@ void GCTACubeBackground::set_eng_axis(void)
     return;
 }
 
+
 /***********************************************************************//**
- * @brief Spatially integrates the background cube at a given energy
+ * @brief Compute spatially averaged background raye for a given energy
  *
  * @param[in] logE Logarithm (base 10) of energy in TeV
- * @return integrated background flux in units of ph/s/MeV/sr
+ * @return Spatially averaged background rate in units of events/s/MeV/sr
  *
  * Spatially integrates the background cube at a given energy. This method
- * performs an interpolation between the energy maps. The integration is limited
- * to counting the bin contents
- *
-
+ * performs an interpolation between the energy maps. The integration is
+ * limited to counting the bin contents
  ***************************************************************************/
 double GCTACubeBackground::integral(const double& logE) const
 {
+    // Update interpolation cache
     update(logE);
 
-    double result = 0.0;
+    // Initialise result
+    double result     = 0.0;
     double solidangle = 0.0;
 
-    for (int i = 0; i < m_cube.npix(); i++) {
+    // Loop over all map pixels
+    for (int i = 0; i < m_cube.npix(); ++i) {
 
         // Sum bin contents
         result += m_wgt_left  * m_cube(i, m_inx_left) +
-                m_wgt_right * m_cube(i, m_inx_right);
+                  m_wgt_right * m_cube(i, m_inx_right);
 
-        // Sum bin solid angles
+        // Sum solid angles of pixels
         solidangle += m_cube.solidangle(i);
+
     }
 
-    // Divide integral by map solidangle
-    result /= solidangle;
+    // Divide integral by solidangle of map
+    if (solidangle > 0.0) {
+        result /= solidangle;
+    }
 
     // Return result
     return result;
-
 }
 
 

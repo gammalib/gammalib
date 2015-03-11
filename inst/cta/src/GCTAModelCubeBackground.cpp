@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAModelCubeBackground.cpp - CTA cube background model class       *
+ *       GCTAModelCubeBackground.cpp - CTA cube background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelCubeBackground.cpp
  * @brief CTA cube background model class implementation
- * @author Juergen Knoedlseder
+ * @author Michael Mayer
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -41,17 +41,17 @@
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelCubeBackground g_cta_inst_background_seed;
-const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_background_seed);
+const GModelRegistry          g_cta_inst_background_registry(&g_cta_inst_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL         "GCTAModelCubeBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS    "GCTAModelCubeBackground::eval_gradients(GEvent&,"\
+#define G_EVAL        "GCTAModelCubeBackground::eval(GEvent&, GObservation&)"
+#define G_EVAL_GRADIENTS   "GCTAModelCubeBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
-#define G_NPRED             "GCTAModelCubeBackground::npred(GEnergy&, GTime&,"\
+#define G_NPRED            "GCTAModelCubeBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_MC               "GCTAModelCubeBackground::mc(GObservation&, GRan&)"
-#define G_XML_SPECTRAL   "GCTAModelCubeBackground::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL   "GCTAModelCubeBackground::xml_temporal(GXmlElement&)"
+#define G_MC              "GCTAModelCubeBackground::mc(GObservation&, GRan&)"
+#define G_XML_SPECTRAL  "GCTAModelCubeBackground::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL  "GCTAModelCubeBackground::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -85,36 +85,15 @@ GCTAModelCubeBackground::GCTAModelCubeBackground(void) : GModelData()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief XML constructor
  *
  * @param[in] xml XML element.
  *
- * Constructs a CTA cube background model from the information
- * provided by an XML element. The XML element is expected to have the
- * following structure
- *
- *     <source name="..." type="..." instrument="...">
- *       <spectrum type="...">
- *         ...
- *       </spectrum>
- *     </source>
- *
- * Optionally, a temporal model may be provided using the following
- * syntax
- *
- *     <source name="..." type="..." instrument="...">
- *       <spectrum type="...">
- *         ...
- *       </spectrum>
- *       <temporalModel type="...">
- *         ...
- *       </temporalModel>
- *     </source>
- *
- * If no temporal component is found a constant model is assumed.
+ * Constructs a CTA cube background model from the information provided by
+ * an XML elements (see GCTAModelCubeBackground::read method).
  ***************************************************************************/
 GCTAModelCubeBackground::GCTAModelCubeBackground(const GXmlElement& xml) :
-                        GModelData(xml)
+                         GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -135,13 +114,13 @@ GCTAModelCubeBackground::GCTAModelCubeBackground(const GXmlElement& xml) :
  *
  * @param[in] spectral Spectral model component.
  *
- * Constructs a CTA cube background model from a spectral
- * model component. The temporal component is assumed to be constant.
- * Please refer to the classe GModelSpectral to learn more about the
- * definition of the spectral components.
+ * Constructs a CTA cube background model from a spectral model component.
+ * The temporal component is assumed to be constant. Please refer to the
+ * class GModelSpectral to learn more about the definition of the spectral
+ * components.
  ***************************************************************************/
 GCTAModelCubeBackground::GCTAModelCubeBackground(const GModelSpectral& spectral) :
-                        GModelData()
+                         GModelData()
 {
     // Initialise members
     init_members();
@@ -167,7 +146,7 @@ GCTAModelCubeBackground::GCTAModelCubeBackground(const GModelSpectral& spectral)
  * @param[in] bgd CTA cube background model.
  ***************************************************************************/
 GCTAModelCubeBackground::GCTAModelCubeBackground(const GCTAModelCubeBackground& bgd) :
-                        GModelData(bgd)
+                         GModelData(bgd)
 {
     // Initialise class members
     init_members();
@@ -276,24 +255,21 @@ GCTAModelCubeBackground* GCTAModelCubeBackground::clone(void) const
  *
  * @exception GException::invalid_argument
  *            Specified observation is not of the expected type.
- *
  ***************************************************************************/
-double GCTAModelCubeBackground::eval(const GEvent& event,
-                                    const GObservation& obs) const
+double GCTAModelCubeBackground::eval(const GEvent&       event,
+                                     const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
     if (cta == NULL) {
-        std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
+        std::string msg = "Specified observation is not a CTA observation.";
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
     // Get pointer on CTA IRF response
     const GCTAResponseCube* rsp = dynamic_cast<const GCTAResponseCube*>(cta->response());
     if (rsp == NULL) {
-        std::string msg = "Specified observation does not contain a cube response.\n" +
-                          obs.print();
+        std::string msg = "Specified observation does not contain a cube response.";
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
@@ -335,10 +311,9 @@ double GCTAModelCubeBackground::eval(const GEvent& event,
  *
  * @exception GException::invalid_argument
  *            Specified observation is not of the expected type.
- *
  ***************************************************************************/
-double GCTAModelCubeBackground::eval_gradients(const GEvent& event,
-                                              const GObservation& obs) const
+double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
+                                               const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -417,14 +392,14 @@ double GCTAModelCubeBackground::eval_gradients(const GEvent& event,
  * @exception GException::invalid_argument
  *            The specified observation is not a CTA observation.
  *
- * Spatially integrates the cube background model for a given
- * measured event energy and event time. This method also applies a deadtime
- * correction factor, so that the normalization of the model is a real rate
+ * Spatially integrates the cube background model for a given measured event
+ * energy and event time. This method also applies a deadtime correction
+ * factor, so that the normalization of the model is a real rate
  * (counts/MeV/s).
  ***************************************************************************/
 double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
-                                     const GTime&        obsTime,
-                                     const GObservation& obs) const
+                                      const GTime&        obsTime,
+                                      const GObservation& obs) const
 {
     // Initialise result
     double npred     = 0.0;
@@ -541,7 +516,6 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
  * The method also applies a deadtime correction using a Monte Carlo process,
  * taking into account temporal deadtime variations. For this purpose, the
  * method makes use of the time dependent GObservation::deadc method.
- *
  ***************************************************************************/
 GCTAEventList* GCTAModelCubeBackground::mc(const GObservation& obs, GRan& ran) const
 {
