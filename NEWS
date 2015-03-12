@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-13 March 2015
+12 March 2015
 
 
 1. Introduction
@@ -173,6 +173,11 @@ Observation definition XML files can now be written and read without any
 event file or counts cube information. This allows to separate the observation
 definition from the event file, providing a convenient way to exchange
 observation definition information (for example to simulate a survey pattern).
+
+Good Time Intervals and livetime information has been added to GCTACubeExposure
+to keep track of the time intervals that were used to compute the exposure
+cube and to make this information available for the response computation
+without needing a fully defined observation.
 
 
 21. COMPTEL interface

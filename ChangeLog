@@ -23,6 +23,7 @@
         Allow appending of empty intervals to GEbounds and GGti
         Add single interval constructor to GGti
         Allow calling GNodeArray::set_value() for a single node
+        Add GTI and livtime information to GCTACubeExposure
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
