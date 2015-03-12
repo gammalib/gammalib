@@ -80,6 +80,8 @@ public:
     const GGti&        gti(void) const;
     const GNodeArray&  elogmeans(void) const;
     const double&      livetime(void) const;
+    const double&      ontime(void) const;
+    double             deadc(void) const;
     void               read(const GFits& fits);
     void               write(GFits& file) const;
     void               load(const std::string& filename);
@@ -189,6 +191,30 @@ inline
 const double& GCTACubeExposure::livetime(void) const
 {
     return (m_livetime);
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime
+ *
+ * @return Ontime (seconds).
+ ***************************************************************************/
+inline
+const double& GCTACubeExposure::ontime(void) const
+{
+    return (m_gti.ontime());
+}
+
+
+/***********************************************************************//**
+ * @brief Return deadtime correction
+ *
+ * @return Deadtime correction factor.
+ ***************************************************************************/
+inline
+double GCTACubeExposure::deadc(void) const
+{
+    return ((m_gti.ontime() > 0.0) ? m_livetime/m_gti.ontime() : 1.0);
 }
 
 

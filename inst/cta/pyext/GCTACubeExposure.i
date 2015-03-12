@@ -71,6 +71,8 @@ public:
     const GGti&       gti(void) const;
     const GNodeArray& elogmeans(void) const;
     const double&     livetime(void) const;
+    const double&     ontime(void) const;
+    double            deadc(void) const;
     void              read(const GFits& fits);
     void              write(GFits& file) const;
     void              load(const std::string& filename);
