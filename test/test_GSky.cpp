@@ -959,6 +959,24 @@ void TestGSky::test_GSkymap(void)
 	test_value(total_less, 0.5*total_src, 1.0e-3, "Test nmaps() method with less maps");
 	test_value(map_less.nmaps(), 1, "Test nmaps() method with less maps");    
 
+    // Test map extraction
+    GSkymap map_extract = map_src.extract(0);
+    double total_extract = 0.0;
+    for (int k = 0; k < map_extract.nmaps(); ++k) {
+        for (int pix = 0; pix < map_extract.npix(); ++pix) {
+            total_extract += map_extract(pix,k);
+        }
+    }
+	test_value(total_extract, 0.5*total_src, 1.0e-3, "Test extract() method with 1 map");
+    map_extract = map_src.extract(0,2);
+    total_extract = 0.0;
+    for (int k = 0; k < map_extract.nmaps(); ++k) {
+        for (int pix = 0; pix < map_extract.npix(); ++pix) {
+            total_extract += map_extract(pix,k);
+        }
+    }
+	test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
+
     // Exit test
     return;
 }

@@ -155,6 +155,7 @@ public:
     const GSkyProjection* projection(void) const;
     void                  projection(const GSkyProjection& proj);
     const double*         pixels(void) const;
+    GSkymap               extract(const int& map, const int& nmaps = 1) const;
     void                  stack_maps(void);
     void                  load(const std::string& filename);
     void                  save(const std::string& filename, bool clobber = false) const;

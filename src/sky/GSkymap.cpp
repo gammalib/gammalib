@@ -43,6 +43,7 @@
                                                        " std::string&, int&)"
 #define G_CONSTRUCT_MAP        "GSkymap::GSkymap(std::string&, std::string&,"\
                       " double&, double&, double& double&, int&, int&, int&)"
+#define G_NMAPS                                        "GSkymap::nmaps(int&)"
 #define G_OP_UNARY_ADD                        "GSkymap::operator+=(GSkymap&)"
 #define G_OP_UNARY_SUB                        "GSkymap::operator-=(GSkymap&)"
 #define G_OP_UNARY_MUL                        "GSkymap::operator-=(GSkymap&)"
@@ -50,13 +51,13 @@
 #define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
 #define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
 #define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
-#define G_NMAPS                                        "GSkymap::nmaps(int&)"
 #define G_INX2DIR                                    "GSkymap::inx2dir(int&)"
 #define G_PIX2DIR                              "GSkymap::pix2dir(GSkyPixel&)"
 #define G_DIR2INX                                "GSkymap::dir2inx(GSkyDir&)"
 #define G_DIR2PIX                                "GSkymap::dir2pix(GSkyDir&)"
 #define G_SOLIDANGLE1                             "GSkymap::solidangle(int&)"
 #define G_SOLIDANGLE2                       "GSkymap::solidangle(GSkyPixel&)"
+#define G_EXTRACT                              "GSkymap::extract(int&, int&)"
 #define G_READ                               "GSkymap::read(const GFitsHDU&)"
 #define G_SET_WCS     "GSkymap::set_wcs(std::string&, std::string&, double&,"\
                               " double&, double&, double&, double&, double&,"\
@@ -894,7 +895,7 @@ GSkymap* GSkymap::clone(void) const
  * Redefines the number of maps in an GSkymap object. If the number of maps
  * is increased with respect to the existing number, additional maps with
  * pixel values of zero are append to the object. Existing map pixel values
- * are kept. If the number of maps is decreases with respect to the existing
+ * are kept. If the number of maps is decreased with respect to the existing
  * number, the excedent maps are dropped. The remaining map pixel values are
  * kept.
  ***************************************************************************/
@@ -1305,6 +1306,73 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
 
     // Return containment flag
     return inmap;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract maps into a new sky map object
+ *
+ * @param[in] map First map to extract
+ * @param[in] nmaps Number of maps to extract (default: 1)
+ * @return Extracted map(s).
+ *
+ * @exception GException::out_of_range
+ *            First map index outside valid range
+ * @exception GException::invalid_argument
+ *            Requested number of maps are not available.
+ *
+ * Extracts @p nmaps sky maps starting from @p map from the sky map.
+ ***************************************************************************/
+GSkymap GSkymap::extract(const int& map, const int& nmaps) const
+{
+    // Throw an exception if the first map index is invalid
+    if (map < 0 || map >= m_num_maps) {
+        throw GException::out_of_range(G_EXTRACT, "Sky map index", map,
+                                       m_num_maps);
+    }
+ 
+    // Throw an exception if the number of maps is invalid
+    if (nmaps < 0) {
+        std::string msg = "The number of maps to extract cannot be negative "
+                          "(nmaps="+gammalib::str(nmaps)+").";
+        throw GException::invalid_argument(G_EXTRACT, msg);
+    }
+    if (nmaps > m_num_maps-map) {
+        std::string msg = "The number of maps to extract ("+
+                          gammalib::str(nmaps)+") exceeds the number of maps "
+                          "that are available ("+
+                          gammalib::str(m_num_maps-map)+").";
+        throw GException::invalid_argument(G_EXTRACT, msg);
+    }
+
+    // Compute memory size for extracted map
+    int n_size = m_num_pixels * nmaps;
+
+    // Allocate memory for extracted maps (handle the case that the
+    // extracted map can be empty)
+    double* pixels = NULL;
+    if (n_size > 0) {
+        pixels = new double[n_size];
+    }
+
+    // Extract pixels
+    double *src = m_pixels + map*m_num_pixels;
+    double *dst = pixels;
+    for (int i = 0; i < n_size; ++i) {
+        *dst++ = *src++;
+    }
+
+    // Create a copy of the map
+    GSkymap result = *this;
+
+    // Delete pixels from that map
+    if (result.m_pixels != NULL) delete [] result.m_pixels;
+
+    // Attach copied pixels to the map
+    result.m_pixels = pixels;
+
+    // Return map
+    return result;
 }
 
 
