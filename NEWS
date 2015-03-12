@@ -107,6 +107,11 @@ provides an interpolation operator that allows bilinear interpolation of a
 linear double precision array. This class is essentially a helper class for
 bilinear interpolations within GammaLib.
 
+The GNodeArray::set_value() method can now be called in case that only a single
+node is present. In that case, left and right nodes will have an index of 0
+and a weight of 1 is given to the left node while the right node will have a
+weight of 0 is given to the right node.
+
 
 14. XML module
 --------------

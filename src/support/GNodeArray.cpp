@@ -542,14 +542,15 @@ double GNodeArray::interpolate(const double& value,
  *
  * @param[in] value Value for which the interpolation should be done.
  *
- * @exception GException::not_enough_nodes
- *            At least two nodes are required for setting up the factors
+ * @exception GException::invalid_value
+ *            No nodes are available for interpolation.
  *
  * Set the indices that bound the specified value and the corresponding
  * weighting factors for linear interpolation. If the array has a linear
  * form (i.e. the nodes are equidistant), an analytic formula is used to
  * determine the boundary indices. If the nodes are not equidistant the
- * boundary indices are searched by bisection.
+ * boundary indices are searched by bisection. If there is only a single
+ * node, no interpolation is done and the index of this node is returned.
  *
  * Note that this method needs to be called after changing the node array
  * to setup the corrected interpolation indices and weights.
@@ -559,9 +560,18 @@ void GNodeArray::set_value(const double& value) const
     // Get number of nodes
     int nodes = m_node.size();
 
+    /*
     // Throw an exception if less than 2 nodes are available
     if (nodes < 2) {
         throw GException::not_enough_nodes(G_SET_VALUE, nodes);
+    }
+    */
+    // Throw an exception if there are no nodes
+    if (nodes < 1) {
+        std::string msg = "Attempting to set interpolating value without "
+                          "having any nodes. Interpolation can only be "
+                          "done if nodes are available.";
+        throw GException::invalid_value(G_SET_VALUE, msg);
     }
 
     // Initialize computation flag
@@ -582,58 +592,71 @@ void GNodeArray::set_value(const double& value) const
     // Continue only if computation is required
     if (compute) {
 
-        // If array is linear then get left index from analytic formula
-        if (m_is_linear) {
-
-            // Set left index
-            m_inx_left = int(m_linear_slope * value + m_linear_offset);
-        
-            // Keep index in valid range
-            if (m_inx_left < 0) {
-                m_inx_left = 0;
-            }
-            else if (m_inx_left >= nodes-1) {
-                m_inx_left = nodes - 2;
-            }
-
-        } // endif: array is linear
-
-        // ... otherwise search the relevant indices by bisection
-        else {
-    
-            // Set left index if value is before first node
-            if (value < m_node[0]) {
-                m_inx_left = 0;
-            }
-
-            // Set left index if value is after last node
-            else if (value >  m_node[nodes-1]) {
-                m_inx_left = nodes - 2;
-            }
-
-            // Set left index by bisection
-            else {
-                int low  = 0;
-                int high = nodes - 1;
-                while ((high - low) > 1) {
-                    int mid = (low+high) / 2;
-                    if (m_node[mid] > value) {
-                        high = mid;
-                    }
-                    else {
-                        low = mid;
-                    }
-                }
-                m_inx_left = low;
-            } // endelse: did bisection
+        // Handle special case of a single node
+        if (nodes == 1) {
+            m_inx_left  = 0;
+            m_inx_right = 0;
+            m_wgt_left  = 1.0;
+            m_wgt_right = 0.0;
         }
 
-        // Set right index
-        m_inx_right = m_inx_left + 1;
+        // Handle all other cases
+        else {
 
-        // Set weighting factors
-        m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
-        m_wgt_left  = 1.0 - m_wgt_right;
+            // If array is linear then get left index from analytic formula
+            if (m_is_linear) {
+
+                // Set left index
+                m_inx_left = int(m_linear_slope * value + m_linear_offset);
+        
+                // Keep index in valid range
+                if (m_inx_left < 0) {
+                    m_inx_left = 0;
+                }
+                else if (m_inx_left >= nodes-1) {
+                    m_inx_left = nodes - 2;
+                }
+
+            } // endif: array is linear
+
+            // ... otherwise search the relevant indices by bisection
+            else {
+    
+                // Set left index if value is before first node
+                if (value < m_node[0]) {
+                    m_inx_left = 0;
+                }
+
+                // Set left index if value is after last node
+                else if (value >  m_node[nodes-1]) {
+                    m_inx_left = nodes - 2;
+                }
+
+                // Set left index by bisection
+                else {
+                    int low  = 0;
+                    int high = nodes - 1;
+                    while ((high - low) > 1) {
+                        int mid = (low+high) / 2;
+                        if (m_node[mid] > value) {
+                            high = mid;
+                        }
+                        else {
+                            low = mid;
+                        }
+                    }
+                    m_inx_left = low;
+                } // endelse: did bisection
+            }
+
+            // Set right index
+            m_inx_right = m_inx_left + 1;
+
+            // Set weighting factors
+            m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
+            m_wgt_left  = 1.0 - m_wgt_right;
+
+        } // endelse: more than one node was present
 
     } // endif: computation was required
 

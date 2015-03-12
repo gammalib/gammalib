@@ -22,6 +22,7 @@
         Remove etrue flag from CTA background IRF (#1437)
         Allow appending of empty intervals to GEbounds and GGti
         Add single interval constructor to GGti
+        Allow calling GNodeArray::set_value() for a single node
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
