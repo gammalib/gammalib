@@ -1371,6 +1371,9 @@ GSkymap GSkymap::extract(const int& map, const int& nmaps) const
     // Attach copied pixels to the map
     result.m_pixels = pixels;
 
+    // Set number of maps
+    result.m_num_maps = nmaps;
+
     // Return map
     return result;
 }

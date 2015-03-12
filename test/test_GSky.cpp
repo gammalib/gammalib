@@ -968,6 +968,7 @@ void TestGSky::test_GSkymap(void)
         }
     }
 	test_value(total_extract, 0.5*total_src, 1.0e-3, "Test extract() method with 1 map");
+	test_value(map_extract.nmaps(), 1, "Test extract() method with 1 map");    
     map_extract = map_src.extract(0,2);
     total_extract = 0.0;
     for (int k = 0; k < map_extract.nmaps(); ++k) {
@@ -976,6 +977,7 @@ void TestGSky::test_GSkymap(void)
         }
     }
 	test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
+	test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");    
 
     // Exit test
     return;
