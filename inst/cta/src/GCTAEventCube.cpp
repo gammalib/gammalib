@@ -732,8 +732,11 @@ void GCTAEventCube::set_directions(void)
  ***************************************************************************/
 void GCTAEventCube::set_energies(void)
 {
+    // Determine number of energy bins
+    int ebins = ebounds().size();
+
     // Throw an error if we have no energy bins
-    if (ebins() < 1) {
+    if (ebins < 1) {
         throw GCTAException::no_ebds(G_SET_ENERGIES, "Every CTA event cube"
                              " needs a definition of the energy boundaries.");
     }
@@ -743,11 +746,11 @@ void GCTAEventCube::set_energies(void)
     m_ewidth.clear();
 
     // Reserve space for bin energies and energy widths
-    m_energies.reserve(ebins());
-    m_ewidth.reserve(ebins());
+    m_energies.reserve(ebins);
+    m_ewidth.reserve(ebins);
 
     // Setup bin energies and energy widths
-    for (int i = 0; i < ebins(); ++i) {
+    for (int i = 0; i < ebins; ++i) {
         m_energies.push_back(ebounds().elogmean(i));
         m_ewidth.push_back(ebounds().emax(i) -  ebounds().emin(i));
     }
