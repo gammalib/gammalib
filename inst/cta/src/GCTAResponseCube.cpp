@@ -418,8 +418,13 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
         // Multiply-in PSF
         if (irf > 0.0) {
 
-            // Revover effective area from exposure
-            irf /= obs.livetime();
+            // Recover effective area from exposure. If the livetime
+            // is zero we keep the exposure instead of the effective
+            // area. This is a (dirty) kluge that avoids using livetime
+            // information in cube computations
+            if (obs.livetime() > 0.0) {
+                irf /= obs.livetime();
+            }
 
             // Get PSF component
             irf *= psf()(srcDir, delta, source.energy());
@@ -494,7 +499,16 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
 
         // Continue only if exposure is positive
         if (irf > 0.0) {
-            irf /= obs.livetime(); //!< Recover effective area from exposure
+
+            // Recover effective area from exposure. If the livetime
+            // is zero we keep the exposure instead of the effective
+            // area. This is a (dirty) kluge that avoids using livetime
+            // information in cube computations
+            if (obs.livetime() > 0.0) {
+                irf /= obs.livetime();
+            }
+
+            // Do the rest
             irf *= psf_radial(model, rho_obs, obsDir, obsEng, obsTime);
             irf *= obs.deadc(obsTime);
         }
@@ -565,7 +579,16 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
 
         // Continue only if exposure is positive
         if (irf > 0.0) {
-            irf /= obs.livetime(); //!< Recover effective area from exposure
+
+            // Recover effective area from exposure. If the livetime
+            // is zero we keep the exposure instead of the effective
+            // area. This is a (dirty) kluge that avoids using livetime
+            // information in cube computations
+            if (obs.livetime() > 0.0) {
+                irf /= obs.livetime();
+            }
+
+            // Do the rest
             irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, obsEng, obsTime);
             irf *= obs.deadc(obsTime);
         }

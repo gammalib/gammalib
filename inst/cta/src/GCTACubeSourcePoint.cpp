@@ -230,9 +230,13 @@ void GCTACubeSourcePoint::set(const std::string&   name,
         // Get exposure
         double aeff = rsp->exposure()(m_dir, srcEng);
 
-        // Divide by ontime as the binned likelihood function is later
-        // multiplying by ontime
-        aeff /= obs.ontime();
+        // Recover effective area from exposure. If the livetime
+        // is zero we keep the exposure instead of the effective
+        // area. This is a (dirty) kluge that avoids using livetime
+        // information in cube computations
+        if (obs.livetime() > 0.0) {
+            aeff /= obs.livetime();
+        }
 
         // Apply deadtime correction
         aeff *= obs.deadc(srcTime);

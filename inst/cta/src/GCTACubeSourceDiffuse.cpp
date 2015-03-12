@@ -253,8 +253,13 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
             // Continue only if effective area is positive
             if (aeff > 0.0) {
 
-                // Revover effective area from exposure
-                aeff /= obs.livetime();
+                // Recover effective area from exposure. If the livetime
+                // is zero we keep the exposure instead of the effective
+                // area. This is a (dirty) kluge that avoids using livetime
+                // information in cube computations
+                if (obs.livetime() > 0.0) {
+                    aeff /= obs.livetime();
+                }
 
                 // Compute product of PSF and diffuse map, integrated
                 // over the relevant PSF area. We assume no energy
