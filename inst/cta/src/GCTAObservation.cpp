@@ -1422,7 +1422,7 @@ void GCTAObservation::init_members(void)
     m_obs_id        = 0;
     m_ontime        = 0.0;
     m_livetime      = 0.0;
-    m_deadc         = 0.0;
+    m_deadc         = 1.0;
     m_ra_obj        = 0.0;
     m_dec_obj       = 0.0;
     m_lo_user_thres = 0.0;
@@ -1566,7 +1566,8 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     double      tstop    = events()->tstop().convert(timeref);
     double      telapse  = events()->gti().telapse();
     double      ontime   = events()->gti().ontime();
-    double      deadc    = (ontime > 0.0) ? livetime() / ontime : 0.0;
+    double      deadc    = (ontime > 0.0 && livetime() > 0.0) ? 
+                           livetime() / ontime : m_deadc;
     std::string utc_obs  = events()->tstart().utc();
     std::string utc_end  = events()->tstop().utc();
     std::string date_obs = utc_obs.substr(0, 10);
