@@ -36,8 +36,7 @@
  * @brief CTA exposure cube class
  *
  * This class implements a CTA exposure cube which provides the average
- * exposure for binned analysis as function of sky position and log10
- * energy.
+ * exposure for binned analysis as function of sky position and energy.
  ***************************************************************************/
 class GCTACubeExposure : public GBase {
 
@@ -69,7 +68,9 @@ public:
     void              fill(const GObservations& obs);
     const GSkymap&    cube(void) const;
     const GEbounds&   ebounds(void) const;
+    const GGti&       gti(void) const;
     const GNodeArray& elogmeans(void) const;
+    const double&     livetime(void) const;
     void              read(const GFits& fits);
     void              write(GFits& file) const;
     void              load(const std::string& filename);

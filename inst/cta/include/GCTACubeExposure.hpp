@@ -43,8 +43,7 @@
  * @brief CTA exposure cube class
  *
  * This class implements a CTA exposure cube which provides the average
- * exposure for binned analysis as function of sky position and log10
- * energy.
+ * exposure for binned analysis as function of sky position and energy.
  ***************************************************************************/
 class GCTACubeExposure : public GBase {
 
@@ -78,7 +77,9 @@ public:
     void               fill(const GObservations& obs);
     const GSkymap&     cube(void) const;
     const GEbounds&    ebounds(void) const;
+    const GGti&        gti(void) const;
     const GNodeArray&  elogmeans(void) const;
+    const double&      livetime(void) const;
     void               read(const GFits& fits);
     void               write(GFits& file) const;
     void               load(const std::string& filename);
@@ -92,15 +93,20 @@ protected:
     void init_members(void);
     void copy_members(const GCTACubeExposure& exp);
     void free_members(void);
-    void clear_cube(void);
     void update(const double& logE) const;
     void set_eng_axis(void);
+    void read_attributes(const GFitsHDU& hdu);
+    void write_attributes(GFitsHDU& hdu) const;
 
-    // Data
+    // Members
     mutable std::string m_filename;  //!< Filename
     GSkymap             m_cube;      //!< Average Exposure cube
     GEbounds            m_ebounds;   //!< Energy bounds for the Exposure cube
     GNodeArray          m_elogmeans; //!< Mean energy for the Exposure cube
+    GGti                m_gti;       //!< Good time interval for the Exposure cube
+
+    // Exposure attributes
+    double              m_livetime;  //!< Livetime (sec)
 
 private:
     // Response table computation cache for 1D access
@@ -159,6 +165,30 @@ inline
 const GNodeArray& GCTACubeExposure::elogmeans(void) const
 {
     return (m_elogmeans);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Good Time Intervals
+ *
+ * @return Good Time Intervals.
+ ***************************************************************************/
+inline
+const GGti& GCTACubeExposure::gti(void) const
+{
+    return (m_gti);
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime
+ *
+ * @return Livetime (seconds).
+ ***************************************************************************/
+inline
+const double& GCTACubeExposure::livetime(void) const
+{
+    return (m_livetime);
 }
 
 

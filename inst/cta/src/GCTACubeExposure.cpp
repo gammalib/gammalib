@@ -36,7 +36,6 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET                       "GCTACubeExposure::set(GCTAObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -202,7 +201,7 @@ GCTACubeExposure::~GCTACubeExposure(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Exposure cube
+ * @param[in] cube Exposure cube.
  * @return Exposure cube.
  ***************************************************************************/
 GCTACubeExposure& GCTACubeExposure::operator=(const GCTACubeExposure& cube)
@@ -299,19 +298,13 @@ GCTACubeExposure* GCTACubeExposure::clone(void) const
  ***************************************************************************/
 void GCTACubeExposure::set(const GCTAObservation& obs)
 {
-    // Clear exposure cube
-    clear_cube();
+    // Clear GTIs, reset livetime and exposure cube pixels
+    m_gti.clear();
+    m_livetime = 0.0;
+    m_cube     = 0.0;
 
     // Extract region of interest from CTA observation
-    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
-    if (list == NULL) {
-        std::string msg = "CTA Observation does not contain an event "
-                          "list. Event list information is needed to "
-                          "retrieve the Region of Interest for each "
-                          "CTA observation.";
-        throw GException::invalid_value(G_SET, msg);
-    }
-    const GCTARoi& roi = list->roi();
+    GCTARoi roi = obs.roi();
 
     // Get references on CTA response and pointing direction
     const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -348,6 +341,10 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
             } // endif: pixel was within RoI
 
         } // endfor: looped over all pixels
+
+        // Append GTIs and increment livetime
+        m_gti.extend(obs.gti());
+        m_livetime += obs.livetime();
     
     } // endif: response was valid
 
@@ -370,8 +367,10 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
  ***************************************************************************/
 void GCTACubeExposure::fill(const GObservations& obs)
 {
-    // Clear exposure cube
-    clear_cube();
+    // Clear GTIs, reset livetime and exposure cube pixels
+    m_gti.clear();
+    m_livetime = 0.0;
+    m_cube     = 0.0;
 
     // Loop over all observations in container
     for (int i = 0; i < obs.size(); ++i) {
@@ -418,6 +417,10 @@ void GCTACubeExposure::fill(const GObservations& obs)
                     } // endif: pixel within RoI
 
                 } // endfor: looped over all pixels
+
+                // Append GTIs and increment livetime
+                m_gti.extend(cta->gti());
+                m_livetime += cta->livetime();
             
             } // endif: response was valid
     
@@ -445,12 +448,19 @@ void GCTACubeExposure::read(const GFits& fits)
     // Get HDUs
     const GFitsImage& hdu_expcube = *fits.image("Primary");
     const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
+    const GFitsTable& hdu_gti     = *fits.table("GTI");
 
     // Read cube
     m_cube.read(hdu_expcube);
 
+    // Read cube attributes
+    read_attributes(hdu_expcube);
+
     // Read energy boundaries
     m_ebounds.read(hdu_ebounds);
+
+    // Read GTIs
+    m_gti.read(hdu_gti);
 
     // Set energy node array
     set_eng_axis();
@@ -464,14 +474,24 @@ void GCTACubeExposure::read(const GFits& fits)
  * @brief Write CTA exposure cube into FITS object.
  *
  * @param[in] fits FITS file.
+ *
+ * Writes the exposure cube image, the energy boundaries and the Good Time
+ * Intervals into the FITS object.
  ***************************************************************************/
 void GCTACubeExposure::write(GFits& fits) const
 {
     // Write cube
     m_cube.write(fits);
 
+    // Get last HDU and write attributes
+    GFitsHDU& hdu = *fits[fits.size()-1];
+    write_attributes(hdu);
+
     // Write energy boundaries
     m_ebounds.write(fits);
+
+    // Write GTIs
+    m_gti.write(fits);
 
     // Return
     return;
@@ -564,6 +584,15 @@ std::string GCTACubeExposure::print(const GChatter& chatter) const
                           "not defined");
         }
 
+        // Append GTIs
+        if (m_gti.size() > 0) {
+            result.append("\n"+m_gti.print(chatter));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("Good Time Intervals") +
+                          "not defined");
+        }
+
         // Append skymap definition
         result.append("\n"+m_cube.print(chatter));
 
@@ -590,6 +619,8 @@ void GCTACubeExposure::init_members(void)
     m_cube.clear();
     m_ebounds.clear();
     m_elogmeans.clear();
+    m_gti.clear();
+    m_livetime = 0.0;
 
     // Initialise cache
     m_inx_left  = 0;
@@ -614,6 +645,8 @@ void GCTACubeExposure::copy_members(const GCTACubeExposure& cube)
     m_cube      = cube.m_cube;
     m_ebounds   = cube.m_ebounds;
     m_elogmeans = cube.m_elogmeans;
+    m_gti       = cube.m_gti;
+    m_livetime  = cube.m_livetime;
 
     // Copy cache
     m_inx_left  = cube.m_inx_left;
@@ -630,29 +663,6 @@ void GCTACubeExposure::copy_members(const GCTACubeExposure& cube)
  ***************************************************************************/
 void GCTACubeExposure::free_members(void)
 {
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clear all pixels in the exposure cube
- ***************************************************************************/
-void GCTACubeExposure::clear_cube(void)
-{
-    // Loop over all exposure cube energy bins
-    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
-
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-
-            // Reset cube value to zero
-            m_cube(pixel, iebin) = 0.0;
-
-        } // endfor: looped over all pixels
-
-    } // endfor: looped over energy bins
-
     // Return
     return;
 }
@@ -714,6 +724,68 @@ void GCTACubeExposure::set_eng_axis(void)
         m_elogmeans.append(m_ebounds.elogmean(i).log10TeV()); 
 
     }  // endfor: looped over energy bins
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read exposure attributes
+ *
+ * @param[in] hdu FITS HDU.
+ *
+ * Reads CTA exposure attributes from the HDU.
+ ***************************************************************************/
+void GCTACubeExposure::read_attributes(const GFitsHDU& hdu)
+{
+    // Read mandatory attributes
+    m_livetime = (hdu.has_card("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write attributes to exposure extension
+ *
+ * @param[in] hdu FITS HDU.
+ ***************************************************************************/
+void GCTACubeExposure::write_attributes(GFitsHDU& hdu) const
+{
+    // Compute some attributes
+    double      tstart   = m_gti.tstart().convert(m_gti.reference());
+    double      tstop    = m_gti.tstop().convert(m_gti.reference());
+    double      telapse  = m_gti.telapse();
+    double      ontime   = m_gti.ontime();
+    double      deadc    = (ontime > 0.0 && m_livetime > 0.0) ? 
+                           m_livetime / ontime : 1.0;
+    std::string utc_obs  = m_gti.tstart().utc();
+    std::string utc_end  = m_gti.tstop().utc();
+    std::string date_obs = utc_obs.substr(0, 10);
+    std::string time_obs = utc_obs.substr(11, 8);
+    std::string date_end = utc_end.substr(0, 10);
+    std::string time_end = utc_end.substr(11, 8);
+
+    // Set observation information
+    hdu.card("CREATOR",  "GammaLib", "Program which created the file");
+    hdu.card("TELESCOP", "unknown",  "Telescope");
+    hdu.card("OBS_ID",   "unknown",  "Observation identifier");
+    hdu.card("DATE_OBS", date_obs,   "Observation start date");
+    hdu.card("TIME_OBS", time_obs,   "Observation start time");
+    hdu.card("DATE_END", date_end,   "Observation end date");
+    hdu.card("TIME_END", time_end,   "Observation end time");
+
+    // Set observation time information
+    hdu.card("TSTART",   tstart, "[s] Mission time of start of observation");
+    hdu.card("TSTOP",    tstop, "[s] Mission time of end of observation");
+    m_gti.reference().write(hdu);
+    hdu.card("TELAPSE",  telapse, "[s] Mission elapsed time");
+    hdu.card("ONTIME",   ontime, "[s] Total good time including deadtime");
+    hdu.card("LIVETIME", m_livetime, "[s] Total livetime");
+    hdu.card("DEADC",    deadc, "Deadtime correction factor");
+    hdu.card("TIMEDEL",  1.0, "Time resolution");
 
     // Return
     return;
