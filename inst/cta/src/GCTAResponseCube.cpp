@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
+ *     GCTAResponseCube.cpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -97,7 +97,7 @@ GCTAResponseCube::GCTAResponseCube(void) : GCTAResponse()
  *
  * @param[in] rsp CTA response.
  *
- * Constructs CTA cube-style response by making a deep copy of an existing
+ * Constructs CTA cube response by making a deep copy of an existing
  * object.
  **************************************************************************/
 GCTAResponseCube::GCTAResponseCube(const GCTAResponseCube& rsp) :
@@ -262,7 +262,7 @@ GCTAResponseCube* GCTAResponseCube::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] photon Incident photon.
- * @param[in] obs Observation.
+ * @param[in] obs Observation (not used).
  * @return Instrument response.
  ***************************************************************************/
 double GCTAResponseCube::irf(const GEvent&       event,
@@ -274,12 +274,12 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
     // Get event attributes
     const GSkyDir& obsDir = dir.dir();
-    const GEnergy& obsEng = event.energy();
+    //const GEnergy& obsEng = event.energy();
 
     // Get photon attributes
     const GSkyDir& srcDir  = photon.dir();
     const GEnergy& srcEng  = photon.energy();
-    const GTime&   srcTime = photon.time();
+    //const GTime&   srcTime = photon.time();
 
     // Determine angular separation between true and measured photon
     // direction in radians
@@ -291,8 +291,12 @@ double GCTAResponseCube::irf(const GEvent&       event,
     // Initialise IRF value
     double irf = 0.0;
 
-    // Compute only if we're sufficiently close to PSF
-    if (delta <= delta_max) {
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is >0 and if we're sufficiently close
+    // to the PSF
+    if ((livetime > 0.0) && (delta <= delta_max)) {
 
         // Get exposure
         irf = exposure()(srcDir, srcEng);
@@ -303,16 +307,15 @@ double GCTAResponseCube::irf(const GEvent&       event,
             // Get PSF component
             irf *= psf()(srcDir, delta, srcEng);
 
-            // Divide by ontime as the binned likelihood function is
-            // later multiplying by ontime
-            irf /= obs.ontime();
+            // Divide by livtime
+            irf /= livetime;
 
             // Apply deadtime correction
-            irf *= obs.deadc(srcTime);
+            irf *= exposure().deadc();
 
         } // endif: Aeff was non-zero
 
-    } // endif: we were sufficiently close to PSF
+    } // endif: we were sufficiently close to PSF and livetime was >0
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -374,7 +377,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
- * @param[in] obs Observation.
+ * @param[in] obs Observation (not used).
  * @return Instrument response to point source.
  *
  * Returns the instrument response to a specified point source.
@@ -409,8 +412,12 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
     // Get maximum angular separation for PSF (in radians)
     double delta_max = psf().delta_max();
 
-    // Compute only if we're sufficiently close to PSF
-    if (delta <= delta_max) {
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is >0 and if we're sufficiently close
+    // to the PSF
+    if ((livetime > 0.0) && (delta <= delta_max)) {
 
         // Get exposure
         irf = exposure()(srcDir, source.energy());
@@ -418,23 +425,18 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
         // Multiply-in PSF
         if (irf > 0.0) {
 
-            // Recover effective area from exposure. If the livetime
-            // is zero we keep the exposure instead of the effective
-            // area. This is a (dirty) kluge that avoids using livetime
-            // information in cube computations
-            if (obs.livetime() > 0.0) {
-                irf /= obs.livetime();
-            }
+            // Recover effective area from exposure
+            irf /= livetime;
 
             // Get PSF component
             irf *= psf()(srcDir, delta, source.energy());
 
-            // Perform deadtime correction
-            irf *= obs.deadc(source.time());
+            // Apply deadtime correction
+            irf *= exposure().deadc();
 
         } // endif: exposure was non-zero
 
-    } // endif: we were sufficiently close to PSF
+    } // endif: we were sufficiently close to PSF and livetime >0
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -456,7 +458,7 @@ double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
- * @param[in] obs Observation.
+ * @param[in] obs Observation (not used).
  * @return Instrument response to radial source.
  *
  * Returns the instrument response to a specified radial source.
@@ -490,9 +492,12 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
     // (radians)
     double rho_obs = model->dir().dist(obsDir);
 
-    // Continue only if we're sufficiently close to the model centre to get a
-    // non-zero response
-    if (rho_obs <= model->theta_max()+psf().delta_max()) {
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is >0 and if we're sufficiently close to
+    // the model centre to get a non-zero response
+    if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
 
         // Get exposure
         irf = exposure()(obsDir, obsEng);
@@ -500,20 +505,18 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
         // Continue only if exposure is positive
         if (irf > 0.0) {
 
-            // Recover effective area from exposure. If the livetime
-            // is zero we keep the exposure instead of the effective
-            // area. This is a (dirty) kluge that avoids using livetime
-            // information in cube computations
-            if (obs.livetime() > 0.0) {
-                irf /= obs.livetime();
-            }
+            // Recover effective area from exposure
+            irf /= livetime;
 
-            // Do the rest
+            // Get PSF component
             irf *= psf_radial(model, rho_obs, obsDir, obsEng, obsTime);
-            irf *= obs.deadc(obsTime);
-        }
+
+            // Apply deadtime correction
+            irf *= exposure().deadc();
+
+        } // endif: exposure was positive
         
-    } // endif: we were sufficiently close
+    } // endif: we were sufficiently close and livetime >0
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -535,7 +538,7 @@ double GCTAResponseCube::irf_radial(const GEvent&       event,
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
- * @param[in] obs Observation.
+ * @param[in] obs Observation (not used).
  * @return Instrument response to elliptical source.
  *
  * Returns the instrument response to a specified elliptical source.
@@ -570,9 +573,12 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
     double rho_obs      = model->dir().dist(obsDir);
     double posangle_obs = model->dir().posang(obsDir);
 
-    // Continue only if we're sufficiently close to the model centre to get a
-    // non-zero response
-    if (rho_obs <= model->theta_max()+psf().delta_max()) {
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is >0 and if we're sufficiently close to
+    // the model centre to get a non-zero response
+    if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
 
         // Get exposure
         irf = exposure()(obsDir, obsEng);
@@ -580,20 +586,18 @@ double GCTAResponseCube::irf_elliptical(const GEvent&       event,
         // Continue only if exposure is positive
         if (irf > 0.0) {
 
-            // Recover effective area from exposure. If the livetime
-            // is zero we keep the exposure instead of the effective
-            // area. This is a (dirty) kluge that avoids using livetime
-            // information in cube computations
-            if (obs.livetime() > 0.0) {
-                irf /= obs.livetime();
-            }
+            // Recover effective area from exposure
+            irf /= livetime;
 
-            // Do the rest
+            // Get PSF component
             irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, obsEng, obsTime);
-            irf *= obs.deadc(obsTime);
-        }
+
+            // Apply deadtime correction
+            irf *= exposure().deadc();
+
+        } // endif: exposure was positive
         
-    } // endif: we were sufficiently close
+    } // endif: we were sufficiently close and livetime >0
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

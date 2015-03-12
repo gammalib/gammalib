@@ -232,58 +232,62 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
     m_cube = cube->map();
     m_cube = 0.0;
 
-    // Loop over all spatial bins
-    for (int pixel = 0; pixel < cube->npix(); ++pixel) {
+    // Get livetime (in seconds) and deadtime correction factor
+    double livetime = rsp->exposure().livetime();
+    double deadc    = rsp->exposure().deadc();
 
-        // Get cube pixel sky direction
-        GSkyDir obsDir = cube->map().inx2dir(pixel);
+    // Continue only if livetime is >0
+    if (livetime > 0.0)  {
 
-        // Loop over all energy layers
-        for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
+        // Loop over all spatial bins
+        for (int pixel = 0; pixel < cube->npix(); ++pixel) {
 
-            // Get cube layer energy
-            const GEnergy& obsEng = cube->energy(iebin);
+            // Get cube pixel sky direction
+            GSkyDir obsDir = cube->map().inx2dir(pixel);
 
-            // Determine exposure. We assume here that the exposure does
-            // not vary significantly over the PSF and just compute it at
-            // the pixel centre. We furthermore assume no energy dispersion,
-            // and thus compute exposure using the observed energy.
-            double aeff = rsp->exposure()(obsDir, obsEng);
+            // Loop over all energy layers
+            for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
 
-            // Continue only if effective area is positive
-            if (aeff > 0.0) {
+                // Get cube layer energy
+                const GEnergy& obsEng = cube->energy(iebin);
 
-                // Recover effective area from exposure. If the livetime
-                // is zero we keep the exposure instead of the effective
-                // area. This is a (dirty) kluge that avoids using livetime
-                // information in cube computations
-                if (obs.livetime() > 0.0) {
-                    aeff /= obs.livetime();
-                }
+                // Determine exposure. We assume here that the exposure does
+                // not vary significantly over the PSF and just compute it at
+                // the pixel centre. We furthermore assume no energy dispersion,
+                // and thus compute exposure using the observed energy.
+                double aeff = rsp->exposure()(obsDir, obsEng);
 
-                // Compute product of PSF and diffuse map, integrated
-                // over the relevant PSF area. We assume no energy
-                // dispersion and thus compute the product using the
-                // observed energy.
-                #if defined(G_PSF_INTEGRATE)
-                double psf = this->psf(rsp, &model, obsDir, obsEng, obsTime);
-                #else
-                double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
-                #endif
+                // Continue only if effective area is positive
+                if (aeff > 0.0) {
 
-                // Set cube value
-                m_cube(pixel, iebin) = aeff * psf * obs.deadc(obsTime);
+                    // Recover effective area from exposure
+                    aeff /= livetime;
 
-            } // endif: effective area was positive
+                    // Compute product of PSF and diffuse map, integrated
+                    // over the relevant PSF area. We assume no energy
+                    // dispersion and thus compute the product using the
+                    // observed energy.
+                    #if defined(G_PSF_INTEGRATE)
+                    double psf = this->psf(rsp, &model, obsDir, obsEng, obsTime);
+                    #else
+                    double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
+                    #endif
+
+                    // Set cube value
+                    m_cube(pixel, iebin) = aeff * psf * deadc;
+
+                } // endif: effective area was positive
+
+            } // endfor: looped over all energy layers
+
+            // Debug option: update statistics
+            #if defined(G_DEBUG_SET)
+            n_pixels_computed++;
+            #endif
         
-        } // endfor: looped over all energy layers
+        } // endfor: looped over all spatial pixels
 
-        // Debug option: update statistics
-        #if defined(G_DEBUG_SET)
-        n_pixels_computed++;
-        #endif
-        
-    } // endfor: looped over all spatial pixels
+    } // endif: livetime was positive
 
     // Debug option: show statistics
     #if defined(G_DEBUG_SET)

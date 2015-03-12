@@ -221,25 +221,32 @@ void GCTACubeSourcePoint::set(const std::string&   name,
     m_delta_map.assign(cube->npix(), 0.0);
     m_psf.assign(cube->ebins()*m_deltas.size(), 0.0);
 
+    // Get livetime (in seconds) and deadtime correction factor
+    double livetime = rsp->exposure().livetime();
+    double deadc    = rsp->exposure().deadc();
+
     // Compute deadtime corrected effective area
     for (int i = 0; i < cube->ebins(); ++i) {
 
-        // Get source energy
-        const GEnergy& srcEng = cube->energy(i);
+        // Initialise effective area
+        double aeff = 0.0;
 
-        // Get exposure
-        double aeff = rsp->exposure()(m_dir, srcEng);
+        // Continue only if livetime is >0
+        if (livetime > 0.0)  {
 
-        // Recover effective area from exposure. If the livetime
-        // is zero we keep the exposure instead of the effective
-        // area. This is a (dirty) kluge that avoids using livetime
-        // information in cube computations
-        if (obs.livetime() > 0.0) {
-            aeff /= obs.livetime();
-        }
+            // Get source energy
+            const GEnergy& srcEng = cube->energy(i);
 
-        // Apply deadtime correction
-        aeff *= obs.deadc(srcTime);
+            // Get exposure
+            aeff = rsp->exposure()(m_dir, srcEng);
+
+            // Recover effective area from exposure
+            aeff /= livetime;
+
+            // Apply deadtime correction
+            aeff *= deadc;
+
+        } // endif: livetime was positive
 
         // Store deadtime corrected effective area in vector
         m_aeff[i] = aeff;
