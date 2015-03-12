@@ -75,7 +75,11 @@ None
 
 10. Observation module
 ----------------------
-None
+The GEbounds and GGti classes now allow appending of empty intervals (i.e.
+intervals having the same start and end value).
+
+A single time interval constructor has been added to GGti, similar to the
+one that exists for GEbounds.
 
 
 11. Optimization module

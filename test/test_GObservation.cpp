@@ -271,19 +271,20 @@ void TestGObservation::test_gti(void)
 
     // Add empty interval
     gti.append(GTime(1.0), GTime(1.0));
-    test_value(gti.size(), 0, "GGti should have zero size.");
-    test_assert(gti.is_empty(), "GGti should be empty.");
-    test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
-    test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
+    test_value(gti.size(), 1, "GGti should have 1 interval.");
+    test_assert(!gti.is_empty(), "GGti should not be empty.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1.0, 1.0e-10, "Stop time should be 1.");
 
     // Add one interval
     gti.append(GTime(1.0), GTime(10.0));
-    test_value(gti.size(), 1, "GGti should have 1 interval.");
+    test_value(gti.size(), 2, "GGti should have 2 intervals.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 10.0, 1.0e-10, "Stop time should be 10.");
 
     // Remove interval
+    gti.remove(0);
     gti.remove(0);
     test_value(gti.size(), 0, "GGti should have zero size.");
     test_assert(gti.is_empty(), "GGti should be empty.");

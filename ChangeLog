@@ -20,6 +20,8 @@
         Increase precision for diffuse model Npred computation (#1248)
         Implement observation definition reader/writer (#1429)
         Remove etrue flag from CTA background IRF (#1437)
+        Allow appending of empty intervals to GEbounds and GGti
+        Add single interval constructor to GGti
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

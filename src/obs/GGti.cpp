@@ -38,11 +38,13 @@
 #include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_REDUCE                               "GGti::reduce(GTime&, GTime&)"
 #define G_REMOVE                                         "GGti::remove(int&)"
 #define G_READ_XML                                 "GGti::read(GXmlElement&)"
 #define G_WRITE_XML                               "GGti::write(GXmlElement&)"
 #define G_TSTART                                         "GGti::tstart(int&)"
 #define G_TSTOP                                           "GGti::tstop(int&)"
+#define G_INSERT_GTI                 "GGti::insert_gti(int&, GTime&, GTime&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -109,6 +111,28 @@ GGti::GGti(const GXmlElement& xml)
 
 
 /***********************************************************************//**
+ * @brief Single time interval constructor
+ *
+ * @param[in] tstart Start time of interval.
+ * @param[in] tstop Stop time of interval.
+ *
+ * Constructs Good Time Intervals from a single time interval, given by
+ * [p@ tstart, @p tstop].
+ ***************************************************************************/
+GGti::GGti(const GTime& tstart, const GTime& tstop)
+{
+    // Initialise members
+    init_members();
+
+    // Append time interval
+    append(tstart, tstop);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Time reference constructor
  *
  * @param[in] ref Time reference.
@@ -155,7 +179,7 @@ GGti::~GGti(void)
  * @param[in] gti Good Time Intervals.
  * @return Good Time Intervals.
  ***************************************************************************/
-GGti& GGti::operator= (const GGti& gti)
+GGti& GGti::operator=(const GGti& gti)
 {
     // Execute only if object is not identical
     if (this != &gti) {
@@ -216,19 +240,11 @@ GGti* GGti::clone(void) const
  * @param[in] tstop Stop time of interval.
  *
  * Appends a Good Time Interval at the end of the container.
- *
- * The method does nothing if the Good Time Interval is not valid
- * (i.e. @p tstart >= @p tstop).
  ***************************************************************************/
 void GGti::append(const GTime& tstart, const GTime& tstop)
 {
-    // Continue only if time interval is valid
-    if (tstop > tstart) {
-
-        // Insert GTI at end of list
-        insert_gti(m_num, tstart, tstop);
-
-    } // endif: Time interval was valid
+    // Insert GTI at end of list
+    insert_gti(m_num, tstart, tstop);
 
     // Return
     return;
@@ -244,27 +260,19 @@ void GGti::append(const GTime& tstart, const GTime& tstop)
  * Inserts a Good Time Interval into the container after the first interval
  * that has a start time smaller than @p tstart. The method implicitely
  * assumes that the Good Time Intervals are ordered by increasing start time.
- *
- * The method does nothing if the Good Time Interval is not valid
- * (i.e. @p tstart >= @p tstop).
  ***************************************************************************/
 void GGti::insert(const GTime& tstart, const GTime& tstop)
 {
-    // Continue only if time interval is valid
-    if (tstop > tstart) {
-
-        // Determine index at which GTI should be inserted
-        int inx = 0;
-        for (int i = 0; i < m_num; ++i) {
-            if (tstart < m_start[i]) {
-                break;
-            }
+    // Determine index at which GTI should be inserted
+    int inx = 0;
+    for (int i = 0; i < m_num; ++i) {
+        if (tstart < m_start[i]) {
+            break;
         }
+    }
 
-        // Insert interval
-        insert_gti(inx, tstart, tstop);
-
-    } // endif: Time interval was valid
+    // Insert interval
+    insert_gti(inx, tstart, tstop);
 
     // Return
     return;
@@ -325,30 +333,22 @@ void GGti::merge(void)
  * that has a start time smaller than @p tstart and then merges any
  * overlapping or connecting Good Time Intervals. The method implicitely
  * assumes that the intervals are ordered by increasing start time.
- *
- * The method does nothing if the Good Time Interval is not valid
- * (i.e. @p tstart >= @p tstop).
  ***************************************************************************/
 void GGti::merge(const GTime& tstart, const GTime& tstop)
 {
-    // Continue only if time interval is valid
-    if (tstop > tstart) {
-
-        // Determine index at which GTI should be inserted
-        int inx = 0;
-        for (int i = 0; i < m_num; ++i) {
-            if (tstart < m_start[i]) {
-                break;
-            }
+    // Determine index at which GTI should be inserted
+    int inx = 0;
+    for (int i = 0; i < m_num; ++i) {
+        if (tstart < m_start[i]) {
+            break;
         }
+    }
 
-        // Insert GTI
-        insert_gti(inx, tstart, tstop);
+    // Insert GTI
+    insert_gti(inx, tstart, tstop);
 
-        // Merge any overlapping GTIs
-        merge();
-
-    } // endif: Time interval was valid
+    // Merge any overlapping GTIs
+    merge();
 
     // Return
     return;
@@ -361,72 +361,75 @@ void GGti::merge(const GTime& tstart, const GTime& tstop)
  * @param[in] tstart Start time of interval.
  * @param[in] tstop Stop time of interval.
  *
+ * @exception GException::invalid_argument
+ *            Start time is later than stop time
+ *
  * Reduces the Good Time Intervals to the specified interval. Reducing means
  * that all Good Time Intervals are dropped that fall outside the specified
  * interval [@p tstart, @p tstop], and Good Time Intervals will be limited
  * to >@p tstart and <=@p tstop in case that their boundaries are outside
  * [@p tstart, @p tstop].
- *
- * The method does nothing if the Good Time Interval is not valid
- * (i.e. @p tstart >= @p tstop).
  ***************************************************************************/
 void GGti::reduce(const GTime& tstart, const GTime& tstop)
 {
-    // Continue only if time interval is valid
-    if (tstop > tstart) {
+    // Throw an exception if time interval is invalid
+    if (tstart > tstop) {
+        std::string msg = "Invalid time interval specified. Start time "+
+                          tstart.print(NORMAL)+" can not be later than "
+                          "stop time "+tstop.print(NORMAL)+".";
+        throw GException::invalid_argument(G_REDUCE, msg);
+    }
 
-        // Adjust existing GTIs. This will limit all GTIs to [tstart,tstop].
-        // All GTIs outside [tstart,tstop] will have start > stop. The number
-        // of valid GTIs will also be determined.
-        int num = 0;
+    // Adjust existing GTIs. This will limit all GTIs to [tstart,tstop].
+    // All GTIs outside [tstart,tstop] will have start > stop. The number
+    // of valid GTIs will also be determined.
+    int num = 0;
+    for (int i = 0; i < m_num; ++i) {
+        if (m_start[i] < tstart) {
+            m_start[i] = tstart;
+        }
+        if (m_stop[i] > tstop) {
+            m_stop[i] = tstop;
+        }
+        if (m_start[i] <= m_stop[i]) {
+            num++;
+        }
+    }
+
+    // If we still have valid GTIs then allocate memory for them, copy
+    // over the start and stop times, and update the attributes
+    if (num > 0) {
+
+        // Allocate new intervals
+        GTime* start = new GTime[num];
+        GTime* stop  = new GTime[num];
+
+        // Copy valid intervals
         for (int i = 0; i < m_num; ++i) {
-            if (m_start[i] < tstart) {
-                m_start[i] = tstart;
-            }
-            if (m_stop[i] > tstop) {
-                m_stop[i] = tstop;
-            }
             if (m_start[i] <= m_stop[i]) {
-                num++;
+                start[i] = m_start[i];
+                stop[i]  = m_stop[i];
             }
         }
 
-        // If we still have valid GTIs then allocate memory for them, copy
-        // over the start and stop times, and update the attributes
-        if (num > 0) {
+        // Free old memory
+        if (m_start != NULL) delete [] m_start;
+        if (m_stop  != NULL) delete [] m_stop;
 
-            // Allocate new intervals
-            GTime* start = new GTime[num];
-            GTime* stop  = new GTime[num];
+        // Set new memory
+        m_start = start;
+        m_stop  = stop;
 
-            // Copy valid intervals
-            for (int i = 0; i < m_num; ++i) {
-                if (m_start[i] <= m_stop[i]) {
-                    start[i] = m_start[i];
-                    stop[i]  = m_stop[i];
-                }
-            }
+        // Set attributes
+        m_num = num;
+        set_attributes();
 
-            // Free old memory
-            if (m_start != NULL) delete [] m_start;
-            if (m_stop  != NULL) delete [] m_stop;
+    } // endif: there were still valid GTIs
 
-            // Set new memory
-            m_start = start;
-            m_stop  = stop;
-
-            // Set attributes
-            m_num = num;
-            set_attributes();
-
-        } // endif: there were still valid GTIs
-
-        // ... otherwise we remove all GTIs
-        else {
-            clear();
-        }
-
-    } // endif: Time interval was valid
+    // ... otherwise we remove all GTIs
+    else {
+        clear();
+    }
 
     // Return
     return;
@@ -1103,63 +1106,69 @@ void GGti::set_attributes(void)
  * @param[in] tstart Start time of interval.
  * @param[in] tstop Stop time of interval.
  *
+ * @exception GException::invalid_argument
+ *            Start time later than stop time
+ *
  * Inserts a Good Time Interval after the specified @p index in the Good
  * Time Intervals. The method does not reorder the intervals by time,
  * instead the client needs to determine the approriate @p index.
  *
  * Invalid parameters do not produce any exception, but are handled
- * transparently. If the interval is invalid (i.e. @p tstart >= @p tstop)
- * then nothing is done. If the @p index is out of the valid range, the
+ * transparently. If the interval is invalid (i.e. @p tstart > @p tstop)
+ * an exception is thrown. If the @p index is out of the valid range, the
  * index will be adjusted to either the first or the last element.
  ***************************************************************************/
 void GGti::insert_gti(const int& index, const GTime& tstart, const GTime& tstop)
 {
-    // Continue only if time interval is valid
-    if (tstop > tstart) {
+    // Throw an exception if time interval is invalid
+    if (tstart > tstop) {
+        std::string msg = "Invalid time interval specified. Start time "+
+                          tstart.print(NORMAL)+" can not be later than "
+                          "stop time "+tstop.print(NORMAL)+".";
+        throw GException::invalid_argument(G_INSERT_GTI, msg);
+    }
 
-        // Set index
-        int inx = index;
+    // Set index
+    int inx = index;
 
-        // If inx is out of range then adjust it
-        if (inx < 0)     inx = 0;
-        if (inx > m_num) inx = m_num;
+    // If inx is out of range then adjust it
+    if (inx < 0)     inx = 0;
+    if (inx > m_num) inx = m_num;
 
-        // Allocate new intervals
-        int    num   = m_num+1;
-        GTime* start = new GTime[num];
-        GTime* stop  = new GTime[num];
+    // Allocate new intervals
+    int    num   = m_num+1;
+    GTime* start = new GTime[num];
+    GTime* stop  = new GTime[num];
 
-        // Copy intervals before GTI to be inserted
-        for (int i = 0; i < inx; ++i) {
-            start[i] = m_start[i];
-            stop[i]  = m_stop[i];
-        }
+    // Copy intervals before GTI to be inserted
+    for (int i = 0; i < inx; ++i) {
+        start[i] = m_start[i];
+        stop[i]  = m_stop[i];
+    }
 
-        // Insert GTI
-        start[inx] = tstart;
-        stop[inx]  = tstop;
+    // Insert GTI
+    start[inx] = tstart;
+    stop[inx]  = tstop;
 
-        // Copy intervals after GTI to be inserted
-        for (int i = inx+1; i < num; ++i) {
-            start[i] = m_start[i-1];
-            stop[i]  = m_stop[i-1];
-        }
+    // Copy intervals after GTI to be inserted
+    for (int i = inx+1; i < num; ++i) {
+        start[i] = m_start[i-1];
+        stop[i]  = m_stop[i-1];
+    }
 
-        // Free memory
-        if (m_start != NULL) delete [] m_start;
-        if (m_stop  != NULL) delete [] m_stop;
+    // Free memory
+    if (m_start != NULL) delete [] m_start;
+    if (m_stop  != NULL) delete [] m_stop;
 
-        // Set new memory
-        m_start = start;
-        m_stop  = stop;
+    // Set new memory
+    m_start = start;
+    m_stop  = stop;
 
-        // Set number of elements
-        m_num = num;
-        
-        // Set attributes
-        set_attributes();
-
-    } // endif: Time interval was valid
+    // Set number of elements
+    m_num = num;
+    
+    // Set attributes
+    set_attributes();
 
     // Return
     return;

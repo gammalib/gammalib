@@ -40,6 +40,7 @@ public:
     // Constructors and destructors
     GGti(void);
     GGti(const GGti& gti);
+    GGti(const GTime& tstart, const GTime& tstop);
     explicit GGti(const GXmlElement& xml);
     explicit GGti(const GTimeReference& ref);
     virtual ~GGti(void);
