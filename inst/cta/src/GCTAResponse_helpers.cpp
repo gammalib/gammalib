@@ -2230,7 +2230,7 @@ double cta_psf_diffuse_kern_phi::eval(const double& phi)
     // Set photon
     GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
-    // Compute map value this sky direction
+    // Compute map value for this sky direction
     double value = m_model->eval(photon); 
 
     // Debug: Check for NaN
