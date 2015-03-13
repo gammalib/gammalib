@@ -241,6 +241,7 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     std::cout<< new_app->m_id << std::endl;
     std::cout<< "Nb. of current applications registered:" << std::endl;
     std::cout<< m_connected_apps.size()<< std::endl;
+    
     for( i=0,q=m_connected_apps.begin(); i<m_connected_apps.size(); i++,q++ ) {
       std::cout << "Displaying element of applications list:" << std::endl;
       content = (*q)->print();
@@ -367,7 +368,7 @@ void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
         }
     }
     
-    std::cout<< "Nb. of current applications registered:" << std::endl;
+    std::cout<< "Searching object for this application... Nb. of current applications registered:" << std::endl;
     std::cout<< m_connected_apps.size()<< std::endl;
     for( i=0,q=m_connected_apps.begin(); i<m_connected_apps.size(); i++,q++ ) {
       std::cout << "Displaying element of applications list:" << std::endl;
@@ -880,14 +881,14 @@ std::list<std::string> GVOHub::get_registrations(const GXml&        xml,
 		  int num = node->elements("member");
                     for (int i = 0; i < num; ++i) {
 			   std::cout << i << std::endl;
-			   std::cout << "Affichage du membre\n";
-			   std::cout << *(node->element("member", i)) << std::cout;
+			   //std::cout << "Affichage du membre\n";
+			   //std::cout << *(node->element("member", i)) << std::cout;
 			   subnode = node->element("member", i);
 			   subnode = subnode->element("name", 0);
-			   std::cout << "\nsubnode" << std::endl;
-			   std::cout << node->element("member",i)->element("name", 0)->print(NORMAL,0) << std::cout;
+			   //std::cout << "\nsubnode" << std::endl;
+			   //std::cout << node->element("member",i)->element("name", 0)->print(NORMAL,0) << std::cout;
 			   value.push_front(node->element("member",i)->element("name", 0)->print(NORMAL,0));
-			   std::cout << "\nFin Affichage du membre\n";
+			   //std::cout << "\nFin Affichage du membre\n";
                         }
 		      }
 		    }
