@@ -31,7 +31,7 @@ import time
 # ============== #
 # Simulate Edisp #
 # ============== #
-def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
+def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
     """
     Simulate Edisp and show results using matplotlib (if available).
     """
@@ -64,8 +64,8 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
         # Simulate observed energies
         tstart = time.clock()
         for i in range(nmc):
-            #eobs     = edisp.mc(ran, logEtrue).TeV()
-            eobs     = edisp.mc(ran, logEtrue, float(i)).TeV()
+            eobs     = edisp.mc(ran, logEtrue).TeV()
+            #eobs     = edisp.mc(ran, logEtrue, float(i)).TeV()
             index    = int(eobs/dEobs)
             if (index < ebins):
                 counts[index] += 1.0
@@ -89,7 +89,7 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
             sum += value
             exp_edisp.append(value)
             cumul.append(sum/nmc)
-        print(sum)
+        print(sum/nmc)
 
         # Create figure
         fig, ax1 = plt.subplots()
@@ -138,11 +138,9 @@ if __name__ == '__main__':
     print("******************************")
 
     # Load edisp
-    edisp = gammalib.GCTAEdispRmf("./caldb/dc1/rmf.fits")
+    #edisp = gammalib.GCTAEdispRmf("./caldb/dc1/rmf.fits")
     #edisp = gammalib.GCTAEdispPerfTable("./caldb/cta_dummy_irf.dat")
-    # NE MARCHE PAS /!\
-    #edisp = gammalib.GCTAEdisp2D("./caldb/edisp_matrix.fits")
+    edisp = gammalib.GCTAEdisp2D("./caldb/edisp_matrix.fits")
 
     # Simulate Edisp
     sim_edisp(edisp, 20.0) # Energy in TeV
-    #sim_edisp(edisp, 1.0) # Energy in TeV

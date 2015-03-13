@@ -129,7 +129,6 @@ private:
     mutable std::vector<GVector>                    m_mc_measured_cdf;
     mutable bool                                    m_cdf_computed;
     mutable double                                  m_theta;
-
     mutable std::vector<std::vector<std::pair<double, double> > > m_cumul;
 
 };

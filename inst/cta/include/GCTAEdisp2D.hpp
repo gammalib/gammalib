@@ -103,8 +103,7 @@ private:
     void update(const double& logEobs,
                 const double& logEsrc,
                 const double& theta) const;
-    void update_cumul(const double& logEsrc,
-                      const double& theta = 0.0,
+    void compute_cumul(const double& theta = 0.0,
                       const double& phi = 0.0,
                       const double& zenith = 0.0,
                       const double& azimuth = 0.0) const;
@@ -112,9 +111,10 @@ private:
     // Members
     std::string       m_filename;  //!< Name of Edisp response file
     GCTAResponseTable m_edisp;     //!< Edisp response table
-    mutable double                                  m_logEsrc;
-    mutable double                                  m_theta;
-    mutable std::vector<std::pair<double, double> > m_cumul;
+
+    mutable bool      m_cdf_computed;
+    mutable double    m_theta;
+    mutable std::vector<std::vector<std::pair<double, double> > > m_cumul;
 };
 
 

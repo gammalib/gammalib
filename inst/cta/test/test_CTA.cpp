@@ -611,6 +611,12 @@ void TestGCTAResponse::test_response_edisp_RMF(void)
     // Test normalisation
     test_edisp_integration(edisp, 0.5, 10.0);
 
+    std::cout << "Eobs = 1 TeV : " << edisp(0.0, 0.0) << std::endl;
+    std::cout << "Eobs = 10 TeV : " << edisp(1.0, 0.0) << std::endl;
+
+    std::cout << "Eobs = 10 TeV : " << edisp(1.0, 1.0) << std::endl;
+    std::cout << "Eobs = 100 TeV : " << edisp(2.0, 1.0) << std::endl;
+
     // Return
     return;
 }
@@ -655,6 +661,12 @@ void TestGCTAResponse::test_response_edisp_2D(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
+
+    std::cout << "Eobs = 1 TeV : " << edisp(0.0, 0.0) << std::endl;
+    std::cout << "Eobs = 10 TeV : " << edisp(1.0, 0.0) << std::endl;
+
+    std::cout << "Eobs = 10 TeV : " << edisp(1.0, 1.0) << std::endl;
+    std::cout << "Eobs = 100 TeV : " << edisp(2.0, 1.0) << std::endl;
 
     // Return
     return;

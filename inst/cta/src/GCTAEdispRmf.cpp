@@ -373,7 +373,7 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
     int high = m_rmf.ntrue();
     while ((high-low) > 1) {
         int mid = (low+high) / 2;
-        if (logEsrc < m_rmf.etrue().elogmean(mid).log10TeV()) {
+        if (logEsrc < m_rmf.etrue().emin(mid).log10TeV()) {
             high = mid;
         }
         else {
@@ -398,18 +398,32 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
             low = mid;
         }
     }
+
     // Index found
-    int index = low;
+    int index = 0;
+    if (low >= m_cumul[isrc].size() - 1) {
+        index = m_cumul[isrc].size() - 2;
+    }
+    else {
+        index = low;
+    }
 
     // Interpolate Eobs value
-    double Eobs =   (m_cumul[isrc][index+1].second - p)*m_cumul[isrc][index].first
-                  + (p - m_cumul[isrc][index].second)*m_cumul[isrc][index+1].first;
-    Eobs       /=   (m_cumul[isrc][index+1].second - m_cumul[isrc][index].second);
+    double Eobs = 0.0;
+
+    if (m_cumul[isrc][index+1].second == m_cumul[isrc][index].second) {
+        Eobs = m_cumul[isrc][index].first;
+    }
+    else {
+        Eobs  =   (m_cumul[isrc][index+1].second - p)*m_cumul[isrc][index].first
+                + (p - m_cumul[isrc][index].second)*m_cumul[isrc][index+1].first;
+        Eobs /=   (m_cumul[isrc][index+1].second - m_cumul[isrc][index].second);
+    }
+
 
     // Set energy
     GEnergy energy;
     energy.TeV(Eobs);
-
 
     // Return energy
     return energy;
