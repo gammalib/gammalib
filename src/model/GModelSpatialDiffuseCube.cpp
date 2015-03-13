@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -469,6 +469,24 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
 
     // Return sky direction
     return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals whether model contains sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] margin Margin to be added to sky direction (degrees)
+ * @return True if the model contains the sky direction.
+ *
+ * Signals whether a sky direction falls within the diffuse model.
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+bool GModelSpatialDiffuseCube::contains(const GSkyDir& dir,
+                                        const double&  margin) const
+{
+    return (true);
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialDiffuseConst.hpp - Spatial isotropic model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,6 +69,8 @@ public:
                                           GRan& ran) const;
     virtual double                     norm(const GSkyDir& dir,
                                             const double&  radius) const;
+    virtual bool                       contains(const GSkyDir& dir,
+                                                const double&  margin = 0.0) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
     virtual std::string                print(const GChatter& chatter = NORMAL) const;
@@ -156,6 +158,25 @@ double GModelSpatialDiffuseConst::norm(const GSkyDir& dir,
                                        const double&  radius) const
 {
     return (value());
+}
+
+
+/***********************************************************************//**
+ * @brief Signals whether model contains sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] margin Margin to be added to sky direction (degrees)
+ * @return True.
+ *
+ * Signals whether a sky direction falls within the diffuse model. As the
+ * constrant model is defined on the entire sphere, the method returns always
+ * true.
+ ***************************************************************************/
+inline
+bool GModelSpatialDiffuseConst::contains(const GSkyDir& dir,
+                                         const double&  margin) const
+{
+    return (true);
 }
 
 #endif /* GMODELSPATIALDIFFUSECONST_HPP */

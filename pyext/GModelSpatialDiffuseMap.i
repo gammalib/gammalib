@@ -60,6 +60,8 @@ public:
                                         GRan& ran) const;
     virtual double                   norm(const GSkyDir& dir,
                                           const double&  radius) const;
+    virtual bool                     contains(const GSkyDir& dir,
+                                              const double&  margin = 0.0) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
 

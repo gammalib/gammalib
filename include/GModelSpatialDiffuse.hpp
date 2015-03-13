@@ -57,7 +57,7 @@ public:
     // Operators
     virtual GModelSpatialDiffuse& operator=(const GModelSpatialDiffuse& model);
 
-    // Pure virtual base class methods
+    // Pure virtual methods
     virtual void                  clear(void) = 0;
     virtual GModelSpatialDiffuse* clone(void) const = 0;
     virtual std::string           classname(void) const = 0;
@@ -68,6 +68,8 @@ public:
                                      GRan& ran) const = 0;
     virtual double                norm(const GSkyDir& dir,
                                        const double&  radius) const = 0;
+    virtual bool                  contains(const GSkyDir& dir,
+                                           const double&  margin = 0.0) const = 0;
     virtual void                  read(const GXmlElement& xml) = 0;
     virtual void                  write(GXmlElement& xml) const = 0;
     virtual std::string           print(const GChatter& chatter = NORMAL) const = 0;

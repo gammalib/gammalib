@@ -393,6 +393,24 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
 
 
 /***********************************************************************//**
+ * @brief Signals whether model contains sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] margin Margin to be added to sky direction (degrees)
+ * @return True if the model contains the sky direction.
+ *
+ * Signals whether a sky direction falls within the diffuse model.
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
+                                       const double&  margin) const
+{
+    return (true);
+}
+
+
+/***********************************************************************//**
  * @brief Read model from XML element
  *
  * @param[in] xml XML element.
