@@ -825,55 +825,65 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
         // ... otherwise perform computation for WCS map
         else {
 
-            // Determine sky pixel
-            GSkyPixel pixel = dir2pix(dir);
+            // Determine sky pixel. At this point an exception may occur
+            // in case that the pixel cannot be represented by the
+            // relevant projection. We catch this exception here
+            try {
 
-            // Set containment flag and store actual sky direction as last
-            // direction
-            m_hascache  = true;
-            m_contained = contains(pixel);
-            m_last_dir  = dir;
+                // Determine sky pixel
+                GSkyPixel pixel = dir2pix(dir);
 
-            // Continue only if pixel is within the map
-            if (m_contained) {
+                // Set containment flag and store actual sky direction
+                // as last direction
+                m_hascache  = true;
+                m_contained = contains(pixel);
+                m_last_dir  = dir;
 
-                // Set left indices for interpolation. The left index is
-                // comprised between 0 and npixels-2. By definition, the
-                // right index is then the left index + 1
-                int inx_x = int(pixel.x());
-                int inx_y = int(pixel.y());
-                if (inx_x < 0) {
-                    inx_x = 0;
-                }
-                else if (inx_x > m_num_x-2) {
-                    inx_x = m_num_x - 2;
-                }
-                if (inx_y < 0) {
-                    inx_y = 0;
-                }
-                else if (inx_y > m_num_y-2) {
-                    inx_y = m_num_y - 2;
-                }
+                // Continue only if pixel is within the map
+                if (m_contained) {
 
-                // Set weighting factors for interpolation
-                double wgt_x_right = (pixel.x() - inx_x);
-                double wgt_x_left  = 1.0 - wgt_x_right;
-                double wgt_y_right = (pixel.y() - inx_y);
-                double wgt_y_left  = 1.0 - wgt_y_right;
+                    // Set left indices for interpolation. The left index is
+                    // comprised between 0 and npixels-2. By definition, the
+                    // right index is then the left index + 1
+                    int inx_x = int(pixel.x());
+                    int inx_y = int(pixel.y());
+                    if (inx_x < 0) {
+                        inx_x = 0;
+                    }
+                    else if (inx_x > m_num_x-2) {
+                        inx_x = m_num_x - 2;
+                    }
+                    if (inx_y < 0) {
+                        inx_y = 0;
+                    }
+                    else if (inx_y > m_num_y-2) {
+                        inx_y = m_num_y - 2;
+                    }
 
-                // Compute skymap pixel indices for bi-linear interpolation
-                m_interpol.index1() = inx_x + inx_y * m_num_x;
-                m_interpol.index2() = m_interpol.index1() + m_num_x;
-                m_interpol.index3() = m_interpol.index1() + 1;
-                m_interpol.index4() = m_interpol.index2() + 1;
+                    // Set weighting factors for interpolation
+                    double wgt_x_right = (pixel.x() - inx_x);
+                    double wgt_x_left  = 1.0 - wgt_x_right;
+                    double wgt_y_right = (pixel.y() - inx_y);
+                    double wgt_y_left  = 1.0 - wgt_y_right;
 
-                // Compute weighting factors for bi-linear interpolation
-                m_interpol.weight1() = wgt_x_left  * wgt_y_left;
-                m_interpol.weight2() = wgt_x_left  * wgt_y_right;
-                m_interpol.weight3() = wgt_x_right * wgt_y_left;
-                m_interpol.weight4() = wgt_x_right * wgt_y_right;
+                    // Compute skymap pixel indices for bi-linear interpolation
+                    m_interpol.index1() = inx_x + inx_y * m_num_x;
+                    m_interpol.index2() = m_interpol.index1() + m_num_x;
+                    m_interpol.index3() = m_interpol.index1() + 1;
+                    m_interpol.index4() = m_interpol.index2() + 1;
 
-            } // endif: pixel was contained in map
+                    // Compute weighting factors for bi-linear interpolation
+                    m_interpol.weight1() = wgt_x_left  * wgt_y_left;
+                    m_interpol.weight2() = wgt_x_left  * wgt_y_right;
+                    m_interpol.weight3() = wgt_x_right * wgt_y_left;
+                    m_interpol.weight4() = wgt_x_right * wgt_y_right;
+
+                } // endif: pixel was contained in map
+                
+            } // endtry: pixel computation was successful
+            catch (GException::wcs_invalid_phi_theta) {
+                m_contained = false;
+            }
     
         } // endelse: we had a WCS map
 
