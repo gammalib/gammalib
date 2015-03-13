@@ -1,4 +1,4 @@
-2015-03-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-03-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -24,6 +24,7 @@
         Add single interval constructor to GGti
         Allow calling GNodeArray::set_value() for a single node
         Add GTI and livtime information to GCTACubeExposure
+        Add GModelSpatialDiffuse::contains method (#1446)
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

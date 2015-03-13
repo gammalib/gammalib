@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-12 March 2015
+13 March 2015
 
 
 1. Introduction
@@ -66,6 +66,10 @@ check. This allows to check for models of a given identifier whatever the
 instrument, or for models for a given instrument, whatever the identifier.
 
 Added unit tests for GModel base class methods.
+
+The GModelSpatialDiffuse::contains method allows to check whether a sky
+direction is contained within a diffuse model. This helps to speed up
+computation for models that are much smaller than the covered data space.
 
 
 9. Numerics module
