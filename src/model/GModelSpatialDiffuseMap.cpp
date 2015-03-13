@@ -399,14 +399,31 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
  * @param[in] margin Margin to be added to sky direction (degrees)
  * @return True if the model contains the sky direction.
  *
- * Signals whether a sky direction falls within the diffuse model.
- *
- * @todo To be implemented.
+ * Signals whether a sky direction falls within the bounding circle of
+ * the diffuse map.
  ***************************************************************************/
 bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
                                        const double&  margin) const
 {
-    return (true);
+    // Initialise containment flag
+    bool contains = false;
+
+    // Continue only if radius is positive
+    if (m_radius > 0.0) {
+
+        // Compute distance to centre
+        double distance = m_centre.dist_deg(dir);
+
+        // If distance is smaller than radius plus margin we consider
+        // the position to be contained within the bounding circle
+        if (distance < m_radius + margin) {
+            contains = true;
+        }
+
+    }
+
+    // Return containment
+    return (contains);
 }
 
 
@@ -566,6 +583,10 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
         if (normalize()) {
             result.append(" [normalized]");
         }
+        result.append("\n"+gammalib::parformat("Map centre"));
+        result.append(m_centre.print());
+        result.append("\n"+gammalib::parformat("Map radius"));
+        result.append(gammalib::str(m_radius)+" deg");
         result.append("\n"+gammalib::parformat("Number of parameters"));
         result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
@@ -641,6 +662,8 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_normalize     = true;
     m_has_normalize = false;
     m_norm          = 0.0;
+    m_centre.clear();
+    m_radius        = 0.0;
 
     // Return
     return;
@@ -662,6 +685,8 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_normalize     = model.m_normalize;
     m_has_normalize = model.m_has_normalize;
     m_norm          = model.m_norm;
+    m_centre        = model.m_centre;
+    m_radius        = model.m_radius;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -698,8 +723,10 @@ void GModelSpatialDiffuseMap::free_members(void)
  ***************************************************************************/
 void GModelSpatialDiffuseMap::prepare_map(void)
 {
-    // Initialise cache
+    // Initialise cache, centre and radius
     m_mc_cache.clear();
+    m_centre.clear();
+    m_radius = 0.0;
 
     // Determine number of skymap pixels
     int npix = m_map.npix();
@@ -750,7 +777,29 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         // Make sure that last pixel in the cache is >1
         m_mc_cache[npix] = 1.0001;
 
-        // Dump premaration results
+        // If we have a HealPix map then set radius to 180 deg
+        if (m_map.projection()->code() == "HPX") {
+            m_radius = 180.0;
+        }
+
+        // ... otherwise compute map centre and radius
+        else {
+        
+            // Get map centre
+            GSkyPixel centre(m_map.nx()/2.0, m_map.ny()/2.0);
+            m_centre = m_map.pix2dir(centre);
+
+            // Determine map radius
+            for (int i = 0; i < npix; ++i) {
+                double radius = m_map.inx2dir(i).dist_deg(m_centre);
+                if (radius > m_radius) {
+                    m_radius = radius;
+                }
+            }
+
+        } // endelse: computed map centre and radius
+
+        // Dump preparation results
         #if defined(G_DEBUG_PREPARE)
         double sum_control = 0.0;
         for (int i = 0; i < npix; ++i) {

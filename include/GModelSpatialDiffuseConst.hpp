@@ -168,9 +168,9 @@ double GModelSpatialDiffuseConst::norm(const GSkyDir& dir,
  * @param[in] margin Margin to be added to sky direction (degrees)
  * @return True.
  *
- * Signals whether a sky direction falls within the diffuse model. As the
- * constrant model is defined on the entire sphere, the method returns always
- * true.
+ * Signals whether a sky direction falls within the bounding circle of
+ * the diffuse model. As the constant model is defined on the entire sphere,
+ * the method returns always true.
  ***************************************************************************/
 inline
 bool GModelSpatialDiffuseConst::contains(const GSkyDir& dir,

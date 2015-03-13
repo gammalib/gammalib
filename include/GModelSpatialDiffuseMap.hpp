@@ -105,6 +105,8 @@ protected:
     bool                m_normalize;     //!< Normalize map (default: true)
     bool                m_has_normalize; //!< XML has normalize attribute
     double              m_norm;          //!< Map normalization
+    GSkyDir             m_centre;        //!< Centre of bounding circle
+    double              m_radius;        //!< Radius of bounding circle
 };
 
 

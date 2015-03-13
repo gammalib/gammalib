@@ -479,7 +479,8 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
  * @param[in] margin Margin to be added to sky direction (degrees)
  * @return True if the model contains the sky direction.
  *
- * Signals whether a sky direction falls within the diffuse model.
+ * Signals whether a sky direction falls within the bounding circle of
+ * the diffuse cube.
  *
  * @todo To be implemented.
  ***************************************************************************/

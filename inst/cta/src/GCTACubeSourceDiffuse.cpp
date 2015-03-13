@@ -191,6 +191,11 @@ GCTACubeSourceDiffuse* GCTACubeSourceDiffuse::clone(void) const
  * @param[in] model Spatial model.
  * @param[in] obs Observation.
  *
+ * @exception GException::invalid_value
+ *            Event or response cube not available.
+ * @exception GException::invalid_argument
+ *            Spatial model is not of type GModelSpatialDiffuse.
+ *
  * Sets the diffuse source cube assuming no energy dispersion and assuming
  * a negligible variation of the effective area over the size of the
  * point spread function.
@@ -224,6 +229,13 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
         throw GException::invalid_value(G_SET, msg);
     }
 
+    // Get pointer on diffuse model
+    const GModelSpatialDiffuse* spatial = dynamic_cast<const GModelSpatialDiffuse*>(&model);
+    if (spatial == NULL) {
+        std::string msg = "Spatial model is not of type GModelSpatialDiffuse.";
+        throw GException::invalid_argument(G_SET, msg);
+    }
+
     // Get diffuse source attributes
     m_name          = name;
     GTime   obsTime = cube->time();
@@ -236,6 +248,9 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
     double livetime = rsp->exposure().livetime();
     double deadc    = rsp->exposure().deadc();
 
+    // Get Psf radius (in degrees)
+    double delta_max = rsp->psf().delta_max() * gammalib::rad2deg;
+
     // Continue only if livetime is >0
     if (livetime > 0.0)  {
 
@@ -245,40 +260,46 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
             // Get cube pixel sky direction
             GSkyDir obsDir = cube->map().inx2dir(pixel);
 
-            // Loop over all energy layers
-            for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
+            // Continue only if model contains that sky direction
+            if (spatial->contains(obsDir, delta_max)) {
 
-                // Get cube layer energy
-                const GEnergy& obsEng = cube->energy(iebin);
+                // Loop over all energy layers
+                for (int iebin = 0; iebin < cube->ebins(); ++iebin) {
 
-                // Determine exposure. We assume here that the exposure does
-                // not vary significantly over the PSF and just compute it at
-                // the pixel centre. We furthermore assume no energy dispersion,
-                // and thus compute exposure using the observed energy.
-                double aeff = rsp->exposure()(obsDir, obsEng);
+                    // Get cube layer energy
+                    const GEnergy& obsEng = cube->energy(iebin);
 
-                // Continue only if effective area is positive
-                if (aeff > 0.0) {
+                    // Determine exposure. We assume here that the exposure
+                    // does not vary significantly over the PSF and just
+                    // compute it at the pixel centre. We furthermore assume
+                    // no energy dispersion, and thus compute exposure using
+                    // the observed energy.
+                    double aeff = rsp->exposure()(obsDir, obsEng);
 
-                    // Recover effective area from exposure
-                    aeff /= livetime;
+                    // Continue only if effective area is positive
+                    if (aeff > 0.0) {
 
-                    // Compute product of PSF and diffuse map, integrated
-                    // over the relevant PSF area. We assume no energy
-                    // dispersion and thus compute the product using the
-                    // observed energy.
-                    #if defined(G_PSF_INTEGRATE)
-                    double psf = this->psf(rsp, &model, obsDir, obsEng, obsTime);
-                    #else
-                    double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
-                    #endif
+                        // Recover effective area from exposure
+                        aeff /= livetime;
 
-                    // Set cube value
-                    m_cube(pixel, iebin) = aeff * psf * deadc;
+                        // Compute product of PSF and diffuse map, integrated
+                        // over the relevant PSF area. We assume no energy
+                        // dispersion and thus compute the product using the
+                        // observed energy.
+                        #if defined(G_PSF_INTEGRATE)
+                        double psf = this->psf(rsp, &model, obsDir, obsEng, obsTime);
+                        #else
+                        double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
+                        #endif
 
-                } // endif: effective area was positive
+                        // Set cube value
+                        m_cube(pixel, iebin) = aeff * psf * deadc;
 
-            } // endfor: looped over all energy layers
+                    } // endif: effective area was positive
+
+                } // endfor: looped over all energy layers
+
+            } // endif: pixel was contained in model
 
             // Debug option: update statistics
             #if defined(G_DEBUG_SET)
