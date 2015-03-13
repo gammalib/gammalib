@@ -316,11 +316,19 @@ void GSkyRegionCircle::read(const std::string& line)
 	double y      = gammalib::todouble(values[1]);
 	double radius = gammalib::todouble(values[2]);
 
+    // Get radius units
+    if (gammalib::contains(values[2], "'")) {
+        radius /= 60.0;
+    }
+    else if (gammalib::contains(values[2], "\"")) {
+        radius /= 3600.0;
+    }
+
 	// Initialise centre direction
 	GSkyDir centre = GSkyDir();
 
 	// Set the values in the correct system
-	if (system == "fk5") {
+	if (system == "fk5" || system == "icrs") {
 		centre.radec_deg(x,y);
 	}
 	else if (system == "galactic") {
@@ -330,8 +338,8 @@ void GSkyRegionCircle::read(const std::string& line)
         std::string msg =
             "Unsupported coordinate system \""+system+"\" in provided string"
             " \""+line+"\".\n"
-            "Only the following coordinate systems are supported: \"fk5\", "
-            "\"galactic\".";
+            "Only the following coordinate systems are supported: "
+            "\"fk5\", \"icrs\" and \"galactic\".";
 		throw GException::invalid_value(G_READ, msg);
 	}
 

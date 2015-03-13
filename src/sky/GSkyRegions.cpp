@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSkyRegions.cpp - Sky region container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Pierrick Martin                                  *
+ *  copyright (C) 2013-2015 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -658,8 +658,7 @@ bool GSkyRegions::contains(const std::string& name) const
  * @exception GException::file_open_error
  *            File could not be opened.
  *
- * Loads all regions from a DS9 region file. See the read() method for more
- * information about the expected structure of the XML file.
+ * Loads all regions from a DS9 region file.
  ***************************************************************************/
 void GSkyRegions::load(const std::string& filename)
 {
@@ -672,12 +671,12 @@ void GSkyRegions::load(const std::string& filename)
 	if (ds9file.is_open()) {
         
 		// Loop over file lines
-		std::string fileline="";
-		std::string coordsys="galactic";
-        while ( ds9file.good() ) {
+		std::string fileline = "";
+		std::string coordsys = "galactic";
+        while (ds9file.good()) {
 			
 			// Read one line
-			getline (ds9file,fileline);
+			getline(ds9file,fileline);
 			
 			// If line is a comment then continue
 			if (fileline[0] == '#') {
@@ -686,7 +685,10 @@ void GSkyRegions::load(const std::string& filename)
 			
 			// Check for global definition of coordinate system
 			if (std::string::npos != fileline.find("fk5")) {
-				coordsys="fk5";
+				coordsys = "fk5";
+			}
+            else if (std::string::npos != fileline.find("icrs")) {
+				coordsys = "icrs";
 			}
 			
 			// If region is a circle
@@ -697,6 +699,7 @@ void GSkyRegions::load(const std::string& filename)
 
 				// If coordinate system and region defined on the same line
 				if ((std::string::npos != fileline.find("fk5")) ||
+                    (std::string::npos != fileline.find("icrs")) ||
 					(std::string::npos != fileline.find("galactic"))) {
 					region.read(fileline);
 					append(region);
@@ -704,7 +707,7 @@ void GSkyRegions::load(const std::string& filename)
                 
 				// else, prepend the coordinate system
                 else {
-				    std::string newfileline=coordsys;
+				    std::string newfileline = coordsys;
 					newfileline.append("; ");
 					newfileline.append(fileline);
 					region.read(newfileline);
