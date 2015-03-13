@@ -313,7 +313,7 @@ GSkymap& GSkymap::operator=(const double& value)
 
 
 /***********************************************************************//**
- * @brief Addition operator
+ * @brief Map addition operator
  *
  * @param[in] map Sky map.
  * @return Sky map.
@@ -364,7 +364,30 @@ GSkymap& GSkymap::operator+=(const GSkymap& map)
 
 
 /***********************************************************************//**
- * @brief Subtraction operator
+ * @brief Value addition operator
+ *
+ * @param[in] value Value.
+ * @return Sky map.
+ *
+ * Add @p value to all sky map pixels.
+ ***************************************************************************/
+GSkymap& GSkymap::operator+=(const double& value)
+{
+    // Set total number of sky map pixels
+    int num = m_num_pixels * m_num_maps;
+
+    // Loop over all pixels of sky map
+    for (int i = 0; i < num; ++i) {
+        m_pixels[i] += value;
+    }
+
+    // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Map subtraction operator
  *
  * @param[in] map Sky map.
  * @return Sky map.
@@ -412,6 +435,30 @@ GSkymap& GSkymap::operator-=(const GSkymap& map)
     // Return this object
     return *this;
 }
+
+
+/***********************************************************************//**
+ * @brief Value subtraction operator
+ *
+ * @param[in] value Value.
+ * @return Sky map.
+ *
+ * Subtracts @p value from all sky map pixels.
+ ***************************************************************************/
+GSkymap& GSkymap::operator-=(const double& value)
+{
+    // Set total number of sky map pixels
+    int num = m_num_pixels * m_num_maps;
+
+    // Loop over all pixels of sky map
+    for (int i = 0; i < num; ++i) {
+        m_pixels[i] -= value;
+    }
+
+    // Return this object
+    return *this;
+}
+
 
 /***********************************************************************//**
  * @brief Multiplication operator

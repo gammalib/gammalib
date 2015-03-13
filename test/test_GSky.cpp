@@ -860,7 +860,7 @@ void TestGSky::test_GSkymap(void)
         }
     }
     total_dst /= 100.0;
-	test_value(total_dst, total_src, 1.0e-3, "Test operator+(GSkymap)");
+	test_value(total_dst, total_src, 1.0e-3, "Test operator+=(GSkymap)");
 
     // Subtract pixels from destination map
     map_dst -= map_src;
@@ -873,7 +873,7 @@ void TestGSky::test_GSkymap(void)
             total_dst += map_dst(pix,k);
         }
     }
-	test_value(total_dst, 0.0, 1.0e-3, "Test operator-(GSkymap)");
+	test_value(total_dst, 0.0, 1.0e-3, "Test operator-=(GSkymap)");
 
     // Check map multiplication
     GSkymap test_map  = map_src;
@@ -886,7 +886,7 @@ void TestGSky::test_GSkymap(void)
             total_ref  += map_src(pix,k) * map_src(pix,k);
         }
     }
-	test_value(total_test, total_ref, 1.0e-3, "Test operator*(GSkymap)");
+	test_value(total_test, total_ref, 1.0e-3, "Test operator*=(GSkymap)");
 
     // Check map division
     test_map   = map_src;
@@ -899,7 +899,7 @@ void TestGSky::test_GSkymap(void)
             total_ref  += map_src(pix,k) / map_src(pix,k);
         }
     }
-	test_value(total_test, total_ref, 1.0e-3, "Test operator/(GSkymap)");
+	test_value(total_test, total_ref, 1.0e-3, "Test operator/=(GSkymap)");
 
     // Check map scaling
     test_map   = map_src;
@@ -910,7 +910,7 @@ void TestGSky::test_GSkymap(void)
             total_test += test_map(pix,k);
         }
     }
-	test_value(total_test, total_src*3.3, 1.0e-3, "Test operator*(double)");
+	test_value(total_test, total_src*3.3, 1.0e-3, "Test operator*=(double)");
 
     // Check map division
     test_map   = map_src;
@@ -921,7 +921,31 @@ void TestGSky::test_GSkymap(void)
             total_test += test_map(pix,k);
         }
     }
-	test_value(total_test, total_src/3.3, 1.0e-3, "Test operator/(double)");
+	test_value(total_test, total_src/3.3, 1.0e-3, "Test operator/=(double)");
+
+    // Check map value addition
+    test_map   = map_src;
+    test_map  += 3.3;
+    total_test = 0.0;
+    double ref = total_src + 3.3*test_map.npix()*test_map.nmaps();
+    for (int pix = 0; pix < test_map.npix(); ++pix) {
+        for (int k = 0; k < test_map.nmaps(); ++k) {
+            total_test += test_map(pix,k);
+        }
+    }
+	test_value(total_test, ref, 1.0e-3, "Test operator+=(double)");
+
+    // Check map value subtraction
+    test_map   = map_src;
+    test_map  -= 3.3;
+    total_test = 0.0;
+    ref        = total_src - 3.3*test_map.npix()*test_map.nmaps();
+    for (int pix = 0; pix < test_map.npix(); ++pix) {
+        for (int k = 0; k < test_map.nmaps(); ++k) {
+            total_test += test_map(pix,k);
+        }
+    }
+	test_value(total_test, ref, 1.0e-3, "Test operator-=(double)");
 
     // Save maps
     map_src.save("test_map_src.fits", true);
