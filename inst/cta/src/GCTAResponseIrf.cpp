@@ -614,6 +614,28 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
         // Load response
         this->load(xml_rspname);
 
+        // If there is a sigma attribute then set sigma values of Aeff and
+        // Background
+        if (par->has_attribute("sigma")) {
+
+            // Get sigma value
+            double sigma = gammalib::todouble(par->attribute("sigma"));
+
+            // If we have an effective area performance table then set sigma
+            // value
+            GCTAAeffPerfTable* perf = const_cast<GCTAAeffPerfTable*>(dynamic_cast<const GCTAAeffPerfTable*>(aeff()));
+            if (perf != NULL) {
+                perf->sigma(sigma);
+            }
+
+            // If we have a background performance table then set sigma value
+            GCTABackgroundPerfTable* bgm = const_cast<GCTABackgroundPerfTable*>(dynamic_cast<const GCTABackgroundPerfTable*>(background()));
+            if (bgm != NULL) {
+                bgm->sigma(sigma);
+            }
+
+        } // endif: sigma attribute specified
+
         // Store database and response names (we do this now since the
         // load() method results the object, except of the calibration
         // database)
@@ -646,21 +668,18 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
                 double sigma    = 3.0;
 
                 // Optionally extract thetacut (0.0 if no thetacut)
-                std::string s_thetacut = par->attribute("thetacut");
-                if (s_thetacut.length() > 0) {
-                    thetacut = gammalib::todouble(s_thetacut);
+                if (par->has_attribute("thetacut")) {
+                    thetacut = gammalib::todouble(par->attribute("thetacut"));
                 }
 
                 // Optionally extract scale factor (1.0 if no scale)
-                std::string s_scale = par->attribute("scale");
-                if (s_scale.length() > 0) {
-                    scale = gammalib::todouble(s_scale);
+                if (par->has_attribute("scale")) {
+                    scale = gammalib::todouble(par->attribute("scale"));
                 }
 
                 // Optionally extract sigma (3.0 if no sigma)
-                std::string s_sigma = par->attribute("sigma");
-                if (s_sigma.length() > 0) {
-                    sigma = gammalib::todouble(s_sigma);
+                if (par->has_attribute("sigma")) {
+                    sigma = gammalib::todouble(par->attribute("sigma"));
                 }
 
                 // If we have an ARF then set attributes
@@ -731,9 +750,8 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
             double sigma = 3.0;
 
             // Optionally extract sigma (3.0 if no sigma)
-            std::string s_sigma = par->attribute("sigma");
-            if (s_sigma.length() > 0) {
-                sigma = gammalib::todouble(s_sigma);
+            if (par->has_attribute("sigma")) {
+                sigma = gammalib::todouble(par->attribute("sigma"));
             }
 
             // If we have a performance table then set attributes
