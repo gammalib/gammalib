@@ -574,6 +574,8 @@ std::string GCTACubeExposure::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Livetime"));
+        result.append(gammalib::str(m_livetime)+" sec");
 
         // Append energy intervals
         if (m_ebounds.size() > 0) {

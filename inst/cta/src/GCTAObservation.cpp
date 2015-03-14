@@ -345,7 +345,9 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  * @param[in] psfcube PSF cube.
  *
  * Sets the CTA response function fur cube analysis by specifying the
- * exposure cube and the PSF cube.
+ * exposure cube and the PSF cube. The method also copies over the ontime,
+ * the livetime and the deadtime correction factor from the exposure
+ * cube.
  ***************************************************************************/
 void GCTAObservation::response(const GCTACubeExposure& expcube,
                                const GCTACubePsf&      psfcube)
@@ -359,6 +361,11 @@ void GCTAObservation::response(const GCTACubeExposure& expcube,
 
     // Store pointer
     m_response = rsp;
+
+    // Copy over time information from exposure cube
+    ontime(expcube.ontime());
+    livetime(expcube.livetime());
+    deadc(expcube.deadc());
 
     // Return
     return;
