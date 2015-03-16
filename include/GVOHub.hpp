@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GVOHub.hpp - VO SAMP Hub class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Thierry Louge                                    *
+ *  copyright (C) 2014-2015 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,23 +68,28 @@ protected:
     void        init_members(void);
     void        copy_members(const GVOHub& client);
     void        free_members(void);
-    void	init_hub(void);
+    void        init_hub(void);
     void        start_hub(void);
     void        register_service(const GXml& xml,const socklen_t& sock);
     void        ping_service(const socklen_t& sock);
     void        unregister(const socklen_t& sock);
-    void 	handle_request(const socklen_t& sock);
+    void        handle_request(const socklen_t& sock);
     void        register_metadata(const GXml& xml,const socklen_t& sock);
     void        declare_subscriptions(const GXml& xml,const socklen_t& sock);
-    // Low-level methods
-    void        post_string(const std::string& string) const;
-    std::string receive_string(void) const;
-    std::string get_response_value(const GXml& xml, const std::string& name) const;
-    std::list<std::string> get_registrations(const GXml& xml, const std::string& name) const;
-    void        get_name_value_pair(const GXmlNode* node, std::string& name, std::string& value) const;
-    std::string get_hub_lockfile(void) const;
 
-    // Protected data area
+    // Low-level methods
+    void                   post_string(const std::string& string) const;
+    std::string            receive_string(void) const;
+    std::string            get_response_value(const GXml& xml,
+                                              const std::string& name) const;
+    std::list<std::string> get_registrations(const GXml& xml,
+                                             const std::string& name) const;
+    void                   get_name_value_pair(const GXmlNode* node,
+                                               std::string& name,
+                                               std::string& value) const;
+    std::string            get_hub_lockfile(void) const;
+
+    // Protected members
     std::string m_name;        //!< Client name
     std::string m_secret;      //!< Secret Hub key
     std::string m_hub_url;     //!< The XML-RPC endpoint for communication with the hub
@@ -94,8 +99,8 @@ protected:
     std::string m_client_key;  //!< Private client key
     std::string m_hub_id;      //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
     int         m_socket;      //!< Hub socket
-    int 	m_nb_clients;  //!< Number of already registered clients
-    std::list<GVOApp*> m_connected_apps; //!< list of apps connected to the hub
+    int         m_nb_clients;  //!< Number of already registered clients
+    std::list<GVOApp> m_connected_apps; //!< list of apps connected to the hub
 };
 
 #endif /* GVOHUB_HPP */
