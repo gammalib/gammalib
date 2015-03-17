@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOHub.hpp - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Thierry Louge                                    *
+ *  copyright (C) 2014-2015 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -228,11 +228,21 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     char buffer[124];
     char privatekey[124];
     int i;
-    std::list<GVOApp*>::iterator q;
+    std::list<GVOApp>::iterator q;
     std::string content;
     std::string translator = "http://localhost:8001/";
     printf("Message composition\n");
-    
+
+    // Add application
+    GVOApp new_app;
+    sprintf(new_app.m_id,"client-key:%d", m_nb_clients);
+std::cout << "Nb. of current applications registered:" << std::endl;
+std::cout << m_connected_apps.size()<< std::endl;
+    m_connected_apps.push_front(new_app);
+std::cout << "Nb. of current applications registered:" << std::endl;
+std::cout << m_connected_apps.size()<< std::endl;
+
+    /*
     GVOApp* new_app = new GVOApp();
     sprintf(new_app -> m_id,"client-key:%d",m_nb_clients);
     std::cout<< "Nb. of current applications registered:" << std::endl;
@@ -241,10 +251,17 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     std::cout<< new_app->m_id << std::endl;
     std::cout<< "Nb. of current applications registered:" << std::endl;
     std::cout<< m_connected_apps.size()<< std::endl;
-    
+    */
+
+    /*
+    for (int i = 0; i < m_connected_apps.size(); ++i) {
+      std::cout << "Displaying element of applications list:" << std::endl;
+      std::cout << m_connected_apps[i].print() << std::endl;
+    }
+    */
     for( i=0,q=m_connected_apps.begin(); i<m_connected_apps.size(); i++,q++ ) {
       std::cout << "Displaying element of applications list:" << std::endl;
-      content = (*q)->print();
+      content = (q)->print();
       std::cout << content << std::endl;
     }
     
@@ -341,7 +358,7 @@ void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
 void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
 {
     std::list<std::string>::iterator p;
-    std::list<GVOApp*>::iterator q;
+    std::list<GVOApp>::iterator q;
     int i;
     std::ofstream myfile;
     std::string content;
@@ -372,7 +389,7 @@ void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
     std::cout<< m_connected_apps.size()<< std::endl;
     for( i=0,q=m_connected_apps.begin(); i<m_connected_apps.size(); i++,q++ ) {
       std::cout << "Displaying element of applications list:" << std::endl;
-      content = (*q)->print();
+      content = (q)->print();
       std::cout << content << std::endl;
     }
     
@@ -460,17 +477,19 @@ std::string GVOHub::print(const GChatter& chatter) const
 void GVOHub::init_members(void)
 {
     // Initialise members
-    m_name     = "GammaLib";
-    m_secret   = "mysupersecret#0032557sentence";
-    m_hub_url  = "http://localhost:8001";
-    m_hub_host = "127.0.0.1";
-    m_hub_port = "8001";
-    m_version  = "1.3";
+    m_name       = "GammaLib";
+    m_secret     = "mysupersecret#0032557sentence";
+    m_hub_url    = "http://localhost:8001";
+    m_hub_host   = "127.0.0.1";
+    m_hub_port   = "8001";
+    m_version    = "1.3";
     m_client_key.clear();
-    m_hub_id   = "b79884e0";
+    m_hub_id     = "b79884e0";
     //m_client_id.clear();
-    m_socket   = -1;         // Signals no socket
-    m_nb_clients = 0;	    //  No registered clients at initialization
+    m_socket     = -1;        // Signals no socket
+    m_nb_clients = 0;	      //  No registered clients at initialization
+    m_connected_apps.clear();
+    
     // Return
     return;
 }
@@ -484,16 +503,17 @@ void GVOHub::init_members(void)
 void GVOHub::copy_members(const GVOHub& hub)
 {
     // Copy members
-    m_name       = hub.m_name;
-    m_secret     = hub.m_secret;
-    m_hub_url    = hub.m_hub_url;
-    m_hub_host   = hub.m_hub_host;
-    m_hub_port   = hub.m_hub_port;
-    m_version    = hub.m_version;
-    m_client_key = hub.m_client_key;
-    m_hub_id     = hub.m_hub_id;
-    //m_client_id  = hub.m_client_id;
-    m_socket     = hub.m_socket;
+    m_name           = hub.m_name;
+    m_secret         = hub.m_secret;
+    m_hub_url        = hub.m_hub_url;
+    m_hub_host       = hub.m_hub_host;
+    m_hub_port       = hub.m_hub_port;
+    m_version        = hub.m_version;
+    m_client_key     = hub.m_client_key;
+    m_hub_id         = hub.m_hub_id;
+    //m_client_id      = hub.m_client_id;
+    m_socket         = hub.m_socket;
+    m_connected_apps = hub.m_connected_apps;
 
     // Return
     return;
@@ -715,7 +735,7 @@ void GVOHub::start_hub(void)
 {
     struct sockaddr_in serv_addr,cli_addr;
     int max_sd, portno,pid,max_clients = 10, i,activity,addrlen;
-    socklen_t hub_socket,newsocket,sockfd,clilen, client_socket[10];
+    socklen_t sockfd, client_socket[10];
     int opt = 1;
     // Prepare TCP/IP structure
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -727,48 +747,46 @@ void GVOHub::start_hub(void)
     //set of socket descriptors
     fd_set readfds;
     
-    //initialise all client_socket[] to 0 so not checked
-    for (i = 0; i < max_clients; i++)
-    {
+    // Initialise all client_socket[] to 0 so not checked
+    for (i = 0; i < max_clients; ++i) {
         client_socket[i] = 0;
     }
+
+    // ...
+    socklen_t hub_socket = socket(AF_INET, SOCK_STREAM, 0);
     
-    hub_socket                = socket(AF_INET, SOCK_STREAM, 0);
-    
-    //Creation of hub main socket
+    // Creation of hub main socket
     if (hub_socket < 0) {
-        std::string msg = "Socket could not be created.";
+        std::string msg = "Hub socket could not be created.";
         throw GException::invalid_value(G_START_HUB, msg);
     }
     
-    //set hub main socket to allow multiple connections
-    if( setsockopt(hub_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 )
-    {
-        std::string msg = "Socket could not be set to multiple connetcions.";
+    // Set hub main socket to allow multiple connections
+    if (setsockopt(hub_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0) {
+        std::string msg = "Hub socket could not be set to multiple connections.";
         throw GException::invalid_value(G_START_HUB, msg);
     }
     
     // Server socket is opened. Now, bind it to the port, with family etc.
     if (bind(hub_socket, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
-        std::string msg = "Could not bind to server socket.";
+        std::string msg = "Hub hub socket could not bind to server socket.";
         throw GException::invalid_value(G_START_HUB, msg);
     }
 
     // Now start listening for the clients: 5 requests simultaneously pending maximum
-    if (listen(hub_socket,5) < 0)
-    {
-	std::string msg = "Main hub socket couldn't start litening";
+    if (listen(hub_socket, 5) < 0) {
+        std::string msg = "Hub socket could not start listening.";
         throw GException::invalid_value(G_START_HUB, msg);
     }
-     
-    clilen = sizeof(cli_addr);
-      
+
+    // ...
+    socklen_t clilen = sizeof(cli_addr);
+
+    // Main event handling loop
     while (1) {
-      
         
     	// Accept connection from the client 
-
-    	newsocket = accept(hub_socket, (struct sockaddr *)&cli_addr, &clilen);
+    	socklen_t newsocket = accept(hub_socket, (struct sockaddr *)&cli_addr, &clilen);
     	if (newsocket < 0) {
             std::string msg = "Client connection to socket not accepted.";
             throw GException::invalid_value(G_START_HUB, msg);
@@ -776,9 +794,8 @@ void GVOHub::start_hub(void)
 
     	// Create child process to handle the request
         pid = fork();
-
         if (pid < 0) {
-            std::string msg = "Not child process created.";
+            std::string msg = "No child process created.";
             throw GException::invalid_value(G_START_HUB, msg);
         }
         if (pid == 0) {
@@ -787,16 +804,17 @@ void GVOHub::start_hub(void)
             exit(0);
         }
         else {
-
             close(newsocket);
 
         }
 
-    }
+    } // endwhile
 
     // Return
     return;
 }
+
+
 /***********************************************************************//**
  * @brief Returns value for a SAMP client query parameter
  *
