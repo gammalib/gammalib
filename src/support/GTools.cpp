@@ -636,7 +636,7 @@ std::vector<std::string> gammalib::split(const std::string& s,
         if (index != std::string::npos) {
             n = index-pos;
         }
-        if (n == 0) {
+        if (sep != " " && n == 0) {
             result.push_back("");
         }
         else if (n > 0) {
