@@ -95,7 +95,7 @@ protected:
     std::string m_hub_id;      //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
     int         m_socket;      //!< Hub socket
     int 	m_nb_clients;  //!< Number of already registered clients
-    std::list<GVOApp*> m_connected_apps; //!< list of apps connected to the hub
+    static std::list<GVOApp*> m_connected_apps; //!< list of apps connected to the hub
 };
 
 #endif /* GVOHUB_HPP */
