@@ -65,7 +65,7 @@ void TestGModel::set(void)
     m_xml_model_radial_gauss      = "data/model_radial_gauss.xml";
     m_xml_model_radial_shell      = "data/model_radial_shell.xml";
     m_xml_model_elliptical_disk   = "data/model_elliptical_disk.xml";
-    m_xml_model_elliptical_gauss   = "data/model_elliptical_gauss.xml";
+    m_xml_model_elliptical_gauss  = "data/model_elliptical_gauss.xml";
 
     // Append tests
     append(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
@@ -1178,16 +1178,16 @@ void TestGModel::test_elliptical_gauss(void)
     test_try("Test XML constructor, value and gradients");
     try {
         // Test XML constructor
-        GXml                        xml(m_xml_model_elliptical_gauss);
-        GXmlElement*                element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GXml                         xml(m_xml_model_elliptical_gauss);
+        GXmlElement*                 element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialEllipticalGauss model(*element);
         test_value(model.size(), 5);
         test_assert(model.type() == "EllipticalGauss", "Expected \"EllipticalGauss\"");
         test_value(model.ra(), 83.6331);
         test_value(model.dec(), 22.0145);
         test_value(model.posangle(), 45.0);
-        test_value(model.semimajor(), 2.0);
-        test_value(model.semiminor(), 0.5);
+        test_value(model.semimajor(), 0.3);
+        test_value(model.semiminor(), 0.1);
 
         // Test ra method
         model.ra(100.0);
