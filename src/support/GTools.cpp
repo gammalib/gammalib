@@ -618,6 +618,18 @@ std::string gammalib::tolower(const std::string& arg)
  *
  * @param[in] s String to be splitted.
  * @param[in] sep Separator(s).
+ *
+ * Splits a string on the basis of one or multiple separator characters. The
+ * separator characters are provided by the @p sep argument. Subsequent
+ * separator characters that are not seperated by some other characters will
+ * lead to an empty string element, except for a blank separator where
+ * subsequent blanks are takens as a single separator. Below a few examples
+ * that illustrate how the function will split a given string.
+ *
+ *     "Name;RA;DEC" => ["Name","RA","DEC"] (sep=";")
+ *     "My house is    red" => ["My","house","is","red"] (sep=" ")
+ *     "IRF::FRONT" => ["IRF","","FRONT"] (sep=":")
+ *     "Fields;RA,DEC,Flux" => ["Fields","RA","DEC","Flux"] (sep=";,")
  ***************************************************************************/
 std::vector<std::string> gammalib::split(const std::string& s,
                                          const std::string& sep)
@@ -636,7 +648,10 @@ std::vector<std::string> gammalib::split(const std::string& s,
         if (index != std::string::npos) {
             n = index-pos;
         }
-        if (n > 0) {
+        if (sep != " " && n == 0) {
+            result.push_back("");
+        }
+        else if (n > 0) {
             result.push_back(s.substr(pos, n));
         }
         pos = (index != std::string::npos) ? index + 1 : std::string::npos;

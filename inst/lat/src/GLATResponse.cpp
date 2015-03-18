@@ -536,22 +536,22 @@ void GLATResponse::load(const std::string& rspname)
     m_caldb = caldb;
 
     // Determine response types to be loaded
-    std::vector<std::string> array = gammalib::split(rspname, "::");
+    std::vector<std::string> array = gammalib::split(rspname, ":");
     if (array.size() == 1) {
         m_rspname  = array[0];
         m_has_front = true;
         m_has_back  = true;
     }
-    else if (array.size() == 2) {
+    else if (array.size() == 3) {
         m_rspname = array[0];
-        if (gammalib::strip_whitespace(gammalib::tolower(array[1])) == "front") {
+        if (gammalib::strip_whitespace(gammalib::tolower(array[2])) == "front") {
             m_has_front = true;
         }
-        else if (gammalib::strip_whitespace(gammalib::tolower(array[1])) == "back") {
+        else if (gammalib::strip_whitespace(gammalib::tolower(array[2])) == "back") {
             m_has_back  = true;
         }
         else {
-            throw GException::rsp_invalid_type(G_LOAD, array[1]);
+            throw GException::rsp_invalid_type(G_LOAD, array[2]);
         }
     }
     else {

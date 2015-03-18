@@ -754,13 +754,16 @@ std::string GEnergy::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append energy
-        if (GeV() > 1000.0) {
+        if (TeV() >= 1000.0) {
+            result.append(gammalib::str(TeV()/1000.0)+" PeV");
+        }
+        else if (GeV() >= 1000.0) {
             result.append(gammalib::str(TeV())+" TeV");
         }
-        else if (MeV() > 1000.0) {
+        else if (MeV() >= 1000.0) {
             result.append(gammalib::str(GeV())+" GeV");
         }
-        else if (keV() > 1000.0) {
+        else if (keV() >= 1000.0) {
             result.append(gammalib::str(MeV())+" MeV");
         }
         else {
