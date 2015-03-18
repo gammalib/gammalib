@@ -183,7 +183,7 @@ std::string GVOApp::print(const GChatter& chatter) const
     // Initialise result string
     std::string result;
     std::list<std::string> temp;
-    temp = registered_calls;
+    temp = registeredMethods;
     
     // Continue only if chatter is not silent
     if (chatter != SILENT) {

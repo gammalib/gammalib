@@ -75,6 +75,8 @@ protected:
     void        unregister(const socklen_t& sock);
     void        handle_request(const socklen_t& sock);
     void        register_metadata(const GXml& xml,const socklen_t& sock);
+    void        set_xml_rpc_callback(const GXml& xml,const socklen_t& sock);
+    void        get_registered_clients(const GXml& xml,const socklen_t& sock);
     void        declare_subscriptions(const GXml& xml,const socklen_t& sock);
 
     // Low-level methods
@@ -83,6 +85,8 @@ protected:
     std::string            get_response_value(const GXml& xml,
                                               const std::string& name) const;
     std::list<std::string> get_registrations(const GXml& xml,
+                                             const std::string& name) const;
+    std::string get_callback_port(const GXml& xml,
                                              const std::string& name) const;
     void                   get_name_value_pair(const GXmlNode* node,
                                                std::string& name,
@@ -99,13 +103,11 @@ protected:
     std::string m_client_key;  //!< Private client key
     std::string m_hub_id;      //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
     int         m_socket;      //!< Hub socket
-<<<<<<< HEAD
-    int 	m_nb_clients;  //!< Number of already registered clients
-    static std::list<GVOApp*> m_connected_apps; //!< list of apps connected to the hub
-=======
     int         m_nb_clients;  //!< Number of already registered clients
-    std::list<GVOApp> m_connected_apps; //!< list of apps connected to the hub
->>>>>>> dab81eb3c037358cd6c4dc35ed8cc4e35a5646c0
+    static std::vector<GVOApp>& connected() {
+      static std::vector<GVOApp> m_connected_apps; //!< list of apps connected to the hub
+      return m_connected_apps;
+    }
 };
 
 #endif /* GVOHUB_HPP */

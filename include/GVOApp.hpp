@@ -77,8 +77,8 @@ protected:
     // Protected data area
     std::string             m_name;           //!< Client name
     char m_id[32];             //!< Id assigned to client by the hub
-    std::list <std::string> registered_calls; //!< Calls for which is registered the application.
-    std::list<std::string>::iterator iterator_calls;
+    std::list <std::string> registeredMethods; //!< Calls for which is registered the application.
+    //std::list<std::string>::iterator iterator_calls;
     
 };
 
