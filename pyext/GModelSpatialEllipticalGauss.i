@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GModelSpatialEllipticalGauss.i - Elliptical gauss source model class *
+ *   GModelSpatialEllipticalGauss.i - Elliptical gauss source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2015 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,36 +35,37 @@
  * @brief Elliptical gauss model class
  ***************************************************************************/
 class GModelSpatialEllipticalGauss : public GModelSpatialElliptical {
+
 public:
     // Constructors and destructors
     GModelSpatialEllipticalGauss(void);
-    explicit GModelSpatialEllipticalGauss(const GSkyDir& dir,
-                                         const double&  semiminor,
-                                         const double&  semimajor,
-                                         const double&  posangle);
+    GModelSpatialEllipticalGauss(const GSkyDir& dir,
+                                 const double&  semiminor,
+                                 const double&  semimajor,
+                                 const double&  posangle);
     explicit GModelSpatialEllipticalGauss(const GXmlElement& xml);
     GModelSpatialEllipticalGauss(const GModelSpatialEllipticalGauss& model);
     virtual ~GModelSpatialEllipticalGauss(void);
 
     // Implemented pure virtual base class methods
-    virtual void                         clear(void);
+    virtual void                          clear(void);
     virtual GModelSpatialEllipticalGauss* clone(void) const;
-    virtual std::string                  classname(void) const;
-    virtual std::string                  type(void) const;
-    virtual double                       eval(const double&  theta,
-                                              const double&  posangle,
-                                              const GEnergy& energy,
-                                              const GTime&   time) const;
-    virtual double                       eval_gradients(const double&  theta,
-                                                        const double&  posangle,
-                                                        const GEnergy& energy,
-                                                        const GTime&   time) const;
-    virtual GSkyDir                      mc(const GEnergy& energy,
-                                            const GTime& time,
-                                            GRan& ran) const;
-    virtual double                       theta_max(void) const;
-    virtual void                         read(const GXmlElement& xml);
-    virtual void                         write(GXmlElement& xml) const;
+    virtual std::string                   classname(void) const;
+    virtual std::string                   type(void) const;
+    virtual double                        eval(const double&  theta,
+                                               const double&  posangle,
+                                               const GEnergy& energy,
+                                               const GTime&   time) const;
+    virtual double                        eval_gradients(const double&  theta,
+                                                         const double&  posangle,
+                                                         const GEnergy& energy,
+                                                         const GTime&   time) const;
+    virtual GSkyDir                       mc(const GEnergy& energy,
+                                             const GTime& time,
+                                             GRan& ran) const;
+    virtual double                        theta_max(void) const;
+    virtual void                          read(const GXmlElement& xml);
+    virtual void                          write(GXmlElement& xml) const;
 };
 
 

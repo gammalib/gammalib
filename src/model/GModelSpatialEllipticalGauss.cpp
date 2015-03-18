@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GModelSpatialEllipticalGauss.cpp - Elliptical gauss source model class  *
+ *  GModelSpatialEllipticalGauss.cpp - Elliptical gauss source model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2015 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,11 +39,11 @@
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialEllipticalGauss g_elliptical_gauss_seed;
-const GModelSpatialRegistry       g_elliptical_gauss_registry(&g_elliptical_gauss_seed);
+const GModelSpatialRegistry g_elliptical_gauss_registry(&g_elliptical_gauss_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ              "GModelSpatialEllipticalGauss::read(GXmlElement&)"
-#define G_WRITE            "GModelSpatialEllipticalGauss::write(GXmlElement&)"
+#define G_READ             "GModelSpatialEllipticalGauss::read(GXmlElement&)"
+#define G_WRITE           "GModelSpatialEllipticalGauss::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -62,7 +62,7 @@ const GModelSpatialRegistry       g_elliptical_gauss_registry(&g_elliptical_gaus
  * @brief Void constructor
  ***************************************************************************/
 GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(void) :
-                             GModelSpatialElliptical()
+                              GModelSpatialElliptical()
 {
     // Initialise members
     init_members();
@@ -73,7 +73,7 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(void) :
 
 
 /***********************************************************************//**
- * @brief Gauss constructor
+ * @brief Elliptical Gauss constructor
  *
  * @param[in] dir Sky position of gauss centre.
  * @param[in] semimajor Semi-major axis (degrees).
@@ -85,10 +85,10 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(void) :
  * angle (@p posangle).
  ***************************************************************************/
 GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GSkyDir& dir,
-                                                         const double&  semimajor,
-                                                         const double&  semiminor,
-                                                         const double&  posangle) :
-                             GModelSpatialElliptical()
+                                                           const double&  semimajor,
+                                                           const double&  semiminor,
+                                                           const double&  posangle) :
+                              GModelSpatialElliptical()
 {
     // Initialise members
     init_members();
@@ -114,7 +114,7 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GSkyDir& dir,
  * structure of the XML element.
  ***************************************************************************/
 GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GXmlElement& xml) :
-                             GModelSpatialElliptical()
+                              GModelSpatialElliptical()
 {
     // Initialise members
     init_members();
@@ -133,7 +133,7 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GXmlElement& xm
  * @param[in] model Elliptical gauss model.
  ***************************************************************************/
 GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GModelSpatialEllipticalGauss& model) :
-                             GModelSpatialElliptical(model)
+                              GModelSpatialElliptical(model)
 {
     // Initialise members
     init_members();
@@ -282,9 +282,9 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  * (see the update() method).
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
-                                         const double&  posangle,
-                                         const GEnergy& energy,
-                                         const GTime&   time) const
+                                          const double&  posangle,
+                                          const GEnergy& energy,
+                                          const GTime&   time) const
 {
     // Initialise value
     double value = 0.0;
@@ -347,9 +347,9 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
  * See the eval() method for more information.
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
-                                                   const double&  posangle,
-                                                   const GEnergy& energy,
-                                                   const GTime&   time) const
+                                                    const double&  posangle,
+                                                    const GEnergy& energy,
+                                                    const GTime&   time) const
 {
     // Return value
     return (eval(theta, posangle, energy, time));
@@ -365,16 +365,15 @@ double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
  * @return Sky direction.
  *
  * Draws an arbitrary sky position from the 2D gauss distribution.
- *
  ***************************************************************************/
 GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
-                                        const GTime&   time,
-                                        GRan&          ran) const
+                                         const GTime&   time,
+                                         GRan&          ran) const
 {
     // Update precomputation cache
-	update();
+    update();
 
-	// Initialise photon
+    // Initialise photon
     GPhoton photon;
     photon.energy(energy);
     photon.time(time);
@@ -394,11 +393,10 @@ GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
     sky_dir.rotate_deg(phi , theta);
 
     // Set photon sky direction
-   photon.dir(sky_dir);
+    photon.dir(sky_dir);
 
-   // Return photon direction
+    // Return photon direction
     return (photon.dir());
-
 }
 
 
@@ -640,21 +638,21 @@ void GModelSpatialEllipticalGauss::init_members(void)
 {
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius is not meaningful
-    m_last_minor = 0.0;
-    m_last_major = 0.0;
-    m_minor_rad  = 0.0;
-    m_major_rad  = 0.0;
-    m_norm           = 0.0;
-    m_last_posangle = 0.0;
+    m_last_minor        = 0.0;
+    m_last_major        = 0.0;
+    m_minor_rad         = 0.0;
+    m_major_rad         = 0.0;
+    m_norm              = 0.0;
+    m_last_posangle     = 0.0;
     m_last_posangle_rad = 0.0;
-    m_sin2pos = 0.0;
-    m_cospos2 = 0.0;
-    m_sinpos2 = 0.0;
-    m_minor2 = 0.0;
-    m_major2 = 0.0;
-    m_term1 = 0.0;
-    m_term2 = 0.0;
-    m_term3 = 0.0;
+    m_sin2pos           = 0.0;
+    m_cospos2           = 0.0;
+    m_sinpos2           = 0.0;
+    m_minor2            = 0.0;
+    m_major2            = 0.0;
+    m_term1             = 0.0;
+    m_term2             = 0.0;
+    m_term3             = 0.0;
 
     // Return
     return;
@@ -665,29 +663,25 @@ void GModelSpatialEllipticalGauss::init_members(void)
  * @brief Copy class members
  *
  * @param[in] model Elliptical gauss model.
- *
- * We do not have to push back the members on the parameter stack as this
- * should have been done by init_members() that was called before. Otherwise
- * we would have the radius twice on the stack.
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGauss& model)
 {
     // Copy precomputation cache
-    m_last_minor = model.m_last_minor;
-    m_last_major = model.m_last_major;
-    m_minor_rad  = model.m_minor_rad;
-    m_major_rad  = model.m_major_rad;
-    m_norm           = model.m_norm;
-    m_last_posangle = model.m_last_posangle;
+    m_last_minor        = model.m_last_minor;
+    m_last_major        = model.m_last_major;
+    m_minor_rad         = model.m_minor_rad;
+    m_major_rad         = model.m_major_rad;
+    m_norm              = model.m_norm;
+    m_last_posangle     = model.m_last_posangle;
     m_last_posangle_rad = model.m_last_posangle_rad;
-    m_sin2pos = model.m_sin2pos;
-    m_cospos2 = model.m_cospos2;
-    m_sinpos2 = model.m_sinpos2;
-    m_minor2 = model.m_minor2;
-    m_major2 = model.m_major2;
-    m_term1 = model.m_term1;
-    m_term2 = model.m_term2;
-    m_term3 =model.m_term3;
+    m_sin2pos           = model.m_sin2pos;
+    m_cospos2           = model.m_cospos2;
+    m_sinpos2           = model.m_sinpos2;
+    m_minor2            = model.m_minor2;
+    m_major2            = model.m_major2;
+    m_term1             = model.m_term1;
+    m_term2             = model.m_term2;
+    m_term3             = model.m_term3;
 
     // Return
     return;
@@ -734,11 +728,9 @@ void GModelSpatialEllipticalGauss::update() const
         m_major_rad = m_last_major * gammalib::deg2rad;
 
         // Perform precomputations
-        m_minor2 = m_minor_rad * m_minor_rad;
-        m_major2 = m_major_rad * m_major_rad;
-
+        m_minor2     = m_minor_rad * m_minor_rad;
+        m_major2     = m_major_rad * m_major_rad;
         double denom = gammalib::twopi * m_minor_rad * m_major_rad;
-
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
