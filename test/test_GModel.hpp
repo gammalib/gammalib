@@ -57,6 +57,7 @@ public:
     void                test_radial_gauss(void);
     void                test_radial_shell(void);
     void                test_elliptical_disk(void);
+    void                test_elliptical_gauss(void);
     void                test_spatial_model(void);
     void                test_const(void);
     void                test_gauss(void);
@@ -99,6 +100,7 @@ private:
     std::string m_xml_model_radial_gauss;
     std::string m_xml_model_radial_shell;
     std::string m_xml_model_elliptical_disk;
+    std::string m_xml_model_elliptical_gauss;
 };
 
 #endif /* TEST_GMODEL_HPP */
