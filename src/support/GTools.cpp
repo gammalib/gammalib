@@ -630,6 +630,7 @@ std::string gammalib::tolower(const std::string& arg)
  *     "My house is    red" => ["My","house","is","red"] (sep=" ")
  *     "IRF::FRONT" => ["IRF","","FRONT"] (sep=":")
  *     "Fields;RA,DEC,Flux" => ["Fields","RA","DEC","Flux"] (sep=";,")
+ *     "Last;Field;" => ["Last","Field",""] (sep=";")
  ***************************************************************************/
 std::vector<std::string> gammalib::split(const std::string& s,
                                          const std::string& sep)
@@ -639,22 +640,43 @@ std::vector<std::string> gammalib::split(const std::string& s,
 
     // Initialise counters
     std::size_t pos = 0;
-    std::size_t len = s.size();
+    std::size_t len = s.length();
 
     // Loop over string
     while (pos < len && pos != std::string::npos) {
+
+        // Get index of first separator occurence and preset the length
+        // of the substring to the end of the string
         std::size_t index = s.find_first_of(sep, pos);
         std::size_t n     = std::string::npos;
+
+        // If we did not reach the end then compute now the length of the
+        // substring
         if (index != std::string::npos) {
             n = index-pos;
         }
+
+        // If we have no whitespace separator and the length of the
+        // substring is zero then push back an empty string. If the
+        // length of the substring is positive then push back the
+        // substring.
         if (sep != " " && n == 0) {
             result.push_back("");
         }
         else if (n > 0) {
             result.push_back(s.substr(pos, n));
         }
+
+        // Go to the string position after the last separator
         pos = (index != std::string::npos) ? index + 1 : std::string::npos;
+
+        // If the position is pointing right beyong the last string
+        // character we terminated with a separator, hence we need to push
+        // back one more empty string before we leave
+        if (sep != " " && pos == len) {
+            result.push_back("");
+        }
+
     } // endwhile: there were still characters in the string
 
     // Return result
