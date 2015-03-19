@@ -643,8 +643,7 @@ void GModelSpatialEllipticalGauss::init_members(void)
     m_minor_rad         = 0.0;
     m_major_rad         = 0.0;
     m_norm              = 0.0;
-    m_last_posangle     = 0.0;
-    m_last_posangle_rad = 0.0;
+    m_last_posangle     = 9999.0; // Signals that has not been initialised
     m_sin2pos           = 0.0;
     m_cospos2           = 0.0;
     m_sinpos2           = 0.0;
@@ -673,7 +672,6 @@ void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGau
     m_major_rad         = model.m_major_rad;
     m_norm              = model.m_norm;
     m_last_posangle     = model.m_last_posangle;
-    m_last_posangle_rad = model.m_last_posangle_rad;
     m_sin2pos           = model.m_sin2pos;
     m_cospos2           = model.m_cospos2;
     m_sinpos2           = model.m_sinpos2;
@@ -745,16 +743,16 @@ void GModelSpatialEllipticalGauss::update() const
         m_last_posangle = posangle();
 
         // Compute angle in radians
-        m_last_posangle_rad = m_last_posangle * gammalib::deg2rad;
+        double posangle_rad = m_last_posangle * gammalib::deg2rad;
 
         // Compute sine and cosine
-        double cospos = std::cos(m_last_posangle_rad);
-        double sinpos = std::sin (m_last_posangle_rad);
+        double cospos = std::cos(posangle_rad);
+        double sinpos = std::sin(posangle_rad);
 
         // Cache important values for further computations
         m_cospos2 = cospos * cospos;
         m_sinpos2 = sinpos * sinpos;
-        m_sin2pos = std::sin (2 * m_last_posangle_rad);
+        m_sin2pos = std::sin(2.0 * posangle_rad);
 
     } // endif: position angle update required
 

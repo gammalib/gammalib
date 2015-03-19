@@ -93,7 +93,6 @@ protected:
     mutable double m_last_minor;        //!< Last semi-minor axis
     mutable double m_last_major;        //!< Last semi-major axis
     mutable double m_last_posangle;     //!< Last position angle
-    mutable double m_last_posangle_rad; //!< Last position angle in radians
     mutable double m_cospos2;           //!< squared cosine of position angle
     mutable double m_sinpos2;           //!< squared sine of position angle
     mutable double m_sin2pos;           //!< sine of twice the position angle
