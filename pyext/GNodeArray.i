@@ -27,6 +27,10 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GNodeArray.hpp"
 %}
+%include "std_vector.i"
+namespace std {
+   %template(DoubleVector) vector<double>;
+}
 
 
 /***********************************************************************//**
@@ -38,7 +42,7 @@ class GNodeArray : public GContainer {
 public:
     // Constructors and destructors
     GNodeArray(void);
-    explicit GNodeArray(const int& num, const double* array);
+    GNodeArray(const int& num, const double* array);
     explicit GNodeArray(const GVector& vector);
     explicit GNodeArray(const std::vector<double>& vector);
     GNodeArray(const GNodeArray& array);

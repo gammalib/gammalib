@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNodeArray.hpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,7 +59,7 @@ class GNodeArray : public GContainer {
 public:
     // Constructors and destructors
     GNodeArray(void);
-    explicit GNodeArray(const int& num, const double* array);
+    GNodeArray(const int& num, const double* array);
     explicit GNodeArray(const GVector& vector);
     explicit GNodeArray(const std::vector<double>& vector);
     GNodeArray(const GNodeArray& array);
