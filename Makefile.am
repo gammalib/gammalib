@@ -76,7 +76,7 @@ dynamic-analysis: coverage valgrind
 # Add cppcheck rule
 cppcheck:
 	@if type cppcheck >/dev/null 2>&1; then \
-		cppcheck -v --enable=all --xml \
+		cppcheck -v --enable=all --xml --suppress=missingIncludeSystem \
 		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
 		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
 	else \
