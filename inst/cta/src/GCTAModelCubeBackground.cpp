@@ -506,17 +506,8 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
  * @exception GException::feature_not_implemented
  *            Specified observation is not a CTA observation.
  *
- * Principle:
- * Draws a sample of events from the background model using a Monte
- * Carlo simulation. The region of interest, the energy boundaries and the
- * good time interval for the sampling will be extracted from the observation
- * argument that is passed to the method. The method also requires a random
- * number generator of type GRan which is passed by reference, hence the
- * state of the random number generator will be changed by the method.
- *
- * The method also applies a deadtime correction using a Monte Carlo process,
- * taking into account temporal deadtime variations. For this purpose, the
- * method makes use of the time dependent GObservation::deadc method.
+ * The simulation of an event list from a cube background model is not
+ * implemented, hence the method will always throw an exception.
  ***************************************************************************/
 GCTAEventList* GCTAModelCubeBackground::mc(const GObservation& obs, GRan& ran) const
 {
@@ -524,8 +515,8 @@ GCTAEventList* GCTAModelCubeBackground::mc(const GObservation& obs, GRan& ran) c
     throw GException::feature_not_implemented(G_MC,
           "MC computation not implemented for binned analysis.");
 
-    // Return event list
-    return new GCTAEventList;
+    // Return NULL pointer
+    return NULL;
 
 }
 

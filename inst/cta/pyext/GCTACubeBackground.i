@@ -47,16 +47,15 @@ public:
     // Operators
     GCTACubeBackground& operator=(const GCTACubeBackground& bgd);
     double              operator()(const GCTAInstDir& dir,
-                                   const GEnergy& energy) const;
+                                   const GEnergy&     energy) const;
 
     // Methods
     void                       clear(void);
     GCTACubeBackground*        clone(void) const;
     std::string                classname(void) const;
-    void               fill(const GObservations& obs);
-    GCTAInstDir                    mc(const GEnergy& energy,
-                                  const GTime& time,
-                                  GRan& ran) const;
+    void                       set(const GSkymap&  cube,
+                                   const GEbounds& ebounds);
+    void                       fill(const GObservations& obs);
     double                     integral(const double& logE) const;
     void                       read(const GFits& fits);
     void                       write(GFits& file) const;

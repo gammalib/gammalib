@@ -31,11 +31,14 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
+#include "GObservations.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTARoi.hpp"
+#include "GCTAInstDir.hpp"
 #include "GCTACubeBackground.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -98,8 +101,8 @@ GCTACubeBackground::GCTACubeBackground(const std::string& filename)
  *
  * @param[in] cube Event cube.
  *
- * Construct background cube using the same binning and sky projection that is
- * used for the event cube.
+ * Construct background cube using the same binning and sky projection that
+ * is used for the event cube.
  ***************************************************************************/
 GCTACubeBackground::GCTACubeBackground(const GCTAEventCube& cube)
 {
@@ -200,11 +203,9 @@ GCTACubeBackground& GCTACubeBackground::operator=(const GCTACubeBackground& bgd)
  * never becomes negative.
  *
  * The method interpolates logarithmically in the energy direction.
- *
- * @todo Check whether this should be a GSkyDir or rather a GInstDir object.
  ***************************************************************************/
 double GCTACubeBackground::operator()(const GCTAInstDir& dir,
-                                      const GEnergy& energy) const
+                                      const GEnergy&     energy) const
 {
     // Set indices and weighting factors for interpolation
     update(energy.log10TeV());
@@ -259,34 +260,6 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Returns MC sky direction
- *
- * @param[in] energy Photon energy.
- * @param[in] time Photon arrival time.
- * @param[in,out] ran Random number generator.
- * @return Instrument direction.
- *
- * @exception GException::feature_not_implemented
- *            Method not implemented.
- *
- *  This method is a dummy method
- ***************************************************************************/
-GCTAInstDir GCTACubeBackground::mc(const GEnergy& energy,
-                               const GTime&   time,
-                               GRan&          ran) const
-{
-
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_MC,
-          "MC computation not implemented for binned analysis.");
-
-    // Return direction
-    return GCTAInstDir();
-
-}
-
-
-/***********************************************************************//**
  * @brief Fill background cube from observation container
  *
  * @param[in] obs Observation container.
@@ -294,14 +267,14 @@ GCTAInstDir GCTACubeBackground::mc(const GEnergy& energy,
  * @exception GException::invalid_value
  *            No event list found in CTA observations.
  *
- * Set the background cube by summing the background rate for all CTA observations in
- * an observation container. The cube pixel values are computed as the sum
- * over the background rates
+ * Set the background cube by computing the livetime weighted background rate
+ * for all CTA observations in an observation container. The cube pixel
+ * values are computed as the sum over the background rates.
  ***************************************************************************/
 void GCTACubeBackground::fill(const GObservations& obs)
 {
     // Clear background cube
-    clear_cube();
+    m_cube = 0.0;
 
     // Initialise event cube to evaluate models
     GCTAEventCube eventcube = GCTAEventCube(m_cube, m_ebounds, obs[0]->events()->gti());
@@ -380,6 +353,42 @@ void GCTACubeBackground::fill(const GObservations& obs)
     // Return
     return;
 
+}
+
+
+/***********************************************************************//**
+ * @brief Compute spatially integrated background rate for a given energy
+ *
+ * @param[in] logE Logarithm (base 10) of energy in TeV
+ * @return Spatially integrated background rate in units of counts/MeV/s
+ *
+ * Spatially integrates the background cube at a given energy. This method
+ * performs an interpolation between the energy maps. The integration is
+ * performed by summing over all bin contents multiplied by the solid angle
+ * of the bin.
+ ***************************************************************************/
+double GCTACubeBackground::integral(const double& logE) const
+{
+    // Update interpolation cache
+    update(logE);
+
+    // Initialise result
+    double result = 0.0;
+
+    // Loop over all map pixels
+    for (int i = 0; i < m_cube.npix(); ++i) {
+
+        // Get bin value
+        double value = m_wgt_left  * m_cube(i, m_inx_left) +
+                       m_wgt_right * m_cube(i, m_inx_right);
+
+        // Sum bin contents
+        result += value * m_cube.solidangle(i);
+
+    }
+
+    // Return result
+    return result;
 }
 
 
@@ -589,10 +598,10 @@ void GCTACubeBackground::copy_members(const GCTACubeBackground& bgd)
     m_elogmeans = bgd.m_elogmeans;
 
     // Copy cache
-    m_inx_left    = bgd.m_inx_left;
-    m_inx_right   = bgd.m_inx_right;
-    m_wgt_left    = bgd.m_wgt_left;
-    m_wgt_right   = bgd.m_wgt_right;
+    m_inx_left  = bgd.m_inx_left;
+    m_inx_right = bgd.m_inx_right;
+    m_wgt_left  = bgd.m_wgt_left;
+    m_wgt_right = bgd.m_wgt_right;
 
     // Return
     return;
@@ -604,28 +613,6 @@ void GCTACubeBackground::copy_members(const GCTACubeBackground& bgd)
  ***************************************************************************/
 void GCTACubeBackground::free_members(void)
 {
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Clear all pixels in the background cube
- ***************************************************************************/
-void GCTACubeBackground::clear_cube(void)
-{
-    // Loop over all exposure cube energy bins
-    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
-
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-
-            // Reset cube value to zero
-            m_cube(pixel, iebin) = 0.0;
-
-        } // endfor: looped over all pixels
-
-    } // endfor: looped over energy bins
-
     // Return
     return;
 }
@@ -663,38 +650,6 @@ void GCTACubeBackground::set_eng_axis(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Compute spatially averaged background raye for a given energy
- *
- * @param[in] logE Logarithm (base 10) of energy in TeV
- * @return Spatially averaged background rate in units of events/s/MeV/sr
- *
- * Spatially integrates the background cube at a given energy. This method
- * performs an interpolation between the energy maps. The integration is
- * limited to counting the bin contents
- ***************************************************************************/
-double GCTACubeBackground::integral(const double& logE) const
-{
-    // Update interpolation cache
-    update(logE);
-
-    // Initialise result
-    double result     = 0.0;
-
-    // Loop over all map pixels
-    for (int i = 0; i < m_cube.npix(); ++i) {
-
-        // Sum bin contents
-        result += m_wgt_left  * m_cube(i, m_inx_left) +
-                  m_wgt_right * m_cube(i, m_inx_right);
-
-    }
-
-    // Return result
-    return result;
 }
 
 

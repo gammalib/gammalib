@@ -30,15 +30,16 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GSkymap.hpp"
-#include "GCTAInstDir.hpp"
-#include "GRan.hpp"
 #include "GNodeArray.hpp"
 #include "GEbounds.hpp"
-#include "GObservations.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
 class GFitsBinTable;
+class GModelSpectralNodes;
+class GRan;
+class GObservations;
+class GCTAInstDir;
 
 
 /***********************************************************************//**
@@ -59,7 +60,7 @@ public:
     // Operators
     GCTACubeBackground& operator=(const GCTACubeBackground& bgd);
     double              operator()(const GCTAInstDir& dir,
-                                   const GEnergy& energy) const;
+                                   const GEnergy&     energy) const;
 
     // Methods
     void                       clear(void);
@@ -67,10 +68,7 @@ public:
     std::string                classname(void) const;
     void                       set(const GSkymap&  cube,
                                    const GEbounds& ebounds);
-    void               fill(const GObservations& obs);
-    GCTAInstDir                    mc(const GEnergy& energy,
-                                  const GTime& time,
-                                  GRan& ran) const;
+    void                       fill(const GObservations& obs);
     double                     integral(const double& logE) const;
     void                       read(const GFits& fits);
     void                       write(GFits& file) const;
@@ -90,7 +88,6 @@ private:
     void copy_members(const GCTACubeBackground& bgd);
     void free_members(void);
     void set_eng_axis(void);
-    void clear_cube(void);
     void update(const double& logE) const;
 
     // Members
@@ -172,6 +169,5 @@ const std::string& GCTACubeBackground::filename(void) const
 {
     return (m_filename);
 }
-
 
 #endif /* GCTACUBEBACKGROUND_HPP */
