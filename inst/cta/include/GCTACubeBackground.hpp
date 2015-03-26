@@ -36,7 +36,6 @@
 /* __ Forward declarations _______________________________________________ */
 class GFits;
 class GFitsBinTable;
-class GModelSpectralNodes;
 class GRan;
 class GObservations;
 class GCTAInstDir;
@@ -63,24 +62,21 @@ public:
                                    const GEnergy&     energy) const;
 
     // Methods
-    void                       clear(void);
-    GCTACubeBackground*        clone(void) const;
-    std::string                classname(void) const;
-    void                       set(const GSkymap&  cube,
-                                   const GEbounds& ebounds);
-    void                       fill(const GObservations& obs);
-    double                     integral(const double& logE) const;
-    void                       read(const GFits& fits);
-    void                       write(GFits& file) const;
-    void                       load(const std::string& filename);
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
-    const GSkymap&             cube(void) const;
-    const GEbounds&            ebounds(void) const;
-    const GNodeArray&          elogmeans(void) const;
-    const std::string&         filename(void) const;
-    const GModelSpectralNodes& spectrum(void) const;
-    std::string                print(const GChatter& chatter = NORMAL) const;
+    void                clear(void);
+    GCTACubeBackground* clone(void) const;
+    std::string         classname(void) const;
+    void                fill(const GObservations& obs);
+    double              integral(const double& logE) const;
+    void                read(const GFits& fits);
+    void                write(GFits& file) const;
+    void                load(const std::string& filename);
+    void                save(const std::string& filename,
+                             const bool& clobber = false) const;
+    const GSkymap&      cube(void) const;
+    const GEbounds&     ebounds(void) const;
+    const GNodeArray&   elogmeans(void) const;
+    const std::string&  filename(void) const;
+    std::string         print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
