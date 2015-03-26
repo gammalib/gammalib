@@ -285,7 +285,7 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
 
     // Evaluate function
     double logE = event.energy().log10TeV();
-    double spat = bgd(dir->dir(), event.energy());
+    double spat = bgd((*dir), event.energy());
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time()) : 1.0;
     double temp = (temporal() != NULL)
@@ -343,7 +343,7 @@ double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
 
     // Evaluate function
     double logE = event.energy().log10TeV();
-    double spat = bgd(dir->dir(), event.energy());
+    double spat = bgd((*dir), event.energy());
     double spec = (spectral() != NULL)
                   ? spectral()->eval_gradients(event.energy(), event.time())
                   : 1.0;
@@ -503,9 +503,10 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
  * @return Pointer to list of simulated events (needs to be de-allocated by
  *         client)
  *
- * @exception GException::invalid_argument
+ * @exception GException::feature_not_implemented
  *            Specified observation is not a CTA observation.
  *
+ * Principle:
  * Draws a sample of events from the background model using a Monte
  * Carlo simulation. The region of interest, the energy boundaries and the
  * good time interval for the sampling will be extracted from the observation
@@ -519,165 +520,13 @@ double GCTAModelCubeBackground::npred(const GEnergy&      obsEng,
  ***************************************************************************/
 GCTAEventList* GCTAModelCubeBackground::mc(const GObservation& obs, GRan& ran) const
 {
-    // Initialise new event list
-    GCTAEventList* list = new GCTAEventList;
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_MC,
+          "MC computation not implemented for binned analysis.");
 
-    // Continue only if model is valid)
-    if (valid_model()) {
+    // Return event list
+    return new GCTAEventList;
 
-        // Retrieve CTA observation
-        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
-        if (cta == NULL) {
-            std::string msg = "Specified observation is not a CTA observation.\n" +
-                              obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Get pointer on CTA IRF response
-        const GCTAResponseCube* rsp = dynamic_cast<const GCTAResponseCube*>(cta->response());
-        if (rsp == NULL) {
-            std::string msg = "Specified observation does not contain"
-                              " a cube response.\n" + obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Retrieve event list to access the ROI, energy boundaries and GTIs
-        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-        if (events == NULL) {
-            std::string msg = "No CTA event list found in observation.\n" +
-                              obs.print();
-            throw GException::invalid_argument(G_MC, msg);
-        }
-
-        // Retrieve CTA response and pointing
-        const GCTAPointing& pnt = cta->pointing();
-
-        // Get pointer to CTA background
-        const GCTACubeBackground bgd = rsp->background();
-
-        // Get simulation region
-        const GCTARoi&  roi     = events->roi();
-        const GEbounds& ebounds = events->ebounds();
-        const GGti&     gti     = events->gti();
-
-        // Set simulation region for result event list
-        list->roi(roi);
-        list->ebounds(ebounds);
-        list->gti(gti);
-
-        // Create a spectral model that combines the information from the
-        // background information and the spectrum provided by the model
-        GModelSpectralNodes spectral(bgd.spectrum());
-        for (int i = 0; i < spectral.nodes(); ++i) {
-            GEnergy energy    = spectral.energy(i);
-            double  intensity = spectral.intensity(i);
-            double  norm      = m_spectral->eval(energy, events->tstart());
-            spectral.intensity(i, norm*intensity);
-        }
-
-        // Loop over all energy boundaries
-        for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
-
-            // Compute the background rate in model within the energy
-            // boundaries from spectral component (units: cts/s).
-            // Note that the time here is ontime. Deadtime correction will
-            // be done later.
-            double rate = spectral.flux(ebounds.emin(ieng), ebounds.emax(ieng));
-
-            // Debug option: dump rate
-            #if defined(G_DUMP_MC)
-            std::cout << "GCTAModelCubeBackground::mc(\"" << name() << "\": ";
-            std::cout << "rate=" << rate << " cts/s)" << std::endl;
-            #endif
-
-            // Loop over all good time intervals
-            for (int itime = 0; itime < gti.size(); ++itime) {
-
-                // Get Monte Carlo event arrival times from temporal model
-                GTimes times = m_temporal->mc(rate,
-                                              gti.tstart(itime),
-                                              gti.tstop(itime),
-                                              ran);
-
-                // Get number of events
-                int n_events = times.size();
-
-                // Reserve space for events
-                if (n_events > 0) {
-                    list->reserve(n_events);
-                }
-
-                // Debug option: provide number of times and initialize
-                // statisics
-                #if defined(G_DUMP_MC)
-                std::cout << " Interval " << itime;
-                std::cout << " times=" << n_events << std::endl;
-                int n_killed_by_deadtime = 0;
-                int n_killed_by_roi      = 0;
-                #endif
-
-                // Loop over events
-                for (int i = 0; i < n_events; ++i) {
-
-                    // Apply deadtime correction
-                    double deadc = obs.deadc(times[i]);
-                    if (deadc < 1.0) {
-                        if (ran.uniform() > deadc) {
-                            #if defined(G_DUMP_MC)
-                            n_killed_by_deadtime++;
-                            #endif
-                            continue;
-                        }
-                    }
-
-                    // Get Monte Carlo event energy from spectral model
-                    GEnergy energy = spectral.mc(ebounds.emin(ieng),
-                                                 ebounds.emax(ieng),
-                                                 times[i],
-                                                 ran);
-
-                    // Get Monte Carlo event direction from spatial model.
-                    GSkyDir skydir = bgd.mc(energy, times[i], ran);
-
-                    // Set instrument direction
-                    GCTAInstDir instdir(skydir);
-
-                    // Allocate event
-                    GCTAEventAtom event;
-
-                    // Set event attributes
-                    event.dir(instdir);
-                    event.energy(energy);
-                    event.time(times[i]);
-
-                    // Append event to list if it falls in ROI
-                    if (events->roi().contains(event)) {
-                        list->append(event);
-                    }
-                    #if defined(G_DUMP_MC)
-                    else {
-                        n_killed_by_roi++;
-                    }
-                    #endif
-
-                } // endfor: looped over all events
-
-                // Debug option: provide  statisics
-                #if defined(G_DUMP_MC)
-                std::cout << " Killed by deadtime=";
-                std::cout << n_killed_by_deadtime << std::endl;
-                std::cout << " Killed by ROI=";
-                std::cout << n_killed_by_roi << std::endl;
-                #endif
-
-            } // endfor: looped over all GTIs
-
-        } // endfor: looped over all energy boundaries
-
-    } // endif: model was valid
-
-    // Return
-    return list;
 }
 
 

@@ -30,8 +30,11 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GSkymap.hpp"
-#include "GModelSpectralNodes.hpp"
+#include "GCTAInstDir.hpp"
+#include "GRan.hpp"
+#include "GNodeArray.hpp"
 #include "GEbounds.hpp"
+#include "GObservations.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -49,12 +52,13 @@ public:
     // Constructors and destructors
     GCTACubeBackground(void);
     explicit GCTACubeBackground(const std::string& filename);
+    explicit GCTACubeBackground(const GCTAEventCube& cube);
     GCTACubeBackground(const GCTACubeBackground& bgd);
     virtual ~GCTACubeBackground(void);
 
     // Operators
     GCTACubeBackground& operator=(const GCTACubeBackground& bgd);
-    double              operator()(const GSkyDir& dir,
+    double              operator()(const GCTAInstDir& dir,
                                    const GEnergy& energy) const;
 
     // Methods
@@ -63,9 +67,8 @@ public:
     std::string                classname(void) const;
     void                       set(const GSkymap&  cube,
                                    const GEbounds& ebounds);
-    void                       set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius);
-    GSkyDir                    mc(const GEnergy& energy,
+    void               fill(const GObservations& obs);
+    GCTAInstDir                    mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;
     double                     integral(const double& logE) const;
@@ -87,24 +90,20 @@ private:
     void copy_members(const GCTACubeBackground& bgd);
     void free_members(void);
     void set_eng_axis(void);
+    void clear_cube(void);
     void update(const double& logE) const;
-    void init_mc_cache(void);
 
     // Members
     mutable std::string m_filename;  //!< Name of background response file
     GSkymap             m_cube;      //!< Background cube
-    GEbounds            m_ebounds;   //!< Energy bounds for the Exposure cube
-    GNodeArray          m_elogmeans; //!< Mean energy for the Exposure cube
+    GEbounds            m_ebounds;   //!< Energy bounds for the background cube
+    GNodeArray          m_elogmeans; //!< Mean energy for the background cube
 
     // Response table computation cache for 1D access
     mutable int    m_inx_left;       //!< Index of left node
     mutable int    m_inx_right;      //!< Index of right node
     mutable double m_wgt_left;       //!< Weight of left node
     mutable double m_wgt_right;      //!< Weight of right node
-
-    // Monte Carlo cache
-    mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
-    mutable GModelSpectralNodes m_mc_spectrum; //!< Response cube spectrum
 
 };
 
@@ -174,18 +173,5 @@ const std::string& GCTACubeBackground::filename(void) const
     return (m_filename);
 }
 
-
-/***********************************************************************//**
- * @brief Return background cube spectrum
- *
- * @return Background cube spectrum.
- *
- * Returns the spectrum of the background cube as spectral nodes.
- ***************************************************************************/
-inline
-const GModelSpectralNodes& GCTACubeBackground::spectrum(void) const
-{
-    return (m_mc_spectrum);
-}
 
 #endif /* GCTACUBEBACKGROUND_HPP */

@@ -33,6 +33,9 @@
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
+#include "GCTAEventCube.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTARoi.hpp"
 #include "GCTACubeBackground.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -87,6 +90,38 @@ GCTACubeBackground::GCTACubeBackground(const std::string& filename)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Event cube constructor
+ *
+ * @param[in] cube Event cube.
+ *
+ * Construct background cube using the same binning and sky projection that is
+ * used for the event cube.
+ ***************************************************************************/
+GCTACubeBackground::GCTACubeBackground(const GCTAEventCube& cube)
+{
+    // Initialise class members
+    init_members();
+
+    // Set background cube to event cube
+    m_cube = cube.map();
+
+    // Store energy boundaries
+    m_ebounds = cube.ebounds();
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
+    // Set all background cube pixels to zero as we want to have a clean map
+    // upon construction
+    m_cube = 0.0;
+
+    // Return
+    return;
+
 }
 
 
@@ -157,7 +192,7 @@ GCTACubeBackground& GCTACubeBackground::operator=(const GCTACubeBackground& bgd)
 /***********************************************************************//**
  * @brief Return background rate in units of events/s/MeV/sr
  *
- * @param[in] dir Position in the sky where rate should be computed
+ * @param[in] dir Reconstructed event position where rate should be computed
  * @param[in] energy Energy at which the rate should be computed
  *
  * Returns the background rate in units of events/s/MeV/sr for a given energy
@@ -168,15 +203,15 @@ GCTACubeBackground& GCTACubeBackground::operator=(const GCTACubeBackground& bgd)
  *
  * @todo Check whether this should be a GSkyDir or rather a GInstDir object.
  ***************************************************************************/
-double GCTACubeBackground::operator()(const GSkyDir& dir,
+double GCTACubeBackground::operator()(const GCTAInstDir& dir,
                                       const GEnergy& energy) const
 {
     // Set indices and weighting factors for interpolation
     update(energy.log10TeV());
 
     // Perform interpolation
-    double background = m_wgt_left  * m_cube(dir, m_inx_left) +
-                        m_wgt_right * m_cube(dir, m_inx_right);
+    double background = m_wgt_left  * m_cube(dir.dir(), m_inx_left) +
+                        m_wgt_right * m_cube(dir.dir(), m_inx_right);
 
     // Make sure that background rate does not become negative
     if (background < 0.0) {
@@ -224,232 +259,127 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set background cube from skymap and energy boundaries
- *
- * @param[in] cube Sky map.
- * @param[in] ebounds Energy boundaries.
- *
- * Set this instance from sky map, energy boundaries
- ***************************************************************************/
-void GCTACubeBackground::set(const GSkymap& cube, const GEbounds& ebounds)
-{
-    // Bring cube to clean state
-    clear();
-
-    // Copy skymap
-    m_cube = cube;
-
-    // Copy ebounds
-    m_ebounds = ebounds;
-
-    // Set energy node array
-    set_eng_axis();
-
-    // Initialise Monte Carlo cache
-    init_mc_cache();
-
-    // Return
-    return;
-}
-
-
-
-/***********************************************************************//**
- * @brief Set Monte Carlo simulation cone
- *
- * @param[in] centre Simulation cone centre.
- * @param[in] radius Simulation cone radius (degrees).
- *
- * Sets the simulation cone centre and radius that defines the directions
- * that will be simulated using the mc() method.
- *
- * @todo Checks whether this is needed
- ***************************************************************************/
-void GCTACubeBackground::set_mc_cone(const GSkyDir& centre,
-                                     const double&  radius)
-{
-    // Initialise cache
-    m_mc_cache.clear();
-    m_mc_spectrum.clear();
-
-    // Determine number of cube pixels and maps
-    int npix  = m_cube.npix();
-    int nmaps = m_cube.nmaps();
-
-    // Continue only if there are pixels and maps
-    if (npix > 0 && nmaps > 0) {
-
-        // Reserve space for all pixels in cache
-        m_mc_cache.reserve((npix+1)*nmaps);
-
-        // Loop over all maps
-        for (int i = 0; i < nmaps; ++i) {
-
-            // Compute pixel offset
-            int offset = i * (npix+1);
-
-            // Set first cache value to 0
-            m_mc_cache.push_back(0.0);
-
-            // Initialise cache with cumulative pixel fluxes and compute
-            // total flux in skymap for normalization. Negative pixels are
-            // excluded from the cumulative map.
-            double total_flux = 0.0;
-            for (int k = 0; k < npix; ++k) {
-
-                // Derive effective pixel radius from half opening angle
-                // that corresponds to the pixel's solid angle. For security,
-                // the radius is enhanced by 50%.
-                double pixel_radius =
-                       std::acos(1.0 - m_cube.solidangle(k)/gammalib::twopi) *
-                       gammalib::rad2deg * 1.5;
-
-                // Add up flux with simulation cone radius + effective pixel
-                // radius. The effective pixel radius is added to make sure
-                // that all pixels that overlap with the simulation cone are
-                // taken into account. There is no problem of having even
-                // pixels outside the simulation cone taken into account as
-                // long as the mc() method has an explicit test of whether a
-                // simulated event is contained in the simulation cone.
-                double distance = centre.dist_deg(m_cube.pix2dir(k));
-                if (distance <= radius+pixel_radius) {
-                    double flux = m_cube(k,i) * m_cube.solidangle(k);
-                    if (flux > 0.0) {
-                        total_flux += flux;
-                    }
-                }
-
-                // Push back flux
-                m_mc_cache.push_back(total_flux); // units: ph/cm2/s/MeV
-            }
-
-            // Normalize cumulative pixel fluxes so that the values in the
-            // cache run from 0 to 1
-            if (total_flux > 0.0) {
-                for (int k = 0; k < npix; ++k) {
-                    m_mc_cache[k+offset] /= total_flux;
-                }
-            }
-
-            // Make sure that last pixel in the cache is >1
-            m_mc_cache[npix+offset] = 1.0001;
-
-            // Store centre flux in node array
-            if (m_elogmeans.size() == nmaps) {
-                GEnergy energy;
-                energy.log10MeV(m_elogmeans[i]);
-
-                // Only append node if flux > 0
-                if (total_flux > 0.0) {
-                    m_mc_spectrum.append(energy, total_flux);
-                }
-
-            }
-
-        } // endfor: looped over all maps
-
-        // Dump cache values for debugging
-        #if defined(G_DEBUG_CACHE)
-        for (int i = 0; i < m_mc_cache.size(); ++i) {
-            std::cout << "i=" << i;
-            std::cout << " c=" << m_mc_cache[i] << std::endl;
-        }
-        #endif
-
-    } // endif: there were cube pixels and maps
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Returns MC sky direction
  *
  * @param[in] energy Photon energy.
  * @param[in] time Photon arrival time.
  * @param[in,out] ran Random number generator.
- * @return Sky direction.
+ * @return Instrument direction.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not implemented.
+ *
+ *  This method is a dummy method
  ***************************************************************************/
-GSkyDir GCTACubeBackground::mc(const GEnergy& energy,
+GCTAInstDir GCTACubeBackground::mc(const GEnergy& energy,
                                const GTime&   time,
                                GRan&          ran) const
 {
 
-    // Allocate sky direction
-    GSkyDir dir;
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_MC,
+          "MC computation not implemented for binned analysis.");
 
-    // Determine number of skymap pixels
-    int npix = m_cube.npix();
+    // Return direction
+    return GCTAInstDir();
 
-    // Continue only if there are skymap pixels
-    if (npix > 0) {
+}
 
-        // If no energy boundaries are defined, throw an exception
-        if (m_ebounds.size() < 1) {
-            std::string msg = "The energy boundaries of the maps in the cube"
-                              " have not been defined. Maybe the map cube file"
-                              " is missing the \"ENERGIES\" extension which"
-                              " defines the energy of each map in the cube.\n"
-                              "Please provide the energy information.";
-            throw GException::invalid_value(G_MC, msg);
-        }
 
-        // Determine the map that corresponds best to the specified energy.
-        // This is not 100% clean, as ideally some map interpolation should
-        // be done to the exact energy specified. However, as long as the map
-        // does not change drastically with energy, taking the closest map
-        // seems to be fine.
-        int i = m_ebounds.index(energy);
-        if (i < 0) {
-            if (energy <= m_ebounds.emin()) {
-                i = 0;
-            }
-            else if (energy >= m_ebounds.emax()) {
-                i = m_ebounds.size()-1;
-            }
-            else {
-                std::string msg = "The specified energy "+energy.print()+" does"
-                                  " not fall in any of the energy boundaries of"
-                                  " the map cube.\n"
-                                  "Please make sure that the map cube energies"
-                                  " are properly defined.";
-                throw GException::invalid_value(G_MC, msg);
-            }
-        }
+/***********************************************************************//**
+ * @brief Fill background cube from observation container
+ *
+ * @param[in] obs Observation container.
+ *
+ * @exception GException::invalid_value
+ *            No event list found in CTA observations.
+ *
+ * Set the background cube by summing the background rate for all CTA observations in
+ * an observation container. The cube pixel values are computed as the sum
+ * over the background rates
+ ***************************************************************************/
+void GCTACubeBackground::fill(const GObservations& obs)
+{
+    // Clear background cube
+    clear_cube();
 
-        // Get uniform random number
-        double u = ran.uniform();
+    // Initialise event cube to evaluate models
+    GCTAEventCube eventcube = GCTAEventCube(m_cube, m_ebounds, obs[0]->events()->gti());
 
-        // Get pixel index according to random number. We use a bi-section
-        // method to find the corresponding skymap pixel
-        int offset = i * (npix+1);
-        int low    = offset;
-        int high   = offset + npix;
-        while ((high - low) > 1) {
-            int mid = (low+high) / 2;
-            if (u < m_mc_cache[mid]) {
-                high = mid;
-            }
-            else if (m_mc_cache[mid] <= u) {
-                low = mid;
-            }
-        }
+    // Initialise total livetime
+    double total_livetime = 0.0;
 
-        // Convert sky map index to sky map pixel
-        GSkyPixel pixel = m_cube.inx2pix(low-offset);
+    // Loop over all observations in container
+    for (int i = 0; i < obs.size(); ++i) {
 
-        // Randomize pixel
-        pixel.x(pixel.x() + ran.uniform() - 0.5);
-        pixel.y(pixel.y() + ran.uniform() - 0.5);
+        // Get observation and continue only if it is a CTA observation
+        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
 
-        // Get sky direction
-        dir = m_cube.pix2dir(pixel);
+        if (cta != NULL) {
 
-    } // endif: there were pixels in sky map
+            // Extract region of interest from CTA observation
+            GCTARoi roi = cta->roi();
 
-    // Return instrument direction
-    return dir;
+            // Set GTI of actual observations as the GTI of the event cube
+            eventcube.gti(cta->gti());
+
+            // Get observation livetime
+            double livetime = cta->livetime();
+
+            // Loop over all bins in background cube
+            for (int i = 0; i < eventcube.size(); ++i) {
+
+                // Get event bin
+                GCTAEventBin* bin = eventcube[i];
+
+                // Continue only if binned in contained in ROI
+                if (roi.contains(*bin)) {
+
+                    // Compute model value for event bin. The model value is
+                    // given in counts/MeV/s/sr.
+                    double model = obs.models().eval(*bin, *cta);
+
+                    // Multiply by livetime to get the correct weighting for
+                    // each observation. We divide by the total livetime later
+                    // to get the background model in units of counts/MeV/s/sr.
+                    model *= livetime;
+
+                    // Add existing number of counts
+                    model += bin->counts();
+
+                    // Store cumulated value (units: counts/MeV/sr)
+                    bin->counts(model);
+
+                } // endif: bin was contained in RoI
+
+            } // endfor: looped over all bins
+
+            // Accumulate livetime
+            total_livetime += livetime;
+
+        } // endif: cta observation was vaild
+
+    } // endfor: looped over all observations
+
+    // Re-normalize cube to get units of counts/MeV/s/sr
+    if (total_livetime > 0.0) {
+
+      // Loop over all bins in background cube and divide the content
+      // by the total livetime.
+      for (int i = 0; i < eventcube.size(); ++i) {
+          GCTAEventBin* bin  = eventcube[i];
+          double        rate = bin->counts() / total_livetime;
+          bin->counts(rate);
+      }
+
+      // Set background cube values from event cube
+      m_cube = eventcube.map();
+
+    } // endif: livetime was positive
+
+    // Return
+    return;
+
 }
 
 
@@ -477,9 +407,6 @@ void GCTACubeBackground::read(const GFits& fits)
 
     // Set energy node array
     set_eng_axis();
-
-    // Initialise Monte Carlo cache
-    init_mc_cache();
 
     // Return
     return;
@@ -611,20 +538,6 @@ std::string GCTACubeBackground::print(const GChatter& chatter) const
                  }
              }
 
-             // VERBOSE: Append MC cache
-             if (chatter >= VERBOSE) {
-                 result.append("\n"+gammalib::parformat("Map flux"));
-                 if (m_mc_spectrum.nodes() > 0) {
-                     for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
-                         result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
-                         result.append(gammalib::str(m_mc_spectrum.intensity(i)));
-                     }
-                 }
-                 else {
-                     result.append("not specified");
-                 }
-             }
-
          } // endif: map cube exists
 
      } // endif: chatter was not silent
@@ -651,9 +564,7 @@ void GCTACubeBackground::init_members(void)
     m_ebounds.clear();
     m_elogmeans.clear();
 
-    // Initialise MC cache
-    m_mc_cache.clear();
-    m_mc_spectrum.clear();
+    // Initialise cache
     m_inx_left  = 0;
     m_inx_right = 0;
     m_wgt_left  = 0.0;
@@ -677,9 +588,7 @@ void GCTACubeBackground::copy_members(const GCTACubeBackground& bgd)
     m_ebounds   = bgd.m_ebounds;
     m_elogmeans = bgd.m_elogmeans;
 
-    // Copy MC cache
-    m_mc_cache    = bgd.m_mc_cache;
-    m_mc_spectrum = bgd.m_mc_spectrum;
+    // Copy cache
     m_inx_left    = bgd.m_inx_left;
     m_inx_right   = bgd.m_inx_right;
     m_wgt_left    = bgd.m_wgt_left;
@@ -699,18 +608,23 @@ void GCTACubeBackground::free_members(void)
     return;
 }
 
-
 /***********************************************************************//**
- * @brief Initialise Monte Carlo cache
+ * @brief Clear all pixels in the background cube
  ***************************************************************************/
-void GCTACubeBackground::init_mc_cache(void)
+void GCTACubeBackground::clear_cube(void)
 {
-    // Set centre and radius to all sky
-    GSkyDir centre;
-    double  radius = 360.0;
+    // Loop over all exposure cube energy bins
+    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
 
-    // Compute cache
-    set_mc_cone(centre, radius);
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Reset cube value to zero
+            m_cube(pixel, iebin) = 0.0;
+
+        } // endfor: looped over all pixels
+
+    } // endfor: looped over energy bins
 
     // Return
     return;
@@ -736,11 +650,11 @@ void GCTACubeBackground::set_eng_axis(void)
     // Get number of bins
     int bins = m_ebounds.size();
 
-    // Clear node array
+    // Clear node array and spectrum cache
     m_elogmeans.clear();
 
     // Compute nodes
-    for (int i = 0; i < m_ebounds.size(); ++i) {
+    for (int i = 0; i < bins; ++i) {
 
         // Get logE/TeV
         m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());
@@ -769,7 +683,6 @@ double GCTACubeBackground::integral(const double& logE) const
 
     // Initialise result
     double result     = 0.0;
-    double solidangle = 0.0;
 
     // Loop over all map pixels
     for (int i = 0; i < m_cube.npix(); ++i) {
@@ -778,14 +691,6 @@ double GCTACubeBackground::integral(const double& logE) const
         result += m_wgt_left  * m_cube(i, m_inx_left) +
                   m_wgt_right * m_cube(i, m_inx_right);
 
-        // Sum solid angles of pixels
-        solidangle += m_cube.solidangle(i);
-
-    }
-
-    // Divide integral by solidangle of map
-    if (solidangle > 0.0) {
-        result /= solidangle;
     }
 
     // Return result

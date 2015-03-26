@@ -40,23 +40,21 @@ public:
     // Constructors and destructors
     GCTACubeBackground(void);
     explicit GCTACubeBackground(const std::string& filename);
+    explicit GCTACubeBackground(const GCTAEventCube& cube);
     GCTACubeBackground(const GCTACubeBackground& bgd);
     virtual ~GCTACubeBackground(void);
 
     // Operators
     GCTACubeBackground& operator=(const GCTACubeBackground& bgd);
-    double              operator()(const GSkyDir& dir,
+    double              operator()(const GCTAInstDir& dir,
                                    const GEnergy& energy) const;
 
     // Methods
     void                       clear(void);
     GCTACubeBackground*        clone(void) const;
     std::string                classname(void) const;
-    void                       set(const GSkymap&  cube,
-                                   const GEbounds& ebounds);
-    void                       set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius);
-    GSkyDir                    mc(const GEnergy& energy,
+    void               fill(const GObservations& obs);
+    GCTAInstDir                    mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;
     double                     integral(const double& logE) const;
