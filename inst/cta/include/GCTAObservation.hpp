@@ -43,6 +43,7 @@ class GCaldb;
 class GGti;
 class GCTACubeExposure;
 class GCTACubePsf;
+class GCTACubeBackground;
 class GCTARoi;
 
 
@@ -64,7 +65,8 @@ public:
     explicit GCTAObservation(const std::string& instrument);
     GCTAObservation(const std::string& cntcube,
                     const std::string& expcube,
-                    const std::string& psfcube);
+                    const std::string& psfcube,
+                    const std::string& bkgcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -97,13 +99,15 @@ public:
     void                load(const std::string& filename);
     void                load(const std::string& cntcube,
                              const std::string& expcube,
-                             const std::string& psfcube);
+                             const std::string& psfcube,
+                             const std::string& bkgcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
-    void                response(const GCTACubeExposure& expcube,
-                                 const GCTACubePsf&      psfcube);
+    void                response(const GCTACubeExposure&   expcube,
+                                 const GCTACubePsf&        psfcube,
+                                 const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     GCTARoi             roi(void) const;

@@ -40,7 +40,9 @@ public:
     GCTAResponseCube(void);
     GCTAResponseCube(const GCTAResponseCube& rsp);
     explicit GCTAResponseCube(const GXmlElement& xml);
-    GCTAResponseCube(const GCTACubeExposure& exposure, const GCTACubePsf& psf);
+    GCTAResponseCube(const GCTACubeExposure&   exposure,
+                     const GCTACubePsf&        psf,
+                     const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
     // Implement pure virtual base class methods
@@ -78,10 +80,12 @@ public:
                                const GObservation& obs) const;
 
     // Other Methods
-    const GCTACubeExposure& exposure(void) const;
-    void                    exposure(const GCTACubeExposure& exposure);
-    const GCTACubePsf&      psf(void) const;
-    void                    psf(const GCTACubePsf& psf);
+    const GCTACubeExposure&   exposure(void) const;
+    void                      exposure(const GCTACubeExposure& exposure);
+    const GCTACubePsf&        psf(void) const;
+    void                      psf(const GCTACubePsf& psf);
+    const GCTACubeBackground& background(void) const;
+    void                      background(const GCTACubeBackground& background);
 };
 
 

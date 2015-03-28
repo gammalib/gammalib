@@ -123,19 +123,21 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
  * @param[in] cntcube Counts cube file name.
  * @param[in] expcube Exposure cube file name.
  * @param[in] psfcube Psf cube file name.
+ * @param[in] bkgcube Backgorund cube file name.
  *
  * Creates a CTA observation from a counts cube, an exposure cube and a Psf
  * cube.
  ***************************************************************************/
 GCTAObservation::GCTAObservation(const std::string& cntcube,
                                  const std::string& expcube,
-                                 const std::string& psfcube) : GObservation()
+                                 const std::string& psfcube,
+                                 const std::string& bkgcube) : GObservation()
 {
     // Initialise members
     init_members();
 
     // Load data
-    load(cntcube, expcube, psfcube);
+    load(cntcube, expcube, psfcube, bkgcube);
 
     // Return
     return;
@@ -342,22 +344,24 @@ void GCTAObservation::response(const std::string& rspname, const GCaldb& caldb)
  * @brief Set CTA response function
  *
  * @param[in] expcube Exposure cube.
- * @param[in] psfcube PSF cube.
+ * @param[in] psfcube Psf cube.
+ * @param[in] bkgcube Background cube.
  *
  * Sets the CTA response function fur cube analysis by specifying the
- * exposure cube and the PSF cube. The method also copies over the ontime,
- * the livetime and the deadtime correction factor from the exposure
- * cube.
+ * exposure cube, the Psf cube and the background cube. The method also
+ * copies over the ontime, the livetime and the deadtime correction factor
+ * from the exposure cube.
  ***************************************************************************/
-void GCTAObservation::response(const GCTACubeExposure& expcube,
-                               const GCTACubePsf&      psfcube)
+void GCTAObservation::response(const GCTACubeExposure&   expcube,
+                               const GCTACubePsf&        psfcube,
+                               const GCTACubeBackground& bkgcube)
 {
     // Free response
     if (m_response != NULL) delete m_response;
     m_response = NULL;
 
     // Allocate fresh response function
-    GCTAResponseCube* rsp = new GCTAResponseCube(expcube, psfcube);
+    GCTAResponseCube* rsp = new GCTAResponseCube(expcube, psfcube, bkgcube);
 
     // Store pointer
     m_response = rsp;
@@ -1175,13 +1179,15 @@ void GCTAObservation::load(const std::string& filename)
  * @param[in] cntcube Counts cube file name.
  * @param[in] expcube Exposure cube file name.
  * @param[in] psfcube Psf cube file name.
+ * @param[in] bkgcube Background cube file name.
  *
- * Loads a counts map, an exposure cube and a Psf cube for stacked cube
- * analysis.
+ * Loads a counts map, an exposure cube, a Psf cube and a background cube
+ * for stacked cube analysis.
  ***************************************************************************/
 void GCTAObservation::load(const std::string& cntcube,
                            const std::string& expcube,
-                           const std::string& psfcube) {
+                           const std::string& psfcube,
+                           const std::string& bkgcube) {
 
     // Load counts cube FITS file
     load(cntcube);
@@ -1199,8 +1205,11 @@ void GCTAObservation::load(const std::string& cntcube,
     // Load Psf cube
     GCTACubePsf psf(psfcube);
 
-    // Attach exposure and Psf cube as response
-    response(exposure, psf);
+    // Load background cube
+    GCTACubeBackground background(bkgcube);
+
+    // Attach exposure cube, Psf cube and background cube as response
+    response(exposure, psf, background);
  
     // Return
     return;
