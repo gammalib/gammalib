@@ -191,6 +191,7 @@
 %include "GCTABackgroundPerfTable.i"
 %include "GCTABackground3D.i"
 %include "GCTACubeExposure.i"
+%include "GCTACubeBackground.i"
 %include "GCTACubePsf.i"
 %include "GCTAModelCubeBackground.i"
 %include "GCTAModelIrfBackground.i"
