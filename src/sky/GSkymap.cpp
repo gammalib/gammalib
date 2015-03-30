@@ -302,8 +302,11 @@ GSkymap& GSkymap::operator=(const GSkymap& map)
  ***************************************************************************/
 GSkymap& GSkymap::operator=(const double& value)
 {
+    // Get number of pixels
+    int num = m_num_pixels * m_num_maps;
+
     // Loop over all pixels
-    for (int i = 0; i < m_num_pixels; ++i) {
+    for (int i = 0; i < num; ++i) {
         m_pixels[i] = value;
     }
 
