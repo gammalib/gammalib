@@ -327,25 +327,19 @@ void GCTAEdisp2D::read(const GFits& fits)
     // Set offset angle axis to radians
     m_edisp.axis_radians(2);
 
-
-//    for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
-
-        m_temp.clear();
-
-        int step = migra_size / etrue_size;
-
-        for (int itrue = 0; itrue < etrue_size; ++itrue) {
-            double logEsrc = std::log10(0.5 * (m_edisp.axis_hi(0, itrue) +
-                                               m_edisp.axis_lo(0, itrue)));
-            m_temp.push_back(std::vector<double>());
-            for (int iobs = 0; iobs < etrue_size; ++iobs) {
-                double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, iobs*step) +
-                                             m_edisp.axis_lo(1, iobs*step));
-                m_temp[itrue].push_back(operator()(logEsrc, EobsOverEsrc));
-            }
+    // ...
+    m_temp.clear();
+    int step = migra_size / etrue_size;
+    for (int itrue = 0; itrue < etrue_size; ++itrue) {
+        double logEsrc = std::log10(0.5 * (m_edisp.axis_hi(0, itrue) +
+                                           m_edisp.axis_lo(0, itrue)));
+        m_temp.push_back(std::vector<double>());
+        for (int iobs = 0; iobs < etrue_size; ++iobs) {
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, iobs*step) +
+                                         m_edisp.axis_lo(1, iobs*step));
+            m_temp[itrue].push_back(operator()(logEsrc, EobsOverEsrc));
         }
-
- //   }
+    }
 
     // Return
     return;
@@ -395,56 +389,6 @@ void GCTAEdisp2D::save(const std::string& filename, const bool& clobber) const
     return;
 }
 
-/***********************************************************************//**
- * @brief Find maximum energy dispersion
- *
-***************************************************************************/
-void GCTAEdisp2D::set_fmax(void) const
-{
-
-    double max = 0.0;
-
-    // Loop over Esrc
-    for (int i = 0; i < m_edisp.axis(0); ++i) {
-
-        // Set Esrc
-        double Esrc   = 0.5 * (m_edisp.axis_hi(0, i) +
-                               m_edisp.axis_lo(0, i));
-        double logEsrc = std::log10(Esrc);
-
-        // Loop over EobsOverEsrc
-        for (int j = 0; j < m_edisp.axis(1); ++j) {
-
-            // Set EobsOverEsrc
-            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, j) +
-                                         m_edisp.axis_lo(1, j));
-/*
-            // Loop over theta
-            for (int k = 0; k < m_edisp.axis(2); ++k) {
-
-                // Set theta
-                double theta = 0.5 * (m_edisp.axis_hi(2, k) +
-                                     m_edisp.axis_lo(2, k));
-
-                double test = operator()(logEsrc, EobsOverEsrc, theta);
-*/
-                double test = operator()(logEsrc, EobsOverEsrc);
-                if (max < test) {
-                    max = test;
-                }
-/*
-             } // endfor: looped over theta
-*/
-        } // endfor: looped over EobsOverEsrc
-
-    } // endfor: looped over Esrc
-
-    // Set fmax
-    m_fmax = max;
-
-    // Return
-    return;
-}
 
 /***********************************************************************//**
  * @brief Simulate energy dispersion
@@ -479,7 +423,6 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
     if (m_fmax == -1.0) {
         set_fmax();
     }
-
     double fmax = m_fmax;
 
     // Find energy by rejection method
@@ -493,8 +436,8 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
         ftest  = ran.uniform() * fmax;
     }
 
+    // Set energy
     energy.log10TeV(e);
-
 
     // Return energy
     return energy;
@@ -760,23 +703,22 @@ void GCTAEdisp2D::init_members(void)
     m_edisp.clear();
 
     // Initialise Monte Carlo cache
-    m_theta        = 0.0;
-    m_logEsrc      =-30.0;
-    m_logEobs      =-30.0;
-    m_fmax         = -1.0;
-    m_index_obs    = 0;
-    m_index_src    = 0;
-    m_cdf_computed = false;
+    m_theta                =   0.0;
+    m_logEsrc              = -30.0;
+    m_logEobs              = -30.0;
+    m_fmax                 =  -1.0;
+    m_index_obs            =     0;
+    m_index_src            =     0;
+    m_cdf_computed         = false;
     m_ebounds_obs_computed = false;
     m_ebounds_src_computed = false;
 
-    m_cumul.clear();
-
-    // Initialize ebounds
+    // Initialize vectors
     m_ebounds_obs.clear();
     m_ebounds_src.clear();
-
+    m_cumul.clear();
     m_eobs_axis.clear();
+    m_temp.clear();
 
     // Return
     return;
@@ -793,17 +735,22 @@ void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
     // Copy members
     m_filename  = edisp.m_filename;
     m_edisp     = edisp.m_edisp;
-    m_theta     = edisp.m_theta;
-    m_logEsrc   = edisp.m_logEsrc;
-    m_logEobs   = edisp.m_logEobs;
-    m_index_obs = edisp.m_index_obs;
-    m_index_src = edisp.m_index_src;
 
-    m_ebounds_obs = edisp.m_ebounds_obs;
-    m_ebounds_src = edisp.m_ebounds_src;
-    m_cumul       = edisp.m_cumul;
-    m_eobs_axis   = edisp.m_eobs_axis;
-    m_temp        = edisp.m_temp;
+    // Copy Monte Carlo cache
+    m_theta                = edisp.m_theta;
+    m_logEsrc              = edisp.m_logEsrc;
+    m_logEobs              = edisp.m_logEobs;
+    m_fmax                 = edisp.m_fmax;
+    m_index_obs            = edisp.m_index_obs;
+    m_index_src            = edisp.m_index_src;
+    m_cdf_computed         = edisp.m_cdf_computed;
+    m_ebounds_obs_computed = edisp.m_ebounds_obs_computed;
+    m_ebounds_src_computed = edisp.m_ebounds_src_computed;
+    m_ebounds_obs          = edisp.m_ebounds_obs;
+    m_ebounds_src          = edisp.m_ebounds_src;
+    m_cumul                = edisp.m_cumul;
+    m_eobs_axis            = edisp.m_eobs_axis;
+    m_temp                 = edisp.m_temp;
 
     // Return
     return;
@@ -1118,3 +1065,41 @@ void GCTAEdisp2D::compute_cumul(const double& theta,
     return;
 }
 #endif
+
+
+/***********************************************************************//**
+ * @brief Find maximum energy dispersion
+ ***************************************************************************/
+void GCTAEdisp2D::set_fmax(void) const
+{
+    // Initialise maximum
+    double max = 0.0;
+
+    // Loop over Esrc
+    for (int i = 0; i < m_edisp.axis(0); ++i) {
+
+        // Set Esrc
+        double Esrc    = 0.5 * (m_edisp.axis_hi(0,i) + m_edisp.axis_lo(0,i));
+        double logEsrc = std::log10(Esrc);
+
+        // Loop over EobsOverEsrc
+        for (int j = 0; j < m_edisp.axis(1); ++j) {
+
+            // Set EobsOverEsrc
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, j) +
+                                         m_edisp.axis_lo(1, j));
+            double test = operator()(logEsrc, EobsOverEsrc);
+            if (max < test) {
+                max = test;
+            }
+
+        } // endfor: looped over EobsOverEsrc
+
+    } // endfor: looped over Esrc
+
+    // Set fmax
+    m_fmax = max;
+
+    // Return
+    return;
+}

@@ -121,6 +121,7 @@ private:
     std::string       m_filename;  //!< Name of Edisp response file
     GCTAResponseTable m_edisp;     //!< Edisp response table
 
+    // Monte Carlo cache
     mutable bool      m_cdf_computed;
     mutable double    m_theta;
     mutable bool      m_ebounds_obs_computed;
@@ -131,11 +132,11 @@ private:
     mutable int       m_index_src;
     mutable double    m_fmax;
 
-    mutable std::vector<GEbounds> m_ebounds_obs;
-    mutable std::vector<GEbounds> m_ebounds_src;
+    mutable std::vector<GEbounds>                                 m_ebounds_obs;
+    mutable std::vector<GEbounds>                                 m_ebounds_src;
     mutable std::vector<std::vector<std::pair<double, double> > > m_cumul;
-    mutable std::vector<double> m_eobs_axis;
-    mutable std::vector<std::vector<double> > m_temp;
+    mutable std::vector<double>                                   m_eobs_axis;
+    mutable std::vector<std::vector<double> >                     m_temp;
 };
 
 

@@ -715,18 +715,17 @@ void GCTAEdispRmf::init_members(void)
     // Initialise Monte Carlo cache
     m_mc_measured_start.clear();
     m_mc_measured_cdf.clear();
-    m_cdf_computed   = false;
-    m_theta          = 0.0;
-    m_logEsrc        = -30.0;
-    m_logEobs        = -30.0;
+    m_cdf_computed         = false;
+    m_theta                = 0.0;
+    m_logEsrc              = -30.0;
+    m_logEobs              = -30.0;
     m_cumul.clear();
-
     m_ebounds_obs_computed = false;
     m_ebounds_obs.clear();
-    m_index_obs = 0;
+    m_index_obs            = 0;
     m_ebounds_src_computed = false;
     m_ebounds_src.clear();
-    m_index_src = 0;
+    m_index_src            = 0;
 
     // Return
     return;
@@ -760,11 +759,19 @@ void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
     m_wgt4           = edisp.m_wgt4;
 
     // Copy Monte Carlo cache
-    m_mc_measured_start = edisp.m_mc_measured_start;
-    m_mc_measured_cdf   = edisp.m_mc_measured_cdf;
-    m_theta             = edisp.m_theta;
-    m_cumul             = edisp.m_cumul;
-    m_cdf_computed      = edisp.m_cdf_computed;
+    m_mc_measured_start    = edisp.m_mc_measured_start;
+    m_mc_measured_cdf      = edisp.m_mc_measured_cdf;
+    m_cdf_computed         = edisp.m_cdf_computed;
+    m_theta                = edisp.m_theta;
+    m_logEsrc              = edisp.m_logEsrc;
+    m_logEobs              = edisp.m_logEobs;
+    m_cumul                = edisp.m_cumul;
+    m_ebounds_obs_computed = edisp.m_ebounds_obs_computed;
+    m_ebounds_obs          = edisp.m_ebounds_obs;
+    m_index_obs            = edisp.m_index_obs;
+    m_ebounds_src_computed = edisp.m_ebounds_src_computed;
+    m_ebounds_src          = edisp.m_ebounds_src;
+    m_index_src            = edisp.m_index_src;
 
     // Return
     return;

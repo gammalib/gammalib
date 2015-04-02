@@ -141,12 +141,12 @@ private:
     mutable double                                  m_logEobs;
     mutable std::vector<std::vector<std::pair<double, double> > > m_cumul;
 
-    mutable bool m_ebounds_obs_computed;
+    mutable bool                  m_ebounds_obs_computed;
     mutable std::vector<GEbounds> m_ebounds_obs;
-    mutable int m_index_obs;
-    mutable bool m_ebounds_src_computed;
+    mutable int                   m_index_obs;
+    mutable bool                  m_ebounds_src_computed;
     mutable std::vector<GEbounds> m_ebounds_src;
-    mutable int m_index_src;
+    mutable int                   m_index_src;
 
 };
 
