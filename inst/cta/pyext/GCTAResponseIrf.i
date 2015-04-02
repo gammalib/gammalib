@@ -178,11 +178,6 @@ public:
                 const GTime&        srcTime,
                 const GCTAPointing& pnt,
                 const GCTARoi&      roi) const;
-    double nedisp(const GSkyDir&      srcDir,
-                  const GEnergy&      srcEng,
-                  const GTime&        srcTime,
-                  const GCTAPointing& pnt,
-                  const GEbounds&     ebds) const;
 };
 
 
