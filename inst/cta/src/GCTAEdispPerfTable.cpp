@@ -245,7 +245,7 @@ GCTAEdispPerfTable* GCTAEdispPerfTable::clone(void) const
  * performance table. The energy resolution is stored in the 5th column
  * of the performance table as RMS(ln(Eest/Etrue)). The method converts
  * this internally to a sigma value by multiplying the stored values by
- * 0.434294481903.
+ * 1/ln(10).
  ***************************************************************************/
 void GCTAEdispPerfTable::load(const std::string& filename)
 {
@@ -290,7 +290,14 @@ void GCTAEdispPerfTable::load(const std::string& filename)
 
         // Push elements in node array and vector
         m_logE.append(gammalib::todouble(elements[0]));
+        // The energy resolution is stored as RMS(ln(Eest/Etrue))
         m_sigma.push_back(gammalib::todouble(elements[4]) * gammalib::inv_ln10);
+
+        // The energy resolution is stored as RMS(Eest/Etrue)
+        //m_sigma.push_back(std::log10(gammalib::todouble(elements[4])));
+
+        // The energy resolution is stored as RMS(log10(Eest/Etrue))
+        //m_sigma.push_back(gammalib::todouble(elements[4]));
 
     } // endwhile: looped over lines
 
@@ -309,7 +316,7 @@ void GCTAEdispPerfTable::load(const std::string& filename)
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.
@@ -319,17 +326,17 @@ void GCTAEdispPerfTable::load(const std::string& filename)
  * m_par_sigma around @p logE.
  ***************************************************************************/
 GEnergy GCTAEdispPerfTable::mc(GRan&         ran,
-                               const double& logE,
+                               const double& logEsrc,
                                const double& theta,
                                const double& phi,
                                const double& zenith,
                                const double& azimuth) const
 {
     // Update the parameter cache
-    update(logE);
+    update(logEsrc);
 
     // Draw log observed energy in TeV
-    double logEobs = m_par_sigma * ran.normal() + logE;
+    double logEobs = m_par_sigma * ran.normal() + logEsrc;
 
     // Set energy
     GEnergy energy;
@@ -530,7 +537,7 @@ void GCTAEdispPerfTable::update(const double& logE) const
 
         // Save energy
         m_par_logE = logE;
-    
+
         // Determine Gaussian sigma and pre-compute Gaussian parameters
         m_par_sigma = m_logE.interpolate(logE, m_sigma);
         m_par_scale = gammalib::inv_sqrt2pi / m_par_sigma;

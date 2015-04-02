@@ -107,6 +107,15 @@ private:
                       const double& phi = 0.0,
                       const double& zenith = 0.0,
                       const double& azimuth = 0.0) const;
+    void compute_ebounds_obs(const double& theta = 0.0,
+                             const double& phi = 0.0,
+                             const double& zenith = 0.0,
+                             const double& azimuth = 0.0) const;
+    void compute_ebounds_src(const double& theta = 0.0,
+                             const double& phi = 0.0,
+                             const double& zenith = 0.0,
+                             const double& azimuth = 0.0) const;
+    void set_fmax(void) const;
 
     // Members
     std::string       m_filename;  //!< Name of Edisp response file
@@ -114,7 +123,19 @@ private:
 
     mutable bool      m_cdf_computed;
     mutable double    m_theta;
+    mutable bool      m_ebounds_obs_computed;
+    mutable bool      m_ebounds_src_computed;
+    mutable double    m_logEsrc;
+    mutable double    m_logEobs;
+    mutable int       m_index_obs;
+    mutable int       m_index_src;
+    mutable double    m_fmax;
+
+    mutable std::vector<GEbounds> m_ebounds_obs;
+    mutable std::vector<GEbounds> m_ebounds_src;
     mutable std::vector<std::vector<std::pair<double, double> > > m_cumul;
+    mutable std::vector<double> m_eobs_axis;
+    mutable std::vector<std::vector<double> > m_temp;
 };
 
 

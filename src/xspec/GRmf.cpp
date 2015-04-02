@@ -449,9 +449,12 @@ void GRmf::read(const GFitsTable& table)
     // Initialize matrix
     m_matrix = GMatrixSparse(rows, columns);
 
+   // Initialize matrix maximum
+   double max = 0.0;
+
     // Set true energy bins
     for (int itrue = 0; itrue < rows; ++itrue) {
-    
+
         // Append energy bin
         GEnergy emin(energy_lo->real(itrue), energy_lo->unit());
         GEnergy emax(energy_hi->real(itrue), energy_hi->unit());
@@ -465,15 +468,23 @@ void GRmf::read(const GFitsTable& table)
             // Get start column index and number of columns
             int imeasured = f_chan->integer(itrue, igroup);
             int nvalues   = n_chan->integer(itrue, igroup);
-            
+
             // Get values
             for (int i = 0; i < nvalues; ++i, ++imeasured, ++icolumn) {
                 m_matrix(itrue, imeasured) = matrix->real(itrue, icolumn);
+
+                // Update fmax
+                if (max < m_matrix(itrue, imeasured)) {
+                    max = m_matrix(itrue, imeasured);
+                    m_itruemax = itrue;
+                    m_imeasmax = imeasured;
+                }
             }
 
         } // endfor: looped over groups
 
     } // endfor: looped over true energy bins
+
 
     // Return
     return;
@@ -497,7 +508,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         // Compute maximum number of matrix elements
         int maxcolumns = 1;
         for (int i = 0; i < length; i++) {
-            
+
             // Search first non-zero element
             int ifirst = 0;
             for (; ifirst < nmeasured(); ++ifirst) {
@@ -521,7 +532,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
             if (num > maxcolumns) {
                 maxcolumns = num;
             }
-        
+
         } // endfor: looped over true energies
 
         // Create new binary table
@@ -560,7 +571,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
                 ifirst = 0;
                 num    = 0;
             }
-    
+
             // Set energy bin
             energy_lo(itrue) = m_ebds_true.emin(itrue)(unit);
             energy_hi(itrue) = m_ebds_true.emax(itrue)(unit);
@@ -662,6 +673,8 @@ void GRmf::init_members(void)
     m_ebds_true.clear();
     m_ebds_measured.clear();
     m_matrix.clear();
+    m_itruemax = 0;
+    m_imeasmax = 0;
 
     // Return
     return;
@@ -680,6 +693,8 @@ void GRmf::copy_members(const GRmf& rmf)
     m_ebds_true     = rmf.m_ebds_true;
     m_ebds_measured = rmf.m_ebds_measured;
     m_matrix        = rmf.m_matrix;
+    m_itruemax      = rmf.m_itruemax;
+    m_imeasmax      = rmf.m_imeasmax;
 
     // Return
     return;

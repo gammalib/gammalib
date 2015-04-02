@@ -1753,6 +1753,7 @@ void GCTAResponseTable::update(const double& arg1, const double& arg2) const
 void GCTAResponseTable::update(const double& arg1, const double& arg2,
                                const double& arg3) const
 {
+
     // Get pointers to node arrays (circumvent const correctness)
     const GNodeArray* nodes1 = &(m_axis_nodes[0]);
     const GNodeArray* nodes2 = &(m_axis_nodes[1]);

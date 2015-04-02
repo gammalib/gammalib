@@ -37,6 +37,9 @@
 #include "GFitsBinTable.hpp"
 #include "GCTAEdisp2D.hpp"
 
+//#define G_CDF_METHOD
+#define G_REJECTION
+
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
@@ -183,7 +186,7 @@ double GCTAEdisp2D::operator()(const double& logEobs,
     double EobsOverEsrc = std::exp((logEobs-logEsrc) * gammalib::ln10);
 
     // Compute edisp
-    edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta) * gammalib::ln10;
+    edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta);
 
     // Return
     return edisp;
@@ -321,11 +324,28 @@ void GCTAEdisp2D::read(const GFits& fits)
     // Set true energy axis to logarithmic scale
     m_edisp.axis_log10(0);
 
-    // Set emigra axis to log scale
-    m_edisp.axis_log10(1);
-
     // Set offset angle axis to radians
     m_edisp.axis_radians(2);
+
+
+//    for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
+
+        m_temp.clear();
+
+        int step = migra_size / etrue_size;
+
+        for (int itrue = 0; itrue < etrue_size; ++itrue) {
+            double logEsrc = std::log10(0.5 * (m_edisp.axis_hi(0, itrue) +
+                                               m_edisp.axis_lo(0, itrue)));
+            m_temp.push_back(std::vector<double>());
+            for (int iobs = 0; iobs < etrue_size; ++iobs) {
+                double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, iobs*step) +
+                                             m_edisp.axis_lo(1, iobs*step));
+                m_temp[itrue].push_back(operator()(logEsrc, EobsOverEsrc));
+            }
+        }
+
+ //   }
 
     // Return
     return;
@@ -375,6 +395,56 @@ void GCTAEdisp2D::save(const std::string& filename, const bool& clobber) const
     return;
 }
 
+/***********************************************************************//**
+ * @brief Find maximum energy dispersion
+ *
+***************************************************************************/
+void GCTAEdisp2D::set_fmax(void) const
+{
+
+    double max = 0.0;
+
+    // Loop over Esrc
+    for (int i = 0; i < m_edisp.axis(0); ++i) {
+
+        // Set Esrc
+        double Esrc   = 0.5 * (m_edisp.axis_hi(0, i) +
+                               m_edisp.axis_lo(0, i));
+        double logEsrc = std::log10(Esrc);
+
+        // Loop over EobsOverEsrc
+        for (int j = 0; j < m_edisp.axis(1); ++j) {
+
+            // Set EobsOverEsrc
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, j) +
+                                         m_edisp.axis_lo(1, j));
+/*
+            // Loop over theta
+            for (int k = 0; k < m_edisp.axis(2); ++k) {
+
+                // Set theta
+                double theta = 0.5 * (m_edisp.axis_hi(2, k) +
+                                     m_edisp.axis_lo(2, k));
+
+                double test = operator()(logEsrc, EobsOverEsrc, theta);
+*/
+                double test = operator()(logEsrc, EobsOverEsrc);
+                if (max < test) {
+                    max = test;
+                }
+/*
+             } // endfor: looped over theta
+*/
+        } // endfor: looped over EobsOverEsrc
+
+    } // endfor: looped over Esrc
+
+    // Set fmax
+    m_fmax = max;
+
+    // Return
+    return;
+}
 
 /***********************************************************************//**
  * @brief Simulate energy dispersion
@@ -388,6 +458,49 @@ void GCTAEdisp2D::save(const std::string& filename, const bool& clobber) const
  *
  * Draws observed energy value.
  ***************************************************************************/
+#if defined(G_REJECTION)
+GEnergy GCTAEdisp2D::mc(GRan&         ran,
+                        const double& logEsrc,
+                        const double& theta,
+                        const double& phi,
+                        const double& zenith,
+                        const double& azimuth) const
+{
+
+    // Set true energy
+    GEnergy energy;
+
+    // Get boundaries for rejection method
+    double emin = ebounds_obs(logEsrc, theta, phi, zenith, azimuth).emin().log10TeV();
+
+    double emax = ebounds_obs(logEsrc, theta, phi, zenith, azimuth).emax().log10TeV();
+
+    // Set fmax if it has not already been set
+    if (m_fmax == -1.0) {
+        set_fmax();
+    }
+
+    double fmax = m_fmax;
+
+    // Find energy by rejection method
+    double ewidth = emax - emin;
+    double e      = emin;
+    double f      = 0.0;
+    double ftest  = 1.0;
+    while (ftest > f) {
+        e      = emin + ewidth * ran.uniform();
+        f      = operator()(e, logEsrc, theta, phi, zenith, azimuth);
+        ftest  = ran.uniform() * fmax;
+    }
+
+    energy.log10TeV(e);
+
+
+    // Return energy
+    return energy;
+
+}
+#else
 GEnergy GCTAEdisp2D::mc(GRan&         ran,
                         const double& logEsrc,
                         const double& theta,
@@ -440,8 +553,6 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
         index = low;
     }
 
-    //std::cout << "p = " << p << std::endl;
-    //std::cout << "index = " << index << std::endl;
 
     // Interpolate EobsOverEsrc value
     double EobsOverEsrc = 0.0;
@@ -459,12 +570,11 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
     // Set energy
     GEnergy energy;
     energy.TeV(EobsOverEsrc * Esrc);
-    //std::cout << "eobs = " << EobsOverEsrc * Esrc << std::endl;
 
     // Return energy
     return energy;
 }
-
+#endif
 
 /***********************************************************************//**
  * @brief Return observed energy interval that contains the energy dispersion.
@@ -486,57 +596,42 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
                                   const double& zenith,
                                   const double& azimuth) const
 {
-    // Set epsilon
-    const double eps = 1.0e-06;
+    // Compute only if parameters changed
+    if (!m_ebounds_obs_computed || theta != m_theta) {
 
-    // Initialise results
-    double logEobsMin = -10.0;
-    double logEobsMax =  30.0;
-    bool   minFound   = false;
-    bool   maxFound   = false;
+        m_ebounds_obs_computed = true;
+        m_theta = theta;
 
-    // Find boundaries
-    for (int i = 0; i < m_edisp.axis(1); ++i) {
+        // Compute ebounds_obs
+        compute_ebounds_obs(theta, phi, zenith, azimuth);
 
-        // Compute value EobsOverEsrc
-        double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, i) +
-                                     m_edisp.axis_lo(1, i));
-
-        // Find first non-negligible matrix term
-        if (!minFound && m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
-            minFound   = true;
-            logEobsMin = std::log10(EobsOverEsrc) + logEsrc;
-        }
-
-        // Find last non-negligible matrix term
-        else if (minFound && !maxFound &&
-                 m_edisp(0, logEsrc, EobsOverEsrc, theta) < eps) {
-            maxFound   = true;
-            logEobsMax = std::log10(EobsOverEsrc) + logEsrc;
-        }
-
-        // Continue searching
-        else if (minFound && maxFound &&
-                 m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
-            maxFound = false;
-        }
-
-    } // endfor: looped over EobsOverEsrc
-
-    // If energy dispersion has never become negligible until end of loop,
-    // reset logEobsMax
-    if (!maxFound) {
-        logEobsMax = 30.0;
     }
 
-    // Compute energy boundaries
-    GEnergy emin;
-    GEnergy emax;
-    emin.log10TeV(logEobsMin);
-    emax.log10TeV(logEobsMax);
+    // Search index only if logEsrc has changed
+    if (logEsrc != m_logEsrc) {
+
+        m_logEsrc = logEsrc;
+
+        // Find right index with bisection
+        int low = 0;
+        int high = m_ebounds_obs.size();
+        while ((high-low) > 1) {
+            int  mid = (low+high) / 2;
+            double e = m_edisp.axis_lo(0, mid);
+            if (logEsrc < std::log10(e)) {
+                high = mid;
+            }
+            else {
+                low = mid;
+            }
+        }
+        // Index found
+        m_index_obs = low;
+
+    }
 
     // Return energy boundaries
-    return (GEbounds(emin, emax));
+    return m_ebounds_obs[m_index_obs];
 }
 
 
@@ -560,58 +655,48 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
                                   const double& zenith,
                                   const double& azimuth) const
 {
-    // Set epsilon
-    const double eps = 1.0e-06;
+    // Compute only if parameters changed
+    if (!m_ebounds_src_computed || theta != m_theta) {
 
-    // Initialise results
-    double logEsrcMin = -10.0;
-    double logEsrcMax =  30.0;
-    bool   minFound   = false;
-    bool   maxFound   = false;
+        m_ebounds_src_computed = true;
+        m_theta = theta;
 
-    // Find boundaries
-    for (int i = 0; i < m_edisp.axis(0); ++i) {
+        // Compute ebounds_src
+        compute_ebounds_src(theta, phi, zenith, azimuth);
 
-        // Compute value of corresponding logEsrc
-        double logEsrc     = 0.5 * (m_edisp.axis_hi(0, i) +
-                                    m_edisp.axis_lo(0, i));
-        double EobsOverEsrc = std::exp((logEobs-logEsrc)*gammalib::ln10);
-
-        // Find first non-negligible matrix term
-        if (!minFound && m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
-            minFound   = true;
-            logEsrcMin = logEsrc;
-        }
-
-        // Find last non-negligible matrix term
-        else if (minFound && !maxFound &&
-                 m_edisp(0, logEsrc, EobsOverEsrc, theta) < eps) {
-            maxFound   = true;
-            logEsrcMax = logEsrc;
-        }
-
-        // Continue
-        else if (minFound && maxFound &&
-                 m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
-            maxFound = false;
-        }
-
-    } // endfor: looped over true energy
-
-    // If energy dispersion has never become negligible until end of loop,
-    // reset logEobsMax
-    if (!maxFound) {
-        logEsrcMax = 30.0;
     }
 
-    // Compute energy boundaries
-    GEnergy emin;
-    GEnergy emax;
-    emin.log10TeV(logEsrcMin);
-    emax.log10TeV(logEsrcMax);
+    // Search index only if logEobs has changed
+    if (logEobs != m_logEobs) {
+
+        m_logEobs = logEobs;
+
+        // Find right index with bisection
+        int low = 0;
+        int high = m_ebounds_src.size();
+
+        while ((high-low) > 1) {
+            int  mid = (low+high) / 2;
+
+            double e = m_edisp.axis_lo(0, mid);
+            //double e = m_eobs_axis[mid];
+            if (logEobs < std::log10(e)) {
+                high = mid;
+            }
+            else {
+                low = mid;
+            }
+        }
+        // Index found
+        m_index_src = low;
+        //m_index_src = low * m_edisp.axis(1) / m_edisp.axis(0);
+        //std::cout << "emin = " << m_ebounds_src[m_index_src].emin().TeV() << std::endl;
+        //std::cout << "emax = " << m_ebounds_src[m_index_src].emax().TeV() << std::endl;
+
+    }
 
     // Return energy boundaries
-    return (GEbounds(emin, emax));
+    return m_ebounds_src[m_index_src];
 }
 
 
@@ -669,14 +754,29 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
  ***************************************************************************/
 void GCTAEdisp2D::init_members(void)
 {
+
     // Initialise members
     m_filename.clear();
     m_edisp.clear();
 
     // Initialise Monte Carlo cache
     m_theta        = 0.0;
+    m_logEsrc      =-30.0;
+    m_logEobs      =-30.0;
+    m_fmax         = -1.0;
+    m_index_obs    = 0;
+    m_index_src    = 0;
     m_cdf_computed = false;
+    m_ebounds_obs_computed = false;
+    m_ebounds_src_computed = false;
+
     m_cumul.clear();
+
+    // Initialize ebounds
+    m_ebounds_obs.clear();
+    m_ebounds_src.clear();
+
+    m_eobs_axis.clear();
 
     // Return
     return;
@@ -691,8 +791,19 @@ void GCTAEdisp2D::init_members(void)
 void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
 {
     // Copy members
-    m_filename = edisp.m_filename;
-    m_edisp    = edisp.m_edisp;
+    m_filename  = edisp.m_filename;
+    m_edisp     = edisp.m_edisp;
+    m_theta     = edisp.m_theta;
+    m_logEsrc   = edisp.m_logEsrc;
+    m_logEobs   = edisp.m_logEobs;
+    m_index_obs = edisp.m_index_obs;
+    m_index_src = edisp.m_index_src;
+
+    m_ebounds_obs = edisp.m_ebounds_obs;
+    m_ebounds_src = edisp.m_ebounds_src;
+    m_cumul       = edisp.m_cumul;
+    m_eobs_axis   = edisp.m_eobs_axis;
+    m_temp        = edisp.m_temp;
 
     // Return
     return;
@@ -709,9 +820,239 @@ void GCTAEdisp2D::free_members(void)
 }
 
 /***********************************************************************//**
+ * @brief Compute ebounds_obs vector
+ *
+ ***************************************************************************/
+void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
+                                      const double& phi,
+                                      const double& zenith,
+                                      const double& azimuth) const
+{
+    // Clear ebounds_obs vector
+    m_ebounds_obs.clear();
+
+    // Set epsilon
+    const double eps = 1.0e-06;
+
+    // Loop over Esrc
+    for (int isrc = 0; isrc < m_edisp.axis(0); ++isrc) {
+
+        // Set Esrc
+        double Esrc   = 0.5 * (m_edisp.axis_hi(0, isrc) +
+                               m_edisp.axis_lo(0, isrc));
+        double logEsrc = std::log10(Esrc);
+
+        // Initialise results
+        double logEobsMin = -30.0;
+        double logEobsMax =  10.0;
+        bool   minFound   = false;
+        bool   maxFound   = false;
+
+        // Find boundaries, loop over EobsOverEsrc
+        for (int i = 0; i < m_edisp.axis(1); ++i) {
+
+            // Compute value EobsOverEsrc
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, i) +
+                                         m_edisp.axis_lo(1, i));
+
+            // Find first non-negligible matrix term
+            if (!minFound && m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
+                minFound   = true;
+                logEobsMin = std::log10(EobsOverEsrc * Esrc);
+            }
+
+            // Find last non-negligible matrix term
+            else if (minFound && !maxFound &&
+                     m_edisp(0, logEsrc, EobsOverEsrc, theta) < eps) {
+                maxFound   = true;
+                logEobsMax = std::log10(EobsOverEsrc * Esrc);
+            }
+
+            // Continue searching
+            else if (minFound && maxFound &&
+                     m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
+                maxFound = false;
+            }
+
+        } // endfor: looped over EobsOverEsrc
+
+
+        // If energy dispersion has never become negligible until end of loop,
+        // reset logEobsMax
+        if (!maxFound) {
+            logEobsMax = 10.0;
+        }
+
+        // Set energy boundaries
+        GEnergy emin;
+        GEnergy emax;
+        emin.log10TeV(logEobsMin);
+        emax.log10TeV(logEobsMax);
+
+        // Add energy boundaries to vector
+        m_ebounds_obs.push_back(GEbounds(emin, emax));
+
+    }
+
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Compute ebounds_src vector
+ *
+ ***************************************************************************/
+void GCTAEdisp2D::compute_ebounds_src(const double& theta,
+                                      const double& phi,
+                                      const double& zenith,
+                                      const double& azimuth) const
+{
+
+    // Clear ebounds_src vector
+    m_ebounds_src.clear();
+
+    // Set epsilon
+    const double eps = 1.0e-06;
+
+/*
+    // Loop over EobsOverEsrc
+    for (int iobs = 0; iobs < m_edisp.axis(1); ++iobs) {
+
+        // Set EobsOverEsrc
+        double EobsOverEsrc   = 0.5 * (m_edisp.axis_hi(1, iobs) +
+                                       m_edisp.axis_lo(1, iobs));
+
+        // Initialise results
+        double logEsrcMin = -10.0;
+        double logEsrcMax =  30.0;
+        bool   minFound   = false;
+        bool   maxFound   = false;
+
+        // Find boundaries, loop over Esrc
+        for (int i = 0; i < m_edisp.axis(0); ++i) {
+
+            // Compute value of corresponding logEsrc
+            double Esrc     = 0.5 * (m_edisp.axis_hi(0, i) +
+                                     m_edisp.axis_lo(0, i));
+            double logEsrc  = std::log10(Esrc);
+
+            // Find first non-negligible matrix term
+            if (!minFound && m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
+                minFound   = true;
+                logEsrcMin = logEsrc;
+            }
+
+            // Find last non-negligible matrix term
+            else if (minFound && !maxFound &&
+                     m_edisp(0, logEsrc, EobsOverEsrc, theta) < eps) {
+                maxFound   = true;
+                logEsrcMax = logEsrc;
+            }
+
+            // Continue
+            else if (minFound && maxFound &&
+                     m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
+                maxFound = false;
+            }
+
+        } // endfor: looped over true energy
+
+        // If energy dispersion has never become negligible until end of loop,
+        // reset logEobsMax
+        if (!maxFound) {
+            logEsrcMax = 30.0;
+        }
+
+        // Set energy boundaries
+        GEnergy emin;
+        GEnergy emax;
+        emin.log10TeV(logEsrcMin);
+        emax.log10TeV(logEsrcMax);
+
+        // Add energy boundaries to vector
+        m_ebounds_src.push_back(GEbounds(emin, emax));
+
+    }
+
+    const int step = m_edisp.axis(1) / m_edisp.axis(0);
+
+    // Loop over EobsOverEsrc to create Eobs axis
+    for (int i = 0; i < m_edisp.axis(0); ++i) {
+        m_eobs_axis.push_back(m_edisp.axis_lo(1, i*step) * m_edisp.axis_lo(0, i));
+    }
+*/
+
+    // Loop over Eobs
+    for (int iobs = 0; iobs < m_edisp.axis(0); ++iobs) {
+
+        double Eobs    = 0.5 * (m_edisp.axis_hi(0, iobs) +
+                                m_edisp.axis_lo(0, iobs));
+        double logEobs = std::log10(Eobs);
+
+        // Initialise results
+        double logEsrcMin = -10.0;
+        double logEsrcMax =  30.0;
+        bool   minFound   = false;
+        bool   maxFound   = false;
+
+        // Find boundaries, loop over Esrc
+        for (int isrc = 0; isrc < m_edisp.axis(0); ++isrc) {
+
+            double Esrc = 0.5 * (m_edisp.axis_hi(0, isrc) +
+                                 m_edisp.axis_lo(0, isrc));
+            double logEsrc = std::log10(Esrc);
+
+            // Find first non-negligible matrix term
+            if (!minFound && operator()(logEobs, logEsrc, theta) >= eps) {
+                minFound   = true;
+                logEsrcMin = logEsrc;
+            }
+
+            // Find last non-negligible matrix term
+            else if (minFound && !maxFound &&
+                     operator()(logEobs, logEsrc, theta) < eps) {
+                maxFound   = true;
+                logEsrcMax = logEsrc;
+            }
+
+            // Continue
+            else if (minFound && maxFound &&
+                     operator()(logEobs, logEsrc, theta) >= eps) {
+                maxFound = false;
+            }
+
+        } // endfor: looped over true energy
+
+        // If energy dispersion has never become negligible until end of loop,
+        // reset logEobsMax
+        if (!maxFound) {
+            logEsrcMax = 30.0;
+        }
+
+
+        // Set energy boundaries
+        GEnergy emin;
+        GEnergy emax;
+        emin.log10TeV(logEsrcMin);
+        emax.log10TeV(logEsrcMax);
+
+        // Add energy boundaries to vector
+        m_ebounds_src.push_back(GEbounds(emin, emax));
+
+    } // endfor : loopend over observed energy
+
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Compute cumulative probability
  *
  ***************************************************************************/
+#if defined(G_CDF_METHOD)
 void GCTAEdisp2D::compute_cumul(const double& theta,
                                 const double& phi,
                                 const double& zenith,
@@ -737,39 +1078,10 @@ void GCTAEdisp2D::compute_cumul(const double& theta,
         // Initialize cumulative probability
         double sum = 0.0;
 
-        // Loop over Eobs from 0.1 TeV to 100.0 TeV
-        //int nsteps = (int) (m_edisp.axis_hi(1, m_edisp.axis(1)-1) * Esrc / deltaEobs);
-        int nsteps = 10000;
-        double deltaEobs = 100.0/nsteps;
-        double Eobs = 0.1;
-
-        for (int iobs = 0; iobs < nsteps; ++iobs) {
-
-            double EobsOverEsrc = Eobs/Esrc;
-
-            // Compute cumulative probability
-            double add = m_edisp(0, std::log10(Esrc), EobsOverEsrc, theta) *
-                         deltaEobs / Eobs;
-
-            // Add to sum (and keep sum lower or equal to 1)
-            sum = sum+add >= 1.0 ? 1.0 : sum+add;
-
-            // Create pair containing EobsOverEsrc and cumulated probability
-            std::pair<double, double> pair(EobsOverEsrc, sum);
-
-            // Add to vector
-            m_cumul[isrc].push_back(pair);
-
-            // Compute new Eobs value
-            Eobs += deltaEobs;
-
-        } // endfor: looped over Eobs
-
-        /* // Loop over EobsOverEtrue
-
         // Divide bin into n sub-bins
         const int n = 10;
 
+        // Loop over EobsOverEtrue
         for (int imigra = 0; imigra < m_edisp.axis(1); ++imigra) {
 
             // Compute delta(Eobs/Etrue) and Eobs/Etrue values
@@ -791,16 +1103,13 @@ void GCTAEdisp2D::compute_cumul(const double& theta,
                 // Create pair containing EobsOverEsrc and cumulated probability
                 std::pair<double, double> pair(EobsOverEsrc, sum);
 
-                //if(Esrc == 10.0 && EobsOverEsrc < 2.0)
-                //std::cout << "Eobs/Esrc = " << EobsOverEsrc << ", add = " << add << ", sum = " << sum << std::endl;
-
                 // Add to vector
                 m_cumul[isrc].push_back(pair);
 
             }
 
         } // endfor: looped over EobsOverEsrc
-        */
+
     }
 
     }
@@ -808,3 +1117,4 @@ void GCTAEdisp2D::compute_cumul(const double& theta,
     // Return
     return;
 }
+#endif

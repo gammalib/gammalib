@@ -79,17 +79,21 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
         sum       = 0.0
         exp_edisp = []
         cumul     = []
+        #fmax      = 0.0
         for i in range(ebins):
             eobs     = eobs_axis[i]
             if eobs <= edisp.ebounds_obs(logEtrue).emax().TeV():
                 dLogEobs = math.log10(eobs_axis[i]) - math.log10(eobs_axis[i-1])
                 value = edisp(math.log10(eobs), logEtrue) * dLogEobs * nmc
+                #if fmax < value / dLogEobs / nmc:
+                #    fmax = value / dLogEobs / nmc
             else:
                 value = 0.0
             sum += value
             exp_edisp.append(value)
             cumul.append(sum/nmc)
         print(sum/nmc)
+        #print(fmax)
 
         # Create figure
         fig, ax1 = plt.subplots()
@@ -105,13 +109,13 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
         ax1.set_xlabel("Observed energy (TeV)")
         ax1.set_ylabel("Number of counts")
 
-        ax2 = ax1.twinx()
+        #ax2 = ax1.twinx()
 
         # Plot cumulative dispersion
-        ax2.plot(eobs_axis, cumul, 'm')
+        #ax2.plot(eobs_axis, cumul, 'm')
 
         # Set axis
-        ax2.set_ylabel("Cumulative probability")
+        #ax2.set_ylabel("Cumulative probability")
 
         # Notify
         print("PLEASE CLOSE WINDOW TO CONTINUE ...")
@@ -140,7 +144,7 @@ if __name__ == '__main__':
     # Load edisp
     #edisp = gammalib.GCTAEdispRmf("./caldb/dc1/rmf.fits")
     #edisp = gammalib.GCTAEdispPerfTable("./caldb/cta_dummy_irf.dat")
-    edisp = gammalib.GCTAEdisp2D("./caldb/edisp_matrix.fits")
+    edisp = gammalib.GCTAEdisp2D("/home/forest/git/gammalib/inst/cta/test/caldb/edisp_matrix.fits")
 
     # Simulate Edisp
     sim_edisp(edisp, 20.0) # Energy in TeV
