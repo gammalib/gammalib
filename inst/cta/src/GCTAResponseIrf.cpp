@@ -509,6 +509,34 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
     // Return response value
     return nroi;
 }
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of sky model
+ *
+ * @param[in] model Sky Model.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obsEng Observed event energy.
+ * @param[in] obsTime Observed event arrival time.
+ * @param[in] obs Observation.
+ *
+ * Computes the integral
+ *
+ * \f[
+ *    N_{\rm ROI}(E',t'|E,t) = \int_{\rm ROI} P(p',E',t'|E,t) dp'
+ * \f]
+ *
+ * of
+ *
+ * \f[
+ *    P(p',E',t'|E,t) = \int
+ *                      S(p,E,t) \times R(p',E',t'|p,E,t) \, dp
+ * \f]
+ *
+ * over the Region of Interest (ROI) for a sky model \f$S(p,E,t)\f$ and the
+ * response function \f$R(p',E',t'|p,E,t)\f$.
+ ***************************************************************************/
 double GCTAResponseIrf::nroi(const GModelSky&    model,
                              const GEnergy&      srcEng,
                              const GTime&        srcTime,
@@ -775,18 +803,18 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
         double omega0 = centre.posang(roi.centre().dir());
 
         // Setup integration kernel
-        cta_npred_radial_kern_rho integrand(*this,
-                                            *spatial,
-                                            srcEng,
-                                            srcTime,
-                                            obsEng,
-                                            obsTime,
-                                            cta,
-                                            rot,
-                                            roi_model_distance,
-                                            roi_psf_radius,
-                                            omega0,
-                                            iter_phi);
+        cta_nroi_radial_kern_rho integrand(*this,
+                                           *spatial,
+                                           srcEng,
+                                           srcTime,
+                                           obsEng,
+                                           obsTime,
+                                           cta,
+                                           rot,
+                                           roi_model_distance,
+                                           roi_psf_radius,
+                                           omega0,
+                                           iter_phi);
 
         // Integrate over model's zenith angle
         GIntegral integral(&integrand);
@@ -980,21 +1008,21 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
         double posangle_roi = centre.posang(roi.centre().dir());
 
         // Setup integration kernel
-        cta_npred_elliptical_kern_rho integrand(*this,
-                                                *spatial,
-                                                semimajor,
-                                                semiminor,
-                                                posangle,
-                                                srcEng,
-                                                srcTime,
-                                                obsEng,
-                                                obsTime,
-                                                cta,
-                                                rot,
-                                                rho_roi,
-                                                posangle_roi,
-                                                radius_roi,
-                                                iter_phi);
+        cta_nroi_elliptical_kern_rho integrand(*this,
+                                               *spatial,
+                                               semimajor,
+                                               semiminor,
+                                               posangle,
+                                               srcEng,
+                                               srcTime,
+                                               obsEng,
+                                               obsTime,
+                                               cta,
+                                               rot,
+                                               rho_roi,
+                                               posangle_roi,
+                                               radius_roi,
+                                               iter_phi);
 
         // Integrate over model's zenith angle
         GIntegral integral(&integrand);
@@ -1160,15 +1188,15 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
             GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
-            cta_npred_diffuse_kern_theta integrand(*this,
-                                                   *spatial,
-                                                   srcEng,
-                                                   srcTime,
-                                                   obsEng,
-                                                   obsTime,
-                                                   cta,
-                                                   rot,
-                                                   iter_phi);
+            cta_nroi_diffuse_kern_theta integrand(*this,
+                                                  *spatial,
+                                                  srcEng,
+                                                  srcTime,
+                                                  obsEng,
+                                                  obsTime,
+                                                  cta,
+                                                  rot,
+                                                  iter_phi);
 
             // Integrate over model's zenith angle
             GIntegral integral(&integrand);
