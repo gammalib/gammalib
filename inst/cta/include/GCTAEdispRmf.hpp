@@ -100,11 +100,18 @@ private:
     void set_cache(void) const;
     void set_mc_cache(void) const;
     void update(const double& arg1, const double& arg2) const;
-    void update_cumul(const double& logEsrc,
-                      const double& theta = 0.0,
-                      const double& phi = 0.0,
-                      const double& zenith = 0.0,
-                      const double& azimuth = 0.0) const;
+    void compute_cumul(const double& theta = 0.0,
+                       const double& phi = 0.0,
+                       const double& zenith = 0.0,
+                       const double& azimuth = 0.0) const;
+    void compute_ebounds_obs(const double& theta = 0.0,
+                             const double& phi = 0.0,
+                             const double& zenith = 0.0,
+                             const double& azimuth = 0.0) const;
+    void compute_ebounds_src(const double& theta = 0.0,
+                             const double& phi = 0.0,
+                             const double& zenith = 0.0,
+                             const double& azimuth = 0.0) const;
 
     // Members
     std::string   m_filename;  //!< Name of response file
@@ -128,9 +135,19 @@ private:
     // Monte Carlo cache
     mutable std::vector<int>                        m_mc_measured_start;
     mutable std::vector<GVector>                    m_mc_measured_cdf;
-    mutable double                                  m_logEsrc;
+    mutable bool                                    m_cdf_computed;
     mutable double                                  m_theta;
-    mutable std::vector<std::pair<double, double> > m_cumul;
+    mutable double                                  m_logEsrc;
+    mutable double                                  m_logEobs;
+    mutable std::vector<std::vector<std::pair<double, double> > > m_cumul;
+
+    mutable bool                  m_ebounds_obs_computed;
+    mutable std::vector<GEbounds> m_ebounds_obs;
+    mutable int                   m_index_obs;
+    mutable bool                  m_ebounds_src_computed;
+    mutable std::vector<GEbounds> m_ebounds_src;
+    mutable int                   m_index_src;
+
 };
 
 

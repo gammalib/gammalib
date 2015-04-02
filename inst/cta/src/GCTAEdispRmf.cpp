@@ -40,8 +40,10 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_OLD_MC_CODE
-#define G_MC_REJECTION
+//#define G_OLD_MC_CODE
+//#define G_MC_REJECTION
+#define G_NEW_REJECTION
+//#define G_CDF_METHOD
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -271,6 +273,40 @@ void GCTAEdispRmf::load(const std::string& filename)
  *       more efficient. Either implement a rejection method for smoothness
  *       or introduce subsampling for CDF cache.
  ***************************************************************************/
+#if defined(G_NEW_REJECTION)
+GEnergy GCTAEdispRmf::mc(GRan&         ran,
+                         const double& logEsrc,
+                         const double& theta,
+                         const double& phi,
+                         const double& zenith,
+                         const double& azimuth) const
+{
+
+    // Set true energy
+    GEnergy energy;
+    energy.log10TeV(logEsrc);
+
+    // Get boundaries for rejection method
+    double emin = ebounds_obs(logEsrc, theta, phi, zenith, azimuth).emin().log10TeV();
+    double emax = ebounds_obs(logEsrc, theta, phi, zenith, azimuth).emax().log10TeV();
+    double fmax = m_matrix(m_rmf.itruemax(), m_rmf.imeasmax());
+
+    // Find energy by rejection method
+    double ewidth = emax - emin;
+    double e      = emin;
+    double f      = 0.0;
+    double ftest  = 1.0;
+    while (ftest > f) {
+        e      = emin + ewidth * ran.uniform();
+        f      = operator()(e, logEsrc, theta, phi, zenith, azimuth);
+        ftest  = ran.uniform() * fmax;
+    }
+    energy.log10TeV(e);
+
+    // Return energy
+    return energy;
+}
+#endif
 #if defined(G_OLD_MC_CODE)
 GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& logEsrc,
@@ -333,7 +369,7 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                 ftest  = ran.uniform() * fmax;
             }
             energy.log10TeV(e);
-            
+
             #else
             // Determine measured energy index from Monte-Carlo cache
             int imeasured = ran.cdf(m_mc_measured_cdf[itrue]) + offset;
@@ -348,7 +384,7 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
             // Set interval
             energy.log10TeV(e);
             #endif
-        
+
         } // endif: offset was valid
 
     } // endif: there was redistribution information
@@ -356,7 +392,8 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
     // Return energy
     return energy;
 }
-#else
+#endif
+#if defined(G_CDF_METHOD)
 GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& logEsrc,
                          const double& theta,
@@ -365,31 +402,65 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
                          const double& azimuth) const
 {
 
-    // Update cumul
-    update_cumul(logEsrc, theta, phi, zenith, azimuth);
+    // Compute cumulative probability
+    compute_cumul(theta, phi, zenith, azimuth);
+
+    // Find right logEsrc index with bisection search
+    int low = 0;
+    int high = m_rmf.ntrue();
+    while ((high-low) > 1) {
+        int mid = (low+high) / 2;
+        if (logEsrc < m_rmf.etrue().emin(mid).log10TeV()) {
+            high = mid;
+        }
+        else {
+            low = mid;
+        }
+    }
+    // Index found
+    int isrc = low;
 
     // Draw random number between 0 and 1 from uniform distribution
     double p = ran.uniform();
 
-    // Find right index
-    // TODO: This can lead to index = m_edisp.axis(1) on exit, which
-    //       leads to an array indexing problem in the interpolation.
-    //       Also, a bisection search would be more efficient.
+    // Find right index with bisection search
+    low = 0;
+    high = m_cumul[isrc].size();
+    while ((high-low) > 1) {
+        int mid = (low+high) / 2;
+        if (p < m_cumul[isrc][mid].second) {
+            high = mid;
+        }
+        else if (m_cumul[isrc][mid].second <= p) {
+            low = mid;
+        }
+    }
+
+    // Index found
     int index = 0;
-    while(index < m_cumul.size() - 2 && m_cumul[index+1].second < p) {
-        index++;
-    } // index found
+    if (low >= m_cumul[isrc].size() - 1) {
+        index = m_cumul[isrc].size() - 2;
+    }
+    else {
+        index = low;
+    }
 
     // Interpolate Eobs value
-    double Eobs =   (m_cumul[index+1].second - p)*m_cumul[index].first
-                  + (p - m_cumul[index].second)*m_cumul[index+1].first;
-    Eobs       /=   (m_cumul[index+1].second - m_cumul[index].second);
+    double Eobs = 0.0;
+
+    if (m_cumul[isrc][index+1].second == m_cumul[isrc][index].second) {
+        Eobs = m_cumul[isrc][index].first;
+    }
+    else {
+        Eobs  =   (m_cumul[isrc][index+1].second - p)*m_cumul[isrc][index].first
+                + (p - m_cumul[isrc][index].second)*m_cumul[isrc][index+1].first;
+        Eobs /=   (m_cumul[isrc][index+1].second - m_cumul[isrc][index].second);
+    }
 
 
     // Set energy
     GEnergy energy;
     energy.TeV(Eobs);
-
 
     // Return energy
     return energy;
@@ -415,14 +486,73 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
                                    const double& zenith,
                                    const double& azimuth) const
 {
-    // Set true energy
-    GEnergy etrue;
-    etrue.log10TeV(logEsrc);
 
-    // Return measured energy boundaries
-    return (m_rmf.emeasured(etrue));
+    // Compute only if parameters changed
+    if (!m_ebounds_obs_computed || theta != m_theta) {
+
+        m_ebounds_obs_computed = true;
+        m_theta = theta;
+
+        // Compute ebounds_obs
+        compute_ebounds_obs(theta, phi, zenith, azimuth);
+
+    }
+
+    // Search index only if logEsrc has changed
+    if (logEsrc != m_logEsrc) {
+
+        m_logEsrc = logEsrc;
+
+        // Find right index with bisection
+        int low = 0;
+        int high = m_ebounds_obs.size();
+        while ((high-low) > 1) {
+            int  mid = (low+high) / 2;
+            double e = m_rmf.etrue().emin(mid).log10TeV();
+            if (logEsrc < e) {
+                high = mid;
+            }
+            else {
+                low = mid;
+            }
+        }
+        // Index found
+        m_index_obs = low;
+
+    }
+
+    // Return energy boundaries
+    return m_ebounds_obs[m_index_obs];
+
 }
 
+/***********************************************************************//**
+ * @brief Compute ebounds_obs vector
+ *
+ ***************************************************************************/
+void GCTAEdispRmf::compute_ebounds_obs(const double& theta,
+                                      const double& phi,
+                                      const double& zenith,
+                                      const double& azimuth) const
+{
+
+    // Loop over Etrue
+    for (int itrue = 0; itrue < m_rmf.ntrue(); ++itrue) {
+
+        double logEsrc = m_rmf.etrue().emin(itrue).log10TeV();
+
+        // Set true energy
+        GEnergy etrue;
+        etrue.log10TeV(logEsrc);
+
+        // Add ebounds to vector
+        m_ebounds_obs.push_back(m_rmf.emeasured(etrue));
+    }
+
+    // Return
+    return;
+
+}
 
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
@@ -442,14 +572,75 @@ GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
                                    const double& zenith,
                                    const double& azimuth) const
 {
-    // Set measured energy
-    GEnergy emeasured;
-    emeasured.log10TeV(logEobs);
 
-    // Return true energy boundaries
-    return (m_rmf.etrue(emeasured));
+    // Compute only if parameters changed
+    if (!m_ebounds_src_computed || theta != m_theta) {
+
+        m_ebounds_src_computed = true;
+        m_theta = theta;
+
+        // Compute ebounds_obs
+        compute_ebounds_src(theta, phi, zenith, azimuth);
+
+    }
+
+    // Search index only if logEobs has changed
+    if (logEobs != m_logEobs) {
+
+        m_logEobs = logEobs;
+
+        // Find right index with bisection
+        int low = 0;
+        int high = m_ebounds_src.size();
+        while ((high-low) > 1) {
+            int  mid = (low+high) / 2;
+            double e = m_rmf.emeasured().emin(mid).log10TeV();
+            if (logEobs < e) {
+                high = mid;
+            }
+            else {
+                low = mid;
+            }
+        }
+        // Index found
+        m_index_src = low;
+        //std::cout << "emin = " << m_ebounds_src[m_index_src].emin().TeV() << std::endl;
+        //std::cout << "emax = " << m_ebounds_src[m_index_src].emax().TeV() << std::endl;
+
+    }
+
+    // Return energy boundaries
+    return m_ebounds_src[m_index_src];
+
 }
 
+/***********************************************************************//**
+ * @brief Compute ebounds_src vector
+ *
+ ***************************************************************************/
+void GCTAEdispRmf::compute_ebounds_src(const double& theta,
+                                       const double& phi,
+                                       const double& zenith,
+                                       const double& azimuth) const
+{
+
+    // Loop over Eobs
+    for (int imeas = 0; imeas < m_rmf.nmeasured(); ++imeas) {
+
+        double logEobs = m_rmf.emeasured().emin(imeas).log10TeV();
+
+        // Set measured energy
+        GEnergy emeasured;
+        emeasured.log10TeV(logEobs);
+
+        // Add ebounds to vector
+        m_ebounds_src.push_back(m_rmf.emeasured(emeasured));
+    }
+
+    // Return
+    return;
+
+}
 
 /***********************************************************************//**
  * @brief Print RMF information
@@ -524,9 +715,17 @@ void GCTAEdispRmf::init_members(void)
     // Initialise Monte Carlo cache
     m_mc_measured_start.clear();
     m_mc_measured_cdf.clear();
-    m_logEsrc     = -30.0;
-    m_theta       = 0.0;
+    m_cdf_computed         = false;
+    m_theta                = 0.0;
+    m_logEsrc              = -30.0;
+    m_logEobs              = -30.0;
     m_cumul.clear();
+    m_ebounds_obs_computed = false;
+    m_ebounds_obs.clear();
+    m_index_obs            = 0;
+    m_ebounds_src_computed = false;
+    m_ebounds_src.clear();
+    m_index_src            = 0;
 
     // Return
     return;
@@ -560,11 +759,19 @@ void GCTAEdispRmf::copy_members(const GCTAEdispRmf& edisp)
     m_wgt4           = edisp.m_wgt4;
 
     // Copy Monte Carlo cache
-    m_mc_measured_start = edisp.m_mc_measured_start;
-    m_mc_measured_cdf   = edisp.m_mc_measured_cdf;
-    m_logEsrc           = edisp.m_logEsrc;
-    m_theta             = edisp.m_theta;
-    m_cumul             = edisp.m_cumul;
+    m_mc_measured_start    = edisp.m_mc_measured_start;
+    m_mc_measured_cdf      = edisp.m_mc_measured_cdf;
+    m_cdf_computed         = edisp.m_cdf_computed;
+    m_theta                = edisp.m_theta;
+    m_logEsrc              = edisp.m_logEsrc;
+    m_logEobs              = edisp.m_logEobs;
+    m_cumul                = edisp.m_cumul;
+    m_ebounds_obs_computed = edisp.m_ebounds_obs_computed;
+    m_ebounds_obs          = edisp.m_ebounds_obs;
+    m_index_obs            = edisp.m_index_obs;
+    m_ebounds_src_computed = edisp.m_ebounds_src_computed;
+    m_ebounds_src          = edisp.m_ebounds_src;
+    m_index_src            = edisp.m_index_src;
 
     // Return
     return;
@@ -770,19 +977,29 @@ void GCTAEdispRmf::update(const double& etrue, const double& emeasured) const
 
 
 /***********************************************************************//**
- * @brief Update cumulative probability
+ * @brief Compute cumulative probability
  *
  ***************************************************************************/
-void GCTAEdispRmf::update_cumul(const double& logEsrc,
-                                const double& theta,
-                                const double& phi,
-                                const double& zenith,
-                                const double& azimuth) const
+void GCTAEdispRmf::compute_cumul(const double& theta,
+                                 const double& phi,
+                                 const double& zenith,
+                                 const double& azimuth) const
 {
-    if (logEsrc != m_logEsrc || theta != m_theta) {
+    // TODO ? compute also for each theta ??
 
-        m_logEsrc = logEsrc;
-        m_theta = theta;
+    if (!m_cdf_computed) {
+
+        m_cumul.clear();
+
+        //m_theta = theta;
+        m_cdf_computed = true;
+
+    // Loop over Esrc
+    for (int isrc = 0; isrc < m_rmf.ntrue(); ++isrc) {
+
+        m_cumul.push_back(std::vector<std::pair<double, double> >());
+
+        double logEsrc = m_rmf.etrue().elogmean(isrc).log10TeV();
 
         // Initialize cumulative probability
         double sum = 0.0;
@@ -802,21 +1019,22 @@ void GCTAEdispRmf::update_cumul(const double& logEsrc,
                 double Eobs = Eobsmin+i*deltaEobs/n;
 
                 // Compute cumulative probability
-                double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta) * deltaEobs / n / Eobs / std::log(10.0);
+                double add = GCTAEdispRmf::operator()(logEsrc, std::log10(Eobs), theta) * deltaEobs / (n * Eobs * gammalib::ln10);
 
-                //sum = sum+add/n >= 1.0 ? 1.0 : sum+add/n;
+                // Add to sum (and keep sum lower or equal to 1)
                 sum = sum+add >= 1.0 ? 1.0 : sum+add;
 
                 // Create pair containing Eobs and cumulative probability
                 std::pair<double, double> pair(Eobs, sum);
 
                 // Add to vector
-                m_cumul.push_back(pair);
+                m_cumul[isrc].push_back(pair);
             }
 
         }
     }
 
+    }
     // Return
     return;
 }
