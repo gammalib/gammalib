@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.hpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,6 +36,7 @@
 #include "GMatrix.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GCTAResponseCube.hpp"
@@ -140,6 +141,41 @@ protected:
     const double&          m_phi;     //!< Azimuth angle of source in camera system
     const double&          m_zenith;  //!< Zenith angle of source in Earth system
     const double&          m_azimuth; //!< Azimuth angle of source in Earth system
+};
+
+
+/***********************************************************************//**
+ * @class cta_nedisp_kern
+ *
+ * @brief Integration kernel for nedisp() method
+ *
+ * This class implements the integration kernel for the nedisp() method.
+ * The cta_nedisp_kern::eval method evaluates the energy dispersion for a
+ * given log10 of true photon energy as function of the log10 of observed
+ * event energy.
+ ***************************************************************************/
+class cta_nroi_kern : public GFunction {
+public:
+    cta_nroi_kern(const GModelSky&       model,
+                  const GCTAResponseIrf& rsp,
+                  const GTime&           srcTime,
+                  const GEnergy&         obsEng,
+                  const GTime&           obsTime,
+                  const GObservation&    obs) :
+                  m_model(model),
+                  m_rsp(rsp),
+                  m_srcTime(srcTime),
+                  m_obsEng(obsEng),
+                  m_obsTime(obsTime),
+                  m_obs(obs) {}
+    double eval(const double& logEsrc);
+protected:
+    const GModelSky&       m_model;
+    const GCTAResponseIrf& m_rsp;     //!< CTA response function
+    const GTime&           m_srcTime;
+    const GEnergy&         m_obsEng;
+    const GTime&           m_obsTime;
+    const GObservation&    m_obs;
 };
 
 
@@ -327,6 +363,8 @@ public:
                               const GModelSpatialRadial& model,
                               const GEnergy&             srcEng,
                               const GTime&               srcTime,
+                              const GEnergy&             obsEng,
+                              const GTime&               obsTime,
                               const GCTAObservation&     obs,
                               const GMatrix&             rot,
                               const double&              dist,
@@ -337,6 +375,8 @@ public:
                               m_model(model),
                               m_srcEng(srcEng),
                               m_srcTime(srcTime),
+                              m_obsEng(obsEng),
+                              m_obsTime(obsTime),
                               m_obs(obs),
                               m_rot(rot),
                               m_dist(dist),
@@ -352,6 +392,8 @@ protected:
     const GModelSpatialRadial& m_model;      //!< Radial spatial model
     const GEnergy&             m_srcEng;     //!< True photon energy
     const GTime&               m_srcTime;    //!< True photon arrival time
+    const GEnergy&             m_obsEng;     //!< Observed photon energy
+    const GTime&               m_obsTime;    //!< Observed photon arrival time
     const GCTAObservation&     m_obs;        //!< CTA observation
     const GMatrix&             m_rot;        //!< Rotation matrix
     const double&              m_dist;       //!< Distance model-ROI centre
@@ -389,6 +431,8 @@ public:
     cta_npred_radial_kern_omega(const GCTAResponseIrf& rsp,
                                 const GEnergy&         srcEng,
                                 const GTime&           srcTime,
+                                const GEnergy&         obsEng,
+                                const GTime&           obsTime,
                                 const GCTAObservation& obs,
                                 const GMatrix&         rot,
                                 double                 sin_rho,
@@ -396,6 +440,8 @@ public:
                                 m_rsp(rsp),
                                 m_srcEng(srcEng),
                                 m_srcTime(srcTime),
+                                m_obsEng(obsEng),
+                                m_obsTime(obsTime),
                                 m_obs(obs),
                                 m_rot(rot),
                                 m_cos_rho(cos_rho),
@@ -405,6 +451,8 @@ protected:
     const GCTAResponseIrf& m_rsp;        //!< CTA response
     const GEnergy&         m_srcEng;     //!< True photon energy
     const GTime&           m_srcTime;    //!< True photon arrival time
+    const GEnergy&         m_obsEng;     //!< Observed photon energy
+    const GTime&           m_obsTime;    //!< Observed photon arrival time
     const GCTAObservation& m_obs;        //!< CTA observation
     const GMatrix&         m_rot;        //!< Rotation matrix
     double                 m_cos_rho;    //!< Cosine of offset angle
@@ -620,6 +668,8 @@ public:
                                   const double&                  posangle,
                                   const GEnergy&                 srcEng,
                                   const GTime&                   srcTime,
+                                  const GEnergy&                 obsEng,
+                                  const GTime&                   obsTime,
                                   const GCTAObservation&         obs,
                                   const GMatrix&                 rot,
                                   const double&                  rho_roi,
@@ -633,6 +683,8 @@ public:
                                   m_posangle(posangle),
                                   m_srcEng(srcEng),
                                   m_srcTime(srcTime),
+                                  m_obsEng(obsEng),
+                                  m_obsTime(obsTime),
                                   m_obs(obs),
                                   m_rot(rot),
                                   m_rho_roi(rho_roi),
@@ -651,6 +703,8 @@ protected:
     const double&                  m_posangle;       //!< Ellipse boundary position angle
     const GEnergy&                 m_srcEng;         //!< True photon energy
     const GTime&                   m_srcTime;        //!< True photon arrival time
+    const GEnergy&                 m_obsEng;         //!< Observed photon energy
+    const GTime&                   m_obsTime;        //!< Observed photon arrival time
     const GCTAObservation&         m_obs;            //!< CTA observation
     const GMatrix&                 m_rot;            //!< Rotation matrix
     const double&                  m_rho_roi;        //!< Distance between model and ROI centre
@@ -691,6 +745,8 @@ public:
                                     const GModelSpatialElliptical& model,
                                     const GEnergy&                 srcEng,
                                     const GTime&                   srcTime,
+                                    const GEnergy&                 obsEng,
+                                    const GTime&                   obsTime,
                                     const GCTAObservation&         obs,
                                     const GMatrix&                 rot,
                                     const double&                  rho,
@@ -701,6 +757,8 @@ public:
                                     m_model(model),
                                     m_srcEng(srcEng),
                                     m_srcTime(srcTime),
+                                    m_obsEng(obsEng),
+                                    m_obsTime(obsTime),
                                     m_obs(obs),
                                     m_rot(rot),
                                     m_rho(rho),
@@ -713,6 +771,8 @@ protected:
     const GModelSpatialElliptical& m_model;        //!< Model
     const GEnergy&                 m_srcEng;       //!< True photon energy
     const GTime&                   m_srcTime;      //!< True photon arrival time
+    const GEnergy&                 m_obsEng;       //!< Observed photon energy
+    const GTime&                   m_obsTime;      //!< Observed photon arrival time
     const GCTAObservation&         m_obs;          //!< Pointer to observation
     const GMatrix&                 m_rot;          //!< Rotation matrix
     const double&                  m_rho;
@@ -906,6 +966,8 @@ public:
                                  const GModelSpatial&   model,
                                  const GEnergy&         srcEng,
                                  const GTime&           srcTime,
+                                 const GEnergy&         obsEng,
+                                 const GTime&           obsTime,
                                  const GCTAObservation& obs,
                                  const GMatrix&         rot,
                                  const int&             iter) :
@@ -913,6 +975,8 @@ public:
                                  m_model(model),
                                  m_srcEng(srcEng),
                                  m_srcTime(srcTime),
+                                 m_obsEng(obsEng),
+                                 m_obsTime(obsTime),
                                  m_obs(obs),
                                  m_rot(rot),
                                  m_iter(iter) { }
@@ -922,6 +986,8 @@ protected:
     const GModelSpatial&   m_model;      //!< Spatial model
     const GEnergy&         m_srcEng;     //!< True photon energy
     const GTime&           m_srcTime;    //!< True photon arrival time
+    const GEnergy&         m_obsEng;     //!< Observed photon energy
+    const GTime&           m_obsTime;    //!< Observed photon arrival time
     const GCTAObservation& m_obs;        //!< CTA observation
     const GMatrix&         m_rot;        //!< Rotation matrix
     const int&             m_iter;       //!< Integration iterations
@@ -954,6 +1020,8 @@ public:
                                const GModelSpatial&   model,
                                const GEnergy&         srcEng,
                                const GTime&           srcTime,
+                               const GEnergy&         obsEng,
+                               const GTime&           obsTime,
                                const GCTAObservation& obs,
                                const GMatrix&         rot,
                                const double&          theta,
@@ -962,6 +1030,8 @@ public:
                                m_model(model),
                                m_srcEng(srcEng),
                                m_srcTime(srcTime),
+                               m_obsEng(obsEng),
+                               m_obsTime(obsTime),
                                m_obs(obs),
                                m_rot(rot),
                                m_theta(theta),
@@ -973,6 +1043,8 @@ protected:
     const GModelSpatial&   m_model;      //!< Spatial model
     const GEnergy&         m_srcEng;     //!< True photon energy
     const GTime&           m_srcTime;    //!< True photon arrival time
+    const GEnergy&         m_obsEng;     //!< Observed photon energy
+    const GTime&           m_obsTime;    //!< Observed photon arrival time
     const GCTAObservation& m_obs;        //!< CTA observation
     const GMatrix&         m_rot;        //!< Rotation matrix
     const double&          m_theta;      //!< Offset angle (radians)

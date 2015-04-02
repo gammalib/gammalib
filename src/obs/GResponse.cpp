@@ -38,6 +38,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialElliptical.hpp"
@@ -153,19 +154,13 @@ GResponse& GResponse::operator=(const GResponse& rsp)
  =                                                                         =
  ==========================================================================*/
 
-
-/*==========================================================================
- =                                                                         =
- =                          Obsolete public methods                        =
- =                                                                         =
- ==========================================================================*/
-
 /***********************************************************************//**
  * @brief Convolve sky model with the instrument response
  *
  * @param[in] model Sky model.
  * @param[in] event Event.
  * @param[in] obs Observation.
+ * @param[in] grad Should model gradients be computed? (default: true)
  * @return Event probability.
  *
  * Computes the event probability
@@ -181,48 +176,47 @@ GResponse& GResponse::operator=(const GResponse& rsp)
  ***************************************************************************/
 double GResponse::convolve(const GModelSky&    model,
                            const GEvent&       event,
-                           const GObservation& obs) const
+                           const GObservation& obs,
+                           const bool&         grad) const
 {
     // Initialise result
     double prob = 0.0;
 
-    // Get response function
-    const GResponse* rsp = obs.response();
-
     // Continue only if the model has a spatial component
-    if (spatial() != NULL) {
+    if (model.spatial() != NULL) {
 
-        // Get response function
-        const GResponse* rsp = obs.response();
+        // Get source energy and time (no dispersion)
+        GEnergy srcEng  = event.energy();
+        GTime   srcTime = event.time();
 
         // Set source
-        GSource source(this->name(), m_spatial, srcEng, srcTime);
+        GSource source(model.name(), model.spatial(), srcEng, srcTime);
         
         // Get IRF value. This method returns the spatial component of the
         // source model.
-        double irf = rsp->irf(event, source, obs);
+        double irf = this->irf(event, source, obs);
 
         // If required, apply instrument specific model scaling
-        if (!m_scales.empty()) {
-            irf *= scale(obs.instrument()).value();
+        if (model.has_scales()) {
+            irf *= model.scale(obs.instrument()).value();
         }
 
         // Case A: evaluate gradients
         if (grad) {
 
             // Evaluate source model
-            double spec = (spectral() != NULL) ? spectral()->eval_gradients(srcEng, srcTime) : 1.0;
-            double temp = (temporal() != NULL) ? temporal()->eval_gradients(srcTime) : 1.0;
+            double spec = (model.spectral() != NULL) ? model.spectral()->eval_gradients(srcEng, srcTime) : 1.0;
+            double temp = (model.temporal() != NULL) ? model.temporal()->eval_gradients(srcTime) : 1.0;
 
-            // Set value
-            value = spec * temp * irf;
+            // Set probability
+            prob = spec * temp * irf;
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-                std::cout << "*** ERROR: GModelSky::integrate_dir:";
+            if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
+                std::cout << "*** ERROR: GResponse::convolve:";
                 std::cout << " NaN/Inf encountered";
-                std::cout << " (value=" << value;
+                std::cout << " (prob=" << prob;
                 std::cout << ", spec=" << spec;
                 std::cout << ", temp=" << temp;
                 std::cout << ", irf=" << irf;
@@ -231,21 +225,21 @@ double GResponse::convolve(const GModelSky&    model,
             #endif
 
             // Multiply factors to spectral gradients
-            if (spectral() != NULL) {
+            if (model.spectral() != NULL) {
                 double fact = temp * irf;
                 if (fact != 1.0) {
-                    for (int i = 0; i < spectral()->size(); ++i) {
-                        (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact);
+                    for (int i = 0; i < model.spectral()->size(); ++i) {
+                        (*model.spectral())[i].factor_gradient((*model.spectral())[i].factor_gradient() * fact);
                     }
                 }
             }
 
             // Multiply factors to temporal gradients
-            if (temporal() != NULL) {
+            if (model.temporal() != NULL) {
                 double fact = spec * irf;
                 if (fact != 1.0) {
-                    for (int i = 0; i < temporal()->size(); ++i) {
-                        (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact);
+                    for (int i = 0; i < model.temporal()->size(); ++i) {
+                        (*model.temporal())[i].factor_gradient((*model.temporal())[i].factor_gradient() * fact);
                     }
                 }
             }
@@ -256,18 +250,18 @@ double GResponse::convolve(const GModelSky&    model,
         else {
 
             // Evaluate source model
-            double spec = (m_spectral != NULL) ? m_spectral->eval(srcEng, srcTime) : 1.0;
-            double temp = (m_temporal != NULL) ? m_temporal->eval(srcTime) : 1.0;
+            double spec = (model.spectral() != NULL) ? model.spectral()->eval(srcEng, srcTime) : 1.0;
+            double temp = (model.temporal() != NULL) ? model.temporal()->eval(srcTime) : 1.0;
 
-            // Set value
-            value = spec * temp * irf;
+            // Set probability
+            prob = spec * temp * irf;
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-                std::cout << "*** ERROR: GModelSky::integrate_dir:";
+            if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
+                std::cout << "*** ERROR: GResponse::convolve:";
                 std::cout << " NaN/Inf encountered";
-                std::cout << " (value=" << value;
+                std::cout << " (prob=" << prob;
                 std::cout << ", spec=" << spec;
                 std::cout << ", temp=" << temp;
                 std::cout << ", irf=" << irf;
@@ -279,21 +273,16 @@ double GResponse::convolve(const GModelSky&    model,
 
     } // endif: Gamma-ray source model had a spatial component
 
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
-        std::cout << "*** ERROR: GResponse::convolve:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << prob;
-        std::cout << ", event=" << event;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
     // Return event probability
     return prob;
 }
 
+
+/*==========================================================================
+ =                                                                         =
+ =                          Obsolete public methods                        =
+ =                                                                         =
+ ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Return value of instrument response function
@@ -448,6 +437,7 @@ double GResponse::irf_diffuse(const GEvent&       event,
  * The method applies the deadtime correction, so that the result can be
  * directly multiplied by the exposure time (also known as ontime).
  ***************************************************************************/
+/*
 double GResponse::npred(const GSource& source, const GObservation& obs) const
 {
     // Initialise Npred value
@@ -474,7 +464,7 @@ double GResponse::npred(const GSource& source, const GObservation& obs) const
     // Return response value
     return npred;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return ROI integral of point source model
@@ -487,6 +477,7 @@ double GResponse::npred(const GSource& source, const GObservation& obs) const
  * region of interest. The method assumes that source.model() is of type
  * GModelSpatialPointSource.
  ***************************************************************************/
+/*
 double GResponse::npred_ptsrc(const GSource& source,
                               const GObservation& obs) const
 {
@@ -503,7 +494,7 @@ double GResponse::npred_ptsrc(const GSource& source,
     // Return Npred
     return npred;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return spatial integral of radial source model
@@ -516,6 +507,7 @@ double GResponse::npred_ptsrc(const GSource& source,
  * the region of interest. The method assumes that source.model() is of type
  * GModelSpatialRadial.
  ***************************************************************************/
+/*
 double GResponse::npred_radial(const GSource& source,
                                const GObservation& obs) const
 {
@@ -578,7 +570,7 @@ double GResponse::npred_radial(const GSource& source,
     // Return Npred
     return npred;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return spatial integral of elliptical source model
@@ -590,6 +582,7 @@ double GResponse::npred_radial(const GSource& source,
  * the region of interest. The method assumes that source.model() is of type
  * GModelSpatialElliptical.
  ***************************************************************************/
+/*
 double GResponse::npred_elliptical(const GSource& source,
                                    const GObservation& obs) const
 {
@@ -652,7 +645,7 @@ double GResponse::npred_elliptical(const GSource& source,
     // Return Npred
     return npred;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return spatial integral of diffuse source model
@@ -663,6 +656,7 @@ double GResponse::npred_elliptical(const GSource& source,
  * @exception GException::feature_not_implemented
  *            Method not yet implemented.
  ***************************************************************************/
+/*
 double GResponse::npred_diffuse(const GSource& source,
                                 const GObservation& obs) const
 {
@@ -673,270 +667,7 @@ double GResponse::npred_diffuse(const GSource& source,
     // Return Npred
     return 0.0;
 }
-
-
-/***********************************************************************//**
- * @brief Return data space integral of instrument response function
- *
- * @param[in] source Source.
- * @param[in] obsEng Observed energy.
- * @param[in] obsTime Observed time.
- * @param[in] obs Observation.
- * @return Integral of model over ROI.
- *
- * Returns the data space integral of the instrument response function for
- * a given source and a particular observation. This method is needed for
- * an unbinned maximum likelihood analysis.
- *
- * The method applies the deadtime correction, so that the result can be
- * directly multiplied by the exposure time (also known as ontime).
- ***************************************************************************/
-double GResponse::npred(const GSource&      source,
-                        const GEnergy&      obsEng,
-                        const GTime&        obsTime,
-                        const GObservation& obs) const
-{
-    // Initialise Npred value
-    double npred = 0.0;
-
-    // Select NPRED depending on the spatial model type
-    switch (source.model()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            npred = npred_ptsrc(source, obsEng, obsTime, obs);
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-            npred = npred_radial(source, obsEng, obsTime, obs);
-            break;
-        case GMODEL_SPATIAL_ELLIPTICAL:
-            npred = npred_elliptical(source, obsEng, obsTime, obs);
-            break;
-        case GMODEL_SPATIAL_DIFFUSE:
-            npred = npred_diffuse(source, obsEng, obsTime, obs);
-            break;
-        default:
-            break;
-    }
-
-    // Return response value
-    return npred;
-}
-
-
-/***********************************************************************//**
- * @brief Return ROI integral of point source model
- *
- * @param[in] source Source.
- * @param[in] obsEng Observed energy.
- * @param[in] obsTime Observed time.
- * @param[in] obs Observation.
- * @return Integral of point source model over ROI.
- *
- * This method returns the spatial integral of a point source model over the
- * region of interest. The method assumes that source.model() is of type
- * GModelSpatialPointSource.
- ***************************************************************************/
-double GResponse::npred_ptsrc(const GSource&      source,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GObservation& obs) const
-{
-    // Get point source spatial model
-    const GModelSpatialPointSource* src =
-          static_cast<const GModelSpatialPointSource*>(source.model());
-
-    // Set Photon
-    GPhoton photon(src->dir(), source.energy(), source.time());
-
-    // Compute Npred
-    double npred = this->npred(photon, obsEng, obsTime, obs);
-
-    // Return Npred
-    return npred;
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of radial source model
- *
- * @param[in] source Source.
- * @param[in] obsEng Observed energy.
- * @param[in] obsTime Observed time.
- * @param[in] obs Observation.
- * @return Integral of radial source model over ROI.
- *
- * This method returns the spatial integral of a radial source model over
- * the region of interest. The method assumes that source.model() is of type
- * GModelSpatialRadial.
- ***************************************************************************/
-double GResponse::npred_radial(const GSource&      source,
-                               const GEnergy&      obsEng,
-                               const GTime&        obsTime,
-                               const GObservation& obs) const
-{
-    // Initialise Npred value
-    double npred = 0.0;
-
-    // Get radial spatial model
-    const GModelSpatialRadial* spatial =
-          static_cast<const GModelSpatialRadial*>(source.model());
-
-    // Compute rotation matrix to convert from native coordinates given
-    // by (theta,phi) into celestial coordinates.
-    GMatrix ry;
-    GMatrix rz;
-    ry.eulery(spatial->dec() - 90.0);
-    rz.eulerz(-spatial->ra());
-    GMatrix rot = (ry * rz).transpose();
-
-    // Set offset angle integration range
-    double theta_min = 0.0;
-    double theta_max = spatial->theta_max();
-
-    // Perform offset angle integration if interval is valid
-    if (theta_max > theta_min) {
-
-        // Setup integration kernel
-        GResponse::npred_radial_kern_theta integrand(*this,
-                                                     *spatial,
-                                                     source.energy(),
-                                                     source.time(),
-                                                     obs,
-                                                     rot);
-
-        // Integrate over theta
-        GIntegral integral(&integrand);
-        npred = integral.romberg(theta_min, theta_max);
-
-        // Compile option: Show integration results
-        #if defined(G_DEBUG_NPRED_RADIAL)
-        std::cout << "GResponse::npred_radial:";
-        std::cout << " theta_min=" << theta_min;
-        std::cout << " theta_max=" << theta_max;
-        std::cout << " npred=" << npred << std::endl;
-        #endif
-
-    } // endif: offset angle range was valid
-
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-        std::cout << "*** ERROR: GResponse::npred_radial:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (npred=" << npred;
-        std::cout << ", theta_min=" << theta_min;
-        std::cout << ", theta_max=" << theta_max;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return Npred
-    return npred;
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of elliptical source model
- *
- * @param[in] source Source.
- * @param[in] obsEng Observed energy.
- * @param[in] obsTime Observed time.
- * @param[in] obs Observation.
- * @return Integral of elliptical source model over ROI.
- *
- * This method returns the spatial integral of a radial source model over
- * the region of interest. The method assumes that source.model() is of type
- * GModelSpatialElliptical.
- ***************************************************************************/
-double GResponse::npred_elliptical(const GSource&      source,
-                                   const GEnergy&      obsEng,
-                                   const GTime&        obsTime,
-                                   const GObservation& obs) const
-{
-    // Initialise Npred value
-    double npred = 0.0;
-
-    // Get elliptical spatial model
-    const GModelSpatialElliptical* spatial =
-          static_cast<const GModelSpatialElliptical*>(source.model());
-
-    // Compute rotation matrix to convert from native coordinates given
-    // by (theta,phi) into celestial coordinates.
-    GMatrix ry;
-    GMatrix rz;
-    ry.eulery(spatial->dec() - 90.0);
-    rz.eulerz(-spatial->ra());
-    GMatrix rot = (ry * rz).transpose();
-
-    // Set offset angle integration range
-    double theta_min = 0.0;
-    double theta_max = spatial->theta_max();
-
-    // Perform offset angle integration if interval is valid
-    if (theta_max > theta_min) {
-
-        // Setup integration kernel
-        GResponse::npred_elliptical_kern_theta integrand(*this,
-                                                         *spatial,
-                                                         source.energy(),
-                                                         source.time(),
-                                                         obs,
-                                                         rot);
-
-        // Integrate over theta
-        GIntegral integral(&integrand);
-        npred = integral.romberg(theta_min, theta_max);
-
-        // Compile option: Show integration results
-        #if defined(G_DEBUG_NPRED_ELLIPTICAL)
-        std::cout << "GResponse::npred_elliptical:";
-        std::cout << " theta_min=" << theta_min;
-        std::cout << " theta_max=" << theta_max;
-        std::cout << " npred=" << npred << std::endl;
-        #endif
-
-    } // endif: performed offset angle integration
-
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-        std::cout << "*** ERROR: GResponse::npred_elliptical:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (npred=" << npred;
-        std::cout << ", theta_min=" << theta_min;
-        std::cout << ", theta_max=" << theta_max;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return Npred
-    return npred;
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of diffuse source model
- *
- * @param[in] source Source.
- * @param[in] obsEng Observed energy.
- * @param[in] obsTime Observed time.
- * @param[in] obs Observation.
- * @return Integral of diffuse source model over ROI.
- *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented.
- ***************************************************************************/
-double GResponse::npred_diffuse(const GSource&      source,
-                                const GEnergy&      obsEng,
-                                const GTime&        obsTime,
-                                const GObservation& obs) const
-{
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_NPRED_DIFFUSE,
-          "Npred computation not implemented for diffuse models.");
-
-    // Return Npred
-    return 0.0;
-}
+*/
 
 
 /***********************************************************************//**
@@ -1006,6 +737,7 @@ void GResponse::free_members(void)
  *
  * @param[in] theta Radial model offset angle (radians).
  ***************************************************************************/
+/*
 double GResponse::npred_radial_kern_theta::eval(const double& theta)
 {
     // Initialise Npred value
@@ -1046,6 +778,7 @@ double GResponse::npred_radial_kern_theta::eval(const double& theta)
     // Return Npred
     return npred;
 }
+*/
 
 
 /***********************************************************************//**
@@ -1053,6 +786,7 @@ double GResponse::npred_radial_kern_theta::eval(const double& theta)
  *
  * @param[in] phi Azimuth angle (radians).
  ***************************************************************************/
+/*
 double GResponse::npred_radial_kern_phi::eval(const double& phi)
 {
     // Compute sky direction vector in native coordinates
@@ -1089,6 +823,7 @@ double GResponse::npred_radial_kern_phi::eval(const double& phi)
     // Return Npred
     return npred;
 }
+*/
 
 
 /***********************************************************************//**
@@ -1096,6 +831,7 @@ double GResponse::npred_radial_kern_phi::eval(const double& phi)
  *
  * @param[in] theta Radial model offset angle (radians).
  ***************************************************************************/
+/*
 double GResponse::npred_elliptical_kern_theta::eval(const double& theta)
 {
     // Initialise Npred value
@@ -1133,6 +869,7 @@ double GResponse::npred_elliptical_kern_theta::eval(const double& theta)
     // Return Npred
     return npred;
 }
+*/
 
 
 /***********************************************************************//**
@@ -1140,6 +877,7 @@ double GResponse::npred_elliptical_kern_theta::eval(const double& theta)
  *
  * @param[in] phi Azimuth angle (radians).
  ***************************************************************************/
+/*
 double GResponse::npred_elliptical_kern_phi::eval(const double& phi)
 {
     // Compute sky direction vector in native coordinates
@@ -1180,3 +918,4 @@ double GResponse::npred_elliptical_kern_phi::eval(const double& phi)
     // Return Npred
     return npred;
 }
+*/

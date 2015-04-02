@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.hpp - CTA instrument response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,20 +84,53 @@ public:
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
                                  const GObservation& obs) const;
+    virtual double           nroi(const GModelSky&    model,
+                                  const GEnergy&      obsEng,
+                                  const GTime&        obsTime,
+                                  const GObservation& obs) const;
+    /*
     virtual double           npred(const GPhoton&      photon,
                                    const GObservation& obs) const;
+    */
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(const GChatter& chatter = NORMAL) const;
 
-    // New pure virtual methods
-    virtual double   convolve(const GModelSky&    model,
-                              const GEvent&       event,
-                              const GObservation& obs) const;
-    virtual double   nroi(const GModelSky&    model,
-                          const GEnergy&      obsEng,
-                          const GTime&        obsTime,
-                          const GObservation& obs) const;
+    // New support methods
+    double nroi(const GModelSky&    model,
+                const GEnergy&      srcEng,
+                const GTime&        srcTime,
+                const GEnergy&      obsEng,
+                const GTime&        obsTime,
+                const GObservation& obs) const;
+    double nroi_ptsrc(const GModelSky&    model,
+                      const GEnergy&      srcEng,
+                      const GTime&        srcTime,
+                      const GEnergy&      obsEng,
+                      const GTime&        obsTime,
+                      const GObservation& obs) const;
+    double nroi_radial(const GModelSky&    model,
+                       const GEnergy&      srcEng,
+                       const GTime&        srcTime,
+                       const GEnergy&      obsEng,
+                       const GTime&        obsTime,
+                       const GObservation& obs) const;
+    double nroi_elliptical(const GModelSky&    model,
+                           const GEnergy&      srcEng,
+                           const GTime&        srcTime,
+                           const GEnergy&      obsEng,
+                           const GTime&        obsTime,
+                           const GObservation& obs) const;
+    double nroi_diffuse(const GModelSky&    model,
+                        const GEnergy&      srcEng,
+                        const GTime&        srcTime,
+                        const GEnergy&      obsEng,
+                        const GTime&        obsTime,
+                        const GObservation& obs) const;
+    double nroi(const GPhoton&      photon,
+                const GEnergy&      obsEng,
+                const GTime&        obsTime,
+                const GObservation& obs) const;
 
     // Overload virtual base class methods
     virtual double   irf_radial(const GEvent&       event,
@@ -109,12 +142,14 @@ public:
     virtual double   irf_diffuse(const GEvent&       event,
                                  const GSource&      source,
                                  const GObservation& obs) const;
+    /*
     virtual double   npred_radial(const GSource&      source,
                                   const GObservation& obs) const;
     virtual double   npred_elliptical(const GSource&      source,
                                       const GObservation& obs) const;
     virtual double   npred_diffuse(const GSource&      source,
                                    const GObservation& obs) const;
+    */
     virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods

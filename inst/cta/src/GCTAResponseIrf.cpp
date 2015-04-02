@@ -36,6 +36,8 @@
 #include "GMath.hpp"
 #include "GIntegral.hpp"
 #include "GCaldb.hpp"
+#include "GModelSky.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialShell.hpp"
 #include "GModelSpatialElliptical.hpp"
@@ -396,6 +398,843 @@ double GCTAResponseIrf::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
+ * @brief Return integral of event probability for a given sky model over ROI
+ *
+ * @param[in] model Incident photon.
+ * @param[in] obs Observation.
+ * @return 0.0
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ *
+ * Computes the integral
+ *
+ * \f[
+ *    N_{\rm ROI}(E',t') = \int_{\rm ROI} P(p',E',t') dp'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * for a given sky model \f$S(p,E,t)\f$ and response function
+ * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
+ ***************************************************************************/
+double GCTAResponseIrf::nroi(const GModelSky&    model,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const
+{
+    // Initialise Nroi value
+    double nroi = 0.0;
+
+    // No time dispersion supported
+    const GTime& srcTime = obsTime;
+
+    // If energy dispersion is requested then integrate over the relevant
+    // true photon energies ...
+    if (use_edisp()) {
+    
+        // Retrieve true energy boundaries
+        double   obsLogEng = obsEng.log10TeV();
+        GEbounds ebounds   = edisp()->ebounds_src(obsLogEng);
+    
+        // Loop over all boundaries
+        for (int i = 0; i < ebounds.size(); ++i) {
+
+            // Get boundaries in MeV
+            double emin = ebounds.emin(i).MeV();
+            double emax = ebounds.emax(i).MeV();
+
+            // Continue only if valid
+            if (emax > emin) {
+
+                // Setup integration function
+                cta_nroi_kern integrand(model, *this, srcTime, obsEng, obsTime, obs);
+                GIntegral integral(&integrand);
+
+                // Set integration precision
+                integral.eps(1.0e-3);
+
+                // Do Romberg integration
+                emin  = std::log(emin);
+                emax  = std::log(emax);
+                nroi += integral.romberg(emin, emax);
+    
+            } // endif: interval was valid
+
+        } // endfor: looped over energy intervals
+
+    } // endif: energy dispersion requested
+
+    // ... otherwise evaluate
+    else {
+    
+        // No energy dispersion
+        const GEnergy& srcEng = obsEng;
+
+        // Compute response components
+        double npred_spatial  = this->nroi(model, srcEng, srcTime, obsEng, obsTime, obs);
+        double npred_spectral = model.spectral()->eval(srcEng, srcTime);
+        double npred_temporal = model.temporal()->eval(srcTime);
+
+        // Compute response
+        nroi = npred_spatial * npred_spectral * npred_temporal;
+        
+    } // endelse: no energy dispersion requested
+
+    // If required, apply instrument specific model scaling
+    if (model.has_scales()) {
+        nroi *= model.scale(obs.instrument()).value();
+    }
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+        std::cout << "*** ERROR: GCTAResponseIrf::nroi:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (nroi=" << nroi;
+        std::cout << ", obsEng=" << obsEng;
+        std::cout << ", obsTime=" << obsTime;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return response value
+    return nroi;
+}
+double GCTAResponseIrf::nroi(const GModelSky&    model,
+                             const GEnergy&      srcEng,
+                             const GTime&        srcTime,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const
+{
+    // Initialise response value
+    double nroi = 0.0;
+
+    // Select method depending on the spatial model type
+    switch (model.spatial()->code()) {
+        case GMODEL_SPATIAL_POINT_SOURCE:
+            nroi = nroi_ptsrc(model, srcEng, srcTime, obsEng, obsTime, obs);
+            break;
+        case GMODEL_SPATIAL_RADIAL:
+            nroi = nroi_radial(model, srcEng, srcTime, obsEng, obsTime, obs);
+            break;
+        case GMODEL_SPATIAL_ELLIPTICAL:
+            nroi = nroi_elliptical(model, srcEng, srcTime, obsEng, obsTime, obs);
+            break;
+        case GMODEL_SPATIAL_DIFFUSE:
+            nroi = nroi_diffuse(model, srcEng, srcTime, obsEng, obsTime, obs);
+            break;
+        default:
+            break;
+    }
+
+    // Return response value
+    return nroi;
+}
+double GCTAResponseIrf::nroi_ptsrc(const GModelSky&    model,
+                                   const GEnergy&      srcEng,
+                                   const GTime&        srcTime,
+                                   const GEnergy&      obsEng,
+                                   const GTime&        obsTime,
+                                   const GObservation& obs) const
+{
+    // Get point source spatial model
+    const GModelSpatialPointSource* src =
+          static_cast<const GModelSpatialPointSource*>(model.spatial());
+
+    // Set Photon
+    GPhoton photon(src->dir(), srcEng, srcTime);
+
+    // Compute Nroi
+    double nroi = this->nroi(photon, obsEng, obsTime, obs);
+
+    // Return Nroi
+    return nroi;
+}
+
+/***********************************************************************//**
+ * @brief Return spatial integral of radial source model over ROI
+ *
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_model_type
+ *            Model is not a radial model.
+ *
+ * Integrates the product of the radial model and Npred over the Region Of
+ * Interest using
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    N_{\rm pred}(\rho, \omega) d\omega
+ *    d\rho
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
+ * - \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest,
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
+ *
+ * The integration is performed in a spherical coordinate system that is
+ * centred on the source model centre \f$\vec{m}\f$, with \f$(\rho,\omega)\f$
+ * being the zenith and azimuth angles, respectively.
+ *
+ * The zenith angle integration range \f$[\rho_{\rm min}, \rho_{\rm max}\f$
+ * and azimuth angle integration range 
+ * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
+ * are adjusted so that only coordinates within the circular region of
+ * interest will be considered.
+ *
+ * Note that we estimate the integration radius based on the size of the
+ * onaxis PSF. This should be fine as long as the offaxis PSF is not
+ * considerably larger than the onaxis PSF. We should verify this, however.
+ *
+ * @todo Verify that offaxis PSF is not considerably larger than onaxis
+ *       PSF. 
+ ***************************************************************************/
+double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
+                                    const GEnergy&      srcEng,
+                                    const GTime&        srcTime,
+                                    const GEnergy&      obsEng,
+                                    const GTime&        obsTime,
+                                    const GObservation& obs) const
+{
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 6;
+    static const int iter_phi = 6;
+
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Retrieve CTA observation, ROI and pointing
+    const GCTAObservation& cta = retrieve_obs(G_NPRED_RADIAL, obs);
+    const GCTARoi&         roi = retrieve_roi(G_NPRED_RADIAL, obs);
+    const GCTAPointing&    pnt = cta.pointing();
+
+    // Get pointer on radial model
+    const GModelSpatialRadial* radial =
+          dynamic_cast<const GModelSpatialRadial*>(&model);
+    if (radial == NULL) {
+        throw GCTAException::bad_model_type(G_NPRED_RADIAL);
+    }
+
+    // Get source attributes
+    const GSkyDir& centre  = radial->dir();
+    //const GEnergy& srcEng  = source.energy();
+    //const GTime&   srcTime = source.time();
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
+
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
+    // as this allows us doing this computation in the outer loop. This
+    // should be sufficient here, unless the offaxis PSF becomes much worse
+    // than the onaxis PSF. In this case, we may add a safety factor here
+    // to make sure we encompass the entire PSF.
+    double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
+
+    // Extract ROI radius (radians)
+    double roi_radius = roi.radius() * gammalib::deg2rad;
+
+    // Compute distance between ROI and model centre (radians)
+    double roi_model_distance = roi.centre().dir().dist(centre);
+
+    // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+    // coming from beyond this radius will not make it in the dataspace and
+    // thus can be neglected.
+    double roi_psf_radius = roi_radius + psf_max_radius;
+
+    // Set offset angle integration range. We take here the ROI+PSF into
+    // account to make no integrations beyond the point where the
+    // contribution drops to zero.
+    double rho_min = (roi_model_distance > roi_psf_radius)
+                     ? roi_model_distance - roi_psf_radius: 0.0;
+    double rho_max = radial->theta_max();
+
+    // Perform offset angle integration only if interval is valid
+    if (rho_max > rho_min) {
+
+        // Compute rotation matrix to convert from native model coordinates,
+        // given by (rho,omega), into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        ry.eulery(radial->dec() - 90.0);
+        rz.eulerz(-radial->ra());
+        GMatrix rot = (ry * rz).transpose();
+
+        // Compute position angle of ROI centre with respect to model
+        // centre (radians)
+        double omega0 = centre.posang(roi.centre().dir());
+
+        // Setup integration kernel
+        cta_npred_radial_kern_rho integrand(*this,
+                                            *radial,
+                                            srcEng,
+                                            srcTime,
+                                            obsEng,
+                                            obsTime,
+                                            cta,
+                                            rot,
+                                            roi_model_distance,
+                                            roi_psf_radius,
+                                            omega0,
+                                            iter_phi);
+
+        // Integrate over model's zenith angle
+        GIntegral integral(&integrand);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
+
+        // If the integration range includes a transition between full
+        // containment of model within ROI and partial containment, then
+        // add a boundary at this location
+        double transition_point = roi_psf_radius - roi_model_distance;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If the integration range includes a transition between full
+        // containment of ROI within model and partial containment, then
+        // add a boundary at this location
+        transition_point = roi_psf_radius + roi_model_distance;
+        if (transition_point > rho_min && transition_point < rho_max) {
+            bounds.push_back(transition_point);
+        }
+
+        // If we have a shell model then add an integration boundary for the
+        // shell radius as a function discontinuity will occur at this
+        // location
+        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(radial);
+        if (shell != NULL) {
+            double shell_radius = shell->radius() * gammalib::deg2rad;
+            if (shell_radius > rho_min && shell_radius < rho_max) {
+                bounds.push_back(shell_radius);
+            }
+        }
+
+        // Integrate kernel
+        npred = integral.romberg(bounds, iter_rho);
+
+        // Compile option: Show integration results
+        #if defined(G_DEBUG_NPRED_RADIAL)
+        std::cout << "GCTAResponseIrf::npred_radial:";
+        std::cout << " rho_min=" << rho_min;
+        std::cout << " rho_max=" << rho_max;
+        std::cout << " npred=" << npred << std::endl;
+        #endif
+
+    } // endif: offset angle range was valid
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+        std::cout << "*** ERROR: GCTAResponseIrf::npred_radial:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", rho_min=" << rho_min;
+        std::cout << ", rho_max=" << rho_max;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of elliptical source model over ROI
+ *
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_model_type
+ *            Model is not an elliptical model.
+ *
+ * Integrates the product of the elliptical model and Npred over the Region
+ * Of Interest using
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    \sin \rho \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    S_{\rm p}(\rho,\omega | E, t) \,
+ *    N_{\rm pred}(\rho,\omega) d\omega
+ *    d\rho
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho,\omega | E, t)\f$ is the elliptical model,
+ * - \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest,
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
+ *
+ * The integration is performed in a spherical coordinate system that is
+ * centred on the source model centre \f$\vec{m}\f$, with \f$(\rho,\omega)\f$
+ * being the zenith and azimuth angles, respectively.
+ *
+ * The zenith angle integration range \f$[\rho_{\rm min}, \rho_{\rm max}\f$
+ * and azimuth angle integration range 
+ * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
+ * are adjusted so that only coordinates within the circular region of
+ * interest will be considered.
+ *
+ * Note that we estimate the integration radius based on the size of the
+ * onaxis PSF. This should be fine as long as the offaxis PSF is not
+ * considerably larger than the onaxis PSF. We should verify this, however.
+ *
+ * @todo Verify that offaxis PSF is not considerably larger than onaxis
+ *       PSF.
+ ***************************************************************************/
+double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
+                                        const GEnergy&      srcEng,
+                                        const GTime&        srcTime,
+                                        const GEnergy&      obsEng,
+                                        const GTime&        obsTime,
+                                        const GObservation& obs) const
+{
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    static const int iter_rho = 6;
+    static const int iter_phi = 6;
+
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Retrieve CTA observation, ROI and pointing
+    const GCTAObservation& cta = retrieve_obs(G_NPRED_ELLIPTICAL, obs);
+    const GCTARoi&         roi = retrieve_roi(G_NPRED_ELLIPTICAL, obs);
+    const GCTAPointing&    pnt = cta.pointing();
+
+    // Get pointer on elliptical model
+    const GModelSpatialElliptical* elliptical =
+          dynamic_cast<const GModelSpatialElliptical*>(&model);
+    if (elliptical == NULL) {
+        throw GCTAException::bad_model_type(G_NPRED_ELLIPTICAL);
+    }
+
+    // Get source attributes
+    const GSkyDir& centre  = elliptical->dir();
+    //const GEnergy& srcEng  = source.energy();
+    //const GTime&   srcTime = source.time();
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
+
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
+    // as this allows us doing this computation in the outer loop. This
+    // should be sufficient here, unless the offaxis PSF becomes much worse
+    // than the onaxis PSF. In this case, we may add a safety factor here
+    // to make sure we encompass the entire PSF.
+    double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
+
+    // Extract ROI radius plus maximum PSF radius (radians). Any photon
+    // coming from beyond this radius will not make it in the dataspace and
+    // thus can be neglected.
+    double radius_roi = roi.radius() * gammalib::deg2rad + psf_max_radius;
+
+    // Compute distance between ROI and model centre (radians)
+    double rho_roi = roi.centre().dir().dist(centre);
+
+    // Get the ellipse boundary (radians). Note that these are NOT the
+    // parameters of the ellipse but of a boundary ellipse that is used
+    // for computing the relevant omega angle intervals for a given angle
+    // rho. The boundary ellipse takes care of the possibility that the
+    // semiminor axis is larger than the semimajor axis
+    double semimajor;    // Will be the larger axis
+    double semiminor;    // Will be the smaller axis
+    double posangle;     // Will be the corrected position angle
+    double aspect_ratio; // Ratio between smaller/larger axis of model
+    if (elliptical->semimajor() >= elliptical->semiminor()) {
+        aspect_ratio = (elliptical->semimajor() > 0.0) ?
+                        elliptical->semiminor() / elliptical->semimajor() : 0.0;
+        posangle     = elliptical->posangle() * gammalib::deg2rad;
+    }
+    else {
+        aspect_ratio = (elliptical->semiminor() > 0.0) ?
+                        elliptical->semimajor() / elliptical->semiminor() : 0.0;
+        posangle     = elliptical->posangle() * gammalib::deg2rad + gammalib::pihalf;
+    }
+    semimajor = elliptical->theta_max();
+    semiminor = semimajor * aspect_ratio;
+
+    // Set offset angle integration range. We take here the ROI+PSF into
+    // account to make no integrations beyond the point where the
+    // contribution drops to zero.
+    double rho_min = (rho_roi > radius_roi) ? rho_roi - radius_roi: 0.0;
+    double rho_max = rho_roi + radius_roi;
+    if (rho_max > semimajor) {
+        rho_max = semimajor;
+    }
+
+    // Perform offset angle integration only if interval is valid
+    if (rho_max > rho_min) {
+
+        // Compute rotation matrix to convert from native model coordinates,
+        // given by (rho,omega), into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        ry.eulery(elliptical->dec() - 90.0);
+        rz.eulerz(-elliptical->ra());
+        GMatrix rot = (ry * rz).transpose();
+
+        // Compute position angle of ROI centre with respect to model
+        // centre (radians)
+        double posangle_roi = centre.posang(roi.centre().dir());
+
+        // Setup integration kernel
+        cta_npred_elliptical_kern_rho integrand(*this,
+                                                *elliptical,
+                                                semimajor,
+                                                semiminor,
+                                                posangle,
+                                                srcEng,
+                                                srcTime,
+                                                obsEng,
+                                                obsTime,
+                                                cta,
+                                                rot,
+                                                rho_roi,
+                                                posangle_roi,
+                                                radius_roi,
+                                                iter_phi);
+
+        // Integrate over model's zenith angle
+        GIntegral integral(&integrand);
+        integral.fixed_iter(iter_rho);
+
+        // Setup integration boundaries
+        std::vector<double> bounds;
+        bounds.push_back(rho_min);
+        bounds.push_back(rho_max);
+
+        // If the integration range includes the semiminor boundary, then
+        // add an integration boundary at that location
+        if (semiminor > rho_min && semiminor < rho_max) {
+            bounds.push_back(semiminor);
+        }
+
+        // Integrate kernel
+        npred = integral.romberg(bounds, iter_rho);
+
+        // Compile option: Show integration results
+        #if defined(G_DEBUG_NPRED_ELLIPTICAL)
+        std::cout << "GCTAResponseIrf::npred_elliptical:";
+        std::cout << " rho_min=" << rho_min;
+        std::cout << " rho_max=" << rho_max;
+        std::cout << " npred=" << npred << std::endl;
+        #endif
+
+    } // endif: offset angle range was valid
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+        std::cout << "*** ERROR: GCTAResponseIrf::npred_elliptical:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", rho_min=" << rho_min;
+        std::cout << ", rho_max=" << rho_max;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of diffuse source model over ROI
+ *
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_model_type
+ *            Model is not a radial model.
+ *
+ * Integrates the product of the diffuse model and Npred over the Region
+ * Of Interest using
+ *
+ * \f[
+ *    \int_{0}^{\theta_{\rm max}}
+ *    \sin \theta \times
+ *    \int_{0}^{2\pi}
+ *    S_{\rm p}(\theta, \phi | E, t) \,
+ *    N_{\rm pred}(\theta, \phi) d\phi
+ *    d\theta
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\theta, \phi | E, t)\f$ is the diffuse model,
+ * - \f$N_{\rm pred}(\theta, \phi)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest in the reference frame of the diffuse source
+ *   model
+ * - \f$\theta\f$ is the distance from the ROI centre, and
+ * - \f$\phi\f$ is the azimuth angle.
+ *
+ * Note that the integration precision was adjusted trading-off between
+ * computation time and computation precision. A value of 1e-4 was judged
+ * appropriate.
+ *
+ * Note that we estimate the integration radius based on the size of the
+ * onaxis PSF in this method. This should be fine as long as the offaxis
+ * PSF is not considerably larger than the onaxis PSF. We should verify
+ * this, however.
+ *
+ * @todo Verify that offaxis PSF is not considerably larger than onaxis PSF.
+ ***************************************************************************/
+double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
+                                     const GEnergy&      srcEng,
+                                     const GTime&        srcTime,
+                                     const GEnergy&      obsEng,
+                                     const GTime&        obsTime,
+                                     const GObservation& obs) const
+{
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1248
+    static const int iter_rho = 9;
+    static const int iter_phi = 9;
+
+    // Initialise Npred value
+    double npred     = 0.0;
+    bool   has_npred = false;
+
+    // Build unique identifier
+    std::string id = model.name() + "::" + obs.id();
+
+    // Check if Npred value is already in cache
+    #if defined(G_USE_NPRED_CACHE)
+    if (!m_npred_names.empty()) {
+
+         // Search for unique identifier, and if found, recover Npred value
+         // and break
+         for (int i = 0; i < m_npred_names.size(); ++i) {
+             if (m_npred_names[i]    == id &&
+                 m_npred_energies[i] == srcEng &&
+                 m_npred_times[i]    == srcTime) {
+                 npred = m_npred_values[i];
+                 has_npred = true;
+                 #if defined(G_DEBUG_NPRED_DIFFUSE)
+                 std::cout << "GCTAResponseIrf::npred_diffuse:";
+                 std::cout << " cache=" << i;
+                 std::cout << " npred=" << npred << std::endl;
+                 #endif
+                 break;
+             }
+         }
+
+    } // endif: there were values in the Npred cache
+    #endif
+
+    // Continue only if no Npred cache value was found
+    if (!has_npred) {
+
+        // Retrieve CTA observation, ROI and pointing
+        const GCTAObservation& cta = retrieve_obs(G_NPRED_DIFFUSE, obs);
+        const GCTARoi&         roi = retrieve_roi(G_NPRED_DIFFUSE, obs);
+        const GCTAPointing&    pnt = cta.pointing();
+
+        // Get pointer on spatial model
+        const GModelSpatial* spatial =
+            dynamic_cast<const GModelSpatial*>(model.spatial());
+        if (spatial == NULL) {
+            throw GCTAException::bad_model_type(G_NPRED_DIFFUSE);
+        }
+
+        // Get source attributes
+        //const GEnergy& srcEng  = source.energy();
+        //const GTime&   srcTime = source.time();
+
+        // Get pointing direction zenith angle and azimuth [radians]
+        double zenith  = pnt.zenith();
+        double azimuth = pnt.azimuth();
+
+        // Get log10(E/TeV) of true photon energy
+        double srcLogEng = srcEng.log10TeV();
+
+        // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
+        // as this allows us doing this computation in the outer loop. This
+        // should be sufficient here, unless the offaxis PSF becomes much worse
+        // than the onaxis PSF. In this case, we may add a safety factor here
+        // to make sure we encompass the entire PSF.
+        double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
+
+        // Extract ROI radius (radians)
+        double roi_radius = roi.radius() * gammalib::deg2rad;
+
+        // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+        // coming from beyond this radius will not make it in the dataspace and
+        // thus can be neglected.
+        double roi_psf_radius = roi_radius + psf_max_radius;
+
+        // Perform offset angle integration only if interval is valid
+        if (roi_psf_radius > 0.0) {
+
+            // Compute rotation matrix to convert from native ROI coordinates,
+            // given by (theta,phi), into celestial coordinates.
+            GMatrix ry;
+            GMatrix rz;
+            ry.eulery(roi.centre().dir().dec_deg() - 90.0);
+            rz.eulerz(-roi.centre().dir().ra_deg());
+            GMatrix rot = (ry * rz).transpose();
+
+            // Setup integration kernel
+            cta_npred_diffuse_kern_theta integrand(*this,
+                                                   *spatial,
+                                                   srcEng,
+                                                   srcTime,
+                                                   obsEng,
+                                                   obsTime,
+                                                   cta,
+                                                   rot,
+                                                   iter_phi);
+
+
+            // Integrate over model's zenith angle
+            GIntegral integral(&integrand);
+            integral.fixed_iter(iter_rho);
+            npred = integral.romberg(0.0, roi_psf_radius);
+
+            // Compile option: Show integration results
+            #if defined(G_DEBUG_NPRED_DIFFUSE)
+            std::cout << "GCTAResponseIrf::npred_diffuse:";
+            std::cout << " roi_psf_radius=" << roi_psf_radius;
+            std::cout << " npred=" << npred;
+            std::cout << " id=" << id << std::endl;
+            #endif
+
+        } // endif: offset angle range was valid
+
+        // Store result in Npred cache
+        #if defined(G_USE_NPRED_CACHE)
+        m_npred_names.push_back(id);
+        m_npred_energies.push_back(srcEng);
+        m_npred_times.push_back(srcTime);
+        m_npred_values.push_back(npred);
+        #endif
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
+            std::cout << "*** ERROR: GCTAResponseIrf::npred_diffuse:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", roi_psf_radius=" << roi_psf_radius;
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endif: Npred computation required
+
+    // Return Npred
+    return npred;
+}
+
+
+double GCTAResponseIrf::nroi(const GPhoton&      photon,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const
+{
+    // Retrieve CTA observation, ROI and pointing
+    const GCTAObservation& cta = retrieve_obs(G_NPRED, obs);
+    const GCTARoi&         roi = retrieve_roi(G_NPRED, obs);
+    const GCTAPointing&    pnt = cta.pointing();
+
+    // Get photon attributes
+    const GSkyDir& srcDir  = photon.dir();
+    const GEnergy& srcEng  = photon.energy();
+    const GTime&   srcTime = photon.time();
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
+
+    // Get radial offset and polar angles of true photon in camera [radians]
+    double theta = pnt.dir().dist(srcDir);
+    double phi   = 0.0; //TODO: Implement Phi dependence
+
+    // Get log10(E/TeV) of true photon energy.
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get effectve area components
+    double nroi = aeff(theta, phi, zenith, azimuth, srcLogEng);
+
+    // Multiply-in PSF
+    if (nroi > 0.0) {
+
+        // Get PSF
+        nroi *= npsf(srcDir, srcLogEng, srcTime, pnt, roi);
+
+        // Multiply-in energy dispersion
+        if (use_edisp() && nroi > 0.0) {
+
+            // Get log10(E/TeV) of observed photon energy.
+            double obsLogEng = obsEng.log10TeV();
+
+            // Get energy dispersion
+            nroi *= edisp()->operator()(obsLogEng, srcLogEng, theta, phi, zenith, azimuth);
+
+        } // endif: had energy dispersion
+
+        // Apply deadtime correction
+        nroi *= obs.deadc(srcTime);
+
+    } // endif: had non-zero effective area
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+        std::cout << "*** ERROR: GCTAResponseIrf::nroi:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (nroi=" << nroi;
+        std::cout << ", theta=" << theta;
+        std::cout << ", phi=" << phi << ")";
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return Nroi
+    return nroi;
+}
+
+
+/***********************************************************************//**
  * @brief Return spatial integral of point spread function
  *
  * @param[in] photon Incident photon.
@@ -404,6 +1243,7 @@ double GCTAResponseIrf::irf(const GEvent&       event,
  * @todo Set polar angle phi of photon in camera system
  * @todo Write method documentation
  ***************************************************************************/
+/*
 double GCTAResponseIrf::npred(const GPhoton&      photon,
                               const GObservation& obs) const
 {
@@ -465,6 +1305,7 @@ double GCTAResponseIrf::npred(const GPhoton&      photon,
     // Return Npred
     return npred;
 }
+*/
 
 
 /***********************************************************************//**
@@ -2031,6 +2872,7 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
  * @todo Verify that offaxis PSF is not considerably larger than onaxis
  *       PSF. 
  ***************************************************************************/
+/*
 double GCTAResponseIrf::npred_radial(const GSource& source,
                                      const GObservation& obs) const
 {
@@ -2183,7 +3025,7 @@ double GCTAResponseIrf::npred_radial(const GSource& source,
     // Return Npred
     return npred;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return spatial integral of elliptical source model over ROI
@@ -2233,6 +3075,7 @@ double GCTAResponseIrf::npred_radial(const GSource& source,
  * @todo Verify that offaxis PSF is not considerably larger than onaxis
  *       PSF.
  ***************************************************************************/
+/*
 double GCTAResponseIrf::npred_elliptical(const GSource& source,
                                          const GObservation& obs) const
 {
@@ -2388,7 +3231,7 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
     // Return Npred
     return npred;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return spatial integral of diffuse source model over ROI
@@ -2431,6 +3274,7 @@ double GCTAResponseIrf::npred_elliptical(const GSource& source,
  *
  * @todo Verify that offaxis PSF is not considerably larger than onaxis PSF.
  ***************************************************************************/
+/*
 double GCTAResponseIrf::npred_diffuse(const GSource& source,
                                       const GObservation& obs) const
 {
@@ -2572,7 +3416,7 @@ double GCTAResponseIrf::npred_diffuse(const GSource& source,
     // Return Npred
     return npred;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Return true energy boundaries for a specific observed energy

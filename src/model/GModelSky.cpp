@@ -562,9 +562,10 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Get response function
-        const GResponse* rsp = obs.response();
+        // Compute Nroi
+        npred = obs.response()->nroi(*this, obsEng, obsTime, obs);
 
+        /*
         // Here we make the simplifying approximations
         // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
         // integrate over true energy and true time here ... at least true
@@ -587,6 +588,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
         if (!m_scales.empty()) {
             npred *= scale(obs.instrument()).value();
         }
+        */
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -594,11 +596,8 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
             std::cout << "*** ERROR: GModelSky::npred:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
-            std::cout << ", npred_spatial=" << npred_spatial;
-            std::cout << ", npred_spectral=" << npred_spectral;
-            std::cout << ", npred_temporal=" << npred_temporal;
-            std::cout << ", srcEng=" << srcEng;
-            std::cout << ", srcTime=" << srcTime;
+            std::cout << ", obsEng=" << obsEng;
+            std::cout << ", obsTime=" << obsTime;
             std::cout << ")" << std::endl;
         }
         #endif

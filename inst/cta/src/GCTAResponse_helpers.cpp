@@ -245,6 +245,32 @@ double cta_nedisp_kern::eval(const double& logEobs)
 }
 
 
+/***********************************************************************//**
+ * @brief Integration kernel for nedisp() method
+ *
+ * @param[in] logEobs Logarithm of true photon energy.
+ * @return Nroi.
+ ***************************************************************************/
+double cta_nroi_kern::eval(const double& logEsrc)
+{
+    // Set true energy
+    GEnergy srcEng;
+    double expx = std::exp(logEsrc);
+    srcEng.MeV(expx);
+
+    // Compute response components
+    double nroi_spatial  = m_rsp.nroi(m_model, srcEng, m_srcTime, m_obsEng, m_obsTime, m_obs);
+    double nroi_spectral = m_model.spectral()->eval(srcEng, m_srcTime);
+    double nroi_temporal = m_model.temporal()->eval(m_srcTime);
+    
+    // Compute response
+    double nroi = nroi_spatial * nroi_spectral * nroi_temporal * expx;
+
+    // Return response
+    return nroi;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                  Helper class methods for radial models                 =
@@ -521,6 +547,8 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
                 cta_npred_radial_kern_omega integrand(m_rsp,
                                                       m_srcEng,
                                                       m_srcTime,
+                                                      m_obsEng,
+                                                      m_obsTime,
                                                       m_obs,
                                                       m_rot,
                                                       sin_rho,
@@ -584,7 +612,8 @@ double cta_npred_radial_kern_omega::eval(const double& omega)
     GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
     // Compute point source Npred for this sky direction
-    double npred = m_rsp.npred(photon, m_obs);
+    //double npred = m_rsp.npred(photon, m_obs);
+    double npred = m_rsp.nroi(photon, m_obsEng, m_obsTime, m_obs);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
@@ -978,6 +1007,8 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                                                       m_model,
                                                       m_srcEng,
                                                       m_srcTime,
+                                                      m_obsEng,
+                                                      m_obsTime,
                                                       m_obs,
                                                       m_rot,
                                                       rho_kluge,
@@ -1159,7 +1190,8 @@ double cta_npred_elliptical_kern_omega::eval(const double& omega)
         GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
         // Compute Npred for this sky direction
-        npred = m_rsp.npred(photon, m_obs) * model;
+        //npred = m_rsp.npred(photon, m_obs) * model;
+        npred = m_rsp.nroi(photon, m_obsEng, m_obsTime, m_obs) * model;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
@@ -1421,6 +1453,8 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
                                              m_model,
                                              m_srcEng,
                                              m_srcTime,
+                                             m_obsEng,
+                                             m_obsTime,
                                              m_obs,
                                              m_rot,
                                              theta,
@@ -1499,7 +1533,8 @@ double cta_npred_diffuse_kern_phi::eval(const double& phi)
     if (intensity > 0.0) {
 
         // Compute Npred for this sky direction
-        npred = m_rsp.npred(photon, m_obs) * intensity;
+        //npred = m_rsp.npred(photon, m_obs) * intensity;
+        npred = m_rsp.nroi(photon, m_obsEng, m_obsTime, m_obs) * intensity;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)

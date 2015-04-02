@@ -52,7 +52,7 @@ public:
     virtual ~GMWLResponse(void);
 
     // Operators
-    virtual GMWLResponse& operator= (const GMWLResponse & rsp);
+    virtual GMWLResponse& operator=(const GMWLResponse & rsp);
 
     // Implemented pure virtual methods
     virtual void          clear(void);
@@ -63,18 +63,11 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const;
+    virtual double        nroi(const GModelSky&    model,
+                               const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
-
-    // New pure virtual methods
-    virtual double   convolve(const GModelSky&    model,
-                              const GEvent&       event,
-                              const GObservation& obs) const;
-    virtual double   nroi(const GModelSky&    model,
-                          const GEnergy&      obsEng,
-                          const GTime&        obsTime,
-                          const GObservation& obs) const;
 
 protected:
     // Protected methods
@@ -132,21 +125,6 @@ bool GMWLResponse::use_tdisp(void) const
 inline
 double GMWLResponse::irf(const GEvent& event, const GPhoton& photon,
                          const GObservation& obs) const
-{
-    return 1.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return predicted number of events
- *
- * @param[in] photon Photon.
- * @param[in] obs Observation.
- *
- * @return Instrument response function (always 1).
- ***************************************************************************/
-inline
-double GMWLResponse::npred(const GPhoton& photon, const GObservation& obs) const
 {
     return 1.0;
 }

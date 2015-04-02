@@ -43,6 +43,7 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GObservation;
+class GModelSky;
 
 
 /***********************************************************************//**
@@ -81,7 +82,8 @@ public:
                             const GObservation& obs) const = 0;
     virtual double      convolve(const GModelSky&    model,
                                  const GEvent&       event,
-                                 const GObservation& obs) const;
+                                 const GObservation& obs,
+                                 const bool&         grad = true) const;
     virtual double      nroi(const GModelSky&    model,
                              const GEnergy&      obsEng,
                              const GTime&        obsTime,
@@ -89,8 +91,6 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Old methods that will become obsolete
-    virtual double   npred(const GPhoton&      photon,
-                           const GObservation& obs) const = 0;
     virtual double   irf(const GEvent&       event,
                          const GSource&      source,
                          const GObservation& obs) const;
@@ -106,6 +106,7 @@ public:
     virtual double   irf_diffuse(const GEvent&       event,
                                  const GSource&      source,
                                  const GObservation& obs) const;
+    /*
     virtual double   npred(const GSource&      source,
                            const GObservation& obs) const;
     virtual double   npred_ptsrc(const GSource&      source,
@@ -116,6 +117,7 @@ public:
                                       const GObservation& obs) const;
     virtual double   npred_diffuse(const GSource&      source,
                                    const GObservation& obs) const;
+    */
     virtual GEbounds ebounds_src(const GEnergy& obsEng) const;
 
 protected:
@@ -125,6 +127,7 @@ protected:
     void free_members(void);
 
     // Npred theta integration kernel for radial model
+    /*
     class npred_radial_kern_theta : public GFunction {
     public:
         npred_radial_kern_theta(const GResponse&           rsp,
@@ -148,8 +151,10 @@ protected:
         const GObservation&        m_obs;      //!< Observation
         const GMatrix&             m_rot;      //!< Rotation matrix
     };
+    */
 
     // Npred phi integration kernel for radial model
+    /*
     class npred_radial_kern_phi : public GFunction {
     public:
         npred_radial_kern_phi(const GResponse&    rsp,
@@ -178,8 +183,10 @@ protected:
         double              m_cos_theta; //!< cosine of offset angle
         const double&       m_sin_theta; //!< Sine of offset angle
     };
+    */
 
     // Npred theta integration kernel for elliptical model
+    /*
     class npred_elliptical_kern_theta : public GFunction {
     public:
         npred_elliptical_kern_theta(const GResponse&               rsp,
@@ -203,8 +210,10 @@ protected:
         const GObservation&            m_obs;      //!< Observation
         const GMatrix&                 m_rot;      //!< Rotation matrix
     };
+    */
 
     // Npred phi integration kernel for elliptical model
+    /*
     class npred_elliptical_kern_phi : public GFunction {
     public:
         npred_elliptical_kern_phi(const GResponse&               rsp,
@@ -236,6 +245,7 @@ protected:
         double                         m_cos_theta; //!< cosine of offset angle
         const double&                  m_sin_theta; //!< Sine of offset angle
     };
+    */
 
 };
 

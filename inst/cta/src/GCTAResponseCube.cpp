@@ -57,7 +57,8 @@
                                                             " GObservation&)"
 #define G_IRF_DIFFUSE      "GCTAResponseCube::irf_diffuse(GEvent&, GSource&,"\
                                                             " GObservation&)"
-#define G_NPRED            "GCTAResponseCube::npred(GPhoton&, GObservation&)"
+#define G_NROI        "GCTAResponseCube::nroi(GModelSky&, GEnergy&, GTime&, "\
+                                                             "GObservation&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 #define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
 
@@ -696,27 +697,45 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of point spread function
+ * @brief Return integral of event probability for a given sky model over ROI
  *
- * @param[in] photon Incident photon.
+ * @param[in] model Incident photon.
  * @param[in] obs Observation.
- * @return Spatial integral of point spread function. 
+ * @return 0.0
  *
  * @exception GException::feature_not_implemented
- *            Method not implemented.
+ *            Method is not implemented.
  *
- * This method is a dummy method that is required for a class derived from
- * GResponse but that needs not to be implemented for a binned response.
+ * Computes the integral
+ *
+ * \f[
+ *    N_{\rm ROI}(E',t') = \int_{\rm ROI} P(p',E',t') dp'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * for a given sky model \f$S(p,E,t)\f$ and response function
+ * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
+ *
+ * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
-double GCTAResponseCube::npred(const GPhoton&      photon,
-                               const GObservation& obs) const
+double GCTAResponseCube::nroi(const GModelSky&    model,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GObservation& obs) const
 {
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_NPRED,
-          "Npred computation not implemented for cube analysis.");
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
 
     // Return Npred
-    return 0.0;
+    return (0.0);
 }
 
 

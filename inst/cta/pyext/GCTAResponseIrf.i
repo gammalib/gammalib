@@ -108,8 +108,10 @@ public:
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
                                  const GObservation& obs) const;
-    virtual double           npred(const GPhoton&      photon,
-                                   const GObservation& obs) const;
+    virtual double           nroi(const GModelSky&    model,
+                                  const GEnergy&      obsEng,
+                                  const GTime&        obsTime,
+                                  const GObservation& obs) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
 
@@ -123,12 +125,6 @@ public:
     virtual double   irf_diffuse(const GEvent&       event,
                                  const GSource&      source,
                                  const GObservation& obs) const;
-    virtual double   npred_radial(const GSource&      source,
-                                  const GObservation& obs) const;
-    virtual double   npred_elliptical(const GSource&      source,
-                                      const GObservation& obs) const;
-    virtual double   npred_diffuse(const GSource&      source,
-                                   const GObservation& obs) const;
     virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods

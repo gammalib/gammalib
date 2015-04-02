@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.cpp - Fermi/LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,6 +49,8 @@
 #define G_LOAD                             "GLATResponse::load(std::string&)"
 #define G_IRF      "GLATResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&,"\
                                           " GEnergy&, GTime&, GObservation&)"
+#define G_NROI            "GLATResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
+                                                             "GObservation&)"
 #define G_AEFF                                     "GLATResponse::aeff(int&)"
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
@@ -56,8 +58,6 @@
                                                      "GTime&, GObservation&)"
 #define G_IRF_BIN       "GLATResponse::irf(GLATEventBin&, GModel&, GEnergy&,"\
                                                      "GTime&, GObservation&)"
-#define G_NPRED             "GLATResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
-                                                            " GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -487,24 +487,45 @@ double GLATResponse::irf(const GLATEventBin& event,
 
 
 /***********************************************************************//**
- * @brief Return integral of instrument response function.
+ * @brief Return integral of event probability for a given sky model over ROI
  *
- * @param[in] photon Incident photon.
+ * @param[in] model Incident photon.
  * @param[in] obs Observation.
+ * @return 0.0
  *
- * @todo Not yet implemented.
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ *
+ * Computes the integral
+ *
+ * \f[
+ *    N_{\rm ROI}(E',t') = \int_{\rm ROI} P(p',E',t') dp'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * for a given sky model \f$S(p,E,t)\f$ and response function
+ * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
+ *
+ * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
-double GLATResponse::npred(const GPhoton&      photon,
-                           const GObservation& obs) const
+double GLATResponse::nroi(const GModelSky&    model,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const
 {
-    // Initialise
-    double npred = 0.0;
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
 
-    // Notify that method is not yet implemented
-    throw GException::feature_not_implemented(G_NPRED);
-
-    // Return integrated IRF value
-    return npred;
+    // Return Npred
+    return (0.0);
 }
 
 

@@ -38,6 +38,7 @@
 /* __ Type definitions ___________________________________________________ */
 
 /* __ Forward declaration ________________________________________________ */
+class GModelSky;
 
 
 /***********************************************************************//**
@@ -66,9 +67,6 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        convolve(const GModelSky&    model,
-                                   const GEvent&       event,
-                                   const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,

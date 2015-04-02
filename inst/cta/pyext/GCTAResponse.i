@@ -50,8 +50,10 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const = 0;
-    virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const = 0;
+    virtual double        nroi(const GModelSky&    model,
+                               const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const = 0;
     virtual void          read(const GXmlElement& xml) = 0;
     virtual void          write(GXmlElement& xml) const = 0;
 };

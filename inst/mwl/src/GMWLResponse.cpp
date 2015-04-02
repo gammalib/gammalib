@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.cpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,8 @@
 #include "GMWLResponse.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_NROI            "GMWLResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
+                                                             "GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -151,10 +153,53 @@ void GMWLResponse::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GMWLResponse* GMWLResponse::clone(void) const
 {
     return new GMWLResponse(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral of event probability for a given sky model over ROI
+ *
+ * @param[in] model Incident photon.
+ * @param[in] obs Observation.
+ * @return 0.0
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ *
+ * Computes the integral
+ *
+ * \f[
+ *    N_{\rm ROI}(E',t') = \int_{\rm ROI} P(p',E',t') dp'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * for a given sky model \f$S(p,E,t)\f$ and response function
+ * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
+ *
+ * @todo Implement method (is maybe not really needed)
+ ***************************************************************************/
+double GMWLResponse::nroi(const GModelSky&    model,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const
+{
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
+
+    // Return Npred
+    return (0.0);
 }
 
 
