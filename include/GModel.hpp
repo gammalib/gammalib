@@ -132,6 +132,7 @@ public:
     GModelPar&          at(const int& index);
     const GModelPar&    at(const int& index) const;
     bool                has_par(const std::string& name) const;
+    bool                has_scales(void) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
     const double&       ts(void) const;
@@ -307,6 +308,18 @@ void GModel::tscalc(const bool& tscalc)
     m_tscalc     = tscalc;
     m_has_tscalc = true; //!< Signals that tscalc is now available
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals that model has scales
+ *
+ * @return True is model has scale factors.
+ ***************************************************************************/
+inline
+bool GModel::has_scales(void) const
+{
+    return (!m_scales.empty());
 }
 
 #endif /* GMODEL_HPP */

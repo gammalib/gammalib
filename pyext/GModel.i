@@ -63,6 +63,7 @@ public:
     int                 size(void) const;
     GModelPar&          at(const int& index);
     bool                has_par(const std::string& name) const;
+    bool                has_scales(void) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
     std::string         instruments(void) const;
@@ -76,7 +77,7 @@ public:
     std::string         ids(void) const;
     void                ids(const std::string& ids);
     bool                is_valid(const std::string& instruments,
-                                const std::string& ids) const;
+                                 const std::string& ids) const;
 };
 
 
