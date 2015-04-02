@@ -124,10 +124,10 @@ public:
                         const GEnergy&      obsEng,
                         const GTime&        obsTime,
                         const GObservation& obs) const;
-    double nroi(const GPhoton&      photon,
-                       const GEnergy&      obsEng,
-                       const GTime&        obsTime,
-                       const GObservation& obs) const;
+    double nirf(const GPhoton&      photon,
+                const GEnergy&      obsEng,
+                const GTime&        obsTime,
+                const GObservation& obs) const;
 
     // Overload virtual base class methods
     virtual double   irf_radial(const GEvent&       event,
