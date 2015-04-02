@@ -35,6 +35,7 @@
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GCaldb.hpp"
+#include "GSource.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATResponse.hpp"

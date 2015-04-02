@@ -41,6 +41,9 @@
 #include "GObservation.hpp"
 #include "GResponse.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GSource;
+
 
 /***********************************************************************//**
  * @class GLATResponse

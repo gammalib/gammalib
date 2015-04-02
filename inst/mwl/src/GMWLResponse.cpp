@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GException.hpp"
 #include "GMWLResponse.hpp"
 
 /* __ Method name definitions ____________________________________________ */

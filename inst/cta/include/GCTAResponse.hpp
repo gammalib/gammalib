@@ -37,6 +37,7 @@
 class GPhoton;
 class GEvent;
 class GObservation;
+class GXmlElement;
 class GCTAObservation;
 class GCTAPointing;
 class GCTARoi;

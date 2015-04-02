@@ -52,6 +52,7 @@ class GCTAAeff;
 class GCTAPsf;
 class GCTAEdisp;
 class GCTABackground;
+class GRan;
 
 
 /***********************************************************************//**

@@ -37,6 +37,7 @@
 #include "GIntegral.hpp"
 #include "GCaldb.hpp"
 #include "GSource.hpp"
+#include "GRan.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
@@ -1168,10 +1169,25 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
 }
 
 
+/***********************************************************************//**
+ * @brief Return spatial integral of Instrument Response Function
+ *
+ * @param[in] photon Photon.
+ * @param[in] obsEng Observed event energy.
+ * @param[in] obsTime Observed event time.
+ * @param[in] obs Observation.
+ *
+ * Computes the integral of the instrument response function over the Region
+ * of Interest
+ *
+ * \f[
+ *    R(E',t'|p,E,t) = \int_{\rm ROI} R(p',E',t'|p,E,t) dp'
+ * \f]
+ ***************************************************************************/
 double GCTAResponseIrf::nroi(const GPhoton&      photon,
-                             const GEnergy&      obsEng,
-                             const GTime&        obsTime,
-                             const GObservation& obs) const
+                                     const GEnergy&      obsEng,
+                                     const GTime&        obsTime,
+                                     const GObservation& obs) const
 {
     // Retrieve CTA observation, ROI and pointing
     const GCTAObservation& cta = retrieve_obs(G_NPRED, obs);

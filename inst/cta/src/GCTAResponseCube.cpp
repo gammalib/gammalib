@@ -42,6 +42,7 @@
 #include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GPhoton.hpp"
+#include "GSource.hpp"
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
