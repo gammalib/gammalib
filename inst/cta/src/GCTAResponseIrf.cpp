@@ -36,6 +36,7 @@
 #include "GMath.hpp"
 #include "GIntegral.hpp"
 #include "GCaldb.hpp"
+#include "GSource.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
@@ -60,6 +61,7 @@
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
+#include "GCTAEdisp2D.hpp"
 #include "GCTAEdispRmf.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTABackground.hpp"
@@ -1204,11 +1206,8 @@ double GCTAResponseIrf::nroi(const GPhoton&      photon,
         // Multiply-in energy dispersion
         if (use_edisp() && nroi > 0.0) {
 
-            // Get log10(E/TeV) of observed photon energy.
-            double obsLogEng = obsEng.log10TeV();
-
-            // Get energy dispersion
-            nroi *= edisp()->operator()(obsLogEng, srcLogEng, theta, phi, zenith, azimuth);
+            // Multiply-in energy dispersion
+            nroi *= edisp(obsEng, theta, phi, zenith, azimuth, srcLogEng);
 
         } // endif: had energy dispersion
 
@@ -1232,80 +1231,6 @@ double GCTAResponseIrf::nroi(const GPhoton&      photon,
     // Return Nroi
     return nroi;
 }
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of point spread function
- *
- * @param[in] photon Incident photon.
- * @param[in] obs Observation.
- *
- * @todo Set polar angle phi of photon in camera system
- * @todo Write method documentation
- ***************************************************************************/
-/*
-double GCTAResponseIrf::npred(const GPhoton&      photon,
-                              const GObservation& obs) const
-{
-    // Retrieve CTA observation, ROI and pointing
-    const GCTAObservation& cta = retrieve_obs(G_NPRED, obs);
-    const GCTARoi&         roi = retrieve_roi(G_NPRED, obs);
-    const GCTAPointing&    pnt = cta.pointing();
-
-    // Get photon attributes
-    const GSkyDir& srcDir  = photon.dir();
-    const GEnergy& srcEng  = photon.energy();
-    const GTime&   srcTime = photon.time();
-
-    // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt.zenith();
-    double azimuth = pnt.azimuth();
-
-    // Get radial offset and polar angles of true photon in camera [radians]
-    double theta = pnt.dir().dist(srcDir);
-    double phi   = 0.0; //TODO: Implement Phi dependence
-
-    // Get log10(E/TeV) of true photon energy.
-    double srcLogEng = srcEng.log10TeV();
-
-    // Get effectve area components
-    double npred = aeff(theta, phi, zenith, azimuth, srcLogEng);
-
-    // Multiply-in PSF
-    if (npred > 0.0) {
-
-        // Get PSF
-        npred *= npsf(srcDir, srcLogEng, srcTime, pnt, roi);
-
-        // Multiply-in energy dispersion
-        if (use_edisp() && npred > 0.0) {
-
-            // Get energy dispersion
-            npred *= nedisp(srcDir, srcEng, srcTime, pnt, cta.events()->ebounds());
-
-        } // endif: had energy dispersion
-
-        // Apply deadtime correction
-        npred *= obs.deadc(srcTime);
-
-    } // endif: had non-zero effective area
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-        std::cout << "*** ERROR: GCTAResponseIrf::npred:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (npred=" << npred;
-        std::cout << ", theta=" << theta;
-        std::cout << ", phi=" << phi << ")";
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return Npred
-    return npred;
-}
-*/
 
 
 /***********************************************************************//**
@@ -2000,7 +1925,7 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
         // as CTA response table
         if (file.contains("ENERGY DISPERSION")) {
             file.close();
-            //m_edisp = new GCTAEdisp2D(filename);
+            m_edisp = new GCTAEdisp2D(filename);
         }
 
         // ... else load it as RMF
@@ -3586,15 +3511,6 @@ double GCTAResponseIrf::edisp(const GEnergy& obsEng,
                               const double&  azimuth,
                               const double&  srcLogEng) const
 {
-    // Throw an exception if instrument response is not defined
-    if (m_edisp == NULL) {
-        std::string msg = "No energy dispersion information found in"
-                          " response.\n"
-                          "Please make sure that the instrument response is"
-                          " properly defined.";
-        throw GException::invalid_value(G_EDISP, msg);
-    }
-
     // Compute log10 energy in TeV and linear energy in MeV
     double obsLogEng = obsEng.log10TeV();
     double energy    = obsEng.MeV();
@@ -3720,136 +3636,6 @@ double GCTAResponseIrf::npsf(const GSkyDir&      srcDir,
 
     // Return integrated PSF
     return value;
-}
-
-
-/***********************************************************************//**
- * @brief Return result of energy dispersion integral over energy range
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt CTA pointing.
- * @param[in] ebds Energy boundaries of data selection.
- *
- * @todo Implement phi dependence in camera system
- ***************************************************************************/
-double GCTAResponseIrf::nedisp(const GSkyDir&      srcDir,
-                               const GEnergy&      srcEng,
-                               const GTime&        srcTime,
-                               const GCTAPointing& pnt,
-                               const GEbounds&     ebds) const
-{
-    // Initialise energy dispersion integral
-    double nedisp = 1.0;
-
-    // Continue only if energy dispersion information is available
-    if (edisp() != NULL) {
-
-        // Get the observed energy boundaries for specified true energy
-        GEbounds ebounds = edisp()->ebounds_obs(srcEng.log10TeV());
-
-        // Check if at least one of the energy boundaries covered by the
-        // energy dispersion for the specified true energy lies outside
-        // any of the energy boundaries of the data selection (or lies
-        // within different energy boundaries of the data selection)
-        bool outside = false;
-        for (int k = 0; k < ebounds.size(); ++k) {
-            int imin = ebds.index(ebounds.emin(k));
-            int imax = ebds.index(ebounds.emax(k));
-            if (imin != imax || imin == -1 || imax == -1) {
-                outside = true;
-                break;
-            }
-        }
-
-        // If energy boundaries are not fully covered then integrate
-        // numerically
-        if (outside) {
-
-            // Initialise energy dispersion integral
-            nedisp = 0.0;
-
-            // Get pointing direction zenith angle and azimuth [radians]
-            double zenith  = pnt.zenith();
-            double azimuth = pnt.azimuth();
-
-            // Compute offset angle of source direction in camera system
-            double theta = pnt.dir().dist(srcDir);
-
-            // Compute azimuth angle of source direction in camera system
-            double phi = 0.0; //TODO: Implement phi dependence
-
-            // Loop over energy boundaries in observed energy
-            for (int i = 0; i < ebds.size(); ++i) {
-
-                // Get boundaries in observed energy
-                GEnergy emin_obs = ebds.emin(i);
-                GEnergy emax_obs = ebds.emax(i);
-
-                // Loop over energy boundaries of energy dispersion
-                for (int k = 0; k < ebounds.size(); ++k) {
-
-                    // Get boundaries of energy dispersion
-                    GEnergy emin_edisp = ebounds.emin(k);
-                    GEnergy emax_edisp = ebounds.emax(k);
-
-                    // Get energy dispersion interval that overlaps with
-                    // the observed energy interval
-                    GEnergy emin = (emin_edisp < emin_obs) ? emin_obs : emin_edisp;
-                    GEnergy emax = (emax_edisp > emax_obs) ? emax_obs : emax_edisp;
-
-                    // If interval has positive length then integrate over
-                    // the energy dispersion
-                    if (emin < emax) {
-
-                        // Get log10 of energy boundaries in TeV
-                        double e_log_min = emin.log10TeV();
-                        double e_log_max = emax.log10TeV();
-
-                        // Get log10 of source energy
-                        double logEsrc = srcEng.log10TeV();
-                        
-                        // Setup integration function
-                        cta_nedisp_kern integrand(*this,
-                                                  logEsrc,
-                                                  theta,
-                                                  phi,
-                                                  zenith,
-                                                  azimuth);
-                        GIntegral integral(&integrand);
-
-                        // Set integration precision
-                        integral.eps(1.0e-3);
-
-                        // Do Romberg integration
-                        nedisp += integral.romberg(e_log_min, e_log_max);
-
-                    } // endif: integration range was valid
-                
-                } // endfor: looped over energy boundaries of energy dispersion
-            } // endfor: looped over energy boundaries in observed energy
-
-            // Compile option: Check for NaN/Inf
-            #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(nedisp) || gammalib::is_infinite(nedisp)) {
-                std::cout << "*** ERROR: GCTAResponseIrf::nedisp:";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (nedisp=" << nedisp;
-                std::cout << ", srcEng=" << srcEng;
-                std::cout << ", srcTime=" << srcTime;
-                std::cout << ", pnt=" << pnt;
-                std::cout << ", ebds=" << ebds;
-                std::cout << ")" << std::endl;
-            }
-            #endif
-
-        } // endif: numerical integration was needed
-
-    } // endif: there is an energy dispersion response
-
-    // Return integral
-    return nedisp;
 }
 
 

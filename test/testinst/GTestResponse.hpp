@@ -105,23 +105,16 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const { return 1.0; }
-    virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const { return 1.0; }
+    virtual double        nroi(const GModelSky&    model,
+                               const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const { return 1.0; }
     virtual std::string   print(const GChatter& chatter = NORMAL) const{ return "=== GTestReponse ==="; }
-
-    // New pure virtual methods
-    virtual double   convolve(const GModelSky&    model,
-                              const GEvent&       event,
-                              const GObservation& obs) const { return 1.0; }
-    virtual double   nroi(const GModelSky&    model,
-                          const GEnergy&      obsEng,
-                          const GTime&        obsTime,
-                          const GObservation& obs) const { return 1.0; }
 
 protected:
     // Protected methods
     void init_members(void){ return; }
-    void copy_members(const GTestResponse& pnt){ return; }
+    void copy_members(const GTestResponse& pnt) { return; }
     void free_members(void){ return; }
 };
 
