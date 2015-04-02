@@ -36,6 +36,7 @@
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRadial.hpp"
+#include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
