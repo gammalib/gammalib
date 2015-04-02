@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.hpp - Abstract response base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,9 +68,9 @@ public:
     virtual ~GResponse(void);
 
     // Operators
-    virtual GResponse& operator= (const GResponse& rsp);
+    virtual GResponse& operator=(const GResponse& rsp);
 
-    // Pure virtual methods
+    // Virtual methods
     virtual void        clear(void) = 0;
     virtual GResponse*  clone(void) const = 0;
     virtual std::string classname(void) const = 0;
@@ -79,11 +79,18 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      npred(const GPhoton&      photon,
-                              const GObservation& obs) const = 0;
+    virtual double      convolve(const GModelSky&    model,
+                                 const GEvent&       event,
+                                 const GObservation& obs) const;
+    virtual double      nroi(const GModelSky&    model,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
-    // Virtual methods
+    // Old methods that will become obsolete
+    virtual double   npred(const GPhoton&      photon,
+                           const GObservation& obs) const = 0;
     virtual double   irf(const GEvent&       event,
                          const GSource&      source,
                          const GObservation& obs) const;
@@ -109,7 +116,7 @@ public:
                                       const GObservation& obs) const;
     virtual double   npred_diffuse(const GSource&      source,
                                    const GObservation& obs) const;
-    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
+    virtual GEbounds ebounds_src(const GEnergy& obsEng) const;
 
 protected:
     // Protected methods

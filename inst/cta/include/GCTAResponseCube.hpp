@@ -86,6 +86,15 @@ public:
     virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
+    // New pure virtual methods
+    virtual double   convolve(const GModelSky&    model,
+                              const GEvent&       event,
+                              const GObservation& obs) const;
+    virtual double   nroi(const GModelSky&    model,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const;
+
     // Overload base class methods
     virtual double irf(const GEvent&       event,
                        const GSource&      source,

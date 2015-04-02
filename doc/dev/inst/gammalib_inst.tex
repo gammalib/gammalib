@@ -155,16 +155,16 @@ The terms $\Delta t$ and $\Delta E$ account for the statistical jitter related t
 process and are of the order of a few time the rms in the time and energy measurements.
 
 Computation of Eq.~(\ref{eq:model}) in this general form is implemented in \this\ by the 
-virtual method\break {\tt GObservation::model()}.
-Figure \ref{fig:modeleval} shows the call tree of this method.
+method\break {\tt GResponse::convolve()}.
+%Figure \ref{fig:modeleval} shows the call tree of this method.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[!t]
-\center
-\epsfig{figure=model-evaluation.eps, width=10cm}
-\caption{Call tree of {\tt GObservation::model()} for sky model evaluation.}
- \label{fig:modeleval}
-\end{figure}
+%\begin{figure}[!t]
+%\center
+%\epsfig{figure=model-evaluation.eps, width=10cm}
+%\caption{Call tree of {\tt GObservation::model()} for sky model evaluation.}
+%\label{fig:modeleval}
+%\end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The integration over sky positions $\vec{p}$, expressed as a zenith angle $\theta$ and an
@@ -207,20 +207,25 @@ virtual method\break {\tt GObservation::npred()}.
 The following diagram gives the call tree of this method:
 \begin{verbatim}
   GObservation::npred()                          - compute Eq. (3) for all source models
-    GObservation::npred_temp()                   - compute GTI integrated source model
-      GObservation::npred_kern_spec::eval()      - time integration kernel
-        GObservation::npred_spec()               - compute Ebounds integrated source model
-          GObservation::npred_kern_spat::eval()  - energy integration kernel
-            GModelSky::npred()                   - compute ROI integrated source model
-              GResponse::npred()                 - perform integration over ROI
+    GObservation::npred_kern::eval()             - time integration kernel
+      GObservation::npred_spec()                 - compute Ebounds integrated source model
+        GObservation::npred_spec_kern::eval()    - energy integration kernel
+          GModelSky::npred()                     - compute ROI integrated source model
+            GResponse::npred()                   - perform integration over ROI
 \end{verbatim}
 The integration over the ROI is given by
 \begin{equation}
 N_{\rm ROI}(E', t') = \int_{\rm ROI} P(\vec{p'}, E', t' | \vec{d}) \, {\rm d}\vec{p'}
 \label{eq:nroi}
 \end{equation}
+
+\begin{eqnarray}
+N_{\rm ROI}(E', t') & = & \int_{\rm ROI} P(\vec{p'}, E', t' | \vec{d}) \, {\rm d}\vec{p'} \\
+& = & \int_{0}^{t'+\Delta t} \int_{E'-\Delta E}^{\infty} \int_{\rm ROI} \int_{\Omega} 
+  S(\vec{p}, E, t) \, R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \, {\rm d}\vec{p'} \, {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
+\end{eqnarray}
 which has to be implemented for each instrument by the virtual method
-{\tt GResponse::npred()}.
+{\tt GResponse::npred\_roi()}.
 
 The correspondance between the parameters given in the above equations and
 \this\ C++ classes and methods is summarized in Table \ref{tab:pars}.
@@ -505,7 +510,7 @@ M(\vec{p}) \times P(E) \times V(t) \times
 L(\vec{d}, \vec{p}, E, t) \times
 A_{\rm eff}(\vec{d}, \vec{p}, E, t) \times \nonumber \\
 PSF(\vec{p'} | \vec{d}, \vec{p}, E, t) \times
-E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) 
+E_{\rm disp}(E' | \vec{d}, \vec{p}, E, t) \times
 T_{\rm disp}(t' | \vec{d}, \vec{p}, E, t) 
 \, {\rm d}\vec{p} \, {\rm d}E \, {\rm d}t \, .
 \end{eqnarray}
@@ -882,7 +887,6 @@ P(\vec{p'}, E', t' | \vec{d}) = \int_{E'-\Delta E}^{\infty} \int_{\Omega}
   A_{\rm eff}(\vec{d}, \vec{p}, E, t') \,
   PSF(\vec{p'} | \vec{d}, \vec{p}, E) \,
   E_{\rm disp}(E' | \vec{d}, \vec{p}, E) \, {\rm d}\vec{p} \, {\rm d}E
-\label{eq:model}
 \end{equation}
 Since for many astrophysical sources $S(\vec{p}, E, t)$ drops quickly with energy, only
 photons near $E'$ contribute effectively to the integral.

@@ -1381,10 +1381,12 @@ double GObservation::npred_spec(const GModel& model,
 
     // If model is sky model and observation uses energy dispersion then
     // add margin
+    /*
     if (dynamic_cast<const GModelSky*>(&model) != NULL && response()->use_edisp()) {
         e_min = response()->ebounds_src(e_min).emin();
         e_max = response()->ebounds_src(e_max).emax();
     }
+    */
 
     // Get energy interval in MeV
     double emin = e_min.MeV();

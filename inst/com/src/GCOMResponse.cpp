@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,7 +42,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF     "GCOMResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&, "\
                                            "GEnergy&, GTime&, GObservation&)"
-#define G_NPRED            "GCOMResponse::npred(GSkyDir&, GEnergy&, GTime&, "\
+#define G_NROI            "GCOMResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -334,34 +334,45 @@ double GCOMResponse::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of point spread function
+ * @brief Return integral of event probability for a given sky model over ROI
  *
- * @param[in] photon Incident photon.
+ * @param[in] model Incident photon.
  * @param[in] obs Observation.
- * @return 1.0
+ * @return 0.0
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ *
+ * Computes the integral
+ *
+ * \f[
+ *    N_{\rm ROI}(E',t') = \int_{\rm ROI} P(p',E',t') dp'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * for a given sky model \f$S(p,E,t)\f$ and response function
+ * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
  *
  * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
-double GCOMResponse::npred(const GPhoton&      photon,
-                           const GObservation& obs) const
+double GCOMResponse::nroi(const GModelSky&    model,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const
 {
-    // Set dummp Npred value
-    double npred = 1.0;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-        std::cout << "*** ERROR: GCOMResponse::npred:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (";
-        std::cout << "npred=" << npred;
-        std::cout << ")";
-        std::cout << std::endl;
-    }
-    #endif
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
 
     // Return Npred
-    return npred;
+    return (0.0);
 }
 
 
