@@ -546,13 +546,6 @@ double GModelSky::eval_gradients(const GEvent& event,
  *
  * The method takes care of any instrument dependent scale factors. These
  * scale factors will be applied to the predicted number of model counts.
- *
- * @todo The actual method is only correct if no energy and time dispersion
- *       exists. For the moment we set srcEng=obsEng and srcTime=obsTime.
- *       Formally, Equation (2) of the instrument document has to be
- *       computed, which is an integration over source energy, time
- *       and arrival direction. For the moment, only the integration over
- *       arrival direction is performed by GResponse::npred().
  ***************************************************************************/
 double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
                         const GObservation& obs) const
@@ -565,31 +558,6 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // Compute Nroi
         npred = obs.response()->nroi(*this, obsEng, obsTime, obs);
-
-        /*
-        // Here we make the simplifying approximations
-        // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
-        // integrate over true energy and true time here ... at least true
-        // time if we want to consider energy dispersion ...
-        GEnergy srcEng  = obsEng;
-        GTime   srcTime = obsTime;
-
-        // Set source
-        GSource source(this->name(), m_spatial, srcEng, srcTime);
-
-        // Compute response components
-        double npred_spatial  = rsp->npred(source, obs);
-        double npred_spectral = spectral()->eval(srcEng, srcTime);
-        double npred_temporal = temporal()->eval(srcTime);
-
-        // Compute response
-        npred = npred_spatial * npred_spectral * npred_temporal;
-
-        // If required, apply instrument specific model scaling
-        if (!m_scales.empty()) {
-            npred *= scale(obs.instrument()).value();
-        }
-        */
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
