@@ -73,7 +73,7 @@ public:
     // Operators
     virtual GCTAResponseIrf& operator=(const GCTAResponseIrf & rsp);
 
-    // Implement pure virtual base class methods
+    // Methods
     virtual void             clear(void);
     virtual GCTAResponseIrf* clone(void) const;
     virtual std::string      classname(void) const;
