@@ -26,26 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSky.hpp"
-#include "GModelSpatial.hpp"
-#include "GModelSpatialPointSource.hpp"
-#include "GModelSpatialRadial.hpp"
-#include "GModelSpatialRadialDisk.hpp"
-#include "GModelSpatialRadialGauss.hpp"
-#include "GModelSpatialRadialShell.hpp"
-#include "GModelSpatialElliptical.hpp"
-#include "GModelSpatialDiffuse.hpp"
-#include "GModelSpatialDiffuseConst.hpp"
-#include "GModelSpatialDiffuseCube.hpp"
-#include "GModelSpatialDiffuseMap.hpp"
-#include "GModelSpectral.hpp"
-#include "GModelSpectralConst.hpp"
-#include "GModelSpectralFunc.hpp"
-#include "GModelSpectralNodes.hpp"
-#include "GModelSpectralPlaw.hpp"
-#include "GModelSpectralPlaw2.hpp"
-#include "GModelSpectralLogParabola.hpp"
-#include "GModelTemporal.hpp"
-#include "GModelTemporalConst.hpp"
 %}
 
 
@@ -55,21 +35,22 @@
  * @brief Sky model class
  ***************************************************************************/
 class GModelSky : public GModel {
+
 public:
     // Constructors and destructors
     GModelSky(void);
     explicit GModelSky(const std::string& type);
     explicit GModelSky(const GXmlElement& xml);
-    explicit GModelSky(const GXmlElement& spatial,
-                       const GXmlElement& spectral);
-    explicit GModelSky(const GXmlElement& spatial,
-                       const GXmlElement& spectral,
-                       const GXmlElement& temporal);
-    explicit GModelSky(const GModelSpatial& spatial,
-                       const GModelSpectral& spectral);
-    explicit GModelSky(const GModelSpatial& spatial,
-                       const GModelSpectral& spectral,
-                       const GModelTemporal& temporal);
+    GModelSky(const GXmlElement& spatial,
+              const GXmlElement& spectral);
+    GModelSky(const GXmlElement& spatial,
+              const GXmlElement& spectral,
+              const GXmlElement& temporal);
+    GModelSky(const GModelSpatial& spatial,
+              const GModelSpectral& spectral);
+    GModelSky(const GModelSpatial& spatial,
+              const GModelSpectral& spectral,
+              const GModelTemporal& temporal);
     GModelSky(const GModelSky& model);
     virtual ~GModelSky(void);
 

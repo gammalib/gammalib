@@ -28,17 +28,20 @@
 #define GCOMRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GEvent.hpp"
-#include "GPhoton.hpp"
-#include "GObservation.hpp"
 #include "GResponse.hpp"
-#include "GFitsImage.hpp"
 #include "GCaldb.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
 /* __ Forward declaration ________________________________________________ */
 class GModelSky;
+class GEvent;
+class GPhoton;
+class GSource;
+class GEnergy;
+class GTime;
+class GObservation;
+class GFitsImage;
 
 
 /***********************************************************************//**
@@ -67,10 +70,14 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
+    virtual double        irf(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
                                const GObservation& obs) const;
+    virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods

@@ -33,6 +33,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GException.hpp"
+#include "GIntegral.hpp"
 #include "GResponse.hpp"
 #include "GEvent.hpp"
 #include "GPhoton.hpp"
@@ -51,7 +52,6 @@
                                                             " GObservation&)"
 #define G_IRF_DIFFUSE             "GResponse::irf_diffuse(GEvent&, GSource&,"\
                                                             " GObservation&)"
-#define G_EBOUNDS_SRC                      "GResponse::ebounds_src(GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -180,9 +180,143 @@ double GResponse::convolve(const GModelSky&    model,
     // Continue only if the model has a spatial component
     if (model.spatial() != NULL) {
 
-        // Get source energy and time (no dispersion)
-        GEnergy srcEng  = event.energy();
-        GTime   srcTime = event.time();
+        // Get source time (no dispersion)
+        GTime srcTime = event.time();
+
+        // Case A: Integration
+        if (use_edisp()) {
+    
+            // Retrieve true energy boundaries
+            GEbounds ebounds = this->ebounds(event.energy());
+    
+            // Loop over all boundaries
+            for (int i = 0; i < ebounds.size(); ++i) {
+
+                // Get boundaries in MeV
+                double emin = ebounds.emin(i).MeV();
+                double emax = ebounds.emax(i).MeV();
+
+                // Continue only if valid
+                if (emax > emin) {
+
+                    // Setup integration function
+                    edisp_kern integrand(this, model, event, srcTime, obs, grad);
+                    GIntegral  integral(&integrand);
+
+                    // Set integration precision
+                    integral.eps(1.0e-3);
+
+                    // Do Romberg integration
+                    emin  = std::log(emin);
+                    emax  = std::log(emax);
+                    prob += integral.romberg(emin, emax);
+    
+                } // endif: interval was valid
+
+            } // endfor: looped over intervals
+
+        }
+
+        // Case B: No integration (assume no energy dispersion)
+        else {
+    
+            // Get source energy (no dispersion)
+            GEnergy srcEng  = event.energy();
+
+            // Evaluate probability
+            prob = eval_prob(model, event, srcEng, srcTime, obs, grad);
+
+        }
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
+            std::cout << "*** ERROR: GResponse::convolve:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (prob=" << prob;
+            std::cout << ", event=" << event;
+            std::cout << ", srcTime=" << srcTime;
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endif: spatial component valid
+
+    // Return probability
+    return prob;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                            Protected methods                            =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GResponse::init_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] rsp Response.
+ ***************************************************************************/
+void GResponse::copy_members(const GResponse& rsp)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GResponse::free_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Convolve sky model with the instrument response
+ *
+ * @param[in] model Sky model.
+ * @param[in] event Event.
+ * @param[in] obs Observation.
+ * @param[in] grad Should model gradients be computed? (default: true)
+ * @return Event probability.
+ *
+ * Computes the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * without taking into account any energy or time dispersion. If energy or
+ * time dispersion should be considered the method needs to be reimplemented
+ * on the level of the instrument specific response class.
+ ***************************************************************************/
+double GResponse::eval_prob(const GModelSky&    model,
+                            const GEvent&       event,
+                            const GEnergy&      srcEng,
+                            const GTime&        srcTime,
+                            const GObservation& obs,
+                            const bool&         grad) const
+{
+    // Initialise result
+    double prob = 0.0;
+
+    // Continue only if the model has a spatial component
+    if (model.spatial() != NULL) {
 
         // Set source
         GSource source(model.name(), model.spatial(), srcEng, srcTime);
@@ -209,7 +343,7 @@ double GResponse::convolve(const GModelSky&    model,
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
             if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
-                std::cout << "*** ERROR: GResponse::convolve:";
+                std::cout << "*** ERROR: GResponse::eval_prob:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (prob=" << prob;
                 std::cout << ", spec=" << spec;
@@ -254,7 +388,7 @@ double GResponse::convolve(const GModelSky&    model,
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
             if (gammalib::is_notanumber(prob) || gammalib::is_infinite(prob)) {
-                std::cout << "*** ERROR: GResponse::convolve:";
+                std::cout << "*** ERROR: GResponse::eval_prob:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (prob=" << prob;
                 std::cout << ", spec=" << spec;
@@ -273,208 +407,44 @@ double GResponse::convolve(const GModelSky&    model,
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                          Obsolete public methods                        =
- =                                                                         =
- ==========================================================================*/
-
 /***********************************************************************//**
- * @brief Return value of instrument response function
+ * @brief Integration kernel for edisp_kern() method
  *
- * @param[in] event Event.
- * @param[in] source Source.
- * @param[in] obs Observation.
+ * @param[in] x Function value.
  *
- * Returns the instrument response function for a given event, source and
- * observation.
+ * This method implements the integration kernel needed for the edisp_kern()
+ * method.
  ***************************************************************************/
-double GResponse::irf(const GEvent&       event,
-                      const GSource&      source,
-                      const GObservation& obs) const
+double GResponse::edisp_kern::eval(const double& x)
 {
-    // Initialise IRF value
-    double irf = 0.0;
+    // Set energy
+    GEnergy eng;
+    double expx = std::exp(x);
+    eng.MeV(expx);
 
-    // Select IRF depending on the spatial model type
-    switch (source.model()->code()) {
-        case GMODEL_SPATIAL_POINT_SOURCE:
-            irf = irf_ptsrc(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_RADIAL:
-            irf = irf_radial(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_ELLIPTICAL:
-            irf = irf_elliptical(event, source, obs);
-            break;
-        case GMODEL_SPATIAL_DIFFUSE:
-            irf = irf_diffuse(event, source, obs);
-            break;
-        default:
-            break;
+    // Get function value
+    double value = m_parent->eval_prob(m_model, m_event, eng, m_srcTime, m_obs, m_grad);
+
+    // Save value if needed
+    #if defined(G_NAN_CHECK)
+    double value_out = value;
+    #endif
+
+    // Correct for variable substitution
+    value *= expx;
+
+    // Compile option: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
+        std::cout << "*** ERROR: GResponse::edisp_kern::eval";
+        std::cout << "(x=" << x << "): ";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (value=" << value_out;
+        std::cout << " exp(x)=" << expx;
+        std::cout << ")" << std::endl;
     }
+    #endif
 
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of point source instrument response function
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- * @return Value of instrument response function for a point source.
- *
- * This method returns the value of the instrument response function for a
- * point source. The method assumes that source.model() is of type
- * GModelSpatialPointSource.
- ***************************************************************************/
-double GResponse::irf_ptsrc(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const
-{
-    // Get point source spatial model
-    const GModelSpatialPointSource* src =
-          static_cast<const GModelSpatialPointSource*>(source.model());
-
-    // Set Photon
-    GPhoton photon(src->dir(), source.energy(), source.time());
-    
-    // Compute IRF
-    double irf = this->irf(event, photon, obs);
-
-    // Return IRF
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return IRF value for radial source model
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Method is not implemented.
- ***************************************************************************/
-double GResponse::irf_radial(const GEvent&       event,
-                             const GSource&      source,
-                             const GObservation& obs) const
-{
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_IRF_RADIAL,
-          "IRF computation not implemented for radial models.");
-
-    // Return IRF
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return IRF value for elliptical source model
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Method is not implemented.
- ***************************************************************************/
-double GResponse::irf_elliptical(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const
-{
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_IRF_ELLIPTICAL,
-          "IRF computation not implemented for elliptical models.");
-
-    // Return IRF
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return value of diffuse source instrument response function
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Method is not implemented.
- ***************************************************************************/
-double GResponse::irf_diffuse(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const
-{
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_IRF_DIFFUSE,
-          "IRF computation not implemented for diffuse models.");
-
-    // Return IRF
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Return true energy boundaries for a specific observed energy
- *
- * @param[in] obsEnergy Observed Energy.
- * @return True energy boundaries for given observed energy.
- *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented.
- ***************************************************************************/
-GEbounds GResponse::ebounds_src(const GEnergy& obsEnergy) const
-{
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_EBOUNDS_SRC,
-          "Energy boundary computation not implemented.");
-
-    // Allocate dummy energy boundaries
-    GEbounds ebounds;
-
-    // Return energy boundaries
-    return (ebounds);
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                            Protected methods                            =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GResponse::init_members(void)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] rsp Response.
- ***************************************************************************/
-void GResponse::copy_members(const GResponse& rsp)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GResponse::free_members(void)
-{
-    // Return
-    return;
+    // Return value
+    return value;
 }

@@ -85,61 +85,17 @@ public:
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
                                  const GObservation& obs) const;
+    virtual double           irf(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const;
     virtual double           nroi(const GModelSky&    model,
                                   const GEnergy&      obsEng,
                                   const GTime&        obsTime,
                                   const GObservation& obs) const;
+    virtual GEbounds         ebounds(const GEnergy& obsEnergy) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(const GChatter& chatter = NORMAL) const;
-
-    // New support methods
-    double nroi(const GModelSky&    model,
-                const GEnergy&      srcEng,
-                const GTime&        srcTime,
-                const GEnergy&      obsEng,
-                const GTime&        obsTime,
-                const GObservation& obs) const;
-    double nroi_ptsrc(const GModelSky&    model,
-                      const GEnergy&      srcEng,
-                      const GTime&        srcTime,
-                      const GEnergy&      obsEng,
-                      const GTime&        obsTime,
-                      const GObservation& obs) const;
-    double nroi_radial(const GModelSky&    model,
-                       const GEnergy&      srcEng,
-                       const GTime&        srcTime,
-                       const GEnergy&      obsEng,
-                       const GTime&        obsTime,
-                       const GObservation& obs) const;
-    double nroi_elliptical(const GModelSky&    model,
-                           const GEnergy&      srcEng,
-                           const GTime&        srcTime,
-                           const GEnergy&      obsEng,
-                           const GTime&        obsTime,
-                           const GObservation& obs) const;
-    double nroi_diffuse(const GModelSky&    model,
-                        const GEnergy&      srcEng,
-                        const GTime&        srcTime,
-                        const GEnergy&      obsEng,
-                        const GTime&        obsTime,
-                        const GObservation& obs) const;
-    double nirf(const GPhoton&      photon,
-                const GEnergy&      obsEng,
-                const GTime&        obsTime,
-                const GObservation& obs) const;
-
-    // Overload virtual base class methods
-    virtual double   irf_radial(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
-    virtual double   irf_elliptical(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
-    virtual double   irf_diffuse(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const;
-    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
     GCTAEventAtom*        mc(const double& area, const GPhoton& photon,
@@ -187,6 +143,16 @@ public:
                  const double&  zenith,
                  const double&  azimuth,
                  const double&  srcLogEng) const;
+    double nroi(const GModelSky&    model,
+                const GEnergy&      srcEng,
+                const GTime&        srcTime,
+                const GEnergy&      obsEng,
+                const GTime&        obsTime,
+                const GObservation& obs) const;
+    double nirf(const GPhoton&      photon,
+                const GEnergy&      obsEng,
+                const GTime&        obsTime,
+                const GObservation& obs) const;
     double npsf(const GSkyDir&      srcDir,
                 const double&       srcLogEng,
                 const GTime&        srcTime,
@@ -199,6 +165,42 @@ private:
     void        copy_members(const GCTAResponseIrf& rsp);
     void        free_members(void);
     std::string irf_filename(const std::string& filename) const;
+    double      irf_ptsrc(const GEvent&       event,
+                          const GSource&      source,
+                          const GObservation& obs) const;
+    double      irf_radial(const GEvent&       event,
+                           const GSource&      source,
+                           const GObservation& obs) const;
+    double      irf_elliptical(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+    double      irf_diffuse(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const;
+    double      nroi_ptsrc(const GModelSky&    model,
+                           const GEnergy&      srcEng,
+                           const GTime&        srcTime,
+                           const GEnergy&      obsEng,
+                           const GTime&        obsTime,
+                           const GObservation& obs) const;
+    double      nroi_radial(const GModelSky&    model,
+                            const GEnergy&      srcEng,
+                            const GTime&        srcTime,
+                            const GEnergy&      obsEng,
+                            const GTime&        obsTime,
+                            const GObservation& obs) const;
+    double      nroi_elliptical(const GModelSky&    model,
+                                const GEnergy&      srcEng,
+                                const GTime&        srcTime,
+                                const GEnergy&      obsEng,
+                                const GTime&        obsTime,
+                                const GObservation& obs) const;
+    double      nroi_diffuse(const GModelSky&    model,
+                             const GEnergy&      srcEng,
+                             const GTime&        srcTime,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const;
 
     // Private data members
     GCaldb          m_caldb;          //!< Calibration database

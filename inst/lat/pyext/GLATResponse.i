@@ -50,15 +50,14 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
+    virtual double        irf(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
                                const GObservation& obs) const;
-
-    // Implemented virtual methods
-    virtual double irf(const GEvent&       event,
-                       const GSource&      source,
-                       const GObservation& obs) const;
+    virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
 
     // Other Methods
     int                size(void) const;

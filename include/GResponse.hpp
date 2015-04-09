@@ -30,18 +30,18 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GFunction.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GEvent;
 class GPhoton;
+class GSource;
 class GEnergy;
+class GEbounds;
 class GTime;
 class GObservation;
 class GModelSky;
 
-// To be removed later ...
-class GSource;
-class GEbounds;
 
 /***********************************************************************//**
  * @class GResponse
@@ -51,10 +51,18 @@ class GEbounds;
  * The response function provides conversion between physical parameters
  * (such as source position, flux, ...) and the measured instrumental
  * parameters (such as measured energy, photon interaction, ...).
+ *
  * For a given observation, the irf method returns the instrument response
- * for a given event and .
- * The npred method returns the integral of the instrument response function
- * over the dataspace. This method is only required for unbinned analysis.
+ * for a given event and photon. An alternative method exists that returns
+ * the response for a specific source.
+ *
+ * The nroi method returns the spatial integral of the instrument response
+ * function times the sky model over the region of interest. This method is
+ * only required for unbinned analysis.
+ *
+ * The ebounds method returns the true energy boundaries for a specified
+ * measured event energy. This method is used for computing the energy
+ * dispersion.
  ***************************************************************************/
 class GResponse : public GBase {
 
@@ -76,10 +84,14 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
+    virtual double      irf(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const = 0;
     virtual double      nroi(const GModelSky&    model,
                              const GEnergy&      obsEng,
                              const GTime&        obsTime,
                              const GObservation& obs) const = 0;
+    virtual GEbounds    ebounds(const GEnergy& obsEng) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
@@ -88,29 +100,42 @@ public:
                                  const GObservation& obs,
                                  const bool&         grad = true) const;
 
-    // Old methods that will become obsolete
-    virtual double   irf(const GEvent&       event,
-                         const GSource&      source,
-                         const GObservation& obs) const;
-    virtual double   irf_ptsrc(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
-    virtual double   irf_radial(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
-    virtual double   irf_elliptical(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
-    virtual double   irf_diffuse(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const;
-    virtual GEbounds ebounds_src(const GEnergy& obsEng) const;
-
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GResponse& rsp);
-    void free_members(void);
+    void   init_members(void);
+    void   copy_members(const GResponse& rsp);
+    void   free_members(void);
+    double eval_prob(const GModelSky&    model,
+                     const GEvent&       event,
+                     const GEnergy&      srcEng,
+                     const GTime&        srcTime,
+                     const GObservation& obs,
+                     const bool&         grad) const;
+
+    // Protected classes
+    class edisp_kern : public GFunction {
+    public:
+        edisp_kern(const GResponse*    parent,
+                   const GModelSky&    model,
+                   const GEvent&       event,
+                   const GTime&        srcTime,
+                   const GObservation& obs,
+                   const bool&         grad) :
+                   m_parent(parent),
+                   m_model(model),
+                   m_event(event),
+                   m_srcTime(srcTime),
+                   m_obs(obs),
+                   m_grad(grad) { }
+        double eval(const double& x);
+    protected:
+        const GResponse*    m_parent;  //!< Pointer to parent class
+        const GModelSky&    m_model;   //!< Reference to model
+        const GEvent&       m_event;   //!< Reference to event
+        const GTime&        m_srcTime; //!< Reference to true time
+        const GObservation& m_obs;     //!< Reference to observation
+        const bool&         m_grad;    //!< Reference to gradient flag
+    };
 };
 
 #endif /* GRESPONSE_HPP */

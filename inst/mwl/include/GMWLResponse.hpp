@@ -29,6 +29,15 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GResponse.hpp"
+#include "GEbounds.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEvent;
+class GPhoton;
+class GSource;
+class GObservation;
+class GEnergy;
+class GTime;
 
 
 /***********************************************************************//**
@@ -63,10 +72,14 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
+    virtual double        irf(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
     virtual double        nroi(const GModelSky&    model,
                                const GEnergy&      obsEng,
                                const GTime&        obsTime,
                                const GObservation& obs) const;
+    virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -124,6 +137,23 @@ bool GMWLResponse::use_tdisp(void) const
  ***************************************************************************/
 inline
 double GMWLResponse::irf(const GEvent& event, const GPhoton& photon,
+                         const GObservation& obs) const
+{
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response function
+ *
+ * @param[in] event Event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @return Instrument response function (always 1).
+ ***************************************************************************/
+inline
+double GMWLResponse::irf(const GEvent& event, const GSource& source,
                          const GObservation& obs) const
 {
     return 1.0;

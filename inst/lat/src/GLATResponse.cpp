@@ -52,6 +52,7 @@
                                           " GEnergy&, GTime&, GObservation&)"
 #define G_NROI            "GLATResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
+#define G_EBOUNDS                           "GLATResponse::ebounds(GEnergy&)"
 #define G_AEFF                                     "GLATResponse::aeff(int&)"
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
@@ -496,24 +497,6 @@ double GLATResponse::irf(const GLATEventBin& event,
  *
  * @exception GException::feature_not_implemented
  *            Method is not implemented.
- *
- * Computes the integral
- *
- * \f[
- *    N_{\rm ROI}(E',t') = \int_{\rm ROI} P(p',E',t') dp'
- * \f]
- *
- * of the event probability
- *
- * \f[
- *    P(p',E',t') = \int \int \int
- *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
- * \f]
- *
- * for a given sky model \f$S(p,E,t)\f$ and response function
- * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
- *
- * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
 double GLATResponse::nroi(const GModelSky&    model,
                           const GEnergy&      obsEng,
@@ -527,6 +510,29 @@ double GLATResponse::nroi(const GModelSky&    model,
 
     // Return Npred
     return (0.0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ ***************************************************************************/
+GEbounds GLATResponse::ebounds(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // Throw an exception
+    std::string msg = "Energy dispersion not implemented.";
+    throw GException::feature_not_implemented(G_EBOUNDS, msg);
+
+    // Return energy boundaries
+    return (ebounds);
 }
 
 
