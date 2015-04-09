@@ -51,6 +51,8 @@
 #define G_INX_OPERATOR3        "GCTAResponseTable::operator()(int&, double&,"\
                                                          " double&, double&)"
 #define G_AXIS                                "GCTAResponseTable::axis(int&)"
+#define G_AXIS_LO_NAME                "GCTAResponseTable::axis_lo_name(int&)"
+#define G_AXIS_HI_NAME                "GCTAResponseTable::axis_hi_name(int&)"
 #define G_AXIS_LO_UNIT                "GCTAResponseTable::axis_lo_unit(int&)"
 #define G_AXIS_HI_UNIT                "GCTAResponseTable::axis_hi_unit(int&)"
 #define G_UNIT                                "GCTAResponseTable::unit(int&)"
@@ -59,6 +61,7 @@
 #define G_AXIS_LINEAR                  "GCTAResponseTable::axis_linear(int&)"
 #define G_AXIS_LOG10                    "GCTAResponseTable::axis_log10(int&)"
 #define G_AXIS_RADIANS                "GCTAResponseTable::axis_radians(int&)"
+#define G_NODES                              "GCTAResponseTable::nodes(int&)"
 #define G_SCALE                     "GCTAResponseTable::scale(int&, double&)"
 #define G_READ                         "GCTAResponseTable::read(GFitsTable*)"
 #define G_READ_COLNAMES       "GCTAResponseTable::read_colnames(GFitsTable*)"
@@ -636,7 +639,7 @@ int GCTAResponseTable::axis(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS, index, axes()-1);
+        throw GException::out_of_range(G_AXIS, "Axis index", index, axes());
     }
     #endif
 
@@ -659,12 +662,13 @@ int GCTAResponseTable::axis(const int& index) const
  ***************************************************************************/
 const double& GCTAResponseTable::axis_lo(const int& index, const int& bin) const
 {
-    // Optionally check if the index is valid
+    // Check if index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= axes() ||
-        bin   < 0 || bin   >= m_axis_lo[index].size()) {
-        throw GException::out_of_range(G_AXIS_LO, index, bin,
-                                       axes()-1, m_axis_lo[index].size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_LO, "Axis index", index, axes());
+    }
+    if (bin < 0 || bin >= m_axis_lo[index].size()) {
+        throw GException::out_of_range(G_AXIS_LO, "Bin index", index, m_axis_lo[index].size());
     }
     #endif
 
@@ -689,10 +693,11 @@ const double& GCTAResponseTable::axis_hi(const int& index, const int& bin) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= axes() ||
-        bin   < 0 || bin   >= m_axis_hi[index].size()) {
-        throw GException::out_of_range(G_AXIS_HI, index, bin,
-                                       axes()-1, m_axis_hi[index].size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_HI, "Axis index", index, axes());
+    }
+    if (bin < 0 || bin >= m_axis_hi[index].size()) {
+        throw GException::out_of_range(G_AXIS_HI, "Bin index", index, m_axis_hi[index].size());
     }
     #endif
 
@@ -717,7 +722,7 @@ const std::string& GCTAResponseTable::axis_lo_name(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
+        throw GException::out_of_range(G_AXIS_LO_NAME, "Axis index", index, axes());
     }
     #endif
 
@@ -742,7 +747,7 @@ const std::string& GCTAResponseTable::axis_hi_name(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
+        throw GException::out_of_range(G_AXIS_HI_NAME, "Axis index", index, axes());
     }
     #endif
 
@@ -767,7 +772,7 @@ const std::string& GCTAResponseTable::axis_lo_unit(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_LO_UNIT, index, axes()-1);
+        throw GException::out_of_range(G_AXIS_LO_UNIT, "Axis index", index, axes());
     }
     #endif
 
@@ -792,7 +797,7 @@ const std::string& GCTAResponseTable::axis_hi_unit(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_HI_UNIT, index, axes()-1);
+        throw GException::out_of_range(G_AXIS_HI_UNIT, "Axis index", index, axes());
     }
     #endif
 
@@ -822,7 +827,7 @@ void GCTAResponseTable::axis_linear(const int& index)
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_LINEAR, index, axes()-1);
+        throw GException::out_of_range(G_AXIS_LINEAR, "Axis index", index, axes());
     }
     #endif
 
@@ -868,7 +873,7 @@ void GCTAResponseTable::axis_log10(const int& index)
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_LINEAR, index, axes()-1);
+        throw GException::out_of_range(G_AXIS_LOG10, "Axis index", index, axes());
     }
     #endif
 
@@ -913,7 +918,7 @@ void GCTAResponseTable::axis_radians(const int& index)
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS_RADIANS, index, axes()-1);
+        throw GException::out_of_range(G_AXIS_RADIANS, "Axis index", index, axes());
     }
     #endif
 
@@ -952,8 +957,8 @@ const std::string& GCTAResponseTable::unit(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_UNIT, index, size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_UNIT, "Axis index", index, axes());
     }
     #endif
 
@@ -1055,7 +1060,7 @@ const GNodeArray& GCTAResponseTable::nodes(const int& index) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_AXIS, index, axes()-1);
+        throw GException::out_of_range(G_NODES, "Axis index", index, axes());
     }
     #endif
 
@@ -1080,8 +1085,8 @@ void GCTAResponseTable::scale(const int& index, const double& scale)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_SCALE, index, size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_SCALE, "Axis index", index, axes());
     }
     #endif
 
@@ -1539,9 +1544,9 @@ void GCTAResponseTable::read_colnames(const GFitsTable& hdu)
  * linear scale.
  *
  * This method sets the following members:
- *    m_axis_lo - Axes lower boundaries
- *    m_axis_hi - Axes upper boundaries
- *    m_axis_nodes - Axes mean values
+ *     m_axis_lo - Axes lower boundaries
+ *     m_axis_hi - Axes upper boundaries
+ *     m_axis_nodes - Axes mean values
  *
  * In case that the HDU pointer is not valid (NULL), this method clears the
  * axes boundaries and does nothing else.
@@ -1616,8 +1621,8 @@ void GCTAResponseTable::read_axes(const GFitsTable& hdu)
  * of elements per parameter).
  *
  * This method sets the following members:
- *    m_pars - Parameter values
- *    m_nelements - Number of elements per parameter
+ *     m_pars - Parameter values
+ *     m_nelements - Number of elements per parameter
  *
  * In case that the HDU pointer is not valid (NULL), this method clears the
  * axes boundaries and does nothing else.

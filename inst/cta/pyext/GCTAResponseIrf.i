@@ -182,14 +182,4 @@ public:
     GCTAResponseIrf copy() {
         return (*self);
     }
-    GCTAResponseIrf(GResponse* rsp) {
-        GCTAResponseIrf* ptr = dynamic_cast<GCTAResponseIrf*>(rsp);
-        if (ptr != NULL) {
-            return (ptr->clone());
-        }
-        else {
-            throw GException::bad_type("GCTAResponseIrf(GResponse*)",
-                                       "GResponse not of type GCTAResponseIrf");
-        }
-    }
 };

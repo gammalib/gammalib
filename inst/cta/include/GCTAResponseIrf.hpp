@@ -32,8 +32,12 @@
 #include <string>
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GCTAResponse.hpp"
 #include "GCaldb.hpp"
+#include "GCTAResponse.hpp"
+#include "GCTAAeff.hpp"
+#include "GCTAPsf.hpp"
+#include "GCTAEdisp.hpp"
+#include "GCTABackground.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -43,16 +47,12 @@ class GPhoton;
 class GEbounds;
 class GEvent;
 class GObservation;
+class GRan;
 class GCTAObservation;
 class GCTAPointing;
 class GCTAEventAtom;
 class GCTARoi;
 class GCTAInstDir;
-class GCTAAeff;
-class GCTAPsf;
-class GCTAEdisp;
-class GCTABackground;
-class GRan;
 
 
 /***********************************************************************//**
@@ -208,7 +208,7 @@ private:
     GCTAAeff*       m_aeff;           //!< Effective area
     GCTAPsf*        m_psf;            //!< Point spread function
     GCTAEdisp*      m_edisp;          //!< Energy dispersion
-    GCTABackground* m_background;     //!< Energy dispersion
+    GCTABackground* m_background;     //!< Background
     mutable bool    m_apply_edisp;    //!< Apply energy dispersion
     double          m_lo_save_thres;  //!< Save low energy threshold
     double          m_hi_save_thres;  //!< Save high energy threshold
@@ -352,7 +352,7 @@ const GCTAAeff* GCTAResponseIrf::aeff(void) const
 inline
 void GCTAResponseIrf::aeff(GCTAAeff* aeff)
 {
-    m_aeff = aeff;
+    m_aeff = aeff->clone();
     return;
 }
 
@@ -377,7 +377,7 @@ const GCTAPsf* GCTAResponseIrf::psf(void) const
 inline
 void GCTAResponseIrf::psf(GCTAPsf* psf)
 {
-    m_psf = psf;
+    m_psf = psf->clone();
     return;
 }
 
@@ -402,7 +402,7 @@ const GCTAEdisp* GCTAResponseIrf::edisp(void) const
 inline
 void GCTAResponseIrf::edisp(GCTAEdisp* edisp)
 {
-    m_edisp = edisp;
+    m_edisp = edisp->clone();
     return;
 }
 
@@ -429,7 +429,7 @@ const GCTABackground* GCTAResponseIrf::background(void) const
 inline
 void GCTAResponseIrf::background(GCTABackground* background)
 {
-    m_background = background;
+    m_background = background->clone();
     return;
 }
 

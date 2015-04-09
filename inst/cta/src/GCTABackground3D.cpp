@@ -524,39 +524,56 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
-        // Compute DETX boundaries in deg
-        double detx_min = m_background.axis_lo(0,0);
-        double detx_max = m_background.axis_hi(0,m_background.axis(0)-1);
-
-        // Compute DETY boundaries in deg
-        double dety_min = m_background.axis_lo(1,0);
-        double dety_max = m_background.axis_hi(1,m_background.axis(1)-1);
-
-        // Compute energy boundaries in TeV
-        double emin = m_background.axis_lo(2,0);
-        double emax = m_background.axis_hi(2,m_background.axis(2)-1);
-
         // Append header
         result.append("=== GCTABackground3D ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
-        result.append("\n"+gammalib::parformat("Number of DETX bins") +
-                      gammalib::str(m_background.axis(0)));
-        result.append("\n"+gammalib::parformat("Number of DETY bins") +
-                      gammalib::str(m_background.axis(1)));
-        result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_background.axis(2)));
-        result.append("\n"+gammalib::parformat("DETX range"));
-        result.append(gammalib::str(detx_min)+" - "+gammalib::str(detx_max)+" deg");
-        result.append("\n"+gammalib::parformat("DETX range"));
-        result.append(gammalib::str(dety_min)+" - "+gammalib::str(dety_max)+" deg");
-        result.append("\n"+gammalib::parformat("Energy range"));
-        result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
-        result.append("\n"+gammalib::parformat("Maximum bin size for MC"));
-        result.append(gammalib::str(m_mc_max_bin)+" deg");
-        result.append("\n"+gammalib::parformat("Maximum logE step for MC"));
-        result.append(gammalib::str(m_mc_max_logE)+"^10 TeV");
+
+        // If there are 3 axis then print information
+        if (m_background.axes() == 3) {
+
+            // Compute DETX boundaries in deg
+            double detx_min = m_background.axis_lo(0,0);
+            double detx_max = m_background.axis_hi(0,m_background.axis(0)-1);
+
+            // Compute DETY boundaries in deg
+            double dety_min = m_background.axis_lo(1,0);
+            double dety_max = m_background.axis_hi(1,m_background.axis(1)-1);
+
+            // Compute energy boundaries in TeV
+            double emin = m_background.axis_lo(2,0);
+            double emax = m_background.axis_hi(2,m_background.axis(2)-1);
+
+            // Append information
+            result.append("\n"+gammalib::parformat("Number of DETX bins") +
+                          gammalib::str(m_background.axis(0)));
+            result.append("\n"+gammalib::parformat("Number of DETY bins") +
+                          gammalib::str(m_background.axis(1)));
+            result.append("\n"+gammalib::parformat("Number of energy bins") +
+                          gammalib::str(m_background.axis(2)));
+            result.append("\n"+gammalib::parformat("DETX range"));
+            result.append(gammalib::str(detx_min)+" - "+gammalib::str(detx_max)+" deg");
+            result.append("\n"+gammalib::parformat("DETX range"));
+            result.append(gammalib::str(dety_min)+" - "+gammalib::str(dety_max)+" deg");
+            result.append("\n"+gammalib::parformat("Energy range"));
+            result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
+            result.append("\n"+gammalib::parformat("Maximum bin size for MC"));
+            result.append(gammalib::str(m_mc_max_bin)+" deg");
+            result.append("\n"+gammalib::parformat("Maximum logE step for MC"));
+            result.append(gammalib::str(m_mc_max_logE)+"^10 TeV");
+
+        } // endif: there were 3 axis
+
+        // ... otherwise show empty array
+        else {
+            result.append("\n"+gammalib::parformat("Number of DETX bins") +
+                          gammalib::str(0));
+            result.append("\n"+gammalib::parformat("Number of DETY bins") +
+                          gammalib::str(0));
+            result.append("\n"+gammalib::parformat("Number of energy bins") +
+                          gammalib::str(0));
+        }
 
     } // endif: chatter was not silent
 
