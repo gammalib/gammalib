@@ -1443,6 +1443,7 @@ void GCTAObservation::init_members(void)
     m_dec_obj       = 0.0;
     m_lo_user_thres = 0.0;
     m_hi_user_thres = 0.0;
+    m_n_tels        = 0;
 
     // Return
     return;
@@ -1470,6 +1471,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_dec_obj       = obs.m_dec_obj;
     m_lo_user_thres = obs.m_lo_user_thres;
     m_hi_user_thres = obs.m_hi_user_thres;
+    m_n_tels        = obs.m_n_tels;
 
     // Clone members
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
@@ -1502,20 +1504,22 @@ void GCTAObservation::free_members(void)
  *
  * Reads CTA observation attributes from HDU. Mandatory attributes are
  *
- * RA_PNT   - Right Ascension of pointing
- * DEC_PNT  - Declination of pointing
- * ONTIME   - Exposure time
- * LIVETIME - Livetime
+ *     RA_PNT   - Right Ascension of pointing
+ *     DEC_PNT  - Declination of pointing
+ *     ONTIME   - Exposure time
+ *     LIVETIME - Livetime
  *
  * and optional attributes are
  *
- * OBJECT   - Name of observed object
- * DEADC    - Deadtime correction
- * RA_OBJ   - Right Ascension of observed object,
- * DEC_OBJ  - Declination of observed object,
- * OBS_ID   - Observation identifier
- * ALT_PNT  - Altitude of pointing above horizon
- * AZ_PNT   - Azimuth of pointing
+ *     OBJECT   - Name of observed object
+ *     DEADC    - Deadtime correction
+ *     RA_OBJ   - Right Ascension of observed object,
+ *     DEC_OBJ  - Declination of observed object,
+ *     OBS_ID   - Observation identifier
+ *     ALT_PNT  - Altitude of pointing above horizon
+ *     AZ_PNT   - Azimuth of pointing
+ *     TELESCOP - Telescope name
+ *     N_TELS   - Number of telescopes
  *
  * Based on RA_PNT and DEC_PNT, the CTA pointing direction is set. Note that
  * DEADC is computed using DEADC=LIVETIME/ONTIME
@@ -1533,13 +1537,15 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     m_livetime = (hdu.has_card("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
 
     // Read optional attributes
-    m_name     = (hdu.has_card("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
-    m_deadc    = (hdu.has_card("DEADC"))    ? hdu.real("DEADC") : 0.0;
-    m_ra_obj   = (hdu.has_card("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
-    m_dec_obj  = (hdu.has_card("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
-    m_obs_id   = (hdu.has_card("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
-    double alt = (hdu.has_card("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
-    double az  = (hdu.has_card("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
+    m_name       = (hdu.has_card("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
+    m_deadc      = (hdu.has_card("DEADC"))    ? hdu.real("DEADC") : 0.0;
+    m_ra_obj     = (hdu.has_card("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
+    m_dec_obj    = (hdu.has_card("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
+    m_obs_id     = (hdu.has_card("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
+    double alt   = (hdu.has_card("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
+    double az    = (hdu.has_card("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
+    m_instrument = (hdu.has_card("TELESCOP")) ? hdu.string("TELESCOP") : "CTA";
+    m_n_tels     = (hdu.has_card("N_TELS"))   ? hdu.integer("N_TELS") : 0;
 
     // Kluge: compute DEADC from livetime and ontime instead of using the
     // keyword value as the original event lists had this values badly
@@ -1626,7 +1632,7 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     hdu.card("OBSERVER", "string",  "Observer");
 
     // Telescope information
-    hdu.card("N_TELS",   100,      "Number of telescopes in event list");
+    hdu.card("N_TELS",   n_tels(), "Number of telescopes in event list");
     hdu.card("TELLIST",  "string", "Telescope IDs");
     hdu.card("GEOLAT",   0.0,      "[deg] Geographic latitude of array centre");
     hdu.card("GEOLON",   0.0,      "[deg] Geographic longitude of array centre");

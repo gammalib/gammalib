@@ -127,6 +127,8 @@ public:
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;
+    void                n_tels(const int& tels);
+    const int&          n_tels(void) const;
 
 protected:
     // Protected methods
@@ -151,6 +153,7 @@ protected:
     double        m_dec_obj;       //!< Declination of object (degrees)
     double        m_lo_user_thres; //!< User defined lower energy threshold
     double        m_hi_user_thres; //!< User defined upper energy boundary
+    int           m_n_tels;        //!< Number of telescopes
 
     // Special protected member for GCTAModelCubeBackground friend
     std::string   m_bgdfile;     //!< Background filename
@@ -432,6 +435,28 @@ const double& GCTAObservation::hi_user_thres(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Set number of telescopes
+ *
+ * @param[in] tels Number of telescopes.
+ ***************************************************************************/
+inline
+void GCTAObservation::n_tels(const int& tels)
+{
+    m_n_tels = tels;
+    return;
+}
 
+
+/***********************************************************************//**
+ * @brief Return number of telescopes
+ *
+ * @return Number of telescopes.
+ ***************************************************************************/
+inline
+const int& GCTAObservation::n_tels(void) const
+{
+    return m_n_tels;
+}
 
 #endif /* GCTAOBSERVATION_HPP */

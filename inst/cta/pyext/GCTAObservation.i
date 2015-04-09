@@ -99,6 +99,8 @@ public:
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;
+    void                n_tels(const int& tels);
+    const int&          n_tels(void) const;
 };
 
 
