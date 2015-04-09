@@ -297,8 +297,15 @@ void GCTAAeff2D::read(const GFits& fits)
  ***************************************************************************/
 void GCTAAeff2D::write(GFitsBinTable& hdu) const
 {
-    // Write background table
-    m_aeff.write(hdu);
+    // Create a copy of the response table
+    GCTAResponseTable table(m_aeff);
+
+    // Convert area from cm2 to m2
+    table.scale(0, 1.0e-4);
+    table.scale(1, 1.0e-4);
+
+    // Write response table
+    table.write(hdu);
 
     // Return
     return;

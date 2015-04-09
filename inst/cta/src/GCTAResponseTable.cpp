@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseTable.cpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1144,12 +1144,15 @@ void GCTAResponseTable::read(const GFitsTable& table)
  ***************************************************************************/
 void GCTAResponseTable::write(GFitsTable& table) const
 {
+    // Initialise dimension vector
+    std::vector<int> dim;
+
     // Loop over all response table axes
     for (int iaxis = 0; iaxis < m_naxes; ++iaxis) {
 
         // Create axis columns
-        GFitsTableDoubleCol col_lo(m_colname_lo[iaxis], 1, m_axis_lo[iaxis].size());
-        GFitsTableDoubleCol col_hi(m_colname_hi[iaxis], 1, m_axis_hi[iaxis].size());
+        GFitsTableFloatCol col_lo(m_colname_lo[iaxis], 1, m_axis_lo[iaxis].size());
+        GFitsTableFloatCol col_hi(m_colname_hi[iaxis], 1, m_axis_hi[iaxis].size());
 
         // Loop through all elements in this axis column
         for (int i = 0; i < m_axis_lo[iaxis].size(); ++i) {
@@ -1165,13 +1168,16 @@ void GCTAResponseTable::write(GFitsTable& table) const
         table.append(col_lo);
         table.append(col_hi);
 
+        // Append dimension
+        dim.push_back(m_axis_lo[iaxis].size());
+
     } // endif: looped over all axes in response table
 
     // Loop over all parameters in the response table
     for (int ipar = 0; ipar < m_npars; ++ipar) {
 
         // Create parameter column
-        GFitsTableDoubleCol col_par(m_colname_par[ipar], 1, m_pars[ipar].size());
+        GFitsTableFloatCol col_par(m_colname_par[ipar], 1, m_pars[ipar].size());
         
         // Loop through elements in this parameter column
         for (int i = 0; i < m_pars[ipar].size() ; ++i) {
@@ -1180,6 +1186,9 @@ void GCTAResponseTable::write(GFitsTable& table) const
 
         // Set column unit
         col_par.unit(m_units_par[ipar]);
+
+        // Set column dimension
+        col_par.dim(dim);
 
         // Append column to table
         table.append(col_par);
