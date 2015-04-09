@@ -336,8 +336,16 @@ void GCTAPsf2D::read(const GFits& fits)
  ***************************************************************************/
 void GCTAPsf2D::write(GFitsBinTable& hdu) const
 {
+    // Create a copy of the response table
+    GCTAResponseTable table(m_psf);
+
+    // Convert sigma parameters back to degrees
+    table.scale(1, gammalib::rad2deg);
+    table.scale(3, gammalib::rad2deg);
+    table.scale(5, gammalib::rad2deg);
+
     // Write background table
-    m_psf.write(hdu);
+    table.write(hdu);
 
     // Return
     return;
