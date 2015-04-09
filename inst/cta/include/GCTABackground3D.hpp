@@ -72,6 +72,7 @@ public:
     std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Methods
+    bool                       is_valid(void) const;
     const GCTAResponseTable&   table(void) const;
     void                       table(const GCTAResponseTable& table);
     void                       read(const GFits& file);
@@ -154,6 +155,18 @@ const GModelSpectralNodes& GCTABackground3D::spectrum(void) const
 
 
 /***********************************************************************//**
+ * @brief Return validity of background model
+ *
+ * @return True if background model is valid.
+ ***************************************************************************/
+inline
+bool GCTABackground3D::is_valid(void) const
+{
+    return (m_background.axes() == 3);
+}
+
+
+/***********************************************************************//**
  * @brief Return response table
  *
  * @return Response table.
@@ -163,6 +176,7 @@ const GCTAResponseTable& GCTABackground3D::table(void) const
 {
     return m_background;
 }
+
 
 /***********************************************************************//**
  * @brief Assign response table

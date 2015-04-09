@@ -38,6 +38,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                               "GCTABackground3D::read(GFits&)"
 #define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
+#define G_INIT_MC_CACHE                   "GCTABackground3D::init_mc_cache()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -172,83 +173,92 @@ GCTABackground3D& GCTABackground3D::operator=(const GCTABackground3D& bgd)
  *
  * The method interpolates linearly in DETX and DETY, and logarithmically
  * in the energy direction.
+ *
+ * If the background model is not valid the operator returns 0.0.
  ***************************************************************************/
 double GCTABackground3D::operator()(const double& logE, 
                                     const double& detx, 
                                     const double& dety) const
 {
-    // Get background rate
-    #if defined(G_LOG_INTERPOLATION)
-    // Retrieve node arrays
-    const GNodeArray& detx_nodes   = m_background.nodes(0);
-    const GNodeArray& dety_nodes   = m_background.nodes(1);
-    const GNodeArray& energy_nodes = m_background.nodes(2);
-
-    // Set values for node arrays
-    detx_nodes.set_value(detx);
-    dety_nodes.set_value(dety);
-    energy_nodes.set_value(logE);
-
-    // Compute offsets of DETY in DETX-DETY plane
-    int size1        = m_background.axis(0);
-    int offset_left  = dety_nodes.inx_left()  * size1;
-    int offset_right = dety_nodes.inx_right() * size1;
-
-    // Set indices for bi-linear interpolation in DETX-DETY plane
-    int inx_ll = detx_nodes.inx_left()  + offset_left;
-    int inx_lr = detx_nodes.inx_left()  + offset_right;
-    int inx_rl = detx_nodes.inx_right() + offset_left;
-    int inx_rr = detx_nodes.inx_right() + offset_right;
-
-    // Set weighting factors for bi-linear interpolation in DETX-DETY plane
-    double wgt_ll = detx_nodes.wgt_left()  * dety_nodes.wgt_left();
-    double wgt_lr = detx_nodes.wgt_left()  * dety_nodes.wgt_right();
-    double wgt_rl = detx_nodes.wgt_right() * dety_nodes.wgt_left();
-    double wgt_rr = detx_nodes.wgt_right() * dety_nodes.wgt_right();
-
-    // Set indices for energy interpolation
-    int inx_emin = energy_nodes.inx_left();
-    int inx_emax = energy_nodes.inx_right();
-
-    // Set weighting factors for energy interpolation
-    double wgt_emin = energy_nodes.wgt_left();
-    double wgt_emax = energy_nodes.wgt_right();
-
-    // Compute offsets in energy dimension
-    int npixels     = m_background.axis(0) * m_background.axis(1);
-    int offset_emin = inx_emin * npixels;
-    int offset_emax = inx_emax * npixels;
-
-    // Bi-linear interpolation the rates in both energy layers
+    // Initialise rate
     double rate(0.0);
-    double rate_emin = wgt_ll * m_background(0, inx_ll + offset_emin) +
-                       wgt_lr * m_background(0, inx_lr + offset_emin) +
-                       wgt_rl * m_background(0, inx_rl + offset_emin) +
-                       wgt_rr * m_background(0, inx_rr + offset_emin);
-    double rate_emax = wgt_ll * m_background(0, inx_ll + offset_emax) +
-                       wgt_lr * m_background(0, inx_lr + offset_emax) +
-                       wgt_rl * m_background(0, inx_rl + offset_emax) +
-                       wgt_rr * m_background(0, inx_rr + offset_emax);
 
-    // If both rates are positive then perform a logarithmic
-    // interpolation in energy
-    if (rate_emin > 0.0 && rate_emax > 0.0) {
-        rate = std::pow(10.0, wgt_emin * std::log10(rate_emin) +
-                              wgt_emax * std::log10(rate_emax));
-    }
+    // Continue only if background model is valid
+    if (is_valid()) {
 
-    // ... otherwise perform a linear interpolation
-    else {
-        rate = wgt_emin * rate_emin + wgt_emax * rate_emax;
-    }
-    #else
-    double rate = m_background(0, detx, dety, logE);
-    #endif
+        // Get background rate
+        #if defined(G_LOG_INTERPOLATION)
+        // Retrieve node arrays
+        const GNodeArray& detx_nodes   = m_background.nodes(0);
+        const GNodeArray& dety_nodes   = m_background.nodes(1);
+        const GNodeArray& energy_nodes = m_background.nodes(2);
 
-    // Make sure that background rate is not negative
-    if (rate < 0.0) {
-        rate = 0.0;
-    }
+        // Set values for node arrays
+        detx_nodes.set_value(detx);
+        dety_nodes.set_value(dety);
+        energy_nodes.set_value(logE);
+
+        // Compute offsets of DETY in DETX-DETY plane
+        int size1        = m_background.axis(0);
+        int offset_left  = dety_nodes.inx_left()  * size1;
+        int offset_right = dety_nodes.inx_right() * size1;
+
+        // Set indices for bi-linear interpolation in DETX-DETY plane
+        int inx_ll = detx_nodes.inx_left()  + offset_left;
+        int inx_lr = detx_nodes.inx_left()  + offset_right;
+        int inx_rl = detx_nodes.inx_right() + offset_left;
+        int inx_rr = detx_nodes.inx_right() + offset_right;
+
+        // Set weighting factors for bi-linear interpolation in DETX-DETY plane
+        double wgt_ll = detx_nodes.wgt_left()  * dety_nodes.wgt_left();
+        double wgt_lr = detx_nodes.wgt_left()  * dety_nodes.wgt_right();
+        double wgt_rl = detx_nodes.wgt_right() * dety_nodes.wgt_left();
+        double wgt_rr = detx_nodes.wgt_right() * dety_nodes.wgt_right();
+
+        // Set indices for energy interpolation
+        int inx_emin = energy_nodes.inx_left();
+        int inx_emax = energy_nodes.inx_right();
+
+        // Set weighting factors for energy interpolation
+        double wgt_emin = energy_nodes.wgt_left();
+        double wgt_emax = energy_nodes.wgt_right();
+
+        // Compute offsets in energy dimension
+        int npixels     = m_background.axis(0) * m_background.axis(1);
+        int offset_emin = inx_emin * npixels;
+        int offset_emax = inx_emax * npixels;
+
+        // Bi-linear interpolation the rates in both energy layers
+        double rate_emin = wgt_ll * m_background(0, inx_ll + offset_emin) +
+                           wgt_lr * m_background(0, inx_lr + offset_emin) +
+                           wgt_rl * m_background(0, inx_rl + offset_emin) +
+                           wgt_rr * m_background(0, inx_rr + offset_emin);
+        double rate_emax = wgt_ll * m_background(0, inx_ll + offset_emax) +
+                           wgt_lr * m_background(0, inx_lr + offset_emax) +
+                           wgt_rl * m_background(0, inx_rl + offset_emax) +
+                           wgt_rr * m_background(0, inx_rr + offset_emax);
+
+        // If both rates are positive then perform a logarithmic
+        // interpolation in energy
+        if (rate_emin > 0.0 && rate_emax > 0.0) {
+            rate = std::pow(10.0, wgt_emin * std::log10(rate_emin) +
+                                  wgt_emax * std::log10(rate_emax));
+        }
+
+        // ... otherwise perform a linear interpolation
+        else {
+            rate = wgt_emin * rate_emin + wgt_emax * rate_emax;
+        }
+        #else
+        rate = m_background(0, detx, dety, logE);
+        #endif
+
+        // Make sure that background rate is not negative
+        if (rate < 0.0) {
+            rate = 0.0;
+        }
+
+    } // endif: background model was valid
 
     // Return background rate
     return rate;
@@ -530,8 +540,8 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
 
-        // If there are 3 axis then print information
-        if (m_background.axes() == 3) {
+        // If background model is valid then print information
+        if (is_valid()) {
 
             // Compute DETX boundaries in deg
             double detx_min = m_background.axis_lo(0,0);
@@ -669,6 +679,9 @@ void GCTABackground3D::free_members(void)
 /***********************************************************************//**
  * @brief Initialise Monte Carlo cache
  *
+ * @exception GException::invalid_value
+ *            No valid background model defined.
+ *
  * Initialises the cache for Monte Carlo sampling. The method uses the
  * members m_mc_max_bin and m_mc_max_logE to enforce an internal rebinning
  * in case that the provided background model information is coarsely
@@ -683,6 +696,12 @@ void GCTABackground3D::init_mc_cache(void) const
     // Initialise cache
     m_mc_cache.clear();
     m_mc_spectrum.clear();
+
+    // Throw an exception if the background model is not valid
+    if (!is_valid()) {
+        std::string msg = "No valid background model defined.";
+        throw GException::invalid_value(G_INIT_MC_CACHE, msg);
+    }
 
     // Determine number of response cube pixels and maps
     m_mc_nx    = m_background.axis(0);
@@ -743,7 +762,6 @@ void GCTABackground3D::init_mc_cache(void) const
             int offset = i * (m_mc_npix+1);
 
             // Get logE
-            //double logE = m_background.nodes(2)[i];
             double logE = m_mc_logE_min + (i+0.5) * m_mc_logE_bin;
 
             // Set first cache value to 0

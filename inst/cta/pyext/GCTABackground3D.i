@@ -60,6 +60,7 @@ public:
     const GModelSpectralNodes& spectrum(void) const;
 
     // Methods
+    bool                       is_valid(void) const;
     const GCTAResponseTable&   table(void) const;
     void                       table(const GCTAResponseTable& table);
     void                       read(const GFits& file);
