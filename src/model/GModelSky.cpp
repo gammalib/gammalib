@@ -36,6 +36,7 @@
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRadial.hpp"
+#include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
@@ -467,16 +468,13 @@ GVector GModelSky::gradients(const GPhoton& photon)
  * @return Value of sky model
  *
  * Evalutes the value of the sky model for an @p event of a specific
- * observation @p obs. This method will subsequently call the following
- * methods:
- * - integrate_time() (performs integral over time dispersion)
- * - spectral() (performs integral over energy dispersion)
- * - spatial() (performs integral over spatial dispersion)
+ * observation @p obs.
  ***************************************************************************/
 double GModelSky::eval(const GEvent& event, const GObservation& obs) const
 {
     // Evaluate function
-    double value = integrate_time(event, obs, false);
+    //double value = integrate_time(event, obs, false);
+    double value = obs.response()->convolve(*this, event, obs, false);
 
     // Return
     return value;
@@ -492,11 +490,7 @@ double GModelSky::eval(const GEvent& event, const GObservation& obs) const
  * @return Value of sky model
  *
  * Evalutes the value of the sky model and of the parameter for an @p event
- * of a specific observation @p obs. This method will subsequently call the
- * following methods:
- * - integrate_time() (performs integral over time dispersion)
- * - spectral() (performs integral over energy dispersion)
- * - spatial() (performs integral over spatial dispersion)
+ * of a specific observation @p obs.
  *
  * While the value of the sky model is returned by the method, the parameter
  * gradients are set as GModelPar members.
@@ -505,7 +499,8 @@ double GModelSky::eval_gradients(const GEvent& event,
                                  const GObservation& obs) const
 {
     // Evaluate function
-    double value = integrate_time(event, obs, true);
+    //double value = integrate_time(event, obs, true);
+    double value = obs.response()->convolve(*this, event, obs, true);
 
     // Return
     return value;
@@ -545,13 +540,6 @@ double GModelSky::eval_gradients(const GEvent& event,
  *
  * The method takes care of any instrument dependent scale factors. These
  * scale factors will be applied to the predicted number of model counts.
- *
- * @todo The actual method is only correct if no energy and time dispersion
- *       exists. For the moment we set srcEng=obsEng and srcTime=obsTime.
- *       Formally, Equation (2) of the instrument document has to be
- *       computed, which is an integration over source energy, time
- *       and arrival direction. For the moment, only the integration over
- *       arrival direction is performed by GResponse::npred().
  ***************************************************************************/
 double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
                         const GObservation& obs) const
@@ -562,31 +550,8 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Get response function
-        const GResponse* rsp = obs.response();
-
-        // Here we make the simplifying approximations
-        // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
-        // integrate over true energy and true time here ... at least true
-        // time if we want to consider energy dispersion ...
-        GEnergy srcEng  = obsEng;
-        GTime   srcTime = obsTime;
-
-        // Set source
-        GSource source(this->name(), m_spatial, srcEng, srcTime);
-
-        // Compute response components
-        double npred_spatial  = rsp->npred(source, obs);
-        double npred_spectral = spectral()->eval(srcEng, srcTime);
-        double npred_temporal = temporal()->eval(srcTime);
-
-        // Compute response
-        npred = npred_spatial * npred_spectral * npred_temporal;
-
-        // If required, apply instrument specific model scaling
-        if (!m_scales.empty()) {
-            npred *= scale(obs.instrument()).value();
-        }
+        // Compute Nroi
+        npred = obs.response()->nroi(*this, obsEng, obsTime, obs);
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -594,11 +559,8 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
             std::cout << "*** ERROR: GModelSky::npred:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
-            std::cout << ", npred_spatial=" << npred_spatial;
-            std::cout << ", npred_spectral=" << npred_spectral;
-            std::cout << ", npred_temporal=" << npred_temporal;
-            std::cout << ", srcEng=" << srcEng;
-            std::cout << ", srcTime=" << srcTime;
+            std::cout << ", obsEng=" << obsEng;
+            std::cout << ", obsTime=" << obsTime;
             std::cout << ")" << std::endl;
         }
         #endif
@@ -1179,6 +1141,7 @@ void GModelSky::set_type(void)
  * @brief Construct spatial model from XML element
  *
  * @param[in] spatial XML element containing spatial model information.
+ * @return Pointer to spatial model.
  *
  * @exception GException::model_invalid_spatial
  *            Invalid spatial model type encountered.
@@ -1211,6 +1174,7 @@ GModelSpatial* GModelSky::xml_spatial(const GXmlElement& spatial) const
  * @brief Construct spectral model from XML element
  *
  * @param[in] spectral XML element containing spectral model information.
+ * @return Pointer to spectral model.
  *
  * @exception GException::model_invalid_spectral
  *            Invalid spatial model type encountered.
@@ -1243,6 +1207,7 @@ GModelSpectral* GModelSky::xml_spectral(const GXmlElement& spectral) const
  * @brief Construct temporal model from XML element
  *
  * @param[in] temporal XML element containing temporal model information.
+ * @return Pointer to temporal model.
  *
  * @exception GException::model_invalid_temporal
  *            Invalid spatial model type encountered.
@@ -1272,311 +1237,9 @@ GModelTemporal* GModelSky::xml_temporal(const GXmlElement& temporal) const
 
 
 /***********************************************************************//**
- * @brief Compute event probability for the sky model
- *
- * @param[in] event Observed event.
- * @param[in] obs Observation.
- * @param[in] grad Evaluate gradients.
- * @return Probability of measuring the event
- *         (\f${\rm s}^{-1}\f$ \f${\rm MeV}^{-1}\f$ \f${\rm sr}^{-1}\f$).
- *
- * @exception GException::feature_not_implemented
- *            Temporal integration not yet implemented
- *
- * Computes the probability \f$P(\vec{p'}, E', t')\f$ of measuring an
- * @p event with instrument direction \f$\vec{p'}\f$, energy \f$E'\f$ at
- * time \f$t'\f$ from a source \f$S(\vec{p}, E, t)\f$ using
- *
- * \f[
- *    P(\vec{p'}, E', t') = \int_{0}^{t'+\Delta t}
- *                          \int_{E'-\Delta E}^{\infty}
- *                          \int_{\Omega} 
- *                          S(\vec{p}, E, t) \,
- *                          R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *                          {\rm d}\vec{p} \, {\rm d}E \,{\rm d}t
- * \f]
- *
- * (in units of \f${\rm s}^{-1}\f$ \f${\rm MeV}^{-1}\f$ \f${\rm sr}^{-1}\f$).
- * The terms \f$\Delta t\f$ and \f$\Delta E\f$ account for the statistical
- * jitter related to the measurement process and are of the order of a few
- * times the rms in the time and energy measurements.
- *
- * The method performs the integration of the true time. The integration
- * over the true photon energy and photon arrival direction is performed
- * by integrate_energy() and integrate_dir(), respectively.
- *
- * @todo Needs implementation of temporal integration to handle time
- *       dispersion.
- ***************************************************************************/
-double GModelSky::integrate_time(const GEvent& event,
-                                 const GObservation& obs,
-                                 bool grad) const
-{
-    // Initialise result
-    double value = 0.0;
-
-    // Get response function
-    const GResponse* rsp = obs.response();
-
-    // Determine if time integration is needed
-    bool integrate = rsp->use_tdisp();
-
-    // Case A: Integration
-    if (integrate) {
-        throw GException::feature_not_implemented(G_INTEGRATE_TIME);
-    }
-
-    // Case B: No integration (assume no time dispersion)
-    else {
-        value = integrate_energy(event, event.time(), obs, grad);
-    }
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSky::integrate_time:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", event=" << event;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Integrate sky model over true photon energy and arrival direction
- *
- * @param[in] event Observed event.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- * @param[in] grad Evaluate gradients.
- *
- * @exception GException::feature_not_implemented
- *            Energy integration not yet implemented
- *
- * Integrates the sky model over the true photon energy and arrival
- * direction using
- *
- * \f[
- *    \int_{E'-\Delta E}^{\infty}
- *    \int_{\Omega} 
- *    S(\vec{p}, E, t) \,
- *    R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p} \, {\rm d}E
- * \f]
- *
- * The method performs the integration of the true photon energy. The
- * integration over the true photon arrival direction is performed by
- * integrate_dir().
- *
- * @todo Needs implementation of energy integration to handle energy
- *       dispersion.
- ***************************************************************************/
-double GModelSky::integrate_energy(const GEvent& event,
-                                   const GTime& srcTime,
-                                   const GObservation& obs,
-                                   bool grad) const
-{
-    // Initialise result
-    double value = 0.0;
-
-    // Get response function
-    const GResponse* rsp = obs.response();
-
-    // Determine if energy integration is needed
-    bool integrate = rsp->use_edisp();
-
-    // Case A: Integration
-    if (integrate) {
-    
-        // Retrieve true energy boundaries
-        GEbounds ebounds = rsp->ebounds_src(event.energy());
-    
-        // Loop over all boundaries
-        for (int i = 0; i < ebounds.size(); ++i) {
-
-            // Get boundaries in MeV
-            double emin = ebounds.emin(i).MeV();
-            double emax = ebounds.emax(i).MeV();
-
-            // Continue only if valid
-            if (emax > emin) {
-
-                // Setup integration function
-                GModelSky::edisp_kern integrand(this, event, srcTime, obs, grad);
-                GIntegral integral(&integrand);
-
-                // Set integration precision
-                integral.eps(1.0e-3);
-
-                // Do Romberg integration
-                emin   = std::log(emin);
-                emax   = std::log(emax);
-                value += integral.romberg(emin, emax);
-    
-            } // endif: interval was valid
-        } // endfor: looped over intervals
-
-    }
-
-    // Case B: No integration (assume no energy dispersion)
-    else {
-        value = integrate_dir(event, event.energy(), srcTime, obs, grad);
-    }
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSky::integrate_energy:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", event=" << event;
-        std::cout << ", srcTime=" << srcTime;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Integrate sky model over true photon arrival direction
- *
- * @param[in] event Observed event.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
- * @param[in] obs Observation.
- * @param[in] grad Evaluate gradients.
- *
- * @exception GException::no_response
- *            Observation has no valid instrument response
- *
- * Integrates the sky model over the true photon arrival direction using
- *
- * \f[
- *    \int_{\Omega} 
- *    S(\vec{p}, E, t) \,
- *    R(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p}
- * \f]
- *
- * The method takes care of any instrument dependent scale factors. These
- * scale factors will be applied to the IRF so that they are correctly
- * taken into account in the spectral and temporal model gradient
- * computations.
- ***************************************************************************/
-double GModelSky::integrate_dir(const GEvent&       event,
-                                const GEnergy&      srcEng,
-                                const GTime&        srcTime,
-                                const GObservation& obs,
-                                bool grad) const
-{
-    // Initialise result
-    double value = 0.0;
-
-    // Continue only if the model has a spatial component
-    if (m_spatial != NULL) {
-
-        // Get response function
-        const GResponse* rsp = obs.response();
-
-        // Set source
-        GSource source(this->name(), m_spatial, srcEng, srcTime);
-        
-        // Get IRF value. This method returns the spatial component of the
-        // source model.
-        double irf = rsp->irf(event, source, obs);
-
-        // If required, apply instrument specific model scaling
-        if (!m_scales.empty()) {
-            irf *= scale(obs.instrument()).value();
-        }
-
-        // Case A: evaluate gradients
-        if (grad) {
-
-            // Evaluate source model
-            double spec = (spectral() != NULL) ? spectral()->eval_gradients(srcEng, srcTime) : 1.0;
-            double temp = (temporal() != NULL) ? temporal()->eval_gradients(srcTime) : 1.0;
-
-            // Set value
-            value = spec * temp * irf;
-
-            // Compile option: Check for NaN/Inf
-            #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-                std::cout << "*** ERROR: GModelSky::integrate_dir:";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (value=" << value;
-                std::cout << ", spec=" << spec;
-                std::cout << ", temp=" << temp;
-                std::cout << ", irf=" << irf;
-                std::cout << ")" << std::endl;
-            }
-            #endif
-
-            // Multiply factors to spectral gradients
-            if (spectral() != NULL) {
-                double fact = temp * irf;
-                if (fact != 1.0) {
-                    for (int i = 0; i < spectral()->size(); ++i) {
-                        (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact);
-                    }
-                }
-            }
-
-            // Multiply factors to temporal gradients
-            if (temporal() != NULL) {
-                double fact = spec * irf;
-                if (fact != 1.0) {
-                    for (int i = 0; i < temporal()->size(); ++i) {
-                        (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact);
-                    }
-                }
-            }
-
-        } // endif: gradient evaluation has been requested
-
-        // Case B: evaluate no gradients
-        else {
-
-            // Evaluate source model
-            double spec = (m_spectral != NULL) ? m_spectral->eval(srcEng, srcTime) : 1.0;
-            double temp = (m_temporal != NULL) ? m_temporal->eval(srcTime) : 1.0;
-
-            // Set value
-            value = spec * temp * irf;
-
-            // Compile option: Check for NaN/Inf
-            #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-                std::cout << "*** ERROR: GModelSky::integrate_dir:";
-                std::cout << " NaN/Inf encountered";
-                std::cout << " (value=" << value;
-                std::cout << ", spec=" << spec;
-                std::cout << ", temp=" << temp;
-                std::cout << ", irf=" << irf;
-                std::cout << ")" << std::endl;
-            }
-            #endif
-
-        }
-
-    } // endif: Gamma-ray source model had a spatial component
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
  * @brief Verifies if model has all components
+ *
+ * @return True is model is valid, false otherwise.
  ***************************************************************************/
 bool GModelSky::valid_model(void) const
 {
@@ -1587,48 +1250,4 @@ bool GModelSky::valid_model(void) const
 
     // Return result
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for edisp_kern() method
- *
- * @param[in] x Function value.
- *
- * This method implements the integration kernel needed for the edisp_kern()
- * method.
- ***************************************************************************/
-double GModelSky::edisp_kern::eval(const double& x)
-{
-    // Set energy
-    GEnergy eng;
-    double expx = std::exp(x);
-    eng.MeV(expx);
-
-    // Get function value
-    double value = m_parent->integrate_dir(m_event, eng, m_srcTime, m_obs, m_grad);
-
-    // Save value if needed
-    #if defined(G_NAN_CHECK)
-    double value_out = value;
-    #endif
-
-    // Correct for variable substitution
-    value *= expx;
-
-    // Compile option: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(value) || gammalib::is_infinite(value)) {
-        std::cout << "*** ERROR: GModelSky::edisp_kern::eval";
-        std::cout << "(x=" << x << "): ";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << " (value_out=" << value_out;
-        std::cout << " exp(x)=" << expx;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return value
-    return value;
 }

@@ -51,36 +51,20 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      npred(const GPhoton&      photon,
-                              const GObservation& obs) const = 0;
+    virtual double      irf(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const = 0;
+    virtual double      nroi(const GModelSky&    model,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const = 0;
+    virtual GEbounds    ebounds(const GEnergy& obsEnergy) const = 0;
 
     // Virtual methods
-    virtual double   irf(const GEvent&       event,
-                         const GSource&      source,
-                         const GObservation& obs) const;
-    virtual double   irf_ptsrc(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
-    virtual double   irf_radial(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
-    virtual double   irf_elliptical(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
-    virtual double   irf_diffuse(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const;
-    virtual double   npred(const GSource&      source,
-                           const GObservation& obs) const;
-    virtual double   npred_ptsrc(const GSource&      source,
-                                 const GObservation& obs) const;
-    virtual double   npred_radial(const GSource&      source,
-                                  const GObservation& obs) const;
-    virtual double   npred_elliptical(const GSource&      source,
-                                      const GObservation& obs) const;
-    virtual double   npred_diffuse(const GSource&      source,
-                                   const GObservation& obs) const;
-    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
+    virtual double      convolve(const GModelSky&    model,
+                                 const GEvent&       event,
+                                 const GObservation& obs,
+                                 const bool&         grad = true) const;
 };
 
 

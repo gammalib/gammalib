@@ -647,17 +647,8 @@ void TestGCTAResponse::test_response_edisp_2D(void)
     GCTAEdisp2D edisp(cta_edisp_2D);
 
     // Test normalisation
-    test_edisp_integration(edisp);
+    test_edisp_integration(edisp, 10.0, 50.0);
 
-    // Test ebounds_obs and ebounds_src methods
-    test_try("GCTAEdisp2D ebounds_src and ebounds_obs methods");
-    try {
-        GCTAEdisp2D edisp(cta_edisp_2D);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
 
     // Return
     return;
@@ -1011,14 +1002,14 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
                                               const double&    e_src_max)
 {
 
-	// Loop over source energies
-	for (double e_src = e_src_min; e_src < e_src_max; e_src *= 2.0) {
+    // Loop over source energies
+    for (double e_src = e_src_min; e_src < e_src_max; e_src *= 2.0) {
 
-	    // Compute log10 of true energy
-	    double log10_e_src = std::log10(e_src);
+        // Compute log10 of true energy
+        double log10_e_src = std::log10(e_src);
 
-	    // Retrieve boundaries in observed energy
-	    GEbounds ebounds  = edisp.ebounds_obs(log10_e_src);
+        // Retrieve boundaries in observed energy
+        GEbounds ebounds  = edisp.ebounds_obs(log10_e_src);
 
         // Skip this energy if the boundaries are empty
         if (ebounds.is_empty()) {
@@ -1026,30 +1017,30 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
         }
 
         // Set measured energy range
-	    GEnergy  emin     = ebounds.emin();
-	    GEnergy  emax     = ebounds.emax();
-	    double   logE_min = std::log10(emin.TeV());
-	    double   logE_max = std::log10(emax.TeV());
+        GEnergy  emin     = ebounds.emin();
+        GEnergy  emax     = ebounds.emax();
+        double   logE_min = std::log10(emin.TeV());
+        double   logE_max = std::log10(emax.TeV());
 
-	    // Compute step size for numerical integration
-	    const int steps = 1000;
-	    double    dlogE = (logE_max-logE_min)/steps;
+        // Compute step size for numerical integration
+        const int steps = 1000;
+        double    dlogE = (logE_max-logE_min)/steps;
 
-	    // Perform numerical integration by summing
-	    double sum      = 0.0;
-	    double logE_obs = logE_min;
-	    for (int i = 0; i < steps; ++i) {
-	        double dp_dlogE = edisp(logE_obs, log10_e_src);
-	        sum            += dp_dlogE * dlogE;
-	        logE_obs       += dlogE;
-	    }
+        // Perform numerical integration by summing
+        double sum      = 0.0;
+        double logE_obs = logE_min;
+        for (int i = 0; i < steps; ++i) {
+            double dp_dlogE = edisp(logE_obs, log10_e_src);
+            sum            += dp_dlogE * dlogE;
+            logE_obs       += dlogE;
+        }
 
         // Set message string
-	    GEnergy     eng(e_src, "TeV");
+        GEnergy     eng(e_src, "TeV");
         std::string msg = edisp.classname()+" integration for "+eng.print();
-	    test_value(sum, 1.0, 0.002, msg);
+        test_value(sum, 1.0, 0.01, msg);
 
-	}
+    }
 
     // Return
     return;

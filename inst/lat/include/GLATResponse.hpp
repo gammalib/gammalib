@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.hpp - Fermi/LAT Response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,9 @@
 #include "GObservation.hpp"
 #include "GResponse.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GSource;
+
 
 /***********************************************************************//**
  * @class GLATResponse
@@ -67,14 +70,15 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const;
+    virtual double        irf(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
+    virtual double        nroi(const GModelSky&    model,
+                               const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const;
+    virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
-
-    // Implemented virtual methods
-    virtual double irf(const GEvent&       event,
-                       const GSource&      source,
-                       const GObservation& obs) const;
 
     // Other Methods
     int                size(void) const;

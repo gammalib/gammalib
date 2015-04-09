@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATResponse.cpp - Fermi/LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GCaldb.hpp"
+#include "GSource.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATResponse.hpp"
@@ -49,6 +50,9 @@
 #define G_LOAD                             "GLATResponse::load(std::string&)"
 #define G_IRF      "GLATResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&,"\
                                           " GEnergy&, GTime&, GObservation&)"
+#define G_NROI            "GLATResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
+                                                             "GObservation&)"
+#define G_EBOUNDS                           "GLATResponse::ebounds(GEnergy&)"
 #define G_AEFF                                     "GLATResponse::aeff(int&)"
 #define G_PSF                                       "GLATResponse::psf(int&)"
 #define G_EDISP                                   "GLATResponse::edisp(int&)"
@@ -56,8 +60,6 @@
                                                      "GTime&, GObservation&)"
 #define G_IRF_BIN       "GLATResponse::irf(GLATEventBin&, GModel&, GEnergy&,"\
                                                      "GTime&, GObservation&)"
-#define G_NPRED             "GLATResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
-                                                            " GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -487,24 +489,50 @@ double GLATResponse::irf(const GLATEventBin& event,
 
 
 /***********************************************************************//**
- * @brief Return integral of instrument response function.
+ * @brief Return integral of event probability for a given sky model over ROI
  *
- * @param[in] photon Incident photon.
+ * @param[in] model Incident photon.
  * @param[in] obs Observation.
+ * @return 0.0
  *
- * @todo Not yet implemented.
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
  ***************************************************************************/
-double GLATResponse::npred(const GPhoton&      photon,
-                           const GObservation& obs) const
+double GLATResponse::nroi(const GModelSky&    model,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const
 {
-    // Initialise
-    double npred = 0.0;
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
 
-    // Notify that method is not yet implemented
-    throw GException::feature_not_implemented(G_NPRED);
+    // Return Npred
+    return (0.0);
+}
 
-    // Return integrated IRF value
-    return npred;
+
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ ***************************************************************************/
+GEbounds GLATResponse::ebounds(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // Throw an exception
+    std::string msg = "Energy dispersion not implemented.";
+    throw GException::feature_not_implemented(G_EBOUNDS, msg);
+
+    // Return energy boundaries
+    return (ebounds);
 }
 
 

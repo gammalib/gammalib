@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAResponse_helpers.cpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -227,6 +227,7 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
  * @param[in] logEobs Observed event energy.
  * @return Energy dispersion PDF value.
  ***************************************************************************/
+/*
 double cta_nedisp_kern::eval(const double& logEobs)
 {
     // Get value
@@ -242,6 +243,33 @@ double cta_nedisp_kern::eval(const double& logEobs)
 
     // Return
     return value;
+}
+*/
+
+
+/***********************************************************************//**
+ * @brief Integration kernel for nedisp() method
+ *
+ * @param[in] logEobs Logarithm of true photon energy.
+ * @return Nroi.
+ ***************************************************************************/
+double cta_nroi_kern::eval(const double& logEsrc)
+{
+    // Set true energy
+    GEnergy srcEng;
+    double expx = std::exp(logEsrc);
+    srcEng.MeV(expx);
+
+    // Compute response components
+    double nroi_spatial  = m_rsp.nroi(m_model, srcEng, m_srcTime, m_obsEng, m_obsTime, m_obs);
+    double nroi_spectral = m_model.spectral()->eval(srcEng, m_srcTime);
+    double nroi_temporal = m_model.temporal()->eval(m_srcTime);
+    
+    // Compute response
+    double nroi = nroi_spatial * nroi_spectral * nroi_temporal * expx;
+
+    // Return response
+    return nroi;
 }
 
 
@@ -448,7 +476,7 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
 
 
 /***********************************************************************//**
- * @brief Kernel for zenith angle Npred integration or radial model
+ * @brief Kernel for zenith angle Nroi integration or radial model
  *
  * @param[in] rho Radial model zenith angle (radians).
  *
@@ -466,10 +494,10 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
  * the ROI centre. This limitation assures that the integration converges
  * properly.
  ***************************************************************************/
-double cta_npred_radial_kern_rho::eval(const double& rho)
+double cta_nroi_radial_kern_rho::eval(const double& rho)
 {
-    // Initialise Npred value
-    double npred = 0.0;
+    // Initialise Nroi value
+    double nroi = 0.0;
 
     // Continue only if rho is positive
     if (rho > 0.0) {
@@ -502,7 +530,7 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
             // Debug: test if model is non positive
             #if defined(G_DEBUG_MODEL_ZERO)
             if (model <= 0.0) {
-                std::cout << "*** WARNING: cta_npred_radial_kern_rho::eval";
+                std::cout << "*** WARNING: cta_nroi_radial_kern_rho::eval";
                 std::cout << " zero model for (rho)=(";
                 std::cout << rho*gammalib::rad2deg << ")";
                 std::cout << " rho-r_model=" << (rho-m_model.theta_max());
@@ -518,27 +546,29 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
                 double cos_rho = std::cos(rho);
 
                 // Setup phi integration kernel
-                cta_npred_radial_kern_omega integrand(m_rsp,
-                                                      m_srcEng,
-                                                      m_srcTime,
-                                                      m_obs,
-                                                      m_rot,
-                                                      sin_rho,
-                                                      cos_rho);
+                cta_nroi_radial_kern_omega integrand(m_rsp,
+                                                     m_srcEng,
+                                                     m_srcTime,
+                                                     m_obsEng,
+                                                     m_obsTime,
+                                                     m_obs,
+                                                     m_rot,
+                                                     sin_rho,
+                                                     cos_rho);
 
                 // Integrate over phi
                 GIntegral integral(&integrand);
                 integral.fixed_iter(m_iter);
-                npred = integral.romberg(omega_min, omega_max, m_iter) *
-                        sin_rho * model;
+                nroi = integral.romberg(omega_min, omega_max, m_iter) *
+                       sin_rho * model;
 
                 // Debug: Check for NaN
                 #if defined(G_NAN_CHECK)
-                if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-                    std::cout << "*** ERROR: cta_npred_radial_kern_rho::eval";
+                if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+                    std::cout << "*** ERROR: cta_nroi_radial_kern_rho::eval";
                     std::cout << "(rho=" << rho << "):";
                     std::cout << " NaN/Inf encountered";
-                    std::cout << " (npred=" << npred;
+                    std::cout << " (nroi=" << nroi;
                     std::cout << ", model=" << model;
                     std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
                     std::cout << ", sin_rho=" << sin_rho;
@@ -552,13 +582,13 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
 
     } // endif: rho was positive
 
-    // Return Npred
-    return npred;
+    // Return Nroi
+    return nroi;
 }
 
 
 /***********************************************************************//**
- * @brief Kernel for azimuth angle Npred integration of radial model
+ * @brief Kernel for azimuth angle Nroi integration of radial model
  *
  * @param[in] omega Azimuth angle (radians).
  *
@@ -566,7 +596,7 @@ double cta_npred_radial_kern_rho::eval(const double& rho)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double cta_npred_radial_kern_omega::eval(const double& omega)
+double cta_nroi_radial_kern_omega::eval(const double& omega)
 {
     // Compute sky direction vector in native coordinates
     double  cos_omega = std::cos(omega);
@@ -583,24 +613,24 @@ double cta_npred_radial_kern_omega::eval(const double& omega)
     // Set Photon
     GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
-    // Compute point source Npred for this sky direction
-    double npred = m_rsp.npred(photon, m_obs);
+    // Compute point source Nroi for this sky direction
+    double nroi = m_rsp.nirf(photon, m_obsEng, m_obsTime, m_obs);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-        std::cout << "*** ERROR: cta_npred_radial_kern_omega::eval";
+    if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+        std::cout << "*** ERROR: cta_nroi_radial_kern_omega::eval";
         std::cout << "(omega=" << omega << "):";
         std::cout << " NaN/Inf encountered";
-        std::cout << " (npred=" << npred;
+        std::cout << " (nroi=" << nroi;
         std::cout << ", cos_omega=" << cos_omega;
         std::cout << ", sin_omega=" << sin_omega;
         std::cout << ")" << std::endl;
     }
     #endif
 
-    // Return Npred
-    return npred;
+    // Return Nroi
+    return nroi;
 }
 
 
@@ -914,7 +944,7 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
 
 
 /***********************************************************************//**
- * @brief Kernel for zenith angle Npred integration of elliptical model
+ * @brief Kernel for zenith angle Nroi integration of elliptical model
  *
  * @param[in] rho Elliptical model offset angle (radians).
  *
@@ -942,10 +972,10 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
  * Npred computations. Furthermore, the method limits the integration range
  * to area where the ellipse intersects the ROI.
  ***************************************************************************/
-double cta_npred_elliptical_kern_rho::eval(const double& rho)
+double cta_nroi_elliptical_kern_rho::eval(const double& rho)
 {
-    // Initialise Npred value
-    double npred = 0.0;
+    // Initialise Nroi value
+    double nroi = 0.0;
 
     // Continue only if rho is positive
     if (rho > 0.0) {
@@ -974,16 +1004,18 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
             }
 
             // Setup phi integration kernel
-            cta_npred_elliptical_kern_omega integrand(m_rsp,
-                                                      m_model,
-                                                      m_srcEng,
-                                                      m_srcTime,
-                                                      m_obs,
-                                                      m_rot,
-                                                      rho_kluge,
-                                                      sin_rho,
-                                                      cos_rho,
-                                                      m_posangle_roi);
+            cta_nroi_elliptical_kern_omega integrand(m_rsp,
+                                                     m_model,
+                                                     m_srcEng,
+                                                     m_srcTime,
+                                                     m_obsEng,
+                                                     m_obsTime,
+                                                     m_obs,
+                                                     m_rot,
+                                                     rho_kluge,
+                                                     sin_rho,
+                                                     cos_rho,
+                                                     m_posangle_roi);
 
             // Setup integrator
             GIntegral integral(&integrand);
@@ -999,8 +1031,8 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                 double omega_max = +domega;
 
                 // Integrate over omega
-                npred = integral.romberg(omega_min, omega_max, m_iter) *
-                        sin_rho;
+                nroi = integral.romberg(omega_min, omega_max, m_iter) *
+                       sin_rho;
 
             } // endif: circle comprised in ellipse
 
@@ -1051,14 +1083,14 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
                     for (int i = 0; i < intervals1.size(); ++i) {
                         double min = intervals1[i].first;
                         double max = intervals1[i].second;
-                        npred     += integral.romberg(min, max, m_iter) * sin_rho;
+                        nroi      += integral.romberg(min, max, m_iter) * sin_rho;
                     }
 
                     // Integrate over all intervals for omega2
                     for (int i = 0; i < intervals2.size(); ++i) {
                         double min = intervals2[i].first;
                         double max = intervals2[i].second;
-                        npred     += integral.romberg(min, max, m_iter) * sin_rho;
+                        nroi      += integral.romberg(min, max, m_iter) * sin_rho;
                     }
 
                 } // endif: arc length was positive
@@ -1067,11 +1099,11 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
 
             // Debug: Check for NaN
             #if defined(G_NAN_CHECK)
-            if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-                std::cout << "*** ERROR: cta_npred_elliptical_kern_rho::eval";
+            if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+                std::cout << "*** ERROR: cta_nroi_elliptical_kern_rho::eval";
                 std::cout << "(rho=" << rho << "):";
                 std::cout << " NaN/Inf encountered";
-                std::cout << " (npred=" << npred;
+                std::cout << " (nroi=" << nroi;
                 std::cout << ", sin_rho=" << sin_rho;
                 std::cout << ", cos_rho=" << cos_rho;
                 std::cout << ")" << std::endl;
@@ -1082,13 +1114,13 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
     
     } // endif: rho was positive
 
-    // Return Npred
-    return npred;
+    // Return Nroi
+    return nroi;
 }
 
 
 /***********************************************************************//**
- * @brief Kernel for azimuth angle Npred integration of elliptical model
+ * @brief Kernel for azimuth angle Nroi integration of elliptical model
  *
  * @param[in] omega Azimuth angle (radians).
  *
@@ -1108,10 +1140,10 @@ double cta_npred_elliptical_kern_rho::eval(const double& rho)
  *       optimized to reduce the number of coordinate transformations.
  * @todo Check whether the Npred omega argument is the right one.
  ***************************************************************************/
-double cta_npred_elliptical_kern_omega::eval(const double& omega)
+double cta_nroi_elliptical_kern_omega::eval(const double& omega)
 {
-    // Initialise Npred value
-    double npred = 0.0;
+    // Initialise Nroi value
+    double nroi = 0.0;
 
     // Compute azimuth angle in model coordinate system (radians)
     double omega_model = omega + m_posangle_roi;
@@ -1131,7 +1163,7 @@ double cta_npred_elliptical_kern_omega::eval(const double& omega)
         double arg2            = m_semimajor_rad * sinus;
         double r_ellipse       = m_semiminor_rad * m_semimajor_rad /
                                  std::sqrt(arg1*arg1 + arg2*arg2);
-        std::cout << "*** WARNING: cta_npred_elliptical_kern_omega::eval";
+        std::cout << "*** WARNING: cta_nroi_elliptical_kern_omega::eval";
         std::cout << " zero model for (rho,omega)=(";
         std::cout << m_rho*gammalib::rad2deg << ",";
         std::cout << omega*gammalib::rad2deg << ")";
@@ -1158,16 +1190,16 @@ double cta_npred_elliptical_kern_omega::eval(const double& omega)
         // Set Photon
         GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
-        // Compute Npred for this sky direction
-        npred = m_rsp.npred(photon, m_obs) * model;
+        // Compute Nroi for this sky direction
+        nroi = m_rsp.nirf(photon, m_obsEng, m_obsTime, m_obs) * model;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-            std::cout << "*** ERROR: cta_npred_elliptical_kern_omega::eval";
+        if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+            std::cout << "*** ERROR: cta_nroi_elliptical_kern_omega::eval";
             std::cout << "(omega=" << omega << "):";
             std::cout << " NaN/Inf encountered";
-            std::cout << " (npred=" << npred;
+            std::cout << " (nroi=" << nroi;
             std::cout << ", model=" << model;
             std::cout << ", cos_omega=" << cos_omega;
             std::cout << ", sin_omega=" << sin_omega;
@@ -1177,8 +1209,8 @@ double cta_npred_elliptical_kern_omega::eval(const double& omega)
 
     } // endif: sky intensity was positive
     
-    // Return Npred
-    return npred;
+    // Return Nroi
+    return nroi;
 }
 
 
@@ -1380,7 +1412,7 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
 
 
 /***********************************************************************//**
- * @brief Kernel for Npred offest angle integration of diffuse model
+ * @brief Kernel for Nroi offest angle integration of diffuse model
  *
  * @param[in] theta Offset angle with respect to ROI centre (radians).
  *
@@ -1405,10 +1437,10 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
  * computation time and computation precision. A value of 1e-4 was judged
  * appropriate.
  ***************************************************************************/
-double cta_npred_diffuse_kern_theta::eval(const double& theta)
+double cta_nroi_diffuse_kern_theta::eval(const double& theta)
 {
-    // Initialise Npred value
-    double npred = 0.0;
+    // Initialise Nroi value
+    double nroi = 0.0;
 
     // Continue only if offset angle is positive
     if (theta > 0.0) {
@@ -1417,22 +1449,24 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
         double sin_theta = std::sin(theta);
 
         // Setup phi integration kernel
-        cta_npred_diffuse_kern_phi integrand(m_rsp,
-                                             m_model,
-                                             m_srcEng,
-                                             m_srcTime,
-                                             m_obs,
-                                             m_rot,
-                                             theta,
-                                             sin_theta);
+        cta_nroi_diffuse_kern_phi integrand(m_rsp,
+                                            m_model,
+                                            m_srcEng,
+                                            m_srcTime,
+                                            m_obsEng,
+                                            m_obsTime,
+                                            m_obs,
+                                            m_rot,
+                                            theta,
+                                            sin_theta);
 
         // Integrate over phi
         GIntegral integral(&integrand);
         integral.fixed_iter(m_iter);
-        npred = integral.romberg(0.0, gammalib::twopi, m_iter) * sin_theta;
+        nroi = integral.romberg(0.0, gammalib::twopi, m_iter) * sin_theta;
         #if defined(G_DEBUG_INTEGRAL)
         if (!integral.isvalid()) {
-            std::cout << "cta_npred_diffuse_kern_theta(theta=";
+            std::cout << "cta_nroi_diffuse_kern_theta(theta=";
             std::cout << theta*gammalib::rad2deg << " deg):" << std::endl;
             std::cout << integral.print() << std::endl;
         }
@@ -1440,11 +1474,11 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-            std::cout << "*** ERROR: cta_npred_radial_kern_theta::eval";
+        if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+            std::cout << "*** ERROR: cta_nroi_radial_kern_theta::eval";
             std::cout << "(theta=" << theta << "):";
             std::cout << " NaN/Inf encountered";
-            std::cout << " (npred=" << npred;
+            std::cout << " (nroi=" << nroi;
             std::cout << ", sin_theta=" << sin_theta;
             std::cout << ")" << std::endl;
         }
@@ -1452,13 +1486,13 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
 
     } // endif: offset angle was positive
 
-    // Return Npred
-    return npred;
+    // Return Nroi
+    return nroi;
 }
 
 
 /***********************************************************************//**
- * @brief Kernel for Npred azimuth angle integration of diffuse model
+ * @brief Kernel for Nroi azimuth angle integration of diffuse model
  *
  * @param[in] phi Azimuth angle with respect to ROI centre (radians).
  *
@@ -1472,10 +1506,10 @@ double cta_npred_diffuse_kern_theta::eval(const double& theta)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double cta_npred_diffuse_kern_phi::eval(const double& phi)
+double cta_nroi_diffuse_kern_phi::eval(const double& phi)
 {
-    // Initialise Npred value
-    double npred = 0.0;
+    // Initialise Nroi value
+    double nroi = 0.0;
 
     // Compute sky direction vector in native coordinates
     double  cos_phi = std::cos(phi);
@@ -1498,16 +1532,16 @@ double cta_npred_diffuse_kern_phi::eval(const double& phi)
     // Continue only if sky intensity is positive
     if (intensity > 0.0) {
 
-        // Compute Npred for this sky direction
-        npred = m_rsp.npred(photon, m_obs) * intensity;
+        // Compute Nroi for this sky direction
+        nroi = m_rsp.nirf(photon, m_obsEng, m_obsTime, m_obs) * intensity;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-            std::cout << "*** ERROR: cta_npred_diffuse_kern_phi::eval";
+        if (gammalib::is_notanumber(nroi) || gammalib::is_infinite(nroi)) {
+            std::cout << "*** ERROR: cta_nroi_diffuse_kern_phi::eval";
             std::cout << "(phi=" << phi << "):";
             std::cout << " NaN/Inf encountered";
-            std::cout << " (npred=" << npred;
+            std::cout << " (nroi=" << nroi;
             std::cout << ", intensity=" << intensity;
             std::cout << ", cos_phi=" << cos_phi;
             std::cout << ", sin_phi=" << sin_phi;
@@ -1517,8 +1551,8 @@ double cta_npred_diffuse_kern_phi::eval(const double& phi)
 
     } // endif: sky intensity was positive
 
-    // Return Npred
-    return npred;
+    // Return Nroi
+    return nroi;
 }
 
 

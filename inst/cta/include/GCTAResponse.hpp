@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAResponse.hpp - CTA response abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,7 @@
 class GPhoton;
 class GEvent;
 class GObservation;
+class GXmlElement;
 class GCTAObservation;
 class GCTAPointing;
 class GCTARoi;
@@ -74,8 +75,14 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const = 0;
-    virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const = 0;
+    virtual double        irf(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const = 0;
+    virtual double        nroi(const GModelSky&    model,
+                               const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const = 0;
+    virtual GEbounds      ebounds(const GEnergy& obsEng) const = 0;
     virtual void          read(const GXmlElement& xml) = 0;
     virtual void          write(GXmlElement& xml) const = 0;
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;

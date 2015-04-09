@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.cpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,9 +29,13 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GException.hpp"
 #include "GMWLResponse.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_NROI            "GMWLResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
+                                                             "GObservation&)"
+#define G_EBOUNDS                           "GMWLResponse::ebounds(GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -151,10 +155,58 @@ void GMWLResponse::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GMWLResponse* GMWLResponse::clone(void) const
 {
     return new GMWLResponse(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral of event probability for a given sky model over ROI
+ *
+ * @param[in] model Incident photon.
+ * @param[in] obs Observation.
+ * @return 0.0
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ ***************************************************************************/
+double GMWLResponse::nroi(const GModelSky&    model,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const
+{
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
+
+    // Return Npred
+    return (0.0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ ***************************************************************************/
+GEbounds GMWLResponse::ebounds(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // Throw an exception
+    std::string msg = "Energy dispersion not implemented.";
+    throw GException::feature_not_implemented(G_EBOUNDS, msg);
+
+    // Return energy boundaries
+    return ebounds;
 }
 
 

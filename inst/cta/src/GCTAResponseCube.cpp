@@ -42,6 +42,7 @@
 #include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GPhoton.hpp"
+#include "GSource.hpp"
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
@@ -57,7 +58,8 @@
                                                             " GObservation&)"
 #define G_IRF_DIFFUSE      "GCTAResponseCube::irf_diffuse(GEvent&, GSource&,"\
                                                             " GObservation&)"
-#define G_NPRED            "GCTAResponseCube::npred(GPhoton&, GObservation&)"
+#define G_NROI        "GCTAResponseCube::nroi(GModelSky&, GEnergy&, GTime&, "\
+                                                             "GObservation&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 #define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
 
@@ -376,347 +378,66 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return instrument response to point source
+ * @brief Return integral of event probability for a given sky model over ROI
  *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation (not used).
- * @return Instrument response to point source.
- *
- * Returns the instrument response to a specified point source.
- ***************************************************************************/
-double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
-                                   const GSource&      source,
-                                   const GObservation& obs) const
-{
-    // Initialise IRF
-    double irf = 0.0;
-
-    // Get pointer to model source model
-    const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
-
-    // Get point source direction
-    GSkyDir srcDir = ptsrc->dir();
-
-    // Get pointer on CTA event bin
-    if (!event.is_bin()) {
-        std::string msg = "The current event is not a CTA event bin. "
-                          "This method only works on binned CTA data. Please "
-                          "make sure that a CTA observation containing binned "
-                          "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_PTSRC, msg);
-    }
-    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-    
-    // Determine angular separation between true and measured photon
-    // direction in radians
-    double delta = bin->dir().dir().dist(srcDir);
-
-    // Get maximum angular separation for PSF (in radians)
-    double delta_max = psf().delta_max();
-
-    // Get livetime (in seconds)
-    double livetime = exposure().livetime();
-
-    // Continue only if livetime is >0 and if we're sufficiently close
-    // to the PSF
-    if ((livetime > 0.0) && (delta <= delta_max)) {
-
-        // Get exposure
-        irf = exposure()(srcDir, source.energy());
-
-        // Multiply-in PSF
-        if (irf > 0.0) {
-
-            // Recover effective area from exposure
-            irf /= livetime;
-
-            // Get PSF component
-            irf *= psf()(srcDir, delta, source.energy());
-
-            // Apply deadtime correction
-            irf *= exposure().deadc();
-
-        } // endif: exposure was non-zero
-
-    } // endif: we were sufficiently close to PSF and livetime >0
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCTAResponseCube::irf_ptsrc:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " irf=" << irf;
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to radial source
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation (not used).
- * @return Instrument response to radial source.
- *
- * Returns the instrument response to a specified radial source.
- ***************************************************************************/
-double GCTAResponseCube::irf_radial(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const
-{
-    // Initialise IRF
-    double irf = 0.0;
-
-    // Get pointer to CTA event bin
-    if (!event.is_bin()) {
-        std::string msg = "The current event is not a CTA event bin. "
-                          "This method only works on binned CTA data. Please "
-                          "make sure that a CTA observation containing binned "
-                          "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_RADIAL, msg);
-    }
-    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-
-    // Get event attribute references
-    const GSkyDir& obsDir  = bin->dir().dir();
-    const GEnergy& obsEng  = bin->energy();
-    const GTime&   obsTime = bin->time();
-
-    // Get pointer to radial model
-    const GModelSpatialRadial* model = static_cast<const GModelSpatialRadial*>(source.model());
-
-    // Compute angle between model centre and measured photon direction
-    // (radians)
-    double rho_obs = model->dir().dist(obsDir);
-
-    // Get livetime (in seconds)
-    double livetime = exposure().livetime();
-
-    // Continue only if livetime is >0 and if we're sufficiently close to
-    // the model centre to get a non-zero response
-    if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
-
-        // Get exposure
-        irf = exposure()(obsDir, obsEng);
-
-        // Continue only if exposure is positive
-        if (irf > 0.0) {
-
-            // Recover effective area from exposure
-            irf /= livetime;
-
-            // Get PSF component
-            irf *= psf_radial(model, rho_obs, obsDir, obsEng, obsTime);
-
-            // Apply deadtime correction
-            irf *= exposure().deadc();
-
-        } // endif: exposure was positive
-        
-    } // endif: we were sufficiently close and livetime >0
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCTAResponseCube::irf_radial:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " irf=" << irf;
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to elliptical source
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
- * @param[in] obs Observation (not used).
- * @return Instrument response to elliptical source.
- *
- * Returns the instrument response to a specified elliptical source.
- ***************************************************************************/
-double GCTAResponseCube::irf_elliptical(const GEvent&       event,
-                                        const GSource&      source,
-                                        const GObservation& obs) const
-{
-    // Initialise IRF
-    double irf = 0.0;
-
-    // Get pointer to CTA event bin
-    if (!event.is_bin()) {
-        std::string msg = "The current event is not a CTA event bin. "
-                          "This method only works on binned CTA data. Please "
-                          "make sure that a CTA observation containing binned "
-                          "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_RADIAL, msg);
-    }
-    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-
-    // Get event attribute references
-    const GSkyDir& obsDir  = bin->dir().dir();
-    const GEnergy& obsEng  = bin->energy();
-    const GTime&   obsTime = bin->time();
-
-    // Get pointer to elliptical model
-    const GModelSpatialElliptical* model = static_cast<const GModelSpatialElliptical*>(source.model());
-
-    // Compute angle between model centre and measured photon direction and
-    // position angle (radians)
-    double rho_obs      = model->dir().dist(obsDir);
-    double posangle_obs = model->dir().posang(obsDir);
-
-    // Get livetime (in seconds)
-    double livetime = exposure().livetime();
-
-    // Continue only if livetime is >0 and if we're sufficiently close to
-    // the model centre to get a non-zero response
-    if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
-
-        // Get exposure
-        irf = exposure()(obsDir, obsEng);
-
-        // Continue only if exposure is positive
-        if (irf > 0.0) {
-
-            // Recover effective area from exposure
-            irf /= livetime;
-
-            // Get PSF component
-            irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, obsEng, obsTime);
-
-            // Apply deadtime correction
-            irf *= exposure().deadc();
-
-        } // endif: exposure was positive
-        
-    } // endif: we were sufficiently close and livetime >0
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCTAResponseCube::irf_elliptical:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " irf=" << irf;
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument response to diffuse source
- *
- * @param[in] event Observed event.
- * @param[in] source Source.
+ * @param[in] model Incident photon.
  * @param[in] obs Observation.
- * @return Instrument response to diffuse source.
- *
- * Returns the instrument response to a specified diffuse source.
- *
- * The method uses a pre-computation cache to store the instrument response
- * for the spatial model component. The pre-computation cache is initialised
- * if no cache has yet been allocated, or if at the beginning of a scan over
- * the events, the model parameters have changed. The beginning of a scan is
- * defined by an event bin index of 0.
- ***************************************************************************/
-double GCTAResponseCube::irf_diffuse(const GEvent&       event,
-                                     const GSource&      source,
-                                     const GObservation& obs) const
-{
-    // Initialise IRF
-    double irf = 0.0;
-
-    // Get pointer to CTA event bin
-    if (!event.is_bin()) {
-        std::string msg = "The current event is not a CTA event bin. "
-                          "This method only works on binned CTA data. Please "
-                          "make sure that a CTA observation containing binned "
-                          "CTA data is provided.";
-        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
-    }
-    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
-
-    // Get pointer to source cache. We first search the cache for a model
-    // with the source name. If no model was found we initialise a new
-    // cache entry for that model. Otherwise, we simply return the actual
-    // cache entry.
-    GCTACubeSourceDiffuse* cache(NULL);
-    int index = cache_index(source.name());
-    if (index == -1) {
-    
-        // No cache entry was found, thus allocate and initialise a new one
-        cache = new GCTACubeSourceDiffuse;
-        cache->set(source.name(), *source.model(), obs);
-        m_cache.push_back(cache);
-
-    } // endif: no cache entry was found
-    else {
-    
-        // Check that the cache entry is of the expected type
-        if (m_cache[index]->code() != GCTA_CUBE_SOURCE_DIFFUSE) {
-            std::string msg = "Cached model \""+source.name()+"\" is not "
-                              "an extended source model. This method only "
-                              "applies to extended source models.";
-            throw GException::invalid_value(G_IRF_DIFFUSE, msg);
-        }
-        cache = static_cast<GCTACubeSourceDiffuse*>(m_cache[index]);
-
-    } // endelse: there was a cache entry for this model
-
-    // Determine IRF value
-    irf = cache->irf(bin->ipix(), bin->ieng());
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
-        std::cout << "*** ERROR: GCTAResponseCube::irf_diffuse:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " irf=" << irf;
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return IRF value
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial integral of point spread function
- *
- * @param[in] photon Incident photon.
- * @param[in] obs Observation.
- * @return Spatial integral of point spread function. 
+ * @return 0.0
  *
  * @exception GException::feature_not_implemented
- *            Method not implemented.
+ *            Method is not implemented.
  *
- * This method is a dummy method that is required for a class derived from
- * GResponse but that needs not to be implemented for a binned response.
+ * Computes the integral
+ *
+ * \f[
+ *    N_{\rm ROI}(E',t') = \int_{\rm ROI} P(p',E',t') dp'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * for a given sky model \f$S(p,E,t)\f$ and response function
+ * \f$R(p',E',t'|p,E,t)\f$ over the Region of Interest (ROI).
+ *
+ * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
-double GCTAResponseCube::npred(const GPhoton&      photon,
-                               const GObservation& obs) const
+double GCTAResponseCube::nroi(const GModelSky&    model,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GObservation& obs) const
 {
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_NPRED,
-          "Npred computation not implemented for cube analysis.");
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
 
     // Return Npred
-    return 0.0;
+    return (0.0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ ***************************************************************************/
+#define G_EBOUNDS                       "GCTAResponseCube::ebounds(GEnergy&)"
+GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // Throw an exception
+    std::string msg = "Energy dispersion not implemented.";
+    throw GException::feature_not_implemented(G_EBOUNDS, msg);
+
+    // Return energy boundaries
+    return ebounds;
 }
 
 
@@ -1316,5 +1037,325 @@ double GCTAResponseCube::psf_elliptical(const GModelSpatialElliptical* model,
     } // endif: integration interval is valid
 
     // Return PSF
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to point source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation (not used).
+ * @return Instrument response to point source.
+ *
+ * Returns the instrument response to a specified point source.
+ ***************************************************************************/
+double GCTAResponseCube::irf_ptsrc(const GEvent&       event,
+                                   const GSource&      source,
+                                   const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to model source model
+    const GModelSpatialPointSource* ptsrc = static_cast<const GModelSpatialPointSource*>(source.model());
+
+    // Get point source direction
+    GSkyDir srcDir = ptsrc->dir();
+
+    // Get pointer on CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_PTSRC, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+    
+    // Determine angular separation between true and measured photon
+    // direction in radians
+    double delta = bin->dir().dir().dist(srcDir);
+
+    // Get maximum angular separation for PSF (in radians)
+    double delta_max = psf().delta_max();
+
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is >0 and if we're sufficiently close
+    // to the PSF
+    if ((livetime > 0.0) && (delta <= delta_max)) {
+
+        // Get exposure
+        irf = exposure()(srcDir, source.energy());
+
+        // Multiply-in PSF
+        if (irf > 0.0) {
+
+            // Recover effective area from exposure
+            irf /= livetime;
+
+            // Get PSF component
+            irf *= psf()(srcDir, delta, source.energy());
+
+            // Apply deadtime correction
+            irf *= exposure().deadc();
+
+        } // endif: exposure was non-zero
+
+    } // endif: we were sufficiently close to PSF and livetime >0
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_ptsrc:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to radial source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation (not used).
+ * @return Instrument response to radial source.
+ *
+ * Returns the instrument response to a specified radial source.
+ ***************************************************************************/
+double GCTAResponseCube::irf_radial(const GEvent&       event,
+                                    const GSource&      source,
+                                    const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_RADIAL, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+
+    // Get event attribute references
+    const GSkyDir& obsDir  = bin->dir().dir();
+    const GEnergy& obsEng  = bin->energy();
+    const GTime&   obsTime = bin->time();
+
+    // Get pointer to radial model
+    const GModelSpatialRadial* model = static_cast<const GModelSpatialRadial*>(source.model());
+
+    // Compute angle between model centre and measured photon direction
+    // (radians)
+    double rho_obs = model->dir().dist(obsDir);
+
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is >0 and if we're sufficiently close to
+    // the model centre to get a non-zero response
+    if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
+
+        // Get exposure
+        irf = exposure()(obsDir, obsEng);
+
+        // Continue only if exposure is positive
+        if (irf > 0.0) {
+
+            // Recover effective area from exposure
+            irf /= livetime;
+
+            // Get PSF component
+            irf *= psf_radial(model, rho_obs, obsDir, obsEng, obsTime);
+
+            // Apply deadtime correction
+            irf *= exposure().deadc();
+
+        } // endif: exposure was positive
+        
+    } // endif: we were sufficiently close and livetime >0
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_radial:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to elliptical source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation (not used).
+ * @return Instrument response to elliptical source.
+ *
+ * Returns the instrument response to a specified elliptical source.
+ ***************************************************************************/
+double GCTAResponseCube::irf_elliptical(const GEvent&       event,
+                                        const GSource&      source,
+                                        const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_RADIAL, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+
+    // Get event attribute references
+    const GSkyDir& obsDir  = bin->dir().dir();
+    const GEnergy& obsEng  = bin->energy();
+    const GTime&   obsTime = bin->time();
+
+    // Get pointer to elliptical model
+    const GModelSpatialElliptical* model = static_cast<const GModelSpatialElliptical*>(source.model());
+
+    // Compute angle between model centre and measured photon direction and
+    // position angle (radians)
+    double rho_obs      = model->dir().dist(obsDir);
+    double posangle_obs = model->dir().posang(obsDir);
+
+    // Get livetime (in seconds)
+    double livetime = exposure().livetime();
+
+    // Continue only if livetime is >0 and if we're sufficiently close to
+    // the model centre to get a non-zero response
+    if ((livetime > 0.0) && (rho_obs <= model->theta_max()+psf().delta_max())) {
+
+        // Get exposure
+        irf = exposure()(obsDir, obsEng);
+
+        // Continue only if exposure is positive
+        if (irf > 0.0) {
+
+            // Recover effective area from exposure
+            irf /= livetime;
+
+            // Get PSF component
+            irf *= psf_elliptical(model, rho_obs, posangle_obs, obsDir, obsEng, obsTime);
+
+            // Apply deadtime correction
+            irf *= exposure().deadc();
+
+        } // endif: exposure was positive
+        
+    } // endif: we were sufficiently close and livetime >0
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_elliptical:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response to diffuse source
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ * @return Instrument response to diffuse source.
+ *
+ * Returns the instrument response to a specified diffuse source.
+ *
+ * The method uses a pre-computation cache to store the instrument response
+ * for the spatial model component. The pre-computation cache is initialised
+ * if no cache has yet been allocated, or if at the beginning of a scan over
+ * the events, the model parameters have changed. The beginning of a scan is
+ * defined by an event bin index of 0.
+ ***************************************************************************/
+double GCTAResponseCube::irf_diffuse(const GEvent&       event,
+                                     const GSource&      source,
+                                     const GObservation& obs) const
+{
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get pointer to CTA event bin
+    if (!event.is_bin()) {
+        std::string msg = "The current event is not a CTA event bin. "
+                          "This method only works on binned CTA data. Please "
+                          "make sure that a CTA observation containing binned "
+                          "CTA data is provided.";
+        throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+    }
+    const GCTAEventBin* bin = static_cast<const GCTAEventBin*>(&event);
+
+    // Get pointer to source cache. We first search the cache for a model
+    // with the source name. If no model was found we initialise a new
+    // cache entry for that model. Otherwise, we simply return the actual
+    // cache entry.
+    GCTACubeSourceDiffuse* cache(NULL);
+    int index = cache_index(source.name());
+    if (index == -1) {
+    
+        // No cache entry was found, thus allocate and initialise a new one
+        cache = new GCTACubeSourceDiffuse;
+        cache->set(source.name(), *source.model(), obs);
+        m_cache.push_back(cache);
+
+    } // endif: no cache entry was found
+    else {
+    
+        // Check that the cache entry is of the expected type
+        if (m_cache[index]->code() != GCTA_CUBE_SOURCE_DIFFUSE) {
+            std::string msg = "Cached model \""+source.name()+"\" is not "
+                              "an extended source model. This method only "
+                              "applies to extended source models.";
+            throw GException::invalid_value(G_IRF_DIFFUSE, msg);
+        }
+        cache = static_cast<GCTACubeSourceDiffuse*>(m_cache[index]);
+
+    } // endelse: there was a cache entry for this model
+
+    // Determine IRF value
+    irf = cache->irf(bin->ipix(), bin->ieng());
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (gammalib::is_notanumber(irf) || gammalib::is_infinite(irf)) {
+        std::cout << "*** ERROR: GCTAResponseCube::irf_diffuse:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " irf=" << irf;
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return IRF value
     return irf;
 }

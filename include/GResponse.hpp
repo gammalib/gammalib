@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.hpp - Abstract response base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,19 +30,17 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GEvent.hpp"
-#include "GPhoton.hpp"
-#include "GSource.hpp"
-#include "GEnergy.hpp"
-#include "GEbounds.hpp"
-#include "GTime.hpp"
-#include "GModelSpatialRadial.hpp"
-#include "GModelSpatialElliptical.hpp"
 #include "GFunction.hpp"
-#include "GMatrix.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GEvent;
+class GPhoton;
+class GSource;
+class GEnergy;
+class GEbounds;
+class GTime;
 class GObservation;
+class GModelSky;
 
 
 /***********************************************************************//**
@@ -53,11 +51,18 @@ class GObservation;
  * The response function provides conversion between physical parameters
  * (such as source position, flux, ...) and the measured instrumental
  * parameters (such as measured energy, photon interaction, ...).
+ *
  * For a given observation, the irf method returns the instrument response
- * for a given event and source model as function of the true photon energy
- * and the true photon arrival time.
- * The npred method returns the integral of the instrument response function
- * over the dataspace. This method is only required for unbinned analysis.
+ * for a given event and photon. An alternative method exists that returns
+ * the response for a specific source.
+ *
+ * The nroi method returns the spatial integral of the instrument response
+ * function times the sky model over the region of interest. This method is
+ * only required for unbinned analysis.
+ *
+ * The ebounds method returns the true energy boundaries for a specified
+ * measured event energy. This method is used for computing the energy
+ * dispersion.
  ***************************************************************************/
 class GResponse : public GBase {
 
@@ -68,7 +73,7 @@ public:
     virtual ~GResponse(void);
 
     // Operators
-    virtual GResponse& operator= (const GResponse& rsp);
+    virtual GResponse& operator=(const GResponse& rsp);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
@@ -79,157 +84,58 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      npred(const GPhoton&      photon,
-                              const GObservation& obs) const = 0;
+    virtual double      irf(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const = 0;
+    virtual double      nroi(const GModelSky&    model,
+                             const GEnergy&      obsEng,
+                             const GTime&        obsTime,
+                             const GObservation& obs) const = 0;
+    virtual GEbounds    ebounds(const GEnergy& obsEng) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
-    virtual double   irf(const GEvent&       event,
-                         const GSource&      source,
-                         const GObservation& obs) const;
-    virtual double   irf_ptsrc(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
-    virtual double   irf_radial(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
-    virtual double   irf_elliptical(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
-    virtual double   irf_diffuse(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const;
-    virtual double   npred(const GSource&      source,
-                           const GObservation& obs) const;
-    virtual double   npred_ptsrc(const GSource&      source,
-                                 const GObservation& obs) const;
-    virtual double   npred_radial(const GSource&      source,
-                                  const GObservation& obs) const;
-    virtual double   npred_elliptical(const GSource&      source,
-                                      const GObservation& obs) const;
-    virtual double   npred_diffuse(const GSource&      source,
-                                   const GObservation& obs) const;
-    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
+    virtual double      convolve(const GModelSky&    model,
+                                 const GEvent&       event,
+                                 const GObservation& obs,
+                                 const bool&         grad = true) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GResponse& rsp);
-    void free_members(void);
+    void   init_members(void);
+    void   copy_members(const GResponse& rsp);
+    void   free_members(void);
+    double eval_prob(const GModelSky&    model,
+                     const GEvent&       event,
+                     const GEnergy&      srcEng,
+                     const GTime&        srcTime,
+                     const GObservation& obs,
+                     const bool&         grad) const;
 
-    // Npred theta integration kernel for radial model
-    class npred_radial_kern_theta : public GFunction {
+    // Protected classes
+    class edisp_kern : public GFunction {
     public:
-        npred_radial_kern_theta(const GResponse&           rsp,
-                                const GModelSpatialRadial& spatial,
-                                const GEnergy&             srcEng,
-                                const GTime&               srcTime,
-                                const GObservation&        obs,
-                                const GMatrix&             rot) :
-                                m_rsp(rsp),
-                                m_spatial(spatial),
-                                m_srcEng(srcEng),
-                                m_srcTime(srcTime),
-                                m_obs(obs),
-                                m_rot(rot) { }
-        double eval(const double& theta);
+        edisp_kern(const GResponse*    parent,
+                   const GModelSky&    model,
+                   const GEvent&       event,
+                   const GTime&        srcTime,
+                   const GObservation& obs,
+                   const bool&         grad) :
+                   m_parent(parent),
+                   m_model(model),
+                   m_event(event),
+                   m_srcTime(srcTime),
+                   m_obs(obs),
+                   m_grad(grad) { }
+        double eval(const double& x);
     protected:
-        const GResponse&           m_rsp;      //!< Response
-        const GModelSpatialRadial& m_spatial;  //!< Spatial model
-        const GEnergy&             m_srcEng;   //!< True photon energy
-        const GTime&               m_srcTime;  //!< True photon arrival time
-        const GObservation&        m_obs;      //!< Observation
-        const GMatrix&             m_rot;      //!< Rotation matrix
+        const GResponse*    m_parent;  //!< Pointer to parent class
+        const GModelSky&    m_model;   //!< Reference to model
+        const GEvent&       m_event;   //!< Reference to event
+        const GTime&        m_srcTime; //!< Reference to true time
+        const GObservation& m_obs;     //!< Reference to observation
+        const bool&         m_grad;    //!< Reference to gradient flag
     };
-
-    // Npred phi integration kernel for radial model
-    class npred_radial_kern_phi : public GFunction {
-    public:
-        npred_radial_kern_phi(const GResponse&    rsp,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
-                              const GObservation& obs,
-                              const GMatrix&      rot,
-                              const double&       theta,
-                              const double&       sin_theta) :
-                              m_rsp(rsp),
-                              m_srcEng(srcEng),
-                              m_srcTime(srcTime),
-                              m_obs(obs),
-                              m_rot(rot),
-                              m_theta(theta),
-                              m_cos_theta(std::cos(theta)),
-                              m_sin_theta(sin_theta) { }
-        double eval(const double& phi);
-    protected:
-        const GResponse&    m_rsp;       //!< Response
-        const GEnergy&      m_srcEng;    //!< True photon energy
-        const GTime&        m_srcTime;   //!< True photon arrival time
-        const GObservation& m_obs;       //!< Observation
-        const GMatrix&      m_rot;       //!< Rotation matrix
-        const double&       m_theta;     //!< Offset angle (radians)
-        double              m_cos_theta; //!< cosine of offset angle
-        const double&       m_sin_theta; //!< Sine of offset angle
-    };
-
-    // Npred theta integration kernel for elliptical model
-    class npred_elliptical_kern_theta : public GFunction {
-    public:
-        npred_elliptical_kern_theta(const GResponse&               rsp,
-                                    const GModelSpatialElliptical& spatial,
-                                    const GEnergy&                 srcEng,
-                                    const GTime&                   srcTime,
-                                    const GObservation&            obs,
-                                    const GMatrix&                 rot) :
-                                    m_rsp(rsp),
-                                    m_spatial(spatial),
-                                    m_srcEng(srcEng),
-                                    m_srcTime(srcTime),
-                                    m_obs(obs),
-                                    m_rot(rot) { }
-        double eval(const double& theta);
-    protected:
-        const GResponse&               m_rsp;      //!< Response
-        const GModelSpatialElliptical& m_spatial;  //!< Spatial model
-        const GEnergy&                 m_srcEng;   //!< True photon energy
-        const GTime&                   m_srcTime;  //!< True photon arrival time
-        const GObservation&            m_obs;      //!< Observation
-        const GMatrix&                 m_rot;      //!< Rotation matrix
-    };
-
-    // Npred phi integration kernel for elliptical model
-    class npred_elliptical_kern_phi : public GFunction {
-    public:
-        npred_elliptical_kern_phi(const GResponse&               rsp,
-                                  const GModelSpatialElliptical& spatial,
-                                  const GEnergy&                 srcEng,
-                                  const GTime&                   srcTime,
-                                  const GObservation&            obs,
-                                  const GMatrix&                 rot,
-                                  const double&                  theta,
-                                  const double&                  sin_theta) :
-                                  m_rsp(rsp),
-                                  m_spatial(spatial),
-                                  m_srcEng(srcEng),
-                                  m_srcTime(srcTime),
-                                  m_obs(obs),
-                                  m_rot(rot),
-                                  m_theta(theta),
-                                  m_cos_theta(std::cos(theta)),
-                                  m_sin_theta(sin_theta) { }
-        double eval(const double& phi);
-    protected:
-        const GResponse&               m_rsp;       //!< Response
-        const GModelSpatialElliptical& m_spatial;   //!< Spatial model
-        const GEnergy&                 m_srcEng;    //!< True photon energy
-        const GTime&                   m_srcTime;   //!< True photon arrival time
-        const GObservation&            m_obs;       //!< Observation
-        const GMatrix&                 m_rot;       //!< Rotation matrix
-        const double&                  m_theta;     //!< Offset angle (radians)
-        double                         m_cos_theta; //!< cosine of offset angle
-        const double&                  m_sin_theta; //!< Sine of offset angle
-    };
-
 };
 
 #endif /* GRESPONSE_HPP */

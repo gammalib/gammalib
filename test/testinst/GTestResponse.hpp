@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GTestResponse.hpp  -  Test response class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,14 +105,20 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const { return 1.0; }
-    virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const { return 1.0; }
+    virtual double        irf(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const { return 1.0; }
+    virtual double        nroi(const GModelSky&    model,
+                               const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const { return 1.0; }
+    virtual GEbounds      ebounds(const GEnergy& obsEng) const { return GEbounds(); }
     virtual std::string   print(const GChatter& chatter = NORMAL) const{ return "=== GTestReponse ==="; }
 
 protected:
     // Protected methods
     void init_members(void){ return; }
-    void copy_members(const GTestResponse& pnt){ return; }
+    void copy_members(const GTestResponse& pnt) { return; }
     void free_members(void){ return; }
 };
 

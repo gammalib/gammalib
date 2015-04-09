@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.hpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,15 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GResponse.hpp"
+#include "GEbounds.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEvent;
+class GPhoton;
+class GSource;
+class GObservation;
+class GEnergy;
+class GTime;
 
 
 /***********************************************************************//**
@@ -52,7 +61,7 @@ public:
     virtual ~GMWLResponse(void);
 
     // Operators
-    virtual GMWLResponse& operator= (const GMWLResponse & rsp);
+    virtual GMWLResponse& operator=(const GMWLResponse & rsp);
 
     // Implemented pure virtual methods
     virtual void          clear(void);
@@ -63,8 +72,14 @@ public:
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const;
+    virtual double        irf(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
+    virtual double        nroi(const GModelSky&    model,
+                               const GEnergy&      obsEng,
+                               const GTime&        obsTime,
+                               const GObservation& obs) const;
+    virtual GEbounds      ebounds(const GEnergy& obsEnergy) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -129,15 +144,17 @@ double GMWLResponse::irf(const GEvent& event, const GPhoton& photon,
 
 
 /***********************************************************************//**
- * @brief Return predicted number of events
+ * @brief Return instrument response function
  *
- * @param[in] photon Photon.
+ * @param[in] event Event.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
  * @return Instrument response function (always 1).
  ***************************************************************************/
 inline
-double GMWLResponse::npred(const GPhoton& photon, const GObservation& obs) const
+double GMWLResponse::irf(const GEvent& event, const GSource& source,
+                         const GObservation& obs) const
 {
     return 1.0;
 }

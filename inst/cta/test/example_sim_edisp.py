@@ -31,7 +31,7 @@ import time
 # ============== #
 # Simulate Edisp #
 # ============== #
-def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
+def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=1000, nmc=100000):
     """
     Simulate Edisp and show results using matplotlib (if available).
     """
@@ -64,8 +64,8 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
         # Simulate observed energies
         tstart = time.clock()
         for i in range(nmc):
-            #eobs     = edisp.mc(ran, logEtrue).TeV()
-            eobs     = edisp.mc(ran, logEtrue, float(i)).TeV()
+            eobs     = edisp.mc(ran, logEtrue).TeV()
+            #eobs     = edisp.mc(ran, logEtrue, float(i)).TeV()
             index    = int(eobs/dEobs)
             if (index < ebins):
                 counts[index] += 1.0
@@ -79,17 +79,21 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
         sum       = 0.0
         exp_edisp = []
         cumul     = []
+        #fmax      = 0.0
         for i in range(ebins):
             eobs     = eobs_axis[i]
             if eobs <= edisp.ebounds_obs(logEtrue).emax().TeV():
                 dLogEobs = math.log10(eobs_axis[i]) - math.log10(eobs_axis[i-1])
                 value = edisp(math.log10(eobs), logEtrue) * dLogEobs * nmc
+                #if fmax < value / dLogEobs / nmc:
+                #    fmax = value / dLogEobs / nmc
             else:
                 value = 0.0
             sum += value
             exp_edisp.append(value)
             cumul.append(sum/nmc)
-        print(sum)
+        print(sum/nmc)
+        #print(fmax)
 
         # Create figure
         fig, ax1 = plt.subplots()
@@ -105,13 +109,13 @@ def sim_edisp(edisp, etrue, eobs_max=40.0, ebins=500, nmc=100000):
         ax1.set_xlabel("Observed energy (TeV)")
         ax1.set_ylabel("Number of counts")
 
-        ax2 = ax1.twinx()
+        #ax2 = ax1.twinx()
 
         # Plot cumulative dispersion
-        ax2.plot(eobs_axis, cumul, 'm')
+        #ax2.plot(eobs_axis, cumul, 'm')
 
         # Set axis
-        ax2.set_ylabel("Cumulative probability")
+        #ax2.set_ylabel("Cumulative probability")
 
         # Notify
         print("PLEASE CLOSE WINDOW TO CONTINUE ...")
@@ -144,4 +148,3 @@ if __name__ == '__main__':
 
     # Simulate Edisp
     sim_edisp(edisp, 20.0) # Energy in TeV
-    #sim_edisp(edisp, 1.0) # Energy in TeV

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,15 @@
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GCaldb.hpp"
+#include "GEvent.hpp"
+#include "GPhoton.hpp"
+#include "GSource.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GObservation.hpp"
+#include "GFitsImage.hpp"
+#include "GModelSky.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventBin.hpp"
@@ -40,10 +49,10 @@
 #include "GCOMException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_IRF     "GCOMResponse::irf(GInstDir&, GEnergy&, GTime&, GSkyDir&, "\
-                                           "GEnergy&, GTime&, GObservation&)"
-#define G_NPRED            "GCOMResponse::npred(GSkyDir&, GEnergy&, GTime&, "\
+#define G_IRF           "GCOMResponse::irf(GEvent&, GSource&, GObservation&)"
+#define G_NROI            "GCOMResponse::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
+#define G_EBOUNDS                           "GCOMResponse::ebounds(GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -334,34 +343,95 @@ double GCOMResponse::irf(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of point spread function
+ * @brief Return instrument response
  *
- * @param[in] photon Incident photon.
+ * @param[in] event Event.
+ * @param[in] source Source.
  * @param[in] obs Observation.
- * @return 1.0
+ * @return Instrument response.
  *
- * @todo Implement method (is maybe not really needed)
+ * Returns the instrument response for a given event, source and observation.
  ***************************************************************************/
-double GCOMResponse::npred(const GPhoton&      photon,
-                           const GObservation& obs) const
+double GCOMResponse::irf(const GEvent&       event,
+                         const GSource&      source,
+                         const GObservation& obs) const
 {
-    // Set dummp Npred value
-    double npred = 1.0;
+    // Initialise IRF value
+    double irf = 0.0;
 
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (gammalib::is_notanumber(npred) || gammalib::is_infinite(npred)) {
-        std::cout << "*** ERROR: GCOMResponse::npred:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (";
-        std::cout << "npred=" << npred;
-        std::cout << ")";
-        std::cout << std::endl;
+    // Select IRF depending on the spatial model type
+    switch (source.model()->code()) {
+        case GMODEL_SPATIAL_POINT_SOURCE:
+            {
+            const GModelSpatialPointSource* src =
+                  static_cast<const GModelSpatialPointSource*>(source.model());
+            GPhoton photon(src->dir(), source.energy(), source.time());
+            irf = this->irf(event, photon, obs);
+            }
+            break;
+        case GMODEL_SPATIAL_RADIAL:
+        case GMODEL_SPATIAL_ELLIPTICAL:
+        case GMODEL_SPATIAL_DIFFUSE:
+            {
+            std::string msg = "Response computation not yet implemented for "
+                              "spatial model type \""+source.model()->type()+"\".";
+            throw GException::feature_not_implemented(G_IRF, msg);
+            }
+            break;
+        default:
+            break;
     }
-    #endif
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return integral of event probability for a given sky model over ROI
+ *
+ * @param[in] model Incident photon.
+ * @param[in] obs Observation.
+ * @return 0.0
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ ***************************************************************************/
+double GCOMResponse::nroi(const GModelSky&    model,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const
+{
+    // Method is not implemented
+    std::string msg = "Spatial integration of sky model over the data space "
+                      "is not implemented.";
+    throw GException::feature_not_implemented(G_NROI, msg);
 
     // Return Npred
-    return npred;
+    return (0.0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return true energy boundaries for a specific observed energy
+ *
+ * @param[in] obsEnergy Observed Energy.
+ * @return True energy boundaries for given observed energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ ***************************************************************************/
+GEbounds GCOMResponse::ebounds(const GEnergy& obsEnergy) const
+{
+    // Initialise an empty boundary object
+    GEbounds ebounds;
+
+    // Throw an exception
+    std::string msg = "Energy dispersion not implemented.";
+    throw GException::feature_not_implemented(G_EBOUNDS, msg);
+
+    // Return energy boundaries
+    return ebounds;
 }
 
 

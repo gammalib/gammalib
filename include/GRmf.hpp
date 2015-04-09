@@ -65,6 +65,8 @@ public:
     int                  size(void) const;
     int                  ntrue(void) const;
     int                  nmeasured(void) const;
+    int                  itruemax(void) const;
+    int                  imeasmax(void) const;
     double&              at(const int& itrue, const int& imeasured);
     const double&        at(const int& itrue, const int& imeasured) const;
     const GEbounds&      etrue(void) const;
@@ -93,6 +95,8 @@ protected:
     GEbounds            m_ebds_true;     //!< True energy boundaries
     GEbounds            m_ebds_measured; //!< Measured energy boundaries
     GMatrixSparse       m_matrix;        //!< Sparse redistribution matrix
+    int                 m_imeasmax;      //!< Index of measured maximum
+    int                 m_itruemax;      //!< Index of true maximum
     
 };
 
@@ -180,6 +184,36 @@ inline
 int GRmf::nmeasured(void) const
 {
     return (m_matrix.columns());
+}
+
+
+
+
+/***********************************************************************//**
+ * @brief Return true energy index of maximum value of the redistribution matrix
+ *
+ * @return True energy index of maximum value of the redistribution matrix.
+ *
+ * Returns the true energy index of maximum value of the redistribution matrix.
+ ***************************************************************************/
+inline
+int GRmf::itruemax(void) const
+{
+    return m_itruemax;
+}
+
+
+/***********************************************************************//**
+ * @brief Return measured energy index of maximum value of the redistribution matrix
+ *
+ * @return Measured energy index of maximum value of the redistribution matrix.
+ *
+ * Returns the measured energy index of maximum value of the redistribution matrix.
+ ***************************************************************************/
+inline
+int GRmf::imeasmax(void) const
+{
+    return m_imeasmax;
 }
 
 

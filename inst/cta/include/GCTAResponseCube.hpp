@@ -80,28 +80,17 @@ public:
     virtual double            irf(const GEvent&       event,
                                   const GPhoton&      photon,
                                   const GObservation& obs) const;
-    virtual double            npred(const GPhoton&      photon,
-                                    const GObservation& obs) const;
+    virtual double            irf(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double            nroi(const GModelSky&    model,
+                                   const GEnergy&      obsEng,
+                                   const GTime&        obsTime,
+                                   const GObservation& obs) const;
+    virtual GEbounds          ebounds(const GEnergy& obsEnergy) const;
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
-
-    // Overload base class methods
-    virtual double irf(const GEvent&       event,
-                       const GSource&      source,
-                       const GObservation& obs) const;
-    virtual double irf_ptsrc(const GEvent&       event,
-                             const GSource&      source,
-                             const GObservation& obs) const;
-    virtual double irf_radial(const GEvent&       event,
-                              const GSource&      source,
-                              const GObservation& obs) const;
-    virtual double irf_elliptical(const GEvent&       event,
-                                  const GSource&      source,
-                                  const GObservation& obs) const;
-    virtual double irf_diffuse(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
 
     // Other Methods
     const GCTACubeExposure&   exposure(void) const;
@@ -128,6 +117,18 @@ private:
                           const GSkyDir&                 obsDir,
                           const GEnergy&                 srcEng,
                           const GTime&                   srcTime) const;
+    double irf_ptsrc(const GEvent&       event,
+                     const GSource&      source,
+                     const GObservation& obs) const;
+    double irf_radial(const GEvent&       event,
+                      const GSource&      source,
+                      const GObservation& obs) const;
+    double irf_elliptical(const GEvent&       event,
+                          const GSource&      source,
+                          const GObservation& obs) const;
+    double irf_diffuse(const GEvent&       event,
+                       const GSource&      source,
+                       const GObservation& obs) const;
 
     // Private data members
     GCTACubeExposure   m_exposure;    //!< Exposure cube

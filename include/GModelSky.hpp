@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModelSky.hpp - Sky model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -126,16 +126,16 @@ public:
     GModelSky(void);
     explicit GModelSky(const std::string& type);
     explicit GModelSky(const GXmlElement& xml);
-    explicit GModelSky(const GXmlElement& spatial,
-                       const GXmlElement& spectral);
-    explicit GModelSky(const GXmlElement& spatial,
-                       const GXmlElement& spectral,
-                       const GXmlElement& temporal);
-    explicit GModelSky(const GModelSpatial& spatial,
-                       const GModelSpectral& spectral);
-    explicit GModelSky(const GModelSpatial& spatial,
-                       const GModelSpectral& spectral,
-                       const GModelTemporal& temporal);
+    GModelSky(const GXmlElement& spatial,
+              const GXmlElement& spectral);
+    GModelSky(const GXmlElement& spatial,
+              const GXmlElement& spectral,
+              const GXmlElement& temporal);
+    GModelSky(const GModelSpatial& spatial,
+              const GModelSpectral& spectral);
+    GModelSky(const GModelSpatial& spatial,
+              const GModelSpectral& spectral,
+              const GModelTemporal& temporal);
     GModelSky(const GModelSky& model);
     virtual ~GModelSky(void);
 
@@ -181,40 +181,7 @@ protected:
     GModelSpatial*  xml_spatial(const GXmlElement& spatial) const;
     GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
-    double          integrate_time(const GEvent& event,
-                                   const GObservation& obs,
-                                   bool grad) const;
-    double          integrate_energy(const GEvent& event,
-                                     const GTime& srcTime,
-                                     const GObservation& obs,
-                                     bool grad) const;
-    double          integrate_dir(const GEvent& event,
-                                  const GEnergy& srcEng,
-                                  const GTime& srcTime,
-                                  const GObservation& obs,
-                                  bool grad) const;
     bool            valid_model(void) const;
-
-    class edisp_kern : public GFunction {
-    public:
-        edisp_kern(const GModelSky*    parent,
-                   const GEvent&       event,
-                   const GTime&        srcTime,
-                   const GObservation& obs,
-                   const bool&         grad) :
-                   m_parent(parent),
-                   m_event(event),
-                   m_srcTime(srcTime),
-                   m_obs(obs),
-                   m_grad(grad) { }
-        double eval(const double& x);
-    protected:
-        const GModelSky*    m_parent;  //!< Pointer to parent
-        const GEvent&       m_event;   //!< Reference to event
-        const GTime&        m_srcTime; //!< Reference to true time
-        const GObservation& m_obs;     //!< Reference to observation
-        const bool&         m_grad;    //!< Reference to gradient flag
-    };
 
     // Protected data members
     std::string     m_type;       //!< Model type

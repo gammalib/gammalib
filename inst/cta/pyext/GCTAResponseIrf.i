@@ -108,28 +108,18 @@ public:
     virtual double           irf(const GEvent&       event,
                                  const GPhoton&      photon,
                                  const GObservation& obs) const;
-    virtual double           npred(const GPhoton&      photon,
-                                   const GObservation& obs) const;
+    virtual double           irf(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const;
+    virtual double           nroi(const GModelSky&    model,
+                                  const GEnergy&      obsEng,
+                                  const GTime&        obsTime,
+                                  const GObservation& obs) const;
+    virtual GEbounds         ebounds(const GEnergy& obsEnergy) const;
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
 
     // Overload virtual base class methods
-    virtual double   irf_radial(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
-    virtual double   irf_elliptical(const GEvent&       event,
-                                    const GSource&      source,
-                                    const GObservation& obs) const;
-    virtual double   irf_diffuse(const GEvent&       event,
-                                 const GSource&      source,
-                                 const GObservation& obs) const;
-    virtual double   npred_radial(const GSource&      source,
-                                  const GObservation& obs) const;
-    virtual double   npred_elliptical(const GSource&      source,
-                                      const GObservation& obs) const;
-    virtual double   npred_diffuse(const GSource&      source,
-                                   const GObservation& obs) const;
-    virtual GEbounds ebounds_src(const GEnergy& obsEnergy) const;
 
     // Other Methods
     bool                  apply_edisp(void) const;
@@ -182,11 +172,6 @@ public:
                 const GTime&        srcTime,
                 const GCTAPointing& pnt,
                 const GCTARoi&      roi) const;
-    double nedisp(const GSkyDir&      srcDir,
-                  const GEnergy&      srcEng,
-                  const GTime&        srcTime,
-                  const GCTAPointing& pnt,
-                  const GEbounds&     ebds) const;
 };
 
 
