@@ -368,9 +368,6 @@ double GCTAResponseIrf::irf(const GEvent&       event,
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
 
-                // Get log10(E/TeV) of measured photon energy.
-                //double obsLogEng = obsEng.log10TeV();
-
                 // Multiply-in energy dispersion
                 irf *= edisp(obsEng, theta, phi, zenith, azimuth, srcLogEng);
 
