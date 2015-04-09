@@ -165,9 +165,9 @@ GResponse& GResponse::operator=(const GResponse& rsp)
  *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
  * \f]
  *
- * without taking into account any energy or time dispersion. If energy or
- * time dispersion should be considered the method needs to be reimplemented
- * on the level of the instrument specific response class.
+ * without taking into account any time dispersion. Energy dispersion is
+ * correctly handled by this method. If time dispersion is indeed needed,
+ * an instrument specific method needs to be provided.
  ***************************************************************************/
 double GResponse::convolve(const GModelSky&    model,
                            const GEvent&       event,
@@ -297,13 +297,10 @@ void GResponse::free_members(void)
  * Computes the event probability
  *
  * \f[
- *    P(p',E',t') = \int \int \int
- *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ *    P(p',E',t'|E,t) = \int S(p,E,t) \times R(p',E',t'|p,E,t) \, dp
  * \f]
  *
- * without taking into account any energy or time dispersion. If energy or
- * time dispersion should be considered the method needs to be reimplemented
- * on the level of the instrument specific response class.
+ * for a given true energy \f$E\f$ and time \f$t\f$.
  ***************************************************************************/
 double GResponse::eval_prob(const GModelSky&    model,
                             const GEvent&       event,
