@@ -67,7 +67,7 @@ public:
     // Operators
     virtual GResponse& operator=(const GResponse& rsp);
 
-    // Virtual methods
+    // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GResponse*  clone(void) const = 0;
     virtual std::string classname(void) const = 0;
@@ -76,15 +76,17 @@ public:
     virtual double      irf(const GEvent&       event,
                             const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      convolve(const GModelSky&    model,
-                                 const GEvent&       event,
-                                 const GObservation& obs,
-                                 const bool&         grad = true) const;
     virtual double      nroi(const GModelSky&    model,
                              const GEnergy&      obsEng,
                              const GTime&        obsTime,
                              const GObservation& obs) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
+
+    // Virtual methods
+    virtual double      convolve(const GModelSky&    model,
+                                 const GEvent&       event,
+                                 const GObservation& obs,
+                                 const bool&         grad = true) const;
 
     // Old methods that will become obsolete
     virtual double   irf(const GEvent&       event,
