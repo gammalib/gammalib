@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -253,8 +253,9 @@ double GObservation::likelihood(const GModels& models,
  * and observation identifiers matches those of the observation. Models that
  * do not match will be skipped.
  ***************************************************************************/
-double GObservation::model(const GModels& models, const GEvent& event,
-                           GVector* gradient) const
+double GObservation::model(const GModels& models,
+                           const GEvent&  event,
+                           GVector*       gradient) const
 {
     // Initialise method variables
     double model     = 0.0;    // Reset model value
@@ -430,27 +431,35 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
  *            Good Time Interval is invalid.
  *
  * Computes
- * \f[N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm bounds}} \int_{\rm ROI}
- *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p'} {\rm d}E' {\rm d}t'\f]
- * where
- * \f$S(\vec{p}, E, t)\f$ is the source model,
- * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
- * spread function,
- * \f$\vec{p'}\f$ is the measured photon direction,
+ *
+ * \f[
+ *    N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm bounds}} \int_{\rm ROI}
+ *                   P(p',E',t') \, dp' \, dE' \, dt'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * where                         
+ * \f$S(p,E,t)\f$ is the source model,
+ * \f$R(p',E',t'|p,E,t)\f$ is the instrument response function,
+ * \f$p'\f$ is the measured photon direction,
  * \f$E'\f$ is the measured photon energy,
  * \f$t'\f$ is the measured photon arrival time,
- * \f$\vec{p}\f$ is the true photon arrival direction,
- * \f$E\f$ is the true photon energy,
- * \f$t\f$ is the true photon arrival time, and
- * \f$d\f$ is the instrument pointing.
+ * \f$p\f$ is the true photon arrival direction,
+ * \f$E\f$ is the true photon energy, and
+ * \f$t\f$ is the true photon arrival time.
  *
- * \f${\rm GTI}\f$ are the Good Time Intervals that are stored in the
- * GObservation::m_gti member.
- * Note that MET is used for the time integration interval. This, however,
- * is no specialisation since npred_grad_kern_spec::eval() converts the
- * argument back in a GTime object by assuming that the argument is in MET,
- * hence the correct time system will be used at the end by the method.
+ * This method performs the time integration over the Good Time Intervals
+ * \f${\rm GTI}\f$. Note that MET is used for the time integration interval.
+ * This, however, is no specialisation since npred_grad_kern_spec::eval()
+ * converts the argument back in a GTime object by assuming that the argument
+ * is in MET, hence the correct time system will be used at the end by the
+ * method.
  ***************************************************************************/
 double GObservation::npred(const GModel& model) const
 {
@@ -610,24 +619,36 @@ double GObservation::model_grad(const GModel&    model,
  * @param[in] par Model parameter.
  *
  * Computes
- * \f[\frac{{\rm d} N_{\rm pred}}{{\rm d} a_i}\f]
+ *
+ * \f[
+ *    \frac{{\rm d} N_{\rm pred}}{{\rm d} a_i}
+ * \f]
+ *
  * where
- * \f[N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm bounds}} \int_{\rm ROI}
- *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p'} {\rm d}E' {\rm d}t'\f]
+ *
+ * \f[
+ *    N_{\rm pred} = \int_{\rm GTI} \int_{E_{\rm bounds}} \int_{\rm ROI}
+ *                   P(p',E',t') \, dp' \, dE' \, dt'
+ * \f]
+ *
+ * is the integral of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
  * and
  * \f$a_i\f$ is the model parameter \f$i\f$.
- * Furthermore,
- * \f$S(\vec{p}, E, t)\f$ is the source model,
- * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
- * spread function,
- * \f$\vec{p'}\f$ is the measured photon direction,
+ * Furthermore
+ * \f$S(p,E,t)\f$ is the source model,
+ * \f$R(p',E',t'|p,E,t)\f$ is the instrument response function,
+ * \f$p'\f$ is the measured photon direction,
  * \f$E'\f$ is the measured photon energy,
  * \f$t'\f$ is the measured photon arrival time,
- * \f$\vec{p}\f$ is the true photon arrival direction,
- * \f$E\f$ is the true photon energy,
- * \f$t\f$ is the true photon arrival time, and
- * \f$d\f$ is the instrument pointing.
+ * \f$p\f$ is the true photon arrival direction,
+ * \f$E\f$ is the true photon energy, and
+ * \f$t\f$ is the true photon arrival time.
  *
  * This method uses a robust but simple difference method to estimate
  * parameter gradients that have not been provided by the model. We use here
@@ -832,7 +853,9 @@ void GObservation::free_members(void)
  * optimisation using unbinned analysis and Poisson statistics.
  * The -(log-likelihood) function is given by
  *
- * \f$L = N_{\rm pred} - \sum_i \log e_i\f$
+ * \f[
+ *    L = N_{\rm pred} - \sum_i \log e_i
+ * \f]
  *
  * where
  * \f$N_{\rm pred}\f$ is the number of events predicted by the model, and
@@ -949,7 +972,11 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
  * This method evaluates the -(log-likelihood) function for parameter
  * optimisation using binned analysis and Poisson statistics.
  * The -(log-likelihood) function is given by
- * \f$L=-\sum_i n_i \log e_i - e_i\f$
+ *
+ * \f[
+ *    L=-\sum_i n_i \log e_i - e_i
+ * \f]
+ *
  * where the sum is taken over all data space bins, \f$n_i\f$ is the
  * observed number of counts and \f$e_i\f$ is the model.
  * This method also computes the parameter gradients
@@ -1154,7 +1181,11 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
  * This method evaluates the -(log-likelihood) function for parameter
  * optimisation using binned analysis and Poisson statistics.
  * The -(log-likelihood) function is given by
- * \f$L = 1/2 \sum_i (n_i - e_i)^2 \sigma_i^{-2}\f$
+ *
+ * \f[
+ *    L = 1/2 \sum_i (n_i - e_i)^2 \sigma_i^{-2}
+ * \f]
+ *
  * where the sum is taken over all data space bins, \f$n_i\f$ is the
  * observed number of counts, \f$e_i\f$ is the model and \f$\sigma_i\f$
  * is the statistical uncertainty.
@@ -1281,8 +1312,6 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
  =                                                                         =
  ==========================================================================*/
 
-
-
 /***********************************************************************//**
  * @brief Model function evaluation for gradient computation
  *
@@ -1351,56 +1380,68 @@ double GObservation::npred_kern::eval(const double& x)
  *            Energy range is invalid.
  *
  * Computes
- * \f[N'_{\rm pred} = \int_{E_{\rm bounds}} \int_{\rm ROI}
- *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p'} {\rm d}E'\f]
- * where
- * \f$S(\vec{p}, E, t)\f$ is the source model,
- * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
- * spread function,
- * \f$\vec{p'}\f$ is the measured photon direction,
+ *
+ * \f[
+ *    N_{\rm pred}(t') = \int_{E_{\rm bounds}} \int_{\rm ROI}
+ *                       P(p',E',t') \, dp' \, dE'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * where                         
+ * \f$S(p,E,t)\f$ is the source model,
+ * \f$R(p',E',t'|p,E,t)\f$ is the instrument response function,
+ * \f$p'\f$ is the measured photon direction,
  * \f$E'\f$ is the measured photon energy,
  * \f$t'\f$ is the measured photon arrival time,
- * \f$\vec{p}\f$ is the true photon arrival direction,
- * \f$E\f$ is the true photon energy,
- * \f$t\f$ is the true photon arrival time, and
- * \f$d\f$ is the instrument pointing.
+ * \f$p\f$ is the true photon arrival direction,
+ * \f$E\f$ is the true photon energy, and
+ * \f$t\f$ is the true photon arrival time.
  *
- * \f$E_{\rm bounds}\f$ are the energy boundaries that are stored in the
- * GObservation::m_ebounds member.
- *
- * @todo Loop also over energy boundaries (is more general; there is no
- *       reason for not doing it).
+ * This method performs the energy intergration over the energy boundaries
+ * \f$E_{\rm bounds}\f$.
  ***************************************************************************/
 double GObservation::npred_spec(const GModel& model,
                                 const GTime&  obsTime) const
 {
-    // Set integration energy interval in MeV
-    GEnergy e_min = events()->ebounds().emin();
-    GEnergy e_max = events()->ebounds().emax();
+    // Initialise result
+    double result = 0.0;
 
-    // Get energy interval in MeV
-    double emin = e_min.MeV();
-    double emax = e_max.MeV();
+    // Get energy boundaries
+    GEbounds ebounds = events()->ebounds();
 
-    // Throw exception if energy range is not valid
-    if (emax <= emin) {
-        throw GException::erange_invalid(G_NPRED_SPEC, emin, emax);
-    }
+    // Loop over energy boundaries
+    for (int i = 0; i < ebounds.size(); ++i) {
 
-    // Setup integration function
-    GObservation::npred_spec_kern integrand(this, &model, &obsTime);
-    GIntegral                     integral(&integrand);
+        // Get boundaries in MeV
+        double emin = ebounds.emin(i).MeV();
+        double emax = ebounds.emax(i).MeV();
 
-    // Set integration precision
-    integral.eps(1.0e-6); // Needed for fluctuating bgd. model !!!
+        // Continue only if valid
+        if (emax > emin) {
 
-    // Do Romberg integration
-    #if defined(G_LN_ENERGY_INT)
-    emin = std::log(emin);
-    emax = std::log(emax);
-    #endif
-    double result = integral.romberg(emin, emax);
+            // Setup integration function
+            GObservation::npred_spec_kern integrand(this, &model, &obsTime);
+            GIntegral                     integral(&integrand);
+
+            // Set integration precision
+            integral.eps(1.0e-6); // Needed for fluctuating bgd. model !!!
+
+            // Do Romberg integration
+            #if defined(G_LN_ENERGY_INT)
+            emin = std::log(emin);
+            emax = std::log(emax);
+            #endif
+            result += integral.romberg(emin, emax);
+
+        } // endif: energy interval was valid
+
+    } // endfor: looped over energy boundaries
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -1408,8 +1449,6 @@ double GObservation::npred_spec(const GModel& model,
         std::cout << "*** ERROR: GObservation::npred_spec:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (result=" << result;
-        std::cout << ", emin=" << emin;
-        std::cout << ", emax=" << emax;
         std::cout << ")" << std::endl;
     }
     #endif

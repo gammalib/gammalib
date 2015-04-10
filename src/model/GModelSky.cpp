@@ -473,7 +473,6 @@ GVector GModelSky::gradients(const GPhoton& photon)
 double GModelSky::eval(const GEvent& event, const GObservation& obs) const
 {
     // Evaluate function
-    //double value = integrate_time(event, obs, false);
     double value = obs.response()->convolve(*this, event, obs, false);
 
     // Return
@@ -495,11 +494,10 @@ double GModelSky::eval(const GEvent& event, const GObservation& obs) const
  * While the value of the sky model is returned by the method, the parameter
  * gradients are set as GModelPar members.
  ***************************************************************************/
-double GModelSky::eval_gradients(const GEvent& event, 
+double GModelSky::eval_gradients(const GEvent&       event, 
                                  const GObservation& obs) const
 {
     // Evaluate function
-    //double value = integrate_time(event, obs, true);
     double value = obs.response()->convolve(*this, event, obs, true);
 
     // Return
@@ -515,33 +513,35 @@ double GModelSky::eval_gradients(const GEvent& event,
  * @param[in] obs Observation.
  * @return Spatially integrated sky model.
  *
- * @exception GException::no_response
- *            No valid instrument response function defined.
- *
  * Computes
- * \f[N"_{\rm pred} = \int_{\rm ROI}
- *    S(\vec{p}, E, t) PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t) \,
- *    {\rm d}\vec{p'}\f]
- * where
- * \f$S(\vec{p}, E, t)\f$ is the source model,
- * \f$PSF(\vec{p'}, E', t' | \vec{d}, \vec{p}, E, t)\f$ is the point
- * spread function,
- * \f$\vec{p'}\f$ is the measured photon direction,
+ *
+ * \f[
+ *    N_{\rm pred}(E',t') = \int_{\rm ROI}
+ *                          P(p',E',t') \, dp' \, dE'
+ * \f]
+ *
+ * of the event probability
+ *
+ * \f[
+ *    P(p',E',t') = \int \int \int
+ *                  S(p,E,t) \times R(p',E',t'|p,E,t) \, dp \, dE \, dt
+ * \f]
+ *
+ * where                         
+ * \f$S(p,E,t)\f$ is the source model,
+ * \f$R(p',E',t'|p,E,t)\f$ is the instrument response function,
+ * \f$p'\f$ is the measured photon direction,
  * \f$E'\f$ is the measured photon energy,
  * \f$t'\f$ is the measured photon arrival time,
- * \f$\vec{p}\f$ is the true photon arrival direction,
- * \f$E\f$ is the true photon energy,
- * \f$t\f$ is the true photon arrival time, and
- * \f$d\f$ is the instrument pointing.
+ * \f$p\f$ is the true photon arrival direction,
+ * \f$E\f$ is the true photon energy, and
+ * \f$t\f$ is the true photon arrival time.
  *
- * \f${\rm ROI}\f$ is the region of interest that is stored in the
- * GObservation::m_roi member. The integration over the ROI is performed
- * by the GResponse::npred() method.
- *
- * The method takes care of any instrument dependent scale factors. These
- * scale factors will be applied to the predicted number of model counts.
+ * The method calls the GResponse::nroi() method that does the relevant
+ * integration.
  ***************************************************************************/
-double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
+double GModelSky::npred(const GEnergy&      obsEng,
+                        const GTime&        obsTime,
                         const GObservation& obs) const
 {
     // Initialise result
