@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadial.hpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,6 +75,8 @@ public:
     virtual GSkyDir              mc(const GEnergy& energy,
                                     const GTime& time,
                                     GRan& ran) const = 0;
+    virtual bool                 contains(const GSkyDir& dir,
+                                          const double&  margin = 0.0) const = 0;
     virtual double               theta_max(void) const = 0;
     virtual std::string          print(const GChatter& chatter = NORMAL) const = 0;
 

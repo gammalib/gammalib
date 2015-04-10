@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.hpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Christoph Deil                              *
+ *  copyright (C) 2011-2015 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,7 +49,7 @@ class GModelSpatialRadialDisk : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialDisk(void);
-    explicit GModelSpatialRadialDisk(const GSkyDir& dir, const double& radius);
+    GModelSpatialRadialDisk(const GSkyDir& dir, const double& radius);
     explicit GModelSpatialRadialDisk(const GXmlElement& xml);
     GModelSpatialRadialDisk(const GModelSpatialRadialDisk& model);
     virtual ~GModelSpatialRadialDisk(void);
@@ -71,6 +71,8 @@ public:
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime&   time,
                                         GRan&          ran) const;
+    virtual bool                     contains(const GSkyDir& dir,
+                                              const double&  margin = 0.0) const;
     virtual double                   theta_max(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;

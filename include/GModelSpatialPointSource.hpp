@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,7 +52,7 @@ public:
     // Constructors and destructors
     GModelSpatialPointSource(void);
     explicit GModelSpatialPointSource(const GSkyDir& dir);
-    explicit GModelSpatialPointSource(const double& ra, const double& dec);
+    GModelSpatialPointSource(const double& ra, const double& dec);
     explicit GModelSpatialPointSource(const GXmlElement& xml);
     GModelSpatialPointSource(const GModelSpatialPointSource& model);
     virtual ~GModelSpatialPointSource(void);
@@ -73,6 +73,8 @@ public:
                                          GRan& ran) const;
     virtual double                    norm(const GSkyDir& dir,
                                            const double&  radius) const;
+    virtual bool                      contains(const GSkyDir& dir,
+                                               const double&  margin = 0.0) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(const GChatter& chatter = NORMAL) const;

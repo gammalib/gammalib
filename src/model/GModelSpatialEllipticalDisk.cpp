@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -399,6 +399,29 @@ GSkyDir GModelSpatialEllipticalDisk::mc(const GEnergy& energy,
 	// Return photon direction
 	return (photon.dir());
 
+}
+
+
+/***********************************************************************//**
+ * @brief Checks where model contains specified sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] margin Margin to be added to sky direction (degrees)
+ * @return True if the model contains the sky direction.
+ *
+ * Signals whether a sky direction is contained in the elliptical disk
+ * model.
+ *
+ * @todo Implement correct evaluation of effective ellipse radius.
+ ***************************************************************************/
+bool GModelSpatialEllipticalDisk::contains(const GSkyDir& dir,
+                                           const double&  margin) const
+{
+    // Compute distance to centre (radian)
+    double distance = dir.dist(this->dir());
+
+    // Return flag
+    return (distance <= theta_max() + margin*gammalib::deg2rad);
 }
 
 

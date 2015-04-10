@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialDisk.cpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Christoph Deil                              *
+ *  copyright (C) 2011-2015 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -330,6 +330,26 @@ GSkyDir GModelSpatialRadialDisk::mc(const GEnergy& energy,
 
     // Return sky direction
     return sky_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks where model contains specified sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] margin Margin to be added to sky direction (degrees)
+ * @return True if the model contains the sky direction.
+ *
+ * Signals whether a sky direction is contained in the radial disk model.
+ ***************************************************************************/
+bool GModelSpatialRadialDisk::contains(const GSkyDir& dir,
+                                       const double&  margin) const
+{
+    // Compute distance to centre (radians)
+    double distance = dir.dist(this->dir());
+
+    // Return flag
+    return (distance <= theta_max() + margin*gammalib::deg2rad);
 }
 
 

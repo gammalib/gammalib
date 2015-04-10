@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialEllipticalDisk.hpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,10 +49,10 @@ class GModelSpatialEllipticalDisk : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalDisk(void);
-    explicit GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                         const double&  semimajor,
-                                         const double&  semiminor,
-                                         const double&  posangle);
+    GModelSpatialEllipticalDisk(const GSkyDir& dir,
+                                const double&  semimajor,
+                                const double&  semiminor,
+                                const double&  posangle);
     explicit GModelSpatialEllipticalDisk(const GXmlElement& xml);
     GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);
     virtual ~GModelSpatialEllipticalDisk(void);
@@ -76,6 +76,8 @@ public:
     virtual GSkyDir                      mc(const GEnergy& energy,
                                             const GTime& time,
                                             GRan& ran) const;
+    virtual bool                         contains(const GSkyDir& dir,
+                                                  const double&  margin = 0.0) const;
     virtual double                       theta_max(void) const;
     virtual void                         read(const GXmlElement& xml);
     virtual void                         write(GXmlElement& xml) const;

@@ -35,10 +35,11 @@
  * @brief Radial Gaussian model class
  ***************************************************************************/
 class GModelSpatialRadialGauss : public GModelSpatialRadial {
+
 public:
     // Constructors and destructors
     GModelSpatialRadialGauss(void);
-    explicit GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
+    GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
     explicit GModelSpatialRadialGauss(const GXmlElement& xml);
     GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
     virtual ~GModelSpatialRadialGauss(void);
@@ -57,6 +58,8 @@ public:
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
+    virtual bool                      contains(const GSkyDir& dir,
+                                               const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;

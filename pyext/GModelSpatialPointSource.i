@@ -35,11 +35,12 @@
  * @brief Point source spatial model
  ***************************************************************************/
 class GModelSpatialPointSource  : public GModelSpatial {
+
 public:
     // Constructors and destructors
-    explicit GModelSpatialPointSource(void);
+    GModelSpatialPointSource(void);
     explicit GModelSpatialPointSource(const GSkyDir& dir);
-    explicit GModelSpatialPointSource(const double& ra, const double& dec);
+    GModelSpatialPointSource(const double& ra, const double& dec);
     explicit GModelSpatialPointSource(const GXmlElement& xml);
     GModelSpatialPointSource(const GModelSpatialPointSource& model);
     virtual ~GModelSpatialPointSource(void);
@@ -56,6 +57,8 @@ public:
                                          GRan& ran) const;
     virtual double                    norm(const GSkyDir& dir,
                                            const double&  radius) const;
+    virtual bool                      contains(const GSkyDir& dir,
+                                               const double&  margin = 0.0) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
 

@@ -63,6 +63,8 @@ public:
     virtual GSkyDir                       mc(const GEnergy& energy,
                                              const GTime& time,
                                              GRan& ran) const;
+    virtual bool                          contains(const GSkyDir& dir,
+                                                   const double&  margin = 0.0) const;
     virtual double                        theta_max(void) const;
     virtual void                          read(const GXmlElement& xml);
     virtual void                          write(GXmlElement& xml) const;

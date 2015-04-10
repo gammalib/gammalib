@@ -34,13 +34,14 @@
  * @brief Radial shell source model class
  ***************************************************************************/
 class GModelSpatialRadialShell : public GModelSpatialRadial {
+
 public:
     // Constructors and destructors
     GModelSpatialRadialShell(void);
-    explicit GModelSpatialRadialShell(const GSkyDir& dir,
-                                      const double&  radius,
-                                      const double&  width,
-                                      const bool&    small_angle = true);
+    GModelSpatialRadialShell(const GSkyDir& dir,
+                             const double&  radius,
+                             const double&  width,
+                             const bool&    small_angle = true);
     explicit GModelSpatialRadialShell(const GXmlElement& xml);
     GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
     virtual ~GModelSpatialRadialShell(void);
@@ -59,6 +60,8 @@ public:
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
+    virtual bool                      contains(const GSkyDir& dir,
+                                               const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;

@@ -55,6 +55,8 @@ public:
                                                     const double&  posangle,
                                                     const GEnergy& energy,
                                                     const GTime&   time) const = 0;
+    virtual bool                     contains(const GSkyDir& dir,
+                                              const double&  margin = 0.0) const = 0;
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime& time,
                                         GRan& ran) const = 0;

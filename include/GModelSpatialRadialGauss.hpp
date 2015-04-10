@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.hpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,7 +50,7 @@ class GModelSpatialRadialGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGauss(void);
-    explicit GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
+    GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
     explicit GModelSpatialRadialGauss(const GXmlElement& xml);
     GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
     virtual ~GModelSpatialRadialGauss(void);
@@ -72,6 +72,8 @@ public:
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
+    virtual bool                      contains(const GSkyDir& dir,
+                                               const double&  margin = 0.0) const;
     virtual double                    theta_max(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;

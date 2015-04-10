@@ -35,13 +35,14 @@
  * @brief Elliptical disk model class
  ***************************************************************************/
 class GModelSpatialEllipticalDisk : public GModelSpatialElliptical {
+
 public:
     // Constructors and destructors
     GModelSpatialEllipticalDisk(void);
-    explicit GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                         const double&  semiminor,
-                                         const double&  semimajor,
-                                         const double&  posangle);
+    GModelSpatialEllipticalDisk(const GSkyDir& dir,
+                                const double&  semiminor,
+                                const double&  semimajor,
+                                const double&  posangle);
     explicit GModelSpatialEllipticalDisk(const GXmlElement& xml);
     GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);
     virtual ~GModelSpatialEllipticalDisk(void);
@@ -62,6 +63,8 @@ public:
     virtual GSkyDir                      mc(const GEnergy& energy,
                                             const GTime& time,
                                             GRan& ran) const;
+    virtual bool                         contains(const GSkyDir& dir,
+                                                  const double&  margin = 0.0) const;
     virtual double                       theta_max(void) const;
     virtual void                         read(const GXmlElement& xml);
     virtual void                         write(GXmlElement& xml) const;

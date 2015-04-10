@@ -401,6 +401,29 @@ GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
 
 
 /***********************************************************************//**
+ * @brief Checks where model contains specified sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] margin Margin to be added to sky direction (degrees)
+ * @return True if the model contains the sky direction.
+ *
+ * Signals whether a sky direction is contained in the elliptical gauss
+ * model.
+ *
+ * @todo Implement correct evaluation of effective ellipse radius.
+ ***************************************************************************/
+bool GModelSpatialEllipticalGauss::contains(const GSkyDir& dir,
+                                            const double&  margin) const
+{
+    // Compute distance to centre (radian)
+    double distance = dir.dist(this->dir());
+
+    // Return flag
+    return (distance <= theta_max() + margin*gammalib::deg2rad);
+}
+
+
+/***********************************************************************//**
  * @brief Return maximum model radius (in radians)
  *
  * @return Returns maximum model radius.
