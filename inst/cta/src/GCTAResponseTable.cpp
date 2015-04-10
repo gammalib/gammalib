@@ -1085,8 +1085,8 @@ void GCTAResponseTable::scale(const int& index, const double& scale)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= axes()) {
-        throw GException::out_of_range(G_SCALE, "Axis index", index, axes());
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_SCALE, "Parameter index", index, size());
     }
     #endif
 

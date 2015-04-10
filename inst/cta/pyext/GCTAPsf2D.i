@@ -40,7 +40,7 @@ class GCTAPsf2D : public GCTAPsf {
 public:
     // Constructors and destructors
     GCTAPsf2D(void);
-    GCTAPsf2D(const std::string& filename);
+    explicit GCTAPsf2D(const std::string& filename);
     GCTAPsf2D(const GCTAPsf2D& psf);
     virtual ~GCTAPsf2D(void);
 
