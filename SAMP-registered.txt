@@ -1,0 +1,1390 @@
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+client-key:0 metadata : Name Aladin
+client-key:0 port : http://127.0.0.1:42195/
+samp.hub.event.register registered for client-key:0
+table.select.rowList registered for client-key:0
+table.highlight.row registered for client-key:0
+table.load.fits registered for client-key:0
+samp.app.ping registered for client-key:0
+coord.pointAt.sky registered for client-key:0
+samp.hub.event.shutdown registered for client-key:0
+image.load.fits registered for client-key:0
+samp.hub.disconnect registered for client-key:0
+table.load.votable registered for client-key:0
+samp.hub.event.unregister registered for client-key:0
+script.aladin.send registered for client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+client-key:0 metadata : Name Aladin
+client-key:0 port : http://127.0.0.1:42195/
+samp.hub.event.register registered for client-key:0
+table.select.rowList registered for client-key:0
+table.highlight.row registered for client-key:0
+table.load.fits registered for client-key:0
+samp.app.ping registered for client-key:0
+coord.pointAt.sky registered for client-key:0
+samp.hub.event.shutdown registered for client-key:0
+image.load.fits registered for client-key:0
+samp.hub.disconnect registered for client-key:0
+table.load.votable registered for client-key:0
+samp.hub.event.unregister registered for client-key:0
+script.aladin.send registered for client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+client-key:0 metadata : Name Aladin
+client-key:0 port : http://127.0.0.1:42195/
+samp.hub.event.register registered for client-key:0
+table.select.rowList registered for client-key:0
+table.highlight.row registered for client-key:0
+table.load.fits registered for client-key:0
+samp.app.ping registered for client-key:0
+coord.pointAt.sky registered for client-key:0
+samp.hub.event.shutdown registered for client-key:0
+image.load.fits registered for client-key:0
+samp.hub.disconnect registered for client-key:0
+table.load.votable registered for client-key:0
+samp.hub.event.unregister registered for client-key:0
+script.aladin.send registered for client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+client-key:0 metadata : Name Aladin
+client-key:0 port : http://127.0.0.1:42196/
+samp.hub.event.register registered for client-key:0
+table.select.rowList registered for client-key:0
+table.highlight.row registered for client-key:0
+table.load.fits registered for client-key:0
+coord.pointAt.sky registered for client-key:0
+samp.app.ping registered for client-key:0
+samp.hub.event.shutdown registered for client-key:0
+image.load.fits registered for client-key:0
+samp.hub.disconnect registered for client-key:0
+table.load.votable registered for client-key:0
+snapshot.get.jpg registered for client-key:0
+samp.hub.event.unregister registered for client-key:0
+script.aladin.send registered for client-key:0
+samp.hub.event.subscriptions registered for client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+client-key:0 metadata : Name Aladin
+client-key:0 port : http://127.0.0.1:42195/
+samp.hub.event.register registered for client-key:0
+table.select.rowList registered for client-key:0
+table.highlight.row registered for client-key:0
+table.load.fits registered for client-key:0
+samp.app.ping registered for client-key:0
+coord.pointAt.sky registered for client-key:0
+samp.hub.event.shutdown registered for client-key:0
+image.load.fits registered for client-key:0
+samp.hub.disconnect registered for client-key:0
+table.load.votable registered for client-key:0
+samp.hub.event.unregister registered for client-key:0
+script.aladin.send registered for client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+client-key:0 metadata : Name Aladin
+client-key:0 port : http://127.0.0.1:42195/
+samp.hub.event.register registered for client-key:0
+table.select.rowList registered for client-key:0
+table.highlight.row registered for client-key:0
+table.load.fits registered for client-key:0
+samp.app.ping registered for client-key:0
+coord.pointAt.sky registered for client-key:0
+samp.hub.event.shutdown registered for client-key:0
+image.load.fits registered for client-key:0
+samp.hub.disconnect registered for client-key:0
+table.load.votable registered for client-key:0
+samp.hub.event.unregister registered for client-key:0
+script.aladin.send registered for client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+Registered client-key:0
+
+mysupersecret#0032557sentence metadata : Name Aladin
+mysupersecret#0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret#0032557sentence
+table.select.rowList registered for mysupersecret#0032557sentence
+table.highlight.row registered for mysupersecret#0032557sentence
+table.load.fits registered for mysupersecret#0032557sentence
+coord.pointAt.sky registered for mysupersecret#0032557sentence
+samp.app.ping registered for mysupersecret#0032557sentence
+samp.hub.event.shutdown registered for mysupersecret#0032557sentence
+image.load.fits registered for mysupersecret#0032557sentence
+samp.hub.disconnect registered for mysupersecret#0032557sentence
+table.load.votable registered for mysupersecret#0032557sentence
+snapshot.get.jpg registered for mysupersecret#0032557sentence
+samp.hub.event.unregister registered for mysupersecret#0032557sentence
+script.aladin.send registered for mysupersecret#0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret#0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:1
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:1
+Registered client-key:2
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:1
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:1
+Registered client-key:2
+Registered client-key:3
+Registered client-key:4
+Registered client-key:5
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:1
+Registered client-key:2
+Registered client-key:3
+Registered client-key:4
+Registered client-key:5
+Registered client-key:6
+Registered client-key:7
+Registered client-key:8
+Registered client-key:9
+Registered client-key:10
+Registered client-key:11
+Registered client-key:12
+Registered client-key:13
+Registered client-key:14
+Registered client-key:15
+Registered client-key:16
+Registered client-key:17
+Registered client-key:18
+Registered client-key:19
+Registered client-key:20
+Registered client-key:21
+Registered client-key:22
+# SAMP registered applications and Methods 
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:1
+Registered client-key:2
+Registered client-key:3
+Registered client-key:4
+Registered client-key:5
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:1
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+Registered client-key:0
+# SAMP registered applications and Methods 
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+snapshot.get.jpg registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+snapshot.get.jpg registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc# SAMP registered applications and Methods 
+Registered client-key:0
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpcRegistered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+snapshot.get.jpg registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+snapshot.get.jpg registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+snapshot.get.jpg registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+snapshot.get.jpg registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name Aladin
+mysupersecret0032557sentence port : http://127.0.0.1:42195/
+samp.hub.event.register registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+samp.app.ping registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+image.load.fits registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+snapshot.get.jpg registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+script.aladin.send registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+# SAMP registered applications and Methods 
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc-1
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence
+Registered client-key:0
+
+mysupersecret0032557sentence metadata : Name topcat
+mysupersecret0032557sentence port : http://127.0.0.1:2525/xmlrpc-2
+voresource.loadlist.tap registered for mysupersecret0032557sentence
+voresource.loadlist.ssap registered for mysupersecret0032557sentence
+voresource.loadlist.siap registered for mysupersecret0032557sentence
+voresource.loadlist.cone registered for mysupersecret0032557sentence
+voresource.loadlist registered for mysupersecret0032557sentence
+table.select.rowList registered for mysupersecret0032557sentence
+table.load.votable registered for mysupersecret0032557sentence
+table.load.stil registered for mysupersecret0032557sentence
+table.load.fits registered for mysupersecret0032557sentence
+table.load.cdf registered for mysupersecret0032557sentence
+table.highlight.row registered for mysupersecret0032557sentence
+table.get.stil registered for mysupersecret0032557sentence
+coord.pointAt.sky registered for mysupersecret0032557sentence
+client.env.get registered for mysupersecret0032557sentence
+samp.hub.event.unregister registered for mysupersecret0032557sentence
+samp.hub.event.subscriptions registered for mysupersecret0032557sentence
+samp.hub.event.shutdown registered for mysupersecret0032557sentence
+samp.hub.event.register registered for mysupersecret0032557sentence
+samp.hub.event.metadata registered for mysupersecret0032557sentence
+samp.hub.disconnect registered for mysupersecret0032557sentence

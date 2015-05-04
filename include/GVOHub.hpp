@@ -77,7 +77,12 @@ protected:
     void        register_metadata(const GXml& xml,const socklen_t& sock);
     void        set_xml_rpc_callback(const GXml& xml,const socklen_t& sock);
     void        get_registered_clients(const GXml& xml,const socklen_t& sock);
+    void        get_subscribed_clients(const GXml& xml,const socklen_t& sock);
+    void        get_metadata(const GXml& xml,const socklen_t& sock);
+    void        get_subscriptions(const GXml& xml,const socklen_t& sock);
     void        declare_subscriptions(const GXml& xml,const socklen_t& sock);
+    void	post_string(const std::string& content,const socklen_t& sock) const;
+    std::string	receive_string(const socklen_t& sock) const;
 
     // Low-level methods
     void                   post_string(const std::string& string) const;
@@ -85,6 +90,8 @@ protected:
     std::string            get_response_value(const GXml& xml,
                                               const std::string& name) const;
     std::list<std::string> get_registrations(const GXml& xml,
+                                             const std::string& name) const;
+    std::list<std::string> get_clientid(const GXml& xml,
                                              const std::string& name) const;
     std::string get_callback_port(const GXml& xml,
                                              const std::string& name) const;

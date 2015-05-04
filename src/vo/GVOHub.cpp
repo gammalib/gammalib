@@ -196,35 +196,49 @@ void GVOHub::ping_service(const socklen_t& sock)
     std::string msg = "";
 
     // Set methodResponse elts
-    /*msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    msg.append("<?xml version=\"1.0\"?>\n");
     msg.append("<methodResponse>\n");
     msg.append("\t<params>\n");
     msg.append("\t\t<param>\n\t\t\t<value/>\n\t\t</param>\n");
     msg.append("\t</params>\n");
-    msg.append("</methodResponse>\n");*/
+    msg.append("</methodResponse>\n");
+    
     
     //Following Aladin return, ping should answer a map and not a list... here is the map in return.
-    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    /*msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     msg.append("<methodResponse>\n");
     msg.append("\t<params>\n");
     msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
     //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name></name>\n\t\t\t\t\t\t<value></value>\n\t\t\t\t\t</member>\n");
     msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.status</name>\n\t\t\t\t\t\t<value>samp.ok</value>\n\t\t\t\t\t</member>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>faultCode</name>\n\t\t\t\t\t\t<value><int>0</int></value>\n\t\t\t\t\t</member>\n");
     msg.append("\t\t\t\t</struct>\n\t\t\t</value>\n\t\t</param>\n");
     msg.append("\t</params>\n");
-    msg.append("</methodResponse>\n");
+    msg.append("</methodResponse>\n");*/
     
-    int length = msg.length();
+    //Formatting message in array way
+    /*msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<array>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name></name>\n\t\t\t\t\t\t<value></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t\t<data>\n\t\t\t\t\t\t<value>samp.ok</value>\n\t\t\t\t\t</data>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>faultCode</name>\n\t\t\t\t\t\t<value><int>0</int></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t</array>\n\t\t\t</value>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
+    msg.append("</methodResponse>\n");*/
     
-    int n = write(sock,msg.c_str(),length);
+    /*int length = msg.length();
+    
+    int n = send(sock,msg.c_str(),length+1,0);
     if (n < 0) {
 	printf("Could not write socket buffer.\n");
         std::string msg = "Could not write socket buffer.";
         throw GException::invalid_value(G_HANDLE_REQUEST, msg);
     }
-
-    printf(msg.c_str());
-    printf("Response message sent\n");
+    */
+    post_string(msg,sock);
+    //printf("Response message sent\n");
     //Return
     return;
 }
@@ -246,7 +260,7 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     char cl_id[256];
     int i;
     std::string content;
-    std::string translator = "http://localhost:8001/";
+    std::string translator = "http://localhost:8001/xmlrpc";
     printf("Message composition\n");
     
     FILE* fptr = fopen("SAMP-registered.txt", "a");
@@ -260,23 +274,25 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     fclose(fptr);
 
     printf("Message composition 2 \n");
-    sprintf(selfid,"<member><name>samp.self-id</name><value>c%d</value></member>\n",m_nb_clients);
-    sprintf(privatekey,"<member><name>samp.private-key</name><value>%s</value></member>\n",m_secret.c_str());
+    sprintf(selfid,"\t\t\t\t\t<member><name>samp.self-id</name><value>c%d</value></member>\n",m_nb_clients);
+    sprintf(privatekey,"\t\t\t\t\t<member><name>samp.private-key</name><value>%s</value></member>\n",m_secret.c_str());
     m_nb_clients ++;
     
     // Set methodResponse elts
-    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    msg.append("<?xml version=\"1.0\" ?>\n");
     msg.append("<methodResponse>\n");
     msg.append("\t<params>\n");
     msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
-    msg.append("<member><name>samp.hub-id</name><value>" + m_hub_id + "</value></member>\n");
+    msg.append("\t\t\t\t\t<member><name>samp.hub-id</name><value>" + m_hub_id + "</value></member>\n");
     msg.append(selfid);
     msg.append(privatekey);
-    msg.append("<member><name>samp.url-translator</name><value>" + translator + "</value></member>\n");
-    msg.append("</struct></value></param>\n");
-    msg.append("</params>\n");
+    msg.append("\t\t\t\t\t<member><name>samp.status</name><value>samp.ok</value>\</member>\n");
+    msg.append("\t\t\t\t\t<member><name>samp.url-translator</name><value>" + translator + "</value></member>\n");
+    msg.append("\t\t\t\t</struct>\n\t\t\t</value>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
     msg.append("</methodResponse>\n");
-
+    post_string(msg,sock);
+    /*
     int length = msg.length();
     printf("Sending message %s\n",msg.c_str());
     fflush(stdout);
@@ -288,6 +304,7 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     }
 
     printf("Response message sent\n");
+    */
     //Return
     return;
 }
@@ -323,7 +340,19 @@ void GVOHub::unregister(const socklen_t& sock)
         fileout << strTemp;
         //if(found) break;
     }*/
-    close(sock);
+    // Declare message
+    std::string msg = "";
+
+    // Set methodResponse elts
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value/>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
+    msg.append("</methodResponse>\n");
+    post_string(msg,sock);
+    //printf("Response message sent\n");
+    //Return
     return;
 }
 
@@ -370,7 +399,8 @@ void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
     msg.append("<?xml version=\"1.0\"?>\n");
     msg.append("<methodResponse><params><param><value/></param></params>\n");
     msg.append("</methodResponse>\n");
-
+    post_string(msg,sock);
+    /*
     int length = msg.length();
     
     int n = write(sock,msg.c_str(),length);
@@ -381,6 +411,7 @@ void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
     }
 
     printf("Response message sent\n");
+    */
     //Return
     return;
 }
@@ -410,10 +441,18 @@ void GVOHub::set_xml_rpc_callback(const GXml& xml,const socklen_t& sock)
 
     //The hub response to rpc callback declaration has no usefull content and can be discarded by the client.
     // Set methodResponse elts
-    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name></name>\n\t\t\t\t\t\t<value></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.status</name>\n\t\t\t\t\t\t<value>samp.ok</value>\n\t\t\t\t\t</member>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>faultCode</name>\n\t\t\t\t\t\t<value><int>0</int></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t</struct>\n\t\t\t</value>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
     msg.append("</methodResponse>\n");
-
+    post_string(msg,sock);
+     /*
     int length = msg.length();
     
     int n = write(sock,msg.c_str(),length);
@@ -424,6 +463,7 @@ void GVOHub::set_xml_rpc_callback(const GXml& xml,const socklen_t& sock)
     }
 
     printf("Response message sent\n");
+    */
     //Return
     return;
 }
@@ -462,8 +502,8 @@ void GVOHub::get_registered_clients(const GXml& xml,const socklen_t& sock)
     msg.append("\t<params>\n");
     msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<array>\n\t\t\t\t\t<data>\n");
     //msg.append("\t\t\t\t\t\t<value>%s</value>\n",m_hub_id.c_str());
-    msg.append("\t\t\t\t\t\t<value>c1</value>\n");
-    msg.append("\t\t\t\t\t\t<value>c2</value>\n");
+    msg.append("\t\t\t\t\t\t<value>c0</value>\n");
+    msg.append("\t\t\t\t\t\t<value>gammalib_hub</value>\n");
     //For each registered client insert <value>id of client (type cn n being client number)</value>
     msg.append("\t\t\t\t\t</data>\n\t\t\t\t</array>\n\t\t\t</value>\n");
     msg.append("\t\t</param>\n");
@@ -472,8 +512,8 @@ void GVOHub::get_registered_clients(const GXml& xml,const socklen_t& sock)
     
 
     //int length = msg.length();
-    
-    int n = write(sock,msg.c_str(),msg.length());
+    post_string(msg,sock);
+    /*int n = write(sock,msg.c_str(),msg.length());
     if (n < 0) {
 	printf("Could not write socket buffer.\n");
         std::string msg = "Could not write socket buffer.";
@@ -481,7 +521,64 @@ void GVOHub::get_registered_clients(const GXml& xml,const socklen_t& sock)
     }
     printf(msg.c_str());
     printf("Response message sent\n");
+    */
+    //Return
+    return;
+  }
+}
+/***********************************************************************//**
+ * @brief 
+ *
+ *
+ ***************************************************************************/
+void GVOHub::get_subscribed_clients(const GXml& xml,const socklen_t& sock)
+{
+    std::string buffer;
+    const int n = 1000; 
+    char      line[n];
+    FILE* fptr = fopen("SAMP-registered.txt", "r");
+    if (fptr != NULL) {
+        while (fgets(line, n, fptr) != NULL) {
+
+                // Convert line to C++ string
+                std::string cline = std::string(line);
+
+                // Check for secret key
+                if (cline.compare(0, 10, "Registered") == 0) {
+                    buffer = gammalib::strip_chars(cline.substr(10, std::string::npos), "\r\n");
+                }
+    }
     
+    // Closes file
+    fclose(fptr);
+    // Declare message
+    std::string msg = "";
+
+    //The hub response to rpc callback declaration has no usefull content and can be discarded by the client.
+    // Set methodResponse elts
+
+    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
+    msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>c0</name>\n\t\t\t\t\t\t<value><struct></struct></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>gammalib_hub</name>\n\t\t\t\t\t\t<value><struct></struct></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t</struct>\n\t\t\t</value>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
+    msg.append("</methodResponse>\n");
+
+
+    //int length = msg.length();
+    post_string(msg,sock);
+    /*int n = write(sock,msg.c_str(),msg.length());
+    if (n < 0) {
+	printf("Could not write socket buffer.\n");
+        std::string msg = "Could not write socket buffer.";
+        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
+    }
+    printf(msg.c_str());
+    printf("Response message sent\n");
+    */
     //Return
     return;
   }
@@ -532,10 +629,19 @@ void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
     // Declare message
     std::string msg = "";
     // Set methodResponse elts
-    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name></name>\n\t\t\t\t\t\t<value></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.status</name>\n\t\t\t\t\t\t<value>samp.ok</value>\n\t\t\t\t\t</member>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>faultCode</name>\n\t\t\t\t\t\t<value><int>0</int></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t</struct>\n\t\t\t</value>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
     msg.append("</methodResponse>\n");
 
+    post_string(msg,sock);
+    /*
     int length = msg.length();
     
     int n = write(sock,msg.c_str(),length);
@@ -546,11 +652,123 @@ void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
     }
 
     printf("Response message sent\n");
+    */
     //Return
     return;
 }
 
+/***********************************************************************//**
+ * @brief 
+ *
+ *
+ ***************************************************************************/
+void GVOHub::get_metadata(const GXml& xml,const socklen_t& sock)
+{
+    std::list<std::string>::iterator p;
+    int i;
+    std::ofstream myfile;
+    std::string content;
+    printf("Retrieving metadata\n");
+    
+    std::string client_calling = "";
+    // Search for value of methodName
+    const GXmlNode* node = xml.element("methodCall", 0);
+    node = node->element("params", 0);
+    node = node->element("param", 0);
+    node = node->element("value", 0);
+    if (node != NULL) {
+        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
+        if (text != NULL) {
+            client_calling = text->text();
+        }
+    }
+    std::cout << client_calling << std::endl;
+    std::list<std::string> client_subscriptions = get_clientid(xml, "samp.hub.getMetadata");
+    std::string temp;
+    temp.append("\n");
+    FILE* fptr = fopen("SAMP-registered.txt", "r");
+    if (fptr != NULL) {
+      for( i=0,p=client_subscriptions.begin(); i<client_subscriptions.size()-1; i++,p++ ) {
+	 std::cout << "Seeking Client registration:" << std::endl;
+         std::cout << *p << std::endl;
+      }
+    }
+    
+    // Declare message
+    std::string msg = "";
+    // Set methodResponse elts
+    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name></name>\n\t\t\t\t\t\t<value></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.status</name>\n\t\t\t\t\t\t<value>samp.ok</value>\n\t\t\t\t\t</member>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>faultCode</name>\n\t\t\t\t\t\t<value><int>0</int></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t</struct>\n\t\t\t</value>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
+    msg.append("</methodResponse>\n");
 
+    post_string(msg,sock);
+   
+    //Return
+    return;
+}
+/***********************************************************************//**
+ * @brief 
+ *
+ *
+ ***************************************************************************/
+void GVOHub::get_subscriptions(const GXml& xml,const socklen_t& sock)
+{
+    std::list<std::string>::iterator p;
+    int i;
+    std::ofstream myfile;
+    std::string content;
+    printf("Retrieving subscriptions\n");
+    
+    std::string client_calling = "";
+    // Search for value of methodName
+    const GXmlNode* node = xml.element("methodCall", 0);
+    node = node->element("params", 0);
+    node = node->element("param", 0);
+    node = node->element("value", 0);
+    if (node != NULL) {
+        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
+        if (text != NULL) {
+            client_calling = text->text();
+        }
+    }
+    std::cout << client_calling << std::endl;
+    std::list<std::string> client_subscriptions = get_clientid(xml, "samp.hub.getSubscriptions");
+    std::string temp;
+    temp.append("\n");
+    FILE* fptr = fopen("SAMP-registered.txt", "r");
+    if (fptr != NULL) {
+      for( i=0,p=client_subscriptions.begin(); i<client_subscriptions.size()-1; i++,p++ ) {
+	 std::cout << "Seeking Client registration:" << std::endl;
+         std::cout << *p << std::endl;
+      }
+    }
+    
+    // Declare message
+    std::string msg = "";
+    // Set methodResponse elts
+    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("\t<params>\n");
+    msg.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name></name>\n\t\t\t\t\t\t<value></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.status</name>\n\t\t\t\t\t\t<value>samp.ok</value>\n\t\t\t\t\t</member>\n");
+    //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>faultCode</name>\n\t\t\t\t\t\t<value><int>0</int></value>\n\t\t\t\t\t</member>\n");
+    msg.append("\t\t\t\t</struct>\n\t\t\t</value>\n\t\t</param>\n");
+    msg.append("\t</params>\n");
+    msg.append("</methodResponse>\n");
+
+    post_string(msg,sock);
+   
+    //Return
+    return;
+}
 /***********************************************************************//**
  * @brief Print VO hub information
  *
@@ -614,8 +832,8 @@ void GVOHub::init_members(void)
 {
     // Initialise members
     m_name       = "GammaLib";
-    m_secret     = "mysupersecret#0032557sentence";
-    m_hub_url    = "http://localhost:8001";
+    m_secret     = "mysupersecret0032557sentence";
+    m_hub_url    = "http://localhost:8001/xmlrpc";
     m_hub_host   = "127.0.0.1";
     m_hub_port   = "8001";
     m_version    = "1.3";
@@ -683,7 +901,7 @@ void GVOHub::init_hub(void)
 
         // If successfull writes basic hub configuration to the lockfile
         fputs ("# SAMP lockfile \n# Required keys:\n",fptr);
-        char sampsecret[256] = "samp.secret= ";
+        char sampsecret[256] = "samp.secret=";
         strcat(sampsecret,m_secret.c_str());
         strcat(sampsecret,"\n");
         fputs (sampsecret,fptr);
@@ -780,21 +998,33 @@ std::string GVOHub::get_hub_lockfile(void) const
 void GVOHub::handle_request(const socklen_t& sock)
 {
     // Initialize buffer
-    char buffer[4096];
-    bzero(buffer,4096);
+    char buffer[8192];
+    bzero(buffer,8192);
    
     // Declare empty XML document
     GXml xml;
     
+    
+    //std::string response = receive_string(sock);
+    //printf("Here is the message: %s\n",response.c_str());
     // Read buffer
-    int n = read(sock,buffer,4096);
+    int n = read(sock,buffer,8192);
     if (n < 0) {
         std::string msg = "Could not read socket buffer.";
         throw GException::invalid_value(G_HANDLE_REQUEST, msg);
     }
     printf("Here is the message: %s\n",buffer);
     std::string response = buffer;
-	
+    /*
+    int j = read(sock,buffer,4096);
+    if (j < 0) {
+        std::string msg = "Could not read socket buffer.";
+        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
+    }
+    printf("Here is the second message: %s\n",buffer);
+	*/
+    
+    
     // Find start of XML text
     size_t start = response.find("<?xml");
     // If found then convert text into XML document
@@ -834,7 +1064,7 @@ void GVOHub::handle_request(const socklen_t& sock)
         declare_subscriptions(xml,sock);
     }
     if (method_called.compare("samp.hub.getSubscriptions") == 0) {
-        ping_service(sock);
+        get_subscriptions(xml, sock);
     }
     if (method_called.compare("samp.hub.setXmlrpcCallback") == 0) {
         set_xml_rpc_callback(xml,sock);
@@ -843,7 +1073,10 @@ void GVOHub::handle_request(const socklen_t& sock)
         get_registered_clients(xml, sock);
     }
     if (method_called.compare("samp.hub.getSubscribedClients") == 0) {
-        ping_service(sock);
+        get_subscribed_clients(xml, sock);
+    }
+    if (method_called.compare("samp.hub.getMetadata") == 0) {
+        get_metadata(xml, sock);
     }
     if (method_called.compare("samp.hub.notify") == 0) {
         ping_service(sock);
@@ -863,9 +1096,7 @@ void GVOHub::handle_request(const socklen_t& sock)
     if (method_called.compare("samp.hub.reply") == 0) {
         ping_service(sock);
     }
-    if (method_called.compare("samp.hub.getMetadata") == 0) {
-        ping_service(sock);
-    }
+    
     // Return
     return;
 }
@@ -929,6 +1160,7 @@ void GVOHub::start_hub(void)
     socklen_t clilen = sizeof(cli_addr);
 
     // Main event handling loop
+    
     while (1) {
         
     	// Accept connection from the client 
@@ -937,10 +1169,13 @@ void GVOHub::start_hub(void)
             std::string msg = "Client connection to socket not accepted.";
             throw GException::invalid_value(G_START_HUB, msg);
     	}
-	//handle_request(newsocket);
-	
+	/*
+	handle_request(newsocket);
+	close(newsocket);
+	*/
     	// Create child process to handle the request
-        pid = fork();
+        
+	pid = fork();
         if (pid < 0) {
             std::string msg = "No child process created.";
             throw GException::invalid_value(G_START_HUB, msg);
@@ -948,16 +1183,15 @@ void GVOHub::start_hub(void)
         if (pid == 0) {
             // Child process: client process
             handle_request(newsocket);
+	    close(newsocket);
             exit(0);
         }
-        else {
-            close(newsocket);
-
-        }
+        
         
 
     } // endwhile
-
+    
+    
     // Return
     return;
 }
@@ -1052,7 +1286,6 @@ std::list<std::string> GVOHub::get_registrations(const GXml&        xml,
 			   subnode = node->element("member", i);
 			   subnode = subnode->element("name", 0);
 			   std::cout << node->element("member",i)->element("name", 0)->print(NORMAL,0) << std::cout;
-			   //value.push_front(node->element("member",i)->element("name", 0)->print(NORMAL,0));
 			   const GXmlText* text = static_cast<const GXmlText*>((*subnode)[0]);
 			   if (text != NULL) {
 			      value.push_front(text->text());
@@ -1164,3 +1397,138 @@ void GVOHub::get_name_value_pair(const GXmlNode* node,
     return;
 }
 
+/***********************************************************************//**
+ * @brief Post string content to Hub
+ *
+ * @param[in] content String content to post
+ *
+ * Posts the content of a string to the Hub.
+ *
+ * The method does nothing if no Hub connection has been established.
+ ***************************************************************************/
+void GVOHub::post_string(const std::string& content,const socklen_t& sock) const
+{
+    // Continue only if Hub connection has been established
+    if (sock != -1) {
+
+        // Determine content length
+        int length = content.length();
+
+        // Set prefix
+        std::string prefix = "HTTP/1.1 200 OK\n"
+			     "Connection: close\n"
+                             "Content-Type: text/xml\n"
+                             "Content-Length: "+gammalib::str(length)+"\n\n";
+
+        // Build post string
+        std::string post = prefix + content;
+	//printf(post.c_str());
+        // Send content to socket
+        bool done = false;
+        do {
+            int length      = post.length();
+            int sent_length = send(sock, post.c_str(), length, 0);
+	    printf("Sent through socket: \n %s",post.c_str());
+            if (sent_length < length) {
+                post = post.substr(sent_length, std::string::npos);
+            }
+            else {
+                done = true;
+            }
+        } while (!done);
+	
+    } // endif: Hub connection had been established
+    // Return
+    return;
+}
+/***********************************************************************//**
+ * @brief Receive string content from Hub
+ *
+ * @return String received from Hub.
+ *
+ * Reads information sent by Hub into a string.
+ * 
+ * The method does nothing if no Hub connection has been established.
+ ***************************************************************************/
+std::string GVOHub::receive_string(const socklen_t& sock) const
+{
+    // Initialise empty string
+    std::string result = "";
+
+    // Continue only if Hub connection has been established
+    printf("sock = %d\n",sock); 
+    if (sock != -1) {
+	
+        // Define buffer
+        char buffer[4097];
+
+        // Read buffer until it is empty
+        int n = 0;
+	int m = 0;
+        //do {
+	    printf("reading socket\n"); 
+            n = recv(sock, buffer, 4096,0);
+	    printf("%d octets received: message %s\n",n,buffer);
+	    fflush(stdout);
+            if (n > 0) {
+                //buffer[n+1] = '\0';
+                result.append(std::string(buffer));
+            }
+            
+            printf("reading socket\n"); 
+            m = recv(sock, buffer, 4096,0);
+	    printf("%d octets received: message %s\n",n,buffer);
+	    fflush(stdout);
+            if (n > 0) {
+                buffer[n+m+1] = '\0';
+                result.append(std::string(buffer));
+            }
+        //} while (n > 0);
+
+    } // endif: Hub connection had been established
+    printf("receive_string now returning\n"); 
+    fflush(stdout);
+    // Return result
+    return result;
+}
+/***********************************************************************//**
+ * @brief Returns value for a SAMP client query parameter
+ *
+ * @param[in] xml client query XML document.
+ * @param[in] name Parameter name.
+ * @return Parameter value.
+ *
+ * Returns value for a SAMP client query parameter. If the specified
+ * parameter was not found or if the response structure is not compliant,
+ * an empty string is returned.
+ ***************************************************************************/
+std::list<std::string> GVOHub::get_clientid(const GXml&        xml,
+                                          const std::string& name) const                                         
+{
+    // Declare value
+    std::list<std::string> value;
+    
+    // Search for value of specified member
+    const GXmlNode* node = xml.element("methodCall", 0);
+    const GXmlNode* subnode;
+    const GXmlText* subtext;
+    if (node != NULL) {
+        node = node->element("params", 0);
+        if (node != NULL) {
+            node = node->element("param", 1);
+            if (node != NULL) {
+	      node = node->element("value", 0);
+	      //std::cout << node->element("member",i)->element("name", 0)->print(NORMAL,0) << std::cout;
+	      const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
+	      if (text != NULL) {
+		value.push_front(text->text());
+		std::cout << "Client id for which information is seeked:" + text->text() + "\n";
+	      }
+            }
+	}
+    }
+		
+
+    // Return value
+    return value;
+}
