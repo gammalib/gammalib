@@ -49,4 +49,4 @@
 /* __ Virtual Observatory module _________________________________________ */
 %include "GVOClient.i"
 %include "GVOHub.i"
-%include "GVOApp.i"
+//%include "GVOApp.i"

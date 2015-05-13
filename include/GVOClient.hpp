@@ -67,6 +67,7 @@ public:
     void        connect(void);
     void        disconnect(void);
     bool        has_hub(void) const;
+    bool        is_connected(void) const;
     GXml        execute(const std::string& request) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 

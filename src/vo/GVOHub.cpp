@@ -51,7 +51,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_HANDLE_REQUEST                  "GVOHub::handle_request(socklen_t)"
 #define G_START_HUB                                     "GVOHub::start_hub()"
-#define G_INIT_MEMBERS			  "GVOHub::init_members()"
+#define G_INIT_MEMBERS			                     "GVOHub::init_members()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -59,6 +59,7 @@
 #define CLEF 12345
 
 /* __ Debug definitions __________________________________________________ */
+#define G_CONSOLE_DUMP
 
 
 /*==========================================================================
@@ -220,15 +221,15 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
     std::string translator = "http://localhost:8001/xmlrpc";
 
     for (int i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	printf("Reference of client %d on registration call: %s\n",i,reg_clients->metadatas[i].reference);
-	if (strcmp(reg_clients->metadatas[i].reference,"NoRef") == 0) {
+	printf("Reference of client %d on registration call: %s\n",i,reg_clients->metadata[i].reference);
+	if (strcmp(reg_clients->metadata[i].reference,"NoRef") == 0) {
 		printf("Client %d ready to be filled with new application\n",i);
 		sprintf(cl_id,"c%d",i);
-		strcpy(reg_clients->metadatas[i].reference,cl_id);
-		sprintf(reg_clients->metadatas[i].private_key,secret.c_str());
+		strcpy(reg_clients->metadata[i].reference,cl_id);
+		sprintf(reg_clients->metadata[i].private_key,secret.c_str());
 		break;
 	} else {
-		printf("Reference of client %d : %s\n",i,reg_clients->metadatas[i].reference);	
+		printf("Reference of client %d : %s\n",i,reg_clients->metadata[i].reference);	
 	}
     }
 
@@ -261,37 +262,40 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
 
 
 /***********************************************************************//**
- * @brief 
+ * @brief Unregister a client from the Hub.
  *
- *
+ * @param[in] xml XML message sent by client.
+ * @param[in] sock Socket.
  ***************************************************************************/
-void GVOHub::unregister(const GXml& xml,const socklen_t& sock)
+void GVOHub::unregister(const GXml& xml, const socklen_t& sock)
 {
+    // Optionally dump header
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::unregister" << std::endl;
+    #endif
+
     // Get the client's private key
-    std::string client_calling = "";
-    const GXmlNode* node = xml.element("methodCall", 0);
-    node = node->element("params", 0);
-    node = node->element("param", 0);
-    node = node->element("value", 0);
-    node = node->element("string", 0);
+    std::string client_calling;
+    const GXmlNode* node = xml.element("methodCall > params > param > value");
     if (node != NULL) {
+        std::cout << *node << std::endl;
         const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
         if (text != NULL) {
             client_calling = text->text();
         }
     }
 
-    // Loop over all clients
+    // Search for the private key in the list of clients
     for (int i = 0; i < GVOHUB_NB_CLIENTS; ++i) {
 
         //
-        printf("Client %s matching candidate:\n",reg_clients->metadatas[i].private_key);
+        printf("Client %s matching candidate:\n",reg_clients->metadata[i].private_key);
 
         //
-        if (strcmp(reg_clients->metadatas[i].private_key, client_calling.c_str()) == 0) {
+        if (strcmp(reg_clients->metadata[i].private_key, client_calling.c_str()) == 0) {
 
             //
-            printf("Client %s unregistration:\n",reg_clients->metadatas[i].reference);
+            printf("Client %s unregistration:\n",reg_clients->metadata[i].reference);
 	
             // Declare message
             std::string msg = "";
@@ -308,18 +312,18 @@ void GVOHub::unregister(const GXml& xml,const socklen_t& sock)
             post_string(msg, sock);
 
             //
-            activate_callbacks("samp.hub.event.unregister",reg_clients->metadatas[i].reference);
+            activate_callbacks("samp.hub.event.unregister",reg_clients->metadata[i].reference);
 
             // Reset client entry
-            strcpy(reg_clients->metadatas[i].reference,"NoRef");
-            sprintf(reg_clients->metadatas[i].name,"NoName");
-            sprintf(reg_clients->metadatas[i].description,"NoDescription");
-            sprintf(reg_clients->metadatas[i].icon,"NoIcon");
-            sprintf(reg_clients->metadatas[i].documentation,"NoDoc");
-            sprintf(reg_clients->metadatas[i].affiliation,"NoAffiliation");
-            sprintf(reg_clients->metadatas[i].email,"NoMail");
-            sprintf(reg_clients->metadatas[i].author_name,"NoAuthor");
-            sprintf(reg_clients->metadatas[i].homepage,"NoPage");
+            strcpy(reg_clients->metadata[i].reference,"NoRef");
+            sprintf(reg_clients->metadata[i].name,"NoName");
+            sprintf(reg_clients->metadata[i].description,"NoDescription");
+            sprintf(reg_clients->metadata[i].icon,"NoIcon");
+            sprintf(reg_clients->metadata[i].documentation,"NoDoc");
+            sprintf(reg_clients->metadata[i].affiliation,"NoAffiliation");
+            sprintf(reg_clients->metadata[i].email,"NoMail");
+            sprintf(reg_clients->metadata[i].author_name,"NoAuthor");
+            sprintf(reg_clients->metadata[i].homepage,"NoPage");
             
             // We can leave the loop now
             break;
@@ -340,18 +344,14 @@ void GVOHub::unregister(const GXml& xml,const socklen_t& sock)
  ***************************************************************************/
 void GVOHub::register_metadata(const GXml& xml, const socklen_t& sock)
 {
-    // 
-    #if GVO_HUB_testing == 1
-    printf("Client Metadata received\n");
+    // Optionally dump header
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::register_metadata" << std::endl;
     #endif
-    
-    // Search for value of methodName
-    std::string     client_calling = "";
-    const GXmlNode* node           = xml.element("methodCall", 0);
-    node = node->element("params", 0);
-    node = node->element("param", 0);
-    node = node->element("value", 0);
-    node = node->element("string", 0);
+
+    // Get the client's private key
+    std::string client_calling;
+    const GXmlNode* node = xml.element("methodCall > params > param > value");
     if (node != NULL) {
         const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
         if (text != NULL) {
@@ -362,8 +362,8 @@ void GVOHub::register_metadata(const GXml& xml, const socklen_t& sock)
     // Loop over all clients
     for (int i = 0; i < GVOHUB_NB_CLIENTS; ++i) {
     
-        if (strcmp(reg_clients->metadatas[i].private_key,client_calling.c_str()) == 0) {
-            printf("Client %s ready to be filled with metadata\n",reg_clients->metadatas[i].reference);
+        if (strcmp(reg_clients->metadata[i].private_key,client_calling.c_str()) == 0) {
+            printf("Client %s ready to be filled with metadata\n",reg_clients->metadata[i].reference);
 
             // Get metadata
             std::string client_name        = get_response_value(xml, "samp.name");
@@ -376,14 +376,14 @@ void GVOHub::register_metadata(const GXml& xml, const socklen_t& sock)
             std::string client_page        = get_response_value(xml, "home.page");
 
             // Store metadata
-            sprintf(reg_clients->metadatas[i].name,          client_name.c_str());
-            sprintf(reg_clients->metadatas[i].description,   client_description.c_str());
-            sprintf(reg_clients->metadatas[i].icon,          client_icon.c_str());
-            sprintf(reg_clients->metadatas[i].documentation, client_doc.c_str());
-            sprintf(reg_clients->metadatas[i].affiliation,   client_affi.c_str());
-            sprintf(reg_clients->metadatas[i].email,         client_mail.c_str());
-            sprintf(reg_clients->metadatas[i].author_name,   client_authname.c_str());
-            sprintf(reg_clients->metadatas[i].homepage,      client_page.c_str());
+            sprintf(reg_clients->metadata[i].name,          client_name.c_str());
+            sprintf(reg_clients->metadata[i].description,   client_description.c_str());
+            sprintf(reg_clients->metadata[i].icon,          client_icon.c_str());
+            sprintf(reg_clients->metadata[i].documentation, client_doc.c_str());
+            sprintf(reg_clients->metadata[i].affiliation,   client_affi.c_str());
+            sprintf(reg_clients->metadata[i].email,         client_mail.c_str());
+            sprintf(reg_clients->metadata[i].author_name,   client_authname.c_str());
+            sprintf(reg_clients->metadata[i].homepage,      client_page.c_str());
 
             // Declare message
             std::string msg = "";
@@ -399,7 +399,7 @@ void GVOHub::register_metadata(const GXml& xml, const socklen_t& sock)
             
             //
             activate_callbacks("samp.hub.event.metadata",
-                               reg_clients->metadatas[i].reference);
+                               reg_clients->metadata[i].reference);
             
             // We are done now and can exit the loop
             break;
@@ -444,14 +444,14 @@ void GVOHub::set_xml_rpc_callback(const GXml& xml,const socklen_t& sock)
     std::cout << client_port << std::endl;
     
     for (i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	//printf("comparing Reference of client %s with seeked %s\n",reg_clients->metadatas[i].private_key,client_calling.c_str());
-	if (strcmp(reg_clients->metadatas[i].private_key,client_calling.c_str()) == 0) {
-		printf("Client %s ready to be filled with port information\n",reg_clients->metadatas[i].reference);
-		sprintf(reg_clients->metadatas[i].port,client_port.c_str());
+	//printf("comparing Reference of client %s with seeked %s\n",reg_clients->metadata[i].private_key,client_calling.c_str());
+	if (strcmp(reg_clients->metadata[i].private_key,client_calling.c_str()) == 0) {
+		printf("Client %s ready to be filled with port information\n",reg_clients->metadata[i].reference);
+		sprintf(reg_clients->metadata[i].port,client_port.c_str());
 		break;
 	}
     }
-    printf("%s\n",reg_clients->metadatas[i].port);
+    printf("%s\n",reg_clients->metadata[i].port);
     // Declare message
     std::string msg = "";
 
@@ -508,15 +508,15 @@ void GVOHub::get_registered_clients(const GXml& xml,const socklen_t& sock)
 
 
     for (int i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	if (strcmp(reg_clients->metadatas[i].reference,"NoRef") == 0) {
+	if (strcmp(reg_clients->metadata[i].reference,"NoRef") == 0) {
 		printf("Client %d not registered\n",i);
 	} else {
 		//Do not send back current client's registration
-		if (strcmp(reg_clients->metadatas[i].private_key,client_calling.c_str()) != 0) {
+		if (strcmp(reg_clients->metadata[i].private_key,client_calling.c_str()) != 0) {
 			msg.append("\t\t\t\t\t\t<value>");
-			msg.append(reg_clients->metadatas[i].reference);
+			msg.append(reg_clients->metadata[i].reference);
 			msg.append("</value>\n");
-			printf("Reference of client %d : %s\n",i,reg_clients->metadatas[i].reference);
+			printf("Reference of client %d : %s\n",i,reg_clients->metadata[i].reference);
 		}
 	}
     }
@@ -612,14 +612,14 @@ void GVOHub::declare_subscriptions(const GXml& xml,const socklen_t& sock)
     std::cout << "Client registered to following methods calls:" << std::endl;
      
     for (int i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	//printf("comparing Reference of client %s with seeked %s\n",reg_clients->metadatas[i].private_key,client_calling.c_str());
-	if (strcmp(reg_clients->metadatas[i].private_key,client_calling.c_str()) == 0) {
+	//printf("comparing Reference of client %s with seeked %s\n",reg_clients->metadata[i].private_key,client_calling.c_str());
+	if (strcmp(reg_clients->metadata[i].private_key,client_calling.c_str()) == 0) {
       		for( j=0,p=client_subscriptions.begin(); j<client_subscriptions.size()-1; j++,p++ ) {
         		std::cout << *p << std::endl;
 			tempo = *p;
 			//content = *p;
-			sprintf(reg_clients->metadatas[i].registered_methods[j],tempo.c_str());
-			/*printf("Registered: %s\n",reg_clients->metadatas[i].registered_methods[j]);
+			sprintf(reg_clients->metadata[i].registered_methods[j],tempo.c_str());
+			/*printf("Registered: %s\n",reg_clients->metadata[i].registered_methods[j]);
 			printf("Registration done\n");*/
 		}
 	}
@@ -690,31 +690,31 @@ void GVOHub::get_metadata(const GXml& xml,const socklen_t& sock)
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>home.page</name>\n\t\t\t\t\t\t<value>no dedicated page</value>\n\t\t\t\t\t</member>\n");
 		break;	
 	}
-	if (strcmp(reg_clients->metadatas[i].reference,client_calling.c_str()) == 0) {
-		printf("Client %s metadata retrieval:\n",reg_clients->metadatas[i].reference);
+	if (strcmp(reg_clients->metadata[i].reference,client_calling.c_str()) == 0) {
+		printf("Client %s metadata retrieval:\n",reg_clients->metadata[i].reference);
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.name</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].name);
+		msg.append(reg_clients->metadata[i].name);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
    		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.description.text</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].description);
+		msg.append(reg_clients->metadata[i].description);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.icon.url</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].icon);
+		msg.append(reg_clients->metadata[i].icon);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.documentation.url</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].documentation);
+		msg.append(reg_clients->metadata[i].documentation);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>author.affiliation</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].affiliation);
+		msg.append(reg_clients->metadata[i].affiliation);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>author.email</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].email);
+		msg.append(reg_clients->metadata[i].email);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>author.name</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].author_name);
+		msg.append(reg_clients->metadata[i].author_name);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
 		msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>home.page</name>\n\t\t\t\t\t\t<value>");
-		msg.append(reg_clients->metadatas[i].homepage);
+		msg.append(reg_clients->metadata[i].homepage);
 		msg.append("</value>\n\t\t\t\t\t</member>\n");
 		break;	
 	} else {
@@ -767,10 +767,10 @@ void GVOHub::get_subscriptions(const GXml& xml,const socklen_t& sock)
     //msg.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.status</name>\n\t\t\t\t\t\t<value>samp.ok</value>\n\t\t\t\t\t</member>\n");
     char tempo[128];
     for (i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	if (strcmp(reg_clients->metadatas[i].reference,client_calling.c_str()) == 0) {
-		//printf("retrieving client %s\n",reg_clients->metadatas[i].reference);
+	if (strcmp(reg_clients->metadata[i].reference,client_calling.c_str()) == 0) {
+		//printf("retrieving client %s\n",reg_clients->metadata[i].reference);
 		for (j = 0; j < GVOHUB_NB_METHODS; j++) {
-			strcpy(tempo,reg_clients->metadatas[i].registered_methods[j]);
+			strcpy(tempo,reg_clients->metadata[i].registered_methods[j]);
 			if (strcmp("",tempo) == 0) {
 				continue;
 			} else {
@@ -853,15 +853,13 @@ void GVOHub::init_members(void)
 {
     // Initialise members
     m_name       = "GammaLib";
-    //m_secret is a private string to identify clients. Every client has his own m_secret
-    m_secret     = "";
+    m_secret     = random_string(15);
     m_hub_url    = "http://localhost:8001/xmlrpc";
     m_hub_host   = "127.0.0.1";
     m_hub_port   = "8001";
     m_version    = "1.3";
     m_client_key.clear();
     m_hub_id     = "gammalib_hub";
-    //m_client_id.clear();
     m_socket     = -1;        // Signals no socket
     m_nb_clients = 0;	      //  No registered clients at initialization
 
@@ -879,21 +877,21 @@ void GVOHub::init_members(void)
     reg_clients = (clients_descriptor *)ptr_mem_partagee;
     reg_clients->registered = 0;
     for (int i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	strcpy(reg_clients->metadatas[i].reference,"NoRef");
-	strcpy(reg_clients->metadatas[i].private_key,"Unknown");
-	strcpy(reg_clients->metadatas[i].name,"Unknown");
-	strcpy(reg_clients->metadatas[i].icon,"Unknown");
-	strcpy(reg_clients->metadatas[i].documentation,"Unknown");
-	strcpy(reg_clients->metadatas[i].affiliation,"Unknown");
-	strcpy(reg_clients->metadatas[i].author_name,"Unknown");
-	strcpy(reg_clients->metadatas[i].email,"Unknown");
-	strcpy(reg_clients->metadatas[i].homepage,"Unknown");
-	strcpy(reg_clients->metadatas[i].port,"Unknown");
-	strcpy(reg_clients->metadatas[i].description,"Unknown");
+	strcpy(reg_clients->metadata[i].reference,"NoRef");
+	strcpy(reg_clients->metadata[i].private_key,"Unknown");
+	strcpy(reg_clients->metadata[i].name,"Unknown");
+	strcpy(reg_clients->metadata[i].icon,"Unknown");
+	strcpy(reg_clients->metadata[i].documentation,"Unknown");
+	strcpy(reg_clients->metadata[i].affiliation,"Unknown");
+	strcpy(reg_clients->metadata[i].author_name,"Unknown");
+	strcpy(reg_clients->metadata[i].email,"Unknown");
+	strcpy(reg_clients->metadata[i].homepage,"Unknown");
+	strcpy(reg_clients->metadata[i].port,"Unknown");
+	strcpy(reg_clients->metadata[i].description,"Unknown");
 	
     }
     for (int j = 0; j < GVOHUB_NB_CLIENTS; j++) {
-	printf("%s\n",reg_clients->metadatas[j].reference);
+	printf("%s\n",reg_clients->metadata[j].reference);
     }
     //sem_init(&reg_clients->lock, 0, 1);
     // Creates Hub
@@ -1624,12 +1622,12 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
     
     for (i = 0; i < GVOHUB_NB_CLIENTS; i++) {
 	for (j = 0; j < GVOHUB_NB_METHODS; j++) {
-		if (strcmp("",reg_clients->metadatas[i].registered_methods[j]) == 0) {
+		if (strcmp("",reg_clients->metadata[i].registered_methods[j]) == 0) {
 			continue;
 		} else {
-			//printf("Comparing %s and %s \n",method.c_str(),reg_clients->metadatas[i].registered_methods[j]);
-			if (strcmp(method.c_str(),reg_clients->metadatas[i].registered_methods[j]) == 0) {
-				strcpy(port,reg_clients->metadatas[i].port);
+			//printf("Comparing %s and %s \n",method.c_str(),reg_clients->metadata[i].registered_methods[j]);
+			if (strcmp(method.c_str(),reg_clients->metadata[i].registered_methods[j]) == 0) {
+				strcpy(port,reg_clients->metadata[i].port);
 				printf("Callback needed on port %s\n",port);
 				std::string port_string = std::string(port);
 				//Eliminate http://127.0.0.1/ from port string -----> improve this code is necessary
@@ -1654,17 +1652,17 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
 				    for (struct addrinfo* ptr = servinfo; ptr != NULL; ptr = ptr->ai_next) {
 
 					// Create socket
-					cback_socket = socket(ptr->ai_family,
+					m_cback_socket = socket(ptr->ai_family,
 						          ptr->ai_socktype,
 						          ptr->ai_protocol);
 
 					// Connect to socket if socket is valid
-					if (cback_socket != -1) {
-					    if (::connect(cback_socket,
+					if (m_cback_socket != -1) {
+					    if (::connect(m_cback_socket,
 						          ptr->ai_addr,
 						          ptr->ai_addrlen) == -1) {
-						close(cback_socket);
-						cback_socket = -1;
+						close(m_cback_socket);
+						m_cback_socket = -1;
 					    }
 					}
 
@@ -1680,7 +1678,7 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
 					msg_cback.append("<methodCall><methodName>samp.client.receiveNotification</methodName>\n");
 					msg_cback.append("\t<params>\n");
 					msg_cback.append("\t\t<param><value>");
-					msg_cback.append(reg_clients->metadatas[i].private_key);
+					msg_cback.append(reg_clients->metadata[i].private_key);
 					msg_cback.append("</value></param>\n");
 					msg_cback.append("\t\t<param><value>"+m_hub_id+"</value></param>\n");
 					msg_cback.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
@@ -1702,7 +1700,7 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
 					msg_cback.append("<methodCall><methodName>samp.client.receiveNotification</methodName>\n");
 					msg_cback.append("\t<params>\n");
 					msg_cback.append("\t\t<param><value>");
-					msg_cback.append(reg_clients->metadatas[i].private_key);
+					msg_cback.append(reg_clients->metadata[i].private_key);
 					msg_cback.append("</value></param>\n");
 					msg_cback.append("\t\t<param><value>"+m_hub_id+"</value></param>\n");
 					msg_cback.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
@@ -1725,7 +1723,7 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
 					msg_cback.append("<methodCall><methodName>samp.client.receiveNotification</methodName>\n");
 					msg_cback.append("\t<params>\n");
 					msg_cback.append("\t\t<param><value>");
-					msg_cback.append(reg_clients->metadatas[i].private_key);
+					msg_cback.append(reg_clients->metadata[i].private_key);
 					msg_cback.append("</value></param>\n");
 					msg_cback.append("\t\t<param><value>"+m_hub_id+"</value></param>\n");
 					msg_cback.append("\t\t<param>\n\t\t\t<value>\n\t\t\t\t<struct>\n");
@@ -1733,36 +1731,36 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
 					msg_cback.append("\t\t\t\t\t<member><name>samp.params</name><value>\n\t\t\t\t\t\t<struct>\n\t\t\t\t\t\t\t");
 					msg_cback.append("\t\t\t\t\t<member><name>id</name><value>");
 					for (k = 0; k < GVOHUB_NB_CLIENTS; k++) {
-						if (strcmp(cl_id,reg_clients->metadatas[k].reference) == 0) {
+						if (strcmp(cl_id,reg_clients->metadata[k].reference) == 0) {
 							break;					
 						}
 					}
-					msg_cback.append(reg_clients->metadatas[k].reference);
+					msg_cback.append(reg_clients->metadata[k].reference);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
 					msg_cback.append("\t\t\t\t\t<member><name>metadata</name><value>\n\t\t\t\t\t\t<struct>\n\t\t\t\t\t\t\t");
 					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.name</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].name);
+					msg_cback.append(reg_clients->metadata[k].name);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
    					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.description.text</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].description);
+					msg_cback.append(reg_clients->metadata[k].description);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
 					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.icon.url</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].icon);
+					msg_cback.append(reg_clients->metadata[k].icon);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
 					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>samp.documentation.url</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].documentation);
+					msg_cback.append(reg_clients->metadata[k].documentation);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
 					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>author.affiliation</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].affiliation);
+					msg_cback.append(reg_clients->metadata[k].affiliation);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
 					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>author.email</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].email);
+					msg_cback.append(reg_clients->metadata[k].email);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
 					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>author.name</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].author_name);
+					msg_cback.append(reg_clients->metadata[k].author_name);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");
 					msg_cback.append("\t\t\t\t\t<member>\n\t\t\t\t\t\t<name>home.page</name>\n\t\t\t\t\t\t<value>");
-					msg_cback.append(reg_clients->metadatas[k].homepage);
+					msg_cback.append(reg_clients->metadata[k].homepage);
 					msg_cback.append("</value>\n\t\t\t\t\t</member>\n");	
 					msg_cback.append("</struct></value></member>\n");				
 					msg_cback.append("</struct>\n\t\t\t\t\t</value></member>\n");
@@ -1794,7 +1792,7 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
 void GVOHub::post_string_toclient(const std::string& content) const
 {
     // Continue only if Hub connection has been established
-    if (cback_socket != -1) {
+    if (m_cback_socket != -1) {
 
         // Determine content length
         int length = content.length();
@@ -1803,7 +1801,7 @@ void GVOHub::post_string_toclient(const std::string& content) const
         std::string prefix = "POST /xmlrpc HTTP/1.1\n"
 			     "Connection: keep-alive\n"
                              "User-Agent: GammaLib\n"
-			     "Host: localhost:"+gammalib::str(cback_socket)+"\n"
+			     "Host: localhost:"+gammalib::str(m_cback_socket)+"\n"
                              "Content-Type: text/xml\n"
                              "Content-Length: "+gammalib::str(length)+"\n\n";
 
@@ -1814,7 +1812,7 @@ void GVOHub::post_string_toclient(const std::string& content) const
         bool done = false;
         do {
             int length      = post.length();
-            int sent_length = send(cback_socket, post.c_str(), length, 0);
+            int sent_length = send(m_cback_socket, post.c_str(), length, 0);
 	    #if GVO_HUB_testing == 1
 	    printf("Send to client: %s\n",post.c_str());
 	    #endif
@@ -1832,7 +1830,7 @@ void GVOHub::post_string_toclient(const std::string& content) const
 	do {
 	  printf("receive socket instruction from callback response\n");
 	  fflush(stdout);
-	  n = recv(cback_socket, buffer, 1000, 0);
+	  n = recv(m_cback_socket, buffer, 1000, 0);
 	  printf("data received: %s\n",buffer);
 	  fflush(stdout);
 	  if (n > 0) {
@@ -1854,7 +1852,7 @@ void GVOHub::post_string_toclient(const std::string& content) const
 	    
 	    
 	    
-	    post_string(msg,cback_socket);*/
+	    post_string(msg,m_cback_socket);*/
     } // endif: Hub connection had been established
 	
     // Return
