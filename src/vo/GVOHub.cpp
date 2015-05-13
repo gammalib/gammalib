@@ -1,5 +1,5 @@
 /***************************************************************************
- *                     GVOHub.hpp - VO SAMP Hub class                      *
+ *                     GVOHub.cpp - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2014-2015 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
@@ -267,71 +267,91 @@ void GVOHub::register_service(const GXml& xml, const socklen_t& sock)
  ***************************************************************************/
 void GVOHub::unregister(const GXml& xml,const socklen_t& sock)
 {
-    //sem_wait(&reg_clients->lock);
+    // Get the client's private key
     std::string client_calling = "";
     const GXmlNode* node = xml.element("methodCall", 0);
     node = node->element("params", 0);
     node = node->element("param", 0);
     node = node->element("value", 0);
+    node = node->element("string", 0);
     if (node != NULL) {
         const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
         if (text != NULL) {
             client_calling = text->text();
         }
     }
-    for (int i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	printf("Client %s matching candidate:\n",reg_clients->metadatas[i].private_key);
-	if (strcmp(reg_clients->metadatas[i].private_key,client_calling.c_str()) == 0) {
-		printf("Client %s unregistration:\n",reg_clients->metadatas[i].reference);
-		
-		
-	
-	    // Declare message
-	    std::string msg = "";
 
-	    // Set methodResponse elts
-	    msg.append("<?xml version=\"1.0\"?>\n");
-	    msg.append("<methodResponse>\n");
-	    msg.append("\t<params>\n");
-	    msg.append("\t\t<param>\n\t\t\t<value/>\n\t\t</param>\n");
-	    msg.append("\t</params>\n");
-	    msg.append("</methodResponse>\n");
-	    post_string(msg,sock);
-	    activate_callbacks("samp.hub.event.unregister",reg_clients->metadatas[i].reference);
-	    strcpy(reg_clients->metadatas[i].reference,"NoRef");
-	    sprintf(reg_clients->metadatas[i].name,"NoName");
-	    sprintf(reg_clients->metadatas[i].description,"NoDescription");
-	    sprintf(reg_clients->metadatas[i].icon,"NoIcon");
-	    sprintf(reg_clients->metadatas[i].documentation,"NoDoc");
-	    sprintf(reg_clients->metadatas[i].affiliation,"NoAffiliation");
-	    sprintf(reg_clients->metadatas[i].email,"NoMail");
-	    sprintf(reg_clients->metadatas[i].author_name,"NoAuthor");
-	    sprintf(reg_clients->metadatas[i].homepage,"NoPage");	
-	}
-    }
-    //sem_post(&reg_clients->lock);	
-    //Return
+    // Loop over all clients
+    for (int i = 0; i < GVOHUB_NB_CLIENTS; ++i) {
+
+        //
+        printf("Client %s matching candidate:\n",reg_clients->metadatas[i].private_key);
+
+        //
+        if (strcmp(reg_clients->metadatas[i].private_key, client_calling.c_str()) == 0) {
+
+            //
+            printf("Client %s unregistration:\n",reg_clients->metadatas[i].reference);
+	
+            // Declare message
+            std::string msg = "";
+
+            // Set methodResponse elts
+            msg.append("<?xml version=\"1.0\"?>\n");
+            msg.append("<methodResponse>\n");
+            msg.append("<params>\n");
+            msg.append("<param><value/></param>\n");
+            msg.append("</params>\n");
+            msg.append("</methodResponse>\n");
+            
+            // Post response
+            post_string(msg, sock);
+
+            //
+            activate_callbacks("samp.hub.event.unregister",reg_clients->metadatas[i].reference);
+
+            // Reset client entry
+            strcpy(reg_clients->metadatas[i].reference,"NoRef");
+            sprintf(reg_clients->metadatas[i].name,"NoName");
+            sprintf(reg_clients->metadatas[i].description,"NoDescription");
+            sprintf(reg_clients->metadatas[i].icon,"NoIcon");
+            sprintf(reg_clients->metadatas[i].documentation,"NoDoc");
+            sprintf(reg_clients->metadatas[i].affiliation,"NoAffiliation");
+            sprintf(reg_clients->metadatas[i].email,"NoMail");
+            sprintf(reg_clients->metadatas[i].author_name,"NoAuthor");
+            sprintf(reg_clients->metadatas[i].homepage,"NoPage");
+            
+            // We can leave the loop now
+            break;
+            
+        }
+        
+    } // endfor: looped over clients
+    
+    // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief 
  *
  *
  ***************************************************************************/
-void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
+void GVOHub::register_metadata(const GXml& xml, const socklen_t& sock)
 {
-    char buffer[4096];
+    // 
     #if GVO_HUB_testing == 1
     printf("Client Metadata received\n");
     #endif
-    // Search for metadata values to store
-    std::string client_calling = "";
+    
     // Search for value of methodName
-    const GXmlNode* node = xml.element("methodCall", 0);
+    std::string     client_calling = "";
+    const GXmlNode* node           = xml.element("methodCall", 0);
     node = node->element("params", 0);
     node = node->element("param", 0);
     node = node->element("value", 0);
+    node = node->element("string", 0);
     if (node != NULL) {
         const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
         if (text != NULL) {
@@ -339,46 +359,60 @@ void GVOHub::register_metadata(const GXml& xml,const socklen_t& sock)
         }
     }
 
-    for (int i = 0; i < GVOHUB_NB_CLIENTS; i++) {
-	if (strcmp(reg_clients->metadatas[i].private_key,client_calling.c_str()) == 0) {
-		printf("Client %s ready to be filled with metadata\n",reg_clients->metadatas[i].reference);
-		std::string client_name = get_response_value(xml, "samp.name");
-		sprintf(reg_clients->metadatas[i].name,client_name.c_str());
-   		std::string client_description = get_response_value(xml, "samp.description.text");
-		sprintf(reg_clients->metadatas[i].description,client_description.c_str());
-    		std::string client_icon = get_response_value(xml, "samp.icon.url");
-		sprintf(reg_clients->metadatas[i].icon,client_icon.c_str());
-    		std::string client_doc = get_response_value(xml, "samp.documentation.url");
-		sprintf(reg_clients->metadatas[i].documentation,client_doc.c_str());
-    		std::string client_affi = get_response_value(xml, "author.affiliation");
-		sprintf(reg_clients->metadatas[i].affiliation,client_affi.c_str());
-    		std::string client_mail = get_response_value(xml, "author.email");
-		sprintf(reg_clients->metadatas[i].email,client_mail.c_str());
-    		std::string client_authname = get_response_value(xml, "author.name");
-		sprintf(reg_clients->metadatas[i].author_name,client_authname.c_str());
-   		std::string client_page = get_response_value(xml, "home.page");
-		sprintf(reg_clients->metadatas[i].homepage,client_page.c_str());
-		// Declare message
-		std::string msg = "";
-
-		//The hub response to Metadata declaration has no usefull content and can be discarded by the client.
-		// Set methodResponse elts
-		msg.append("<?xml version=\"1.0\"?>\n");
-		msg.append("<methodResponse><params><param><value/></param></params>\n");
-		msg.append("</methodResponse>\n");
-		post_string(msg,sock);
-		activate_callbacks("samp.hub.event.metadata",reg_clients->metadatas[i].reference);
-		break;
-	} else {
-		if (i == GVOHUB_NB_CLIENTS - 1) {
-			printf("OOPS... unable to find client: %s\n",client_calling.c_str());
-		}
-	}
-    }
+    // Loop over all clients
+    for (int i = 0; i < GVOHUB_NB_CLIENTS; ++i) {
     
+        if (strcmp(reg_clients->metadatas[i].private_key,client_calling.c_str()) == 0) {
+            printf("Client %s ready to be filled with metadata\n",reg_clients->metadatas[i].reference);
 
+            // Get metadata
+            std::string client_name        = get_response_value(xml, "samp.name");
+            std::string client_description = get_response_value(xml, "samp.description.text");
+    		std::string client_icon        = get_response_value(xml, "samp.icon.url");
+    		std::string client_doc         = get_response_value(xml, "samp.documentation.url");
+    		std::string client_affi        = get_response_value(xml, "author.affiliation");
+    		std::string client_mail        = get_response_value(xml, "author.email");
+    		std::string client_authname    = get_response_value(xml, "author.name");
+            std::string client_page        = get_response_value(xml, "home.page");
+
+            // Store metadata
+            sprintf(reg_clients->metadatas[i].name,          client_name.c_str());
+            sprintf(reg_clients->metadatas[i].description,   client_description.c_str());
+            sprintf(reg_clients->metadatas[i].icon,          client_icon.c_str());
+            sprintf(reg_clients->metadatas[i].documentation, client_doc.c_str());
+            sprintf(reg_clients->metadatas[i].affiliation,   client_affi.c_str());
+            sprintf(reg_clients->metadatas[i].email,         client_mail.c_str());
+            sprintf(reg_clients->metadatas[i].author_name,   client_authname.c_str());
+            sprintf(reg_clients->metadatas[i].homepage,      client_page.c_str());
+
+            // Declare message
+            std::string msg = "";
+
+            // The hub response to Metadata declaration has no useful
+            // content and can be discarded by the client.
+            msg.append("<?xml version=\"1.0\"?>\n");
+            msg.append("<methodResponse><params><param><value/></param></params>\n");
+            msg.append("</methodResponse>\n");
+
+            // Post response
+            post_string(msg,sock);
+            
+            //
+            activate_callbacks("samp.hub.event.metadata",
+                               reg_clients->metadatas[i].reference);
+            
+            // We are done now and can exit the loop
+            break;
+        } 
+        else {
+            if (i == GVOHUB_NB_CLIENTS - 1) {
+                printf("OOPS... unable to find client: %s\n",client_calling.c_str());
+            }
+        }
+        
+    } // endfor: looped over client entries
     
-    //Return
+    // Return
     return;
 }
 
