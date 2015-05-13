@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   test_GVO.hpp - Test VO module                         *
+ *                       GVOApp.i - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2015 by Thierry Louge                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,39 +19,46 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GVO.hpp
- * @brief Definition of unit tests for VO module
- * @author Juergen Knoedlseder 
+ * @file GVOApp.i
+ * @brief SAMP hub class interface definition
+ * @author Thierry Louge
  */
-
-#ifndef TEST_GVO_HPP
-#define TEST_GVO_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GVOApp.hpp"
+%}
 
 
 /***********************************************************************//**
- * @class TestGVO
+ * @class GVOApp
  *
- * @brief Test suite for VO module
+ * @brief VO Hub class
  ***************************************************************************/
-class TestGVO : public GTestSuite {
+class GVOApp : public GBase {
 
 public:
     // Constructors and destructors
-    TestGVO(void) : GTestSuite() {}
-    virtual ~TestGVO(void) {}
+    GVOApp(void);
+    GVOApp(const GVOApp& hub);
+    virtual ~GVOApp(void);
+
+    // Operators
+    GVOApp& operator=(const GVOApp& hub);
 
     // Methods
-    virtual void        set(void);
-    virtual TestGVO*    clone(void) const;
-    virtual std::string classname(void) const { return "TestGVO"; }
-    void                test_GVOHub(void);
-    void                test_GVOClient(void);
-
-private:
-    // Private members
+    void    clear(void);
+    GVOApp* clone(void) const;
+    void    start(void);
 };
 
-#endif /* TEST_GVO_HPP */
+
+/***********************************************************************//**
+ * @brief GVOApp class extension
+ ***************************************************************************/
+%extend GVOApp {
+    GVOApp copy() {
+        return (*self);
+    }
+};
+
+

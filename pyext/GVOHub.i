@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   test_GVO.hpp - Test VO module                         *
+ *                       GVOHub.i - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Thierry Louge                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,39 +19,41 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GVO.hpp
- * @brief Definition of unit tests for VO module
- * @author Juergen Knoedlseder 
+ * @file GVOHub.i
+ * @brief SAMP hub class interface definition
+ * @author Thierry Louge
  */
-
-#ifndef TEST_GVO_HPP
-#define TEST_GVO_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GVOHub.hpp"
+%}
 
 
 /***********************************************************************//**
- * @class TestGVO
+ * @class GVOHub
  *
- * @brief Test suite for VO module
+ * @brief VO Hub class
  ***************************************************************************/
-class TestGVO : public GTestSuite {
-
+class GVOHub : public GBase {
 public:
     // Constructors and destructors
-    TestGVO(void) : GTestSuite() {}
-    virtual ~TestGVO(void) {}
+    GVOHub(void);
+    GVOHub(const GVOHub& hub);
+    virtual ~GVOHub(void);
 
     // Methods
-    virtual void        set(void);
-    virtual TestGVO*    clone(void) const;
-    virtual std::string classname(void) const { return "TestGVO"; }
-    void                test_GVOHub(void);
-    void                test_GVOClient(void);
-
-private:
-    // Private members
+    void        clear(void);
+    GVOHub*     clone(void) const;
 };
 
-#endif /* TEST_GVO_HPP */
+
+/***********************************************************************//**
+ * @brief GVOHub class extension
+ ***************************************************************************/
+%extend GVOHub {
+    GVOHub copy() {
+        return (*self);
+    }
+};
+
+
