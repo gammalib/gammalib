@@ -1,0 +1,6 @@
+#PLASTIC server uk.ac.starlink.plastic.ServerSet
+#Tue May 12 17:16:26 CEST 2015
+plastic.xmlrpc.url=http\://STAR-VORS\:2112/
+uk.ac.starlink.plastic.servid=uk.ac.starlink.plastic.ServerSet@b61fd1
+plastic.version=0.4
+plastic.rmi.port=1099

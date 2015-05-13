@@ -28,11 +28,13 @@
 #define GVOHUB_HPP
 #define GVOHUB_NB_CLIENTS 5
 #define GVOHUB_NB_METHODS 128
+#define GVO_HUB_testing 1
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <list>
 #include <sys/socket.h>
+#include <semaphore.h>
 #include "GBase.hpp"
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
@@ -61,7 +63,6 @@ public:
     // Methods
     void        clear(void);
     GVOHub*     clone(void) const;
-    void        start(void);
     std::string print(const GChatter& chatter = NORMAL) const;
     
 
@@ -70,7 +71,7 @@ protected:
     void        init_members(void);
     void        copy_members(const GVOHub& client);
     void        free_members(void);
-    void        init_hub(void);
+    void        create_samp_file(void);
     void        start_hub(void);
     void        register_service(const GXml& xml,const socklen_t& sock);
     void        ping_service(const socklen_t& sock);
@@ -102,7 +103,8 @@ protected:
                                                std::string& value) const;
     std::string            get_hub_lockfile(void) const;
     std::string		   random_string( size_t length );
-    void intHandler(int sig);
+    void 		   activate_callbacks(std::string method,char cl_id[31]);
+    void 		   post_string_toclient(const std::string& content) const;
 
     // Protected members
     std::string m_name;        //!< Client name
@@ -114,33 +116,32 @@ protected:
     std::string m_client_key;  //!< Private client key
     std::string m_hub_id;      //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
     int         m_socket;      //!< Hub socket
+    int		cback_socket;  //!< Hub socket to callback clients
     int         m_nb_clients;  //!< Number of already registered clients
     typedef struct {
 	char private_key[16];
 	char name[32];
 	char reference[32];
-	char description[32];
+	char description[256];
 	char icon[32];
 	char documentation[32];
 	char affiliation[32];
 	char author_name[32];
 	char email[32];
 	char homepage[32];
-	char port[16];
-	char registered_methods[GVOHUB_NB_METHODS][128]; //128 methods of 128 cars max.
+	char port[32];
+	char registered_methods[GVOHUB_NB_METHODS][GVOHUB_NB_METHODS]; //128 methods of 128 cars max.
     } connected_shm;
     typedef struct {
     	int registered;
+	sem_t lock;
         connected_shm metadatas[GVOHUB_NB_CLIENTS];
     } clients_descriptor;
     clients_descriptor *reg_clients;
     connected_shm *clients;
     void* ptr_mem_partagee; //pointer to shm address
     int shm_handler; //handler to shm 
-    static std::vector<GVOApp>& connected() {
-      static std::vector<GVOApp> m_connected_apps; //!< list of apps connected to the hub
-      return m_connected_apps;
-    }
+    
 };
 
 #endif /* GVOHUB_HPP */

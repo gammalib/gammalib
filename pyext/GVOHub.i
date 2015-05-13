@@ -44,7 +44,6 @@ public:
     // Methods
     void        clear(void);
     GVOHub*     clone(void) const;
-    void        start(void);
 };
 
 
