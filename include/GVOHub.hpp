@@ -40,7 +40,6 @@
 #include "GBase.hpp"
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
-#include "GVOApp.hpp"
 
 
 /***********************************************************************//**
