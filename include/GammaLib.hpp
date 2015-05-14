@@ -108,7 +108,6 @@
 /* __ VO module __________________________________________________________ */
 #include "GVOClient.hpp"
 #include "GVOHub.hpp"
-#include "GVOApp.hpp"
 
 /* __ XSPEC module _______________________________________________________ */
 #include "GArf.hpp"
