@@ -34,6 +34,7 @@
 #include <csignal>         // signal() function
 #include <unistd.h>        // close() function
 #include <netdb.h>         // getaddrinfo() function
+#include <netinet/in.h>    // sockaddr_in, INADDR_ANY, htons
 #include <fstream>
 #include <sys/shm.h>
 #include <sys/socket.h>    // socket(), connect() functions
@@ -340,7 +341,7 @@ void GVOHub::start_hub(void)
     int opt = 1;
 
     // Prepare TCP/IP structure
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+    std::memset(&serv_addr, 0, sizeof(serv_addr));
     portno                    = 8001;
     serv_addr.sin_family      = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -440,7 +441,7 @@ void GVOHub::handle_request(const socklen_t& sock)
 
     // Initialize buffer
     char buffer[8192];
-    bzero(buffer,8192);
+    std::memset(&buffer, 0, 8192);
     
     // Read buffer
     int n = read(sock, buffer, 8192);
