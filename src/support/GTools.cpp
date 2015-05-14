@@ -28,8 +28,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <unistd.h>        // access() function
+#include <unistd.h>        // access() functions
+#include <fcntl.h>         // fcntl() functions
 #include <sys/stat.h>
+#include <sys/time.h>      // timeval
+#include <sys/select.h>    // select() function
+#include <sys/types.h>
+#include <sys/socket.h>    // recv() function
 #include <cmath>
 #include <cfloat>
 #include <cctype>
@@ -1398,4 +1403,72 @@ void gammalib::xml_check_par(const std::string& origin,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks whether a parameter has occured once
+ *
+ * @param[in] fd Socket file descriptor.
+ * @param[out] buffer Buffer to hold data.
+ * @param[in] len Maximum number of bytes to recv().
+ * @param[in] flags Flags (as the fourth param to recv() ).
+ * @param[in] timeout Timeout in milliseconds.
+ * @return recv() error code, -2 == timeout
+ *
+ * This function implements the recv() function with a timeout. The timeout
+ * is specified in milliseconds.
+ ***************************************************************************/
+int gammalib::recv(int fd, char *buffer, int len, int flags, int timeout)
+{
+    // Initialise error code with time out
+    int error = -2;
+    
+    // Initialize the set
+    fd_set readset;
+    FD_ZERO(&readset);
+    FD_SET(fd, &readset);
+   
+    // Initialize time out struct
+    struct timeval tv;
+    if (timeout >= 1000) {
+        tv.tv_sec  = timeout/1000;
+        tv.tv_usec = 0;
+    }
+    else {
+        tv.tv_sec  = 0;
+        tv.tv_usec = timeout*1000;
+    }
+    
+    // select()
+    int result = select(fd+1, &readset, NULL, NULL, &tv);
+
+    // Check status
+    if (result < 0) {
+        error = -1;
+    }
+    else if (result > 0 && FD_ISSET(fd, &readset)) {
+
+        // Initialise flags
+        int iof = -1;
+
+        // Set non-blocking mode
+        if ((iof = fcntl(fd, F_GETFL, 0)) != -1) {
+            fcntl(fd, F_SETFL, iof | O_NONBLOCK);
+        }
+        
+        // Receive data
+        result = ::recv(fd, buffer, len, flags);
+        
+        // Set as before
+        if (iof != -1) {
+            fcntl(fd, F_SETFL, iof);
+        }
+        
+        // Set error
+        error = result;
+    }
+    
+    // Return error
+    return error;
 }

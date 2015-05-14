@@ -46,7 +46,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_SHOW_MESSAGE               //!< Show posted and received messages
+#define G_SHOW_MESSAGE               //!< Show posted and received messages
 
 
 /*==========================================================================
@@ -826,14 +826,17 @@ std::string GVOClient::receive_string(void) const
         char buffer[1001];
 
         // Read buffer until it is empty
-        int n = 0;
-        //do {
-            n = recv(m_socket, buffer, 1000, 0);
+        int timeout = 5000; // Initial timeout is 5 sec
+        int n       = 0;
+        do {
+            n = gammalib::recv(m_socket, buffer, 1000, 0, timeout);
+            //n = recv(m_socket, buffer, 1000, 0);
             if (n > 0) {
                 buffer[n] = '\0';
                 result.append(std::string(buffer));
             }
-        //} while (n > 0);
+            timeout = 10; // The timeout now is 0.01 sec 
+        } while (n > 0);
 
         // Debug option: show received message
         #if defined(G_SHOW_MESSAGE)

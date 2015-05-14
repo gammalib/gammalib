@@ -117,6 +117,8 @@ namespace gammalib {
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);
+    int                      recv(int fd, char *buffer, int len, int flags,
+                                  int timeout);
 }
 
 

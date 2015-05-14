@@ -56,7 +56,7 @@
 #define G_KEY 12345
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_CONSOLE_DUMP
+#define G_CONSOLE_DUMP
 
 
 /*==========================================================================
@@ -429,8 +429,7 @@ void GVOHub::start_hub(void)
 /***********************************************************************//**
  * @brief Reads the client message and runs appropriate function
  *
- * @exception GExpection::invalid_value
- *            Buffer could not be read or written
+ * @param[in] sock Socket to client.
  ***************************************************************************/
 void GVOHub::handle_request(const socklen_t& sock)
 {
@@ -440,20 +439,26 @@ void GVOHub::handle_request(const socklen_t& sock)
     #endif
 
     // Initialize buffer
-    char buffer[8192];
-    std::memset(&buffer, 0, 8192);
-    
-    // Read buffer
-    int n = read(sock, buffer, 8192);
-    if (n < 0) {
-        std::string msg = "Could not read socket buffer.";
-        throw GException::invalid_value(G_HANDLE_REQUEST, msg);
-    }
-    std::string response = std::string(buffer);
+    char buffer[1001];
 
+    // Initialise response
+    std::string response = "";
+
+    // Read from socket until nothing is received anymore.
+    int timeout = 5000; // Initial timeout is 5 sec
+    int n       = 0;
+    do {
+        n = gammalib::recv(sock, buffer, 1000, 0, timeout);
+        if (n > 0) {
+            buffer[n] = '\0';
+            response.append(std::string(buffer));
+        }
+        timeout = 10; // The timeout now is 0.01 sec 
+    } while (n > 0);
+    
     // Dump the buffer
     #if defined(G_CONSOLE_DUMP)
-    std::cout << "*** Hub has received the following message ***" << std::endl;
+    std::cout << "Hub has received the following message:" << std::endl;
     std::cout << response << std::endl;
     #endif
     
@@ -473,6 +478,11 @@ void GVOHub::handle_request(const socklen_t& sock)
             method_called = text->text();
         }
     }
+
+    // Dump the buffer
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "Method called: " << method_called << std::endl;
+    #endif
 
     // Dispatch according to method
     if (method_called.compare("samp.hub.ping") == 0) {
@@ -601,7 +611,6 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
         std::string msg = "No free slot found for client.";
         throw GException::invalid_value(G_REGISTER_SERVICE, msg);
     }
-    
 
     // Set self ID and private key
     sprintf(selfid,     "    <member><name>samp.self-id</name><value>%s</value></member>\n",cl_id);
@@ -1716,7 +1725,7 @@ void GVOHub::post_string_callback(const std::string& content) const
         char buffer[1001];
         int n = 0;
         do {
-            n = recv(m_cback_socket, buffer, 1000, 0);
+            n = gammalib::recv(m_cback_socket, buffer, 1000, 0, 100);
             if (n > 0) {
                 buffer[n+1] = '\0';
             }
