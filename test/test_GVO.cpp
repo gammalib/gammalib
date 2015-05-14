@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <unistd.h>      // for sleep() function
 #include <pthread.h>
 #include "test_GVO.hpp"
 #include "GTools.hpp"
