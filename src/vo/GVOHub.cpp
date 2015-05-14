@@ -31,11 +31,13 @@
 #include <cstdlib>         // std::getenv() function
 #include <cstdio>          // std::fopen(), etc. functions
 #include <cstring>         // std::memset() function
+#include <csignal>         // signal() function
 #include <unistd.h>        // close() function
 #include <netdb.h>         // getaddrinfo() function
 #include <fstream>
 #include <sys/shm.h>
 #include <sys/socket.h>    // socket(), connect() functions
+#include <sys/wait.h>      // waitpid() function
 #include "GVOHub.hpp"
 #include "GVOClient.hpp"
 #include "GException.hpp"
@@ -413,7 +415,7 @@ void GVOHub::start_hub(void)
         else {
             int status = 0;
             waitpid(pid, &status, 0);
-            signal(pid, SIG_IGN);	
+            std::signal(pid, SIG_IGN);	
         }
 
     } // endwhile: main event loop
