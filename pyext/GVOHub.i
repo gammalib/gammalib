@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVOHub.i - VO SAMP Hub class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Thierry Louge                                    *
+ *  copyright (C) 2014-2015 by Thierry Louge                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,6 +44,7 @@ public:
     // Methods
     void        clear(void);
     GVOHub*     clone(void) const;
+    std::string classname(void) const;
 };
 
 
@@ -55,5 +56,3 @@ public:
         return (*self);
     }
 };
-
-

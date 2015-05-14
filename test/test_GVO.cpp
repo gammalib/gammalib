@@ -86,9 +86,7 @@ void TestGVO::test_GVOHub(void)
     test_try("Start hub");
     try {
         pthread_t thread;
-std::cout << "Start thread now" << std::endl;
         int       rc = pthread_create(&thread, NULL, vo_thread, NULL);
-std::cout << "Thread started" << std::endl;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -100,22 +98,16 @@ std::cout << "Thread started" << std::endl;
     try {
         for (int i = 0; i < 3; ++i) {
             sleep(1);
-std::cout << "*** Try to connect client" << std::endl;
             GVOClient client;
-std::cout << client << std::endl;
             client.connect();
-std::cout << "*** called client.connect" << std::endl;
             if (client.is_connected()) {
-std::cout << "*** we are connected" << std::endl;
                 break;
             }
-            std::cout << client << std::endl;
+            //std::cout << client << std::endl;
         }
-        //test_try_failure();
         test_try_success();
     }
     catch (std::exception &e) {
-        //test_try_success();
         test_try_failure(e);
     }
 
@@ -145,9 +137,9 @@ void TestGVO::test_GVOClient(void)
     try {
         GVOClient client;
         client.connect();
-        std::cout << client << std::endl;
+        //std::cout << client << std::endl;
         client.disconnect();
-        std::cout << client << std::endl;
+        //std::cout << client << std::endl;
         test_try_success();
     }
     catch (std::exception &e) {

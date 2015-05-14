@@ -586,7 +586,7 @@ void GVOClient::register_to_hub(void)
 void GVOClient::unregister_from_hub(void)
 {
     // Unregister only if we were registered
-    if (!m_client_key.empty()) {
+    if (is_connected()) {
 
         // Declare request
         std::string request;
@@ -628,47 +628,47 @@ void GVOClient::send_metadata(void) const
     request.append("<methodCall>\n");
     request.append("<methodName>samp.hub.declareMetadata</methodName>\n");
     request.append("<params>\n");
-    request.append("<param><value>"+m_client_key+"</value></param>\n");
-    request.append("<param><value><struct>\n");
+    request.append("  <param><value>"+m_client_key+"</value></param>\n");
+    request.append("  <param><value><struct>\n");
 
     // Set SAMP name
-    request.append("<member>\n");
-    request.append("<name>samp.name</name>\n");
-    request.append("<value>"+m_name+"</value>\n");
-    request.append("</member>\n");
+    request.append("    <member>\n");
+    request.append("      <name>samp.name</name>\n");
+    request.append("      <value>"+m_name+"</value>\n");
+    request.append("    </member>\n");
 
     // Set SAMP description text
-    request.append("<member>\n");
-    request.append("<name>samp.description.text</name>\n");
-    request.append("<value>GammaLib client</value>\n");
-    request.append("</member>\n");
+    request.append("    <member>\n");
+    request.append("      <name>samp.description.text</name>\n");
+    request.append("      <value>GammaLib client</value>\n");
+    request.append("    </member>\n");
 
     // Set SAMP icon URL
-    request.append("<member>\n");
-    request.append("<name>samp.icon.url</name>\n");
-    request.append("<value>http://a.fsdn.com/allura/p/gammalib/icon</value>\n");
-    request.append("</member>\n");
+    request.append("    <member>\n");
+    request.append("      <name>samp.icon.url</name>\n");
+    request.append("      <value>http://a.fsdn.com/allura/p/gammalib/icon</value>\n");
+    request.append("    </member>\n");
 
     // Set author affiliation
-    request.append("<member>\n");
-    request.append("<name>author.affiliation</name>\n");
-    request.append("<value>IRAP, Toulouse, France</value>\n");
-    request.append("</member>\n");
+    request.append("    <member>\n");
+    request.append("      <name>author.affiliation</name>\n");
+    request.append("      <value>IRAP, Toulouse, France</value>\n");
+    request.append("    </member>\n");
 
     // Set author e-mail
-    request.append("<member>\n");
-    request.append("<name>author.email</name>\n");
-    request.append("<value>jurgen.knodlseder@irap.omp.eu</value>\n");
-    request.append("</member>\n");
+    request.append("    <member>\n");
+    request.append("      <name>author.email</name>\n");
+    request.append("      <value>jurgen.knodlseder@irap.omp.eu</value>\n");
+    request.append("    </member>\n");
 
     // Set author name
-    request.append("<member>\n");
-    request.append("<name>author.name</name>\n");
-    request.append("<value>Juergen Knoedlseder</value>\n");
-    request.append("</member>\n");
+    request.append("    <member>\n");
+    request.append("      <name>author.name</name>\n");
+    request.append("      <value>Juergen Knoedlseder</value>\n");
+    request.append("    </member>\n");
 
     // Set metadata trailer
-    request.append("</struct></value></param>\n");
+    request.append("  </struct></value></param>\n");
     request.append("</params>\n");
     request.append("</methodCall>\n");
 

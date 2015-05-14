@@ -26,6 +26,8 @@
 
 #ifndef GVOHUB_HPP
 #define GVOHUB_HPP
+
+/* __ Definitions ________________________________________________________ */
 #define GVOHUB_NB_CLIENTS 5
 #define GVOHUB_NB_METHODS 128
 #define GVO_HUB_testing 1
@@ -46,8 +48,8 @@
  *
  * @brief VO SAMP Hub class
  *
- * This class implements a SAMP hub for exchanges 
- * through VO-compatible applications.
+ * This class implements a SAMP hub for exchanges through VO-compatible
+ * applications.
  ***************************************************************************/
 class GVOHub : public GBase {
 
@@ -69,44 +71,47 @@ public:
 
 protected:
     // Protected methods
-    void        init_members(void);
-    void        copy_members(const GVOHub& client);
-    void        free_members(void);
-    void        create_samp_file(void);
-    void        start_hub(void);
-    void        register_service(const GXml& xml, const socklen_t& sock);
-    void        ping_service(const socklen_t& sock);
-    void        unregister(const GXml& xml, const socklen_t& sock);
-    void        handle_request(const socklen_t& sock);
-    void        register_metadata(const GXml& xml, const socklen_t& sock);
-    void        set_xml_rpc_callback(const GXml& xml, const socklen_t& sock);
-    void        get_registered_clients(const GXml& xml, const socklen_t& sock);
-    void        get_subscribed_clients(const GXml& xml, const socklen_t& sock);
-    void        get_metadata(const GXml& xml, const socklen_t& sock);
-    void        get_subscriptions(const GXml& xml, const socklen_t& sock);
-    void        declare_subscriptions(const GXml& xml, const socklen_t& sock);
-    void	    post_string(const std::string& content, const socklen_t& sock) const;
-    std::string	receive_string(const socklen_t& sock) const;
+    void                   init_members(void);
+    void                   copy_members(const GVOHub& client);
+    void                   free_members(void);
+    void                   start_hub(void);
+    void                   handle_request(const socklen_t& sock);
+    void                   request_ping(const socklen_t& sock);
+    void                   request_register(const GXml& xml,
+                                            const socklen_t& sock);
+    void                   request_unregister(const GXml& xml,
+                                              const socklen_t& sock);
+    void                   request_declare_metadata(const GXml& xml,
+                                                    const socklen_t& sock);
+    void                   request_declare_subscriptions(const GXml& xml,
+                                                         const socklen_t& sock);
+    void                   request_set_xml_rpc_callback(const GXml& xml,
+                                                        const socklen_t& sock);
+    void                   request_get_subscriptions(const GXml& xml,
+                                                     const socklen_t& sock);
+    void                   request_get_registered_clients(const GXml& xml,
+                                                          const socklen_t& sock);
+    void                   request_get_subscribed_clients(const GXml& xml,
+                                                          const socklen_t& sock);
+    void                   request_get_metadata(const GXml& xml,
+                                                const socklen_t& sock);
+    std::string            get_client_key(const GXml& xml) const;
+    int                    get_client_index(const GXml& xml) const;
+    std::string            get_response_value(const GXml& xml,
+                                              const std::string& name) const;
+    void                   get_name_value_pair(const GXmlNode* node,
+                                               std::string&    name,
+                                               std::string&    value) const;
+    std::list<std::string> get_registrations(const GXml& xml) const;
+    std::string            get_callback_port(const GXml& xml) const;
+    std::string            get_hub_lockfile(void) const;
+    void 		           activate_callbacks(std::string method, char cl_id[31]);
 
     // Low-level methods
-    //void                   post_string(const std::string& string) const;
-    //std::string            receive_string(void) const;
-    std::string get_response_value(const GXml& xml, const std::string& name) const;
-
-
-    std::list<std::string> get_registrations(const GXml& xml,
-                                             const std::string& name) const;
-    std::list<std::string> get_clientid(const GXml& xml,
-                                             const std::string& name) const;
-    std::string get_callback_port(const GXml& xml,
-                                             const std::string& name) const;
-    void        get_name_value_pair(const GXmlNode* node,
-                                    std::string& name,
-                                    std::string& value) const;
-    std::string get_hub_lockfile(void) const;
-    std::string	random_string(size_t length);
-    void 		activate_callbacks(std::string method,char cl_id[31]);
-    void 		post_string_toclient(const std::string& content) const;
+    void        create_samp_file(void);
+    void	    post_string(const std::string& content, const socklen_t& sock) const;
+    void 		post_string_callback(const std::string& content) const;
+    std::string	random_string(const size_t& length) const;
 
     // Protected structures
     typedef struct {
@@ -127,24 +132,22 @@ protected:
     	int           registered;
         sem_t         lock;
         connected_shm metadata[GVOHUB_NB_CLIENTS];
-    } clients_descriptor;
+    } clients;
 
     // Protected members
-    std::string m_name;         //!< Client name
-    std::string m_secret;       //!< Secret Hub key
-    std::string m_hub_url;      //!< The XML-RPC endpoint for communication with the hub
-    std::string m_hub_host;     //!< Hub host (extracted from XML-RPC endpoint)
-    std::string m_hub_port;     //!< Hub port (extracted from XML-RPC endpoint)
-    std::string m_version;      //!< The version of the SAMP Standard Profile implemented by the hub
-    std::string m_client_key;   //!< Private client key
-    std::string m_hub_id;       //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
-    int         m_socket;       //!< Hub socket
-    int		    m_cback_socket; //!< Hub socket to callback clients
-    int         m_nb_clients;   //!< Number of already registered clients
-    clients_descriptor *reg_clients;
-    connected_shm      *clients;
-    void*              ptr_mem_partagee; //pointer to shm address
-    int                shm_handler; //handler to shm 
+    std::string m_name;          //!< Client name
+    std::string m_secret;        //!< Secret Hub key
+    std::string m_hub_url;       //!< The XML-RPC endpoint for communication with the hub
+    std::string m_hub_host;      //!< Hub host (extracted from XML-RPC endpoint)
+    std::string m_hub_port;      //!< Hub port (extracted from XML-RPC endpoint)
+    std::string m_version;       //!< The version of the SAMP Standard Profile implemented by the hub
+    std::string m_hub_id;        //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
+    int         m_socket;        //!< Hub socket
+    int		    m_cback_socket;  //!< Hub socket to callback clients
+    int         m_nb_clients;    //!< Number of already registered clients
+    clients*    m_clients;       //!< Structure of registered clients
+    void*       m_shmem;         //!< Pointer to shared memory address
+    int         m_shmem_handler; //!< Handler to shared memory 
     
 };
 
