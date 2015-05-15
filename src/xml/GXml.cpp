@@ -730,8 +730,8 @@ void GXml::parse(const GUrl& url)
             continue;
         }
 
-        // If we are not within a markup and if a markup is reached then add
-        // the text segment to the nodes and switch to in_markup mode
+        // If we are not within a markup and if a markup is reached then
+        // add the text segment to the nodes and switch to in_markup mode
         if (in_markup == false) {
 
             // Markup start reached?
@@ -760,8 +760,8 @@ void GXml::parse(const GUrl& url)
             }
         }
 
-        // If we are within a markup and if a markup end is reached then process
-        // the markup and switch to not in_tag mode
+        // If we are within a markup and if a markup end is reached then
+        // process the markup and switch to not in_tag mode
         else {
 
             // Markup stop reached?
@@ -790,7 +790,7 @@ void GXml::parse(const GUrl& url)
                     // Prepare new segment and signal that we are not
                     // within markup
                     segment.clear();
-                    in_markup  = false;
+                    in_markup = false;
                 }
             }
 
@@ -892,7 +892,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Append empty-element tag
     case MT_ELEMENT_EMPTY:
         {
-            GXmlElement element(segment);
+            GXmlElement element(segment.substr(1,segment.length()-3));
             element.parent(*current);
             (*current)->append(element);
         }
