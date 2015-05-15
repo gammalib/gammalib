@@ -32,6 +32,7 @@
 #include <cstdio>          // std::fopen(), etc. functions
 #include <cstring>         // std::memset() function
 #include <csignal>         // signal() function
+#include <cerrno>          // errno
 #include <unistd.h>        // close() function
 #include <netdb.h>         // getaddrinfo() function
 #include <netinet/in.h>    // sockaddr_in, INADDR_ANY, htons
@@ -331,58 +332,64 @@ void GVOHub::free_members(void)
 /***********************************************************************//**
  * @brief Starts the SAMP hub socket and listens on it
  *
+ * @exception GException::runtime_error
+ *            Problem with creating of or listening on socket
+ *
  * This is the main Hub event loop.
  ***************************************************************************/
 void GVOHub::start_hub(void)
 {
-    struct sockaddr_in serv_addr,cli_addr;
-    int max_sd, portno,pid,max_clients = 10, i,activity,addrlen;
-    socklen_t sockfd, client_socket[10];
-    int opt = 1;
+    // Set maximum number of clients
+    int max_clients = 10;
 
     // Prepare TCP/IP structure
+    struct sockaddr_in serv_addr;
     std::memset(&serv_addr, 0, sizeof(serv_addr));
-    portno                    = 8001;
     serv_addr.sin_family      = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port        = htons(portno);
-    
-    //set of socket descriptors
-    fd_set readfds;
+    serv_addr.sin_port        = htons(8001);
     
     // Initialise all client_socket[] to 0 so not checked
-    for (i = 0; i < max_clients; ++i) {
+    socklen_t client_socket[max_clients];
+    for (int i = 0; i < max_clients; ++i) {
         client_socket[i] = 0;
     }
 
-    // ...
+    // Create Hub socket
     socklen_t hub_socket = socket(AF_INET, SOCK_STREAM, 0);
     
     // Creation of hub main socket
     if (hub_socket < 0) {
-        std::string msg = "Hub socket could not be created.";
-        throw GException::invalid_value(G_START_HUB, msg);
+        std::string msg = "Unable to create Hub socket. Errno="+
+                          gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
     }
     
     // Set hub main socket to allow multiple connections
-    if (setsockopt(hub_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0) {
-        std::string msg = "Hub socket could not be set to multiple connections.";
-        throw GException::invalid_value(G_START_HUB, msg);
+    int opt = 1;
+    if (setsockopt(hub_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0) {
+        std::string msg = "Unable to set Hub socket to multiple connections."
+                          " Errno="+gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
     }
     
     // Server socket is opened. Now, bind it to the port, with family etc.
-    if (bind(hub_socket, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
-        std::string msg = "Hub socket could not bind to server socket.";
-        throw GException::invalid_value(G_START_HUB, msg);
+    if (bind(hub_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+        std::string msg = "Unable to bind Hub socket to server socket. Errno="+
+                          gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
     }
 
-    // Now start listening for the clients: 5 requests simultaneously pending maximum
+    // Now start listening for the clients: 5 requests simultaneously pending
+    // maximum
     if (listen(hub_socket, 5) < 0) {
-        std::string msg = "Hub socket could not start listening.";
-        throw GException::invalid_value(G_START_HUB, msg);
+        std::string msg = "Unable to start listening on Hub socket. Errno="+
+                          gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
     }
 
     // ...
+    struct sockaddr_in cli_addr;
     socklen_t clilen = sizeof(cli_addr);
 
     // Main event handling loop
@@ -392,14 +399,14 @@ void GVOHub::start_hub(void)
     	socklen_t newsocket = accept(hub_socket, (struct sockaddr *)&cli_addr, &clilen);
     	if (newsocket < 0) {
             std::string msg = "Client connection to socket not accepted.";
-            throw GException::invalid_value(G_START_HUB, msg);
+            throw GException::runtime_error(G_START_HUB, msg);
     	}
 
     	// Create child process to handle the request
-        pid = fork();
+        int pid = fork();
         if (pid < 0) {
             std::string msg = "No child process created.";
-            throw GException::invalid_value(G_START_HUB, msg);
+            throw GException::runtime_error(G_START_HUB, msg);
         }
 
         // If we have a PID of 0 we are in the child process. In this case
