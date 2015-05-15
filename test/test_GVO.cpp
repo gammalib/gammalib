@@ -30,6 +30,7 @@
 #endif
 #include <unistd.h>      // for sleep() function
 #include <pthread.h>
+#include <signal.h>      // for pthread_kill() function
 #include "test_GVO.hpp"
 #include "GTools.hpp"
 
@@ -86,11 +87,13 @@ TestGVO* TestGVO::clone(void) const
  **************************************************************************/
 void TestGVO::test_GVOHub(void)
 {
-    // Start Hub
+    // Declare thread
+    pthread_t thread;
+    
+    // Start Hub in a thread
     test_try("Start hub");
     try {
-        pthread_t thread;
-        int       rc = pthread_create(&thread, NULL, vo_thread, NULL);
+        int rc = pthread_create(&thread, NULL, vo_thread, NULL);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -98,22 +101,26 @@ void TestGVO::test_GVOHub(void)
     }
 
     // Test Hub connection
-    test_try("GVOClient hub connection and disconnection");
-    try {
-        for (int i = 0; i < 3; ++i) {
-            sleep(1);
-            GVOClient client;
-            client.connect();
-            if (client.is_connected()) {
-                break;
-            }
-            //std::cout << client << std::endl;
+    GVOClient client;
+    for (int i = 0; i < 3; ++i) {
+        sleep(1);
+        client.connect();
+        if (client.is_connected()) {
+            break;
         }
-        test_try_success();
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+
+    // Test ping
+    test_assert(client.ping_hub(), "Ping Hub.");
+
+    // Disconnect client
+    client.disconnect();
+
+    // Cancel thread. We do this here so that for the next test
+    // there is no Hub anymore. We do some sleeping to assure that
+    // the thread has been canceled.
+    pthread_cancel(thread);
+    sleep(1);
 
     // Return
     return;
@@ -136,19 +143,25 @@ void TestGVO::test_GVOClient(void)
         test_try_failure(e);
     }
 
-    // Test Hub connection
-    test_try("GVOClient hub connection and disconnection");
-    try {
-        GVOClient client;
-        client.connect();
-        //std::cout << client << std::endl;
-        client.disconnect();
-        //std::cout << client << std::endl;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Create client
+    GVOClient client;
+
+    // Test ping
+    test_assert(!client.ping_hub(), "Ping Hub (should fail).");
+
+    // Connect client
+    client.connect();
+    std::cout << client << std::endl;
+
+    // Test ping
+    test_assert(client.ping_hub(), "Ping Hub.");
+
+    // Disconnect client
+    client.disconnect();
+    std::cout << client << std::endl;
+
+    // Test ping
+    test_assert(client.ping_hub(), "Ping Hub.");
 
     // Return
     return;
