@@ -44,6 +44,9 @@ void* vo_thread(void* ptr)
     // Create VO Hub
     GVOHub hub;
 
+    // Start Hub
+    hub.start();
+
     // Return
     return NULL;
 }

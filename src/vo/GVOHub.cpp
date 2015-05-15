@@ -75,9 +75,6 @@ GVOHub::GVOHub(void)
     // Initialise members
     init_members();
 
-    // Start Hub
-    start_hub();
-
     // Return
     return;
 }
@@ -96,9 +93,6 @@ GVOHub::GVOHub(const GVOHub& hub)
     // Copy members
     copy_members(hub);
 
-    // Start Hub
-    start_hub();
-
     // Return
     return;
 }
@@ -109,7 +103,9 @@ GVOHub::GVOHub(const GVOHub& hub)
  ***************************************************************************/
 GVOHub::~GVOHub(void)
 {
+    // Free members
     free_members();
+
     // Return
     return;
 }
@@ -141,9 +137,6 @@ GVOHub& GVOHub::operator=(const GVOHub& hub)
         // Copy members
         copy_members(hub);
 
-        // Start Hub
-        start_hub();
-
     } // endif: object was not identical
 
     // Return
@@ -164,12 +157,11 @@ GVOHub& GVOHub::operator=(const GVOHub& hub)
  ***************************************************************************/
 void GVOHub::clear(void)
 {
-    // Free memory and initialise members
+    // Free members
     free_members();
-    init_members();
 
-    // Start Hub
-    start_hub();
+    // Initialise members
+    init_members();
 
     // Return
     return;
@@ -183,6 +175,22 @@ GVOHub* GVOHub::clone(void) const
 {
     // Clone client
     return new GVOHub(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Start Hub
+ ***************************************************************************/
+void GVOHub::start(void)
+{
+    // Create SAMP file
+    create_samp_file();
+
+    // Start Hub
+    start_hub();
+
+    // Return
+    return;
 }
 
 
@@ -276,9 +284,6 @@ void GVOHub::init_members(void)
         strcpy(m_clients->metadata[i].description,  "Unknown");
     }
     
-    // Create SAMP file
-    create_samp_file();
-
     // Return
     return;
 }
@@ -347,7 +352,6 @@ void GVOHub::start_hub(void)
     struct sockaddr_in serv_addr;
     std::memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family      = AF_INET;
-    //serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_addr.sin_addr.s_addr = inet_addr(m_hub_host.c_str());
     serv_addr.sin_port        = htons(gammalib::toint(m_hub_port));
     
@@ -390,7 +394,7 @@ void GVOHub::start_hub(void)
     }
 
     // Now start listening for the clients: 5 requests simultaneously pending
-    // maximum
+    // at maximum
     if (listen(hub_socket, 5) < 0) {
         std::string msg = "Unable to start listening on Hub socket. Errno="+
                           gammalib::str(errno);
@@ -1612,7 +1616,7 @@ void GVOHub::activate_callbacks(std::string method,char cl_id[31])
  *
  * Implements IVOA standard REC-SAMP-1.3-20120411.
  ***************************************************************************/
-void GVOHub::create_samp_file(void)
+void GVOHub::create_samp_file(void) const
 {
     // Get lockfile URL
     std::string lockurl = get_hub_lockfile();

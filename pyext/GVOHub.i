@@ -45,6 +45,7 @@ public:
     void        clear(void);
     GVOHub*     clone(void) const;
     std::string classname(void) const;
+    void        start(void);
 };
 
 

@@ -65,6 +65,7 @@ public:
     void        clear(void);
     GVOHub*     clone(void) const;
     std::string classname(void) const;
+    void        start(void);
     std::string print(const GChatter& chatter = NORMAL) const;
     
 
@@ -107,7 +108,7 @@ protected:
     void 		           activate_callbacks(std::string method, char cl_id[31]);
 
     // Low-level methods
-    void        create_samp_file(void);
+    void        create_samp_file(void) const;
     void	    post_string(const std::string& content, const socklen_t& sock) const;
     void 		post_string_callback(const std::string& content) const;
     std::string	random_string(const size_t& length) const;
