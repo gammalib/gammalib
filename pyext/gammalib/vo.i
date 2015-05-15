@@ -37,14 +37,14 @@
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
-//%include stl.i
+%include stl.i
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
 //%import(module="gammalib.base") "GContainer.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
-//%import(module="gammalib.support") "GException.i";
+%import(module="gammalib.support") "GException.i";
 
 /* __ Virtual Observatory module _________________________________________ */
 %include "GVOClient.i"
