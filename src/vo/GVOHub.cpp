@@ -357,6 +357,7 @@ void GVOHub::start_hub(void)
 
     // Create Hub socket
     socklen_t hub_socket = socket(AF_INET, SOCK_STREAM, 0);
+std::cout << "Created Hub socket " << hub_socket << std::endl;
     
     // Creation of hub main socket
     if (hub_socket < 0) {
@@ -372,6 +373,7 @@ void GVOHub::start_hub(void)
                           " Errno="+gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
     }
+std::cout << "Allow for multiple connections on " << hub_socket << std::endl;
     
     // Server socket is opened. Now, bind it to the port, with family etc.
     if (bind(hub_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
@@ -379,6 +381,7 @@ void GVOHub::start_hub(void)
                           gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
     }
+std::cout << "Bind to socket " << hub_socket << std::endl;
 
     // Now start listening for the clients: 5 requests simultaneously pending
     // maximum
