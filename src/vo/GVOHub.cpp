@@ -40,6 +40,7 @@
 #include <sys/shm.h>
 #include <sys/socket.h>    // socket(), connect() functions
 #include <sys/wait.h>      // waitpid() function
+#include <arpa/inet.h>     // inet_addr() function
 #include "GVOHub.hpp"
 #include "GVOClient.hpp"
 #include "GException.hpp"
@@ -234,9 +235,9 @@ void GVOHub::init_members(void)
     // Initialise members
     m_name          = "GammaLib";
     m_secret        = random_string(15);
-    m_hub_url       = "http://localhost:8001/xmlrpc";
     m_hub_host      = "127.0.0.1";
-    m_hub_port      = "8001";
+    m_hub_port      = "2525";
+    m_hub_url       = "http://"+m_hub_host+":"+m_hub_port+"/xmlrpc";
     m_version       = "1.3";
     m_hub_id        = "gammalib_hub";
     m_socket        = -1;        // Signals no socket
@@ -346,8 +347,9 @@ void GVOHub::start_hub(void)
     struct sockaddr_in serv_addr;
     std::memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family      = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port        = htons(8001);
+    //serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_addr.s_addr = inet_addr(m_hub_host.c_str());
+    serv_addr.sin_port        = htons(gammalib::toint(m_hub_port));
     
     // Initialise all client_socket[] to 0 so not checked
     socklen_t client_socket[max_clients];
@@ -357,7 +359,6 @@ void GVOHub::start_hub(void)
 
     // Create Hub socket
     socklen_t hub_socket = socket(AF_INET, SOCK_STREAM, 0);
-std::cout << "Created Hub socket " << hub_socket << std::endl;
     
     // Creation of hub main socket
     if (hub_socket < 0) {
@@ -373,7 +374,13 @@ std::cout << "Created Hub socket " << hub_socket << std::endl;
                           " Errno="+gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
     }
-std::cout << "Allow for multiple connections on " << hub_socket << std::endl;
+    #ifdef SO_REUSEPORT
+    if (setsockopt(hub_socket, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0) {
+        std::string msg = "Unable to set Hub socket to multiple connections."
+                          " Errno="+gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
+    }
+    #endif
     
     // Server socket is opened. Now, bind it to the port, with family etc.
     if (bind(hub_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
@@ -381,7 +388,6 @@ std::cout << "Allow for multiple connections on " << hub_socket << std::endl;
                           gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
     }
-std::cout << "Bind to socket " << hub_socket << std::endl;
 
     // Now start listening for the clients: 5 requests simultaneously pending
     // maximum

@@ -738,6 +738,10 @@ void GVOClient::connect_to_hub(void) const
                         close(m_socket);
                         m_socket = -1;
                     }
+                    else {
+                        // Socket connection successful, break now
+                        break;
+                    }
                 }
                 else {
                     break;
