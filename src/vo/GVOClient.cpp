@@ -65,6 +65,9 @@ GVOClient::GVOClient(void)
     // Initialise members
     init_members();
 
+    // Find Hub
+    find_hub();
+    
     // Return
     return;
 }
@@ -177,9 +180,9 @@ GVOClient* GVOClient::clone(void) const
  ***************************************************************************/
 void GVOClient::connect(void)
 {
-    // Find Hub
-    find_hub();
-    
+    // Require a Hub
+    require_hub();
+
     // Continue only if we have a Hub
     if (has_hub()) {
     
@@ -465,9 +468,6 @@ void GVOClient::free_members(void)
  *     samp.hub.xmlrpc.url   XML-RPC endpoint for communication
  *     samp.profile.version  Version of SAMP profile
  *
- * In case that no VO Hub is found (or alive) the method will start a
- * GammaLib internal Hub.
- *
  * Implements IVOA standard REC-SAMP-1.3-20120411.
  ***************************************************************************/
 bool GVOClient::find_hub(void)
@@ -560,7 +560,25 @@ bool GVOClient::find_hub(void)
 
     } // endif: URL has been found
 
-    // If we have found a Hub then check if the VO Hub is alive
+    // Return find flag
+    return found;
+}
+
+
+/***********************************************************************//**
+ * @brief Require VO Hub
+ *
+ * @return True if VO Hub has been found, false otherwise.
+ *
+ * Make sure that a VO Hub is available and alive. If no VO Hub is found
+ * or alive the method will start a GammaLib internal Hub.
+ ***************************************************************************/
+bool GVOClient::require_hub(void)
+{
+    // First get Hub information
+    bool found = find_hub();
+
+    // If we have Hub information, check if the Hub is alive
     if (found) {
         found = ping_hub();
     }
@@ -586,12 +604,18 @@ bool GVOClient::find_hub(void)
         // ... otherwise we are in the parent process. Check if the Hub
         // is alive.
         else {
+
+            // Check that Hub is alive
             for (int i = 0; i < 3; ++i) {
                 found = ping_hub();
                 if (found) {
                     break;
                 }
             }
+
+            // Get Hub information
+            found = find_hub();
+
         }
 
     } // endif: created own VO Hub

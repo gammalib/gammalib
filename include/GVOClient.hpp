@@ -78,6 +78,7 @@ protected:
     void        copy_members(const GVOClient& client);
     void        free_members(void);
     bool        find_hub(void);
+    bool        require_hub(void);
     void        register_to_hub(void);
     void        unregister_from_hub(void);
     void        send_metadata(void) const;

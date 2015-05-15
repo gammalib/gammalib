@@ -146,19 +146,16 @@ void TestGVO::test_GVOClient(void)
     // Create client
     GVOClient client;
 
-    // Test ping
-    test_assert(!client.ping_hub(), "Ping Hub (should fail).");
-
     // Connect client
     client.connect();
-    std::cout << client << std::endl;
+    //std::cout << client << std::endl;
 
     // Test ping
     test_assert(client.ping_hub(), "Ping Hub.");
 
     // Disconnect client
     client.disconnect();
-    std::cout << client << std::endl;
+    //std::cout << client << std::endl;
 
     // Test ping
     test_assert(client.ping_hub(), "Ping Hub.");
