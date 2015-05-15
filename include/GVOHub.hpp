@@ -135,7 +135,6 @@ protected:
     } clients;
 
     // Protected members
-    std::string m_name;          //!< Client name
     std::string m_secret;        //!< Secret Hub key
     std::string m_hub_url;       //!< The XML-RPC endpoint for communication with the hub
     std::string m_hub_host;      //!< Hub host (extracted from XML-RPC endpoint)
@@ -144,11 +143,9 @@ protected:
     std::string m_hub_id;        //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
     int         m_socket;        //!< Hub socket
     int		    m_cback_socket;  //!< Hub socket to callback clients
-    int         m_nb_clients;    //!< Number of already registered clients
     clients*    m_clients;       //!< Structure of registered clients
     void*       m_shmem;         //!< Pointer to shared memory address
     int         m_shmem_handler; //!< Handler to shared memory 
-    
 };
 
 

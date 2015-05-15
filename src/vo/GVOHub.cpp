@@ -211,10 +211,8 @@ std::string GVOHub::print(const GChatter& chatter) const
         // Append header
         result.append("=== GVOHub ===");
 
-        // Append client information
-        result.append("\n"+gammalib::parformat("Name")+m_name);
-
         // Append Hub information
+        result.append("\n"+gammalib::parformat("Hub identifier")+m_hub_id);
         result.append("\n"+gammalib::parformat("Hub key")+m_secret);
         result.append("\n"+gammalib::parformat("Hub URL")+m_hub_url);
         result.append("\n"+gammalib::parformat("Hub host (port)"));
@@ -241,7 +239,6 @@ std::string GVOHub::print(const GChatter& chatter) const
 void GVOHub::init_members(void)
 {
     // Initialise members
-    m_name          = "GammaLib";
     m_secret        = random_string(15);
     m_hub_host      = "127.0.0.1";
     m_hub_port      = "2525";
@@ -250,7 +247,6 @@ void GVOHub::init_members(void)
     m_hub_id        = "gammalib_hub";
     m_socket        = -1;        // Signals no socket
     m_cback_socket  = -1;
-    m_nb_clients    = 0;     //  No registered clients at initialization
     m_clients       = NULL;
     m_shmem         = NULL;
     m_shmem_handler = 0;
@@ -297,7 +293,6 @@ void GVOHub::init_members(void)
 void GVOHub::copy_members(const GVOHub& hub)
 {
     // Copy members
-    m_name         = hub.m_name;
     m_secret       = hub.m_secret;
     m_hub_url      = hub.m_hub_url;
     m_hub_host     = hub.m_hub_host;
@@ -306,7 +301,6 @@ void GVOHub::copy_members(const GVOHub& hub)
     m_hub_id       = hub.m_hub_id;
     m_socket       = hub.m_socket;
     m_cback_socket = hub.m_cback_socket;
-    m_nb_clients   = hub.m_nb_clients;
 
     //TODO: What to do with shared memory? Copy over all data?
 
@@ -612,7 +606,7 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
     char        selfid[124];
     char        privatekey[124];
     std::string secret     = random_string(15);
-    std::string translator = "http://localhost:8001/xmlrpc";
+    std::string translator = m_hub_url;
     
     // Search for a new free slot
     bool found = false;
