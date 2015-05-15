@@ -48,6 +48,8 @@ public:
     void        connect(void);
     void        disconnect(void);
     bool        has_hub(void) const;
+    bool        is_connected(void) const;
+    bool        ping_hub(void) const;
     GXml        execute(const std::string& request) const;
 };
 

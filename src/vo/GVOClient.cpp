@@ -35,10 +35,12 @@
 #include <netdb.h>         // getaddrinfo() function
 #include <sys/socket.h>    // socket(), connect() functions
 #include "GVOClient.hpp"
+#include "GVOHub.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_FIND_HUB                                    "GVOClient::find_hub()"
 #define G_REGISTER_TO_HUB                      "GVOClient::register_to_hub()"
 
 /* __ Macros _____________________________________________________________ */
@@ -46,7 +48,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_SHOW_MESSAGE               //!< Show posted and received messages
+//#define G_SHOW_MESSAGE               //!< Show posted and received messages
 
 
 /*==========================================================================
@@ -63,9 +65,6 @@ GVOClient::GVOClient(void)
     // Initialise members
     init_members();
 
-    // Find Hub
-    find_hub();
-    
     // Return
     return;
 }
@@ -148,8 +147,10 @@ GVOClient& GVOClient::operator=(const GVOClient& client)
  ***************************************************************************/
 void GVOClient::clear(void)
 {
-    // Free memory and initialise members
+    // Free memory
     free_members();
+
+    // Initialise members
     init_members();
 
     // Return
@@ -168,13 +169,17 @@ GVOClient* GVOClient::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Register client to SAMP Hub
+ * @brief Register client at VO Hub
  *
- * Connects the VO client to the Hub. A socket to the Hub is opened and the
- * client is registered at the Hub. Metadata are sent.
+ * Registers a client at the VO Hub. The method will search for a VO Hub,
+ * launch it's own VO Hub if no Hub was found, and the register the client
+ * at the Hub, including sending of metadata.
  ***************************************************************************/
 void GVOClient::connect(void)
 {
+    // Find Hub
+    find_hub();
+    
     // Continue only if we have a Hub
     if (has_hub()) {
     
@@ -192,10 +197,9 @@ void GVOClient::connect(void)
 
 
 /***********************************************************************//**
- * @brief Unregister client from SAMP Hub
+ * @brief Unregister client from VO Hub
  *
- * Disconnects the VO client from the Hub. The client is unregistered and the
- * socket to the Hub is closed.
+ * Disconnects the VO client from the VO Hub. The client is unregistered.
  ***************************************************************************/
 void GVOClient::disconnect(void)
 {
@@ -219,11 +223,11 @@ void GVOClient::disconnect(void)
 
 
 /***********************************************************************//**
- * @brief Signals if client has Hub information
+ * @brief Signals if client has VO Hub information
  *
- * @return True if client has Hub information, false otherwise.
+ * @return True if client has VO Hub information, false otherwise.
  *
- * Checks if all mandatory Hub tokens are non-empty.
+ * Checks if all mandatory VO Hub tokens are non-empty.
  ***************************************************************************/
 bool GVOClient::has_hub(void) const
 {
@@ -233,9 +237,9 @@ bool GVOClient::has_hub(void) const
 
 
 /***********************************************************************//**
- * @brief Signals if client is connected to Hub
+ * @brief Signals if client is connected to VO Hub
  *
- * @return True if client is connected to Hub, false otherwise.
+ * @return True if client is connected to VO Hub, false otherwise.
  *
  * Checks if the clients has non-empty client key, Hub ID and client ID.
  ***************************************************************************/
@@ -243,6 +247,41 @@ bool GVOClient::is_connected(void) const
 {
     // Return Hub information status
     return (!m_client_key.empty() && !m_hub_id.empty() && !m_client_id.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Ping VO Hub
+ *
+ * @return True if VO Hub is alive, false otherwise.
+ ***************************************************************************/
+bool GVOClient::ping_hub(void) const
+{
+    // Initialise ping result
+    bool result = false;
+
+    // Declare request
+    std::string request = "";
+    
+    // Set request
+    request.append("<?xml version=\"1.0\"?>\n");
+    request.append("<methodCall>\n");
+    request.append("  <methodName>samp.hub.ping</methodName>\n");
+    request.append("  <params>\n");
+    request.append("    <param><value/></param>\n");
+    request.append("  </params>\n");
+    request.append("</methodCall>\n");
+
+    // Execute request
+    GXml xml = execute(request);
+
+    // If we got a valid response then set ping result flag to true
+    if (response_is_valid(xml)) {
+        result = true;
+    }
+
+    // Return ping result
+    return result;
 }
 
 
@@ -415,21 +454,21 @@ void GVOClient::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Find SAMP Hub
+ * @brief Find VO Hub
  *
- * @return True if SAMP Hub has been found, false otherwise.
+ * @return True if VO Hub has been found, false otherwise.
  *
- * Search a valid SAMP Hub and retrieve all mandatory token for this Hub.
- * The manadtory tokens are
+ * Search a valid VO Hub and retrieve all mandatory token for this Hub.
+ * The mandatory tokens are
  *
  *     samp.secret           Opaque text string required for Hub registration
  *     samp.hub.xmlrpc.url   XML-RPC endpoint for communication
  *     samp.profile.version  Version of SAMP profile
  *
- * Implements IVOA standard REC-SAMP-1.3-20120411.
+ * In case that no VO Hub is found (or alive) the method will start a
+ * GammaLib internal Hub.
  *
- * @todo If no valid Hub was found the method should attempt to start its
- * own Hub.
+ * Implements IVOA standard REC-SAMP-1.3-20120411.
  ***************************************************************************/
 bool GVOClient::find_hub(void)
 {
@@ -521,9 +560,41 @@ bool GVOClient::find_hub(void)
 
     } // endif: URL has been found
 
-    //TODO: Create GammaLib own Hub in case that no Hub has been found
-    //if (!found) {
-    //}
+    // If we have found a Hub then check if the VO Hub is alive
+    if (found) {
+        found = ping_hub();
+    }
+
+    // If the Hub is not alive then create a GammaLib own Hub
+    if (!found) {
+
+        // Create child process to start the Hub
+        int pid = fork();
+        if (pid < 0) {
+            std::string msg = "Unable to create child process for VO Hub.";
+            throw GException::runtime_error(G_FIND_HUB, msg);
+        }
+
+        // If we have a PID of 0 we are in the child process. In this case
+        // we create and start a VO Hub ...
+        if (pid == 0) {
+            GVOHub hub;
+            hub.start();
+            exit(0);
+        }
+
+        // ... otherwise we are in the parent process. Check if the Hub
+        // is alive.
+        else {
+            for (int i = 0; i < 3; ++i) {
+                found = ping_hub();
+                if (found) {
+                    break;
+                }
+            }
+        }
+
+    } // endif: created own VO Hub
 
     // If no Hub has been found, clear all Hub related members
     if (!found) {
@@ -830,7 +901,7 @@ std::string GVOClient::receive_string(void) const
         char buffer[1001];
 
         // Read buffer until it is empty
-        int timeout = 5000; // Initial timeout is 5 sec
+        int timeout = 1000; // Initial timeout is 1 sec
         int n       = 0;
         do {
             n = gammalib::recv(m_socket, buffer, 1000, 0, timeout);
@@ -999,7 +1070,7 @@ bool GVOClient::response_is_valid(const GXml& xml) const
     bool valid = true;
 
     // Check for data
-    const GXmlNode* node = xml.element("methodResponse > params > param > value > struct");
+    const GXmlNode* node = xml.element("methodResponse > params > param > value");
     if (node == NULL) {
         valid = false;
     }
