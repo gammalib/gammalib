@@ -362,10 +362,7 @@ std::string GVOClient::print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("SAMP protocol version"));
             result.append(m_version);
             result.append("\n"+gammalib::parformat("Hub connection"));
-            if (m_socket == -1) {
-                result.append("no");
-            }
-            else {
+            if (is_connected()) {
                 if (!m_client_key.empty()) {
                     result.append("registered as \""+m_client_id);
                     result.append("\" on Hub \""+m_hub_id);
@@ -374,6 +371,9 @@ std::string GVOClient::print(const GChatter& chatter) const
                 else {
                     result.append("established.");
                 }
+            }
+            else {
+                result.append("no");
             }
         }
         else {
@@ -930,7 +930,7 @@ std::string GVOClient::receive_string(void) const
         char buffer[1001];
 
         // Read buffer until it is empty
-        int timeout = 1000; // Initial timeout is 1 sec
+        int timeout = 2000; // Initial timeout is 2 sec
         int n       = 0;
         do {
             n = gammalib::recv(m_socket, buffer, 1000, 0, timeout);

@@ -459,7 +459,7 @@ void GVOHub::handle_request(const socklen_t& sock)
     std::string response = "";
 
     // Read from socket until nothing is received anymore.
-    int timeout = 1000; // Initial timeout is 1 sec
+    int timeout = 2000; // Initial timeout is 2 sec
     int n       = 0;
     do {
         n = gammalib::recv(sock, buffer, 1000, 0, timeout);
@@ -1737,7 +1737,7 @@ void GVOHub::post_string_callback(const std::string& content) const
 
         // Read buffer until it is empty
         char buffer[1001];
-        int timeout = 1000; // Initial timeout is 1 sec
+        int timeout = 2000; // Initial timeout is 2 sec
         int n       = 0;
         do {
             n = gammalib::recv(m_cback_socket, buffer, 1000, 0, timeout);
