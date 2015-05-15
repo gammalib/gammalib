@@ -517,8 +517,16 @@ const GXmlElement* GXml::element(const std::string& name, const int& index) cons
  ***************************************************************************/
 void GXml::load(const std::string& filename)
 {
+    // Expand environment variables
+    std::string fname = gammalib::expand_env(filename);
+
+    // Check if file exists
+    if (!gammalib::file_exists(fname)) {
+        throw GException::file_open_error(G_LOAD, fname);
+    }
+
     // Open XML URL as file for reading
-    GUrlFile url(filename.c_str(), "r");
+    GUrlFile url(fname.c_str(), "r");
 
     // Read XML document from URL
     read(url);

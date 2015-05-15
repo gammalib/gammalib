@@ -211,11 +211,6 @@ void GUrlFile::open(const std::string& url, const std::string& mode)
     // Expand environment variables
     std::string filename = gammalib::expand_env(url);
 
-    // Check if file exists
-    if (!gammalib::file_exists(filename)) {
-        throw GException::file_open_error(G_OPEN, filename);
-    }
-
     // Try opening file. Throw an exception if opening failed.
     m_fptr = std::fopen(filename.c_str(), mode.c_str());
     if (m_fptr == NULL) {
