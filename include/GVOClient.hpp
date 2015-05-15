@@ -41,13 +41,16 @@
  *
  * This class implements a client for the Virtual Observatory. Upon
  * construction of an instance of the class, the client will search for a
- * SAMP Hub. If no such Hub exists, a GammaLib owned Hub will be started
- * using the GVOHub class. Once a Hub is running, the client will retrieve
- * its information and store it.
+ * VO Hub. The has_hub() method signals whether VO Hub information was
+ * found.
  *
- * The connect() and disconnect() methods exist to connect or disconnect
- * from the Hub. Connecting means opening a socket to the Hub and registering
- * the client to the Hub.
+ * The connect() method will connect the client to the VO Hub. If no VO
+ * Hub has been found or if the VO Hub that was found is not alive the
+ * client will start an own VO Hub using the GVOHub class. The
+ * is_connected() method signals whether the client is connected to a
+ * Hub.
+ * 
+ * The disconnect() method disconnects a client from the VO Hub.
  ***************************************************************************/
 class GVOClient : public GBase {
 

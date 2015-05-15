@@ -319,6 +319,12 @@ GXml GVOClient::execute(const std::string& request) const
             xml = GXml(response.substr(start, std::string::npos));
         }
 
+        // Close socket
+        if (m_socket != -1) {
+            close(m_socket);
+            m_socket = -1;
+        }
+
     } // endif: connection has been established
 
     // Return response
@@ -363,11 +369,10 @@ std::string GVOClient::print(const GChatter& chatter) const
                 if (!m_client_key.empty()) {
                     result.append("registered as \""+m_client_id);
                     result.append("\" on Hub \""+m_hub_id);
-                    result.append("\" via socket "+gammalib::str(m_socket));
+                    result.append("\".");
                 }
                 else {
-                    result.append("established on socket ");
-                    result.append(gammalib::str(m_socket));
+                    result.append("established.");
                 }
             }
         }

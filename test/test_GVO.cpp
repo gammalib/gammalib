@@ -148,6 +148,7 @@ void TestGVO::test_GVOClient(void)
 
     // Connect client
     client.connect();
+    test_assert(client.is_connected(), "Check for connection.");
     //std::cout << client << std::endl;
 
     // Test ping
@@ -155,6 +156,7 @@ void TestGVO::test_GVOClient(void)
 
     // Disconnect client
     client.disconnect();
+    test_assert(!client.is_connected(), "Check for disconnection.");
     //std::cout << client << std::endl;
 
     // Test ping
