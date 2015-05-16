@@ -636,9 +636,10 @@ bool GVOClient::require_hub(void)
         else {
 
             // Check that Hub is alive
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < 5; ++i) {
                 found = find_hub() && ping_hub();
                 if (found) {
+std::cout << "*** Hub is alive ***" << std::endl;
                     break;
                 }
                 sleep(1);
