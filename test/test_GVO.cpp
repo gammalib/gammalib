@@ -167,6 +167,9 @@ void TestGVO::test_GVOClient(void)
     // Shutdown VO Hub
     client.shutdown_hub();
 
+    // Sleep a bit to make sure that the Hub is dead
+    sleep(1);
+
     // Test ping
     test_assert(!client.ping_hub(), "Ping Hub (should not be alive).");
 
