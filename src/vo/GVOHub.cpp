@@ -402,7 +402,7 @@ void GVOHub::start_hub(void)
     // Main event handling loop
     while (1) {
 
-    	// Accept connection from the client 
+        // Accept connection from the client 
     	socklen_t newsocket = accept(hub_socket, (struct sockaddr *)&cli_addr, &clilen);
     	if (newsocket < 0) {
             std::string msg = "Client connection to socket not accepted.";

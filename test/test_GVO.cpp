@@ -89,6 +89,8 @@ void TestGVO::test_GVOHub(void)
 {
     // Declare thread
     pthread_t thread;
+std::cout << "\n*** Before start of thread ***" << std::endl;
+system("netstat -natp tcp");
     
     // Start Hub in a thread
     test_try("Start hub");
@@ -99,6 +101,8 @@ void TestGVO::test_GVOHub(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
+std::cout << "\n*** After start of thread ***" << std::endl;
+system("netstat -natp tcp");
 
     // Test Hub connection
     GVOClient client;
@@ -121,6 +125,8 @@ void TestGVO::test_GVOHub(void)
     // the thread has been canceled.
     pthread_cancel(thread);
     sleep(1);
+std::cout << "\n*** After thread canel ***" << std::endl;
+system("netstat -natp tcp");
 
     // Return
     return;
@@ -143,6 +149,8 @@ void TestGVO::test_GVOClient(void)
         test_try_failure(e);
     }
 
+std::cout << "\n*** Before client connect ***" << std::endl;
+system("netstat -natp tcp");
     // Create client
     GVOClient client;
 
@@ -150,6 +158,8 @@ void TestGVO::test_GVOClient(void)
     client.connect();
     test_assert(client.is_connected(), "Check for connection.");
     //std::cout << client << std::endl;
+std::cout << "\n*** After client connect ***" << std::endl;
+system("netstat -natp tcp");
 
     // Test ping
     test_assert(client.ping_hub(), "Ping Hub.");
