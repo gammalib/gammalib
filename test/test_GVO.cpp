@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>       // for system() function
 #include <unistd.h>      // for sleep() function
 #include <pthread.h>
 #include <signal.h>      // for pthread_kill() function

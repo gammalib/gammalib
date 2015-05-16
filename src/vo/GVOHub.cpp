@@ -419,8 +419,14 @@ void GVOHub::start_hub(void)
         // If we have a PID of 0 we are in the child process. In this case
         // we have to handle the incoming requests ...
         if (pid == 0) {
+        
+            // Handle request
             handle_request(newsocket);
+            
+            // Close socket
             close(newsocket);
+            
+            // Exit child process
             exit(0);
         }
 
@@ -428,12 +434,20 @@ void GVOHub::start_hub(void)
 	    // so that the kernel can close it without sending it to zombie state
         // <defunct>
         else {
+        
+            // Wait for the child process to terminate
             int status = 0;
             waitpid(pid, &status, 0);
-            std::signal(pid, SIG_IGN);	
+            
+            // Send SIG_IGN to child process
+            std::signal(pid, SIG_IGN);
+            
         }
 
     } // endwhile: main event loop
+
+    // Close socket
+    close(hub_socket);
     
     // Return
     return;
