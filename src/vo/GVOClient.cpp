@@ -41,6 +41,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FIND_HUB                                    "GVOClient::find_hub()"
+#define G_REQUIRE_HUB                              "GVOClient::require_hub()"
 #define G_REGISTER_TO_HUB                      "GVOClient::register_to_hub()"
 
 /* __ Macros _____________________________________________________________ */
@@ -620,7 +621,7 @@ bool GVOClient::require_hub(void)
         int pid = fork();
         if (pid < 0) {
             std::string msg = "Unable to create child process for VO Hub.";
-            throw GException::runtime_error(G_FIND_HUB, msg);
+            throw GException::runtime_error(G_REQUIRE_HUB, msg);
         }
 
         // If we have a PID of 0 we are in the child process. In this case
@@ -639,7 +640,6 @@ bool GVOClient::require_hub(void)
             for (int i = 0; i < 5; ++i) {
                 found = find_hub() && ping_hub();
                 if (found) {
-std::cout << "*** Hub is alive ***" << std::endl;
                     break;
                 }
                 sleep(1);

@@ -120,6 +120,9 @@ void TestGVO::test_GVOHub(void)
     // We now shutdown the Hub via the client
     client.shutdown_hub();
 
+    // Sleep a bit to make sure that we exit without a Hub
+    sleep(1);
+
     // Return
     return;
 }
