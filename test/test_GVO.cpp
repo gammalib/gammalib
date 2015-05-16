@@ -90,8 +90,6 @@ void TestGVO::test_GVOHub(void)
 {
     // Declare thread
     pthread_t thread;
-std::cout << "\n*** Before start of thread ***" << std::endl;
-system("netstat -npta");
     
     // Start Hub in a thread
     test_try("Start hub");
@@ -102,8 +100,6 @@ system("netstat -npta");
     catch (std::exception &e) {
         test_try_failure(e);
     }
-std::cout << "\n*** After start of thread ***" << std::endl;
-system("netstat -npta");
 
     // Test Hub connection
     GVOClient client;
@@ -121,14 +117,8 @@ system("netstat -npta");
     // Disconnect client
     client.disconnect();
 
-    // Cancel thread. We do this here so that for the next test
-    // there is no Hub anymore. We do some sleeping to assure that
-    // the thread has been canceled.
-    //pthread_cancel(thread);
-    //sleep(1);
+    // We now shutdown the Hub via the client
     client.shutdown_hub();
-std::cout << "\n*** After thread canel ***" << std::endl;
-system("netstat -npta");
 
     // Return
     return;
@@ -151,17 +141,15 @@ void TestGVO::test_GVOClient(void)
         test_try_failure(e);
     }
 
-std::cout << "\n*** Before client connect ***" << std::endl;
-system("netstat -npta");
     // Create client
     GVOClient client;
+
+    // Test ping
+    test_assert(!client.ping_hub(), "Ping Hub (should not be alive).");
 
     // Connect client
     client.connect();
     test_assert(client.is_connected(), "Check for connection.");
-    //std::cout << client << std::endl;
-std::cout << "\n*** After client connect ***" << std::endl;
-system("netstat -npta");
 
     // Test ping
     test_assert(client.ping_hub(), "Ping Hub.");
@@ -169,13 +157,15 @@ system("netstat -npta");
     // Disconnect client
     client.disconnect();
     test_assert(!client.is_connected(), "Check for disconnection.");
-    //std::cout << client << std::endl;
 
     // Test ping
     test_assert(client.ping_hub(), "Ping Hub.");
 
     // Shutdown VO Hub
     client.shutdown_hub();
+
+    // Test ping
+    test_assert(!client.ping_hub(), "Ping Hub (should not be alive).");
 
     // Return
     return;

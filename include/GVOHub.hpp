@@ -142,7 +142,7 @@ protected:
     std::string m_hub_port;      //!< Hub port (extracted from XML-RPC endpoint)
     std::string m_version;       //!< The version of the SAMP Standard Profile implemented by the hub
     std::string m_hub_id;        //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
-    int         m_socket;        //!< Hub socket
+    socklen_t   m_socket;        //!< Hub socket
     int		    m_cback_socket;  //!< Hub socket to callback clients
     clients*    m_clients;       //!< Structure of registered clients
     void*       m_shmem;         //!< Pointer to shared memory address

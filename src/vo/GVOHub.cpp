@@ -246,7 +246,7 @@ void GVOHub::init_members(void)
     m_version       = "1.3";
     m_hub_id        = "gammalib_hub";
     m_socket        = -1;        // Signals no socket
-    m_cback_socket  = -1;
+    m_cback_socket  = -1;        // Signals no socket
     m_clients       = NULL;
     m_shmem         = NULL;
     m_shmem_handler = 0;
@@ -314,7 +314,16 @@ void GVOHub::copy_members(const GVOHub& hub)
  ***************************************************************************/
 void GVOHub::free_members(void)
 { 
-
+    // Close sockets
+    if (m_socket != -1) {
+        close(m_socket);
+        m_socket = -1;
+    }
+    if (m_cback_socket != -1) {
+        close(m_cback_socket);
+        m_cback_socket = -1;
+    }
+    
     // Remove lockfile
     std::string lockurl = get_hub_lockfile();
     std::remove(lockurl.c_str());
@@ -356,10 +365,10 @@ void GVOHub::start_hub(void)
     }
 
     // Create Hub socket
-    socklen_t hub_socket = socket(AF_INET, SOCK_STREAM, 0);
+    m_socket = socket(AF_INET, SOCK_STREAM, 0);
     
     // Creation of hub main socket
-    if (hub_socket < 0) {
+    if (m_socket < 0) {
         std::string msg = "Unable to create Hub socket. Errno="+
                           gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
@@ -367,13 +376,13 @@ void GVOHub::start_hub(void)
     
     // Set hub main socket to allow multiple connections
     int opt = 1;
-    if (setsockopt(hub_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0) {
+    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0) {
         std::string msg = "Unable to set Hub socket to multiple connections."
                           " Errno="+gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
     }
     #ifdef SO_REUSEPORT
-    if (setsockopt(hub_socket, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0) {
+    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0) {
         std::string msg = "Unable to set Hub socket to multiple connections."
                           " Errno="+gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
@@ -381,7 +390,7 @@ void GVOHub::start_hub(void)
     #endif
     
     // Server socket is opened. Now, bind it to the port, with family etc.
-    if (bind(hub_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+    if (bind(m_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         std::string msg = "Unable to bind Hub socket to server socket. Errno="+
                           gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
@@ -389,7 +398,7 @@ void GVOHub::start_hub(void)
 
     // Now start listening for the clients: 5 requests simultaneously pending
     // at maximum
-    if (listen(hub_socket, 5) < 0) {
+    if (listen(m_socket, 5) < 0) {
         std::string msg = "Unable to start listening on Hub socket. Errno="+
                           gammalib::str(errno);
         throw GException::runtime_error(G_START_HUB, msg);
@@ -403,8 +412,8 @@ void GVOHub::start_hub(void)
     while (1) {
 
         // Accept connection from the client 
-    	socklen_t newsocket = accept(hub_socket, (struct sockaddr *)&cli_addr, &clilen);
-    	if (newsocket < 0) {
+    	socklen_t socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
+    	if (socket < 0) {
             std::string msg = "Client connection to socket not accepted.";
             throw GException::runtime_error(G_START_HUB, msg);
     	}
@@ -421,15 +430,13 @@ void GVOHub::start_hub(void)
         if (pid == 0) {
         
             // Handle request
-            handle_request(newsocket);
+            handle_request(socket);
             
             // Exit child process
             exit(0);
         }
 
-        // ... otherwise we are in the parent process. Set SIG_IGN to child
-	    // so that the kernel can close it without sending it to zombie state
-        // <defunct>
+        // ... otherwise we are in the parent process.
         else {
         
             // Wait for the child process to terminate
@@ -437,9 +444,10 @@ void GVOHub::start_hub(void)
             waitpid(pid, &status, 0);
 
             // Close socket
-            close(newsocket);
+            close(socket);
             
-            // Send SIG_IGN to child process
+            // Send SIG_IGN to the child process so that the kernel can
+            // close it without sending it to zombie state <defunct>
             std::signal(pid, SIG_IGN);
 
             // If we have received a shutdown request then exit the event
@@ -453,9 +461,8 @@ void GVOHub::start_hub(void)
     } // endwhile: main event loop
 
     // Close socket
-    close(hub_socket);
-std::cout << "\n\n*** Hub shutdown ***" << std::endl;
-system("netstat -npta");
+    close(m_socket);
+    m_socket = -1;
 
     // Return
     return;
