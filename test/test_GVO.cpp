@@ -124,8 +124,9 @@ system("netstat -npta");
     // Cancel thread. We do this here so that for the next test
     // there is no Hub anymore. We do some sleeping to assure that
     // the thread has been canceled.
-    pthread_cancel(thread);
-    sleep(1);
+    //pthread_cancel(thread);
+    //sleep(1);
+    client.shutdown_hub();
 std::cout << "\n*** After thread canel ***" << std::endl;
 system("netstat -npta");
 
@@ -172,6 +173,9 @@ system("netstat -npta");
 
     // Test ping
     test_assert(client.ping_hub(), "Ping Hub.");
+
+    // Shutdown VO Hub
+    client.shutdown_hub();
 
     // Return
     return;

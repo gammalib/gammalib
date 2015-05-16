@@ -423,9 +423,6 @@ void GVOHub::start_hub(void)
             // Handle request
             handle_request(newsocket);
             
-            // Close socket
-            close(newsocket);
-            
             // Exit child process
             exit(0);
         }
@@ -438,9 +435,18 @@ void GVOHub::start_hub(void)
             // Wait for the child process to terminate
             int status = 0;
             waitpid(pid, &status, 0);
+
+            // Close socket
+            close(newsocket);
             
             // Send SIG_IGN to child process
             std::signal(pid, SIG_IGN);
+
+            // If we have received a shutdown request then exit the event
+            // loop
+            if (m_clients->registered == -1) {
+                break;
+            }
             
         }
 
@@ -448,7 +454,9 @@ void GVOHub::start_hub(void)
 
     // Close socket
     close(hub_socket);
-    
+std::cout << "\n\n*** Hub shutdown ***" << std::endl;
+system("netstat -npta");
+
     // Return
     return;
 }
@@ -561,6 +569,9 @@ void GVOHub::handle_request(const socklen_t& sock)
     else if (method_called.compare("samp.hub.reply") == 0) {
         request_ping(sock);
     }
+    else if (method_called.compare("samp.hub.shutdown") == 0) {
+        request_shutdown(sock);
+    }
 
     // Return
     return;
@@ -666,7 +677,7 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
     activate_callbacks("samp.hub.event.register", cl_id);	
 
     // Increment number of registered clients
-    m_clients->registered ++;
+    //m_clients->registered++;
 
     //Return
     return;
@@ -1162,6 +1173,42 @@ void GVOHub::request_get_metadata(const GXml& xml,const socklen_t& sock)
     // Post response
     post_string(msg, sock);
    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Handles Hub shutdown requests
+ *
+ * @param[in] sock Socket.
+ *
+ * Handles all incoming Hub shutdown requests.
+ ***************************************************************************/
+void GVOHub::request_shutdown(const socklen_t& sock)
+{
+    // Header
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::request_shutdown" << std::endl;
+    #endif
+
+    // Set shutdown flag
+    m_clients->registered = -1;
+    
+    // Declare message
+    std::string msg = "";
+
+    // Set response
+    msg.append("<?xml version=\"1.0\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("<params>\n");
+    msg.append("  <param><value/></param>\n");
+    msg.append("</params>\n");
+    msg.append("</methodResponse>\n");
+    
+    // Post response
+    post_string(msg,sock);
+
     // Return
     return;
 }

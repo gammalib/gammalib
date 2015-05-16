@@ -289,6 +289,31 @@ bool GVOClient::ping_hub(void) const
 
 
 /***********************************************************************//**
+ * @brief Shutdown VO Hub
+ ***************************************************************************/
+void GVOClient::shutdown_hub(void) const
+{
+    // Declare request
+    std::string request = "";
+    
+    // Set request
+    request.append("<?xml version=\"1.0\"?>\n");
+    request.append("<methodCall>\n");
+    request.append("  <methodName>samp.hub.shutdown</methodName>\n");
+    request.append("  <params>\n");
+    request.append("    <param><value/></param>\n");
+    request.append("  </params>\n");
+    request.append("</methodCall>\n");
+
+    // Execute request
+    execute(request);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Execute function on server
  *
  * @param[in] request XML request string
@@ -612,14 +637,12 @@ bool GVOClient::require_hub(void)
 
             // Check that Hub is alive
             for (int i = 0; i < 3; ++i) {
-                found = ping_hub();
+                found = find_hub() && ping_hub();
                 if (found) {
                     break;
                 }
+                sleep(1);
             }
-
-            // Get Hub information
-            found = find_hub();
 
         }
 

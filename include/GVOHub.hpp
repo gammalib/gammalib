@@ -95,6 +95,7 @@ protected:
                                                           const socklen_t& sock);
     void                   request_get_metadata(const GXml& xml,
                                                 const socklen_t& sock);
+    void                   request_shutdown(const socklen_t& sock);
     std::string            get_client_key(const GXml& xml) const;
     int                    get_client_index(const GXml& xml) const;
     std::string            get_response_value(const GXml& xml,
