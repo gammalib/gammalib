@@ -30,28 +30,8 @@
 #endif
 #include <cstdlib>       // for system() function
 #include <unistd.h>      // for sleep() function
-#include <pthread.h>
-#include <signal.h>      // for pthread_kill() function
 #include "test_GVO.hpp"
 #include "GTools.hpp"
-
-
-/***********************************************************************//**
- * @brief Thread start routine to test GVOHub class
- *
- * @param[in] ptr Start routine argument.
- **************************************************************************/
-void* vo_thread(void* ptr)
-{
-    // Create VO Hub
-    GVOHub hub;
-
-    // Start Hub
-    hub.start();
-
-    // Return
-    return NULL;
-}
 
 
 /***********************************************************************//**
@@ -88,40 +68,49 @@ TestGVO* TestGVO::clone(void) const
  **************************************************************************/
 void TestGVO::test_GVOHub(void)
 {
-    // Declare thread
-    pthread_t thread;
+   	// Create child process
+    int pid = fork();
+
+    // If we have a PID of 0 we are in the child process
+    if (pid == 0) {
+
+        // Create VO Hub
+        GVOHub hub;
+
+        // Start Hub
+        hub.start();
+            
+        // Exit child process
+        exit(0);
     
-    // Start Hub in a thread
-    test_try("Start hub");
-    try {
-        int rc = pthread_create(&thread, NULL, vo_thread, NULL);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
     }
 
-    // Test Hub connection
-    GVOClient client;
-    for (int i = 0; i < 3; ++i) {
-        sleep(1);
-        client.connect();
-        if (client.is_connected()) {
-            break;
+    // ... otherwise if PID is >0 then we are in the parent process
+    else if (pid > 0) {
+    
+        // Test Hub connection
+        GVOClient client;
+        for (int i = 0; i < 3; ++i) {
+            sleep(1);
+            client.connect();
+            if (client.is_connected()) {
+                break;
+            }
         }
-    }
 
-    // Test ping
-    test_assert(client.ping_hub(), "Ping Hub.");
+        // Test ping
+        test_assert(client.ping_hub(), "Ping Hub.");
 
-    // Disconnect client
-    client.disconnect();
+        // Disconnect client
+        client.disconnect();
 
-    // We now shutdown the Hub via the client
-    client.shutdown_hub();
+        // We now shutdown the Hub via the client
+        client.shutdown_hub();
 
-    // Sleep a bit to make sure that we exit without a Hub
-    sleep(1);
+        // Sleep a bit to make sure that we exit without a Hub
+        sleep(1);
+
+    } // endelse: parent process
 
     // Return
     return;
