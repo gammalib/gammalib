@@ -56,6 +56,8 @@
 
 /* __ Coding definitions _________________________________________________ */
 #define G_KEY 12345
+//#define G_USE_FORK
+//#define G_USE_SHMEM
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_CONSOLE_DUMP
@@ -251,6 +253,7 @@ void GVOHub::init_members(void)
     m_shmem         = NULL;
     m_shmem_handler = 0;
 
+    #if defined(G_USE_SHMEM)
     // Get shared memory for handling of clients
     if ((m_shmem_handler = shmget(G_KEY, sizeof(clients), 0666 | IPC_CREAT)) < 0) {
         std::string msg = "Could not open shared memory.";
@@ -263,8 +266,13 @@ void GVOHub::init_members(void)
         throw GException::invalid_value(G_INIT_MEMBERS, msg);
 	}
 
+    // Get pointer
+    m_clients = static_cast<clients*>(m_shmem);
+    #else
+    m_clients = new clients;
+    #endif
+
     // Initialise shared memory
-    m_clients             = static_cast<clients*>(m_shmem);
     m_clients->registered = 0;
     for (int i = 0; i < GVOHUB_NB_CLIENTS; ++i) {
         strcpy(m_clients->metadata[i].reference,    "NoRef");
@@ -329,9 +337,11 @@ void GVOHub::free_members(void)
     std::remove(lockurl.c_str());
 
     // Release shared memory
+    #if defined(G_USE_SHMEM)
     struct shmid_ds *buf;
     shmdt(m_shmem);
     shmctl(m_shmem_handler, IPC_RMID, buf);
+    #endif
 
     // Return
     return;
@@ -418,6 +428,7 @@ void GVOHub::start_hub(void)
             throw GException::runtime_error(G_START_HUB, msg);
     	}
 
+        #if defined(G_USE_FORK)
     	// Create child process to handle the request
         int pid = fork();
         if (pid < 0) {
@@ -457,6 +468,19 @@ void GVOHub::start_hub(void)
             }
             
         }
+        #else
+        // Handle request
+        handle_request(socket);
+
+        // Close socket
+        close(socket);
+
+        // If we have received a shutdown request then exit the event
+        // loop
+        if (m_clients->registered == -1) {
+            break;
+        }
+        #endif
 
     } // endwhile: main event loop
 
