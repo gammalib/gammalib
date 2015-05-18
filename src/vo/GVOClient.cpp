@@ -913,7 +913,7 @@ void GVOClient::post_string(const std::string& content) const
         // Send content to socket
         bool done = false;
         do {
-            int length      = post.length() + 1; // +1 for terminating 0
+            int length      = post.length();
             int sent_length = send(m_socket, post.c_str(), length, 0);
             if (sent_length < length) {
                 post = post.substr(sent_length, std::string::npos);

@@ -94,6 +94,7 @@ protected:
     void                     request_shutdown(const socklen_t& sock);
     std::string              get_client_key(const GXml& xml) const;
     int                      get_client_index(const GXml& xml) const;
+    int                      get_client_index(const std::string& reference) const;
     std::string              get_response_value(const GXml& xml,
                                                 const std::string& name) const;
     void                     get_name_value_pair(const GXmlNode* node,
@@ -108,6 +109,7 @@ protected:
     // Low-level methods
     void        create_samp_file(void) const;
     void        post_samp_ok(const socklen_t& sock) const;
+    void        post_samp_void(const socklen_t& sock) const;
     void	    post_string(const std::string& content, const socklen_t& sock) const;
     void        notify(const std::string& url, const std::string& notification) const;
     std::string	random_string(const size_t& length) const;
