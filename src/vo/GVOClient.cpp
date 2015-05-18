@@ -867,9 +867,6 @@ void GVOClient::connect_to_hub(void) const
                         break;
                     }
                 }
-                else {
-                    break;
-                }
 
             } // endfor: looped through all results
 
@@ -917,7 +914,7 @@ void GVOClient::post_string(const std::string& content) const
         bool done = false;
         do {
             int length      = post.length() + 1; // +1 for terminating 0
-            int sent_length = send(m_socket, post.c_str(), length+1, 0);
+            int sent_length = send(m_socket, post.c_str(), length, 0);
             if (sent_length < length) {
                 post = post.substr(sent_length, std::string::npos);
             }
