@@ -545,9 +545,26 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
     std::cout << "GVOHub::request_register" << std::endl;
     #endif
 
+    // Set client reference
+    int         counter = 0;
+    std::string reference;
+    do {
+        reference = "c"+gammalib::str(counter);
+        int i = 0;
+        for (; i < m_clients.size(); ++i) {
+            if (m_clients[i].reference == reference) {
+                counter++;
+                break;
+            }
+        }
+        if (i >= m_clients.size()) {
+            break;
+        }
+    } while (true);
+
     // Create a new client
     struct client voclient;
-    voclient.reference   = "c"+gammalib::str(m_clients.size());
+    voclient.reference   = reference;
     voclient.private_key = random_string(15);
     
     // Attached client
