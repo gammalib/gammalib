@@ -1,4 +1,4 @@
-2015-05-16  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-05-20  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         ========================
@@ -23,10 +23,11 @@
         Allow appending of empty intervals to GEbounds and GGti
         Add single interval constructor to GGti
         Allow calling GNodeArray::set_value() for a single node
-        Add GTI and livtime information to GCTACubeExposure
+        Add GTI and livetime information to GCTACubeExposure
         Add GModelSpatial::contains method (#1446)
         Add GModelSpatialEllipticalGauss class (#1412)
         Add GVOHub class (#1229)
+        Add CTA Prod2 instrument response function (#1464)
 
 
 2015-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

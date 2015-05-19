@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-16 May 2015
+20 May 2015
 
 
 1. Introduction
@@ -188,6 +188,9 @@ Good Time Intervals and livetime information has been added to GCTACubeExposure
 to keep track of the time intervals that were used to compute the exposure
 cube and to make this information available for the response computation
 without needing a fully defined observation.
+
+Prod2 instrument response functions for the Southern and Northern array
+have been added.
 
 
 21. COMPTEL interface
