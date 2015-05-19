@@ -105,27 +105,36 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
                      include/GCTALib.hpp
 
-# Calibration files to distribute
-caldb_pinx = caldb/caldb.indx
-caldb_perf = caldb/cta_dummy_irf.dat
-caldb_indx = caldb/data/cta/e/caldb.indx
-caldb_irf1 = caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits
-caldb_irf2 = caldb/data/cta/e/bcf/IFAE20120510_50h_King/irf_file.fits
-
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
 libcta_la_SOURCES = $(sources)
 libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
 
 # Distribute calibration database files
-EXTRA_DIST     = $(caldb_pinx) $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)
-caldbpinxdir   = $(datadir)/caldb/data/cta/dummy
-caldbpinx_DATA = $(caldb_pinx)
-caldbperfdir   = $(datadir)/caldb/data/cta/dummy/bcf
-caldbperf_DATA = $(caldb_perf)
-caldbindxdir   = $(datadir)/caldb/data/cta/e
-caldbindx_DATA = $(caldb_indx)
-caldbirf1dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h
-caldbirf1_DATA = $(caldb_irf1)
-caldbirf2dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h_King
-caldbirf2_DATA = $(caldb_irf2)
+#EXTRA_DIST     = $(caldb_pinx) $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)
+#caldbpinxdir   = $(datadir)/caldb/data/cta/dummy
+#caldbpinx_DATA = caldb/caldb.indx
+#caldbperfdir   = $(datadir)/caldb/data/cta/dummy/bcf
+#caldbperf_DATA = caldb/cta_dummy_irf.dat
+#caldbindxdir   = $(datadir)/caldb/data/cta/e
+#caldbindx_DATA = caldb/data/cta/e/caldb.indx
+#caldbirf1dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h
+#caldbirf1_DATA = caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits
+#caldbirf2dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h_King
+#caldbirf2_DATA = caldb/data/cta/e/bcf/IFAE20120510_50h_King/irf_file.fits
+#
+caldb_prod2_indxdir      = $(datadir)/caldb/data/cta/prod2
+caldb_prod2_indx_DATA    = caldb/data/cta/prod2/caldb.indx
+caldb_prod2_north1dir    = $(datadir)/caldb/data/cta/prod2/bcf/North_0.5h
+caldb_prod2_north1_DATA  = caldb/data/cta/prod2/bcf/North_0.5h/irf_file.fits.gz
+caldb_prod2_north2dir    = $(datadir)/caldb/data/cta/prod2/bcf/North_5h
+caldb_prod2_north2_DATA  = caldb/data/cta/prod2/bcf/North_5h/irf_file.fits.gz
+caldb_prod2_north3dir    = $(datadir)/caldb/data/cta/prod2/bcf/North_50h
+caldb_prod2_north3_DATA  = caldb/data/cta/prod2/bcf/North_50h/irf_file.fits.gz
+#
+caldb_prod2_south1dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_0.5h
+caldb_prod2_south1_DATA  = caldb/data/cta/prod2/bcf/South_0.5h/irf_file.fits.gz
+caldb_prod2_south2dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_5h
+caldb_prod2_south2_DATA  = caldb/data/cta/prod2/bcf/South_5h/irf_file.fits.gz
+caldb_prod2_south3dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_50h
+caldb_prod2_south3_DATA  = caldb/data/cta/prod2/bcf/South_50h/irf_file.fits.gz
