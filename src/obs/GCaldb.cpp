@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCaldb.cpp - Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,8 +37,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_GET_ROOTDIR                                     "GCaldb::rootdir()"
 #define G_SET_ROOTDIR                         "GCaldb::rootdir(std::string&)"
-#define G_PATH                       "GCaldb::path(std::string, std::string)"
-#define G_CIF                         "GCaldb::cif(std::string, std::string)"
+#define G_PATH                     "GCaldb::path(std::string&, std::string&)"
+#define G_CIFNAME               "GCaldb::cifname(std::string&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -420,7 +420,7 @@ std::string GCaldb::cifname(const std::string& mission, const std::string& instr
 
     // Verify that CIF exists
     if (access(cif.c_str(), F_OK) != 0) {
-        throw GException::file_not_found(G_CIF, cif,
+        throw GException::file_not_found(G_CIFNAME, cif,
               "Calibration Index File (CIF) not found.");
     }
 
