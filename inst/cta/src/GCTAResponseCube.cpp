@@ -313,7 +313,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
             // Get PSF component
             irf *= psf()(srcDir, delta, srcEng);
 
-            // Divide by livtime
+            // Divide by livetime
             irf /= livetime;
 
             // Apply deadtime correction
