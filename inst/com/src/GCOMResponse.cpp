@@ -390,7 +390,9 @@ double GCOMResponse::irf(const GEvent&       event,
 /***********************************************************************//**
  * @brief Return integral of event probability for a given sky model over ROI
  *
- * @param[in] model Incident photon.
+ * @param[in] model Sky model.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
  * @param[in] obs Observation.
  * @return 0.0
  *

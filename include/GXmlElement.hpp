@@ -142,7 +142,7 @@ GXmlNode* GXmlElement::parent(void) const
 /***********************************************************************//**
  * @brief Set parent of XML element
  *
- * @param[in] node Parent of XML element.
+ * @param[in] parent Parent of XML element.
  ***************************************************************************/
 inline
 void GXmlElement::parent(GXmlNode* parent)

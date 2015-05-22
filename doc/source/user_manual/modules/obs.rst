@@ -234,21 +234,6 @@ Equation :eq:`pirf` is used by the :doxy:`GModelSky::eval` and
 :doxy:`GModelSky::eval_gradients` methods for computation of the instrument
 response to a source model (see :ref:`fig_calltree_model`). 
 
-Dependent on the source model type (point source, radial source, elliptical
-source or diffuse source),
-:doxy:`GResponse::irf(GEvent&, GSource&, GObservation&)`
-calls the methods
-:doxy:`GResponse::irf_ptsrc`, 
-:doxy:`GResponse::irf_radial`,
-:doxy:`GResponse::irf_elliptical` or
-:doxy:`GResponse::irf_diffuse`.
-All these methods have a default implementation in :doxy:`GResponse`, thus 
-formally the methods do not need to be implemented in the derived class.
-However, except for :doxy:`GResponse::irf_ptsrc`, the code for the methods 
-has not been written so far, hence if an instrument should support models others
-than the point source model, the respective methods need to be implemented in
-the instrument specific implementation of the :doxy:`GResponse` class.
-
 A maximum likelihood analysis of the data generally needs the computation of the
 predicted number of events within the selection region for each source model.
 Selection region means here the range of measured quantities that is used for
@@ -282,17 +267,8 @@ The integration over the region of interest
 .. math::
     N_{\rm ROI} = \int_{\rm ROI} (p', E', t'| d) \, {\rm d}p'
 
-is provided by the :doxy:`GResponse::npred(GSource&, GObservation&)` method.
-Dependent on the source model type (point source, radial source, elliptical
-source or diffuse source), :doxy:`GResponse::npred(GSource&, GObservation&)`
-calls the methods ``GResponse::npred_ptsrc``, ``GResponse::npred_radial``,
-``GResponse::npred_elliptical`` or ``GResponse::npred_diffuse``.
-All these methods have a default implementation in :doxy:`GResponse`, which
-all make use of the pure virtual :doxy:`GResponse::npred(GPhoton&, GObservation&)`
-method that needs to be implemented by the instrument specific derived
-class.
-See :ref:`fig_calltree_model` to see how the :doxy:`GResponse::npred` method is
-used in response computations of source models.
+is provided by the 
+:doxy:`GResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)` method.
 
 A final word about deadtime corrections.
 Deadtime corrections need to be taken into account at the level of the instrument

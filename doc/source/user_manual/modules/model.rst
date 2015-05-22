@@ -34,7 +34,7 @@ methods. The top section shows the abstract methods, the bottom section
 shows the methods that are called for :doxy:`GModelSky` models, i.e. models of 
 celestial sources that are folded by the instrument response.
 
-For model evaluation, the ``GObservation::model`` method loops over all 
+For model evaluation, the :doxy:``GObservation::model`` method loops over all 
 models in the :doxy:`GModels` container and calls the 
 :doxy:`GModel::eval_gradients` method of each model. For :doxy:`GModelSky` models, 
 this invokes an integration over true time, true energy and all possible 
@@ -48,7 +48,7 @@ performed by the ``GObservation::npred_temp`` and
 ``GObservation::npred_spec`` methods within the :doxy:`GObservation` class, 
 the spatial integral is done within the :doxy:`GModel` class by invoking the 
 ``GModel::npred`` method. For :doxy:`GModelSky` models, the integral is 
-performed by the abstract :doxy:`GResponse::npred` method that needs to be 
+performed by the abstract :doxy:`GResponse::nroi` method that needs to be 
 implemented for each instrument.
 
 .. _fig_calltree_model:

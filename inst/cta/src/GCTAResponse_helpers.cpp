@@ -224,33 +224,7 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
 /***********************************************************************//**
  * @brief Integration kernel for nedisp() method
  *
- * @param[in] logEobs Observed event energy.
- * @return Energy dispersion PDF value.
- ***************************************************************************/
-/*
-double cta_nedisp_kern::eval(const double& logEobs)
-{
-    // Get value
-    double value = (*m_rsp.edisp())(logEobs,
-                                    m_logEsrc,
-                                    m_theta,
-                                    m_phi,
-                                    m_zenith,
-                                    m_azimuth);
-
-    // Correct for variable substitution
-    //value *= std::exp(logEobs);
-
-    // Return
-    return value;
-}
-*/
-
-
-/***********************************************************************//**
- * @brief Integration kernel for nedisp() method
- *
- * @param[in] logEobs Logarithm of true photon energy.
+ * @param[in] logEsrc Logarithm of true photon energy.
  * @return Nroi.
  ***************************************************************************/
 double cta_nroi_kern::eval(const double& logEsrc)

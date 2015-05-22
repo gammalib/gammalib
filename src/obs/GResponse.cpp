@@ -290,6 +290,8 @@ void GResponse::free_members(void)
  *
  * @param[in] model Sky model.
  * @param[in] event Event.
+ * @param[in] srcEng Source energy.
+ * @param[in] srcTime Source time.
  * @param[in] obs Observation.
  * @param[in] grad Should model gradients be computed? (default: true)
  * @return Event probability.
