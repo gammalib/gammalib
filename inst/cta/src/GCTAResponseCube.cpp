@@ -60,6 +60,7 @@
                                                             " GObservation&)"
 #define G_NROI        "GCTAResponseCube::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
+#define G_EBOUNDS                       "GCTAResponseCube::ebounds(GEnergy&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 #define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
 
@@ -428,7 +429,6 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
  * @param[in] obsEnergy Observed Energy.
  * @return True energy boundaries for given observed energy.
  ***************************************************************************/
-#define G_EBOUNDS                       "GCTAResponseCube::ebounds(GEnergy&)"
 GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
 {
     // Initialise an empty boundary object
