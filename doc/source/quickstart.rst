@@ -8,7 +8,7 @@ GammaLib comes with a Python interface, and as first step you should
 verify that the Python interfaces workes correctly. You do this by
 typing::
 
-   >>> from gammalib import *
+   >>> import gammalib
 
 If everything works fine you should just get a new Python prompt after
 importing GammaLib. If you get an error message, make sure that you've
@@ -22,7 +22,7 @@ up the environment as described
 
 Now try::
 
-   >>> models = GModels()
+   >>> models = gammalib.GModels()
    >>> print(models)
    === GModels ===
    Number of models ..........: 0
@@ -33,11 +33,11 @@ container.
 
 Now let's append a model to this container. For this, type::
 
-    >>> pos = GSkyDir()
+    >>> pos = gammalib.GSkyDir()
     >>> pos.radec_deg(83.6331, 22.0145)
-    >>> spatial = GModelSpatialPointSource(pos)
-    >>> spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100, 'MeV'))
-    >>> model = GModelSky(spatial, spectral)
+    >>> spatial = gammalib.GModelSpatialPointSource(pos)
+    >>> spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100, 'MeV'))
+    >>> model = gammalib.GModelSky(spatial, spectral)
     >>> models.append(model)
     >>> print(models)
     === GModels ===
@@ -101,7 +101,7 @@ typing::
 
 and you can load it from an XML file in memory using::
 
-   >>> new_models = GModels('test.xml')
+   >>> new_models = gammalib.GModels('test.xml')
    >>> print(new_models)
 
 The last print command is to convince yourself that the models have been

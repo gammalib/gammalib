@@ -37,7 +37,7 @@ version 3. The latest source code can be downloaded from
 https://sourceforge.net/projects/gammalib/ which also provides bug
 trackers and mailing lists. Further information and documentation on
 GammaLib can be found on http://gammalib.sourceforge.net/. The present document
-applies to GammaLib version 0.8.
+applies to GammaLib version 0.10.
 
 GammaLib is designed to compile on any POSIX compliant platform. So far, 
 GammaLib has been successfully compiled and tested on Mac OS X, OpenBSD, OpenSolaris
@@ -91,7 +91,7 @@ correspond to the folders in the source code distribution):
 
 GammaLib can be used as C++ application program interface (API) or as a Python
 module (provided that Python is installed on your system). The GammaLib Python
-bindings were built using `swig <http://www.swig.org/>`_ version 2.0.8, and are
+bindings were built using `swig <http://www.swig.org/>`_ version 3.0.2, and are
 shipped together with the source code. This enables using all
 GammaLib functionalities from within Python.
 
