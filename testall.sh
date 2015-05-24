@@ -2,7 +2,7 @@
 #
 # Run all test and example scripts that come with the package
 #
-# Copyright (C) 2011-2013 Juergen Knoedlseder
+# Copyright (C) 2011-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -62,11 +62,13 @@ cd $base
 echo
 echo "=====> inst/cta/test"
 cd inst/cta/test
-./test_model.py
-./test_gauss.py
 ./example_binned_ml_fit.py
+./example_make_model.py
 ./example_sim_photons.py
-./example_sim_psf.py
+./test_gauss.py
+./test_model.py
+./test_sim_psf.py
+./test_sim_edisp.py
 cd $base
 
 

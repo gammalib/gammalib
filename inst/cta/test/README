@@ -1,20 +1,32 @@
 This folder contains files used for unit testing and files that serve
 as example scripts for the CTA interface of GammaLib.
 
+benchmark_irf_computing.py
+  This script performs a benchmark of the response computation for all
+  different analysis methods (unbinned, binned, stacked). Specifically it
+  compares the total number of modelled counts to the expected number from
+  Monte-Carlo simulations. This script is used to validate the absolute
+  normalization of the CTA response computations.
+
+benchmark_ml_fitting.py
+  This script performs a benchmark for maximum likelihood fitting of CTA
+  data.
+
 example_binned_ml_fit.py
   Illustrates a binned maximum likelihood fit of CTA data.
   This script implements a full analysis chain, and computes
   also the TS statistics value that estimates the significance
   of the source detection.
 
+example_make_model.py
+  Illustrates how to make a model in counts space for a counts
+  map given a specific model in XML format.
+
 example_sim_photons.py
   Illustrates how photons are simulated from a source model. If
   matplotlib is installed, the simulated photons are shown as
   a spectrum.
 
-example_make_model.py
-  Illustrates how to make a model in counts space for a counts
-  map given a specific model in XML format.
 test_CTA.cpp
   Unit test C++ file for CTA specific GammaLib components.
 
@@ -43,3 +55,11 @@ test_radial_acceptance.py
 
 test_response_table.py
   Display CTA response table.
+
+test_sim_edisp.py
+  Compares energy dispersion simulation to energy dispersion
+  model.
+
+test_sim_psf.py
+  Compares Point Spread function simulation to Point Spread function
+  model.
