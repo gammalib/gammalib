@@ -174,10 +174,10 @@ def observation(ra=83.6331, dec=22.0145, emin=0.1, emax=100.0,
     obs = gammalib.GCTAObservation()
 
     # Set response
-    #obs.response("cta_dummy_irf", GCaldb("../caldb"))
-    exposure = gammalib.GCTACubeExposure("data/expcube.fits")
-    psf      = gammalib.GCTACubePsf("data/psfcube.fits")
-    obs.response(exposure, psf)
+    exposure   = gammalib.GCTACubeExposure("data/expcube.fits")
+    psf        = gammalib.GCTACubePsf("data/psfcube.fits")
+    background = gammalib.GCTACubeBackground("data/bkgcube.fits")
+    obs.response(exposure, psf, background)
 
     # Set pointing
     dir = gammalib.GSkyDir()
@@ -200,9 +200,6 @@ def observation(ra=83.6331, dec=22.0145, emin=0.1, emax=100.0,
     obs.ontime(duration)
     obs.livetime(duration * deadc)
     obs.deadc(deadc)
-
-    # Optionally show observation
-    # print(obs)
 
     # Return observation
     return obs

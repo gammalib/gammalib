@@ -115,7 +115,7 @@ def binned_analysis(model, cntmap, irf, caldb):
 # ==================== #
 # CTA stacked analysis #
 # ==================== #
-def stacked_analysis(model, cntmap, expcube, psfcube):
+def stacked_analysis(model, cntmap, expcube, psfcube, bkgcube):
     """
     Perform stacked maximum likelihood fitting of CTA data using GammaLib
     classes. The function performs two fits, one with the full model and
@@ -141,9 +141,10 @@ def stacked_analysis(model, cntmap, expcube, psfcube):
     cta_obs.load(cntmap)
 
     # Specify response for CTA observation
-    exposure = gammalib.GCTACubeExposure(expcube)
-    psf      = gammalib.GCTACubePsf(psfcube)
-    cta_obs.response(exposure, psf)
+    exposure   = gammalib.GCTACubeExposure(expcube)
+    psf        = gammalib.GCTACubePsf(psfcube)
+    background = gammalib.GCTACubeBackground(bkgcube)
+    cta_obs.response(exposure, psf, background)
 
     # Append CTA observation to observation container
     obs.append(cta_obs)
@@ -225,12 +226,13 @@ if __name__ == '__main__':
     cntmap  = "data/crab_cntmap.fits"
     expcube = "data/expcube.fits"
     psfcube = "data/psfcube.fits"
+    bkgcube = "data/bkgcube.fits"
 
     # Perform binned analysis
     results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
 
     # Perform stacked analysis
-    results_cube = stacked_analysis(model, cntmap, expcube, psfcube)
+    results_cube = stacked_analysis(model, cntmap, expcube, psfcube, bkgcube)
 
     # Print model results
     #print(result)

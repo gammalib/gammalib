@@ -89,7 +89,7 @@ def sim_psf(response, energy, r_max=0.8, rbins=1000, nmc=1000000):
 
         # Plot simulated data
         plt.plot(delta, counts, 'ro')
-        plt.errorbar(delta, counts, error, fmt=None, ecolor='r')
+        plt.errorbar(delta, counts, error, ecolor='r')
 
         # Plot PSF
         plt.plot(delta, psf, 'b-')
