@@ -6,15 +6,16 @@ Observation handling
 Overview
 ~~~~~~~~
 
-:ref:`fig_uml_obs` present an overview over the C++ classes of the obs
+The following figure presents an overview over the C++ classes of the obs
 module and their relations.
 
 .. _fig_uml_obs:
 
 .. figure:: uml_obs.png
+   :align: center
    :width: 100%
 
-   Observation module
+   *Overview over the obs module*
 
 The central C++ class of the obs module is the abstract base class
 :doxy:`GObservation` which defines the instrument-independent interface for a
@@ -115,15 +116,17 @@ for an unbinned observation and by:
 .. code-block:: xml
 
     <observation name="..." id="..." instrument="...">
-        <parameter name="CountsMap"           file="..."/>
+        <parameter name="CountsCube"          file="..."/>
         <parameter name="EffectiveArea"       file="..."/>
         <parameter name="PointSpreadFunction" file="..."/>
         <parameter name="EnergyDispersion"    file="..."/>
     </observation>
 
 for a binned observation. Here, ``EventList`` specifies a FITS file containing
-an event list and ``CountsMap`` specifies a FITS file containing a counts map.
-The other tags specify the components of the instrumental response function.
+an event list and ``CountsCube`` specifies a FITS file containing a counts 
+cube.
+The other tags specify the components of the instrumental response function
+and are optional.
 Similar definitions exist for the other instruments.
 
 The observations are loaded from the XML file descriptor using the load
@@ -234,21 +237,6 @@ Equation :eq:`pirf` is used by the :doxy:`GModelSky::eval` and
 :doxy:`GModelSky::eval_gradients` methods for computation of the instrument
 response to a source model (see :ref:`fig_calltree_model`). 
 
-Dependent on the source model type (point source, radial source, elliptical
-source or diffuse source),
-:doxy:`GResponse::irf(GEvent&, GSource&, GObservation&)`
-calls the methods
-:doxy:`GResponse::irf_ptsrc`, 
-:doxy:`GResponse::irf_radial`,
-:doxy:`GResponse::irf_elliptical` or
-:doxy:`GResponse::irf_diffuse`.
-All these methods have a default implementation in :doxy:`GResponse`, thus 
-formally the methods do not need to be implemented in the derived class.
-However, except for :doxy:`GResponse::irf_ptsrc`, the code for the methods 
-has not been written so far, hence if an instrument should support models others
-than the point source model, the respective methods need to be implemented in
-the instrument specific implementation of the :doxy:`GResponse` class.
-
 A maximum likelihood analysis of the data generally needs the computation of the
 predicted number of events within the selection region for each source model.
 Selection region means here the range of measured quantities that is used for
@@ -282,17 +270,8 @@ The integration over the region of interest
 .. math::
     N_{\rm ROI} = \int_{\rm ROI} (p', E', t'| d) \, {\rm d}p'
 
-is provided by the :doxy:`GResponse::npred(GSource&, GObservation&)` method.
-Dependent on the source model type (point source, radial source, elliptical
-source or diffuse source), :doxy:`GResponse::npred(GSource&, GObservation&)`
-calls the methods ``GResponse::npred_ptsrc``, ``GResponse::npred_radial``,
-``GResponse::npred_elliptical`` or ``GResponse::npred_diffuse``.
-All these methods have a default implementation in :doxy:`GResponse`, which
-all make use of the pure virtual :doxy:`GResponse::npred(GPhoton&, GObservation&)`
-method that needs to be implemented by the instrument specific derived
-class.
-See :ref:`fig_calltree_model` to see how the :doxy:`GResponse::npred` method is
-used in response computations of source models.
+is provided by the 
+:doxy:`GResponse::nroi(GModelSky&, GEnergy&, GTime&, GObservation&)` method.
 
 A final word about deadtime corrections.
 Deadtime corrections need to be taken into account at the level of the instrument
@@ -305,7 +284,9 @@ which provides the time dependent deadtime correction factor.
 Setting up and using a calibration database
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TBW: Describe how to setup and how to use a calibration database.
+To be written (describe how to setup and how to use a calibration 
+database) ...
+
 
 .. _sec_time:
 
@@ -380,12 +361,14 @@ OGIP compliant header keywords.
 Energies in GammaLib
 ~~~~~~~~~~~~~~~~~~~~
 
-TBW: Describe how energies are implemented in GammaLib. Mention that the
-internal energy is MeV. This section should also handle EBOUNDS.
+To be written (describe how energies are implemented in GammaLib; mention
+that the internal energy is MeV; this section should also handle EBOUNDS) 
+...
 
 .. _sec_roi:
 
 Regions of Interest
 ~~~~~~~~~~~~~~~~~~~
 
-TBW: Describe what a ROI is and why this is needed (unbinned analysis).
+To be written (describe what a ROI is and that this is needed for unbinned
+analysis) ...

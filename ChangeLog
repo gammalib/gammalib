@@ -1,7 +1,7 @@
-2015-05-20  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-05-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
-        * Version 1.0.0 released
-        ========================
+        * Version 0.10.0 released
+        =========================
 
         Add optional PHASE information to CTA event lists
         Use URL path informtion in GVOClient connection to Hub

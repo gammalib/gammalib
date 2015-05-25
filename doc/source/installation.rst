@@ -4,8 +4,8 @@ Installation
 
 .. note ::
 
-   These installation instructions apply to gammalib-00-04-10 and
-   later. gammalib-00-04-10 has been built, installed and tested
+   These installation instructions apply to gammalib-0.10.0 and
+   later. gammalib-0.10.0 has been built, installed and tested
    successfully on Debian, Ubuntu, Mandriva, OpenSUSE, Scientific Linux,
    CentOS, gentoo, Mac OS X, FreeBSD, and OpenSolaris (using gcc), so
    hopefully it also installs on your distribution. In case you encounter
@@ -64,12 +64,12 @@ Building GammaLib
 Download the latest source tarball, save it in an appropriate location,
 and type ::
 
-   $ tar xvfz GammaLib-XX-XX-XX.tar.gz
+   $ tar xvfz gammalib-x.y.z.tar.gz
 
-where ``XX-XX-XX`` is the version number of the library. Step in the created
+where ``x.y.z`` is the version number of the library. Step in the created
 directory using ::
 
-   $ cd gammalib-XX-XX-XX
+   $ cd gammalib-x.y.z
 
 and build GammaLib by typing ::
 

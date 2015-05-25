@@ -8,7 +8,7 @@ classes and their primary usage, as well as their underlying
 arithmetics. However, we do not provide a detailed description of the
 interface and the inner workings of each C++ class. This information is
 provided in the reference documentation, which can be found online at
-http://gammalib.sourceforge.net/doxygen/, or which can be installed
+http://cta.irap.omp.eu/gammalib/doxygen/, or which can be installed
 locally on your machine (see section :ref:`sec_doxygen`).
 
 Each GammaLib module is presented in a dedicated section, following the overview

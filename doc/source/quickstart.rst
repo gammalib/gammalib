@@ -5,10 +5,10 @@ First steps with GammaLib
 -------------------------
 
 GammaLib comes with a Python interface, and as first step you should
-verify that the Python interfaces workes correctly. You do this by
+verify that the Python interface works correctly. You do this by
 typing::
 
-   >>> from gammalib import *
+   >>> import gammalib
 
 If everything works fine you should just get a new Python prompt after
 importing GammaLib. If you get an error message, make sure that you've
@@ -22,7 +22,7 @@ up the environment as described
 
 Now try::
 
-   >>> models = GModels()
+   >>> models = gammalib.GModels()
    >>> print(models)
    === GModels ===
    Number of models ..........: 0
@@ -33,11 +33,11 @@ container.
 
 Now let's append a model to this container. For this, type::
 
-    >>> pos = GSkyDir()
+    >>> pos = gammalib.GSkyDir()
     >>> pos.radec_deg(83.6331, 22.0145)
-    >>> spatial = GModelSpatialPointSource(pos)
-    >>> spectral = GModelSpectralPlaw(1.0, -2.0, GEnergy(100, 'MeV'))
-    >>> model = GModelSky(spatial, spectral)
+    >>> spatial = gammalib.GModelSpatialPointSource(pos)
+    >>> spectral = gammalib.GModelSpectralPlaw(1.0, -2.0, gammalib.GEnergy(100, 'MeV'))
+    >>> model = gammalib.GModelSky(spatial, spectral)
     >>> models.append(model)
     >>> print(models)
     === GModels ===
@@ -62,13 +62,13 @@ Now let's append a model to this container. For this, type::
       Constant .................: 1 (relative value) (fixed,scale=1,gradient)
 
 With this sequence of commands you first defined a sky direction in
-celestial coordinates using ``GSkyDir``. You may easily recognise that this
+celestial coordinates using ``GSkyDir``. You may recognise that this
 is the position of the Crab. You then used this position to define the
 spatial component of a sky model using ``GModelSpatialPointSource``. As the name
 suggests, the spatial component is a point source. Next, you defined the
 spectral component using ``GModelSpactralPlaw``: a power law with
-normalisation of 1 and index of -2. Then, you combined the spatial and
-spectral components in a point source model using ``GModelSky``. And
+normalisation of 1 and a spectral index of -2. Then, you combined the spatial
+and spectral components in a point source model using ``GModelSky``. And
 finally you appended the point source to the model container allocated
 previously using the append method. When you then print the model
 container you see that is contains now one model with 6 parameters.
@@ -101,7 +101,7 @@ typing::
 
 and you can load it from an XML file in memory using::
 
-   >>> new_models = GModels('test.xml')
+   >>> new_models = gammalib.GModels('test.xml')
    >>> print(new_models)
 
 The last print command is to convince yourself that the models have been

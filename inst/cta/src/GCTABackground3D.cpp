@@ -473,7 +473,7 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
             std::string msg = "The specified energy "+energy.print()+" does"
                               " not fall in any of the energy boundaries of"
                               " the background response cube.\n"
-                              "Please select an energy range that is comprised"
+                              "Please select an energy that is comprised"
                               " in the range ["+
                               gammalib::str(m_background.axis_lo(2,0))+
                               " "+m_background.axis_lo_unit(2)+" - "+

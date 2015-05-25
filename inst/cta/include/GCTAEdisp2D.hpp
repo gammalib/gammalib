@@ -180,7 +180,7 @@ const GCTAResponseTable& GCTAEdisp2D::table(void) const
 /***********************************************************************//**
  * @brief Set response table
  *
- * @param[in] Response table.
+ * @param[in] table Response table.
  ***************************************************************************/
 inline
 void GCTAEdisp2D::table(const GCTAResponseTable& table)

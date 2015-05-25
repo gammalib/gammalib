@@ -60,6 +60,7 @@
                                                             " GObservation&)"
 #define G_NROI        "GCTAResponseCube::nroi(GModelSky&, GEnergy&, GTime&, "\
                                                              "GObservation&)"
+#define G_EBOUNDS                       "GCTAResponseCube::ebounds(GEnergy&)"
 #define G_READ                         "GCTAResponseCube::read(GXmlElement&)"
 #define G_WRITE                       "GCTAResponseCube::write(GXmlElement&)"
 
@@ -312,7 +313,7 @@ double GCTAResponseCube::irf(const GEvent&       event,
             // Get PSF component
             irf *= psf()(srcDir, delta, srcEng);
 
-            // Divide by livtime
+            // Divide by livetime
             irf /= livetime;
 
             // Apply deadtime correction
@@ -380,7 +381,9 @@ double GCTAResponseCube::irf(const GEvent&       event,
 /***********************************************************************//**
  * @brief Return integral of event probability for a given sky model over ROI
  *
- * @param[in] model Incident photon.
+ * @param[in] model Sky model.
+ * @param[in] obsEng Observed photon energy.
+ * @param[in] obsTime Observed photon arrival time.
  * @param[in] obs Observation.
  * @return 0.0
  *
@@ -426,7 +429,6 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
  * @param[in] obsEnergy Observed Energy.
  * @return True energy boundaries for given observed energy.
  ***************************************************************************/
-#define G_EBOUNDS                       "GCTAResponseCube::ebounds(GEnergy&)"
 GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
 {
     // Initialise an empty boundary object

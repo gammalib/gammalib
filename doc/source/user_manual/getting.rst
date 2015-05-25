@@ -10,7 +10,7 @@ to compile and to install GammaLib.
 
 You will need the following to build the software:
 
--  About 100 MB of free disk space.
+-  About 200 MB of free disk space.
 
 -  An ANSI C++ compiler. We recommend building GammaLib with the GNU g++
    compiler.
@@ -144,8 +144,8 @@ https://sourceforge.net/projects/gammalib/. The code can be downloaded
 from this site by clicking on the download button. Alternatively, the
 code can be downloaded and unpacked from the UNIX prompt using::
 
-    $ wget --no-check-certificate https://downloads.sourceforge.net/project/gammalib/gammalib/gammalib-00-08-00.tar.gz
-    $ tar xfz gammalib-00-08-00.tar.gz
+    $ wget --no-check-certificate https://downloads.sourceforge.net/project/gammalib/gammalib/gammalib-0.10.0.tar.gz
+    $ tar xfz gammalib-0.10.0.tar.gz
 
 The GammaLib source code can also be cloned using git. This method is
 recommended if you plan to contribute to the development of the GammaLib
@@ -201,17 +201,20 @@ follows::
       * FITS I/O support             (yes)   /usr/local/gamma/lib /usr/local/gamma/include
       * Readline support             (yes)    
       * Ncurses support              (yes)   
+      * Make Python binding          (yes)   use swig for updates
       * Python                       (yes)
       * Python.h                     (yes)
+      * Python wrappers              (yes)
       * swig                         (yes)
-      * Make Python bindings         (yes)
       * Multiwavelength interface    (yes)
       * Fermi-LAT interface          (yes)
       * CTA interface                (yes)
-      * Doxygen                      (yes)   /usr/local/bin/doxygen
+      * COMPTEL interface            (yes)
+      * Doxygen                      (yes)   /opt/local/bin/doxygen
       * Perform NaN/Inf checks       (yes)   (default)
       * Perform range checking       (yes)   (default)
       * Optimize memory usage        (yes)   (default)
+      * Enable OpenMP                (yes)   (default)
       - Compile in debug code        (no)    (default)
       - Enable code for profiling    (no)    (default)
 
@@ -409,7 +412,7 @@ instrument dependent modules are enabled), you should see the following
 message in your terminal::
 
     ===================
-    All 19 tests passed
+    All 20 tests passed
     ===================
 
 (Note that the exact number of tests that is conducted depends on the 
@@ -481,7 +484,7 @@ Generating the reference documentation
 The reference documentation for GammaLib is generated directly from the source
 code using the `Doxygen <http://www.doxygen.org/>`_ documentation system.
 The latest GammaLib reference manual can be found at
-http://gammalib.sourceforge.net/doxygen/.
+http://cta.irap.omp.eu/gammalib/doxygen/.
 
 The reference documentation is not shipped together with the source code
 as this would considerably increase the size of the tarball. In case

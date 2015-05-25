@@ -280,8 +280,8 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
-    // Retrieve pointer to CTA cube background
-    const GCTACubeBackground bgd = rsp->background();
+    // Retrieve reference to CTA cube background
+    const GCTACubeBackground& bgd = rsp->background();
 
     // Evaluate function
     double logE = event.energy().log10TeV();
@@ -338,8 +338,8 @@ double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
         throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
-    // Retrieve pointer to CTA cube background
-    const GCTACubeBackground bgd = rsp->background();
+    // Retrieve reference to CTA cube background
+    const GCTACubeBackground& bgd = rsp->background();
 
     // Evaluate function
     double logE = event.energy().log10TeV();

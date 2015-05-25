@@ -6,7 +6,7 @@
 # Monte-Carlo simulations. This script is used to validate the absolute
 # normalization of the CTA response computations.
 #
-# Copyright (C) 2014 Juergen Knoedlseder
+# Copyright (C) 2014-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ def binned_irf(model, cntmap, irf, caldb, cntref):
 # =========================== #
 # CTA stacked IRF computation #
 # =========================== #
-def stacked_irf(model, cntmap, expcube, psfcube, cntref):
+def stacked_irf(model, cntmap, expcube, psfcube, bkgcube, cntref):
     """
     Perform stacked IRF computation.
     """
@@ -132,9 +132,10 @@ def stacked_irf(model, cntmap, expcube, psfcube, cntref):
     obs.load(cntmap)
 
     # Specify response for CTA observation
-    exposure = gammalib.GCTACubeExposure(expcube)
-    psf      = gammalib.GCTACubePsf(psfcube)
-    obs.response(exposure, psf)
+    exposure   = gammalib.GCTACubeExposure(expcube)
+    psf        = gammalib.GCTACubePsf(psfcube)
+    background = gammalib.GCTACubeBackground(bkgcube)
+    obs.response(exposure, psf, background)
 
     # Load model to describe the data from XML file
     models = gammalib.GModels(model)
@@ -179,6 +180,7 @@ if __name__ == '__main__':
     caldb   = "../caldb"
     expcube = "data/expcube.fits"
     psfcube = "data/psfcube.fits"
+    bkgcube = "data/bkgcube.fits"
 
     # Set tests
     tests = ["point", "disk", "gauss", "shell", "ellipse", "diffuse"]
@@ -235,4 +237,4 @@ if __name__ == '__main__':
         binned_irf(model, cntmap, irf, gammalib.GCaldb(caldb), cntref)
 
         # Perform stacked computation
-        stacked_irf(model, cntmap, expcube, psfcube, cntref)
+        stacked_irf(model, cntmap, expcube, psfcube, bkgcube, cntref)

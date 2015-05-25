@@ -3,7 +3,7 @@
 # This script performs a benchmark for maximum likelihood fitting of CTA
 # data.
 #
-# Copyright (C) 2012-2014 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@ def binned_analysis(model, cntmap, irf, caldb):
 # ==================== #
 # CTA stacked analysis #
 # ==================== #
-def stacked_analysis(model, cntmap, expcube, psfcube):
+def stacked_analysis(model, cntmap, expcube, psfcube, bkgcube):
     """
     Perform stacked maximum likelihood fitting of CTA data using GammaLib
     classes.
@@ -166,9 +166,10 @@ def stacked_analysis(model, cntmap, expcube, psfcube):
     cta_obs.load(cntmap)
 
     # Specify response for CTA observation
-    exposure = gammalib.GCTACubeExposure(expcube)
-    psf      = gammalib.GCTACubePsf(psfcube)
-    cta_obs.response(exposure, psf)
+    exposure   = gammalib.GCTACubeExposure(expcube)
+    psf        = gammalib.GCTACubePsf(psfcube)
+    background = gammalib.GCTACubeBackground(bkgcube)
+    cta_obs.response(exposure, psf, background)
 
     # Append CTA observation to observation container
     obs.append(cta_obs)
@@ -217,6 +218,7 @@ if __name__ == '__main__':
     caldb   = "../caldb"
     expcube = "data/expcube.fits"
     psfcube = "data/psfcube.fits"
+    bkgcube = "data/bkgcube.fits"
 
     # Set tests
     tests = ["point", "disk", "gauss", "shell", "ellipse", "diffuse"]
@@ -273,4 +275,4 @@ if __name__ == '__main__':
         binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
 
         # Perform stacked analysis
-        stacked_analysis(model, cntmap, expcube, psfcube)
+        stacked_analysis(model, cntmap, expcube, psfcube, bkgcube)

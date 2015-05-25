@@ -6,4 +6,4 @@ Under the hood
 Registry classes
 ----------------
 
-TBW: Describe what a registry class is.
+To be written (describe what a registry class is) ...

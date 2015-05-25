@@ -116,7 +116,7 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
 
         # Plot data
         plt.loglog(energy, counts, 'ro')
-        plt.errorbar(energy, counts, error, fmt=None, ecolor='r')
+        plt.errorbar(energy, counts, error, ecolor='r')
 
         # Plot model
         plt.plot(energy, model, 'b-')

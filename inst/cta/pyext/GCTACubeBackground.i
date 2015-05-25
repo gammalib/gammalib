@@ -45,7 +45,6 @@ public:
     virtual ~GCTACubeBackground(void);
 
     // Operators
-    GCTACubeBackground& operator=(const GCTACubeBackground& bgd);
     double              operator()(const GCTAInstDir& dir,
                                    const GEnergy&     energy) const;
 

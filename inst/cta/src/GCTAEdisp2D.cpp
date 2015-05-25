@@ -394,7 +394,7 @@ void GCTAEdisp2D::save(const std::string& filename, const bool& clobber) const
  * @brief Simulate energy dispersion
  *
  * @param[in] ran Random number generator.
- * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] logEsrc Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
  * @param[in] zenith Zenith angle in Earth system (rad). Not used.

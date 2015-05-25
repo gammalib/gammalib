@@ -6,15 +6,17 @@
 Overview
 ~~~~~~~~
 
-The LAT module provides an instrument interface for the Large Area 
-Telescope aboard NASA's Fermi satellite.
-
-:ref:`fig_uml_lat` present an overview over the C++ classes of the LAT
+The following figure presents an overview over the C++ classes of the LAT
 module and their relations.
 
 .. _fig_uml_lat:
 
 .. figure:: uml_lat.png
-   :width: 100%
+   :align: center
+   :width: 80%
 
-   LAT module
+   *LAT module*
+
+The LAT module provides an instrument interface for the Large Area 
+Telescope aboard NASA's Fermi satellite.
+

@@ -6,15 +6,16 @@ XML file interface
 Overview
 ~~~~~~~~
 
-:ref:`fig_uml_xml` present an overview over the C++ classes of the XML
+The followinf figure presents an overview over the C++ classes of the XML
 module and their relations.
 
 .. _fig_uml_xml:
 
 .. figure:: uml_xml.png
-   :width: 100%
+   :width: 80%
+   :align: center
 
-   XML module
+   *XML module*
 
 The XML module provides classes that allow creation, writing and reading of
 files in the Extensible Markup Language (XML) format.

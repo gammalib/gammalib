@@ -6,6 +6,17 @@ Sky maps, sky coordinates and sky regions
 Overview
 ~~~~~~~~
 
+The following figure presents an overview over the C++ classes of the sky
+module and their relations.
+
+.. _fig_uml_sky:
+
+.. figure:: uml_sky.png
+   :align: center
+   :width: 75%
+
+   *Sky module*
+
 The sky module provides classes to handle sky maps, sky coordinates
 and sky regions.
 Sky maps are implemented by the :doxy:`GSkymap` class which stores
@@ -20,9 +31,9 @@ implements the relation for the HEALPix pixelisation scheme, the
 abstract :doxy:`GWcs` base class represents the relation for World
 Coordinate Systems. Specific World Coordinate System projections
 are implemented by the :doxy:`GWcsAIT`, :doxy:`GWcsAZP`, :doxy:`GWcsCAR`,
-:doxy:`GWcsMER`, :doxy:`GWcsSTG` and :doxy:`GWcsTAN` classes. Instances of
-all specific World Coordinate System classes are collected in
-the :doxy:`GWcsRegistry` registry class.
+:doxy:`GWcsMER`, :doxy:`GWcsMOL`, :doxy:`GWcsSTG` and :doxy:`GWcsTAN` 
+classes. Instances of all specific World Coordinate System classes 
+are collected in the :doxy:`GWcsRegistry` registry class.
 
 Sky coordinates are implemented by the :doxy:`GSkyDir` class that
 specifies celestial coordinates in either equatorial (Right Ascension
@@ -36,12 +47,5 @@ So far, only a simple circular sky region is implemented by the
 :doxy:`GSkyRegionCircle` class. Sky regions are collected in the 
 :doxy:`GSkyRegions` container class.
 
-:ref:`fig_uml_sky` present an overview over the C++ classes of the sky
-module and their relations.
-
-.. _fig_uml_sky:
-
-.. figure:: uml_sky.png
-   :width: 100%
-
-   Sky module
+Coordinates in the horizon system (altitude and azimuth) are implemented
+by the :doxy:`GHorizDir` class.
