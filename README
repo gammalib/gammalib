@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 1.0.0 (2 February 2015)
+Version: 0.10.0 (20 May 2015)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -41,7 +41,7 @@ data analysis framework that enables simultaneous multi-mission analysis.
 
 Web sites
 =========
-http://gammalib.sourceforge.net                   - for documentation
+http://cta.irap.omp.eu/gammalib/                  - for documentation
 https://sourceforge.net/projects/gammalib/        - for downloads
 https://cta-redmine.irap.omp.eu/projects/gammalib - for developers
 
@@ -181,7 +181,7 @@ If everything works successfully you should see
 or
 
 ============================================================================
-Testsuite summary for gammalib 0.9.1
+Testsuite summary for gammalib 0.10.0
 ============================================================================
 # TOTAL: 20
 # PASS:  20
@@ -222,8 +222,8 @@ The easiest way to start with GammaLib is by using the python interface.
 To start, type the following:
 
     % python
-    >>> from gammalib import *
-    >>> models=GModels()
+    >>> import gammalib
+    >>> models=gammalib.GModels()
     >>> print models
     === GModels ===
     Number of models ..........: 0
