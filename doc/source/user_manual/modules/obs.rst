@@ -6,15 +6,16 @@ Observation handling
 Overview
 ~~~~~~~~
 
-:ref:`fig_uml_obs` present an overview over the C++ classes of the obs
+The following figure presents an overview over the C++ classes of the obs
 module and their relations.
 
 .. _fig_uml_obs:
 
 .. figure:: uml_obs.png
+   :align: center
    :width: 100%
 
-   Observation module
+   *Overview over the obs module*
 
 The central C++ class of the obs module is the abstract base class
 :doxy:`GObservation` which defines the instrument-independent interface for a
@@ -115,15 +116,17 @@ for an unbinned observation and by:
 .. code-block:: xml
 
     <observation name="..." id="..." instrument="...">
-        <parameter name="CountsMap"           file="..."/>
+        <parameter name="CountsCube"          file="..."/>
         <parameter name="EffectiveArea"       file="..."/>
         <parameter name="PointSpreadFunction" file="..."/>
         <parameter name="EnergyDispersion"    file="..."/>
     </observation>
 
 for a binned observation. Here, ``EventList`` specifies a FITS file containing
-an event list and ``CountsMap`` specifies a FITS file containing a counts map.
-The other tags specify the components of the instrumental response function.
+an event list and ``CountsCube`` specifies a FITS file containing a counts 
+cube.
+The other tags specify the components of the instrumental response function
+and are optional.
 Similar definitions exist for the other instruments.
 
 The observations are loaded from the XML file descriptor using the load
@@ -281,7 +284,9 @@ which provides the time dependent deadtime correction factor.
 Setting up and using a calibration database
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TBW: Describe how to setup and how to use a calibration database.
+To be written (describe how to setup and how to use a calibration 
+database) ...
+
 
 .. _sec_time:
 
@@ -356,12 +361,14 @@ OGIP compliant header keywords.
 Energies in GammaLib
 ~~~~~~~~~~~~~~~~~~~~
 
-TBW: Describe how energies are implemented in GammaLib. Mention that the
-internal energy is MeV. This section should also handle EBOUNDS.
+To be written (describe how energies are implemented in GammaLib; mention
+that the internal energy is MeV; this section should also handle EBOUNDS) 
+...
 
 .. _sec_roi:
 
 Regions of Interest
 ~~~~~~~~~~~~~~~~~~~
 
-TBW: Describe what a ROI is and why this is needed (unbinned analysis).
+To be written (describe what a ROI is and that this is needed for unbinned
+analysis) ...

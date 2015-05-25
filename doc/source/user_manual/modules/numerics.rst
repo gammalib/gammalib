@@ -37,6 +37,7 @@ Constant                   Value
 ``gammalib::ln2``          :math:`\log 2` (natural logarithm of 2)
 ``gammalib::ln10``         :math:`\log 10` (natural logarithm of 10)
 ``gammalib::inv_ln2``      :math:`(\log 2)^{-1}`
+``gammalib::inv_ln10``     :math:`(\log 10)^{-1}`
 ``gammalib::onethird``     :math:`1/3`
 ``gammalib::twothird``     :math:`2/3`
 ``gammalib::fourthird``    :math:`4/3`
@@ -64,6 +65,8 @@ Function              Description
 ``gammalib::atan2d``  Arc tangens function for argument x/y given in degrees
 ``gammalib::sincosd`` Returns sine and cosine for argument given in degrees
 ``gammalib::gammln``  Natural logarithm of gamma function
+``gammalib::erfcc``   Complementary error function
+``gammalib::erfinv``  Inverse error function
 ``gammalib::modulo``  Remainder of division x/y
 ===================== ===========
 

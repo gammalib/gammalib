@@ -144,8 +144,8 @@ https://sourceforge.net/projects/gammalib/. The code can be downloaded
 from this site by clicking on the download button. Alternatively, the
 code can be downloaded and unpacked from the UNIX prompt using::
 
-    $ wget --no-check-certificate https://downloads.sourceforge.net/project/gammalib/gammalib/gammalib-00-10-00.tar.gz
-    $ tar xfz gammalib-00-10-00.tar.gz
+    $ wget --no-check-certificate https://downloads.sourceforge.net/project/gammalib/gammalib/gammalib-0.10.0.tar.gz
+    $ tar xfz gammalib-0.10.0.tar.gz
 
 The GammaLib source code can also be cloned using git. This method is
 recommended if you plan to contribute to the development of the GammaLib
@@ -484,7 +484,7 @@ Generating the reference documentation
 The reference documentation for GammaLib is generated directly from the source
 code using the `Doxygen <http://www.doxygen.org/>`_ documentation system.
 The latest GammaLib reference manual can be found at
-http://gammalib.sourceforge.net/doxygen/.
+http://cta.irap.omp.eu/gammalib/doxygen/.
 
 The reference documentation is not shipped together with the source code
 as this would considerably increase the size of the tarball. In case

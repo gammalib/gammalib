@@ -6,15 +6,16 @@ FITS file interface
 Overview
 ~~~~~~~~
 
-:ref:`fig_uml_fits` present an overview over the C++ classes of the FITS
+The following figure presents an overview over the C++ classes of the FITS
 module and their relations.
 
 .. _fig_uml_fits:
 
 .. figure:: uml_fits.png
-   :width: 100%
+   :width: 75%
+   :align: center
 
-   FITS module
+   *FITS module*
 
 The FITS module provides a high-level interface to FITS files. The module
 is based on the cfitsio library for file access. The C++ classes of the
@@ -158,6 +159,7 @@ above example is shown below.
 .. _fig_fits_example:
 
 .. figure:: fits_example.png
-   :width: 100%
+   :width: 90%
+   :align: center
 
-   FITS file example
+   *FITS file example*

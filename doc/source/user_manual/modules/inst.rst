@@ -4,7 +4,7 @@ Instrument-specific interfaces
 ==============================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    cta
    lat

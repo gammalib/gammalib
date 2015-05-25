@@ -6,6 +6,18 @@ Support functions and classes
 Overview
 ~~~~~~~~
 
+The following figure presents an overview over the C++ classes of the 
+support module and their relations.
+
+.. _fig_uml_support:
+
+.. figure:: uml_support.png
+   :width: 75%
+   :align: center
+
+   *Support module*
+
+
 The support module contains a number of functions and classes that are 
 needed to support core functionnalities of GammaLib. An overview of the 
 functions and C++ classes present in this module is given in 
@@ -24,13 +36,6 @@ information that is independent of the media. The classes :doxy:`GUrlFile`
 and :doxy:`GUrlString` are derived from :doxy:`GUrl` and implement a file storage 
 and a string storage, respectively. As most of the classes are unrelated,
 they will be described individually in the following sections.
-
-.. _fig_uml_support:
-
-.. figure:: uml_support.png
-   :width: 100%
-
-   Support module
 
 
 Column Separated Value tables
@@ -207,7 +212,7 @@ The :doxy:`GRan::chisq2` method draws random numbers from the propability
 distribution
 
 .. math::
-   p(x) = \frac{1}{2\pi} x \exp( -\frac{1}{2} x^2 )
+   p(x) = \frac{1}{2\pi} x \exp \left( -\frac{1}{2} x^2 \right)
 
 This method can be used to simulate the random radial offset of a measured
 source position from the true source position, assuming an azimuthally
@@ -225,14 +230,17 @@ Constants
 
 The following constants are available:
 
-======================== =====
-Constant                 Value
-======================== =====
-``gammalib::MeV2erg``    :math:`1.6021765 \times 10^{-6}` (converts MeV to erg)
-``gammalib::erg2MeV``    :math:`624150.96` (converts erg to MeV)
-``gammalib::pc2cm``      :math:`3.08568025 \times 10^{18}` (converts pc to cm)
-``gammalib::sec_in_day`` :math:`86400.0` (number of seconds in one day)
-======================== =====
+========================== =====
+Constant                   Value
+========================== =====
+``gammalib::MeV2erg``      :math:`1.6021765 \times 10^{-6}` (converts MeV to erg)
+``gammalib::erg2MeV``      :math:`624150.96` (converts erg to MeV)
+``gammalib::MeV2Angstrom`` :math:`1.239841875e-2` (converts MeV to Angstrom)
+``gammalib::pc2cm``        :math:`3.08568025 \times 10^{18}` (converts pc to cm)
+``gammalib::sec_in_day``   :math:`86400.0` (number of seconds in one day)
+``gammalib::sec2day``      :math:`1/86400` (converts seconds to days)
+``gammalib::tai2tt``       :math:`32.184` (converts TAI to TT system)
+========================== =====
 
 
 Functions
@@ -246,6 +254,7 @@ Function                       Description
 ``gammalib::strip_whitespace`` Strips all leading and trailing whitespace from string.
 ``gammalib::strip_chars``      Strips all leading and trailing characters from string.
 ``gammalib::expand_env``       Replace any environment variables in string by its value.
+``gammalib::filepath``         Build path from filename and path.
 ``gammalib::str``              Conversion of C-types to strings.
 ``gammalib::tochar``           Conversion of string to ``char``.
 ``gammalib::toshort``          Conversion of string to ``short``.
@@ -268,11 +277,20 @@ Function                       Description
 ``gammalib::parformat``        Format string for parameter value display.
 ``gammalib::plaw_photon_flux`` Compute photon flux under a power law.
 ``gammalib::plaw_energy_flux`` Compute energy flux under a power law.
+``gammalib::elogmean``         Computes geometric mean of energy.
 ``gammalib::file_exists``      Check whether a file exists.
+``gammalib::dir_exists``       Check whether a directory exists.
 ``gammalib::is_infinite``      Check whether a double precision value is infinite.
 ``gammalib::is_notanumber``    Check whether a double precision value is not a number.
 ``gammalib::contains``         Check whether a string contains a sub-string.
 ``gammalib::warning``          Dump warning in console.
+``gammalib::xml2str``          Converts XML to string.
+``gammalib::str2xml``          Converts string to XML.
+``gammalib::xml_has_par``      Checks is XML file has parameter.
+``gammalib::xml_need_par``     Require specific parameter in XML file.
+``gammalib::xml_get_par``      Get parameter from XML file.
+``gammalib::xml_check_par``    Check parameter in XML file.
+``gammalib::recv``             Receive on socket with timeout.
 ============================== ===========
 
 

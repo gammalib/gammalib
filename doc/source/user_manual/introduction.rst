@@ -4,8 +4,8 @@ Introduction
 Scope
 -----
 
-This User Manual provides a complete description of the GammaLib C++ library. It
-is equally well suited for beginners as well as experienced users.
+This User Manual provides a complete description of the GammaLib C++ library.
+It is equally well suited for beginners as for experienced users.
 
 Overview
 --------
@@ -34,16 +34,19 @@ that allows for consistent broad-band spectral fitting or imaging.
 
 GammaLib source code is freely available under the GNU General Public license
 version 3. The latest source code can be downloaded from
-https://sourceforge.net/projects/gammalib/ which also provides bug
-trackers and mailing lists. Further information and documentation on
-GammaLib can be found on http://gammalib.sourceforge.net/. The present document
-applies to GammaLib version 0.10.
+https://sourceforge.net/projects/gammalib/.
+The issue tracker can be found at 
+https://cta-redmine.irap.omp.eu/projects/gammalib/issues.
+Further information and documentation on GammaLib can be found at
+http://cta.irap.omp.eu/gammalib/.
+The present document applies to GammaLib version 0.10.
 
 GammaLib is designed to compile on any POSIX compliant platform. So far, 
 GammaLib has been successfully compiled and tested on Mac OS X, OpenBSD, OpenSolaris
 (using the gcc compiler) and many Linux flavours. Pre-packed binary
 versions of the code are also available for Mac OS X. For known problems
-with specific platforms, please refer to section :ref:`sec_known_problems`.
+with specific platforms, please refer to the :ref:`sec_known_problems`
+section.
 
 GammaLib makes heavily use of C++ classes. Instrument independency is achieved
 by using abstract virtual base classes, which are implemented as derived

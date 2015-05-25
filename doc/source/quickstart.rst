@@ -5,7 +5,7 @@ First steps with GammaLib
 -------------------------
 
 GammaLib comes with a Python interface, and as first step you should
-verify that the Python interfaces workes correctly. You do this by
+verify that the Python interface works correctly. You do this by
 typing::
 
    >>> import gammalib
@@ -62,13 +62,13 @@ Now let's append a model to this container. For this, type::
       Constant .................: 1 (relative value) (fixed,scale=1,gradient)
 
 With this sequence of commands you first defined a sky direction in
-celestial coordinates using ``GSkyDir``. You may easily recognise that this
+celestial coordinates using ``GSkyDir``. You may recognise that this
 is the position of the Crab. You then used this position to define the
 spatial component of a sky model using ``GModelSpatialPointSource``. As the name
 suggests, the spatial component is a point source. Next, you defined the
 spectral component using ``GModelSpactralPlaw``: a power law with
-normalisation of 1 and index of -2. Then, you combined the spatial and
-spectral components in a point source model using ``GModelSky``. And
+normalisation of 1 and a spectral index of -2. Then, you combined the spatial
+and spectral components in a point source model using ``GModelSky``. And
 finally you appended the point source to the model container allocated
 previously using the append method. When you then print the model
 container you see that is contains now one model with 6 parameters.
