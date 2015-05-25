@@ -860,13 +860,13 @@ void GCTAObservation::read(const GXmlElement& xml)
         const GXmlElement* par = xml.element("parameter", i);
 
         // Check for response type 1 (GCTAResponseIrf)
-        if ((par->attribute("name") == "EffectiveArea") ||
-            (par->attribute("name") == "ARF") ||
+        if ((par->attribute("name") == "EffectiveArea")       ||
+            (par->attribute("name") == "ARF")                 ||
             (par->attribute("name") == "PointSpreadFunction") ||
-            (par->attribute("name") == "PSF") ||
-            (par->attribute("name") == "EnergyDispersion") ||
-            (par->attribute("name") == "RMF") ||
-            (par->attribute("name") == "Background") ||
+            (par->attribute("name") == "PSF")                 ||
+            (par->attribute("name") == "EnergyDispersion")    ||
+            (par->attribute("name") == "RMF")                 ||
+            (par->attribute("name") == "Background")          ||
             (par->attribute("name") == "Calibration")) {
             if (response_type == 2) {
                 throw GException::xml_invalid_parnames(G_READ, xml,
@@ -878,7 +878,8 @@ void GCTAObservation::read(const GXmlElement& xml)
         
         // Check for response type 2 (GCTAResponseCube)
         else if ((par->attribute("name") == "ExposureCube") ||
-                 (par->attribute("name") == "PsfCube")) {
+                 (par->attribute("name") == "PsfCube")      ||
+                 (par->attribute("name") == "BkgCube")) {
             if (response_type == 1) {
                 throw GException::xml_invalid_parnames(G_READ, xml,
                       "Incompatible parameter names encountered in the "
