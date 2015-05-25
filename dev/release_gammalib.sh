@@ -4,17 +4,18 @@
 basedir=$(pwd)
 installdir=$(pwd)/build
 makedoc="no"
+makelatex="no"
 
 echo "Checkout latest GammaLib"
 rm -rf gammalib
-#cvs -Q -d /home/cvs export -N -r HEAD "gammalib"
-#git clone https://cta-git.irap.omp.eu/gammalib
 git clone -b release https://cta-git.irap.omp.eu/gammalib
+#git clone -b devel https://cta-git.irap.omp.eu/gammalib
 rm -rf gammalib/.git
 
 # Extract version number
 version=`cat gammalib/configure.ac | grep 'AC_INIT' | awk -F"[" '{print $3}' | sed 's/],//' | sed 's/\./ /g'`
-version=`printf "%2.2d-%2.2d-%2.2d" $version`
+#version=`printf "%2.2d-%2.2d-%2.2d" $version`
+version=`printf "%d.%d.%d" $version`
 echo "GammaLib version: "$version
 
 # Set source directory
@@ -48,53 +49,50 @@ rm -rf dev
 rm -rf autom4te.cache
 cd $basedir
 
-# Create Doxygen documentation
+# Create Documentation
 if [ "x$makedoc" == "xyes" ] ; then
-  echo "Create doxygen documentation"
-  cd $sourcedir/doc
-  doxygen Doxyfile
-  cd latex
-  make
-  make
-  dvips -o refman.ps refman
-  ps2pdf refman.ps 
+  echo "Create Documentation"
+  cd $sourcedir
+  make doc
   cd $basedir
 fi
 
 # Create LaTeX documentation
-echo "Create LaTeX documentation"
-cd $sourcedir/doc
-#
-cd dev/inst
-latex gammalib_inst.tex
-dvips gammalib_inst.dvi -o gammalib_inst.ps
-ps2pdf gammalib_inst.ps
-cd ../..
-mv dev/inst/gammalib_inst.pdf .
-#
-cd dev/maths
-latex gammalib_maths.tex
-dvips gammalib_maths.dvi -o gammalib_maths.ps
-ps2pdf gammalib_maths.ps
-cd ../..
-mv dev/maths/gammalib_maths.pdf .
-#
-cd dev/sdd 
-latex gammalib_sdd.tex
-dvips gammalib_sdd.dvi -o gammalib_sdd.ps
-ps2pdf gammalib_sdd.ps
-cd ../..
-mv dev/sdd/gammalib_sdd.pdf .
-#
-cd dev/srs 
-latex gammalib_srs.tex
-dvips gammalib_srs.dvi -o gammalib_srs.ps
-ps2pdf gammalib_srs.ps
-cd ../..
-mv dev/srs/gammalib_srs.pdf .
-#
-rm -rf dev
-cd $basedir
+if [ "x$makelatex" == "xyes" ] ; then
+  echo "Create LaTeX documentation"
+  cd $sourcedir/doc
+  #
+  cd dev/inst
+  latex gammalib_inst.tex
+  dvips gammalib_inst.dvi -o gammalib_inst.ps
+  ps2pdf gammalib_inst.ps
+  cd ../..
+  mv dev/inst/gammalib_inst.pdf .
+  #
+  cd dev/maths
+  latex gammalib_maths.tex
+  dvips gammalib_maths.dvi -o gammalib_maths.ps
+  ps2pdf gammalib_maths.ps
+  cd ../..
+  mv dev/maths/gammalib_maths.pdf .
+  #
+  cd dev/sdd 
+  latex gammalib_sdd.tex
+  dvips gammalib_sdd.dvi -o gammalib_sdd.ps
+  ps2pdf gammalib_sdd.ps
+  cd ../..
+  mv dev/sdd/gammalib_sdd.pdf . 
+  #
+  cd dev/srs 
+  latex gammalib_srs.tex
+  dvips gammalib_srs.dvi -o gammalib_srs.ps
+  ps2pdf gammalib_srs.ps
+  cd ../..
+  mv dev/srs/gammalib_srs.pdf .
+  #
+  rm -rf dev
+  cd $basedir
+fi
 
 # Set permissions
 echo "Make files read/write"
