@@ -48,6 +48,7 @@
 #define G_OP_UNARY_SUB                        "GSkymap::operator-=(GSkymap&)"
 #define G_OP_UNARY_MUL                        "GSkymap::operator-=(GSkymap&)"
 #define G_OP_UNARY_DIV                        "GSkymap::operator-=(GSkymap&)"
+#define G_OP_UNARY_DIV2                        "GSkymap::operator/=(double&)"
 #define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
 #define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
 #define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
@@ -608,7 +609,6 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
  *
  * Divides all pixels of the sky map by the given @p factor.
  ***************************************************************************/
-#define G_OP_UNARY_DIV2                        "GSkymap::operator/=(double&)"
 GSkymap& GSkymap::operator/=(const double& factor)
 {
     // Check for division by zero
