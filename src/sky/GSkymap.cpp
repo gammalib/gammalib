@@ -56,6 +56,8 @@
 #define G_PIX2DIR                              "GSkymap::pix2dir(GSkyPixel&)"
 #define G_DIR2INX                                "GSkymap::dir2inx(GSkyDir&)"
 #define G_DIR2PIX                                "GSkymap::dir2pix(GSkyDir&)"
+#define G_FLUX1                                         "GSkymap::flux(int&)"
+#define G_FLUX2                                   "GSkymap::flux(GSkyPixel&)"
 #define G_SOLIDANGLE1                             "GSkymap::solidangle(int&)"
 #define G_SOLIDANGLE2                       "GSkymap::solidangle(GSkyPixel&)"
 #define G_EXTRACT                              "GSkymap::extract(int&, int&)"
@@ -1207,6 +1209,106 @@ GSkyPixel GSkymap::dir2pix(const GSkyDir& dir) const
 
 
 /***********************************************************************//**
+ * @brief Returns flux in pixel
+ *
+ * @param[in] index Pixel index [0,...,npix()-1].
+ * @param[in] map Map index [0,...,nmaps()-1].
+ * @return Flux in pixel.
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ *
+ * Returns the flux in the pixel with the specified @p index.
+ ***************************************************************************/
+double GSkymap::flux(const int& index, const int& map) const
+{
+    // Throw error if WCS is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_FLUX1, msg);
+    }
+
+    // Determine flux from pixel index.
+    double flux = this->flux(inx2pix(index), map);
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns flux in pixel
+ *
+ * @param[in] pixel Sky map pixel.
+ * @param[in] map Map index [0,...,nmaps()-1].
+ * @return Flux in pixel.
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ *
+ * Returns the flux in the specified sky map @p pixel.
+ *
+ * @todo Implement flux computation for HealPix map.
+ ***************************************************************************/
+double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
+{
+    // Throw error if WCS is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_FLUX2, msg);
+    }
+
+    // Initialise flux
+    double flux = 0.0;
+
+    // Perform flux computation for HealPix map
+    if (m_proj->size() == 1)  {
+
+        // This does a simple flux computation that is using just the pixel
+        // centre. This is incorrect for interpolated maps.
+        // TODO: Implement flux computation that takes care of interpolated
+        // maps
+        flux = this->operator()(pixel, map) * solidangle(pixel);
+    
+    } // endif: we had a HealPix map
+
+    // ... otherwise perform flux computation for WCS map
+    else {
+
+        // Compute flux
+        flux = this->operator()(pix2dir(GSkyPixel(pixel.x()-0.25,
+                                                  pixel.y()-0.25)), map) *
+               solidangle(pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5)),
+                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5)),
+                          pix2dir(GSkyPixel(pixel.x(),     pixel.y())),
+                          pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()))) +
+               this->operator()(pix2dir(GSkyPixel(pixel.x()+0.25,
+                                                  pixel.y()-0.25)), map) *
+               solidangle(pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5)),
+                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()-0.5)),
+                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y())),
+                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()))) +
+               this->operator()(pix2dir(GSkyPixel(pixel.x()+0.25,
+                                                  pixel.y()+0.25)), map) *
+               solidangle(pix2dir(GSkyPixel(pixel.x(),     pixel.y())),
+                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y())),
+                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5)),
+                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5))) +
+               this->operator()(pix2dir(GSkyPixel(pixel.x()-0.25,
+                                                  pixel.y()+0.25)), map) *
+               solidangle(pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y())),
+                          pix2dir(GSkyPixel(pixel.x(),     pixel.y())),
+                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5)),
+                          pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5)));
+
+    } // endelse: we had a WCS map
+
+    // Return flux
+    return flux;
+}
+
+
+/***********************************************************************//**
  * @brief Returns solid angle of pixel
  *
  * @param[in] index Pixel index [0,...,npix()-1].
@@ -1226,7 +1328,7 @@ double GSkymap::solidangle(const int& index) const
     }
 
     // Determine solid angle from pixel index.
-    double solidangle = m_proj->solidangle(inx2pix(index));
+    double solidangle = this->solidangle(inx2pix(index));
 
     // Return solid angle
     return solidangle;
@@ -2259,6 +2361,96 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
 
     // Return HDU
     return hdu;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute solid angle subtended by 4 sky directions
+ *
+ * @param[in] dir1 First sky direction.
+ * @param[in] dir2 Second sky direction.
+ * @param[in] dir3 Third sky direction.
+ * @param[in] dir4 Forth sky direction.
+ * @return Solid angle (steradians).
+ *
+ * Estimate the solid angle subtended by 4 sky directions using Huilier's
+ * theroem.
+ *
+ * Below, the definiton of the pixel cornes and sides are shown as used
+ * within the code.
+ *
+ *             a12
+ *         1---------2
+ *         |\       /|
+ *         | \a13  / |
+ *         |  \   /  |
+ *         |   \ /   |
+ *      a14|    X    |a23
+ *         |   / \   |
+ *         |  /   \  |
+ *         | /a24  \ |
+ *         |/       \|
+ *         4---------3
+ *             a34
+ *
+ ***************************************************************************/
+double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
+                           const GSkyDir& dir3, const GSkyDir& dir4) const
+{
+    // Initialise solid angle
+    double solidangle = 0.0;
+
+    // Compute angular distances between pixel corners
+    double a12 = dir1.dist(dir2);
+    double a14 = dir1.dist(dir4);
+    double a23 = dir2.dist(dir3);
+    double a24 = dir2.dist(dir4);
+    double a34 = dir3.dist(dir4);
+
+    // Special case: a12 or a14 is zero, then pixel is a triangle composed
+    // of [2,3,4]
+    if (a12 <= 0.0 || a14 <= 0.0) {
+        double s   = 0.5 * (a23 + a34 + a24);
+        solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                               std::tan(0.5*(s-a23)) *
+                                               std::tan(0.5*(s-a34)) *
+                                               std::tan(0.5*(s-a24))));
+    }
+
+    // Special case: a23 or a 34 is zero, then pixel is a triangle composed
+    // of [1,2,4]
+    else if (a23 <= 0.0 || a34 <= 0.0) {
+        double s   = 0.5 * (a12 + a24 + a14);
+        solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                               std::tan(0.5*(s-a12)) *
+                                               std::tan(0.5*(s-a24)) *
+                                               std::tan(0.5*(s-a14))));
+    }
+
+    // Otherwise we have a polygon
+    else {
+
+        // Triangle 1 [1,2,4]
+        double s1      = 0.5 * (a12 + a24 + a14);
+        double excess1 = std::atan(std::sqrt(std::tan(0.5*s1) *
+                                             std::tan(0.5*(s1-a12)) *
+                                             std::tan(0.5*(s1-a24)) *
+                                             std::tan(0.5*(s1-a14))));
+
+        // Triangle 2 [2,3,4]
+        double s2      = 0.5 * (a23 + a34 + a24);
+        double excess2 = std::atan(std::sqrt(std::tan(0.5*s2) *
+                                             std::tan(0.5*(s2-a23)) *
+                                             std::tan(0.5*(s2-a34)) *
+                                             std::tan(0.5*(s2-a24))));
+
+        // Determine solid angle
+        solidangle = 4.0 * (excess1 + excess2);
+
+    } // endif: we had a polynom
+
+    // Return solid angle
+    return solidangle;
 }
 
 
