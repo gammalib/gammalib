@@ -357,10 +357,31 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
     	// If we have a 2D pixel then randomize pixel values and convert them
         // into a sky direction
         if (pixel.is_2D()) {
-            pixel.x(pixel.x() + ran.uniform() - 0.5);
-            pixel.y(pixel.y() + ran.uniform() - 0.5);
-            dir = m_map.pix2dir(pixel);
-        }
+
+            // Use a rejection method to find a sky direction
+            while (true) {
+
+                // Draw random sky pixel
+                GSkyPixel test(pixel.x() + ran.uniform() - 0.5,
+                               pixel.y() + ran.uniform() - 0.5);
+
+                // Derive sky direction
+                dir = m_map.pix2dir(test);
+
+                // Get map value at that sky direction
+                double value = m_map(dir);
+
+                // Get uniform random number up to the maximum
+                double uniform = ran.uniform() * m_mc_max[index];
+
+                // Exit loop if we're not larger than the map value
+                if (uniform <= value) {
+                    break;
+                }
+
+            } // endwhile: rejection method
+
+        } // endif: had a 2D pixel
 
         // ... otherwise convert pixel into sky direction and randomize
         // position. We use here a kluge to compute the radius that contains
@@ -659,6 +680,7 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_map.clear();
     m_filename.clear();
     m_mc_cache.clear();
+    m_mc_max.clear();
     m_normalize     = true;
     m_has_normalize = false;
     m_norm          = 0.0;
@@ -682,6 +704,7 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_map           = model.m_map;
     m_filename      = model.m_filename;
     m_mc_cache      = model.m_mc_cache;
+    m_mc_max        = model.m_mc_max;
     m_normalize     = model.m_normalize;
     m_has_normalize = model.m_has_normalize;
     m_norm          = model.m_norm;
@@ -716,7 +739,9 @@ void GModelSpatialDiffuseMap::free_members(void)
  *
  * The method also initialises a cache for Monte Carlo sampling of the
  * skymap. This Monte Carlo cache consists of a linear array that maps a
- * value between 0 and 1 into the skymap pixel.
+ * value between 0 and 1 into the skymap pixel. A second array contains the
+ * maximum expected value for each pixel which is also used in Monte Carlo
+ * sampling.
  *
  * Note that if the GSkymap object contains multiple maps, only the first
  * map is used.
@@ -725,6 +750,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 {
     // Initialise cache, centre and radius
     m_mc_cache.clear();
+    m_mc_max.clear();
     m_centre.clear();
     m_radius = 0.0;
 
@@ -736,6 +762,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         // Reserve space for all pixels in cache
         m_mc_cache.reserve(npix+1);
+        m_mc_max.reserve(npix);
 
         // Set first cache value to 0
         m_mc_cache.push_back(0.0);
@@ -779,7 +806,10 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         // If we have a HealPix map then set radius to 180 deg
         if (m_map.projection()->code() == "HPX") {
+
+            // Set the map radius to full sky
             m_radius = 180.0;
+
         }
 
         // ... otherwise compute map centre and radius
@@ -795,6 +825,30 @@ void GModelSpatialDiffuseMap::prepare_map(void)
                 if (radius > m_radius) {
                     m_radius = radius;
                 }
+            }
+
+            // Compute maximum value that may occur from bilinear
+            // interpolation within this pixel and push this value on the
+            // stack. We do this by checking the map values at the corners
+            // and the centre of each edge.
+            for (int i = 0; i < npix; ++i) {
+                GSkyPixel pixel = m_map.inx2pix(i);
+                double    max   = m_map(pixel);
+                for (int ix = -1; ix < 2; ++ix) {
+                    for (int iy = -1; iy < 2; ++iy) {
+                        if (ix != 0 || iy != 0) {
+                            GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
+                            if (m_map.contains(edge)) {
+                                GSkyDir dir  = m_map.pix2dir(edge);
+                                double value = m_map(dir);
+                                if (value > max) {
+                                    max = value;
+                                }
+                            }
+                        }
+                    }
+                }
+                m_mc_max.push_back(max);
             }
 
         } // endelse: computed map centre and radius
