@@ -772,7 +772,8 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         // zero intensity in the skymap. Invalid pixels are also filtered.
         double sum = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.solidangle(i);
+            //double flux = m_map(i) * m_map.solidangle(i);
+            double flux = m_map.flux(i);
             if (flux < 0.0 ||
                 gammalib::is_notanumber(flux) ||
                 gammalib::is_infinite(flux)) {
