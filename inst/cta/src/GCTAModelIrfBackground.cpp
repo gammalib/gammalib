@@ -65,8 +65,6 @@ const GModelRegistry         g_cta_inst_background_registry(&g_cta_inst_backgrou
 //#define G_DEBUG_NPRED
 
 /* __ Constants __________________________________________________________ */
-const double g_cta_inst_background_npred_theta_eps = 1.0e-4;
-const double g_cta_inst_background_npred_phi_eps   = 1.0e-4;
 
 
 /*==========================================================================
@@ -448,6 +446,10 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
                                      const GTime&        obsTime,
                                      const GObservation& obs) const
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter_theta = 6;
+    static const int iter_phi   = 6;
+
     // Initialise result
     double npred     = 0.0;
     bool   has_npred = false;
@@ -525,11 +527,15 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
             double logE = obsEng.log10TeV();
 
             // Setup integration function
-            GCTAModelIrfBackground::npred_roi_kern_theta integrand(bgd, logE);
+            GCTAModelIrfBackground::npred_roi_kern_theta integrand(bgd,
+                                                                   logE,
+                                                                   iter_phi);
 
-            // Setup integrator
+            // Setup integration
             GIntegral integral(&integrand);
-            integral.eps(g_cta_inst_background_npred_theta_eps);
+
+            // Set fixed number of iterations
+            integral.fixed_iter(iter_theta);
 
             // Spatially integrate radial component
             npred = integral.romberg(0.0, roi_radius);
@@ -1208,9 +1214,13 @@ double GCTAModelIrfBackground::npred_roi_kern_theta::eval(const double& theta)
                                                               m_logE,
                                                               theta);
 
-        // Integrate over phi
+        // Setup integration
         GIntegral integral(&integrand);
-        integral.eps(g_cta_inst_background_npred_phi_eps);
+
+        // Set fixed number of iterations
+        integral.fixed_iter(m_iter);
+
+        // Integrate over phi
         value = integral.romberg(0.0, gammalib::twopi) * std::sin(theta);
 
         // Debug: Check for NaN

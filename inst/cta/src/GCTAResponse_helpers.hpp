@@ -1375,16 +1375,14 @@ public:
                                const GEnergy&          srcEng,
                                const GTime&            srcTime,
                                const GMatrix&          rot,
-                               const double&           eps,
-                               const int&              order) :
+                               const int&              iter) :
                                m_rsp(rsp),
                                m_model(model),
                                m_srcDir(srcDir),
                                m_srcEng(srcEng),
                                m_srcTime(srcTime),
                                m_rot(rot),
-                               m_eps(eps),
-                               m_order (order),
+                               m_iter (iter),
                                m_psf_max(rsp->psf()(srcDir, 0.0, srcEng)) { }
     double eval(const double& delta);
 protected:
@@ -1394,8 +1392,7 @@ protected:
     const GEnergy&          m_srcEng;  //!< True photon energy
     const GTime&            m_srcTime; //!< True photon arrival time
     const GMatrix&          m_rot;     //!< Rotation matrix
-    const double&           m_eps;     //!< Integration precision
-    const int&              m_order;   //!< Romberg order
+    const int&              m_iter;    //!< Romberg iterations
     double                  m_psf_max; //!< Maximum PSF value
 };
 

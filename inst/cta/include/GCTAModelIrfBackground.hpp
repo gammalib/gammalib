@@ -93,13 +93,16 @@ private:
     class npred_roi_kern_theta : public GFunction {
     public:
         npred_roi_kern_theta(const GCTABackground* bgd,
-                             const double&         logE) :
+                             const double&         logE,
+                             const int&            iter) :
                              m_bgd(bgd),
-                             m_logE(logE) { }
+                             m_logE(logE),
+                             m_iter(iter) { }
         double eval(const double& theta);
     protected:
         const GCTABackground* m_bgd;  //!< Pointer to background
         const double&         m_logE; //!< Log10 of energy
+        const int&            m_iter; //!< Romberg iterations
     };
 
     // ROI integration kernel over phi

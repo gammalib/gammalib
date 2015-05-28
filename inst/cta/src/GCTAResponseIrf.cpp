@@ -470,6 +470,9 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
                              const GTime&        obsTime,
                              const GObservation& obs) const
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter = 4;
+
     // Initialise Nroi value
     double nroi = 0.0;
 
@@ -498,8 +501,8 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
                 cta_nroi_kern integrand(model, *this, srcTime, obsEng, obsTime, obs);
                 GIntegral integral(&integrand);
 
-                // Set integration precision
-                integral.eps(1.0e-3);
+                // Set fixed number of iterations
+                integral.fixed_iter(iter);
 
                 // Do Romberg integration
                 emin  = std::log(emin);
@@ -1811,6 +1814,9 @@ double GCTAResponseIrf::npsf(const GSkyDir&      srcDir,
                              const GCTAPointing& pnt,
                              const GCTARoi&      roi) const
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter = 6;
+
     // Declare result
     double value = 0.0;
 
@@ -1857,7 +1863,9 @@ double GCTAResponseIrf::npsf(const GSkyDir&      srcDir,
 
             // Setup integration
             GIntegral integral(&integrand);
-            integral.eps(1.0e-5);
+
+            // Set fixed number of iterations
+            integral.fixed_iter(iter);
 
             // Radially integrate PSF. In case that the radial integration
             // region is small, we do the integration using a simple

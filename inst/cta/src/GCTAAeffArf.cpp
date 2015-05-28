@@ -364,6 +364,9 @@ void GCTAAeffArf::read(const GFitsTable& hdu)
  ***************************************************************************/
 void GCTAAeffArf::remove_thetacut(const GCTAResponseIrf& rsp)
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter = 6;
+
     // Continue only if thetacut value has been set
     if (m_thetacut > 0.0) {
 
@@ -385,7 +388,9 @@ void GCTAAeffArf::remove_thetacut(const GCTAResponseIrf& rsp)
 
             // Setup integration
             GIntegral integral(&integrand);
-            integral.eps(1.0e-5);
+
+            // Set fixed number of iterations
+            integral.fixed_iter(iter);
 
             // Perform integration
             double fraction = integral.romberg(0.0, rmax);

@@ -408,6 +408,9 @@ double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng,
 double GModelSpectralLogParabola::flux(const GEnergy& emin,
                                        const GEnergy& emax) const
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter = 9;
+
     // Initialise flux
     double flux = 0.0;
     
@@ -420,8 +423,8 @@ double GModelSpectralLogParabola::flux(const GEnergy& emin,
         // Initialise integral class with function
         GIntegral integral(&kernel);
 
-        // Set integration precision
-        integral.eps(1.0e-8);
+        // Set number of iterations
+        integral.fixed_iter(iter);
 
         // Calculate integral between emin and emax
         flux = integral.romberg(emin.MeV(), emax.MeV());
@@ -454,6 +457,9 @@ double GModelSpectralLogParabola::flux(const GEnergy& emin,
 double GModelSpectralLogParabola::eflux(const GEnergy& emin,
                                         const GEnergy& emax) const
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter = 9;
+
     // Initialise flux
     double eflux = 0.0;
     
@@ -466,8 +472,8 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
         // Initialise integral class with function
         GIntegral integral(&kernel);
 
-        // Set integration precision
-        integral.eps(1.0e-8);
+        // Set number of iterations
+        integral.fixed_iter(iter);
 
         // Calculate integral between emin and emax
         eflux = integral.romberg(emin.MeV(), emax.MeV());

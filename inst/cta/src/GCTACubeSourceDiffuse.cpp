@@ -359,13 +359,9 @@ double GCTACubeSourceDiffuse::psf(const GCTAResponseCube* rsp,
                                   const GEnergy&          srcEng,
                                   const GTime&            srcTime) const
 {
-    // Set integration precision and Romberg order. These values have been
-    // determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1291
-    const double eps_delta   = 1.0e-2;
-    const int    order_delta =      5;
-    const double eps_phi     = 1.0e-2;
-    const int    order_phi   =      5;
+    // Set number of iterations for Romberg integration.
+    static const int iter_delta = 5;
+    static const int iter_phi   = 5;
 
     // Initialise PSF
     double psf = 0.0;
@@ -387,12 +383,16 @@ double GCTACubeSourceDiffuse::psf(const GCTAResponseCube* rsp,
     // direction as the true photon arrival direction because the PSF does
     // not vary significantly over a small region.
     cta_psf_diffuse_kern_delta integrand(rsp, model, obsDir, srcEng, srcTime,
-                                         rot, eps_phi, order_phi);
+                                         rot, iter_phi);
+
+    // Setup integration
+    GIntegral integral(&integrand);
+
+    // Set fixed number of iterations
+    integral.fixed_iter(iter_delta);
 
     // Integrate over PSF delta angle
-    GIntegral integral(&integrand);
-    integral.eps(eps_delta);
-    psf = integral.romberg(delta_min, delta_max, order_delta);
+    psf = integral.romberg(delta_min, delta_max);
 
     // Return PSF
     return psf;

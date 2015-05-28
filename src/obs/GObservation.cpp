@@ -1409,6 +1409,9 @@ double GObservation::npred_kern::eval(const double& x)
 double GObservation::npred_spec(const GModel& model,
                                 const GTime&  obsTime) const
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter = 8;
+
     // Initialise result
     double result = 0.0;
 
@@ -1429,8 +1432,8 @@ double GObservation::npred_spec(const GModel& model,
             GObservation::npred_spec_kern integrand(this, &model, &obsTime);
             GIntegral                     integral(&integrand);
 
-            // Set integration precision
-            integral.eps(1.0e-6); // Needed for fluctuating bgd. model !!!
+            // Set number of iterations
+            integral.fixed_iter(iter);
 
             // Do Romberg integration
             #if defined(G_LN_ENERGY_INT)

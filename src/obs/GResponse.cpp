@@ -174,6 +174,9 @@ double GResponse::convolve(const GModelSky&    model,
                            const GObservation& obs,
                            const bool&         grad) const
 {
+    // Set number of iterations for Romberg integration.
+    static const int iter = 4;
+
     // Initialise result
     double prob = 0.0;
 
@@ -203,8 +206,8 @@ double GResponse::convolve(const GModelSky&    model,
                     edisp_kern integrand(this, model, event, srcTime, obs, grad);
                     GIntegral  integral(&integrand);
 
-                    // Set integration precision
-                    integral.eps(1.0e-3);
+                    // Set number of iterations
+                    integral.fixed_iter(iter);
 
                     // Do Romberg integration
                     emin  = std::log(emin);

@@ -2185,10 +2185,14 @@ double cta_psf_diffuse_kern_delta::eval(const double& delta)
                                                m_rot,
                                                sin_delta, cos_delta);
 
-            // Azimuthally integrate model
+            // Setup untegration
             GIntegral integral(&integrand);
-            integral.eps(m_eps);
-            value *= integral.romberg(0.0, gammalib::twopi, m_order) * sin_delta;
+
+            // Set fixed number of iterations
+            integral.fixed_iter(m_iter);
+
+            // Azimuthally integrate model
+            value *= integral.romberg(0.0, gammalib::twopi) * sin_delta;
 
         } // endif: PSF value was positive
 
