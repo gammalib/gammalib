@@ -344,7 +344,7 @@ GSkymap& GSkymap::operator+=(const GSkymap& map)
         std::string msg = "Mismatch of number of maps in skymap object"
                           " ("+gammalib::str(nmaps())+" maps in destination"
                           " map, "+gammalib::str(map.nmaps())+" in source"
-                          " map.";
+                          " map).";
         throw GException::invalid_value(G_OP_UNARY_ADD, msg);
     }
 
@@ -418,7 +418,7 @@ GSkymap& GSkymap::operator-=(const GSkymap& map)
         std::string msg = "Mismatch of number of maps in skymap object"
                           " ("+gammalib::str(nmaps())+" maps in destination"
                           " map, "+gammalib::str(map.nmaps())+" in source"
-                          " map.";
+                          " map).";
         throw GException::invalid_value(G_OP_UNARY_SUB, msg);
     }
 
@@ -492,7 +492,7 @@ GSkymap& GSkymap::operator*=(const GSkymap& map)
         std::string msg = "Mismatch of number of maps in skymap object"
                           " ("+gammalib::str(nmaps())+" maps in destination"
                           " map, "+gammalib::str(map.nmaps())+" in source"
-                          " map.";
+                          " map).";
         throw GException::invalid_value(G_OP_UNARY_MUL, msg);
     }
 
@@ -567,7 +567,7 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
         std::string msg = "Mismatch of number of maps in skymap object"
                           " ("+gammalib::str(nmaps())+" maps in destination"
                           " map, "+gammalib::str(map.nmaps())+" in source"
-                          " map.";
+                          " map).";
         throw GException::invalid_value(G_OP_UNARY_DIV, msg);
     }
 
@@ -847,35 +847,53 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                 // Continue only if pixel is within the map
                 if (m_contained) {
 
-                    // Set left indices for interpolation. The left index is
-                    // comprised between 0 and npixels-2. By definition, the
-                    // right index is then the left index + 1
-                    int inx_x = int(pixel.x());
-                    int inx_y = int(pixel.y());
-                    if (inx_x < 0) {
-                        inx_x = 0;
+                    // Signal that we have a wrap around in the x axis
+                    double x_size = std::abs(m_num_x * static_cast<GWcs*>(m_proj)->cdelt(0));
+                    bool   x_wrap = (x_size > 359.99);
+
+                    // Set left and right indices for interpolation. The left
+                    // index needs to non-negative and the right index needs
+                    // to be not larger that the number of pixels. We treat
+                    // here also the special case of wrap around in the x
+                    // axis that may occur if we have an allsky map.
+                    int inx_x_left  = int(pixel.x());
+                    int inx_y_left  = int(pixel.y());
+                    int inx_x_right = inx_x_left + 1;
+                    int inx_y_right = inx_y_left + 1;
+                    if (inx_x_left < 0) {
+                        if (x_wrap) {
+                            inx_x_left += m_num_x;
+                        }
+                        else {
+                            inx_x_left = 0;
+                        }
                     }
-                    else if (inx_x > m_num_x-2) {
-                        inx_x = m_num_x - 2;
+                    if (inx_y_right >= m_num_x) {
+                        if (x_wrap) {
+                            inx_y_right -= m_num_x;
+                        }
+                        else {
+                            inx_y_right = m_num_x - 1;
+                        }
                     }
-                    if (inx_y < 0) {
-                        inx_y = 0;
+                    if (inx_y_left < 0) {
+                        inx_y_left = 0;
                     }
-                    else if (inx_y > m_num_y-2) {
-                        inx_y = m_num_y - 2;
+                    if (inx_y_right >= m_num_y) {
+                        inx_y_right = m_num_y - 1;
                     }
 
                     // Set weighting factors for interpolation
-                    double wgt_x_right = (pixel.x() - inx_x);
+                    double wgt_x_right = (pixel.x() - int(pixel.x()));
                     double wgt_x_left  = 1.0 - wgt_x_right;
-                    double wgt_y_right = (pixel.y() - inx_y);
+                    double wgt_y_right = (pixel.y() - int(pixel.y()));
                     double wgt_y_left  = 1.0 - wgt_y_right;
 
                     // Compute skymap pixel indices for bi-linear interpolation
-                    m_interpol.index1() = inx_x + inx_y * m_num_x;
-                    m_interpol.index2() = m_interpol.index1() + m_num_x;
-                    m_interpol.index3() = m_interpol.index1() + 1;
-                    m_interpol.index4() = m_interpol.index2() + 1;
+                    m_interpol.index1() = inx_x_left  + inx_y_left  * m_num_x;
+                    m_interpol.index2() = inx_x_left  + inx_y_right * m_num_x;
+                    m_interpol.index3() = inx_x_right + inx_y_left  * m_num_x;
+                    m_interpol.index4() = inx_x_right + inx_y_right * m_num_x;
 
                     // Compute weighting factors for bi-linear interpolation
                     m_interpol.weight1() = wgt_x_left  * wgt_y_left;
@@ -1644,7 +1662,6 @@ void GSkymap::load(const std::string& filename)
 
             // Load WCS map
             read_wcs(static_cast<const GFitsImage&>(hdu));
-            //loaded = true;
             break;
 
         } // endfor: looped over HDUs
@@ -2129,8 +2146,9 @@ void GSkymap::read_healpix(const GFitsTable& table)
  *
  * @param[in] image FITS image.
  *
- * @exception GException::skymap_bad_image_dim
- *            WCS image has invalid dimension (naxis=2 or 3).
+ * @exception GException::invalid_value
+ *            WCS image has an invalid dimension or covers a too large
+ *            range.
  ***************************************************************************/
 void GSkymap::read_wcs(const GFitsImage& image)
 {
@@ -2152,7 +2170,10 @@ void GSkymap::read_wcs(const GFitsImage& image)
         m_num_maps = image.naxes(2);
     }
     else {
-        throw GException::skymap_bad_image_dim(G_READ_WCS, image.naxis());
+        std::string msg = "Skymap has a dimension of "+
+                          gammalib::str(image.naxis())+" but only dimensions "
+                          "of 2 or 3 are supported.";
+        throw GException::invalid_value(G_READ_WCS, msg);
     }
     #if defined(G_READ_WCS_DEBUG)
     std::cout << "m_num_x=" << m_num_x << std::endl;
@@ -2187,6 +2208,24 @@ void GSkymap::read_wcs(const GFitsImage& image)
                 }
             }
         }
+    }
+
+    // Check if the map is too large
+    double x_size = std::abs(m_num_x * static_cast<GWcs*>(m_proj)->cdelt(0));
+    double y_size = std::abs(m_num_y * static_cast<GWcs*>(m_proj)->cdelt(1));
+    if (x_size > 360.001) {
+        std::string msg = "Skymap covers "+gammalib::str(x_size)+" degrees "
+                          "in the X axis which results in ambiguous "
+                          "coordinate transformations. Please provide a "
+                          "skymap that does not cover more than 360 degrees.";
+        throw GException::invalid_value(G_READ_WCS, msg);
+    }
+    if (y_size > 180.001) {
+        std::string msg = "Skymap covers "+gammalib::str(y_size)+" degrees "
+                          "in the Y axis which results in ambiguous "
+                          "coordinate transformations. Please provide a "
+                          "skymap that does not cover more than 180 degrees.";
+        throw GException::invalid_value(G_READ_WCS, msg);
     }
 
     // Return
