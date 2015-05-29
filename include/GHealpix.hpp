@@ -75,41 +75,49 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const int&   npix(void) const;
-    const int&   nside(void) const;
-    std::string  ordering(void) const;
-    void         ordering(const std::string& ordering);
+    const int&           npix(void) const;
+    const int&           nside(void) const;
+    std::string          ordering(void) const;
+    void                 ordering(const std::string& ordering);
+    std::vector<int>     neighbours(const GSkyPixel& pixel) const;
+    std::vector<GSkyDir> boundaries(const GSkyPixel& pixel, const int& step = 1) const;
+    double               max_pixrad(void) const;
 
 private:
     // Private methods
-    void         init_members(void);
-    void         copy_members(const GHealpix& wcs);
-    void         free_members(void);
-    virtual bool compare(const GSkyProjection& proj) const;
+    void             init_members(void);
+    void             copy_members(const GHealpix& wcs);
+    void             free_members(void);
+    virtual bool     compare(const GSkyProjection& proj) const;
 
     // Low-level HealPix methods
-    int          compress_bits(const int& value) const;
-    int          spread_bits(const int& value) const;
-    void         nest2xyf(const int& pix, int* ix, int* iy, int* face) const;
-    void         ring2xyf(const int& pix, int* ix, int* iy, int* face) const;
-    int          xyf2nest(const int& ix, const int& iy, const int& face) const;
-    int          xyf2ring(const int& ix, const int& iy, const int& face) const;
-    int          nside2order(const int& nside) const;
-    int          nest2ring(const int& pix) const;
-    int          ring2nest(const int& pix) const;
-    void         pix2xy(const int& ipix, int* x, int* y) const;
-    int          xy2pix(int x, int y) const;
-    void         pix2ang_ring(int ipix, double* theta, double* phi) const;
-    void         pix2ang_nest(int ipix, double* theta, double* phi) const;
-    int          ang2pix_z_phi_ring(double z, double phi) const;
-    int          ang2pix_z_phi_nest(double z, double phi) const;
-    int          ring_above(const double& z) const;
-    void         get_ring_info(const int& ring, int* startpix, int* ringpix,
-                               bool* shifted) const;
-    void         get_ring_info(const int& ring, int* startpix, int* ringpix,
-                               double* theta, bool* shifted) const;
-    GBilinear    interpolator(const double& theta, const double& phi) const;
-    unsigned int isqrt(unsigned int arg) const;
+    int              compress_bits(const int& value) const;
+    int              spread_bits(const int& value) const;
+    void             pix2xyf(const int& pix, int* ix, int* iy, int* face) const;
+    void             nest2xyf(const int& pix, int* ix, int* iy, int* face) const;
+    void             ring2xyf(const int& pix, int* ix, int* iy, int* face) const;
+    int              xyf2nest(const int& ix, const int& iy, const int& face) const;
+    int              xyf2ring(const int& ix, const int& iy, const int& face) const;
+    void             xyf2loc(const double& x, const double& y, const int& face,
+                             double* z, double* phi) const;
+    int              nside2order(const int& nside) const;
+    int              nest2ring(const int& pix) const;
+    int              ring2nest(const int& pix) const;
+    void             pix2xy(const int& ipix, int* x, int* y) const;
+    int              xy2pix(int x, int y) const;
+    void             pix2ang_ring(int ipix, double* theta, double* phi) const;
+    void             pix2ang_nest(int ipix, double* theta, double* phi) const;
+    int              ang2pix_z_phi_ring(double z, double phi) const;
+    int              ang2pix_z_phi_nest(double z, double phi) const;
+    int              ring_above(const double& z) const;
+    void             get_ring_info(const int& ring, int* startpix, int* ringpix,
+                                   bool* shifted) const;
+    void             get_ring_info(const int& ring, int* startpix, int* ringpix,
+                                   double* theta, bool* shifted) const;
+    GBilinear        interpolator(const double& theta, const double& phi) const;
+    unsigned int     isqrt(unsigned int arg) const;
+    GVector          set_z_phi(const double& z, const double& phi) const;
+    GSkyDir          loc2dir(const double& z, const double& phi) const;
 
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)
