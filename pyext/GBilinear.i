@@ -49,14 +49,14 @@ public:
     void        clear(void);
     GBilinear*  clone(void) const;
     std::string classname(void) const;
-    int&        index1(void);
-    int&        index2(void);
-    int&        index3(void);
-    int&        index4(void);
-    double&     weight1(void);
-    double&     weight2(void);
-    double&     weight3(void);
-    double&     weight4(void);
+    int         index1(void);
+    int         index2(void);
+    int         index3(void);
+    int         index4(void);
+    double      weight1(void);
+    double      weight2(void);
+    double      weight3(void);
+    double      weight4(void);
 };
 
 
