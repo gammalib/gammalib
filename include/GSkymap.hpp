@@ -167,6 +167,8 @@ private:
     GFitsBinTable*    create_healpix_hdu(void) const;
     GFitsImageDouble* create_wcs_hdu(void) const;
     double            solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
+                                 const GSkyDir& dir3) const;
+    double            solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                                  const GSkyDir& dir3, const GSkyDir& dir4) const;
 
     // Private data area

@@ -1259,14 +1259,22 @@ double GSkymap::flux(const int& index, const int& map) const
  *
  * @param[in] pixel Sky map pixel.
  * @param[in] map Map index [0,...,nmaps()-1].
- * @return Flux in pixel.
+ * @return Flux in pixel (ph/cm2/s).
  *
  * @exception GException::invalid_value
  *            No valid sky projection found.
  *
- * Returns the flux in the specified sky map @p pixel.
+ * Returns the flux in the specified sky map @p pixel. The flux is computed
+ * by integrating the intensity over the solid angle subtended by the pixel.
+ * 
+ * For a HealPix pixelisation, the pixel is divided into 12 wedges and the
+ * flux is integrated in each wedge by computing the average of the corner
+ * intensities multiplied by the solid angle of the wedge. This leads to a
+ * precision of the order of 1-3% in the flux computation.
  *
- * @todo Implement flux computation for HealPix map.
+ * For a WCS pixelisation, the pixel is divided into 4 quadrants and the flux
+ * is computed in each quandrant by multiplying the intensity in the centre
+ * of the quadrant with the solid angle of the quadrant.
  ***************************************************************************/
 double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
 {
@@ -1279,18 +1287,74 @@ double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
     // Initialise flux
     double flux = 0.0;
 
-    // Perform flux computation for HealPix map
+    // Perform flux computation for HealPix map. The pixel is divided into
+    // 12 wedges and the flux is integrated in each wedge by computing the
+    // average of the corner intensities multiplied by the solid angle of
+    // the wedge. This leads to a precision of the order of 1-2% in the
+    // flux computation.
     if (m_proj->size() == 1)  {
 
-        // This does a simple flux computation that is using just the pixel
-        // centre. This is incorrect for interpolated maps.
-        // TODO: Implement flux computation that takes care of interpolated
-        // maps
-        flux = this->operator()(pixel, map) * solidangle(pixel);
+        // Get pointer on HealPix projection
+        const GHealpix* healpix = static_cast<const GHealpix*>(projection());
+
+        // Get centre
+        GSkyDir centre = healpix->pix2dir(pixel);
+
+        // Get boundaries
+        std::vector<GSkyDir> boundaries = healpix->boundaries(pixel, 3);
+
+        // Compute intensities
+        double i0  = this->operator()(centre);
+        double i1  = this->operator()(boundaries[0]);
+        double i2  = this->operator()(boundaries[4]);
+        double i3  = this->operator()(boundaries[8]);
+        double i4  = this->operator()(boundaries[1]);
+        double i5  = this->operator()(boundaries[5]);
+        double i6  = this->operator()(boundaries[9]);
+        double i7  = this->operator()(boundaries[2]);
+        double i8  = this->operator()(boundaries[6]);
+        double i9  = this->operator()(boundaries[10]);
+        double i10 = this->operator()(boundaries[3]);
+        double i11 = this->operator()(boundaries[7]);
+        double i12 = this->operator()(boundaries[11]);
+ 
+        // Compute fluxes in wedges
+        double flux1  = (i0 + i1 + i2)   / 3.0 *
+                        solidangle(centre, boundaries[0], boundaries[4]);
+        double flux2  = (i0 + i2 + i3)   / 3.0 *
+                        solidangle(centre, boundaries[4], boundaries[8]);
+        double flux3  = (i0 + i3 + i4)   / 3.0 *
+                        solidangle(centre, boundaries[8], boundaries[1]);
+        double flux4  = (i0 + i4 + i5)   / 3.0 *
+                        solidangle(centre, boundaries[1], boundaries[5]);
+        double flux5  = (i0 + i5 + i6)   / 3.0 *
+                        solidangle(centre, boundaries[5], boundaries[9]);
+        double flux6  = (i0 + i6 + i7)   / 3.0 *
+                        solidangle(centre, boundaries[9], boundaries[2]);
+        double flux7  = (i0 + i7 + i8)   / 3.0 *
+                        solidangle(centre, boundaries[2], boundaries[6]);
+        double flux8  = (i0 + i8 + i9)   / 3.0 *
+                        solidangle(centre, boundaries[6], boundaries[10]);
+        double flux9  = (i0 + i9 + i10)  / 3.0 *
+                        solidangle(centre, boundaries[10], boundaries[3]);
+        double flux10 = (i0 + i10 + i11) / 3.0 *
+                        solidangle(centre, boundaries[3], boundaries[7]);
+        double flux11 = (i0 + i11 + i12) / 3.0 *
+                        solidangle(centre, boundaries[7], boundaries[11]);
+        double flux12 = (i0 + i12 + i1)  / 3.0 *
+                        solidangle(centre, boundaries[11], boundaries[0]);
+
+        // Sum up fluxes
+        flux = (flux1 + flux2  + flux3  + flux4 +
+                flux5 + flux6  + flux7  + flux8 +
+                flux9 + flux10 + flux11 + flux12);
     
     } // endif: we had a HealPix map
 
-    // ... otherwise perform flux computation for WCS map
+    // ... otherwise perform flux computation for WCS map. The pixel is
+    // divided into 4 quadrants and the flux is computed in each quandrant
+    // by multiplying the intensity in the centre of the quadrant with the
+    // solid angle of the quadrant.
     else {
 
         // Compute flux
@@ -2487,6 +2551,57 @@ double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
         solidangle = 4.0 * (excess1 + excess2);
 
     } // endif: we had a polynom
+
+    // Return solid angle
+    return solidangle;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute solid angle subtended by 3 sky directions
+ *
+ * @param[in] dir1 First sky direction.
+ * @param[in] dir2 Second sky direction.
+ * @param[in] dir3 Third sky direction.
+ * @return Solid angle (steradians).
+ *
+ * Estimate the solid angle subtended by 3 sky directions using Huilier's
+ * theroem.
+ *
+ * Below, the definiton of the pixel cornes and sides are shown as used
+ * within the code.
+ *
+ *             a12
+ *         1---------2
+ *         |        / 
+ *         |       /  
+ *         |      /   
+ *         |     /    
+ *      a13|    /a23
+ *         |   / 
+ *         |  / 
+ *         | /
+ *         |/
+ *         3
+ *
+ ***************************************************************************/
+double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
+                           const GSkyDir& dir3) const
+{
+    // Initialise solid angle
+    double solidangle = 0.0;
+
+    // Compute angular distances between pixel corners
+    double a12 = dir1.dist(dir2);
+    double a13 = dir1.dist(dir3);
+    double a23 = dir2.dist(dir3);
+
+    // Compute solid angle
+    double s   = 0.5 * (a12 + a23 + a13);
+    solidangle = 4.0 * std::atan(std::sqrt(std::tan(0.5*s) *
+                                           std::tan(0.5*(s-a12)) *
+                                           std::tan(0.5*(s-a23)) *
+                                           std::tan(0.5*(s-a13))));
 
     // Return solid angle
     return solidangle;
