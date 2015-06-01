@@ -913,7 +913,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         #if defined(G_DEBUG_PREPARE)
         double sum_control = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.solidangle(i);
+            double flux = m_map.flux(i);
             if (flux >= 0.0) {
                 sum_control += flux;
             }
