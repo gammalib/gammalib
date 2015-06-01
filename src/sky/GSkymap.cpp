@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
+#include "GMath.hpp"
 #include "GTools.hpp"
 #include "GSkymap.hpp"
 #include "GHealpix.hpp"
@@ -851,13 +852,26 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                     double x_size = std::abs(m_num_x * static_cast<GWcs*>(m_proj)->cdelt(0));
                     bool   x_wrap = (x_size > 359.99);
 
+                    // Get pixel index that is to the left-top of the actual
+                    // pixel. We take care of the special case of negative pixel
+                    // indices which arise if we are in the first column or
+                    // first row of the map.
+                    int inx_x = int(pixel.x());
+                    int inx_y = int(pixel.y());
+                    if (pixel.x() < 0.0) {
+                        inx_x--;
+                    }
+                    if (pixel.y() < 0.0) {
+                        inx_y--;
+                    }
+
                     // Set left and right indices for interpolation. The left
-                    // index needs to non-negative and the right index needs
+                    // index needs to be non-negative and the right index needs
                     // to be not larger that the number of pixels. We treat
                     // here also the special case of wrap around in the x
                     // axis that may occur if we have an allsky map.
-                    int inx_x_left  = int(pixel.x());
-                    int inx_y_left  = int(pixel.y());
+                    int inx_x_left  = inx_x;
+                    int inx_y_left  = inx_y;
                     int inx_x_right = inx_x_left + 1;
                     int inx_y_right = inx_y_left + 1;
                     if (inx_x_left < 0) {
@@ -865,7 +879,7 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                             inx_x_left += m_num_x;
                         }
                         else {
-                            inx_x_left = 0;
+                            inx_x_left  = 0;
                         }
                     }
                     if (inx_x_right >= m_num_x) {
@@ -877,16 +891,16 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                         }
                     }
                     if (inx_y_left < 0) {
-                        inx_y_left = 0;
+                        inx_y_left  = 0;
                     }
                     if (inx_y_right >= m_num_y) {
                         inx_y_right = m_num_y - 1;
                     }
 
                     // Set weighting factors for interpolation
-                    double wgt_x_right = (pixel.x() - int(pixel.x()));
+                    double wgt_x_right = (pixel.x() - inx_x);
                     double wgt_x_left  = 1.0 - wgt_x_right;
-                    double wgt_y_right = (pixel.y() - int(pixel.y()));
+                    double wgt_y_right = (pixel.y() - inx_y);
                     double wgt_y_left  = 1.0 - wgt_y_right;
 
                     // Compute skymap pixel indices for bi-linear interpolation
@@ -1266,15 +1280,14 @@ double GSkymap::flux(const int& index, const int& map) const
  *
  * Returns the flux in the specified sky map @p pixel. The flux is computed
  * by integrating the intensity over the solid angle subtended by the pixel.
+ * Integration is done by dividing the pixel into wedges, computing the
+ * intensitites at the cornes of each wedge, averaging these intensities,
+ * and multiplying it with the solid angle of each wedge. This provides an
+ * approximation of the true pixel flux which is accurate to better than
+ * about 5%.
  * 
- * For a HealPix pixelisation, the pixel is divided into 12 wedges and the
- * flux is integrated in each wedge by computing the average of the corner
- * intensities multiplied by the solid angle of the wedge. This leads to a
- * precision of the order of 1-3% in the flux computation.
- *
- * For a WCS pixelisation, the pixel is divided into 4 quadrants and the flux
- * is computed in each quandrant by multiplying the intensity in the centre
- * of the quadrant with the solid angle of the quadrant.
+ * For a HealPix pixelisation, the pixel is divided into 12 wedges. For a
+ * WCS pixelisation, the pixel is divided into 8 wedges.
  ***************************************************************************/
 double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
 {
@@ -1319,29 +1332,29 @@ double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
         double i12 = this->operator()(boundaries[11]);
  
         // Compute fluxes in wedges
-        double flux1  = (i0 + i1 + i2)   / 3.0 *
+        double flux1  = gammalib::onethird * (i0 + i1 + i2) *
                         solidangle(centre, boundaries[0], boundaries[4]);
-        double flux2  = (i0 + i2 + i3)   / 3.0 *
+        double flux2  = gammalib::onethird * (i0 + i2 + i3) *
                         solidangle(centre, boundaries[4], boundaries[8]);
-        double flux3  = (i0 + i3 + i4)   / 3.0 *
+        double flux3  = gammalib::onethird * (i0 + i3 + i4) *
                         solidangle(centre, boundaries[8], boundaries[1]);
-        double flux4  = (i0 + i4 + i5)   / 3.0 *
+        double flux4  = gammalib::onethird * (i0 + i4 + i5) *
                         solidangle(centre, boundaries[1], boundaries[5]);
-        double flux5  = (i0 + i5 + i6)   / 3.0 *
+        double flux5  = gammalib::onethird * (i0 + i5 + i6) *
                         solidangle(centre, boundaries[5], boundaries[9]);
-        double flux6  = (i0 + i6 + i7)   / 3.0 *
+        double flux6  = gammalib::onethird * (i0 + i6 + i7) *
                         solidangle(centre, boundaries[9], boundaries[2]);
-        double flux7  = (i0 + i7 + i8)   / 3.0 *
+        double flux7  = gammalib::onethird * (i0 + i7 + i8) *
                         solidangle(centre, boundaries[2], boundaries[6]);
-        double flux8  = (i0 + i8 + i9)   / 3.0 *
+        double flux8  = gammalib::onethird * (i0 + i8 + i9) *
                         solidangle(centre, boundaries[6], boundaries[10]);
-        double flux9  = (i0 + i9 + i10)  / 3.0 *
+        double flux9  = gammalib::onethird * (i0 + i9 + i10) *
                         solidangle(centre, boundaries[10], boundaries[3]);
-        double flux10 = (i0 + i10 + i11) / 3.0 *
+        double flux10 = gammalib::onethird * (i0 + i10 + i11) *
                         solidangle(centre, boundaries[3], boundaries[7]);
-        double flux11 = (i0 + i11 + i12) / 3.0 *
+        double flux11 = gammalib::onethird * (i0 + i11 + i12) *
                         solidangle(centre, boundaries[7], boundaries[11]);
-        double flux12 = (i0 + i12 + i1)  / 3.0 *
+        double flux12 = gammalib::onethird * (i0 + i12 + i1) *
                         solidangle(centre, boundaries[11], boundaries[0]);
 
         // Sum up fluxes
@@ -1352,36 +1365,57 @@ double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
     } // endif: we had a HealPix map
 
     // ... otherwise perform flux computation for WCS map. The pixel is
-    // divided into 4 quadrants and the flux is computed in each quandrant
-    // by multiplying the intensity in the centre of the quadrant with the
-    // solid angle of the quadrant.
+    // divided into 8 wedges and the flux is integrated in each wedge by
+    // computing the average of the corner intensities multiplied by the
+    // solid angle of the wedge. This leads to a precision of the order
+    // of <1% in the flux computation.
     else {
 
-        // Compute flux
-        flux = this->operator()(pix2dir(GSkyPixel(pixel.x()-0.25,
-                                                  pixel.y()-0.25)), map) *
-               solidangle(pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5)),
-                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5)),
-                          pix2dir(GSkyPixel(pixel.x(),     pixel.y())),
-                          pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()))) +
-               this->operator()(pix2dir(GSkyPixel(pixel.x()+0.25,
-                                                  pixel.y()-0.25)), map) *
-               solidangle(pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5)),
-                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()-0.5)),
-                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y())),
-                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()))) +
-               this->operator()(pix2dir(GSkyPixel(pixel.x()+0.25,
-                                                  pixel.y()+0.25)), map) *
-               solidangle(pix2dir(GSkyPixel(pixel.x(),     pixel.y())),
-                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y())),
-                          pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5)),
-                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5))) +
-               this->operator()(pix2dir(GSkyPixel(pixel.x()-0.25,
-                                                  pixel.y()+0.25)), map) *
-               solidangle(pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y())),
-                          pix2dir(GSkyPixel(pixel.x(),     pixel.y())),
-                          pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5)),
-                          pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5)));
+        // Get centre
+        GSkyDir centre = pix2dir(pixel);
+
+        // Get boundaries
+        GSkyDir boundary1 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5));
+        GSkyDir boundary2 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5));
+        GSkyDir boundary3 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()-0.5));
+        GSkyDir boundary4 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()));
+        GSkyDir boundary5 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5));
+        GSkyDir boundary6 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5));
+        GSkyDir boundary7 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5));
+        GSkyDir boundary8 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()));
+
+        // Compute intensities
+        double i0  = this->operator()(centre);
+        double i1  = this->operator()(boundary1);
+        double i2  = this->operator()(boundary2);
+        double i3  = this->operator()(boundary3);
+        double i4  = this->operator()(boundary4);
+        double i5  = this->operator()(boundary5);
+        double i6  = this->operator()(boundary6);
+        double i7  = this->operator()(boundary7);
+        double i8  = this->operator()(boundary8);
+
+        // Compute fluxes
+        double flux1 = gammalib::onethird * (i1 + i2 + i0) *
+                       solidangle(boundary1, boundary2, centre);
+        double flux2 = gammalib::onethird * (i2 + i3 + i0) *
+                       solidangle(boundary2, boundary3, centre);
+        double flux3 = gammalib::onethird * (i3 + i4 + i0) *
+                       solidangle(boundary3, boundary4, centre);
+        double flux4 = gammalib::onethird * (i4 + i5 + i0) *
+                       solidangle(boundary4, boundary5, centre);
+        double flux5 = gammalib::onethird * (i5 + i6 + i0) *
+                       solidangle(boundary5, boundary6, centre);
+        double flux6 = gammalib::onethird * (i6 + i7 + i0) *
+                       solidangle(boundary6, boundary7, centre);
+        double flux7 = gammalib::onethird * (i7 + i8 + i0) *
+                       solidangle(boundary7, boundary8, centre);
+        double flux8 = gammalib::onethird * (i8 + i1 + i0) *
+                       solidangle(boundary8, boundary1, centre);
+
+        // Sum up fluxes
+        flux = (flux1 + flux2  + flux3  + flux4 +
+                flux5 + flux6  + flux7  + flux8);
 
     } // endelse: we had a WCS map
 
@@ -2602,7 +2636,7 @@ double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                                            std::tan(0.5*(s-a12)) *
                                            std::tan(0.5*(s-a23)) *
                                            std::tan(0.5*(s-a13))));
-
+    
     // Return solid angle
     return solidangle;
 }
