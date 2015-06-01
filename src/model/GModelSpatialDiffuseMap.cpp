@@ -31,6 +31,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GHealpix.hpp"
 #include "GModelSpatialDiffuseMap.hpp"
 #include "GModelSpatialRegistry.hpp"
 
@@ -322,18 +323,18 @@ double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Returns a random sky direction according to the intensity distribution of
- * the model sky map. It makes use of a cache array that contains the
- * normalized cumulative flux values of the skymap. Using a uniform random
- * number, this cache array is scanned using a bi-section method to determine
- * the skymap pixel for which the position should be returned. To avoid
- * binning problems, the exact position within the pixel is set by a uniform
- * random number generator. In case of a 2D map, this is done by randomizing
- * the skymap pixel values (neglecting thus pixel distortions). In case of a
- * HealPix map, this is done by selecing a random sky position within the
- * HealPix map.
+ * Draws a random sky direction from the intensity distribution of the model
+ * sky map.
  *
- * @todo: Improve HealPix randomization
+ * The method makes use of a cache array that contains the normalized
+ * cumulative flux values of the skymap. Using a uniform random number, this
+ * cache array is scanned using a bi-section method to determine the skymap
+ * pixel for which the position should be returned.
+ *
+ * Within that pixel, a rejection method is used to draw a sky direction
+ * that follows the intensity distribution that is obtained when calling the
+ * interpolation operator. This assures that even for coarse binning of the
+ * sky map the simulation corresponds to the model.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
                                     const GTime&   time,
@@ -357,33 +358,81 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
     	// If we have a 2D pixel then randomize pixel values and convert them
         // into a sky direction
         if (pixel.is_2D()) {
-            pixel.x(pixel.x() + ran.uniform() - 0.5);
-            pixel.y(pixel.y() + ran.uniform() - 0.5);
-            dir = m_map.pix2dir(pixel);
-        }
+
+            // Use a rejection method to find a sky direction
+            while (true) {
+
+                // Draw random sky pixel
+                GSkyPixel test(pixel.x() + ran.uniform() - 0.5,
+                               pixel.y() + ran.uniform() - 0.5);
+
+                // Derive sky direction
+                dir = m_map.pix2dir(test);
+
+                // Get map value at that sky direction
+                double value = m_map(dir);
+
+                // Get uniform random number up to the maximum
+                double uniform = ran.uniform() * m_mc_max[index];
+
+                // Exit loop if we're not larger than the map value
+                if (uniform <= value) {
+                    break;
+                }
+
+            } // endwhile: rejection method
+
+        } // endif: had a 2D pixel
 
         // ... otherwise convert pixel into sky direction and randomize
-        // position. We use here a kluge to compute the radius that contains
-        // a HealPix pixel by setting this radius to twice the half angle
-        // subtended by the solid angle of the pixel. We then use a while
-        // loop to randomize the position within that circle and to retain
-        // only directions that result in the same pixel index.
+        // position. We use a while loop to randomize the position within a
+        // circle that enclosed the pixel and retain only directions that
+        // result in the same pixel index and that are compatible with the
+        // density distribution.
         else {
+
+            // Get pointer on HealPix projection
+            const GHealpix* healpix = static_cast<const GHealpix*>(m_map.projection());
+
+            // Get enclosing radius
+            double radius = healpix->max_pixrad();
+
+            // Initialize pixel centre
             dir = m_map.pix2dir(pixel);
+
+            // Get randomized pixel
             GSkyDir randomized_dir;
-            int     randomized_index = -1;
-            double  radius           = 2.0 * std::acos(1.0 - m_map.solidangle(index)/gammalib::twopi);
-            double  cosrad           = std::cos(radius);
-            while (randomized_index != index) {
+            double  cosrad = std::cos(radius);
+            while (true) {
+
+                // Get randomized sky direction
                 randomized_dir = dir;
                 double theta   = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * gammalib::rad2deg;
                 double phi     = 360.0 * ran.uniform();
                 randomized_dir.rotate_deg(phi, theta);
-                randomized_index = m_map.dir2inx(randomized_dir);
-//std::cout << radius << " " << randomized_index << " " << index << " " << randomized_dir << std::endl;
-            }
+
+                // Skip if we are not in the actual pixel
+                if (m_map.dir2inx(randomized_dir) != index) {
+                    continue;
+                }
+
+                // Get map value at that sky direction
+                double value = m_map(randomized_dir);
+
+                // Get uniform random number up to the maximum
+                double uniform = ran.uniform() * m_mc_max[index];
+
+                // Exit loop if we're not larger than the map value
+                if (uniform <= value) {
+                    break;
+                }
+                
+            } // endwhile
+
+            // Store randomize sky position
             dir = randomized_dir;
-        }
+            
+        } // endelse: we had a HealPix map
 
     } // endif: there were pixels in sky map
 
@@ -659,6 +708,7 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_map.clear();
     m_filename.clear();
     m_mc_cache.clear();
+    m_mc_max.clear();
     m_normalize     = true;
     m_has_normalize = false;
     m_norm          = 0.0;
@@ -682,6 +732,7 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_map           = model.m_map;
     m_filename      = model.m_filename;
     m_mc_cache      = model.m_mc_cache;
+    m_mc_max        = model.m_mc_max;
     m_normalize     = model.m_normalize;
     m_has_normalize = model.m_has_normalize;
     m_norm          = model.m_norm;
@@ -716,7 +767,9 @@ void GModelSpatialDiffuseMap::free_members(void)
  *
  * The method also initialises a cache for Monte Carlo sampling of the
  * skymap. This Monte Carlo cache consists of a linear array that maps a
- * value between 0 and 1 into the skymap pixel.
+ * value between 0 and 1 into the skymap pixel. A second array contains the
+ * maximum expected value for each pixel which is also used in Monte Carlo
+ * sampling.
  *
  * Note that if the GSkymap object contains multiple maps, only the first
  * map is used.
@@ -725,6 +778,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 {
     // Initialise cache, centre and radius
     m_mc_cache.clear();
+    m_mc_max.clear();
     m_centre.clear();
     m_radius = 0.0;
 
@@ -736,6 +790,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         // Reserve space for all pixels in cache
         m_mc_cache.reserve(npix+1);
+        m_mc_max.reserve(npix);
 
         // Set first cache value to 0
         m_mc_cache.push_back(0.0);
@@ -745,7 +800,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         // zero intensity in the skymap. Invalid pixels are also filtered.
         double sum = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.solidangle(i);
+            double flux = m_map.flux(i);
             if (flux < 0.0 ||
                 gammalib::is_notanumber(flux) ||
                 gammalib::is_infinite(flux)) {
@@ -779,8 +834,39 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         // If we have a HealPix map then set radius to 180 deg
         if (m_map.projection()->code() == "HPX") {
+
+            // Get pointer on HealPix projection
+            const GHealpix* healpix =
+                static_cast<const GHealpix*>(m_map.projection());
+
+            // Set the map radius to full sky
             m_radius = 180.0;
-        }
+
+            // Compute maximum value that may occur from bilinear
+            // interpolation within this pixel and push this value on the
+            // stack. We do this by checking values of all neighbours.
+            for (int i = 0; i < npix; ++i) {
+
+                // Get neighbours
+                std::vector<int> neighbours = healpix->neighbours(i);
+
+                // Loop over neighbours
+                double max = m_map(i);
+                for (int k = 0; k < neighbours.size(); ++k) {
+                    if (neighbours[k] != -1) {
+                        double value = m_map(neighbours[k]);
+                        if (value > max) {
+                            max = value;
+                        }
+                    }
+                }
+
+                // Store maximum
+                m_mc_max.push_back(max);
+            
+            } // endfor: looped over pixels
+
+        } // endif: Healpix projection
 
         // ... otherwise compute map centre and radius
         else {
@@ -797,13 +883,37 @@ void GModelSpatialDiffuseMap::prepare_map(void)
                 }
             }
 
+            // Compute maximum value that may occur from bilinear
+            // interpolation within this pixel and push this value on the
+            // stack. We do this by checking the map values at the corners
+            // and the centre of each edge.
+            for (int i = 0; i < npix; ++i) {
+                GSkyPixel pixel = m_map.inx2pix(i);
+                double    max   = m_map(pixel);
+                for (int ix = -1; ix < 2; ++ix) {
+                    for (int iy = -1; iy < 2; ++iy) {
+                        if (ix != 0 || iy != 0) {
+                            GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
+                            if (m_map.contains(edge)) {
+                                GSkyDir dir  = m_map.pix2dir(edge);
+                                double value = m_map(dir);
+                                if (value > max) {
+                                    max = value;
+                                }
+                            }
+                        }
+                    }
+                }
+                m_mc_max.push_back(max);
+            }
+
         } // endelse: computed map centre and radius
 
         // Dump preparation results
         #if defined(G_DEBUG_PREPARE)
         double sum_control = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.solidangle(i);
+            double flux = m_map.flux(i);
             if (flux >= 0.0) {
                 sum_control += flux;
             }

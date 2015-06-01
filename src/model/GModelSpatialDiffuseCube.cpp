@@ -31,6 +31,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GHealpix.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GFitsTable.hpp"
@@ -454,16 +455,90 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                 low = mid;
             }
         }
+        int index = low - offset;
 
         // Convert sky map index to sky map pixel
-        GSkyPixel pixel = m_cube.inx2pix(low-offset);
+        GSkyPixel pixel = m_cube.inx2pix(index);
 
-        // Randomize pixel
-        pixel.x(pixel.x() + ran.uniform() - 0.5);
-        pixel.y(pixel.y() + ran.uniform() - 0.5);
+    	// If we have a 2D pixel then randomize pixel values and convert them
+        // into a sky direction
+        if (pixel.is_2D()) {
 
-        // Get sky direction
-        dir = m_cube.pix2dir(pixel);
+            // Use a rejection method to find a sky direction
+            while (true) {
+
+                // Draw random sky pixel
+                GSkyPixel test(pixel.x() + ran.uniform() - 0.5,
+                               pixel.y() + ran.uniform() - 0.5);
+
+                // Derive sky direction
+                dir = m_cube.pix2dir(test);
+
+                // Get map value at that sky direction
+                double value = m_cube(dir);
+
+                // Get uniform random number up to the maximum
+                double uniform = ran.uniform() * m_mc_max[low];
+
+                // Exit loop if we're not larger than the map value
+                if (uniform <= value) {
+                    break;
+                }
+
+            } // endwhile: rejection method
+
+        } // endif: had a 2D pixel
+
+        // ... otherwise convert pixel into sky direction and randomize
+        // position. We use a while loop to randomize the position within a
+        // circle that enclosed the pixel and retain only directions that
+        // result in the same pixel index and that are compatible with the
+        // density distribution.
+        else {
+
+            // Get pointer on HealPix projection
+            const GHealpix* healpix =
+                static_cast<const GHealpix*>(m_cube.projection());
+
+            // Get enclosing radius
+            double radius = healpix->max_pixrad();
+
+            // Initialize pixel centre
+            dir = m_cube.pix2dir(pixel);
+
+            // Get randomized pixel
+            GSkyDir randomized_dir;
+            double  cosrad = std::cos(radius);
+            while (true) {
+
+                // Get randomized sky direction
+                randomized_dir = dir;
+                double theta   = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * gammalib::rad2deg;
+                double phi     = 360.0 * ran.uniform();
+                randomized_dir.rotate_deg(phi, theta);
+
+                // Skip if we are not in the actual pixel
+                if (m_cube.dir2inx(randomized_dir) != index) {
+                    continue;
+                }
+
+                // Get map value at that sky direction
+                double value = m_cube(randomized_dir);
+
+                // Get uniform random number up to the maximum
+                double uniform = ran.uniform() * m_mc_max[low];
+
+                // Exit loop if we're not larger than the map value
+                if (uniform <= value) {
+                    break;
+                }
+                
+            } // endwhile
+
+            // Store randomize sky position
+            dir = randomized_dir;
+            
+        } // endelse: we had a HealPix map
     
     } // endif: there were pixels in sky map
 
@@ -787,6 +862,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
 {
     // Initialise cache
     m_mc_cache.clear();
+    m_mc_max.clear();
     m_mc_spectrum.clear();
 
     // Fetch cube
@@ -801,6 +877,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
 
         // Reserve space for all pixels in cache
         m_mc_cache.reserve((npix+1)*nmaps);
+        m_mc_max.reserve(npix*nmaps);
 
         // Loop over all maps
         for (int i = 0; i < nmaps; ++i) {
@@ -833,7 +910,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // simulated event is contained in the simulation cone.
                 double distance = centre.dist_deg(m_cube.pix2dir(k));
                 if (distance <= radius+pixel_radius) {
-                    double flux = m_cube(k,i) * m_cube.solidangle(k);
+                    double flux = m_cube.flux(k,i);
                     if (flux > 0.0) {
                         total_flux += flux;
                     }
@@ -865,6 +942,68 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 }
 
             }
+
+            // Do we have a HealPix map?
+            if (m_cube.projection()->code() == "HPX") {
+
+                // Get pointer on HealPix projection
+                const GHealpix* healpix =
+                    static_cast<const GHealpix*>(m_cube.projection());
+
+                // Compute maximum value that may occur from bilinear
+                // interpolation within this pixel and push this value on the
+                // stack. We do this by checking values of all neighbours.
+                for (int k = 0; k < npix; ++k) {
+
+                    // Get neighbours
+                    std::vector<int> neighbours = healpix->neighbours(k);
+
+                    // Loop over neighbours
+                    double max = m_cube(k,i);
+                    for (int j = 0; j < neighbours.size(); ++j) {
+                        if (neighbours[j] != -1) {
+                            double value = m_cube(neighbours[j],i);
+                            if (value > max) {
+                                max = value;
+                            }
+                        }
+                    }
+
+                // Store maximum
+                m_mc_max.push_back(max);
+            
+                } // endfor: looped over pixels
+
+            } // endif: Healpix projection
+
+            // ... no, then we have a WCS map
+            else {
+        
+                // Compute maximum value that may occur from bilinear
+                // interpolation within this pixel and push this value on the
+                // stack. We do this by checking the map values at the corners
+                // and the centre of each edge.
+                for (int k = 0; k < npix; ++k) {
+                    GSkyPixel pixel = m_cube.inx2pix(k);
+                    double    max   = m_cube(pixel,i);
+                    for (int ix = -1; ix < 2; ++ix) {
+                        for (int iy = -1; iy < 2; ++iy) {
+                            if (ix != 0 || iy != 0) {
+                                GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
+                                if (m_cube.contains(edge)) {
+                                    GSkyDir dir  = m_cube.pix2dir(edge);
+                                    double value = m_cube(dir,i);
+                                    if (value > max) {
+                                        max = value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    m_mc_max.push_back(max);
+                }
+
+            } // endelse: computed maximum pixel value
 
         } // endfor: looped over all maps
 
@@ -1000,6 +1139,7 @@ void GModelSpatialDiffuseCube::init_members(void)
 
     // Initialise MC cache
     m_mc_cache.clear();
+    m_mc_max.clear();
     m_mc_spectrum.clear();
     m_mc_cone_dir.clear();
     m_mc_cone_rad = 0.0;
@@ -1026,6 +1166,7 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
 
     // Copy MC cache
     m_mc_cache    = model.m_mc_cache;
+    m_mc_max      = model.m_mc_max;
     m_mc_spectrum = model.m_mc_spectrum;
     m_mc_cone_dir = model.m_mc_cone_dir;
     m_mc_cone_rad = model.m_mc_cone_rad;
