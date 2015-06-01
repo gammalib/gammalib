@@ -868,12 +868,12 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                             inx_x_left = 0;
                         }
                     }
-                    if (inx_y_right >= m_num_x) {
+                    if (inx_x_right >= m_num_x) {
                         if (x_wrap) {
-                            inx_y_right -= m_num_x;
+                            inx_x_right -= m_num_x;
                         }
                         else {
-                            inx_y_right = m_num_x - 1;
+                            inx_x_right = m_num_x - 1;
                         }
                     }
                     if (inx_y_left < 0) {
