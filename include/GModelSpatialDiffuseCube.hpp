@@ -119,6 +119,7 @@ protected:
     GNodeArray          m_logE;        //!< Log10(energy) values of the maps
     GEbounds            m_ebounds;     //!< Energy bounds of the maps
     std::vector<double> m_mc_cache;    //!< Monte Carlo cache
+    std::vector<double> m_mc_max;      //!< Maximum values for MC
     GModelSpectralNodes m_mc_spectrum; //!< Map cube spectrum
     GSkyDir             m_mc_cone_dir; //!< Monte Carlo simulation cone centre
     double              m_mc_cone_rad; //!< Monte Carlo simulation cone radius
