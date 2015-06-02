@@ -43,7 +43,10 @@ None
 
 8. Model module
 ---------------
-None
+Implement a rejection method for Monte Carlo simulations of photons in
+GModelSpatialDiffuseMap and GModelSpatialDiffuseCube. This assures that the
+simulated photon distribution follows the intensity distribution of the skymap
+as obtained using the sky direction access operator.
 
 
 9. Numerics module
@@ -65,7 +68,9 @@ factor.
 
 12. Sky module
 --------------
-None
+Added the flux() method that provides estimates for the flux value of a pixel. The
+flux is defined as the intensity (computed by bilinear interpolation over the pixel)
+multiplied by the solid angle of the pixel.
 
 
 13. Support module
