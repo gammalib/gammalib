@@ -182,7 +182,7 @@ void TestGModel::test_model_par(void)
         par.free();
         test_value(par.value(), 94.02);
         test_value(par.error(), 4.006);
-        test_value(par.gradient(), 102.0);
+        test_value(par.gradient(), 25.5);
         test_value(par.factor_value(), 47.01);
         test_value(par.factor_error(), 2.003);
         test_value(par.factor_gradient(), 51.0);
@@ -284,11 +284,11 @@ void TestGModel::test_model_par(void)
 
     // Test autoscaling
     GModelPar par("Test parameter", 3.0);
+    par.scale(1.0);
     par.error(3.0);
     par.gradient(3.0);
     par.min(3.0);
     par.max(3.0);
-    par.scale(1.0);
     test_value(par.scale(), 1.0);
     test_value(par.factor_value(), 3.0);
     test_value(par.factor_error(), 3.0);
@@ -299,7 +299,7 @@ void TestGModel::test_model_par(void)
     test_value(par.scale(), 3.0);
     test_value(par.factor_value(), 1.0);
     test_value(par.factor_error(), 1.0);
-    test_value(par.factor_gradient(), 1.0);
+    test_value(par.factor_gradient(), 9.0);
     test_value(par.factor_min(), 1.0);
     test_value(par.factor_max(), 1.0);
     //
