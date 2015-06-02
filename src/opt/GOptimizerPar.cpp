@@ -587,7 +587,7 @@ void GOptimizerPar::autoscale(void)
         // Renormalize values, error, gradient, min and max
         m_factor_value    *= renormalization;
         m_factor_error    *= renormalization;
-        m_factor_gradient *= renormalization;
+        m_factor_gradient /= renormalization;
         if (m_has_min) {
             m_factor_min *= renormalization;
         }
