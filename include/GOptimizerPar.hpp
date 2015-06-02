@@ -233,7 +233,9 @@ double GOptimizerPar::error(void) const
 inline
 double GOptimizerPar::gradient(void) const
 {
-    return ((m_scale > 0.0) ? m_factor_gradient / m_scale : 0.0);
+    // The GOptimizerPar class makes sure that m_scale is never 0, so no test
+    // is needed here
+    return (m_factor_gradient / m_scale);
 }
 
 
