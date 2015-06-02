@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 0.10.0
+New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-22 May 2015
+2 June 2015
 
 
 1. Introduction
@@ -13,17 +13,7 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-classname() methods have now been added to the Python interface.
-
-The following classes have been renamed:
-* GCTAExposure               => GCTACubeExposure
-* GCTAMeanPsf                => GCTACubePsf
-* GCTASourceCube             => GCTACubeSource
-* GCTASourceCubeDiffuse      => GCTACubeSourceDiffuse
-* GCTASourceCubePointSource  => GCTACubeSourcePoint
-
-The etrue flag has been removed from the GCTABackground class access operator.
-Background histograms are always given as function of reconstructued energy.
+None
 
 
 3. Configuration
@@ -33,14 +23,7 @@ None
 
 4. Application module
 ---------------------
-The GApplication::log_parameters() method does no longer dump values for
-parameters that have not yet been queried. The actual value of these parameters
-is not yet know, and likely they will not be used in an application. The
-method thus dumps [not queried] instead of a parameter value (#1349).
-
-Range and option checking has now been implement for the GApplicationPar class.
-Exceptions are now thrown if a parameter is outside the valid parameter range
-or if a parameter does not correspond to one of the possible options.
+None
 
 
 5. Base module
@@ -60,19 +43,7 @@ None
 
 8. Model module
 ---------------
-The GModel::is_valid() method now allows specifying empty strings for the
-instrument and id parameters that will skip the specific model validity
-check. This allows to check for models of a given identifier whatever the
-instrument, or for models for a given instrument, whatever the identifier.
-
-Added unit tests for GModel base class methods.
-
-The GModelSpatial::contains method allows to check whether a sky direction
-is contained within a spatial model. This helps to speed up computation for
-models that are much smaller than the covered data space.
-
-Add the GModelSpatialEllipticalGauss class that handles elliptical
-Gaussian spatial models.
+None
 
 
 9. Numerics module
@@ -82,66 +53,34 @@ None
 
 10. Observation module
 ----------------------
-The GEbounds and GGti classes now allow appending of empty intervals (i.e.
-intervals having the same start and end value).
-
-A single time interval constructor has been added to GGti, similar to the
-one that exists for GEbounds.
+None
 
 
 11. Optimization module
 -----------------------
-None
+The gradient computation has been corrected. Instead of multiplying the gradient
+factor with the scale factor we have to divide the gradient factor by the scale
+factor.
 
 
 12. Sky module
 --------------
-The following WCS projections have been added:
-* GWcsMOL (Mollweide's projection)
-
-Scaling operators operator*=(double) and operator/=(double) have been added
-to GSkymap to allow scaling of all pixel values by a given value.
-
-An extract() method has been added to GSkymap to allow extraction of a number
-if sky maps from a GSkymap object.
+None
 
 
 13. Support module
 ------------------
-The GBilinear class has been added to support bilinear interpolations. The
-class holds the four indices and weights for the bilinear corner points. It
-provides an interpolation operator that allows bilinear interpolation of a
-linear double precision array. This class is essentially a helper class for
-bilinear interpolations within GammaLib.
-
-The GNodeArray::set_value() method can now be called in case that only a single
-node is present. In that case, left and right nodes will have an index of 0
-and a weight of 1 is given to the left node while the right node will have a
-weight of 0 is given to the right node.
+None
 
 
 14. XML module
 --------------
-The method GXmlElement::has_attribute() has been added to check whether an
-XML element contains a given attribute.
-
-It is now forbidden to append to a GXmlText, GXmlComment and GXmlPI node.
-Before appending was allowed yet the element was not visible. As appending
-is not allowed by the XML syntax, the XML module now throws an exception
-if an attempt of invalid node appending is made.
-
-The XML parser now strips all linefeeds so that no extra linefeeds appears
-in text nodes.
+None
 
 
 15. VO module
 -------------
-The XMLRPC path name as found in the .samp lockfile is now used to compose
-the http POST message. This solves a problem when trying to connect to some
-VO tool hubs.
-
-The GVOHub class was added that implements a SAMP compliant VO Hub. The Hub
-is automatically lauched from GVOClient in case that no Hub is found.
+None
 
 
 16. Xspec module
@@ -166,31 +105,7 @@ None
 
 20. CTA interface
 -----------------
-Add a filename constructor to GCTAEventCube, and event cube constructors
-to GCTACubePsf and GCTACubeExposure.
-
-CTA event lists can now handle optional event phase information stored in a
-column named PHASE. GCTAEventList takes care about bookeeping the existence
-of such information while GCTAEventAtom actually holds the information.
-phase() methods have been added to GCTAEventAtom to manipulate the phase
-information.
-
-The precision for the diffuse model Npred computation was increased in
-GCTAResponseIrf to remove an observed mis-estimation of diffuse model
-flux values (#1248).
-
-Observation definition XML files can now be written and read without any
-event file or counts cube information. This allows to separate the observation
-definition from the event file, providing a convenient way to exchange
-observation definition information (for example to simulate a survey pattern).
-
-Good Time Intervals and livetime information has been added to GCTACubeExposure
-to keep track of the time intervals that were used to compute the exposure
-cube and to make this information available for the response computation
-without needing a fully defined observation.
-
-Prod2 instrument response functions for the Southern and Northern array
-have been added.
+None
 
 
 21. COMPTEL interface

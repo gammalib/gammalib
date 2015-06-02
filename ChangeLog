@@ -1,3 +1,11 @@
+2015-06-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+        * Version 0.11.0 released
+        =========================
+
+        Correct model gradient computation
+
+
 2015-05-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.10.0 released
