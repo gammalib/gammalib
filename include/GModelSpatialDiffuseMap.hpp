@@ -102,6 +102,7 @@ protected:
     GSkymap             m_map;           //!< Skymap
     std::string         m_filename;      //!< Name of skymap
     std::vector<double> m_mc_cache;      //!< Monte Carlo cache
+    std::vector<double> m_mc_max;        //!< Monte Carlo maximum
     bool                m_normalize;     //!< Normalize map (default: true)
     bool                m_has_normalize; //!< XML has normalize attribute
     double              m_norm;          //!< Map normalization

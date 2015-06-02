@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GVector.hpp"
 #include "GHealpix.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -45,6 +46,8 @@
 #define G_PIX2ANG_NEST        "GHealpix::pix2ang_nest(int, double*, double*)"
 #define G_ORDERING_SET                     "GHealpix::ordering(std::string&)"
 #define G_INTERPOLATOR             "GHealpix::interpolator(double&, double&)"
+#define G_NEIGHBOURS                       "GHealpix::neighbours(GSkyPixel&)"
+#define G_BOUNDARIES                 "GHealpix::boundaries(GSkyPixel&, int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -55,10 +58,30 @@
 /* __ Local prototypes ___________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const int jrll[12]  = {2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4};
-const int jpll[12]  = {1, 3, 5, 7, 0, 2, 4, 6, 1, 3, 5, 7};
-const int order_max = 13;
-const int ns_max    = 1 << order_max;
+const int jrll[12]           = {2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4};
+const int jpll[12]           = {1, 3, 5, 7, 0, 2, 4, 6, 1, 3, 5, 7};
+const int nb_xoffset[]       = {-1,-1, 0, 1, 1, 1, 0,-1};
+const int nb_yoffset[]       = { 0, 1, 1, 1, 0,-1,-1,-1};
+const int nb_facearray[][12] = {{  8, 9,10,11,-1,-1,-1,-1,10,11, 8, 9 },  // S
+                                {  5, 6, 7, 4, 8, 9,10,11, 9,10,11, 8 },  // SE
+                                { -1,-1,-1,-1, 5, 6, 7, 4,-1,-1,-1,-1 },  // E
+                                {  4, 5, 6, 7,11, 8, 9,10,11, 8, 9,10 },  // SW
+                                {  0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11 },  // center
+                                {  1, 2, 3, 0, 0, 1, 2, 3, 5, 6, 7, 4 },  // NE
+                                { -1,-1,-1,-1, 7, 4, 5, 6,-1,-1,-1,-1 },  // W
+                                {  3, 0, 1, 2, 3, 0, 1, 2, 4, 5, 6, 7 },  // NW
+                                {  2, 3, 0, 1,-1,-1,-1,-1, 0, 1, 2, 3 }}; // N
+const int nb_swaparray[][3]  = {{ 0,0,3 },   // S
+                                { 0,0,6 },   // SE
+                                { 0,0,0 },   // E
+                                { 0,0,5 },   // SW
+                                { 0,0,0 },   // center
+                                { 5,0,0 },   // NE
+                                { 0,0,0 },   // W
+                                { 6,0,0 },   // NW
+                                { 3,0,0 }}; // N
+const int order_max          = 13;
+const int ns_max             = 1 << order_max;
 
 /* __ Static conversion arrays ___________________________________________ */
 static short ctab[0x100];
@@ -534,6 +557,239 @@ void GHealpix::ordering(const std::string& ordering)
 
 
 /***********************************************************************//**
+ * @brief Return neighbouring pixels of a pixel
+ *
+ * @param[in] pix Pixel index.
+ * @return Array of neighbouring pixels.
+ *
+ * Returns the 8 neighbours of a given pixel. The method returns a vector
+ * with contains the pixel indices of the SW, W, NW, N, NE, E, SE and S
+ * neighbours of @p pix (in the given order). If a neighbour does not exist
+ * (this can only be the case for the W, N, E and S neighbors), its entry is
+ * set to -1.
+ *
+ * This method has been adapted from the neighbors() function located in the
+ * file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+std::vector<int> GHealpix::neighbours(const GSkyPixel& pixel) const
+{
+    // Throw an exception if sky map pixel is not 1D
+    if (!pixel.is_1D()) {
+        std::string msg = "Sky map pixel "+pixel.print()+" is not"
+                          " 1-dimensional.\n"
+                          "Only 1-dimensional pixels are supported by the"
+                          " Healpix projection.";
+        throw GException::invalid_argument(G_NEIGHBOURS, msg);
+    }
+
+    // Initialise result array
+    std::vector<int> result;
+
+    // Determine pixel index and face number
+    int ix;
+    int iy;
+    int face_num;
+    pix2xyf(int(pixel), &ix, &iy, &face_num);
+
+    // ...
+    const int nsm1 = m_nside - 1;
+
+    // ...
+    if ((ix > 0) && (ix < nsm1) && (iy > 0) && (iy < nsm1)) {
+
+        // Ring ordering scheme ...
+        if (m_ordering == 0) { // Ring?
+            for (int m = 0; m < 8; ++m) {
+                int index = xyf2ring(ix+nb_xoffset[m],iy+nb_yoffset[m],face_num);
+                result.push_back(index);
+            }
+        }
+
+        // ... or nested scheme?
+        else {
+            int fpix = int(face_num) << (2*m_order);
+            int px0  = spread_bits(ix);
+            int py0  = spread_bits(iy) << 1;
+            int pxp  = spread_bits(ix+1);
+            int pyp  = spread_bits(iy+1) << 1;
+            int pxm  = spread_bits(ix-1);
+            int pym  = spread_bits(iy-1) << 1;
+            result.push_back(fpix + pxm + py0);
+            result.push_back(fpix + pxm + pyp);
+            result.push_back(fpix + px0 + pyp);
+            result.push_back(fpix + pxp + pyp);
+            result.push_back(fpix + pxp + py0);
+            result.push_back(fpix + pxp + pym);
+            result.push_back(fpix + px0 + pym);
+            result.push_back(fpix + pxm + pym);
+        }
+
+    } // endif
+    
+    // ...
+    else {
+        for (int i = 0; i < 8; ++i) {
+            int x     = ix + nb_xoffset[i];
+            int y     = iy + nb_yoffset[i];
+            int nbnum = 4;
+            if (x < 0) {
+                x     += m_nside;
+                nbnum -= 1;
+            }
+            else if (x >= m_nside) {
+                x     -= m_nside;
+                nbnum += 1;
+            }
+            if (y < 0) {
+                y     += m_nside;
+                nbnum -= 3;
+            }
+            else if (y >= m_nside) {
+                y     -= m_nside;
+                nbnum += 3;
+            }
+
+            // Compute face
+            int f = nb_facearray[nbnum][face_num];
+        
+            // If face is valid then compute index
+            if (f >= 0) {
+                int bits = nb_swaparray[nbnum][face_num>>2];
+                if (bits & 1) {
+                    x = m_nside - x - 1;
+                }
+                if (bits & 2) {
+                    y = m_nside - y - 1;
+                }
+                if (bits & 4) {
+                    std::swap(x,y);
+                }
+                if (m_ordering == 0) { // Ring?
+                    result.push_back(xyf2ring(x, y, f));
+                }
+                else {
+                    result.push_back(xyf2nest(x, y, f));
+                }
+            }
+
+            // ... otherwise push back an invalid pixel
+            else {
+                result.push_back(-1);
+            }
+
+        } // endfor
+        
+    } // endelse
+
+    // Return indices
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pixel boundaries
+ *
+ * @param[in] pixel Sky pixel.
+ * @param[in] step Number of returned points (4*step, defaults to 4).
+ * @return Array of pixel boundaries.
+ *
+ * The method returns a vector with sky directions along the boundary of a
+ * HealPix pixel. By default, the 4 corners of HealPix pixel will be
+ * returned. The first point corresponds to the northernmost corner, the
+ * subsequent points follow the pixel boundary through west, south and east
+ * corners. If step>1 more intermediate points will be added after the 4th
+ * corner of the pixel.
+ *
+ * This method has been adapted from the boundaries() function located in the
+ * file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+std::vector<GSkyDir> GHealpix::boundaries(const GSkyPixel& pixel,
+                                          const int&       step) const
+{
+    // Throw an exception if sky map pixel is not 1D
+    if (!pixel.is_1D()) {
+        std::string msg = "Sky map pixel "+pixel.print()+" is not"
+                          " 1-dimensional.\n"
+                          "Only 1-dimensional pixels are supported by the"
+                          " Healpix projection.";
+        throw GException::invalid_argument(G_BOUNDARIES, msg);
+    }
+
+    // Allocate boundaries
+    std::vector<GSkyDir> boundaries;
+
+    // Determine pixel index and face number
+    int ix;
+    int iy;
+    int face;
+    pix2xyf(int(pixel), &ix, &iy, &face);
+
+    // ...
+    double dc = 0.5        / m_nside;
+    double xc = (ix + 0.5) / m_nside;
+    double yc = (iy + 0.5) / m_nside;
+    double d  = 1.0 / (step*m_nside);
+    
+    //
+    for (int i = 0; i < step; ++i) {
+    
+        // Declare local coordinates
+        double  z;
+        double  phi;
+
+        // First coordinate
+        xyf2loc(xc+dc-i*d, yc+dc, face, &z, &phi);
+        boundaries.push_back(loc2dir(z, phi));
+
+        // Second coordinate
+        xyf2loc(xc-dc, yc+dc-i*d, face, &z, &phi);
+        boundaries.push_back(loc2dir(z, phi));
+                
+        // Third coordinate
+        xyf2loc(xc-dc+i*d, yc-dc, face, &z, &phi);
+        boundaries.push_back(loc2dir(z, phi));
+        
+        // Forth coordinate
+        xyf2loc(xc+dc, yc-dc+i*d, face, &z, &phi);
+        boundaries.push_back(loc2dir(z, phi));
+        
+    } // endfor: looped over step size
+
+    // Return boundaries
+    return boundaries;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum angular distance between pixel centre and corners
+ *
+ * @return Maximum angular distance between pixel centre and corners (radians).
+ *
+ * Returns the maximum angular distance (in radians) between any pixel
+ * centre and its corners.
+ *
+ * This method has been adapted from the max_pixrad() function located in the
+ * file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+double GHealpix::max_pixrad(void) const
+{
+    // Compute ...
+    double t1 = 1.0 - 1.0/m_nside;
+    t1       *= t1;
+    
+    // Get vectors
+    GVector va = set_z_phi(2.0/3.0, gammalib::pi/(4*m_nside));
+    GVector vb = set_z_phi(1.0 - t1/3, 0.0);
+
+    // Get angle
+    double angle = std::atan2(norm(cross(va, vb)), va * vb);
+
+    // Return angle
+    return angle;
+}
+
+
+/***********************************************************************//**
  * @brief Print WCS information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -720,9 +976,37 @@ int GHealpix::spread_bits(const int& value) const
 
 
 /***********************************************************************//**
+ * @brief Convert pixel number in to (x,y,face) tuple
+ *
+ * @param[in] pix Pixel number.
+ * @param[out] ix X index.
+ * @param[out] iy Y index.
+ * @param[out] face Face number.
+ *
+ * This method has been adapted from the pix2xyf() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+void GHealpix::pix2xyf(const int& pix, int* ix, int* iy, int* face) const
+{
+    // Handle ring scheme ...
+    if (m_ordering == 0) {
+        ring2xyf(pix, ix, iy, face);
+    }
+
+    // ... or nested scheme
+    else {
+        nest2xyf(pix, ix, iy, face);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Convert pixel number in nested scheme to (x,y,face) tuple
  *
- * @param[in] pix Pixel number in nested scheme
+ * @param[in] pix Pixel number in nested scheme.
  * @param[out] ix X index.
  * @param[out] iy Y index.
  * @param[out] face Face number.
@@ -883,6 +1167,91 @@ int GHealpix::xyf2ring(const int& ix, const int& iy, const int& face) const
 
     // Return pixel number
     return (n_before + jp - 1);
+}
+
+
+/***********************************************************************//**
+ * @brief Convert (x,y,f) tuple into local coordinates
+ *
+ * @param[in] x X value.
+ * @param[in] y Y value.
+ * @param[in] face Face number.
+ * @param[out] z Z value.
+ * @param[out] phi Phi value.
+ *
+ * This method has been adapted from the xyf2loc() function located in the
+ * file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+void GHealpix::xyf2loc(const double& x, const double& y, const int& face,
+                       double* z, double* phi) const
+{
+    // ...
+    double jr = jrll[face] - x - y;
+    double nr;
+
+    // Compute z
+    if (jr < 1) {
+        nr         = jr;
+        double tmp = nr*nr / 3.0;
+        *z = 1 - tmp;
+    }
+    else if (jr > 3) {
+        nr         = 4 - jr;
+        double tmp = nr*nr / 3.0;
+        *z = tmp - 1;
+    }
+    else {
+        nr = 1;
+        *z = (2.0-jr) * 2.0/3.0;
+    }
+
+    // Compute Phi
+    double tmp = jpll[face] * nr + x - y;
+    if (tmp < 0) {
+        tmp += 8;
+    }
+    if (tmp >= 8) {
+        tmp -= 8;
+    }
+    *phi = (nr < 1.0e-15) ? 0.0 : (0.5 * gammalib::pihalf * tmp) / nr;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert local coordinate into sky direction
+ *
+ * @param[in] z Z value.
+ * @param[in] phi Phi value.
+ * @return Sky direction.
+ *
+ * This method has been adapted from the locToVec3() function located in
+ * the file healpix_base.cc in Healpix version 3.20.
+ ***************************************************************************/
+GSkyDir GHealpix::loc2dir(const double& z, const double& phi) const
+{
+    // Compute longitude and latitude
+    double sintheta  = std::sqrt((1.0 - z) * (1.0 + z));
+    double longitude = std::atan2(sintheta * std::sin(phi), sintheta * std::cos(phi));
+    double latitude  = std::asin(z);
+
+    // Set sky direction
+    GSkyDir dir;
+    switch (m_coordsys) {
+    case 0:
+        dir.radec(longitude, latitude);
+        break;
+    case 1:
+        dir.lb(longitude, latitude);
+        break;
+    default:
+        break;
+    }
+
+    // Return sky direction
+    return dir;
 }
 
 
@@ -1459,7 +1828,7 @@ GBilinear GHealpix::interpolator(const double& theta, const double& phi) const
     // Now handle the special case that the colatitude is  North of all
     // rings
     if (ir1 == 0) {
-        double wtheta = theta/theta2;
+        double wtheta           = theta/theta2;
         interpolator.weight3() *= wtheta;
         interpolator.weight4() *= wtheta;
         double fac              = (1.0-wtheta)*0.25;
@@ -1473,7 +1842,7 @@ GBilinear GHealpix::interpolator(const double& theta, const double& phi) const
 
     // ... and now the case that the colatitude is South of all rings
     else if (ir2 == 4*m_nside) {
-        double wtheta = (theta-theta1) / (gammalib::pi-theta1);
+        double wtheta            = (theta-theta1) / (gammalib::pi-theta1);
         interpolator.weight1()  *= (1.0 - wtheta);
         interpolator.weight2()  *= (1.0 - wtheta);
         double fac              = wtheta*0.25;
@@ -1487,7 +1856,7 @@ GBilinear GHealpix::interpolator(const double& theta, const double& phi) const
     
     // ... and now multiply-in the theta weights for the general case
     else {
-        double wtheta = (theta-theta1) / (theta2-theta1);
+        double wtheta           = (theta-theta1) / (theta2-theta1);
         interpolator.weight1() *= (1.0 - wtheta);
         interpolator.weight2() *= (1.0 - wtheta);
         interpolator.weight3() *= wtheta;
@@ -1519,4 +1888,30 @@ unsigned int GHealpix::isqrt(unsigned int arg) const
 {
     // Return
     return unsigned(std::sqrt(arg+0.5));
+}
+
+
+/***********************************************************************//**
+ * @brief Return 3D vector
+ *
+ * @param[in] z Z value.
+ * @param[in] phi Phi value.
+ * @return 3D vector
+ *
+ * This method has been adapted from the set_z_phi() function located in the
+ * file vec3.h in Healpix version 3.20.
+ ***************************************************************************/
+GVector GHealpix::set_z_phi(const double& z, const double& phi) const
+{
+    // Initialise 3D vector
+    GVector vector(3);
+
+    // Assign elements
+    double sintheta = std::sqrt((1.0 - z) * (1.0 + z));
+    vector[0] = sintheta * std::cos(phi);
+    vector[1] = sintheta * std::sin(phi);
+    vector[2] = z;
+
+    // Return vector
+    return vector;
 }

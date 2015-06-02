@@ -924,7 +924,6 @@ void GModelSpectralExpPlaw::update_eval_cache(const GEnergy& energy) const
         m_last_e_cut  = eng / m_last_ecut;
         m_last_power  = std::pow(m_last_e_norm, m_last_index) *
                         std::exp(-m_last_e_cut);
-
     } // endif: recomputation was required
 
     // Return

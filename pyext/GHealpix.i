@@ -27,6 +27,13 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GHealpix.hpp"
 %}
+%include "std_vector.i"
+namespace std {
+   %template(SkyDirVector) vector<GSkyDir>;
+}
+namespace std {
+   %template(IntVector) vector<int>;
+}
 
 
 /***********************************************************************//**
@@ -60,10 +67,13 @@ public:
     virtual GBilinear   interpolator(const GSkyDir& dir) const;
 
     // Other methods
-    const int&   npix(void) const;
-    const int&   nside(void) const;
-    std::string  ordering(void) const;
-    void         ordering(const std::string& ordering);
+    const int&           npix(void) const;
+    const int&           nside(void) const;
+    std::string          ordering(void) const;
+    void                 ordering(const std::string& ordering);
+    std::vector<int>     neighbours(const GSkyPixel& pixel) const;
+    std::vector<GSkyDir> boundaries(const GSkyPixel& pixel, const int& step = 1) const;
+    double               max_pixrad(void) const;
 };
 
 

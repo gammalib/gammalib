@@ -1,9 +1,11 @@
-2015-05-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-06-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
+        Correct model gradient computation
         Replaced fixed precision integration by fixed iterations (#1466)
+        Implement rejection method for skymap Monte Carlo (#1465)
 
 
 2015-05-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

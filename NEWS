@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-28 May 2015
+2 June 2015
 
 
 1. Introduction
@@ -43,6 +43,11 @@ None
 
 8. Model module
 ---------------
+Implement a rejection method for Monte Carlo simulations of photons in
+GModelSpatialDiffuseMap and GModelSpatialDiffuseCube. This assures that the
+simulated photon distribution follows the intensity distribution of the skymap
+as obtained using the sky direction access operator.
+
 Integration of flux() and eflux() is now done using a fixed number of Romberg
 iterations instead of using the integration precision. This will assure that
 the log-likelihood function is smooth.
@@ -62,12 +67,16 @@ likelihood function is smooth.
 
 11. Optimization module
 -----------------------
-None
+The gradient computation has been corrected. Instead of multiplying the gradient
+factor with the scale factor we have to divide the gradient factor by the scale
+factor.
 
 
 12. Sky module
 --------------
-None
+Added the flux() method that provides estimates for the flux value of a pixel. The
+flux is defined as the intensity (computed by bilinear interpolation over the pixel)
+multiplied by the solid angle of the pixel.
 
 
 13. Support module

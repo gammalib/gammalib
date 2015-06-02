@@ -182,7 +182,7 @@ void TestGModel::test_model_par(void)
         par.free();
         test_value(par.value(), 94.02);
         test_value(par.error(), 4.006);
-        test_value(par.gradient(), 102.0);
+        test_value(par.gradient(), 25.5);
         test_value(par.factor_value(), 47.01);
         test_value(par.factor_error(), 2.003);
         test_value(par.factor_gradient(), 51.0);
@@ -284,11 +284,11 @@ void TestGModel::test_model_par(void)
 
     // Test autoscaling
     GModelPar par("Test parameter", 3.0);
+    par.scale(1.0);
     par.error(3.0);
     par.gradient(3.0);
     par.min(3.0);
     par.max(3.0);
-    par.scale(1.0);
     test_value(par.scale(), 1.0);
     test_value(par.factor_value(), 3.0);
     test_value(par.factor_error(), 3.0);
@@ -299,7 +299,7 @@ void TestGModel::test_model_par(void)
     test_value(par.scale(), 3.0);
     test_value(par.factor_value(), 1.0);
     test_value(par.factor_error(), 1.0);
-    test_value(par.factor_gradient(), 1.0);
+    test_value(par.factor_gradient(), 9.0);
     test_value(par.factor_min(), 1.0);
     test_value(par.factor_max(), 1.0);
     //
@@ -767,17 +767,17 @@ void TestGModel::test_diffuse_map(void)
     // Test normalized map
     GModelSpatialDiffuseMap map_norm(m_map_file, 3.0, true);
     test_assert(map_norm.normalize(),"Model should be normalized.");
-    test_value(map_norm.eval(photon), 13069.603989, 1e-6, "Unexpected skymap intensity.");
+    test_value(map_norm.eval(photon), 13069.6047247, 1e-5, "Unexpected skymap intensity.");
     GXmlElement element;
     map_norm.write(element);
     map_norm.read(element);
     test_assert(map_norm.normalize(),"Model should be normalized.");
-    test_value(map_norm.eval(photon), 13069.603989, 1e-6, "Unexpected skymap intensity.");
+    test_value(map_norm.eval(photon), 13069.6047247, 1e-5, "Unexpected skymap intensity.");
 
     // Test non-normalized map
     GModelSpatialDiffuseMap map_nonnorm(m_map_file, 3.0, false);
     test_assert(!map_nonnorm.normalize(),"Model should not be normalized.");
-    test_value(map_nonnorm.eval(photon), 13069.6002755, 1e-6, "Unexpected skymap intensity.");
+    test_value(map_nonnorm.eval(photon), 13069.6002755, 1e-5, "Unexpected skymap intensity.");
     GXmlElement element2;
     map_nonnorm.write(element2);
     map_nonnorm.read(element2);

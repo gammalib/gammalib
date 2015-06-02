@@ -128,12 +128,15 @@ public:
     virtual ~GSkymap(void);
 
     // Operators
-    GSkymap& operator+=(const GSkymap& map);
-    GSkymap& operator+=(const double& value);
-    GSkymap& operator-=(const GSkymap& map);
-    GSkymap& operator-=(const double& value);
-    GSkymap& operator*=(const GSkymap& map);
-    GSkymap& operator*=(const double& factor);
+    GSkymap&      operator+=(const GSkymap& map);
+    GSkymap&      operator+=(const double& value);
+    GSkymap&      operator-=(const GSkymap& map);
+    GSkymap&      operator-=(const double& value);
+    GSkymap&      operator*=(const GSkymap& map);
+    GSkymap&      operator*=(const double& factor);
+    double&       operator()(const int& index, const int& map = 0);
+    double&       operator()(const GSkyPixel& pixel, const int& map = 0);
+    double        operator()(const GSkyDir& dir, const int& map = 0) const;
 
     // Methods
     void                  clear(void);
@@ -150,6 +153,8 @@ public:
     int                   pix2inx(const GSkyPixel& pixel) const;
     int                   dir2inx(const GSkyDir& dir) const;
     GSkyPixel             dir2pix(const GSkyDir& dir) const;
+    double                flux(const int& index, const int& map = 0) const;
+    double                flux(const GSkyPixel& pixel, const int& map = 0) const;
     double                solidangle(const int& index) const;
     double                solidangle(const GSkyPixel& pixel) const;
     bool                  contains(const GSkyDir& dir) const;

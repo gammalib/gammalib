@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GOptimizerPar.cpp - Optimizer parameter class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -287,13 +287,12 @@ void GOptimizerPar::error(const double& error)
  * @param[in] gradient Parameter gradient.
  *
  * Sets the parameter gradient. The method stores the gradient factor which
- * is obtained by dividing @p gradient by the scale factor.
+ * is obtained by multiplying @p gradient by the scale factor.
  ***************************************************************************/
 void GOptimizerPar::gradient(const double& gradient)
 {
-    // Set gradient factor. The GOptimizerPar class makes sure that m_scale is
-    // never 0, so no test is needed here
-    factor_gradient(gradient / m_scale);
+    // Set gradient factor.
+    factor_gradient(gradient * m_scale);
 	
     // Return
     return;
@@ -588,7 +587,7 @@ void GOptimizerPar::autoscale(void)
         // Renormalize values, error, gradient, min and max
         m_factor_value    *= renormalization;
         m_factor_error    *= renormalization;
-        m_factor_gradient *= renormalization;
+        m_factor_gradient /= renormalization;
         if (m_has_min) {
             m_factor_min *= renormalization;
         }
@@ -710,9 +709,9 @@ void GOptimizerPar::init_members(void)
     m_factor_max      = 0.0;
     m_scale           = 1.0;
     m_free            = true;
-    m_has_min          = false;
-    m_has_max          = false;
-    m_has_grad         = false;
+    m_has_min         = false;
+    m_has_max         = false;
+    m_has_grad        = false;
   
     // Return
     return;
@@ -736,9 +735,9 @@ void GOptimizerPar::copy_members(const GOptimizerPar& par)
     m_factor_max      = par.m_factor_max;
     m_scale           = par.m_scale;
     m_free            = par.m_free;
-    m_has_min          = par.m_has_min;
-    m_has_max          = par.m_has_max;
-    m_has_grad         = par.m_has_grad;
+    m_has_min         = par.m_has_min;
+    m_has_max         = par.m_has_max;
+    m_has_grad        = par.m_has_grad;
 
     // Return
     return;

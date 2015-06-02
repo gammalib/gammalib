@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -845,7 +845,8 @@ GPhotons GModelSky::mc(const double& area,
             #if defined(G_DUMP_MC)
             std::cout << "GModelSky::mc(\"" << name() << "\": ";
             std::cout << "flux=" << flux << " ph/cm2/s, ";
-            std::cout << "rate=" << rate << " ph/s)" << std::endl;
+            std::cout << "rate=" << rate << " ph/s, ";
+            std::cout << "norm=" << norm << ")" << std::endl;
             #endif
 
             // Get photon arrival times from temporal model
