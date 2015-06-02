@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GOptimizerPar.hpp - Optimizer parameter class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -227,12 +227,13 @@ double GOptimizerPar::error(void) const
  * @return Parameter gradient.
  *
  * Returns the parameter gradient. The parameter gradient is computed by
- * multiplying the gradient factor by the scale factor.
+ * dividing the gradient factor by the scale factor. The method returns
+ * zero in case that the scale factor is zero.
  ***************************************************************************/
 inline
 double GOptimizerPar::gradient(void) const
 {
-    return (m_factor_gradient * m_scale);
+    return ((m_scale > 0.0) ? m_factor_gradient / m_scale : 0.0);
 }
 
 
