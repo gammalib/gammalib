@@ -1,7 +1,7 @@
 /***************************************************************************
  *               test_MWL.cpp - Test multi-wavelength classes              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -177,7 +177,7 @@ void TestGMWL::test_optimizer(void)
     try {
         GLog log;
         log.cout(false);
-        GOptimizerLM opt(log);
+        GOptimizerLM opt(&log);
         opt.max_iter(1000);
         obs.optimize(opt);
         obs.errors(opt);
@@ -232,7 +232,7 @@ void TestGMWL::test_optimizer(void)
     try {
         GLog log;
         log.cout(false);
-        GOptimizerLM opt(log);
+        GOptimizerLM opt(&log);
         opt.max_iter(1000);
         obs.optimize(opt);
         obs.errors(opt);

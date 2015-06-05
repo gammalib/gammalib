@@ -1062,7 +1062,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
     GLog log;
 
     // Create an optimizer.
-    GOptimizerLM opt(log);
+    GOptimizerLM opt(&log);
 
     opt.max_stalls(50);
 

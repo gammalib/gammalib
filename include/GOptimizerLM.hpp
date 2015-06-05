@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.hpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,7 @@ public:
 
     // Constructors and destructors
     GOptimizerLM(void);
-    explicit GOptimizerLM(GLog& log);
+    explicit GOptimizerLM(GLog* log);
     GOptimizerLM(const GOptimizerLM& opt);
     virtual ~GOptimizerLM(void);
 
@@ -73,6 +73,7 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
     
     // Methods
+    void          logger(GLog* log);
     void          max_iter(const int& max_iter);
     void          max_stalls(const int& max_stalls);
     void          max_boundary_hits(const int& max_hit);
@@ -173,6 +174,21 @@ inline
 int GOptimizerLM::iter(void) const
 {
     return (m_iter);
+}
+
+
+/***********************************************************************//**
+ * @brief Set logger
+ *
+ * @param[in] log Logger to use in optimizer.
+ *
+ * Set the logger into which the optimizer will dump any output.
+ ***************************************************************************/
+inline
+void GOptimizerLM::logger(GLog* log)
+{
+    m_logger = log;
+    return;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GOptimizer.cpp - test GOptimizer class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -131,7 +131,7 @@ void TestGOptimizer::test_optimizer(const int& mode)
     GLog log;
 
     // Create an optimizer.
-    GOptimizerLM opt(log);
+    GOptimizerLM opt(&log);
 
     opt.max_stalls(50);
 

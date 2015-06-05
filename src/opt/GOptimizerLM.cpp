@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,13 +68,13 @@ GOptimizerLM::GOptimizerLM(void) : GOptimizer()
  *
  * @param[in] log Logger to use in optimizer.
  ***************************************************************************/
-GOptimizerLM::GOptimizerLM(GLog& log) : GOptimizer()
+GOptimizerLM::GOptimizerLM(GLog* log) : GOptimizer()
 {
     // Initialise private members for clean destruction
     init_members();
 
     // Set pointer to logger
-    m_logger = &log;
+    m_logger = log;
 
     // Return
     return;

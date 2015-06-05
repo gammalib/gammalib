@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizerLM.i - Levenberg Marquardt optimizer class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,7 +40,7 @@ public:
 
     // Constructors and destructors
     GOptimizerLM(void);
-    GOptimizerLM(GLog& log);
+    explicit GOptimizerLM(GLog* log);
     GOptimizerLM(const GOptimizerLM& opt);
     virtual ~GOptimizerLM(void);
 
@@ -55,6 +55,7 @@ public:
     virtual int           iter(void) const;
     
     // Methods
+    void          logger(GLog* log);
     void          max_iter(const int& max_iter);
     void          max_stalls(const int& max_stalls);
     void          max_boundary_hits(const int& max_hit);
