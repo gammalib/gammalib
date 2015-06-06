@@ -1,9 +1,10 @@
-2015-06-05  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-06-06  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
         Correct model gradient computation
+        Increased number of integration iterations for energy dispersion (#1472)
         Add GOptimizerLM::logger() method, logger constructor takes pointer (#1471)
         Replaced fixed precision integration by fixed iterations (#1466)
         Implement rejection method for skymap Monte Carlo (#1465)

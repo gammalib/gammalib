@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-5 June 2015
+6 June 2015
 
 
 1. Introduction
@@ -66,6 +66,9 @@ Integration in npred() is now done using a fixed number of Romberg iterations
 instead of using the integration precision. This will assure that the log-
 likelihood function is smooth.
 
+The number of integration iterations for the energy dispersion was changed from
+4 to 5 to make it compatible with the default integration order.
+
 
 11. Optimization module
 -----------------------
@@ -124,6 +127,9 @@ None
 All integrations are now done using a fixed number of Romberg iterations
 instead of using the integration precision. This will assure that the log-
 likelihood function is smooth.
+
+The number of integration iterations for the energy dispersion was changed from
+4 to 5 to make it compatible with the default integration order.
 
 
 21. COMPTEL interface

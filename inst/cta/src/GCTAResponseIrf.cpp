@@ -471,7 +471,7 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
                              const GObservation& obs) const
 {
     // Set number of iterations for Romberg integration.
-    static const int iter = 4;
+    static const int iter = 5;
 
     // Initialise Nroi value
     double nroi = 0.0;
