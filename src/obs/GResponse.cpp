@@ -175,7 +175,7 @@ double GResponse::convolve(const GModelSky&    model,
                            const bool&         grad) const
 {
     // Set number of iterations for Romberg integration.
-    static const int iter = 5;
+    static const int iter = 6;
 
     // Initialise result
     double prob = 0.0;
