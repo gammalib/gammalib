@@ -341,6 +341,9 @@ void GCTAEdisp2D::read(const GFits& fits)
         }
     }
 
+    // Set fmax
+    set_fmax();
+
     // Return
     return;
 }
@@ -410,34 +413,25 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
                         const double& zenith,
                         const double& azimuth) const
 {
-
-    // Set true energy
-    GEnergy energy;
-
-    // Get boundaries for rejection method
-    double emin = ebounds_obs(logEsrc, theta, phi, zenith, azimuth).emin().log10TeV();
-
-    double emax = ebounds_obs(logEsrc, theta, phi, zenith, azimuth).emax().log10TeV();
-
-    // Set fmax if it has not already been set
-    if (m_fmax == -1.0) {
-        set_fmax();
-    }
-    double fmax = m_fmax;
+    // Get boundaries for observed energy
+    GEbounds ebounds = ebounds_obs(logEsrc, theta, phi, zenith, azimuth);
+    double   emin    = ebounds.emin().log10TeV();
+    double   emax    = ebounds.emax().log10TeV();
 
     // Find energy by rejection method
-    double ewidth = emax - emin;
-    double e      = emin;
-    double f      = 0.0;
-    double ftest  = 1.0;
+    double ewidth  = emax - emin;
+    double logEobs = emin;
+    double f       = 0.0;
+    double ftest   = 1.0;
     while (ftest > f) {
-        e      = emin + ewidth * ran.uniform();
-        f      = operator()(e, logEsrc, theta, phi, zenith, azimuth);
-        ftest  = ran.uniform() * fmax;
+        logEobs = emin + ewidth * ran.uniform();
+        f      = operator()(logEobs, logEsrc, theta, phi, zenith, azimuth);
+        ftest  = ran.uniform() * m_fmax;
     }
 
-    // Set energy
-    energy.log10TeV(e);
+    // Set observed energy
+    GEnergy energy;
+    energy.log10TeV(logEobs);
 
     // Return energy
     return energy;
@@ -451,8 +445,7 @@ GEnergy GCTAEdisp2D::mc(GRan&         ran,
                         const double& zenith,
                         const double& azimuth) const
 {
-
-   // Compute cumulative probability
+    // Compute cumulative probability
     compute_cumul(theta, phi, zenith, azimuth);
 
     // Find right logEsrc index with bisection search
@@ -697,7 +690,6 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
  ***************************************************************************/
 void GCTAEdisp2D::init_members(void)
 {
-
     // Initialise members
     m_filename.clear();
     m_edisp.clear();
@@ -1068,37 +1060,20 @@ void GCTAEdisp2D::compute_cumul(const double& theta,
 
 
 /***********************************************************************//**
- * @brief Find maximum energy dispersion
+ * @brief Find maximum energy dispersion value
  ***************************************************************************/
 void GCTAEdisp2D::set_fmax(void) const
 {
     // Initialise maximum
-    double max = 0.0;
+    m_fmax = 0.0;
 
-    // Loop over Esrc
-    for (int i = 0; i < m_edisp.axis(0); ++i) {
-
-        // Set Esrc
-        double Esrc    = 0.5 * (m_edisp.axis_hi(0,i) + m_edisp.axis_lo(0,i));
-        double logEsrc = std::log10(Esrc);
-
-        // Loop over EobsOverEsrc
-        for (int j = 0; j < m_edisp.axis(1); ++j) {
-
-            // Set EobsOverEsrc
-            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, j) +
-                                         m_edisp.axis_lo(1, j));
-            double test = operator()(logEsrc, EobsOverEsrc);
-            if (max < test) {
-                max = test;
-            }
-
-        } // endfor: looped over EobsOverEsrc
-
-    } // endfor: looped over Esrc
-
-    // Set fmax
-    m_fmax = max;
+    // Loop over all response table elements
+    for (int i = 0; i < m_edisp.elements(); ++i) {
+        double value = m_edisp(0,i);
+        if (value > m_fmax) {
+            m_fmax = value;
+        }
+    }
 
     // Return
     return;
