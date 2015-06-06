@@ -442,7 +442,7 @@ double GIntegral::romberg(const double& a, const double& b, const int& order)
             std::string msg = "Requested integration order "+
                               gammalib::str(order)+" is larger than the "
                               "maximum number of iterations "+
-                              gammalib::str(max_iter)+". Either reduced the "
+                              gammalib::str(max_iter)+". Either reduce the "
                               "integration order or increase the (maximum) "
                               "number of iterations.";
             throw GException::invalid_argument(G_ROMBERG, msg);
