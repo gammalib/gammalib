@@ -502,8 +502,8 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
         m_last_logEsrc = logEsrc;
 
         // Find right index with bisection
-        int low = 0;
-        int high = m_ebounds_obs.size();
+        int low  = 0;
+        int high = m_ebounds_obs.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_edisp.axis_lo(0, mid);
@@ -565,7 +565,7 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
 
         // Find right index with bisection
         int low  = 0;
-        int high = m_ebounds_src.size();
+        int high = m_ebounds_src.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_edisp.axis_lo(0, mid);

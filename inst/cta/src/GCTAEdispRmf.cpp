@@ -337,8 +337,8 @@ GEbounds GCTAEdispRmf::ebounds_obs(const double& logEsrc,
         m_last_logEsrc = logEsrc;
 
         // Find right index with bisection
-        int low = 0;
-        int high = m_ebounds_obs.size();
+        int low  = 0;
+        int high = m_ebounds_obs.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_rmf.etrue().emin(mid).log10TeV();
@@ -397,8 +397,8 @@ GEbounds GCTAEdispRmf::ebounds_src(const double& logEobs,
         m_last_logEobs = logEobs;
 
         // Find right index with bisection
-        int low = 0;
-        int high = m_ebounds_src.size();
+        int low  = 0;
+        int high = m_ebounds_src.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
             double e = m_rmf.emeasured().emin(mid).log10TeV();
