@@ -334,8 +334,6 @@ void GCTAEdisp2D::read(const GFits& fits)
 
                     // Do Romberg integration
                     sum += integral.romberg(emin, emax);
-//std::cout << theta << " " << logEsrc << " " << sum;
-//std::cout << " e=[" << emin << "," << emax << "]" << std::endl;
 
                 } // endfor: looped over all energy intervals
 
