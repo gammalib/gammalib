@@ -647,7 +647,7 @@ void TestGCTAResponse::test_response_edisp_2D(void)
     GCTAEdisp2D edisp(cta_edisp_2D);
 
     // Test normalisation
-    test_edisp_integration(edisp, 10.0, 50.0);
+    test_edisp_integration(edisp);
 
 
     // Return
@@ -1005,7 +1005,7 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
 {
 
     // Loop over source energies
-    for (double e_src = e_src_min; e_src < e_src_max; e_src *= 2.0) {
+    for (double e_src = e_src_min; e_src <= e_src_max; e_src *= 2.0) {
 
         // Compute log10 of true energy
         double log10_e_src = std::log10(e_src);
@@ -1031,7 +1031,7 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
         // Perform numerical integration by summing
         double sum      = 0.0;
         double logE_obs = logE_min;
-        for (int i = 0; i < steps; ++i) {
+        for (int i = 0; i <= steps; ++i) {
             double dp_dlogE = edisp(logE_obs, log10_e_src);
             sum            += dp_dlogE * dlogE;
             logE_obs       += dlogE;
@@ -1040,7 +1040,7 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
         // Set message string
         GEnergy     eng(e_src, "TeV");
         std::string msg = edisp.classname()+" integration for "+eng.print();
-        test_value(sum, 1.0, 0.01, msg);
+        test_value(sum, 1.0, 0.05, msg);
 
     }
 
