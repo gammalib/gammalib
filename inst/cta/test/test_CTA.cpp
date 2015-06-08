@@ -1040,7 +1040,7 @@ void TestGCTAResponse::test_edisp_integration(const GCTAEdisp& edisp,
         // Set message string
         GEnergy     eng(e_src, "TeV");
         std::string msg = edisp.classname()+" integration for "+eng.print();
-        test_value(sum, 1.0, 0.05, msg);
+        test_value(sum, 1.0, 0.03, msg);
 
     }
 

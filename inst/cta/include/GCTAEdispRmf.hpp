@@ -99,6 +99,7 @@ private:
     void free_members(void);
     void set_matrix(void);
     void set_cache(void) const;
+    void set_max_edisp(void) const;
     void update(const double& arg1, const double& arg2) const;
     void compute_ebounds_obs(const double& theta = 0.0,
                              const double& phi = 0.0,
@@ -108,7 +109,6 @@ private:
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
-    void set_max_edisp(void) const;
 
     // Protected classes
     class edisp_kern : public GFunction {

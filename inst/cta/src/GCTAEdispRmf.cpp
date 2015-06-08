@@ -166,7 +166,6 @@ GCTAEdispRmf& GCTAEdispRmf::operator=(const GCTAEdispRmf& edisp)
  * Returns the energy resolution, i.e. the probability density in observed
  * photon energy at a given (log10(E_src), log10(E_obs)).
  * To be precise: energy dispersion = dP / d(log10(E_obs)).
- *
  ***************************************************************************/
 double GCTAEdispRmf::operator()(const double& logEobs,
                                 const double& logEsrc,
@@ -241,11 +240,11 @@ void GCTAEdispRmf::load(const std::string& filename)
     // Store the filename
     m_filename = filename;
 
+    // Set cache (has to come before set_matrix())
+    set_cache();
+
     // Set matrix
     set_matrix();
-
-    // Set cache
-    set_cache();
 
     // Set maximum edisp value
     set_max_edisp();
@@ -278,7 +277,6 @@ GEnergy GCTAEdispRmf::mc(GRan&         ran,
     GEbounds ebounds = ebounds_obs(logEsrc, theta, phi, zenith, azimuth);
     double   emin    = ebounds.emin().log10TeV();
     double   emax    = ebounds.emax().log10TeV();
-    double   fmax    = m_matrix(m_rmf.itruemax(), m_rmf.imeasmax());
 
     // Find energy by rejection method
     double ewidth  = emax - emin;
@@ -576,7 +574,18 @@ void GCTAEdispRmf::set_matrix(void)
     // Initialize matrix
     m_matrix = GMatrixSparse(rows, columns);
 
-    // Set matrix elements
+    // Fill matrix elements
+    for (int itrue = 0; itrue < rows; ++itrue) {
+        for (int imeasured = 0; imeasured < columns; ++imeasured) {
+            m_matrix(itrue, imeasured) = m_rmf(itrue, imeasured);
+        }
+    }
+
+    // Initialise row sums
+    std::vector<double> row_sums;
+    row_sums.reserve(rows);
+
+    // Normalize matrix elements
     for (int itrue = 0; itrue < rows; ++itrue) {
 
         // Get true photon energy
@@ -607,24 +616,20 @@ void GCTAEdispRmf::set_matrix(void)
             
         } // endfor: looped over all energy intervals
 
-        // Sum all measured energy bins
-        /*
-        for (int imeasured = 0; imeasured < columns; ++imeasured) {
-            double ewidth = m_rmf.emeasured().ewidth(imeasured).TeV();
-            double emean  = m_rmf.emeasured().emean(imeasured).TeV();
-            sum          += m_rmf(itrue, imeasured) *
-                            ewidth / (gammalib::ln10 * emean);
-        }
-        */
-
-        // If sum is positive then scale all measured energy bins
-        if (sum > 0.0) {
-            for (int imeasured = 0; imeasured < columns; ++imeasured) {
-                m_matrix(itrue, imeasured) = m_rmf(itrue, imeasured) / sum;
-            }
-        }
+        // Store matrix sum
+        row_sums.push_back(sum);
 
     } // endfor: looped over all true energies
+
+    // Normalize matrix elements
+    for (int itrue = 0; itrue < rows; ++itrue) {
+        double sum = row_sums[itrue];
+        if (sum > 0.0) {
+            for (int imeasured = 0; imeasured < columns; ++imeasured) {
+                m_matrix(itrue, imeasured) /= sum;
+            }
+        }
+    }
 
     // Return
     return;
@@ -644,12 +649,35 @@ void GCTAEdispRmf::set_cache(void) const
 
     // Set log10(Etrue) nodes
     for (int i = 0; i < m_rmf.ntrue(); ++i) {
-        m_etrue.append(m_rmf.etrue().emean(i).log10TeV());
+        m_etrue.append(m_rmf.etrue().elogmean(i).log10TeV());
     }
 
     // Set log10(Emeasured) nodes
     for (int i = 0; i < m_rmf.nmeasured(); ++i) {
-        m_emeasured.append(m_rmf.emeasured().emean(i).log10TeV());
+        m_emeasured.append(m_rmf.emeasured().elogmean(i).log10TeV());
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum energy dispersion value
+ ***************************************************************************/
+void GCTAEdispRmf::set_max_edisp(void) const
+{
+    // Initialise maximum
+    m_max_edisp = 0.0;
+
+    // Loop over all response table elements
+    for (int i = 0; i < m_matrix.rows(); ++i) {
+        for (int k = 0; k < m_matrix.columns(); ++k) {
+            double value = m_matrix(i,k);
+            if (value > m_max_edisp) {
+                m_max_edisp = value;
+            }
+        }
     }
 
     // Return
@@ -759,29 +787,6 @@ void GCTAEdispRmf::compute_ebounds_src(const double& theta,
         m_ebounds_src.push_back(m_rmf.emeasured(emeasured));
 
     } // endfor: looped over measured photon energies
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set maximum energy dispersion value
- ***************************************************************************/
-void GCTAEdispRmf::set_max_edisp(void) const
-{
-    // Initialise maximum
-    m_max_edisp = 0.0;
-
-    // Loop over all response table elements
-    for (int i = 0; i < m_matrix.rows(); ++i) {
-        for (int k = 0; k < m_matrix.columns(); ++k) {
-            double value = m_matrix(i,k);
-            if (value > m_max_edisp) {
-                m_max_edisp = value;
-            }
-        }
-    }
 
     // Return
     return;
