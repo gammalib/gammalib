@@ -31,6 +31,7 @@
 #include <string>
 #include "GRmf.hpp"
 #include "GVector.hpp"
+#include "GFunction.hpp"
 #include "GCTAEdisp.hpp"
 #include "GNodeArray.hpp"
 
@@ -88,7 +89,7 @@ public:
     std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int   size(void) const;
+    int         size(void) const;
     const GRmf& rmf(void) const;
 
 private:
@@ -98,12 +99,7 @@ private:
     void free_members(void);
     void set_matrix(void);
     void set_cache(void) const;
-    void set_mc_cache(void) const;
     void update(const double& arg1, const double& arg2) const;
-    void compute_cumul(const double& theta = 0.0,
-                       const double& phi = 0.0,
-                       const double& zenith = 0.0,
-                       const double& azimuth = 0.0) const;
     void compute_ebounds_obs(const double& theta = 0.0,
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
@@ -112,6 +108,23 @@ private:
                              const double& phi = 0.0,
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
+    void set_max_edisp(void) const;
+
+    // Protected classes
+    class edisp_kern : public GFunction {
+    public:
+        edisp_kern(const GCTAEdispRmf* parent,
+                   const double&       logEsrc,
+                   const double&       theta) :
+                   m_parent(parent),
+                   m_logEsrc(logEsrc),
+                   m_theta(theta) { }
+        double eval(const double& x);
+    protected:
+        const GCTAEdispRmf* m_parent;  //!< Pointer to parent class
+        const double&       m_logEsrc; //!< True photon energy
+        const double&       m_theta;   //!< Offset angle
+    };
 
     // Members
     std::string   m_filename;  //!< Name of response file
@@ -133,21 +146,17 @@ private:
     mutable double     m_wgt4;           //!< Weight of upper right node
 
     // Monte Carlo cache
-    mutable std::vector<int>                        m_mc_measured_start;
-    mutable std::vector<GVector>                    m_mc_measured_cdf;
-    mutable bool                                    m_cdf_computed;
-    mutable double                                  m_theta;
-    mutable double                                  m_logEsrc;
-    mutable double                                  m_logEobs;
-    mutable std::vector<std::vector<std::pair<double, double> > > m_cumul;
-
-    mutable bool                  m_ebounds_obs_computed;
-    mutable std::vector<GEbounds> m_ebounds_obs;
+    mutable double                m_max_edisp;
+    mutable double                m_last_theta_obs;
+    mutable double                m_last_theta_src;
+    mutable double                m_last_logEsrc;
+    mutable double                m_last_logEobs;
     mutable int                   m_index_obs;
-    mutable bool                  m_ebounds_src_computed;
-    mutable std::vector<GEbounds> m_ebounds_src;
     mutable int                   m_index_src;
-
+    mutable bool                  m_ebounds_obs_computed;
+    mutable bool                  m_ebounds_src_computed;
+    mutable std::vector<GEbounds> m_ebounds_obs;
+    mutable std::vector<GEbounds> m_ebounds_src;
 };
 
 
