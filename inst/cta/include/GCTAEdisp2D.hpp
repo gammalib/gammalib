@@ -31,6 +31,7 @@
 #include <string>
 #include "GCTAEdisp.hpp"
 #include "GCTAResponseTable.hpp"
+#include "GFunction.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
@@ -111,6 +112,22 @@ private:
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0) const;
     void set_max_edisp(void) const;
+
+    // Protected classes
+    class edisp_kern : public GFunction {
+    public:
+        edisp_kern(const GCTAEdisp2D*  parent,
+                   const double&       logEsrc,
+                   const double&       theta) :
+                   m_parent(parent),
+                   m_logEsrc(logEsrc),
+                   m_theta(theta) { }
+        double eval(const double& x);
+    protected:
+        const GCTAEdisp2D*  m_parent;  //!< Pointer to parent class
+        const double&       m_logEsrc; //!< True photon energy
+        const double&       m_theta;   //!< Offset angle
+    };
 
     // Members
     std::string       m_filename;  //!< Name of Edisp response file
