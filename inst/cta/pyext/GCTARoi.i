@@ -57,6 +57,7 @@ public:
     void                radius(const double& radius);
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
+    bool                is_valid(void) const;
 };
 
 

@@ -72,6 +72,7 @@ public:
     void                radius(const double& radius);
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
+    bool                is_valid(void) const;
 
 protected:
     // Protected methods
@@ -141,17 +142,15 @@ void GCTARoi::centre(const GCTAInstDir& centre)
 
 
 /***********************************************************************//**
- * @brief Set radius of region of interest
+ * @brief Checks sanity of RoI
  *
- * @param[in] radius Region of interest radius (degrees).
- *
- * Set the radius of the region of interest.
+ * @return Bool Flag if ROI information is valid.
  ***************************************************************************/
 inline
-void GCTARoi::radius(const double& radius)
+bool GCTARoi::is_valid(void) const
 {
-    m_radius = radius;
-    return;
+    return (m_radius > 0.0);
 }
+
 
 #endif /* GCTAROI_HPP */
