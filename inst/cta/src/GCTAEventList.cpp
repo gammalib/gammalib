@@ -1060,12 +1060,6 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
     std::string dsval2 = gammalib::str(e_min) + ":" +
                          gammalib::str(e_max);
 
-    // Set cone selection string
-    std::string dsval3 = "CIRCLE(" +
-                         gammalib::str(ra) + "," +
-                         gammalib::str(dec) + "," +
-                         gammalib::str(rad) + ")";
-
     // Add time selection keywords
     hdu.card("DSTYP1", "TIME",  "Data selection type");
     hdu.card("DSUNI1", "s",     "Data selection unit");
@@ -1080,15 +1074,22 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
     // Initialise number of NDSKEYS
     int ndskeys = 2;
 
-    // Check if RoI information is valid before writing it
+    // Add acceptance cone only if RoI information is valid
     if (m_roi.is_valid()) {
 
-        // Add acceptance cone selection
+        // Set cone selection string
+        std::string dsval3 = "CIRCLE(" +
+                             gammalib::str(ra) + "," +
+                             gammalib::str(dec) + "," +
+                             gammalib::str(rad) + ")";
+
+        // Write DS keywords
         hdu.card("DSTYP3", "POS(RA,DEC)", "Data selection type");
         hdu.card("DSUNI3", "deg",         "Data selection unit");
         hdu.card("DSVAL3", dsval3,        "Data selection value");
-        ndskeys = 3;
-    }
+        ndskeys++;
+        
+    } // endif: RoI was valid
 
     // Set number of data selection keys
     hdu.card("NDSKEYS", ndskeys,  "Number of data selections");

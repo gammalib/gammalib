@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-6 June 2015
+9 June 2015
 
 
 1. Introduction
@@ -130,6 +130,10 @@ likelihood function is smooth.
 
 The number of integration iterations for the energy dispersion was changed from
 4 to 5 to make it compatible with the default integration order.
+
+An is_valid() method has been added to GCTARoi that returns true if the ROI
+has a positive radius. DS keywords are only written for a valid ROI into the
+event list file.
 
 
 21. COMPTEL interface

@@ -51,13 +51,13 @@ public:
     virtual bool        contains(const GEvent& event) const;
 
     // Other methods
+    bool                is_valid(void) const;
     const GCTAInstDir&  centre(void) const;
     const double&       radius(void) const;
     void                centre(const GCTAInstDir& centre);
     void                radius(const double& radius);
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
-    bool                is_valid(void) const;
 };
 
 

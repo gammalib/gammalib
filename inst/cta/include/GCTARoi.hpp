@@ -66,13 +66,13 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    bool                is_valid(void) const;
     const GCTAInstDir&  centre(void) const;
     const double&       radius(void) const;
     void                centre(const GCTAInstDir& centre);
     void                radius(const double& radius);
     void                read(const GXmlElement& xml);
     void                write(GXmlElement& xml) const;
-    bool                is_valid(void) const;
 
 protected:
     // Protected methods
@@ -142,9 +142,9 @@ void GCTARoi::centre(const GCTAInstDir& centre)
 
 
 /***********************************************************************//**
- * @brief Checks sanity of RoI
+ * @brief Checks if RoI is valid
  *
- * @return Bool Flag if ROI information is valid.
+ * @return Bool flag if ROI information is valid.
  ***************************************************************************/
 inline
 bool GCTARoi::is_valid(void) const
