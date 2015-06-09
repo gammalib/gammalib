@@ -1056,14 +1056,8 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
     double e_min = emin().TeV();
     double e_max = emax().TeV();
 
-    // Set cone selection string
-    std::string dsval2 = "CIRCLE(" +
-                         gammalib::str(ra) + "," +
-                         gammalib::str(dec) + "," +
-                         gammalib::str(rad) + ")";
-
     // Set energy selection string
-    std::string dsval3 = gammalib::str(e_min) + ":" +
+    std::string dsval2 = gammalib::str(e_min) + ":" +
                          gammalib::str(e_max);
 
     // Add time selection keywords
@@ -1072,18 +1066,33 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
     hdu.card("DSVAL1", "TABLE", "Data selection value");
     hdu.card("DSREF1", ":GTI",  "Data selection reference");
 
-    // Add acceptance cone selection
-    hdu.card("DSTYP2", "POS(RA,DEC)", "Data selection type");
-    hdu.card("DSUNI2", "deg",         "Data selection unit");
-    hdu.card("DSVAL2", dsval2,        "Data selection value");
-
     // Add energy range selection
-    hdu.card("DSTYP3", "ENERGY", "Data selection type");
-    hdu.card("DSUNI3", "TeV",    "Data selection unit");
-    hdu.card("DSVAL3", dsval3,   "Data selection value");
+    hdu.card("DSTYP2", "ENERGY", "Data selection type");
+    hdu.card("DSUNI2", "TeV",    "Data selection unit");
+    hdu.card("DSVAL2", dsval2,   "Data selection value");
+
+    // Initialise number of NDSKEYS
+    int ndskeys = 2;
+
+    // Add acceptance cone only if RoI information is valid
+    if (m_roi.is_valid()) {
+
+        // Set cone selection string
+        std::string dsval3 = "CIRCLE(" +
+                             gammalib::str(ra) + "," +
+                             gammalib::str(dec) + "," +
+                             gammalib::str(rad) + ")";
+
+        // Write DS keywords
+        hdu.card("DSTYP3", "POS(RA,DEC)", "Data selection type");
+        hdu.card("DSUNI3", "deg",         "Data selection unit");
+        hdu.card("DSVAL3", dsval3,        "Data selection value");
+        ndskeys++;
+        
+    } // endif: RoI was valid
 
     // Set number of data selection keys
-    hdu.card("NDSKEYS", 3,  "Number of data selections");
+    hdu.card("NDSKEYS", ndskeys,  "Number of data selections");
 
     // Return
     return;

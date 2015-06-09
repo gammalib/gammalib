@@ -51,6 +51,7 @@ public:
     virtual bool        contains(const GEvent& event) const;
 
     // Other methods
+    bool                is_valid(void) const;
     const GCTAInstDir&  centre(void) const;
     const double&       radius(void) const;
     void                centre(const GCTAInstDir& centre);

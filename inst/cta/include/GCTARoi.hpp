@@ -66,6 +66,7 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    bool                is_valid(void) const;
     const GCTAInstDir&  centre(void) const;
     const double&       radius(void) const;
     void                centre(const GCTAInstDir& centre);
@@ -141,17 +142,15 @@ void GCTARoi::centre(const GCTAInstDir& centre)
 
 
 /***********************************************************************//**
- * @brief Set radius of region of interest
+ * @brief Checks if RoI is valid
  *
- * @param[in] radius Region of interest radius (degrees).
- *
- * Set the radius of the region of interest.
+ * @return Bool flag if ROI information is valid.
  ***************************************************************************/
 inline
-void GCTARoi::radius(const double& radius)
+bool GCTARoi::is_valid(void) const
 {
-    m_radius = radius;
-    return;
+    return (m_radius > 0.0);
 }
+
 
 #endif /* GCTAROI_HPP */

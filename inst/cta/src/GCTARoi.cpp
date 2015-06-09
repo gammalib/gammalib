@@ -35,6 +35,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                  "GCTARoi::read(GXmlElement&)"
 #define G_WRITE                                "GCTARoi::write(GXmlElement&)"
+#define G_RADIUS                                   "GCTARoi::radius(double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -342,6 +343,32 @@ std::string GCTARoi::print(const GChatter& chatter) const
     return result;
 }
 
+/***********************************************************************//**
+ * @brief Set radius of region of interest
+ *
+ * @param[in] radius Region of interest radius (degrees).
+ *
+ * @exception GException::invalid_argument
+ *            Non-positive ROI radius encountered
+ *
+ * Set the radius of the region of interest.
+ ***************************************************************************/
+void GCTARoi::radius(const double& radius)
+{
+    // Throw an exception if argument is not valid
+    if (radius <= 0.0) {
+        std::string msg = "Invalid RoI radius "+gammalib::str(radius)+
+                          " encountered. Please specify a strictly"
+                          " positive radius.";
+        throw GException::invalid_argument(G_RADIUS, msg);
+    }
+
+    // Set radius value
+    m_radius = radius;
+
+    // Return
+    return;
+}
 
 /*==========================================================================
  =                                                                         =
