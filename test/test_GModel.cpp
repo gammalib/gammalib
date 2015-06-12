@@ -767,17 +767,17 @@ void TestGModel::test_diffuse_map(void)
     // Test normalized map
     GModelSpatialDiffuseMap map_norm(m_map_file, 3.0, true);
     test_assert(map_norm.normalize(),"Model should be normalized.");
-    test_value(map_norm.eval(photon), 13069.7741687, 0.1, "Unexpected skymap intensity.");
+    test_value(map_norm.eval(photon), 13069.7741687, 0.2, "Unexpected skymap intensity.");
     GXmlElement element;
     map_norm.write(element);
     map_norm.read(element);
     test_assert(map_norm.normalize(),"Model should be normalized.");
-    test_value(map_norm.eval(photon), 13069.7741687, 0.1, "Unexpected skymap intensity.");
+    test_value(map_norm.eval(photon), 13069.7741687, 0.2, "Unexpected skymap intensity.");
 
     // Test non-normalized map
     GModelSpatialDiffuseMap map_nonnorm(m_map_file, 3.0, false);
     test_assert(!map_nonnorm.normalize(),"Model should not be normalized.");
-    test_value(map_nonnorm.eval(photon), 13069.6002755, 0.1, "Unexpected skymap intensity.");
+    test_value(map_nonnorm.eval(photon), 13069.6002755, 0.2, "Unexpected skymap intensity.");
     GXmlElement element2;
     map_nonnorm.write(element2);
     map_nonnorm.read(element2);
