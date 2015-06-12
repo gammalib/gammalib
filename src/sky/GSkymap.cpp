@@ -902,23 +902,6 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                     double wgt_x_left  = 1.0 - wgt_x_right;
                     double wgt_y_right = (pixel.y() - inx_y);
                     double wgt_y_left  = 1.0 - wgt_y_right;
-if ((inx_x_left  < 0 || inx_x_left  >= m_num_x) ||
-    (inx_x_right < 0 || inx_x_right >= m_num_x) ||
-    (inx_y_left  < 0 || inx_y_left  >= m_num_y) ||
-    (inx_y_right < 0 || inx_y_right >= m_num_y)) {
-std::cout << dir;
-std::cout << " pixel=" << pixel;
-std::cout << " " << inx_x_left;
-std::cout << " " << inx_x_right;
-std::cout << " " << inx_y_left;
-std::cout << " " << inx_y_right;
-std::cout << " " << wgt_x_left;
-std::cout << " " << wgt_x_right;
-std::cout << " " << wgt_y_left;
-std::cout << " " << wgt_y_right;
-std::cout << "   " << m_num_x;
-std::cout << " " << m_num_y << std::endl;
-}
 
                     // Compute skymap pixel indices for bi-linear interpolation
                     m_interpol.index1() = inx_x_left  + inx_y_left  * m_num_x;
