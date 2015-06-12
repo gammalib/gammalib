@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-9 June 2015
+12 June 2015
 
 
 1. Introduction
@@ -85,6 +85,12 @@ optimizer (before, a logger could only be set during construction).
 Added the flux() method that provides estimates for the flux value of a pixel. The
 flux is defined as the intensity (computed by bilinear interpolation over the pixel)
 multiplied by the solid angle of the pixel.
+
+The pixel containment check has been corrected. Before, the containment check returned
+true even if the pixel was by one beyond the skymap limits. On of the unwanted side
+effects in the sky map access operator was that pixels outside the valid sky map
+array were accessed, leading to unpredictable results at the edge of the images.
+This quite severe bug was now corrected.
 
 
 13. Support module

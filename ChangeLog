@@ -1,9 +1,10 @@
-2015-06-09  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-06-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
         Correct model gradient computation
+        Correct check of pixel containment in sky map (GSkymap::contains())
         Add is_valid() method to GCTARoi and write keywords only if ROI is valid (#1476)
         Increased number of integration iterations for energy dispersion (#1472)
         Add GOptimizerLM::logger() method, logger constructor takes pointer (#1471)

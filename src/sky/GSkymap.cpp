@@ -62,7 +62,7 @@
 #define G_SOLIDANGLE1                             "GSkymap::solidangle(int&)"
 #define G_SOLIDANGLE2                       "GSkymap::solidangle(GSkyPixel&)"
 #define G_EXTRACT                              "GSkymap::extract(int&, int&)"
-#define G_READ                               "GSkymap::read(const GFitsHDU&)"
+#define G_READ                                     "GSkymap::read(GFitsHDU&)"
 #define G_SET_WCS     "GSkymap::set_wcs(std::string&, std::string&, double&,"\
                               " double&, double&, double&, double&, double&,"\
                                                        " GMatrix&, GVector&)"
@@ -357,12 +357,12 @@ GSkymap& GSkymap::operator+=(const GSkymap& map)
 
         // Loop over all layers
         for (int layer = 0; layer < nmaps(); ++layer) {
-        
+
             // Add value
             (*this)(index, layer) += map(dir, layer);
 
         } // endfor: looped over all layers
-        
+
     } // endfor: looped over all pixels
 
     // Return this object
@@ -431,12 +431,12 @@ GSkymap& GSkymap::operator-=(const GSkymap& map)
 
         // Loop over all layers
         for (int layer = 0; layer < nmaps(); ++layer) {
-        
+
             // Subtract value
             (*this)(index, layer) -= map(dir, layer);
 
         } // endfor: looped over all layers
-        
+
     } // endfor: looped over all pixels
 
     // Return this object
@@ -588,7 +588,7 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
                                   " for division";
                 throw GException::invalid_value(G_OP_UNARY_DIV, msg);
             }
-            
+
             // Subtract value
             (*this)(index, layer) /= map(dir, layer);
 
@@ -902,6 +902,23 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                     double wgt_x_left  = 1.0 - wgt_x_right;
                     double wgt_y_right = (pixel.y() - inx_y);
                     double wgt_y_left  = 1.0 - wgt_y_right;
+if ((inx_x_left  < 0 || inx_x_left  >= m_num_x) ||
+    (inx_x_right < 0 || inx_x_right >= m_num_x) ||
+    (inx_y_left  < 0 || inx_y_left  >= m_num_y) ||
+    (inx_y_right < 0 || inx_y_right >= m_num_y)) {
+std::cout << dir;
+std::cout << " pixel=" << pixel;
+std::cout << " " << inx_x_left;
+std::cout << " " << inx_x_right;
+std::cout << " " << inx_y_left;
+std::cout << " " << inx_y_right;
+std::cout << " " << wgt_x_left;
+std::cout << " " << wgt_x_right;
+std::cout << " " << wgt_y_left;
+std::cout << " " << wgt_y_right;
+std::cout << "   " << m_num_x;
+std::cout << " " << m_num_y << std::endl;
+}
 
                     // Compute skymap pixel indices for bi-linear interpolation
                     m_interpol.index1() = inx_x_left  + inx_y_left  * m_num_x;
@@ -916,12 +933,12 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
                     m_interpol.weight4() = wgt_x_right * wgt_y_right;
 
                 } // endif: pixel was contained in map
-                
+
             } // endtry: pixel computation was successful
             catch (GException::wcs_invalid_phi_theta) {
                 m_contained = false;
             }
-    
+
         } // endelse: we had a WCS map
 
     } // endif: computation of the bi-linear interpolater was required
@@ -1361,7 +1378,7 @@ double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
         flux = (flux1 + flux2  + flux3  + flux4 +
                 flux5 + flux6  + flux7  + flux8 +
                 flux9 + flux10 + flux11 + flux12);
-    
+
     } // endif: we had a HealPix map
 
     // ... otherwise perform flux computation for WCS map. The pixel is
@@ -1544,7 +1561,7 @@ bool GSkymap::contains(const GSkyDir& dir) const
 {
     // Convert sky direction into sky pixel
     GSkyPixel pixel = dir2pix(dir);
-    
+
     // Return location flag
     return (contains(pixel));
 }
@@ -1557,7 +1574,7 @@ bool GSkymap::contains(const GSkyDir& dir) const
  * @return Trus if pixels is within map, false otherwise.
  *
  * Checks whether the specified sky map @p pixel falls within the skymap
- * or not. 
+ * or not.
  ***************************************************************************/
 bool GSkymap::contains(const GSkyPixel& pixel) const
 {
@@ -1566,7 +1583,8 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
 
     // Test 1D pixels
     if (pixel.is_1D()) {
-        if (pixel.index()+0.5 >= 0.0 && pixel.index()-0.5 < m_num_pixels) {
+        if (pixel.index() >= -0.5 &&
+            pixel.index() <= double(m_num_pixels)-0.5) {
             inmap = true;
         }
     }
@@ -1575,8 +1593,8 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
     else if (pixel.is_2D()) {
 
         // If pixel is in range then set containment flag to true
-        if ((pixel.x()+0.5 >= 0.0 && pixel.x()-0.5 < m_num_x) &&
-            (pixel.y()+0.5 >= 0.0 && pixel.y()-0.5 < m_num_y)) {
+        if ((pixel.x() >= -0.5 && pixel.x() <= double(m_num_x)-0.5) &&
+            (pixel.y() >= -0.5 && pixel.y() <= double(m_num_y)-0.5)) {
             inmap = true;
         }
 
@@ -1608,7 +1626,7 @@ GSkymap GSkymap::extract(const int& map, const int& nmaps) const
         throw GException::out_of_range(G_EXTRACT, "Sky map index", map,
                                        m_num_maps);
     }
- 
+
     // Throw an exception if the number of maps is invalid
     if (nmaps < 0) {
         std::string msg = "The number of maps to extract cannot be negative "
@@ -1692,7 +1710,7 @@ void GSkymap::stack_maps(void)
 
         // Set number of maps to 1
         m_num_maps = 1;
-    
+
     } // endif: map had pixels
 
     // Return
@@ -1734,7 +1752,7 @@ void GSkymap::load(const std::string& filename)
 
         // Get reference to HDU
         const GFitsHDU& hdu = *fits.at(extno);
-        
+
         // If PIXTYPE keyword equals "HEALPIX" then load map
         if (hdu.has_card("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
             read_healpix(static_cast<const GFitsTable&>(hdu));
@@ -2084,18 +2102,18 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
 {
     // Convert WCS to upper case
     std::string uwcs = gammalib::toupper(wcs);
-    
+
     // Check if HPX was requested (since this is not allowed)
     if (uwcs == "HPX") {
        throw GException::wcs_invalid(G_SET_WCS, uwcs,
                                      "Method not valid for HPX projection.");
     }
-    
+
     // ... otherwise get projection from registry
     else {
         // Allocate WCS registry
         GWcsRegistry registry;
-        
+
         // Allocate projection from registry
         GWcs* projection = registry.alloc(uwcs);
         m_proj           = projection;
@@ -2110,7 +2128,7 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
         // Setup WCS
         projection->set(coords, crval1, crval2, crpix1, crpix2,
                         cdelt1, cdelt2);
-    
+
     } // endelse: got projection from registry
 
     // Return
@@ -2361,10 +2379,10 @@ void GSkymap::alloc_wcs(const GFitsImage& image)
 
     // Allocate WCS registry
     GWcsRegistry registry;
-    
+
     // Allocate projection from registry
     m_proj = registry.alloc(xproj);
-    
+
     // Signal if projection type is not known
     if (m_proj == NULL) {
         std::string message = "Projection code not known. "
@@ -2636,7 +2654,7 @@ double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                                            std::tan(0.5*(s-a12)) *
                                            std::tan(0.5*(s-a23)) *
                                            std::tan(0.5*(s-a13))));
-    
+
     // Return solid angle
     return solidangle;
 }
@@ -2668,8 +2686,8 @@ GSkymap sqrt(const GSkymap& map)
             // Get the content from the bin
             double content = map(j,i);
 
-    		// Check if content is not negative
-    		if (content < 0.0) {
+            // Check if content is not negative
+            if (content < 0.0) {
                 std::string msg = "Negative value envountered."
                                   " Cannot take the sqrt from a negative value";
                 throw GException::invalid_value(G_OP_UNARY_DIV, msg);
