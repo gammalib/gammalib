@@ -670,7 +670,8 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     //const double ref = 13803.5186374;
     //const double ref = 13803.6932774; // after GWcs::solidangle improvement
     //const double ref = 13803.3453994; // after Irf computation improvements
-    const double ref = 13803.3461768; // using skymap flux() method
+    //const double ref = 13803.3461768; // using skymap flux() method
+    const double ref = 13803.5251338; // after correcting contains() method
 
     // Set parameters
     double src_ra  = 201.3651;
@@ -754,7 +755,8 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     //const double ref = 10997.0851335; // After response computation change
     //const double ref = 11212.7161901; // npred_diffuse precision to iter=8
     //const double ref = 11238.6928076; // npred_diffuse precision to iter=9
-    const double ref = 11238.6933328; // using skymap flux() method
+    //const double ref = 11238.6933328; // using skymap flux() method
+    const double ref = 11238.8390288; // after correcting contains() method
 
     // Set parameters
     double src_ra  = 201.3651;
