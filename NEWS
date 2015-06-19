@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-19 June 2015
+20 June 2015
 
 
 1. Introduction
@@ -55,9 +55,9 @@ GModelSpatialDiffuseMap and GModelSpatialDiffuseCube. This assures that the
 simulated photon distribution follows the intensity distribution of the skymap
 as obtained using the sky direction access operator.
 
-Integration of flux() and eflux() is now done using a fixed number of Romberg
-iterations instead of using the integration precision. This will assure that
-the log-likelihood function is smooth.
+The algorithm used to draw random numbers in GModelSpatialDiffuseConst::mc()
+was wrong (sky directions were not distributed isotropically on the sky). This
+has now been fixed (#1480).
 
 
 9. Numerics module
