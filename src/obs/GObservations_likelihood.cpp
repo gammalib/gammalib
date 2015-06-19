@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GObservations_likelihood.cpp - Likelihood function class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -349,6 +349,154 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute Hessian matrix
+ *
+ * @param[in] pars Optimizer parameters.
+ *
+ * @return Hessian matrix.
+ ***************************************************************************/
+GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
+{
+    // Create working copy of parameters
+    GOptimizerPars wrk_pars = pars;
+
+    // Get number of parameters
+    int npars = wrk_pars.size();
+
+    // Allocate Hessian matrix
+    GMatrixSparse hessian(npars, npars);
+
+    // Find out machine precision
+    double eps = 0.1;
+    while (1.0+eps != 1.0) {
+        eps *= 0.5;
+    }
+    double eps2 = 2.0 * std::sqrt(eps);
+
+    // Function value
+    eval(wrk_pars);
+    double f = value();
+
+    // Compute aimsag
+    double aimsag = std::sqrt(eps2)*std::abs(f);
+
+    // Diagonal elements
+    std::vector<double> g2(npars, 0.0);
+    std::vector<double> dir(npars, 0.0);
+    std::vector<double> yy(npars, 0.0);
+
+    // Loop over parameters
+    for (int i = 0; i < npars; ++i) {
+    
+        // Get parameter
+        GOptimizerPar* par = wrk_pars[i];
+
+        // Interrupt if parameter is fixed
+        if (par->is_fixed()) {
+            hessian(i,i) = 0.0;
+            continue;
+        }
+
+        // Setup step size
+        double dmin = 0.0002;
+        double d    = dmin;
+
+        // Loop
+        for (int icyc = 0; icyc < 5; ++icyc) {
+
+            // Initialise
+            double sag = 0.0;
+            double fs1 = 0.0; //right-hand side
+            double fs2 = 0.0; //left-hand side
+
+            // ...
+            for (int multpy = 0; multpy < 5; ++multpy) {
+
+                GOptimizerPar current = *par;
+                par->factor_value(par->factor_value()+d);
+                eval(wrk_pars);
+                fs1  = value();
+                *par = current;
+                par->factor_value(par->factor_value()-d);
+                eval(wrk_pars);
+                fs2  = value();
+                *par = current;
+                sag  = 0.5*(fs1-2.0*f+fs2);
+
+                // Break if sag is okay
+                if (std::abs(sag) > eps2 || sag == 0.0) {
+                    break;
+                }
+
+                // ... otherwise increase step size
+                d *= 10.0;
+                
+            } // endfor
+
+            // Compute parameter derivatives and store step size and
+            // function value
+            g2[i]  = 2.0*sag/(d*d);
+            dir[i] = d;
+            yy[i]  = fs1;
+
+            // Compute a new step size based on the aimed sag
+            if (sag != 0.0) {
+                d = std::sqrt(2.0*aimsag/std::abs(g2[i]));
+            }
+            if (d < dmin) {
+                d = dmin;
+            }
+            else if (par->factor_value()+d > par->factor_max()) {
+                d = dmin;
+            }
+            else if (par->factor_value()-d > par->factor_min()) {
+                d = dmin;
+            }
+
+        } // endfor: cycles
+
+        // Set diagonal element
+        hessian(i,i) = g2[i];
+
+    } // endfor: looped over all parameters
+
+    // Compute off-diagonal elements
+    for (int i = 0; i < npars; ++i) {
+    
+        // Get parameter
+        GOptimizerPar* par1 = wrk_pars[i];
+        par1->factor_value(par1->factor_value()+dir[i]);
+
+        // Loop
+        for (int j = i+1; j < npars; ++j) {
+
+            // Get parameter
+            GOptimizerPar* par2 = wrk_pars[j];
+
+            // Interrupt if parameter is fixed
+            if (par1->is_fixed() || par2->is_fixed()) {
+                hessian(i,j) = 0.0;
+                continue;
+            }
+
+            par2->factor_value(par2->factor_value()+dir[j]);
+            eval(wrk_pars);
+            double fs1 = value();
+            hessian(i,j) = (fs1 + f - yy[i] - yy[j])/(dir[i]*dir[j]);
+            par2->factor_value(par2->factor_value()-dir[j]);
+        }
+        
+        // ...
+        par1->factor_value(par1->factor_value()-dir[i]);
+
+    } // endfor: looped over parameters
+
+    // Return Hessian
+    return hessian;
 }
 
 

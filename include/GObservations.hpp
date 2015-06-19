@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GObservations.hpp - Observation container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -126,9 +126,7 @@ public:
     const GModels&      models(void) const;
     void                optimize(GOptimizer& opt);
     void                errors(GOptimizer& opt);
-    void                errors_hessian(GOptimizer& opt);
-    void                compute_hessian(void);
-    void                compute_errors(GOptimizer& opt);
+    void                errors_hessian(void);
     void                eval(void);
     double              logL(void) const;
     double              npred(void) const;
@@ -153,8 +151,9 @@ public:
         virtual GMatrixSparse* curvature(void);
 
         // Other methods
-        void   set(GObservations* obs);
-        double npred(void) const;
+        void          set(GObservations* obs);
+        double        npred(void) const;
+        GMatrixSparse hessian(const GOptimizerPars& pars);
 
     protected:
         // Protected methods
@@ -182,11 +181,9 @@ protected:
                    const std::string& id) const;
 
     // Protected members
-    std::vector<GObservation*> m_obs;    //!< List of observations
-    GModels                    m_models; //!< List of models
-    GObservations::likelihood  m_fct;    //!< Optimizer function
-    GMatrixSymmetric* m_hessian;  //!< Pointer to hessian matrix
-
+    std::vector<GObservation*> m_obs;      //!< List of observations
+    GModels                    m_models;   //!< List of models
+    GObservations::likelihood  m_fct;      //!< Optimizer function
 };
 
 

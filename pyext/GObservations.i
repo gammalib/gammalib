@@ -65,6 +65,7 @@ public:
     const GModels& models(void);
     void           optimize(GOptimizer& opt);
     void           errors(GOptimizer& opt);
+    void           errors_hessian(void);
     void           eval(void);
     double         logL(void) const;
     double         npred(void) const;
@@ -89,8 +90,9 @@ public:
     virtual GMatrixSparse* curvature(void);
 
     // Other methods
-    void   set(GObservations* obs);
-    double npred(void) const;
+    void          set(GObservations* obs);
+    double        npred(void) const;
+    GMatrixSparse hessian(const GOptimizerPars& pars);
 };
 %nestedworkaround GObservations::likelihood;
 %{
