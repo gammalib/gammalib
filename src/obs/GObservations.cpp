@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GObservations.hpp"
 #include "GObservationRegistry.hpp"
+#include "GMatrixSymmetric.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                        "GObservations::at(int&)"
@@ -741,6 +742,251 @@ void GObservations::errors(GOptimizer& opt)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Computes parameter errors using hessian matrix and optimizer
+ *
+ * @param[in] opt Optimizer.
+ *
+ * Calculates the errors of the free parameters of the models by computing
+ * the hessian matrix of the model and using the optimizer that has been
+ * provided by the @p opt argument.
+ ***************************************************************************/
+void GObservations::errors_hessian(GOptimizer& opt)
+{
+    // Compute hessian matrix
+    compute_hessian();
+
+    // Compute model parameter errors
+    compute_errors(opt);
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Compute hessian matrix
+ *
+ ***************************************************************************/
+void GObservations::compute_hessian(void)
+{
+
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
+    // Clear hessian matrix
+    m_hessian = new GMatrixSymmetric(pars.size(), pars.size());
+
+
+    // Find out machine precision
+    double eps = 0.1;
+    while(1.0+eps != 1.0) eps *= 0.5;
+    double eps2 = 2.0*std::sqrt(eps);
+
+    // Function value
+    eval();
+    double f = logL();
+
+    // Compute aimsag
+    double aimsag = std::sqrt(eps2)*std::abs(f);
+    //double aimsag   = 0.0002;
+    //double aimsag = std::min(std::sqrt(eps2)*std::abs(f), 0.0002);
+
+
+    // Diagonal elements
+    unsigned int npars = pars.size();
+    std::vector<double> g2(npars, 0.0);
+    std::vector<double> dir(npars, 0.0);
+    std::vector<double> yy(npars, 0.0);
+
+    // Loop over parameters
+    for(unsigned int i=0; i<npars; ++i)
+    {
+        // Get parameter
+        GOptimizerPar* par = pars.at(i);
+
+        // Interrupt if parameter is fixed
+        if (par->is_fixed())
+        {
+            (*m_hessian)(i,i) = 0.0;
+            continue;
+        }
+
+        // Setup step size
+        //double dmin = 8.0*eps2*par->factor_value();
+        double dmin = 0.0002;
+        double d    = dmin;
+
+        for(unsigned int icyc=0; icyc<5; ++icyc)
+        {
+
+            double sag = 0.0;
+            double fs1 = 0.0; //right-hand side
+            double fs2 = 0.0; //left-hand side
+
+            for(unsigned int multpy=0; multpy<5; ++multpy)
+            {
+
+                GOptimizerPar current = *par;
+                par->factor_value(par->factor_value()+d);
+                eval();
+                fs1 = logL();
+                *par = current;
+                par->factor_value(par->factor_value()-d);
+                eval();
+                fs2 = logL();
+                *par = current;
+
+                sag = 0.5*(fs1-2.0*f+fs2);
+                if(std::abs(sag) > eps2 || sag == 0.0) break;
+
+                d *= 10.0;
+            }
+
+            // Compute parameter derivatives and store step size and function value
+            g2[i]  = 2.0*sag/(d*d);
+            dir[i] = d;
+            yy[i]  = fs1;
+
+            // Compute a new step size based on the aimed sag
+            if (sag != 0.0)
+                d = std::sqrt(2.0*aimsag/std::abs(g2[i]));
+
+            if (d < dmin)
+                d = dmin;
+            else if (par->factor_value()+d > par->factor_max())
+                d = dmin;
+            else if (par->factor_value()-d > par->factor_min())
+                d = dmin;
+        }
+
+
+        (*m_hessian)(i,i) = g2[i];
+    }
+
+    // Off-diagonal elements
+    for(unsigned int i=0; i<npars; ++i)
+    {
+        // Get parameter
+        GOptimizerPar* par1 = pars.at(i);
+        par1->factor_value(par1->factor_value()+dir[i]);
+        for(unsigned int j=i+1; j<npars; ++j)
+        {
+            // Get parameter
+            GOptimizerPar* par2 = pars.at(j);
+
+            // Interrupt if parameter is fixed
+            if (par1->is_fixed() || par2->is_fixed())
+            {
+                (*m_hessian)(i,j) = 0.0;
+                continue;
+            }
+
+            par2->factor_value(par2->factor_value()+dir[j]);
+            eval();
+            double fs1 = logL();
+            (*m_hessian)(i,j) = (fs1 + f - yy[i] - yy[j])/(dir[i]*dir[j]);
+            par2->factor_value(par2->factor_value()-dir[j]);
+        }
+        par1->factor_value(par1->factor_value()-dir[i]);
+    }
+
+    return;
+
+}
+
+/***********************************************************************//**
+ * @brief Compute errors
+ *
+ * 
+ ***************************************************************************/
+void GObservations::compute_errors(GOptimizer& opt)
+{
+    if(m_hessian != NULL)
+    {
+        // Extract optimizer parameter container from model container
+        GOptimizerPars pars = m_models.pars();
+
+        // Signal no diagonal element loading
+        bool diag_loaded = false;
+
+        int npars = pars.size();
+        GMatrixSymmetric save_hessian = *m_hessian;
+
+
+        // Loop over error computation (maximum 2 turns)
+        for (int i = 0; i < 2; ++i) {
+
+            // Solve: hessian * X = unit
+            try {
+                GMatrixSymmetric decomposition = m_hessian->cholesky_decompose(true);
+                GVector unit(npars);
+                for (int ipar = 0; ipar < npars; ++ipar) {
+                    unit[ipar] = 1.0;
+                    GVector x  = decomposition.cholesky_solver(unit, true);
+                    if (x[ipar] >= 0.0) {
+                        pars[ipar]->factor_error(sqrt(x[ipar]));
+                    }
+                    else {
+                        pars[ipar]->factor_error(0.0);
+                    }
+                    unit[ipar] = 0.0;
+                }
+            }
+            catch (GException::matrix_zero &e) {
+                std::cout << "GObservations::terminate: "
+                          << "All hessian matrix elements are zero."
+                          << std::endl;
+            break;
+            }
+            catch (GException::matrix_not_pos_definite &e) {
+
+                // Load diagonal if this has not yet been tried
+                if (!diag_loaded) {
+
+                    // Flag errors as inaccurate
+                    std::cout << "Non-Positive definite hessian matrix encountered."
+                              << std::endl;
+                    std::cout << "Load diagonal elements with 1e-10."
+                              << " Fit errors may be inaccurate."
+                              << std::endl;
+
+                    // Try now with diagonal loaded matrix
+                    *m_hessian = save_hessian;
+                    for (int ipar = 0; ipar < npars; ++ipar) {
+                        (*m_hessian)(ipar,ipar) += 1.0e-10;
+                    }
+
+                    // Signal loading
+                    diag_loaded = true;
+
+                    // Try again
+                    continue;
+
+                } // endif: diagonal has not yet been loaded
+
+                // ... otherwise signal an error
+                else {
+                    // Compute model parameter errors with old method
+                    //opt.errors(m_fct, pars);
+
+                    std::cout << "Non-Positive definite hessian matrix encountered,"
+                              << " even after diagonal loading." << std::endl;
+                break;
+                }
+            }
+            catch (std::exception &e) {
+                throw;
+            }
+
+            // If no error occured then break now
+            break;
+
+        } // endfor: looped over error computation
+
+    }
+
+    return;
+}
 
 /***********************************************************************//**
  * @brief Evaluate function

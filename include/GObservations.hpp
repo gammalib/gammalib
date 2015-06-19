@@ -126,6 +126,9 @@ public:
     const GModels&      models(void) const;
     void                optimize(GOptimizer& opt);
     void                errors(GOptimizer& opt);
+    void                errors_hessian(GOptimizer& opt);
+    void                compute_hessian(void);
+    void                compute_errors(GOptimizer& opt);
     void                eval(void);
     double              logL(void) const;
     double              npred(void) const;
@@ -182,6 +185,8 @@ protected:
     std::vector<GObservation*> m_obs;    //!< List of observations
     GModels                    m_models; //!< List of models
     GObservations::likelihood  m_fct;    //!< Optimizer function
+    GMatrixSymmetric* m_hessian;  //!< Pointer to hessian matrix
+
 };
 
 
