@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-12 June 2015
+19 June 2015
 
 
 1. Introduction
@@ -25,7 +25,12 @@ None
 
 4. Application module
 ---------------------
-None
+GammaLib applications now only look for the application parameter file in the
+users pfiles directory if the PFILES environment variable has been not set. This
+assure that the PFILES environment variable will always take precedence over the
+users pfiles directory, and if the paramter file is missing in the directory
+pointed by the PFILES environment variable, it will be copied over from the
+syspfiles directory.
 
 
 5. Base module

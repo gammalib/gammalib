@@ -852,9 +852,12 @@ void GApplicationPars::free_members(void)
  * The parameter file is first searched in the directories that are listed
  * in the PFILES environment variable. Directories may be separated by : or
  * by ; in PFILES.
- * If the PFILES environment variable is not set or no parameter file was
- * found, the parameter file is searched (in the given order) in the users
- * pfiles directory, in ${GAMMALIB}/syspfiles and in ${prefix}/syspfiles,
+ *
+ * If the PFILES environment variable is not set the parameter file is
+ * searched in the users pfiles directory.
+ *
+ * If still no parameter file is found, the parameter file is searched (in
+ * the given order) in ${GAMMALIB}/syspfiles and in ${prefix}/syspfiles,
  * where ${prefix} is the path to the GammaLib installation.
  ***************************************************************************/
 std::string GApplicationPars::inpath(const std::string& filename) const
@@ -862,7 +865,8 @@ std::string GApplicationPars::inpath(const std::string& filename) const
     // Allocate result path
     std::string path;
 
-    // Search for parameter file in PFILES directories
+    // Search for parameter file in PFILES directories if the PFILES
+    // environment variable has been set
     char* ptr = std::getenv("PFILES");
     if (ptr != NULL) {
 
@@ -884,11 +888,11 @@ std::string GApplicationPars::inpath(const std::string& filename) const
 
         } // endfor: searched all directories given in PFILES
 
-    } // endif: PFILES directory has been found
+    } // endif: PFILES environment variable has been set
 
-    // If we have no valid path so far then search in users pfiles
-    // directory
-    if (path.size() == 0) {
+    // ... otherwise, if no PFILES environment variable has been set
+    // then search in users pfiles directory
+    else {
         uid_t uid         = geteuid();
         struct passwd* pw = getpwuid(uid);
         if (pw != NULL) {
@@ -896,8 +900,8 @@ std::string GApplicationPars::inpath(const std::string& filename) const
             if (access(fname.c_str(), R_OK) == 0) {
                 path = fname;
             }
-        }
-    }
+        }    
+    } // endif: searched in users pfiles directory
 
     // If we have no valid path so far then search file within GAMMALIB
     // repository (${GAMMALIB}/syspfiles)
