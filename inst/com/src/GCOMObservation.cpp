@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -157,7 +157,7 @@ GCOMObservation::~GCOMObservation(void)
  *
  * Assign COMPTEL observation to this object.
  ***************************************************************************/
-GCOMObservation& GCOMObservation::operator= (const GCOMObservation& obs)
+GCOMObservation& GCOMObservation::operator=(const GCOMObservation& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
@@ -366,7 +366,7 @@ void GCOMObservation::read(const GXmlElement& xml)
     load(drename, drbname, drgname, drxname);
 
     // Load IAQ
-    response(iaqname, GCaldb("cgro", "com"));
+    response(iaqname, GCaldb("cgro", "comptel"));
 
     // Return
     return;

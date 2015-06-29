@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,8 +40,7 @@
 /* __ Constants __________________________________________________________ */
 const std::string datadir       = PACKAGE_SOURCE"/inst/com/test/data";
 const std::string com_caldb     = PACKAGE_SOURCE"/inst/com/caldb";
-//const std::string com_iaq       = "u47569_iaq.fits";          // 1-3 MeV
-const std::string com_iaq       = "ENERG(1.0-3.0)MeV";          // 1-3 MeV
+const std::string com_iaq       = "ENERG(1.0-3.0)MeV";        // 1-3 MeV
 const std::string com_dre       = datadir+"/m50439_dre.fits"; // 1-3 MeV
 const std::string com_drb       = datadir+"/m34997_drg.fits";
 const std::string com_drg       = datadir+"/m34997_drg.fits";
@@ -232,7 +231,7 @@ void TestGCOMResponse::test_response(void)
     test_try("Test response loading");
     try {
         // Construct response from datasets
-        GCOMResponse rsp(com_iaq, GCaldb("cgro", "com"));
+        GCOMResponse rsp(com_iaq, GCaldb("cgro", "comptel"));
 
         // If we arrived here, signal success
         test_try_success();
@@ -512,7 +511,7 @@ void TestGCOMOptimize::test_binned_optimizer(void)
     test_try("Load binned COMPTEL observation");
     try {
         run.load(com_dre, com_drb, com_drg, com_drx);
-        run.response(com_iaq, GCaldb("cgro", "com"));
+        run.response(com_iaq, GCaldb("cgro", "comptel"));
         obs.append(run);
         test_try_success();
     }
