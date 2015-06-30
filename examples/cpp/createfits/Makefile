@@ -1,8 +1,7 @@
-CXX=g++
-CFLAGS=-I${GAMMALIB}/include/gammalib
-LDFLAGS=-L${GAMMALIB}/lib -lgamma
-DEPS=
+PROGRAM=createfits
 OBJ=createfits.cpp
+CFLAGS=`pkg-config --cflags gammalib`
+LDFLAGS=`pkg-config --libs gammalib`
 
-createfits: $(OBJ)
+$(PROGRAM): $(OBJ)
 	$(CXX) -o $@ $^ $(CFLAGS) $(LDFLAGS)
