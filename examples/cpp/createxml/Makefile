@@ -1,8 +1,7 @@
-CXX=g++
-CFLAGS=-I${GAMMALIB}/include/gammalib
-LDFLAGS=-L${GAMMALIB}/lib -lgamma
-DEPS=
+PROGRAM=createxml
 OBJ=createxml.cpp
+CFLAGS=`pkg-config --cflags gammalib`
+LDFLAGS=`pkg-config --libs gammalib`
 
-createxml: $(OBJ)
+$(PROGRAM): $(OBJ)
 	$(CXX) -o $@ $^ $(CFLAGS) $(LDFLAGS)
