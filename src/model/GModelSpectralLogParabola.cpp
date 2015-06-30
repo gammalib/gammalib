@@ -472,6 +472,9 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
         // Calculate integral between emin and emax
         eflux = integral.romberg(emin.MeV(), emax.MeV());
 
+    	// Convert from MeV/cm2/s to erg/cm2/s
+    	eflux *= gammalib::MeV2erg;
+
     } // endif: integration range was valid
 
     // Return flux
