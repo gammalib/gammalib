@@ -120,12 +120,8 @@ public:
             par.filename(val);
         }
         else {
-            std::string msg = "Attempt to set \""+par.type()+
-                              "\" parameter \""+name+"\" with string "
-                              "value.";
-            throw GException::invalid_argument("__setitem__(std::string, int)",
-                                               msg);
-        }
+            par.value(val);
+        } 
         return;
     }
     GApplication copy() {
