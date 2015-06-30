@@ -88,7 +88,12 @@ public:
         return;
     }
     void __setitem__(const std::string& name, const int& val) {
-        (*self)[name].integer(val);
+        GApplicationPar& par = (*self)[name];
+        if (par.type() == "r") {
+            par.real(val);
+        } else {
+            par.integer(val);
+        }
         return;
     }
     void __setitem__(const std::string& name, const double& val) {
