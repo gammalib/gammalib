@@ -192,8 +192,8 @@ double GCTAPsfKing::operator()(const double& delta,
     #endif
     #endif
 
-	// Initialise PSF value
-	double psf = 0.0;
+    // Initialise PSF value
+    double psf = 0.0;
 
     // Compile option: set PSF to zero outside delta_max
     #if defined(G_FIX_DELTA_MAX)
@@ -206,11 +206,11 @@ double GCTAPsfKing::operator()(const double& delta,
     // Continue only if normalization is positive
     if (m_par_norm > 0.0) {
 
-		// Compute PSF value
+        // Compute PSF value
         double arg  = delta / m_par_sigma;
         double arg2 = arg * arg;
-		psf = m_par_norm * 
-              std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
+        psf = m_par_norm * 
+        std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
 
         // If we are at large offset angles, add a smooth ramp down to
         // avoid steps in the log-likelihood computation
@@ -671,10 +671,14 @@ double GCTAPsfKing::containment_radius(const double& fraction,
     // Update the parameter cache
     update(logE, theta);
 
-    // Compute radius
+    // Initialize Radius value
     double radius = 0.0 ; // TODO implement calculation
     
-    // Return maximum PSF radius
+    // use analytic calculation
+    double arg  = std::pow( 1 - fraction, 1/(1-m_par_gamma) ) ;
+    radius = m_par_sigma * std::pow( 2.0 * m_par_gamma * ( arg - 1.0 ) , 0.5 ) ;
+    
+    // Return radius containing fraction of events
     return radius;
 }
 
