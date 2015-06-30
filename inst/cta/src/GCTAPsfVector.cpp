@@ -551,3 +551,36 @@ void GCTAPsfVector::update(const double& logE) const
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Return the radius that contains a fraction of the events (radians)
+ *
+ * @param[in] fraction of events (0.0-1.0)
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] etrue Use true energy (true/false). Not used.
+ *
+ * Calculate the radius from the center that contains 'fraction' percent
+ * of the events.  fraction * 100. = Containment % .
+ ***************************************************************************/
+double GCTAPsfVector::containment_radius(const double& fraction, 
+                                         const double& logE, 
+                                         const double& theta, 
+                                         const double& phi,
+                                         const double& zenith,
+                                         const double& azimuth,
+                                         const bool&   etrue) const
+{
+    // Update the parameter cache
+    update(logE);
+
+    // Compute radius
+    double radius = 0.0 ; // TODO implement calculation
+    
+    // Return maximum PSF radius
+    return radius;
+}
