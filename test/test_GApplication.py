@@ -22,11 +22,10 @@ from math import *
 import os
 import sys
 
+
 # ========================================== #
 # Test class for GammaLib application module #
 # ========================================== #
-
-
 class Test(GPythonTestSuite):
     """
     Test class for GammaLib application module.
