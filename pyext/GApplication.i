@@ -101,7 +101,7 @@ public:
         else {
             std::string msg = "Attempt to set \""+par.type()+
                               "\" parameter \""+name+"\" with integer "
-                              "value.";
+                              "value \""+gammalib::str(val)+"\".";
             throw GException::invalid_argument("__setitem__(std::string, int)",
                                                msg);
         }
@@ -119,8 +119,31 @@ public:
         else if (par.type().substr(0,1) == "f") {
             par.filename(val);
         }
+        else if ((par.type() == "r") || (par.type() == "i")) {
+            std::string lval = gammalib::tolower(val);
+            if (lval == "indef"     ||
+                lval == "none"      ||
+                lval == "undef"     ||
+                lval == "undefined" ||
+                lval == "inf"       ||
+                lval == "infinity"  ||
+                lval == "nan") {
+                par.value(val);
+            }
+            else {
+                std::string msg = "Attempt to set \""+par.type()+
+                                  "\" parameter \""+name+"\" with string "
+                                  "value \""+val+"\".";
+                throw GException::invalid_argument("__setitem__(std::string, std::string)",
+                                                   msg);
+            }
+        } 
         else {
-            par.value(val);
+            std::string msg = "Attempt to set \""+par.type()+
+                              "\" parameter \""+name+"\" with string "
+                              "value \""+val+"\".";
+            throw GException::invalid_argument("__setitem__(std::string, std::string)",
+                                               msg);
         } 
         return;
     }
