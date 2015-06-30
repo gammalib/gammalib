@@ -74,7 +74,7 @@ public:
     GCTACubePsf*       clone(void) const;
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
-    void               fill(const GObservations& obs);
+    void               fill(const GObservations& obs, GLog* log=0);
     const GSkymap&     map(void) const;
     const GEbounds&    ebounds(void) const;
     const GNodeArray&  deltas(void) const;

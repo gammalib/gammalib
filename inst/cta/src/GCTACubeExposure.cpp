@@ -34,6 +34,7 @@
 #include "GCTAEventList.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
+#include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -298,55 +299,61 @@ GCTACubeExposure* GCTACubeExposure::clone(void) const
  ***************************************************************************/
 void GCTACubeExposure::set(const GCTAObservation& obs)
 {
-    // Clear GTIs, reset livetime and exposure cube pixels
-    m_gti.clear();
-    m_livetime = 0.0;
-    m_cube     = 0.0;
 
-    // Extract region of interest from CTA observation
-    GCTARoi roi = obs.roi();
+    // Only continue if we have an unbinned observation
+    if (obs.eventtype() == "EventList") {
 
-    // Get references on CTA response and pointing direction
-    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
-    const GSkyDir&         pnt = obs.pointing().dir();
+        // Clear GTIs, reset livetime and exposure cube pixels
+        m_gti.clear();
+        m_livetime = 0.0;
+        m_cube     = 0.0;
 
-    // Continue only if response is valid
-    if (rsp != NULL) {
+        // Extract region of interest from CTA observation
+        GCTARoi roi = obs.roi();
 
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // Get references on CTA response and pointing direction
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
+        const GSkyDir&         pnt = obs.pointing().dir();
 
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-            
-            // Continue only if pixel is within RoI
-            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+        // Continue only if response is valid
+        if (rsp != NULL) {
 
-                // Compute theta angle with respect to pointing direction
-                // in radians
-                double theta = pnt.dist(dir);
+            // Loop over all pixels in sky map
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+                // Get pixel sky direction
+                GSkyDir dir = m_cube.inx2dir(pixel);
+
+                // Continue only if pixel is within RoI
+                if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+
+                    // Compute theta angle with respect to pointing direction
+                    // in radians
+                    double theta = pnt.dist(dir);
+
+                    // Loop over all exposure cube energy bins
+                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+
+                        // Get logE/TeV
+                        double logE = m_ebounds.elogmean(iebin).log10TeV();
+
+                        // Set exposure cube (effective area * lifetime)
+                        m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                               obs.livetime();
+
+                    } // endfor: looped over energy bins
+
+                } // endif: pixel was within RoI
     
-                // Loop over all exposure cube energy bins
-                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
-
-                    // Get logE/TeV
-                    double logE = m_ebounds.elogmean(iebin).log10TeV();
-
-                    // Set exposure cube (effective area * lifetime)
-                    m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                           obs.livetime();
-
-                } // endfor: looped over energy bins
-
-            } // endif: pixel was within RoI
-
-        } // endfor: looped over all pixels
-
-        // Append GTIs and increment livetime
-        m_gti.extend(obs.gti());
-        m_livetime += obs.livetime();
+            } // endfor: looped over all pixels
     
-    } // endif: response was valid
+            // Append GTIs and increment livetime
+            m_gti.extend(obs.gti());
+            m_livetime += obs.livetime();
+
+        } // endif: response was valid
+
+    } // endif: observation was unbinned
 
     // Return
     return;
@@ -365,7 +372,7 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
  * an observation container. The cube pixel values are computed as the sum
  * over the products of the effective area and the livetime.
  ***************************************************************************/
-void GCTACubeExposure::fill(const GObservations& obs)
+void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
 {
     // Clear GTIs, reset livetime and exposure cube pixels
     m_gti.clear();
@@ -378,6 +385,17 @@ void GCTACubeExposure::fill(const GObservations& obs)
         // Get observation and continue only if it is a CTA observation
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
         if (cta != NULL) {
+
+            // Skip observation if we don't have an unbinned observation
+            if (cta->eventtype() != "EventList") {
+
+                // Log that we skip the this observation
+                if (log != NULL) {
+                    *log << "Warning: Skipping binned observation ";
+                    *log << "\"" << cta->name() << "\"" <<std::endl;
+                }
+                continue;
+            }
 
             // Extract region of interest from CTA observation
             GCTARoi roi = cta->roi();

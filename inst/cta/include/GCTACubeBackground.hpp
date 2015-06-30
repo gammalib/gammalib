@@ -65,7 +65,7 @@ public:
     void                clear(void);
     GCTACubeBackground* clone(void) const;
     std::string         classname(void) const;
-    void                fill(const GObservations& obs);
+    void                fill(const GObservations& obs, GLog* log = 0);
     double              integral(const double& logE) const;
     void                read(const GFits& fits);
     void                write(GFits& file) const;

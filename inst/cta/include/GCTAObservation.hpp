@@ -129,6 +129,7 @@ public:
     const double&       hi_user_thres(void) const;
     void                n_tels(const int& tels);
     const int&          n_tels(void) const;
+    const std::string&  eventtype(void) const;
 
 protected:
     // Protected methods
@@ -459,4 +460,15 @@ const int& GCTAObservation::n_tels(void) const
     return m_n_tels;
 }
 
+
+/***********************************************************************//**
+ * @brief Return type of events
+ *
+ * @return Type of events.
+ ***************************************************************************/
+inline
+const std::string& GCTAObservation::eventtype(void) const
+{
+    return m_eventtype;
+}
 #endif /* GCTAOBSERVATION_HPP */

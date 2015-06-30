@@ -40,6 +40,7 @@
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTACubeBackground.hpp"
+#include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                             "GCTACubeBackground::read(GFits&)"
@@ -271,7 +272,7 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
  * for all CTA observations in an observation container. The cube pixel
  * values are computed as the sum over the background rates.
  ***************************************************************************/
-void GCTACubeBackground::fill(const GObservations& obs)
+void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 {
     // Clear background cube
     m_cube = 0.0;
@@ -289,6 +290,17 @@ void GCTACubeBackground::fill(const GObservations& obs)
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
 
         if (cta != NULL) {
+
+            // Skip observation if we don't have an unbinned observation
+            if (cta->eventtype() != "EventList") {
+
+                // Log that we skip the this observation
+                if (log != NULL) {
+                    *log << "Warning: Skipping binned observation ";
+                    *log << "\"" << cta->name() << "\"" <<std::endl;
+                }
+                continue;
+            }
 
             // Extract region of interest from CTA observation
             GCTARoi roi = cta->roi();
