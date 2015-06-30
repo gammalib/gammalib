@@ -88,7 +88,23 @@ public:
         return;
     }
     void __setitem__(const std::string& name, const int& val) {
-        (*self)[name].integer(val);
+        GApplicationPar& par = (*self)[name];
+        if (par.type() == "r") {
+            par.real(val);
+        } 
+        else if (par.type() == "i") {
+            par.integer(val);
+        }
+        else if (par.type() == "b") {
+            par.boolean(val);
+        }
+        else {
+            std::string msg = "Attempt to set \""+par.type()+
+                              "\" parameter \""+name+"\" with integer "
+                              "value.";
+            throw GException::invalid_argument("__setitem__(std::string, int)",
+                                               msg);
+        }
         return;
     }
     void __setitem__(const std::string& name, const double& val) {
@@ -96,7 +112,20 @@ public:
         return;
     }
     void __setitem__(const std::string& name, const std::string& val) {
-        (*self)[name].value(val);
+        GApplicationPar& par = (*self)[name];
+        if (par.type() == "s") {
+            par.string(val);
+        } 
+        else if (par.type().substr(0,1) == "f") {
+            par.filename(val);
+        }
+        else {
+            std::string msg = "Attempt to set \""+par.type()+
+                              "\" parameter \""+name+"\" with string "
+                              "value.";
+            throw GException::invalid_argument("__setitem__(std::string, int)",
+                                               msg);
+        }
         return;
     }
     GApplication copy() {
