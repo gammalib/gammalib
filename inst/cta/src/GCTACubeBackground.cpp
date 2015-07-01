@@ -40,6 +40,7 @@
 #include "GCTARoi.hpp"
 #include "GCTAInstDir.hpp"
 #include "GCTACubeBackground.hpp"
+#include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                             "GCTACubeBackground::read(GFits&)"
@@ -263,6 +264,7 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
  * @brief Fill background cube from observation container
  *
  * @param[in] obs Observation container.
+ * @param[in] log Pointer to logger (optional).
  *
  * @exception GException::invalid_value
  *            No event list found in CTA observations.
@@ -271,7 +273,7 @@ GCTACubeBackground* GCTACubeBackground::clone(void) const
  * for all CTA observations in an observation container. The cube pixel
  * values are computed as the sum over the background rates.
  ***************************************************************************/
-void GCTACubeBackground::fill(const GObservations& obs)
+void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 {
     // Clear background cube
     m_cube = 0.0;
@@ -288,49 +290,63 @@ void GCTACubeBackground::fill(const GObservations& obs)
         // Get observation and continue only if it is a CTA observation
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
 
-        if (cta != NULL) {
+        // Skip observation if it's not CTA
+        if (cta == NULL) {
+            if (log != NULL) {
+                *log << "Warning: Skipping "+obs[i]->instrument()+" observation ";
+                *log << "\"" << obs[i]->name() << "\"" <<std::endl;
+            }
+            continue;
+        }
 
-            // Extract region of interest from CTA observation
-            GCTARoi roi = cta->roi();
+        // Skip observation if we don't have an unbinned observation
+        if (cta->eventtype() != "EventList") {
+            if (log != NULL) {
+                *log << "Warning: Skipping binned observation ";
+                *log << "\"" << cta->name() << "\"" <<std::endl;
+            }
+            continue;
+        }
 
-            // Set GTI of actual observations as the GTI of the event cube
-            eventcube.gti(cta->gti());
+        // Extract region of interest from CTA observation
+        GCTARoi roi = cta->roi();
 
-            // Get observation livetime
-            double livetime = cta->livetime();
+        // Set GTI of actual observations as the GTI of the event cube
+        eventcube.gti(cta->gti());
 
-            // Loop over all bins in background cube
-            for (int i = 0; i < eventcube.size(); ++i) {
+        // Get observation livetime
+        double livetime = cta->livetime();
 
-                // Get event bin
-                GCTAEventBin* bin = eventcube[i];
+        // Loop over all bins in background cube
+        for (int i = 0; i < eventcube.size(); ++i) {
 
-                // Continue only if binned in contained in ROI
-                if (roi.contains(*bin)) {
+            // Get event bin
+            GCTAEventBin* bin = eventcube[i];
 
-                    // Compute model value for event bin. The model value is
-                    // given in counts/MeV/s/sr.
-                    double model = obs.models().eval(*bin, *cta);
+            // Continue only if binned in contained in ROI
+            if (roi.contains(*bin)) {
 
-                    // Multiply by livetime to get the correct weighting for
-                    // each observation. We divide by the total livetime later
-                    // to get the background model in units of counts/MeV/s/sr.
-                    model *= livetime;
+                // Compute model value for event bin. The model value is
+                // given in counts/MeV/s/sr.
+                double model = obs.models().eval(*bin, *cta);
 
-                    // Add existing number of counts
-                    model += bin->counts();
+                // Multiply by livetime to get the correct weighting for
+                // each observation. We divide by the total livetime later
+                // to get the background model in units of counts/MeV/s/sr.
+                model *= livetime;
 
-                    // Store cumulated value (units: counts/MeV/sr)
-                    bin->counts(model);
+                // Add existing number of counts
+                model += bin->counts();
 
-                } // endif: bin was contained in RoI
+                // Store cumulated value (units: counts/MeV/sr)
+                bin->counts(model);
 
-            } // endfor: looped over all bins
+            } // endif: bin was contained in RoI
 
-            // Accumulate livetime
-            total_livetime += livetime;
+        } // endfor: looped over all bins
 
-        } // endif: cta observation was vaild
+        // Accumulate livetime
+        total_livetime += livetime;
 
     } // endfor: looped over all observations
 

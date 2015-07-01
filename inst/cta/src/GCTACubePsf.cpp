@@ -34,6 +34,7 @@
 #include "GCTAEventList.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
+#include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                            "GCTACubePsf::set(GCTAObservation&)"
@@ -357,64 +358,69 @@ void GCTACubePsf::set(const GCTAObservation& obs)
     // Clear PSF cube
     clear_cube();
 
-    // Extract region of interest from CTA observation
-    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
-    if (list == NULL) {
-        std::string msg = "CTA Observation does not contain an event "
-                          "list. Event list information is needed to "
-                          "retrieve the Region of Interest for each "
-                          "CTA observation.";
-        throw GException::invalid_value(G_SET, msg);
-    }
-    const GCTARoi& roi = list->roi();
+    // Only continue if we have an unbinned observation
+    if (obs.eventtype() == "EventList") {
 
-    // Get references on CTA response and pointing direction
-    const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
-    const GSkyDir&         pnt = obs.pointing().dir();
+        // Extract region of interest from CTA observation
+        const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
+        if (list == NULL) {
+            std::string msg = "CTA Observation does not contain an event "
+                              "list. Event list information is needed to "
+                              "retrieve the Region of Interest for each "
+                              "CTA observation.";
+            throw GException::invalid_value(G_SET, msg);
+        }
+        const GCTARoi& roi = list->roi();
 
-    // Continue only if response is valid
-    if (rsp != NULL) {
+        // Get references on CTA response and pointing direction
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
+        const GSkyDir&         pnt = obs.pointing().dir();
 
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // Continue only if response is valid
+        if (rsp != NULL) {
 
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-            
-            // Continue only if pixel is within RoI
-            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
-
-                // Compute theta angle with respect to pointing direction
-                // in radians
-                double  theta = pnt.dist(dir);
+            // Loop over all pixels in sky map
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
     
-                // Loop over all exposure cube energy bins
-                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
-
-                    // Get logE/TeV
-                    double logE = m_ebounds.elogmean(iebin).log10TeV();
-
-                    // Loop over delta values
-                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
-
-                        // Compute delta in radians
-                        double delta = m_deltas[idelta] * gammalib::deg2rad;
-
-                        // Set map index
-                        int imap = offset(idelta, iebin);
+                // Get pixel sky direction
+                GSkyDir dir = m_cube.inx2dir(pixel);
                 
-                        // Set PSF cube
-                        m_cube(pixel, imap) = rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE);
+                // Continue only if pixel is within RoI
+                if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
 
-                    } // endfor: looped over delta bins
+                    // Compute theta angle with respect to pointing direction
+                    // in radians
+                    double  theta = pnt.dist(dir);
 
-                } // endfor: looped over energy bins
+                    // Loop over all exposure cube energy bins
+                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-            } // endif: pixel was within RoI
+                        // Get logE/TeV
+                        double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-        } // endfor: looped over all pixels
+                        // Loop over delta values
+                        for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-    } // endif: response was valid
+                            // Compute delta in radians
+                            double delta = m_deltas[idelta] * gammalib::deg2rad;
+
+                            // Set map index
+                            int imap = offset(idelta, iebin);
+
+                            // Set PSF cube
+                            m_cube(pixel, imap) = rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE);
+
+                        } // endfor: looped over delta bins
+
+                    } // endfor: looped over energy bins
+
+                } // endif: pixel was within RoI
+
+            } // endfor: looped over all pixels
+
+        } // endif: response was valid
+
+    } // endif: observation was unbinned
 
     // Compile option: guarantee smooth Psf
     #if defined(G_SMOOTH_PSF)
@@ -431,7 +437,7 @@ void GCTACubePsf::set(const GCTAObservation& obs)
  *
  * @param[in] obs Observation container.
  ***************************************************************************/
-void GCTACubePsf::fill(const GObservations& obs)
+void GCTACubePsf::fill(const GObservations& obs, GLog* log)
 {
     // Clear PSF cube
     clear_cube();
@@ -444,68 +450,87 @@ void GCTACubePsf::fill(const GObservations& obs)
 
         // Get observation and continue only if it is a CTA observation
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
-        if (cta != NULL) {
 
-            // Extract region of interest from CTA observation
-            GCTARoi roi = cta->roi();
+        // Skip observation if it's not CTA
+        if (cta == NULL) {
+            if (log != NULL) {
+                *log << "Warning: Skipping "+obs[i]->instrument()+" observation ";
+                *log << "\"" << obs[i]->name() << "\"" <<std::endl;
+            }
+            continue;
+        }
 
-            // Get references on CTA response and pointing direction
-            const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-            const GSkyDir&         pnt = cta->pointing().dir();
+        // Skip observation if we don't have an unbinned observation
+        if (cta->eventtype() != "EventList") {
+            if (log != NULL) {
+                *log << "Warning: Skipping binned observation ";
+                *log << "\"" << cta->name() << "\"" <<std::endl;
+            }
+            continue;
+        }
 
-            // Continue only if response is valid
-            if (rsp != NULL) {
+        // Extract region of interest from CTA observation
+        GCTARoi roi = cta->roi();
 
-                // Loop over all pixels in sky map
-                for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // Get references on CTA response and pointing direction
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+        const GSkyDir&         pnt = cta->pointing().dir();
 
-                    // Get pixel sky direction
-                    GSkyDir dir = m_cube.inx2dir(pixel);
+        // Skip observation if we don't have an unbinned observation
+        if (rsp == NULL) {
+            if (log != NULL) {
+                *log << "Warning: Observation \"" << cta->name();
+                *log << "\" contains no IRF response." <<std::endl;
+            }
+            continue;
+        }
+
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
                     
-                    // Continue only if pixel is within RoI
-                    if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Continue only if pixel is within RoI
+            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
 
-                        // Compute theta angle with respect to pointing
-                        // direction in radians
-                        double theta = pnt.dist(dir);
-    
-                        // Loop over all energy bins
-                        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+                // Compute theta angle with respect to pointing
+                // direction in radians
+                double theta = pnt.dist(dir);
 
-                            // Get logE/TeV
-                            double logE = m_ebounds.elogmean(iebin).log10TeV();
+                // Loop over all energy bins
+                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
 
-                            // Compute exposure weight
-                            double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                            cta->livetime();
+                    // Get logE/TeV
+                    double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                            // Accumulate weights
-                            exposure(pixel, iebin) += weight;
+                    // Compute exposure weight
+                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                    cta->livetime();
 
-                            // Loop over delta values
-                            for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                    // Accumulate weights
+                    exposure(pixel, iebin) += weight;
 
-                                // Compute delta in radians
-                                double delta = m_deltas[idelta] * gammalib::deg2rad;
+                    // Loop over delta values
+                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-                                // Set map index
-                                int imap = offset(idelta, iebin);
+                        // Compute delta in radians
+                        double delta = m_deltas[idelta] * gammalib::deg2rad;
 
-                                // Add on PSF cube
-                                m_cube(pixel, imap) +=
-                                    rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+                        // Set map index
+                        int imap = offset(idelta, iebin);
 
-                            } // endfor: looped over delta bins
+                        // Add on PSF cube
+                        m_cube(pixel, imap) +=
+                            rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
 
-                        } // endfor: looped over energy bins
+                    } // endfor: looped over delta bins
 
-                    } // endif: pixel was within RoI
+                } // endfor: looped over energy bins
 
-                } // endfor: looped over all pixels
+            } // endif: pixel was within RoI
 
-            } // endif: response was valid
-
-        } // endif: observation was a CTA observation
+        } // endfor: looped over all pixels
 
     } // endfor: looped over observations
 

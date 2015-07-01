@@ -124,6 +124,7 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    const std::string&  eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;
@@ -409,6 +410,18 @@ inline
 const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
+}
+
+
+/***********************************************************************//**
+ * @brief Return type of events
+ *
+ * @return Type of events.
+ ***************************************************************************/
+inline
+const std::string& GCTAObservation::eventtype(void) const
+{
+    return m_eventtype;
 }
 
 
