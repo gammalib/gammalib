@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAPsf.hpp - CTA point spread function base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,13 +81,13 @@ public:
                                   const double& zenith = 0.0,
                                   const double& azimuth = 0.0,
                                   const bool&   etrue = true) const = 0;
-    virtual double      containment_radius( const double& fraction,
-                                            const double& logE,
-                                            const double& theta = 0.0,
-                                            const double& phi = 0.0,
-                                            const double& zenith = 0.0,
-                                            const double& azimuth = 0.0,
-                                            const bool  & etrue = true) const = 0;
+    virtual double      containment_radius(const double& fraction,
+                                           const double& logE,
+                                           const double& theta = 0.0,
+                                           const double& phi = 0.0,
+                                           const double& zenith = 0.0,
+                                           const double& azimuth = 0.0,
+                                           const bool  & etrue = true) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
