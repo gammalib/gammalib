@@ -723,7 +723,7 @@ void GOptimizerPars::copy_members(const GOptimizerPars& pars)
 
     // Clone or copy parameter pointers, depending on whether they have
     // been allocated or not in the instance from which we copy
-    for (int i = 0; i < size(); ++i) {
+    for (int i = 0; i < pars.size(); ++i) {
         GOptimizerPar* par = (pars.m_alloc[i]) ? pars.m_pars[i]->clone()
                                                : pars.m_pars[i];
         m_pars.push_back(par);
