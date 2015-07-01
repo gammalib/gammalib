@@ -299,8 +299,8 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Skip observation if we don't have an unbinned observation
-        if (cta->eventtype() != "EventList") {
+        // Skip observation if we have a binned observation
+        if (obs->eventtype() == "CountsCube") {
             if (log != NULL) {
                 *log << "Warning: Skipping binned observation ";
                 *log << "\"" << cta->name() << "\"" <<std::endl;
