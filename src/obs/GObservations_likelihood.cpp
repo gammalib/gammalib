@@ -46,10 +46,12 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+//#define G_USE_HESSIAN
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_EVAL_TIMING     //!< Perform optimizer timing (0=no, 1=yes)
 //#define G_EVAL_DEBUG      //!< Perform optimizer debugging (0=no, 1=yes)
+//#define G_HESSIAN         //!< Debug Hessian computation
 
 /* __ Prototypes _________________________________________________________ */
 
@@ -325,6 +327,11 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
         }
     }
 
+    // Optionally use Hessian instead of curvature matrix
+    #if defined(G_USE_HESSIAN)
+    *m_curvature = hessian(pars);
+    #endif
+
     // Optionally dump gradient and curvature matrix
     #if defined(G_EVAL_DEBUG)
     std::cout << *m_gradient << std::endl;
@@ -361,6 +368,22 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
  ***************************************************************************/
 GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
 {
+    // Set strategy constants (low)
+    //const int    ncyles             = 3;
+    //const double step_tolerance     = 0.5;
+    //const double gradient_tolerance = 0.1;
+
+    // Set strategy constants (medium)
+    const int    ncyles             = 5;
+    const double step_tolerance     = 0.3;
+    const double gradient_tolerance = 0.05;
+
+    // Set strategy constants (high)
+    //const int    ncyles             = 7;
+    //const double step_tolerance     = 0.1;
+    //const double gradient_tolerance = 0.02;
+
+
     // Create working copy of parameters
     GOptimizerPars wrk_pars = pars;
 
@@ -382,10 +405,11 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
     double f = value();
 
     // Compute aimsag
-    double aimsag = std::sqrt(eps2)*std::abs(f);
+    double aimsag = std::sqrt(eps2) * std::abs(f);
 
     // Diagonal elements
     std::vector<double> g2(npars, 0.0);
+    std::vector<double> grd(npars, 0.0);
     std::vector<double> dir(npars, 0.0);
     std::vector<double> yy(npars, 0.0);
 
@@ -402,30 +426,41 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
         }
 
         // Setup step size
-        double dmin = 0.0002;
-        double d    = dmin;
+        double xtf  = par->factor_value();
+        double dmin = 8.0 * eps2 * std::abs(xtf);
+        double d    = 0.000001;
+        if (d < dmin) {
+            d = dmin;
+        }
 
-        // Loop
-        for (int icyc = 0; icyc < 5; ++icyc) {
+        // Loop over cycles
+        for (int icyc = 0; icyc < ncyles; ++icyc) {
+        //for (int icyc = 0; icyc < 1; ++icyc) {
 
             // Initialise
             double sag = 0.0;
-            double fs1 = 0.0; //right-hand side
-            double fs2 = 0.0; //left-hand side
+            double fs1 = 0.0; // right-hand side
+            double fs2 = 0.0; // left-hand side
 
-            // ...
+            // Compute gradient
             for (int multpy = 0; multpy < 5; ++multpy) {
+            //for (int multpy = 0; multpy < 1; ++multpy) {
 
-                GOptimizerPar current = *par;
-                par->factor_value(par->factor_value()+d);
+                // Compute right-hand side
+                par->factor_value(xtf + d);
                 eval(wrk_pars);
                 fs1  = value();
-                *par = current;
-                par->factor_value(par->factor_value()-d);
+                
+                // Compute left-hand side
+                par->factor_value(xtf - d);
                 eval(wrk_pars);
                 fs2  = value();
-                *par = current;
-                sag  = 0.5*(fs1-2.0*f+fs2);
+                
+                // Recover current value
+                par->factor_value(xtf);
+                
+                // Compute sag
+                sag = 0.5 * (fs1 + fs2 - 2.0*f);
 
                 // Break if sag is okay
                 if (std::abs(sag) > eps2 || sag == 0.0) {
@@ -437,9 +472,14 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
                 
             } // endfor
 
+            // Save old step size and second derivative
+            double dlast  = d;
+            double g2bfor = g2[i];
+
             // Compute parameter derivatives and store step size and
             // function value
-            g2[i]  = 2.0*sag/(d*d);
+            g2[i]  = 2.0 * sag/(d*d);
+            grd[i] = (fs1-fs2)/(2.*d);
             dir[i] = d;
             yy[i]  = fs1;
 
@@ -450,12 +490,24 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
             if (d < dmin) {
                 d = dmin;
             }
+            /*
             else if (par->factor_value()+d > par->factor_max()) {
                 d = dmin;
             }
             else if (par->factor_value()-d > par->factor_min()) {
                 d = dmin;
             }
+            */
+            
+            // Check if converged
+            if (std::abs((d-dlast)/d) < step_tolerance) {
+                break;
+            }
+            if (std::abs((g2[i]-g2bfor)/g2[i]) < gradient_tolerance) {
+                break;
+            }
+            d = std::min(d, 10.*dlast);
+            d = std::max(d, 0.1*dlast);
 
         } // endfor: cycles
 
@@ -464,36 +516,67 @@ GMatrixSparse GObservations::likelihood::hessian(const GOptimizerPars& pars)
 
     } // endfor: looped over all parameters
 
+    // Debug dump
+    #if defined(G_HESSIAN)
+    std::cout << "GObservations::likelihood::hessian: ";
+    std::cout << "deltas and gradients:" << std::endl;
+    for (int i = 0; i < npars; ++i) {
+        std::cout << dir[i] << " ";
+        std::cout << grd[i] << std::endl;
+    }
+    #endif
+
     // Compute off-diagonal elements
     for (int i = 0; i < npars; ++i) {
     
-        // Get parameter
+        // Get parameter 1
         GOptimizerPar* par1 = wrk_pars[i];
-        par1->factor_value(par1->factor_value()+dir[i]);
+        double         x1   = par1->factor_value();
+        
+        // Increment parameter 1
+        par1->factor_value(x1 + dir[i]);
 
-        // Loop
+        // Loop over columns
         for (int j = i+1; j < npars; ++j) {
 
-            // Get parameter
+            // Get parameter 2
             GOptimizerPar* par2 = wrk_pars[j];
+            double         x2   = par2->factor_value();
 
             // Interrupt if parameter is fixed
             if (par1->is_fixed() || par2->is_fixed()) {
                 hessian(i,j) = 0.0;
+                hessian(j,i) = 0.0;
                 continue;
             }
 
-            par2->factor_value(par2->factor_value()+dir[j]);
+            // Increment parameter 2
+            par2->factor_value(x2 + dir[j]);
+
+            // Evaluate Hessian element
             eval(wrk_pars);
-            double fs1 = value();
-            hessian(i,j) = (fs1 + f - yy[i] - yy[j])/(dir[i]*dir[j]);
-            par2->factor_value(par2->factor_value()-dir[j]);
-        }
+            double fs1     = value();
+            double element = (fs1 + f - yy[i] - yy[j])/(dir[i]*dir[j]);
+            
+            // Store Hessian element
+            hessian(i,j) = element;
+            hessian(j,i) = element;
+
+            // Restore parameter 2
+            par2->factor_value(x2);
+            
+        } // endfor: looped over columns
         
-        // ...
-        par1->factor_value(par1->factor_value()-dir[i]);
+        // Restore parameter 1
+        par1->factor_value(x1);
 
     } // endfor: looped over parameters
+
+    // Debug dump
+    #if defined(G_HESSIAN)
+    std::cout << "GObservations::likelihood::hessian: " << std::endl;
+    std::cout << hessian << std::endl;
+    #endif
 
     // Return Hessian
     return hessian;
