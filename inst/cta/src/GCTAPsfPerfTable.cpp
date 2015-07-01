@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAPsfPerfTable.cpp - CTA performance table PSF class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                         "GCTAPsfPerfTable::load(std::string&)"
+#define G_CONTAINMENT_RADIUS  "GCTAPsfPerfTable::containment_radius(double&,"\
+                       " double&, double&, double&, double&, double&, bool&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -377,6 +379,72 @@ double GCTAPsfPerfTable::delta_max(const double& logE,
     double radius = 5.0 * m_par_sigma;
     
     // Return maximum PSF radius
+    return radius;
+}
+
+
+/***********************************************************************//**
+ * @brief Return the radius that contains a fraction of the events (radians)
+ *
+ * @param[in] fraction of events (0.0-1.0)
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] etrue Use true energy (true/false). Not used.
+ * @return Containment radius (radians).
+ *
+ * @exception GException::invalid_argument
+ *            Invalid fraction specified.
+ *
+ * Evaluates:
+ * 
+ * \f[
+ *
+ * radius = \sqrt{ \frac{\ln{\left( \frac{ fraction * m\_par\_width}
+ *          {\pi*m\_par\_scale} +1\right)}}{m\_par\_width} }
+ *
+ * \f]
+ *
+ * which is derived by integrating
+ *
+ * \f[
+ *
+ * fraction = \int_{0}^{2\pi}\int_{0}^{radius}r * 
+ *            e^{ m\_par\_width * r^{2}}dr d\phi
+ *
+ * \f]
+ *
+ * and solving for radius.
+ *
+ * Calculate the radius from the center that contains 'fraction' percent
+ * of the events.  fraction * 100. = Containment % .
+ ***************************************************************************/
+double GCTAPsfPerfTable::containment_radius(const double& fraction, 
+                                            const double& logE, 
+                                            const double& theta, 
+                                            const double& phi,
+                                            const double& zenith,
+                                            const double& azimuth,
+                                            const bool&   etrue) const
+{
+    // Check input argument
+    if (fraction <= 0.0 || fraction >= 1.0) {
+        std::string message = "Containment fraction "+
+                              gammalib::str(fraction)+" must be between " +
+                              "0.0 and 1.0, not inclusive.";
+        throw GException::invalid_argument(G_CONTAINMENT_RADIUS, message);
+    }
+
+    // Update the parameter cache
+    update(logE);
+
+    // Compute radius
+    double arg    = fraction * m_par_width / ( gammalib::pi * m_par_scale);
+    double radius = std::sqrt(std::log(arg + 1.0) / m_par_width);
+    
+    // Return containement radius
     return radius;
 }
 

@@ -75,6 +75,13 @@ public:
                              const double& zenith = 0.0,
                              const double& azimuth = 0.0,
                              const bool&   etrue = true) const;
+    double         containment_radius(const double& fraction,
+                                      const double& logE, 
+                                      const double& theta = 0.0, 
+                                      const double& phi = 0.0,
+                                      const double& zenith = 0.0,
+                                      const double& azimuth = 0.0,
+                                      const bool&   etrue = true) const;
 
     // Other methods
     void read(const GFitsTable& table);

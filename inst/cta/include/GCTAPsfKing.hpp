@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.hpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Michael Mayer                               *
+ *  copyright (C) 2013-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -81,6 +81,14 @@ public:
                            const double& zenith = 0.0,
                            const double& azimuth = 0.0,
                            const bool&   etrue = true) const;
+    double       containment_radius(const double& fraction,
+                                    const double& logE,
+                                    const double& theta = 0.0,
+                                    const double& phi = 0.0,
+                                    const double& zenith = 0.0,
+                                    const double& azimuth = 0.0,
+                                    const bool&   etrue = true) const;
+
     std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Methods

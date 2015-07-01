@@ -40,6 +40,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                      "GCTAPsf2D::read(GFits&)"
 #define G_LOAD                                "GCTAPsf2D::load(std::string&)"
+#define G_CONTAINMENT_RADIUS         "GCTAPsf2D::containment_radius(double&,"\
+                       " double&, double&, double&, double&, double&, bool&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -489,6 +491,110 @@ double GCTAPsf2D::delta_max(const double& logE,
     
     // Return maximum PSF radius
     return radius;
+}
+
+
+/***********************************************************************//**
+ * @brief Return the radius that contains a fraction of the events (radians)
+ *
+ * @param[in] fraction of events (0.0<fraction<1.0)
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] etrue Use true energy (true/false). Not used.
+ * @return Containment radius (radians).
+ *
+ * @exception GException::invalid_argument
+ *            Invalid fraction specified.
+ *
+ * Uses the Newton-Raphson method to find which 'a' solves the equation:
+ *
+ * \f[
+ *
+ * fraction = \pi * m\_norm * \left( 
+ *   \frac{      1 }{m\_width1} e^{m\_width1 * a^2} + 
+ *   \frac{m\_norm2}{m\_width2} e^{m\_width2 * a^2} + 
+ *   \frac{m\_norm3}{m\_width3} e^{m\_width3 * a^2} \right)
+ *
+ * \f]
+ *
+ * Calculate the radius from the center that contains 'fraction' percent
+ * of the events.  fraction * 100. = Containment % .  Fraction must be
+ * 0.0 < fraction < 1.0 .
+ ***************************************************************************/
+double GCTAPsf2D::containment_radius(const double& fraction, 
+                                     const double& logE, 
+                                     const double& theta, 
+                                     const double& phi,
+                                     const double& zenith,
+                                     const double& azimuth,
+                                     const bool&   etrue) const
+{
+    // Check input argument
+    if (fraction <= 0.0 || fraction >= 1.0) {
+        std::string message = "Containment fraction "+
+                              gammalib::str(fraction)+" must be between " +
+                              "0.0 and 1.0, not inclusive.";
+        throw GException::invalid_argument(G_CONTAINMENT_RADIUS, message);
+    }
+    
+    // Update the parameter cache
+    update(logE, theta);
+
+    // Required accuracy
+    const double convergence = 1.0e-6;
+    
+    // Initial radius to start Newton's method with guess fraction * delta_max
+    double a = fraction * delta_max(logE, theta, phi, zenith, azimuth, etrue); 
+    
+    // Maximum number of newton-raphson loops before giving up
+    const int iterlimit = 10000;
+    
+    // Do the newton-raphson loops
+    int iter(0);
+    for (; iter < iterlimit; ++iter) {
+
+        // ...
+        double a2 = a*a;
+
+        // Calculate f(a)
+        double fa(0.0);
+        fa += m_norm  * (std::exp( m_width1 * a2) - 1.0) / m_width1;
+        fa += m_norm2 * (std::exp( m_width2 * a2) - 1.0) / m_width2;
+        fa += m_norm3 * (std::exp( m_width3 * a2) - 1.0) / m_width3;
+        fa *= gammalib::pi;
+        fa -= fraction;
+        
+        // Check if we've met the desired accuracy
+        if (std::abs(fa) < convergence) {
+            break;
+        }
+        
+        // Calculate f'(a)
+        double fp(0.0);
+        fp += m_norm  * std::exp(m_width1 * a2);
+        fp += m_norm2 * std::exp(m_width2 * a2);
+        fp += m_norm3 * std::exp(m_width3 * a2);
+        fp *= gammalib::twopi * a;
+        
+        // Calculate next point via x+1 = x - f(a) / f'(a)
+        a = a - fa / fp;
+    
+    } // endfor: Newton-Raphson loops
+    
+    // Warn the user if we didn't converge
+    if (iter == iterlimit-1) {
+        std::string message = "Unable to converge within " +
+                              gammalib::str(convergence)   + 
+                              " of the root in less than " + 
+                              gammalib::str(iterlimit) + " iterations." ;
+        gammalib::warning(G_CONTAINMENT_RADIUS, message);
+    }
+    
+    // Return containment radius
+    return a;
 }
 
 

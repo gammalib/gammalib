@@ -39,6 +39,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                    "GCTAPsfKing::read(GFits&)"
+#define G_CONTAINMENT_RADIUS       "GCTAPsfKing::containment_radius(double&,"\
+                       " double&, double&, double&, double&, double&, bool&)"
 #define G_UPDATE                      "GCTAPsfKing::update(double&, double&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -192,8 +194,8 @@ double GCTAPsfKing::operator()(const double& delta,
     #endif
     #endif
 
-	// Initialise PSF value
-	double psf = 0.0;
+    // Initialise PSF value
+    double psf = 0.0;
 
     // Compile option: set PSF to zero outside delta_max
     #if defined(G_FIX_DELTA_MAX)
@@ -206,11 +208,11 @@ double GCTAPsfKing::operator()(const double& delta,
     // Continue only if normalization is positive
     if (m_par_norm > 0.0) {
 
-		// Compute PSF value
+        // Compute PSF value
         double arg  = delta / m_par_sigma;
         double arg2 = arg * arg;
-		psf = m_par_norm * 
-              std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
+        psf = m_par_norm * 
+        std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
 
         // If we are at large offset angles, add a smooth ramp down to
         // avoid steps in the log-likelihood computation
@@ -488,6 +490,52 @@ double GCTAPsfKing::delta_max(const double& logE,
     #endif
 
     // Return maximum PSF radius
+    return radius;
+}
+
+
+/***********************************************************************//**
+ * @brief Return the radius that contains a fraction of the events (radians)
+ *
+ * @param[in] fraction of events (0.0-1.0)
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] theta Offset angle in camera system (rad). Not used.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] etrue Use true energy (true/false). Not used.
+ * @return Containment radius (radians).
+ *
+ * @exception GException::invalid_argument
+ *            Invalid fraction specified.
+ *
+ * Calculate the radius from the center that contains 'fraction' percent
+ * of the events.  fraction * 100. = Containment %.
+ ***************************************************************************/
+double GCTAPsfKing::containment_radius(const double& fraction, 
+                                       const double& logE, 
+                                       const double& theta, 
+                                       const double& phi,
+                                       const double& zenith,
+                                       const double& azimuth,
+                                       const bool&   etrue) const
+{
+    // Check input argument
+    if (fraction <= 0.0 || fraction >= 1.0) {
+        std::string message = "Containment fraction "+
+                              gammalib::str(fraction)+" must be between " +
+                              "0.0 and 1.0, not inclusive.";
+        throw GException::invalid_argument(G_CONTAINMENT_RADIUS, message);
+    }
+
+    // Update the parameter cache
+    update(logE, theta);
+
+    // Use analytic calculation
+    double arg    = std::pow(1.0 - fraction, 1.0/(1.0-m_par_gamma));
+    double radius = m_par_sigma * std::pow(2.0 * m_par_gamma * (arg - 1.0), 0.5);
+    
+    // Return radius containing fraction of events
     return radius;
 }
 

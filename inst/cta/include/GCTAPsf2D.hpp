@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.hpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -84,6 +84,13 @@ public:
                           const double& zenith = 0.0,
                           const double& azimuth = 0.0,
                           const bool&   etrue = true) const;
+    double      containment_radius(const double& fraction,
+                                   const double& logE, 
+                                   const double& theta = 0.0, 
+                                   const double& phi = 0.0,
+                                   const double& zenith = 0.0,
+                                   const double& azimuth = 0.0,
+                                   const bool&   etrue = true) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
     // Methods

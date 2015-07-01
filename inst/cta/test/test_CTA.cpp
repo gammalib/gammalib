@@ -390,6 +390,12 @@ void TestGCTAResponse::test_response_psf(void)
                    gammalib::deg2rad;
         }
         test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
+        
+        // Test containment radii
+        for (double f = 0.01; f < 1.0; f += 0.07) {
+            double radius = rsp.psf()->containment_radius(f, eng.log10TeV());
+            test_assert(radius > 0.0 && radius < 1e6, "PSF containment radius for fraction="+gammalib::str(f));
+        }
     }
 
     // Return
@@ -428,6 +434,7 @@ void TestGCTAResponse::test_response_psf_king(void)
                    gammalib::deg2rad;
         }
         test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
+        
     }
 
     // Return
