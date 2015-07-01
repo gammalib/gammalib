@@ -124,12 +124,12 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    const std::string&  eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;
     void                n_tels(const int& tels);
     const int&          n_tels(void) const;
-    const std::string&  eventtype(void) const;
 
 protected:
     // Protected methods
@@ -414,6 +414,18 @@ const std::string& GCTAObservation::eventfile(void) const
 
 
 /***********************************************************************//**
+ * @brief Return type of events
+ *
+ * @return Type of events.
+ ***************************************************************************/
+inline
+const std::string& GCTAObservation::eventtype(void) const
+{
+    return m_eventtype;
+}
+
+
+/***********************************************************************//**
  * @brief Return user low energy threshold
  *
  * @return User low energy threshold.
@@ -460,15 +472,4 @@ const int& GCTAObservation::n_tels(void) const
     return m_n_tels;
 }
 
-
-/***********************************************************************//**
- * @brief Return type of events
- *
- * @return Type of events.
- ***************************************************************************/
-inline
-const std::string& GCTAObservation::eventtype(void) const
-{
-    return m_eventtype;
-}
 #endif /* GCTAOBSERVATION_HPP */

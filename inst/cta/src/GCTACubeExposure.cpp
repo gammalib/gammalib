@@ -364,6 +364,7 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
  * @brief Fill exposure cube from observation container
  *
  * @param[in] obs Observation container.
+ * @param[in] log Pointer to logger (optional).
  *
  * @exception GException::invalid_value
  *            No event list found in CTA observations.
@@ -384,66 +385,74 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
 
         // Get observation and continue only if it is a CTA observation
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
-        if (cta != NULL) {
 
-            // Skip observation if we don't have an unbinned observation
-            if (cta->eventtype() != "EventList") {
-
-                // Log that we skip the this observation
-                if (log != NULL) {
-                    *log << "Warning: Skipping binned observation ";
-                    *log << "\"" << cta->name() << "\"" <<std::endl;
-                }
-                continue;
+        // Skip observation if it's not CTA
+        if (cta == NULL) {
+            if (log != NULL) {
+                *log << "Warning: Skipping "+obs[i]->instrument()+" observation ";
+                *log << "\"" << obs[i]->name() << "\"" <<std::endl;
             }
+            continue;
+        }
 
-            // Extract region of interest from CTA observation
-            GCTARoi roi = cta->roi();
+        // Skip observation if we don't have an unbinned observation
+        if (cta->eventtype() != "EventList") {
+            if (log != NULL) {
+                *log << "Warning: Skipping binned observation ";
+                *log << "\"" << cta->name() << "\"" <<std::endl;
+            }
+            continue;
+        }
 
-            // Get references on CTA response and pointing direction
-            const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-            const GSkyDir&         pnt = cta->pointing().dir();
+        // Extract region of interest from CTA observation
+        GCTARoi roi = cta->roi();
 
-            // Continue only if response is valid
-            if (rsp != NULL) {
+        // Get references on CTA response and pointing direction
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+        const GSkyDir&         pnt = cta->pointing().dir();
+
+        // Skip observation if we don't have an unbinned observation
+        if (rsp == NULL) {
+            if (log != NULL) {
+                *log << "Warning: Observation \"" << cta->name();
+                *log << "\" contains no IRF response." <<std::endl;
+            }
+            continue;
+        }
             
-                // Loop over all pixels in sky map
-                for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
 
-                    // Get pixel sky direction
-                    GSkyDir dir = m_cube.inx2dir(pixel);
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
                     
-                    // Continue only if pixel is within RoI
-                    if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Continue only if pixel is within RoI
+            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
 
-                        // Compute theta angle with respect to pointing
-                        // direction in radians
-                        double theta = pnt.dist(dir);
-    
-                        // Loop over all exposure cube energy bins
-                        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                // Compute theta angle with respect to pointing
+                // direction in radians
+                double theta = pnt.dist(dir);
 
-                            // Get logE/TeV
-                            double logE = m_ebounds.elogmean(iebin).log10TeV();
+                // Loop over all exposure cube energy bins
+                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-                            // Add to exposure cube (effective area * livetime)
-                            m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                                    cta->livetime();
+                    // Get logE/TeV
+                    double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                        } // endfor: looped over energy bins
+                    // Add to exposure cube (effective area * livetime)
+                    m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                            cta->livetime();
 
-                    } // endif: pixel within RoI
+                } // endfor: looped over energy bins
 
-                } // endfor: looped over all pixels
+            } // endif: pixel within RoI
 
-                // Append GTIs and increment livetime
-                m_gti.extend(cta->gti());
-                m_livetime += cta->livetime();
+        } // endfor: looped over all pixels
+
+        // Append GTIs and increment livetime
+        m_gti.extend(cta->gti());
+        m_livetime += cta->livetime();
             
-            } // endif: response was valid
-    
-        } // endif: observation was a CTA observation
-
     } // endfor: looped over observations
 
     // Return

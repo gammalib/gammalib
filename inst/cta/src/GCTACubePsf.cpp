@@ -450,79 +450,87 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
 
         // Get observation and continue only if it is a CTA observation
         const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
-        if (cta != NULL) {
 
-            // Skip observation if we don't have an unbinned observation
-            if (cta->eventtype() != "EventList") {
-
-                // Log that we skip the this observation
-                if (log != NULL) {
-                    *log << "Warning: Skipping binned observation ";
-                    *log << "\"" << cta->name() << "\"" << std::endl;
-                }
-                continue;
+        // Skip observation if it's not CTA
+        if (cta == NULL) {
+            if (log != NULL) {
+                *log << "Warning: Skipping "+obs[i]->instrument()+" observation ";
+                *log << "\"" << obs[i]->name() << "\"" <<std::endl;
             }
+            continue;
+        }
 
-            // Extract region of interest from CTA observation
-            GCTARoi roi = cta->roi();
+        // Skip observation if we don't have an unbinned observation
+        if (cta->eventtype() != "EventList") {
+            if (log != NULL) {
+                *log << "Warning: Skipping binned observation ";
+                *log << "\"" << cta->name() << "\"" <<std::endl;
+            }
+            continue;
+        }
 
-            // Get references on CTA response and pointing direction
-            const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-            const GSkyDir&         pnt = cta->pointing().dir();
+        // Extract region of interest from CTA observation
+        GCTARoi roi = cta->roi();
 
-            // Continue only if response is valid
-            if (rsp != NULL) {
+        // Get references on CTA response and pointing direction
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
+        const GSkyDir&         pnt = cta->pointing().dir();
 
-                // Loop over all pixels in sky map
-                for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // Skip observation if we don't have an unbinned observation
+        if (rsp == NULL) {
+            if (log != NULL) {
+                *log << "Warning: Observation \"" << cta->name();
+                *log << "\" contains no IRF response." <<std::endl;
+            }
+            continue;
+        }
 
-                    // Get pixel sky direction
-                    GSkyDir dir = m_cube.inx2dir(pixel);
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
                     
-                    // Continue only if pixel is within RoI
-                    if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Continue only if pixel is within RoI
+            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
 
-                        // Compute theta angle with respect to pointing
-                        // direction in radians
-                        double theta = pnt.dist(dir);
-    
-                        // Loop over all energy bins
-                        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+                // Compute theta angle with respect to pointing
+                // direction in radians
+                double theta = pnt.dist(dir);
 
-                            // Get logE/TeV
-                            double logE = m_ebounds.elogmean(iebin).log10TeV();
+                // Loop over all energy bins
+                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
 
-                            // Compute exposure weight
-                            double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                            cta->livetime();
+                    // Get logE/TeV
+                    double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                            // Accumulate weights
-                            exposure(pixel, iebin) += weight;
+                    // Compute exposure weight
+                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                    cta->livetime();
 
-                            // Loop over delta values
-                            for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                    // Accumulate weights
+                    exposure(pixel, iebin) += weight;
 
-                                // Compute delta in radians
-                                double delta = m_deltas[idelta] * gammalib::deg2rad;
+                    // Loop over delta values
+                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-                                // Set map index
-                                int imap = offset(idelta, iebin);
+                        // Compute delta in radians
+                        double delta = m_deltas[idelta] * gammalib::deg2rad;
 
-                                // Add on PSF cube
-                                m_cube(pixel, imap) +=
-                                    rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+                        // Set map index
+                        int imap = offset(idelta, iebin);
 
-                            } // endfor: looped over delta bins
+                        // Add on PSF cube
+                        m_cube(pixel, imap) +=
+                            rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
 
-                        } // endfor: looped over energy bins
+                    } // endfor: looped over delta bins
 
-                    } // endif: pixel was within RoI
+                } // endfor: looped over energy bins
 
-                } // endfor: looped over all pixels
+            } // endif: pixel was within RoI
 
-            } // endif: response was valid
-
-        } // endif: observation was a CTA observation
+        } // endfor: looped over all pixels
 
     } // endfor: looped over observations
 
