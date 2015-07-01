@@ -675,7 +675,7 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
 /***********************************************************************//**
  * @brief Return the radius that contains a fraction of the events (radians)
  *
- * @param[in] fraction of events (0.0-1.0)
+ * @param[in] fraction of events (0.0<fraction<1.0)
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.
@@ -683,18 +683,16 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
- * Solve
+ * Uses the Newton-Raphson method to find which 'a' solves the equation:
  *
  * \f[
  *
  * fraction = \pi * m\_norm * \left( 
- *   \left( \frac{m\_norm }{m\_width1} e^{m\_width1 * a^2} \right) + 
- *   \left( \frac{m\_norm2}{m\_width2} e^{m\_width2 * a^2} \right) + 
- *   \left( \frac{m\_norm3}{m\_width3} e^{m\_width3 * a^2} \right) \right)
+ *   \frac{      1 }{m\_width1} e^{m\_width1 * a^2} + 
+ *   \frac{m\_norm2}{m\_width2} e^{m\_width2 * a^2} + 
+ *   \frac{m\_norm3}{m\_width3} e^{m\_width3 * a^2} \right)
  *
  * \f]
- *
- * for a.
  *
  * Calculate the radius from the center that contains 'fraction' percent
  * of the events.  fraction * 100. = Containment % .  Fraction must be
@@ -713,7 +711,7 @@ double GCTAPsf2D::containment_radius(const double& fraction,
         std::string origin  = "GCTAPsf2D::containment_radius" ;
         std::string message = " First argument (fraction=" +
                               gammalib::str(fraction) + ") must be between " +
-                              "0.0 and 1.0 ." ;
+                              "0.0 and 1.0, not inclusive." ;
         throw GException::invalid_argument( origin, message ) ;
     }
       
