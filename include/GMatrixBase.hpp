@@ -188,7 +188,7 @@ protected:
     double      get_max_element(void) const;
     double      get_element_sum(void) const;
     std::string print_elements(const GChatter& chatter = NORMAL,
-                               const int&      num = 10) const;
+                               const int&      num = 15) const;
     std::string print_row_compression(const GChatter& chatter = NORMAL) const;
     std::string print_col_compression(const GChatter& chatter = NORMAL) const;
 
