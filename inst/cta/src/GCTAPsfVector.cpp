@@ -573,7 +573,7 @@ void GCTAPsfVector::update(const double& logE) const
  *
  * \f]
  *
- * which is derived from integrating
+ * which is derived by integrating
  *
  * \f[
  *

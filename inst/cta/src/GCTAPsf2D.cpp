@@ -683,8 +683,22 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
+ * Solve
+ *
+ * \f[
+ *
+ * fraction = \pi * m\_norm * \left( 
+ *   \left( \frac{m\_norm }{m\_width1} e^{m\_width1 * a^2} \right) + 
+ *   \left( \frac{m\_norm2}{m\_width2} e^{m\_width2 * a^2} \right) + 
+ *   \left( \frac{m\_norm3}{m\_width3} e^{m\_width3 * a^2} \right) \right)
+ *
+ * \f]
+ *
+ * for a.
+ *
  * Calculate the radius from the center that contains 'fraction' percent
- * of the events.  fraction * 100. = Containment % .
+ * of the events.  fraction * 100. = Containment % .  Fraction must be
+ * 0.0 < fraction < 1.0 .
  ***************************************************************************/
 double GCTAPsf2D::containment_radius(const double& fraction, 
                                      const double& logE, 
@@ -694,12 +708,76 @@ double GCTAPsf2D::containment_radius(const double& fraction,
                                      const double& azimuth,
                                      const bool&   etrue) const
 {
+    
+    if ( fraction <= 0.0 || fraction >= 1.0 ) {
+        std::string origin  = "GCTAPsf2D::containment_radius" ;
+        std::string message = " First argument (fraction=" +
+                              gammalib::str(fraction) + ") must be between " +
+                              "0.0 and 1.0 ." ;
+        throw GException::invalid_argument( origin, message ) ;
+    }
+      
+    
     // Update the parameter cache
     update(logE, theta);
 
-    // Compute radius
-    double radius = 0.0 ; // TODO implement calculation
+    // required accuracy
+    double convergence = 1.0e-6 ;
     
-    // Return maximum PSF radius
-    return radius;
+    // initial radius to start Newton's method with
+    // guess fraction * delta_max
+    double a = fraction * delta_max( logE, theta, phi, zenith, azimuth, etrue ) ; 
+    
+    // maximum number of newton-raphson loops before giving up
+    int iterlimit = 10000 ;
+    
+    // initialization variables for f(a), f'(a), a^2, and the iter counter
+    double fa   = 0.0 ;
+    double fp   = 0.0 ;
+    double a2   = 0.0 ;
+    int    iter = 0   ;
+    
+    // do the newton-raphson loops
+    for ( iter = 0 ; iter < iterlimit ; iter++ ) {
+      
+        a2 = a*a ;
+
+        // calculate f(a)
+        fa  = 0.0 ;
+        fa += m_norm  * ( std::exp( m_width1 * a2 ) - 1 ) / m_width1 ;
+        fa += m_norm2 * ( std::exp( m_width2 * a2 ) - 1 ) / m_width2 ;
+        fa += m_norm3 * ( std::exp( m_width3 * a2 ) - 1 ) / m_width3 ;
+        fa *= gammalib::pi ;
+        fa -= fraction ;
+        
+        // check if we've met the desired accuracy
+        if ( fabs( fa ) < convergence ) {
+            break ;
+        }
+        
+        // calculate f'(a)
+        fp  = 0.0 ;
+        fp += m_norm  * std::exp( m_width1 * a2 ) ;
+        fp += m_norm2 * std::exp( m_width2 * a2 ) ;
+        fp += m_norm3 * std::exp( m_width3 * a2 ) ;
+        fp *= gammalib::twopi * a       ;
+        
+        // calculate next point via x+1 = x - f(a) / f'(a)
+        a = a - fa / fp ;
+    
+    }  ;
+    
+    // warn the user if we didn't converge
+    if ( iter == iterlimit-1 ) {
+        std::string origin  = "GCTAPsf2D::containment_radius" ;
+        std::string message = " Unable to converge within " +
+                              gammalib::str(convergence)    + 
+                              " of the root in less than "  + 
+                              gammalib::str(iterlimit) + " iterations." ;
+        gammalib::warning(origin, message);
+    }
+    
+    // Return containment radius
+    return a ;
 }
+

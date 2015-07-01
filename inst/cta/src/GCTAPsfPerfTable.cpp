@@ -520,6 +520,26 @@ void GCTAPsfPerfTable::update(const double& logE) const
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
+ * Evaluates:
+ * 
+ * \f[
+ *
+ * radius = \sqrt{ \frac{\ln{\left( \frac{ fraction * m\_par\_width}
+ *          {\pi*m\_par\_scale} +1\right)}}{m\_par\_width} }
+ *
+ * \f]
+ *
+ * which is derived by integrating
+ *
+ * \f[
+ *
+ * fraction = \int_{0}^{2\pi}\int_{0}^{radius}r * 
+ *            e^{ m\_par\_width * r^{2}}dr d\phi
+ *
+ * \f]
+ *
+ * and solving for radius.
+ *
  * Calculate the radius from the center that contains 'fraction' percent
  * of the events.  fraction * 100. = Containment % .
  ***************************************************************************/
@@ -535,7 +555,8 @@ double GCTAPsfPerfTable::containment_radius(const double& fraction,
     update(logE);
 
     // Compute radius
-    double radius = 0.0 ; // TODO implement calculation
+    double arg = fraction * m_par_width / ( gammalib::pi * m_par_scale ) ;
+    double radius = std::sqrt( std::log( arg + 1 ) / m_par_width ) ;
     
     // Return maximum PSF radius
     return radius;

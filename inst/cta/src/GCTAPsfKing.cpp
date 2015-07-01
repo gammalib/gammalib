@@ -672,7 +672,7 @@ double GCTAPsfKing::containment_radius(const double& fraction,
     update(logE, theta);
 
     // Initialize Radius value
-    double radius = 0.0 ; // TODO implement calculation
+    double radius = 0.0 ; 
     
     // use analytic calculation
     double arg  = std::pow( 1 - fraction, 1/(1-m_par_gamma) ) ;
