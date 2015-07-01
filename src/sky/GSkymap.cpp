@@ -1317,19 +1317,19 @@ double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
         std::vector<GSkyDir> boundaries = healpix->boundaries(pixel, 3);
 
         // Compute intensities
-        double i0  = this->operator()(centre);
-        double i1  = this->operator()(boundaries[0]);
-        double i2  = this->operator()(boundaries[4]);
-        double i3  = this->operator()(boundaries[8]);
-        double i4  = this->operator()(boundaries[1]);
-        double i5  = this->operator()(boundaries[5]);
-        double i6  = this->operator()(boundaries[9]);
-        double i7  = this->operator()(boundaries[2]);
-        double i8  = this->operator()(boundaries[6]);
-        double i9  = this->operator()(boundaries[10]);
-        double i10 = this->operator()(boundaries[3]);
-        double i11 = this->operator()(boundaries[7]);
-        double i12 = this->operator()(boundaries[11]);
+        double i0  = this->operator()(centre,         map);
+        double i1  = this->operator()(boundaries[0],  map);
+        double i2  = this->operator()(boundaries[4],  map);
+        double i3  = this->operator()(boundaries[8],  map);
+        double i4  = this->operator()(boundaries[1],  map);
+        double i5  = this->operator()(boundaries[5],  map);
+        double i6  = this->operator()(boundaries[9],  map);
+        double i7  = this->operator()(boundaries[2],  map);
+        double i8  = this->operator()(boundaries[6],  map);
+        double i9  = this->operator()(boundaries[10], map);
+        double i10 = this->operator()(boundaries[3],  map);
+        double i11 = this->operator()(boundaries[7],  map);
+        double i12 = this->operator()(boundaries[11], map);
  
         // Compute fluxes in wedges
         double flux1  = gammalib::onethird * (i0 + i1 + i2) *
@@ -1385,15 +1385,15 @@ double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
         GSkyDir boundary8 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()));
 
         // Compute intensities
-        double i0  = this->operator()(centre);
-        double i1  = this->operator()(boundary1);
-        double i2  = this->operator()(boundary2);
-        double i3  = this->operator()(boundary3);
-        double i4  = this->operator()(boundary4);
-        double i5  = this->operator()(boundary5);
-        double i6  = this->operator()(boundary6);
-        double i7  = this->operator()(boundary7);
-        double i8  = this->operator()(boundary8);
+        double i0  = this->operator()(centre,    map);
+        double i1  = this->operator()(boundary1, map);
+        double i2  = this->operator()(boundary2, map);
+        double i3  = this->operator()(boundary3, map);
+        double i4  = this->operator()(boundary4, map);
+        double i5  = this->operator()(boundary5, map);
+        double i6  = this->operator()(boundary6, map);
+        double i7  = this->operator()(boundary7, map);
+        double i8  = this->operator()(boundary8, map);
 
         // Compute fluxes
         double flux1 = gammalib::onethird * (i1 + i2 + i0) *
