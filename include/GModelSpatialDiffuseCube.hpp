@@ -108,6 +108,7 @@ protected:
     void copy_members(const GModelSpatialDiffuseCube& model);
     void free_members(void);
     void fetch_cube(void) const;
+    void load_cube(const std::string& filename);
     void set_energy_boundaries(void);
     void update_mc_cache(void);
 

@@ -49,8 +49,8 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 #define G_MC          "GModelSpatialDiffuseCube::mc(GEnergy&, GTime&, GRan&)"
 #define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
-#define G_LOAD                 "GModelSpatialDiffuseCube::load(std::string&)"
 #define G_ENERGIES           "GModelSpatialDiffuseCube::energies(GEnergies&)"
+#define G_LOAD_CUBE                   "GModelSpatialDiffuseCube::load_cube()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -704,56 +704,12 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
  *
  * @param[in] filename cube file.
  *
- * @exception GException::invalid_value
- *            Number of maps in cube mismatches number of energy bins.
- *
  * Loads cube into the model class.
  ***************************************************************************/
 void GModelSpatialDiffuseCube::load(const std::string& filename)
 {
-    // Initialise skymap
-    m_cube.clear();
-    m_logE.clear();
-
-    // Store filename of cube (for XML writing). Note that we do not
-    // expand any environment variable at this level, so that if we write
-    // back the XML element we write the filepath with the environment
-    // variables
-    m_filename = filename;
-
-    // Get expanded filename
-    std::string fname = gammalib::expand_env(filename);
-
     // Load cube
-    m_cube.load(fname);
-
-    // Load energies
-    GEnergies energies(fname);
-
-    // Extract number of energy bins
-    int num = energies.size();
-
-    // Check if energy binning is consistent with primary image hdu
-    if (num != m_cube.nmaps() ) {
-        std::string msg = "Number of energies in \"ENERGIES\" extension"
-                          " ("+gammalib::str(num)+") does not match the"
-                          " number of maps ("+gammalib::str(m_cube.nmaps())+""
-                          " in the map cube.\n"
-                          "The \"ENERGIES\" extension table shall provide"
-                          " one enegy value for each map in the cube.";
-        throw GException::invalid_value(G_LOAD, msg);
-    }
-
-    // Set log10(energy) nodes, where energy is in units of MeV
-    for (int i = 0; i < num; ++i) {
-        m_logE.append(energies[i].log10MeV());
-    }
-
-    // Signal that cube has been loaded
-    m_loaded = true;
-
-    // Set energy boundaries
-    set_energy_boundaries();
+    load_cube(filename);
 
     // Update Monte Carlo cache
     update_mc_cache();
@@ -1009,9 +965,22 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
 
         // Dump cache values for debugging
         #if defined(G_DEBUG_CACHE)
+        std::cout << "GModelSpatialDiffuseCube::set_mc_cone: cache";
+        std::cout << std::endl;
         for (int i = 0; i < m_mc_cache.size(); ++i) {
             std::cout << "i=" << i;
             std::cout << " c=" << m_mc_cache[i] << std::endl;
+        }
+        #endif
+
+        // Dump spectrum for debugging
+        #if defined(G_DEBUG_CACHE)
+        std::cout << "GModelSpatialDiffuseCube::set_mc_cone: spectrum";
+        std::cout << std::endl;
+        for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
+            std::cout << i;
+            std::cout << " " << m_mc_spectrum.energy(i);
+            std::cout << " " << m_mc_spectrum.intensity(i) << std::endl;
         }
         #endif
 
@@ -1199,11 +1168,77 @@ void GModelSpatialDiffuseCube::fetch_cube(void) const
 {
     // Load cube if it is not yet loaded
     if (!m_loaded && !m_filename.empty()) {
+
+        // Put in a OMP critical zone
         #pragma omp critical
         {
-            const_cast<GModelSpatialDiffuseCube*>(this)->load(m_filename);
-        }
+            const_cast<GModelSpatialDiffuseCube*>(this)->load_cube(m_filename);
+        } // end of pragma
+        
+    } // endif: file not
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load cube
+ *
+ * @param[in] filename Cube file.
+ *
+ * @exception GException::invalid_value
+ *            Number of maps in cube mismatches number of energy bins.
+ *
+ * Load diffuse cube.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::load_cube(const std::string& filename)
+{
+    // Initialise skymap
+    m_cube.clear();
+    m_logE.clear();
+
+    // Store filename of cube (for XML writing). Note that we do
+    // not expand any environment variable at this level, so that
+    // if we write back the XML element we write the filepath with
+    // the environment variables
+    m_filename = filename;
+
+    // Get expanded filename
+    std::string fname = gammalib::expand_env(filename);
+    
+    // Load cube
+    m_cube.load(fname);
+
+    // Load energies
+    GEnergies energies(fname);
+
+    // Extract number of energy bins
+    int num = energies.size();
+
+    // Check if energy binning is consistent with primary image hdu
+    if (num != m_cube.nmaps() ) {
+        std::string msg = "Number of energies in \"ENERGIES\""
+                          " extension ("+gammalib::str(num)+")"
+                          " does not match the number of maps ("+
+                          gammalib::str(m_cube.nmaps())+" in the"
+                          " map cube.\n"
+                          "The \"ENERGIES\" extension table shall"
+                          " provide one enegy value for each map"
+                          " in the cube.";
+        throw GException::invalid_value(G_LOAD_CUBE, msg);
     }
+
+    // Set log10(energy) nodes, where energy is in units of MeV
+    for (int i = 0; i < num; ++i) {
+        m_logE.append(energies[i].log10MeV());
+    }
+
+    // Signal that cube has been loaded
+    m_loaded = true;
+
+    // Set energy boundaries
+    set_energy_boundaries();
 
     // Return
     return;
