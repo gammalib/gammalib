@@ -1431,6 +1431,7 @@ void GCTAObservation::init_members(void)
 {
     // Initialise members
     m_instrument = "CTA";
+    m_object.clear();
     m_eventfile.clear();
     m_eventtype.clear();
     m_bgdfile.clear();
@@ -1460,6 +1461,7 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
 {
     // Copy members
     m_instrument    = obs.m_instrument;
+    m_object        = obs.m_object;
     m_eventfile     = obs.m_eventfile;
     m_eventtype     = obs.m_eventtype;
     m_bgdfile       = obs.m_bgdfile;
@@ -1538,7 +1540,7 @@ void GCTAObservation::read_attributes(const GFitsHDU& hdu)
     m_livetime = (hdu.has_card("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
 
     // Read optional attributes
-    m_name       = (hdu.has_card("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
+    m_object     = (hdu.has_card("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
     m_deadc      = (hdu.has_card("DEADC"))    ? hdu.real("DEADC") : 0.0;
     m_ra_obj     = (hdu.has_card("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
     m_dec_obj    = (hdu.has_card("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
@@ -1618,7 +1620,7 @@ void GCTAObservation::write_attributes(GFitsHDU& hdu) const
     hdu.card("TIMEDEL",  1.0, "Time resolution");
 
     // Set pointing information
-    hdu.card("OBJECT",   name(),    "Observed object");
+    hdu.card("OBJECT",   object(),  "Observed object");
     hdu.card("RA_OBJ",   ra_obj(),  "[deg] Target Right Ascension");
     hdu.card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
     hdu.card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");

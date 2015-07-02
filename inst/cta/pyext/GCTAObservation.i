@@ -85,6 +85,8 @@ public:
     GCTARoi             roi(void) const;
     GGti                gti(void) const;
     GEbounds            ebounds(void) const;
+    void                object(const std::string& object);
+    const std::string&  object(void) const;
     void                obs_id(const int& id);
     const int&          obs_id(void) const;
     void                ra_obj(const double& ra);

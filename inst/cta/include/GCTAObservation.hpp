@@ -113,6 +113,8 @@ public:
     GCTARoi             roi(void) const;
     GGti                gti(void) const;
     GEbounds            ebounds(void) const;
+    void                object(const std::string& object);
+    const std::string&  object(void) const;
     void                obs_id(const int& id);
     const int&          obs_id(void) const;
     void                ra_obj(const double& ra);
@@ -142,6 +144,7 @@ protected:
 
     // Protected members
     std::string   m_instrument;    //!< Instrument name
+    std::string   m_object;        //!< Object name
     std::string   m_eventfile;     //!< Event filename
     std::string   m_eventtype;     //!< Event type (for XML file)
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
@@ -271,6 +274,31 @@ void GCTAObservation::pointing(const GCTAPointing& pointing)
 {
     m_pointing = pointing;
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set CTA observation object name
+ *
+ * @param[in] object Object name.
+ ***************************************************************************/
+inline
+void GCTAObservation::object(const std::string& object)
+{
+    m_object = object;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return CTA observation object
+ *
+ * @return Object name.
+ ***************************************************************************/
+inline
+const std::string& GCTAObservation::object(void) const
+{
+    return m_object;
 }
 
 
