@@ -1,8 +1,9 @@
-2015-06-20  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-07-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
+        Add GCTAObservation::object() method
         Correct model gradient computation
         Correct check of pixel containment in sky map (GSkymap::contains())
         Do only search in users pfiles if PFILES environment variable is not set
