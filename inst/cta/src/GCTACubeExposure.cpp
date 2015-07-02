@@ -389,8 +389,11 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
         // Skip observation if it's not CTA
         if (cta == NULL) {
             if (log != NULL) {
-                *log << "Warning: Skipping "+obs[i]->instrument()+" observation ";
-                *log << "\"" << obs[i]->name() << "\"" <<std::endl;
+                *log << "Skipping ";
+                *log << obs[i]->instrument();
+                *log << " observation ";
+                *log << "\"" << obs[i]->name() << "\"";
+                *log << " (id=" << obs[i]->id() << ")" << std::endl;
             }
             continue;
         }
@@ -398,8 +401,11 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
         // Skip observation if we have a binned observation
         if (cta->eventtype() == "CountsCube") {
             if (log != NULL) {
-                *log << "Warning: Skipping binned observation ";
-                *log << "\"" << cta->name() << "\"" <<std::endl;
+                *log << "Skipping binned ";
+                *log << cta->instrument();
+                *log << " observation ";
+                *log << "\"" << cta->name() << "\"";
+                *log << " (id=" << cta->id() << ")" << std::endl;
             }
             continue;
         }
@@ -414,10 +420,23 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
         // Skip observation if we don't have an unbinned observation
         if (rsp == NULL) {
             if (log != NULL) {
-                *log << "Warning: Observation \"" << cta->name();
-                *log << "\" contains no IRF response." <<std::endl;
+                *log << "WARNING: ";
+                *log << cta->instrument();
+                *log << " observation \"" << cta->name();
+                *log << "\" (id=" << cta->id() << ")";
+                *log << " contains no IRF response.";
+                *log << " Skipping this observation." << std::endl;
             }
             continue;
+        }
+
+        // Announce observation usage
+        if (log != NULL) {
+            *log << "Including ";
+            *log << cta->instrument();
+            *log << " observation \"" << cta->name();
+            *log << "\" (id=" << cta->id() << ")";
+            *log << " in exposure cube computation." << std::endl;
         }
             
         // Loop over all pixels in sky map
