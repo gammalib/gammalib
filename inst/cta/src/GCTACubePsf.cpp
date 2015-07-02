@@ -38,7 +38,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                            "GCTACubePsf::set(GCTAObservation&)"
-#define G_FILL_CUBE                      "GCTACubePsf::fill_cube(GObservations&)"
+#define G_FILL                     "GCTACubePsf::fill(GObservations&, GLog*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -375,7 +375,7 @@ void GCTACubePsf::set(const GCTAObservation& obs)
 
         // Check for RoI sanity
         if (!roi.is_valid()) {
-           std::string msg = "No RoI information found in input observation "
+            std::string msg = "No RoI information found in input observation "
                               "\""+obs.name()+"\". Run ctselect to specify "
                               "an RoI for this observation";
             throw GException::invalid_value(G_SET, msg);
@@ -483,10 +483,10 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
 
         // Check for RoI sanity
         if (!roi.is_valid()) {
-           std::string msg = "No RoI information found in input observation "
+            std::string msg = "No RoI information found in input observation "
                               "\""+cta->name()+"\". Run ctselect to specify "
                               "an RoI for this observation";
-            throw GException::invalid_value(G_FILL_CUBE, msg);
+            throw GException::invalid_value(G_FILL, msg);
         }
 
         // Get references on CTA response and pointing direction
