@@ -45,6 +45,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                             "GCTACubeBackground::read(GFits&)"
 #define G_MC                "GCTACubeBackground::mc(GEnergy&, GTime&, GRan&)"
+#define G_FILL              "GCTACubeBackground::fill(GObservations&, GLog*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -325,6 +326,14 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
         // Extract region of interest from CTA observation
         GCTARoi roi = cta->roi();
+
+        // Check for RoI sanity
+        if (!roi.is_valid()) {
+            std::string msg = "No RoI information found in input observation "
+                              "\""+cta->name()+"\". Run ctselect to specify "
+                              "an RoI for this observation";
+            throw GException::invalid_value(G_FILL, msg);
+        }
 
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
