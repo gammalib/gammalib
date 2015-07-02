@@ -37,6 +37,8 @@
 #include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_SET                            "GCTACubeExposure::set(GCTAObservation&)"
+#define G_FILL_CUBE                      "GCTACubeExposure::fill_cube(GObservations&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -311,6 +313,14 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
         // Extract region of interest from CTA observation
         GCTARoi roi = obs.roi();
 
+        // Check for RoI sanity
+        if (!roi.is_valid()) {
+           std::string msg = "No RoI information found in input observation "
+                              "\""+obs.name()+"\". Run ctselect to specify "
+                              "an RoI for this observation";
+            throw GException::invalid_value(G_SET, msg);
+        }
+
         // Get references on CTA response and pointing direction
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
         const GSkyDir&         pnt = obs.pointing().dir();
@@ -406,6 +416,14 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
 
         // Extract region of interest from CTA observation
         GCTARoi roi = cta->roi();
+
+        // Check for RoI sanity
+        if (!roi.is_valid()) {
+           std::string msg = "No RoI information found in input observation "
+                              "\""+cta->name()+"\". Run ctselect to specify "
+                              "an RoI for this observation";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
 
         // Get references on CTA response and pointing direction
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
