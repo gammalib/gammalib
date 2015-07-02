@@ -144,7 +144,6 @@ protected:
 
     // Protected members
     std::string   m_instrument;    //!< Instrument name
-    std::string   m_object;        //!< Object name
     std::string   m_eventfile;     //!< Event filename
     std::string   m_eventtype;     //!< Event type (for XML file)
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
@@ -159,8 +158,10 @@ protected:
     double        m_hi_user_thres; //!< User defined upper energy boundary
     int           m_n_tels;        //!< Number of telescopes
 
-    // Special protected member for GCTAModelCubeBackground friend
-    std::string   m_bgdfile;     //!< Background filename
+    // Put those late as for some unknown reason putting them earlier
+    // corrupts memory on Mac OS X
+    std::string   m_object;        //!< Object name
+    std::string   m_bgdfile;       //!< Background filename
 };
 
 
