@@ -291,11 +291,9 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
     double temp = (temporal() != NULL)
                   ? temporal()->eval(event.time()) : 1.0;
 
-    // Compute value
+    // Compute value. Note that background rates are already per
+    // livetime, hence no deadtime correction is needed here.
     double value = spat * spec * temp;
-
-    // Apply deadtime correction
-    value *= obs.deadc(event.time());
 
     // Return value
     return value;
@@ -351,30 +349,9 @@ double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
                   ? temporal()->eval_gradients(event.time())
                   : 1.0;
 
-    // Compute value
+    // Compute value. Note that background rates are already per
+    // livetime, hence no deadtime correction is needed here.
     double value = spat * spec * temp;
-
-    // Apply deadtime correction
-    double deadc = obs.deadc(event.time());
-    value       *= deadc;
-
-    // Multiply factors to spectral gradients
-    if (spectral() != NULL) {
-        double fact = spat * temp * deadc;
-        if (fact != 1.0) {
-            for (int i = 0; i < spectral()->size(); ++i)
-                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
-        }
-    }
-
-    // Multiply factors to temporal gradients
-    if (temporal() != NULL) {
-        double fact = spat * spec * deadc;
-        if (fact != 1.0) {
-            for (int i = 0; i < temporal()->size(); ++i)
-                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
-        }
-    }
 
     // Return value
     return value;
