@@ -3,7 +3,7 @@
 # This script builds a set of models, saves the models into an XML file
 # and loads the models back into memory.
 #
-# Copyright (C) 2011-2013 Juergen Knoedlseder
+# Copyright (C) 2011-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,13 +18,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # =====================================================================
-from gammalib import *
+import gammalib
 
 #
 # Set the location / centre of the source model to
 # Right Ascension = 42.0 deg and Declination = 43 deg
 # ===================================================
-centre = GSkyDir()
+centre = gammalib.GSkyDir()
 centre.radec_deg(42.0, 43.0)
 
 #
@@ -32,9 +32,9 @@ centre.radec_deg(42.0, 43.0)
 # Normalization:   1.0e-7 ph/cm2/s/MeV @ 100 MeV
 # Spectral index: -2.1
 # ===================================================
-point_spatial  = GModelSpatialPointSource(centre)
-point_spectrum = GModelSpectralPlaw(1.0e-7, -2.1, GEnergy(100.0, "MeV"))
-point = GModelSky(point_spatial, point_spectrum)
+point_spatial  = gammalib.GModelSpatialPointSource(centre)
+point_spectrum = gammalib.GModelSpectralPlaw(1.0e-7, -2.1, gammalib.GEnergy(100.0, "MeV"))
+point = gammalib.GModelSky(point_spatial, point_spectrum)
 point.name('My point source')
 
 #
@@ -43,9 +43,9 @@ point.name('My point source')
 # Normalization:   4.2e-7 ph/cm2/s/MeV @ 100 MeV
 # Spectral index: -2.4
 # ===================================================
-gauss_spatial  = GModelSpatialRadialGauss(centre, 3.0)
-gauss_spectrum = GModelSpectralPlaw(4.2e-7, -2.4, GEnergy(100.0, "MeV"))
-gauss = GModelSky(gauss_spatial, gauss_spectrum)
+gauss_spatial  = gammalib.GModelSpatialRadialGauss(centre, 3.0)
+gauss_spectrum = gammalib.GModelSpectralPlaw(4.2e-7, -2.4, gammalib.GEnergy(100.0, "MeV"))
+gauss = gammalib.GModelSky(gauss_spatial, gauss_spectrum)
 gauss.name('My Gaussian source')
 
 #
@@ -53,7 +53,7 @@ gauss.name('My Gaussian source')
 # models to the model container. Print the content of the
 # container
 # =========================================================
-models = GModels()
+models = gammalib.GModels()
 models.append(point)
 models.append(gauss)
 print(models)
@@ -70,6 +70,6 @@ del models
 # Now read the models back from the XML file into the container.
 # Print again the content of the container.
 # ==============================================================
-models2 = GModels(filename)
+models2 = gammalib.GModels(filename)
 print("")
 print(models2)

@@ -2,7 +2,7 @@
 # ==========================================================================
 # This script tests the GModelSpectralFunc file function spectral model.
 #
-# Copyright (C) 2011 Jurgen Knodlseder
+# Copyright (C) 2011-2015 Jurgen Knodlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
 import math
-
+import gammalib
 
 # ================================= #
 # Generate file function from model #
@@ -37,14 +36,14 @@ def make_file_function(model, emin=0.1e6, emax=100.0e6, nodes=10):
     file = open(filename, "w")
     for i in range(nodes):
         energy = math.pow(10.0, math.log10(emin) + i * dloge)
-        eng = GEnergy()
+        eng    = gammalib.GEnergy()
         eng.MeV(energy)
         value = model.eval(eng)
         file.write(str(energy) + " " + str(value) + "\n")
     file.close()
 
     # Generate file function
-    file_function = GModelSpectralFunc(filename)
+    file_function = gammalib.GModelSpectralFunc(filename)
 
     # Return
     return file_function
@@ -62,8 +61,8 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
     n_violate = 0
 
     # Allocate boundaries
-    e_min = GEnergy()
-    e_max = GEnergy()
+    e_min = gammalib.GEnergy()
+    e_max = gammalib.GEnergy()
 
     # Ramp up emax from below first node
     e_min.MeV(emin)
@@ -72,9 +71,9 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         energy = math.pow(10.0, math.log10(emin) + i * dloge)
         e_max.MeV(energy)
         flux_model = model.flux(e_min, e_max)
-        flux_ff = file_function.flux(e_min, e_max)
+        flux_ff    = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp up emax from above first node
@@ -87,7 +86,7 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.flux(e_min, e_max)
         flux_ff = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from above last node
@@ -99,7 +98,7 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.flux(e_min, e_max)
         flux_ff = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from below last node
@@ -112,14 +111,14 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.flux(e_min, e_max)
         flux_ff = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Print summary
     if n_violate == 0:
-        print "compare_photon_flux: All tests satisfied accuracy."
+        print("compare_photon_flux: All tests satisfied accuracy.")
     else:
-        print "compare_photon_flux: " + str(n_violate) + " tests exceeded accuracy."
+        print("compare_photon_flux: " + str(n_violate) + " tests exceeded accuracy.")
 
     # Return
     return
@@ -137,8 +136,8 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
     n_violate = 0
 
     # Allocate boundaries
-    e_min = GEnergy()
-    e_max = GEnergy()
+    e_min = gammalib.GEnergy()
+    e_max = gammalib.GEnergy()
 
     # Ramp up emax from below first node
     e_min.MeV(emin)
@@ -149,7 +148,7 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp up emax from above first node
@@ -162,7 +161,7 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from above last node
@@ -174,7 +173,7 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from below last node
@@ -187,14 +186,14 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Print summary
     if n_violate == 0:
-        print "compare_energy_flux: All tests satisfied accuracy."
+        print("compare_energy_flux: All tests satisfied accuracy.")
     else:
-        print "compare_energy_flux: " + str(n_violate) + " tests exceeded accuracy."
+        print("compare_energy_flux: " + str(n_violate) + " tests exceeded accuracy.")
 
     # Return
     return
@@ -208,17 +207,17 @@ def test_mc(file_function, trials=10):
     Print a bunch of Monte Carlo energies.
     """
     # Allocate boundaries
-    e_min = GEnergy()
-    e_max = GEnergy()
-    ran = GRan()
+    e_min = gammalib.GEnergy()
+    e_max = gammalib.GEnergy()
+    ran   = GRan()
 
     # Set energy range
     e_min.TeV(0.1)
     e_max.TeV(100.0)
 
-# Loop over trials
+    # Loop over trials
     for i in range(trials):
-        print file_function.mc(e_min, e_max, ran)
+        print(file_function.mc(e_min, e_max, ran))
 
     # Return
     return
@@ -232,7 +231,7 @@ if __name__ == '__main__':
     Main entry point
     """
     # Allocate power law
-    model = GModelSpectralPlaw(5.7, -2.48)
+    model = gammalib.GModelSpectralPlaw(5.7, -2.48)
     model["Prefactor"].scale(1.0e-16)
     model["PivotEnergy"].value(0.3)
     model["PivotEnergy"].scale(1.0e6)
