@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.cpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -102,7 +102,7 @@ GCOMEventCube::GCOMEventCube(const std::string& filename) : GEventCube()
  * Construct an event cube from sky map, energy boundaries, Good Time
  * Intervals and the scatter angle minimum value and step size.
  ***************************************************************************/
-GCOMEventCube::GCOMEventCube(const GSkymap& map, const GEbounds& ebds,
+GCOMEventCube::GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
                              const GGti& gti, const double& phimin,
                              const double& dphi) : GEventCube()
 {
@@ -530,7 +530,7 @@ int GCOMEventCube::number(void) const
  *
  * @todo Check if we really need this method.
  ***************************************************************************/
-void GCOMEventCube::map(const GSkymap& map, const double& phimin,
+void GCOMEventCube::map(const GSkyMap& map, const double& phimin,
                         const double& dphi)
 {
     // Store sky map

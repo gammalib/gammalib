@@ -17,6 +17,9 @@ The GOptimizerLM logger constructor now takes a pointer to a logger instead of
 a reference. This allows setting of a NULL pointer, disabling the logging of the
 optimizer.
 
+The GSkymap class has been renamed to GSkyMap to be consistent with the other
+classes in the sky module.
+
 
 3. Configuration
 -----------------
@@ -99,6 +102,8 @@ This quite severe bug was now corrected.
 
 The GSkymap::operator/=(GSkymap) operator now sets all pixels to zero for which the
 nominator is zero. No exception is thrown any longer.
+
+Add +, -, * and / binary operators to the GSkymap class.
 
 
 13. Support module

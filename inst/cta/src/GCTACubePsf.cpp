@@ -226,7 +226,7 @@ GCTACubePsf::GCTACubePsf(const std::string&   wcs,
     int nmaps = m_ebounds.size() * m_deltas.size();
     
     // Create sky map
-    m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
+    m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
 
     // Return
     return;
@@ -452,7 +452,7 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
     clear_cube();
 
     // Initialise skymap for exposure weight accumulation
-    GSkymap exposure(m_cube);
+    GSkyMap exposure(m_cube);
 
     // Loop over all observations in container
     for (int i = 0; i < obs.size(); ++i) {

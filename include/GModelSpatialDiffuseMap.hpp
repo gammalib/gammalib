@@ -33,7 +33,7 @@
 #include "GModelSpatialDiffuse.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -54,7 +54,7 @@ public:
     GModelSpatialDiffuseMap(const std::string& filename,
                             const double&      value = 1.0,
                             const bool&        normalize = true);
-    GModelSpatialDiffuseMap(const GSkymap& map,
+    GModelSpatialDiffuseMap(const GSkyMap& map,
                             const double&  value = 1.0,
                             const bool&    normalize = true);
     GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
@@ -86,8 +86,8 @@ public:
     void               value(const double& value);
     const std::string& filename(void) const;
     void               load(const std::string& filename);
-    const GSkymap&     map(void) const;
-    void               map(const GSkymap& map);
+    const GSkyMap&     map(void) const;
+    void               map(const GSkyMap& map);
     bool               normalize(void) const;
 
 protected:
@@ -99,7 +99,7 @@ protected:
 
     // Protected members
     GModelPar           m_value;         //!< Value
-    GSkymap             m_map;           //!< Skymap
+    GSkyMap             m_map;           //!< Skymap
     std::string         m_filename;      //!< Name of skymap
     std::vector<double> m_mc_cache;      //!< Monte Carlo cache
     std::vector<double> m_mc_max;        //!< Monte Carlo maximum
@@ -188,7 +188,7 @@ const std::string& GModelSpatialDiffuseMap::filename(void) const
  * Returns the sky map.
  ***************************************************************************/
 inline
-const GSkymap& GModelSpatialDiffuseMap::map(void) const
+const GSkyMap& GModelSpatialDiffuseMap::map(void) const
 {
     return (m_map);
 }
@@ -202,7 +202,7 @@ const GSkymap& GModelSpatialDiffuseMap::map(void) const
  * Set the sky map.
  ***************************************************************************/
 inline
-void GModelSpatialDiffuseMap::map(const GSkymap& map)
+void GModelSpatialDiffuseMap::map(const GSkyMap& map)
 {
     m_map = map;
     prepare_map();

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GLATLtCubeMap.hpp - Fermi LAT livetime cube map class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GFitsTable.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GSkyDir.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
@@ -89,7 +89,7 @@ private:
     void free_members(void);
     
     // Protected members
-    GSkymap m_map;          //!< Lifetime cube map
+    GSkyMap m_map;          //!< Lifetime cube map
     int     m_num_ctheta;   //!< Number of bins in cos theta
     int     m_num_phi;      //!< Number of bins in phi
     double  m_min_ctheta;   //!< Minimum cos theta value

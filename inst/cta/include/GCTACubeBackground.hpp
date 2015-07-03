@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
 #include "GEbounds.hpp"
 
@@ -72,7 +72,7 @@ public:
     void                load(const std::string& filename);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
-    const GSkymap&      cube(void) const;
+    const GSkyMap&      cube(void) const;
     const GEbounds&     ebounds(void) const;
     const GNodeArray&   elogmeans(void) const;
     const std::string&  filename(void) const;
@@ -88,7 +88,7 @@ private:
 
     // Members
     mutable std::string m_filename;  //!< Name of background response file
-    GSkymap             m_cube;      //!< Background cube
+    GSkyMap             m_cube;      //!< Background cube
     GEbounds            m_ebounds;   //!< Energy bounds for the background cube
     GNodeArray          m_elogmeans; //!< Mean energy for the background cube
 
@@ -118,11 +118,11 @@ std::string GCTACubeBackground::classname(void) const
  *
  * @return Sky map holding the background cube.
  *
- * Returns the GSkymap object that is used to store the background cube
+ * Returns the GSkyMap object that is used to store the background cube
  * information.
  ***************************************************************************/
 inline
-const GSkymap& GCTACubeBackground::cube(void) const
+const GSkyMap& GCTACubeBackground::cube(void) const
 {
     return (m_cube);
 }

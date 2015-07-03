@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GTestEventCube.hpp - Test event bin container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2013-2015 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,6 @@
 #include <vector>
 #include "GEventCube.hpp"
 #include "GTestEventBin.hpp"
-#include "GSkymap.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
 #include "GEnergy.hpp"

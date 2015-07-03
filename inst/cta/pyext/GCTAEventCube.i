@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCTAEventCube(void);
     explicit GCTAEventCube(const std::string& filename);
-    GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
+    GCTAEventCube(const GSkyMap& map, const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -58,8 +58,8 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    void                   map(const GSkymap& map);
-    const GSkymap&         map(void) const;
+    void                   map(const GSkyMap& map);
+    const GSkyMap&         map(void) const;
     int                    nx(void) const;
     int                    ny(void) const;
     int                    npix(void) const;

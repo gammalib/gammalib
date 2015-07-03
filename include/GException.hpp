@@ -398,7 +398,7 @@ public:
     };
 
 
-    // GSkymap exceptions
+    // GSkyMap exceptions
     class skymap : public GExceptionHandler {
     public:
         skymap(std::string origin, std::string message = "");

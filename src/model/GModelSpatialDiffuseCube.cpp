@@ -144,7 +144,7 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
  * constructor also assigns the energy values for all maps and sets the
  * scaling @p value. The filename will remain blank.
  ***************************************************************************/
-GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap&   cube,
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkyMap&   cube,
                                                    const GEnergies& energies,
                                                    const double&    value) :
                           GModelSpatialDiffuse()

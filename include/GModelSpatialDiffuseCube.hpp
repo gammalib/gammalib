@@ -34,7 +34,7 @@
 #include "GModelSpectralNodes.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
 #include "GXmlElement.hpp"
 #include "GEbounds.hpp"
@@ -59,7 +59,7 @@ public:
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
     GModelSpatialDiffuseCube(const std::string& filename,
                              const double&      value = 1.0);
-    GModelSpatialDiffuseCube(const GSkymap&   cube,
+    GModelSpatialDiffuseCube(const GSkyMap&   cube,
                              const GEnergies& energies,
                              const double&    value = 1.0);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
@@ -94,8 +94,8 @@ public:
     void                       value(const double& value);
     const std::string&         filename(void) const;
     void                       filename(const std::string& filename);
-    const GSkymap&             cube(void) const;
-    void                       cube(const GSkymap& cube);
+    const GSkyMap&             cube(void) const;
+    void                       cube(const GSkyMap& cube);
     GEnergies                  energies(void);
     void                       energies(const GEnergies& energies);
     const GModelSpectralNodes& spectrum(void) const;
@@ -116,7 +116,7 @@ protected:
     GModelPar           m_value;       //!< Value
     std::string         m_filename;    //!< Name of map cube
     bool                m_loaded;      //!< Signals if map cube has been loaded
-    GSkymap             m_cube;        //!< Map cube
+    GSkyMap             m_cube;        //!< Map cube
     GNodeArray          m_logE;        //!< Log10(energy) values of the maps
     GEbounds            m_ebounds;     //!< Energy bounds of the maps
     std::vector<double> m_mc_cache;    //!< Monte Carlo cache
@@ -247,7 +247,7 @@ void GModelSpatialDiffuseCube::filename(const std::string& filename)
  * Returns the map cube.
  ***************************************************************************/
 inline
-const GSkymap& GModelSpatialDiffuseCube::cube(void) const
+const GSkyMap& GModelSpatialDiffuseCube::cube(void) const
 {
     return (m_cube);
 }
@@ -261,7 +261,7 @@ const GSkymap& GModelSpatialDiffuseCube::cube(void) const
  * Set the map cube of the spatial map cube model.
  ***************************************************************************/
 inline
-void GModelSpatialDiffuseCube::cube(const GSkymap& cube)
+void GModelSpatialDiffuseCube::cube(const GSkyMap& cube)
 {
     m_filename.clear();
     m_loaded = false;

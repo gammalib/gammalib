@@ -139,7 +139,7 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename,
  * Constructs spatial map model by setting the sky @p map and by setting the
  * normalization @p value.
  ***************************************************************************/
-GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkymap& map,
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkyMap& map,
                                                  const double&  value,
                                                  const bool&    normalize) :
                          GModelSpatialDiffuse()
@@ -771,7 +771,7 @@ void GModelSpatialDiffuseMap::free_members(void)
  * maximum expected value for each pixel which is also used in Monte Carlo
  * sampling.
  *
- * Note that if the GSkymap object contains multiple maps, only the first
+ * Note that if the GSkyMap object contains multiple maps, only the first
  * map is used.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::prepare_map(void)

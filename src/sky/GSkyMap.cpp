@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GSkymap.cpp - Sky map class                       *
+ *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkymap.cpp
+ * @file GSkyMap.cpp
  * @brief Sky map class implementation
  * @author Juergen Knoedlseder
  */
@@ -31,7 +31,7 @@
 #include "GException.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcs.hpp"
@@ -40,35 +40,35 @@
 #include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCT_HPX                "GSkymap::GSkymap(std::string&, int&,"\
+#define G_CONSTRUCT_HPX                "GSkyMap::GSkyMap(std::string&, int&,"\
                                                        " std::string&, int&)"
-#define G_CONSTRUCT_MAP        "GSkymap::GSkymap(std::string&, std::string&,"\
+#define G_CONSTRUCT_MAP        "GSkyMap::GSkyMap(std::string&, std::string&,"\
                       " double&, double&, double& double&, int&, int&, int&)"
-#define G_NMAPS                                        "GSkymap::nmaps(int&)"
-#define G_OP_UNARY_ADD                        "GSkymap::operator+=(GSkymap&)"
-#define G_OP_UNARY_SUB                        "GSkymap::operator-=(GSkymap&)"
-#define G_OP_UNARY_MUL                        "GSkymap::operator-=(GSkymap&)"
-#define G_OP_UNARY_DIV                        "GSkymap::operator/=(GSkymap&)"
-#define G_OP_UNARY_DIV2                        "GSkymap::operator/=(double&)"
-#define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
-#define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
-#define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
-#define G_INX2DIR                                    "GSkymap::inx2dir(int&)"
-#define G_PIX2DIR                              "GSkymap::pix2dir(GSkyPixel&)"
-#define G_DIR2INX                                "GSkymap::dir2inx(GSkyDir&)"
-#define G_DIR2PIX                                "GSkymap::dir2pix(GSkyDir&)"
-#define G_FLUX1                                         "GSkymap::flux(int&)"
-#define G_FLUX2                                   "GSkymap::flux(GSkyPixel&)"
-#define G_SOLIDANGLE1                             "GSkymap::solidangle(int&)"
-#define G_SOLIDANGLE2                       "GSkymap::solidangle(GSkyPixel&)"
-#define G_EXTRACT                              "GSkymap::extract(int&, int&)"
-#define G_READ                                     "GSkymap::read(GFitsHDU&)"
-#define G_SET_WCS     "GSkymap::set_wcs(std::string&, std::string&, double&,"\
+#define G_NMAPS                                        "GSkyMap::nmaps(int&)"
+#define G_OP_UNARY_ADD                        "GSkyMap::operator+=(GSkyMap&)"
+#define G_OP_UNARY_SUB                        "GSkyMap::operator-=(GSkyMap&)"
+#define G_OP_UNARY_MUL                        "GSkyMap::operator-=(GSkyMap&)"
+#define G_OP_UNARY_DIV                        "GSkyMap::operator/=(GSkyMap&)"
+#define G_OP_UNARY_DIV2                        "GSkyMap::operator/=(double&)"
+#define G_OP_ACCESS_1D                        "GSkyMap::operator(int&, int&)"
+#define G_OP_ACCESS_2D                  "GSkyMap::operator(GSkyPixel&, int&)"
+#define G_OP_VALUE                        "GSkyMap::operator(GSkyDir&, int&)"
+#define G_INX2DIR                                    "GSkyMap::inx2dir(int&)"
+#define G_PIX2DIR                              "GSkyMap::pix2dir(GSkyPixel&)"
+#define G_DIR2INX                                "GSkyMap::dir2inx(GSkyDir&)"
+#define G_DIR2PIX                                "GSkyMap::dir2pix(GSkyDir&)"
+#define G_FLUX1                                         "GSkyMap::flux(int&)"
+#define G_FLUX2                                   "GSkyMap::flux(GSkyPixel&)"
+#define G_SOLIDANGLE1                             "GSkyMap::solidangle(int&)"
+#define G_SOLIDANGLE2                       "GSkyMap::solidangle(GSkyPixel&)"
+#define G_EXTRACT                              "GSkyMap::extract(int&, int&)"
+#define G_READ                                     "GSkyMap::read(GFitsHDU&)"
+#define G_SET_WCS     "GSkyMap::set_wcs(std::string&, std::string&, double&,"\
                               " double&, double&, double&, double&, double&,"\
                                                        " GMatrix&, GVector&)"
-#define G_READ_HEALPIX                   "GSkymap::read_healpix(GFitsTable*)"
-#define G_READ_WCS                           "GSkymap::read_wcs(GFitsImage*)"
-#define G_ALLOC_WCS                         "GSkymap::alloc_wcs(GFitsImage*)"
+#define G_READ_HEALPIX                   "GSkyMap::read_healpix(GFitsTable*)"
+#define G_READ_WCS                           "GSkyMap::read_wcs(GFitsImage*)"
+#define G_ALLOC_WCS                         "GSkyMap::alloc_wcs(GFitsImage*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -90,7 +90,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GSkymap::GSkymap(void)
+GSkyMap::GSkyMap(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -105,7 +105,7 @@ GSkymap::GSkymap(void)
  *
  * @param[in] filename FITS file name.
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& filename)
+GSkyMap::GSkyMap(const std::string& filename)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -131,7 +131,7 @@ GSkymap::GSkymap(const std::string& filename)
  *
  * Constructs sky map in Healpix pixelisation.
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& coords,
+GSkyMap::GSkyMap(const std::string& coords,
                  const int&         nside,
                  const std::string& order,
                  const int&         nmaps)
@@ -179,7 +179,7 @@ GSkymap::GSkymap(const std::string& coords,
  *
  * Constructs sky map in World Coordinate System projection.
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& wcs,
+GSkyMap::GSkyMap(const std::string& wcs,
                  const std::string& coords,
                  const double&      x,
                  const double&      y,
@@ -237,7 +237,7 @@ GSkymap::GSkymap(const std::string& wcs,
  *
  * @param[in] map Sky map.
  ***************************************************************************/
-GSkymap::GSkymap(const GSkymap& map)
+GSkyMap::GSkyMap(const GSkyMap& map)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -253,7 +253,7 @@ GSkymap::GSkymap(const GSkymap& map)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GSkymap::~GSkymap(void)
+GSkyMap::~GSkyMap(void)
 {
     // Free members
     free_members();
@@ -275,7 +275,7 @@ GSkymap::~GSkymap(void)
  * @param[in] map Sky map.
  * @return Sky map.
  ***************************************************************************/
-GSkymap& GSkymap::operator=(const GSkymap& map)
+GSkyMap& GSkyMap::operator=(const GSkyMap& map)
 {
     // Execute only if object is not identical
     if (this != &map) {
@@ -304,7 +304,7 @@ GSkymap& GSkymap::operator=(const GSkymap& map)
  *
  * Sets all pixels to the specified @p value.
  ***************************************************************************/
-GSkymap& GSkymap::operator=(const double& value)
+GSkyMap& GSkyMap::operator=(const double& value)
 {
     // Get number of pixels
     int num = m_num_pixels * m_num_maps;
@@ -338,7 +338,7 @@ GSkymap& GSkymap::operator=(const double& value)
  * does the transformation, allowing the to loop more effectively over the
  * layers.
  ***************************************************************************/
-GSkymap& GSkymap::operator+=(const GSkymap& map)
+GSkyMap& GSkyMap::operator+=(const GSkyMap& map)
 {
     // Check if number of layers are identical
     if (map.nmaps() != nmaps()) {
@@ -378,7 +378,7 @@ GSkymap& GSkymap::operator+=(const GSkymap& map)
  *
  * Add @p value to all sky map pixels.
  ***************************************************************************/
-GSkymap& GSkymap::operator+=(const double& value)
+GSkyMap& GSkyMap::operator+=(const double& value)
 {
     // Set total number of sky map pixels
     int num = m_num_pixels * m_num_maps;
@@ -412,7 +412,7 @@ GSkymap& GSkymap::operator+=(const double& value)
  * does the transformation, allowing the to loop more effectively over the
  * layers.
  ***************************************************************************/
-GSkymap& GSkymap::operator-=(const GSkymap& map)
+GSkyMap& GSkyMap::operator-=(const GSkyMap& map)
 {
     // Check if number of layers are identical
     if (map.nmaps() != nmaps()) {
@@ -452,7 +452,7 @@ GSkymap& GSkymap::operator-=(const GSkymap& map)
  *
  * Subtracts @p value from all sky map pixels.
  ***************************************************************************/
-GSkymap& GSkymap::operator-=(const double& value)
+GSkyMap& GSkyMap::operator-=(const double& value)
 {
     // Set total number of sky map pixels
     int num = m_num_pixels * m_num_maps;
@@ -486,7 +486,7 @@ GSkymap& GSkymap::operator-=(const double& value)
  * does the transformation, allowing to loop more effectively over the
  * layers.
  ***************************************************************************/
-GSkymap& GSkymap::operator*=(const GSkymap& map)
+GSkyMap& GSkyMap::operator*=(const GSkyMap& map)
 {
     // Check if number of layers are identical
     if (map.nmaps() != nmaps()) {
@@ -526,7 +526,7 @@ GSkymap& GSkymap::operator*=(const GSkymap& map)
  *
  * Multiplies all pixels of the sky map by the given scale @p factor.
  ***************************************************************************/
-GSkymap& GSkymap::operator*=(const double& factor)
+GSkyMap& GSkyMap::operator*=(const double& factor)
 {
     // Compute total number of pixels
     int n = npix() * nmaps();
@@ -559,7 +559,7 @@ GSkymap& GSkymap::operator*=(const double& factor)
  * On return, all pixels in @p map that are zero are silently set to zero in
  * the skymap.
  ***************************************************************************/
-GSkymap& GSkymap::operator/=(const GSkymap& map)
+GSkyMap& GSkyMap::operator/=(const GSkyMap& map)
 {
     // Check if number of layers are identical
     if (map.nmaps() != nmaps()) {
@@ -614,7 +614,7 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
  *
  * Divides all pixels of the sky map by the given @p factor.
  ***************************************************************************/
-GSkymap& GSkymap::operator/=(const double& factor)
+GSkyMap& GSkyMap::operator/=(const double& factor)
 {
     // Check for division by zero
     if (factor == 0.0) {
@@ -649,7 +649,7 @@ GSkymap& GSkymap::operator/=(const double& factor)
  * Access sky map pixel by its index, where the most quickly varying axis is
  * the x axis of the map.
  ***************************************************************************/
-double& GSkymap::operator()(const int& index, const int& map)
+double& GSkyMap::operator()(const int& index, const int& map)
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
@@ -682,7 +682,7 @@ double& GSkymap::operator()(const int& index, const int& map)
  * Access sky map pixel by its index, where the most quickly varying axis is
  * the x axis of the map.
  ***************************************************************************/
-const double& GSkymap::operator()(const int& index, const int& map) const
+const double& GSkyMap::operator()(const int& index, const int& map) const
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
@@ -717,7 +717,7 @@ const double& GSkymap::operator()(const int& index, const int& map) const
  *
  * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
-double& GSkymap::operator()(const GSkyPixel& pixel, const int& map)
+double& GSkyMap::operator()(const GSkyPixel& pixel, const int& map)
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
@@ -755,7 +755,7 @@ double& GSkymap::operator()(const GSkyPixel& pixel, const int& map)
  *
  * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
-const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
+const double& GSkyMap::operator()(const GSkyPixel& pixel, const int& map) const
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
@@ -798,7 +798,7 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
  * is requested several times. This speeds up use cases where skymap values
  * for various map indices have to be returned for the same sky direction.
  ***************************************************************************/
-double GSkymap::operator()(const GSkyDir& dir, const int& map) const
+double GSkyMap::operator()(const GSkyDir& dir, const int& map) const
 {
     // Throw an error if the map index is not in valid range
     #if defined(G_RANGE_CHECK)
@@ -956,7 +956,7 @@ double GSkymap::operator()(const GSkyDir& dir, const int& map) const
  *
  * Resets the sky map to the initial state.
  ***************************************************************************/
-void GSkymap::clear(void)
+void GSkyMap::clear(void)
 {
     // Free class members
     free_members();
@@ -974,9 +974,9 @@ void GSkymap::clear(void)
  *
  * @return Pointer to deep copy of sky map.
  ***************************************************************************/
-GSkymap* GSkymap::clone(void) const
+GSkyMap* GSkyMap::clone(void) const
 {
-    return new GSkymap(*this);
+    return new GSkyMap(*this);
 }
 
 
@@ -988,18 +988,18 @@ GSkymap* GSkymap::clone(void) const
  * @exception GException::invalid_argument
  *            Invalid number of maps specified.
  *
- * Redefines the number of maps in an GSkymap object. If the number of maps
+ * Redefines the number of maps in an GSkyMap object. If the number of maps
  * is increased with respect to the existing number, additional maps with
  * pixel values of zero are append to the object. Existing map pixel values
  * are kept. If the number of maps is decreased with respect to the existing
  * number, the excedent maps are dropped. The remaining map pixel values are
  * kept.
  ***************************************************************************/
-void GSkymap::nmaps(const int& nmaps)
+void GSkyMap::nmaps(const int& nmaps)
 {
     // Throw an exception if less than 1 map is required
     if (nmaps < 1) {
-        std::string msg = "At least one map is required in an GSkymap object."
+        std::string msg = "At least one map is required in an GSkyMap object."
                           " Please specify an argument >=1.";
         throw GException::invalid_argument(G_NMAPS, msg);
     }
@@ -1055,7 +1055,7 @@ void GSkymap::nmaps(const int& nmaps)
  * sky map leads to a 1D GSkyPixel object, a 2D sky map leads to a 2D
  * GSkyPixel object.
  ***************************************************************************/
-GSkyPixel GSkymap::inx2pix(const int& index) const
+GSkyPixel GSkyMap::inx2pix(const int& index) const
 {
     // Initialise sky map pixel
     GSkyPixel pixel;
@@ -1085,7 +1085,7 @@ GSkyPixel GSkymap::inx2pix(const int& index) const
  *
  * Returns sky direction for a given pixel index.
  ***************************************************************************/
-GSkyDir GSkymap::inx2dir(const int& index) const
+GSkyDir GSkyMap::inx2dir(const int& index) const
 {
     // Throw error if sky projection is not valid
     if (m_proj == NULL) {
@@ -1114,7 +1114,7 @@ GSkyDir GSkymap::inx2dir(const int& index) const
  *
  * Returns sky direction for a given sky map @p pixel.
  ***************************************************************************/
-GSkyDir GSkymap::pix2dir(const GSkyPixel& pixel) const
+GSkyDir GSkyMap::pix2dir(const GSkyPixel& pixel) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
@@ -1161,7 +1161,7 @@ GSkyDir GSkymap::pix2dir(const GSkyPixel& pixel) const
  *
  * Converts a sky map @p pixel into the pixel index.
  ***************************************************************************/
-int GSkymap::pix2inx(const GSkyPixel& pixel) const
+int GSkyMap::pix2inx(const GSkyPixel& pixel) const
 {
     // Initialise pixel index
     int index = 0;
@@ -1199,7 +1199,7 @@ int GSkymap::pix2inx(const GSkyPixel& pixel) const
  *
  * Returns sky map pixel index for a given sky direction.
  ***************************************************************************/
-int GSkymap::dir2inx(const GSkyDir& dir) const
+int GSkyMap::dir2inx(const GSkyDir& dir) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
@@ -1226,7 +1226,7 @@ int GSkymap::dir2inx(const GSkyDir& dir) const
  *
  * Returns sky map pixel for a given sky direction.
  ***************************************************************************/
-GSkyPixel GSkymap::dir2pix(const GSkyDir& dir) const
+GSkyPixel GSkyMap::dir2pix(const GSkyDir& dir) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
@@ -1254,7 +1254,7 @@ GSkyPixel GSkymap::dir2pix(const GSkyDir& dir) const
  *
  * Returns the flux in the pixel with the specified @p index.
  ***************************************************************************/
-double GSkymap::flux(const int& index, const int& map) const
+double GSkyMap::flux(const int& index, const int& map) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
@@ -1291,7 +1291,7 @@ double GSkymap::flux(const int& index, const int& map) const
  * For a HealPix pixelisation, the pixel is divided into 12 wedges. For a
  * WCS pixelisation, the pixel is divided into 8 wedges.
  ***************************************************************************/
-double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
+double GSkyMap::flux(const GSkyPixel& pixel, const int& map) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
@@ -1437,7 +1437,7 @@ double GSkymap::flux(const GSkyPixel& pixel, const int& map) const
  *
  * Returns the solid angle of the pixel with the specified @p index.
  ***************************************************************************/
-double GSkymap::solidangle(const int& index) const
+double GSkyMap::solidangle(const int& index) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
@@ -1464,7 +1464,7 @@ double GSkymap::solidangle(const int& index) const
  *
  * Returns the solid angle of the specified sky map @p pixel.
  ***************************************************************************/
-double GSkymap::solidangle(const GSkyPixel& pixel) const
+double GSkyMap::solidangle(const GSkyPixel& pixel) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
@@ -1512,14 +1512,14 @@ double GSkymap::solidangle(const GSkyPixel& pixel) const
  * performs a deep copy of @p proj, allowing to destroy the argument after
  * using the method.
  *
- * Warning: this method may corrupt the GSkymap object as it allows assigning
+ * Warning: this method may corrupt the GSkyMap object as it allows assigning
  * for example a 1D projection to a 2D skymap. Please use this method only
  * when you know what you're doing.
  *
  * @todo We may restrict this method to not allow changing the projection
  * dimension.
  ***************************************************************************/
-void GSkymap::projection(const GSkyProjection& proj)
+void GSkyMap::projection(const GSkyProjection& proj)
 {
     // Free any existing WCS
     if (m_proj != NULL) delete m_proj;
@@ -1542,7 +1542,7 @@ void GSkymap::projection(const GSkyProjection& proj)
  * sky direction into 2D pixel indices, and then checks whether the pixel
  * indices fall in the skymap.
  ***************************************************************************/
-bool GSkymap::contains(const GSkyDir& dir) const
+bool GSkyMap::contains(const GSkyDir& dir) const
 {
     // Convert sky direction into sky pixel
     GSkyPixel pixel = dir2pix(dir);
@@ -1561,7 +1561,7 @@ bool GSkymap::contains(const GSkyDir& dir) const
  * Checks whether the specified sky map @p pixel falls within the skymap
  * or not.
  ***************************************************************************/
-bool GSkymap::contains(const GSkyPixel& pixel) const
+bool GSkyMap::contains(const GSkyPixel& pixel) const
 {
     // Initialise containment flag
     bool inmap = false;
@@ -1604,7 +1604,7 @@ bool GSkymap::contains(const GSkyPixel& pixel) const
  *
  * Extracts @p nmaps sky maps starting from @p map from the sky map.
  ***************************************************************************/
-GSkymap GSkymap::extract(const int& map, const int& nmaps) const
+GSkyMap GSkyMap::extract(const int& map, const int& nmaps) const
 {
     // Throw an exception if the first map index is invalid
     if (map < 0 || map >= m_num_maps) {
@@ -1644,7 +1644,7 @@ GSkymap GSkymap::extract(const int& map, const int& nmaps) const
     }
 
     // Create a copy of the map
-    GSkymap result = *this;
+    GSkyMap result = *this;
 
     // Delete pixels from that map
     if (result.m_pixels != NULL) delete [] result.m_pixels;
@@ -1670,7 +1670,7 @@ GSkymap GSkymap::extract(const int& map, const int& nmaps) const
  * pixels or there is only a single map in the object, the method does
  * nothing.
  ***************************************************************************/
-void GSkymap::stack_maps(void)
+void GSkyMap::stack_maps(void)
 {
     // Continue only if the map has pixels and if there is more than 1 map
     if (m_num_pixels > 0 && m_num_maps > 1) {
@@ -1715,7 +1715,7 @@ void GSkymap::stack_maps(void)
  * @todo Do we have to restrict a HEALPix map to a BinTable and a WCS map
  * to a Double precision image???
  ***************************************************************************/
-void GSkymap::load(const std::string& filename)
+void GSkyMap::load(const std::string& filename)
 {
     // Free memory and initialise members
     free_members();
@@ -1784,7 +1784,7 @@ void GSkymap::load(const std::string& filename)
  *
  * The method does nothing if the skymap holds no valid WCS.
  ***************************************************************************/
-void GSkymap::save(const std::string& filename, bool clobber) const
+void GSkyMap::save(const std::string& filename, bool clobber) const
 {
     // Continue only if we have data to save
     if (m_proj != NULL) {
@@ -1824,7 +1824,7 @@ void GSkymap::save(const std::string& filename, bool clobber) const
  *
  * @param[in] hdu FITS HDU.
  ***************************************************************************/
-void GSkymap::read(const GFitsHDU& hdu)
+void GSkyMap::read(const GFitsHDU& hdu)
 {
     // Free memory and initialise members
     free_members();
@@ -1860,7 +1860,7 @@ void GSkymap::read(const GFitsHDU& hdu)
  *
  * @param[in] file FITS file pointer.
  ***************************************************************************/
-void GSkymap::write(GFits& file) const
+void GSkyMap::write(GFits& file) const
 {
     // Continue only if we have data to save
     if (m_proj != NULL) {
@@ -1899,7 +1899,7 @@ void GSkymap::write(GFits& file) const
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing sky map information.
  ***************************************************************************/
-std::string GSkymap::print(const GChatter& chatter) const
+std::string GSkyMap::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -1908,7 +1908,7 @@ std::string GSkymap::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GSkymap ===");
+        result.append("=== GSkyMap ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Number of pixels"));
@@ -1948,7 +1948,7 @@ std::string GSkymap::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GSkymap::init_members(void)
+void GSkyMap::init_members(void)
 {
     // Initialise members
     m_num_pixels = 0;
@@ -1972,7 +1972,7 @@ void GSkymap::init_members(void)
 /***********************************************************************//**
  * @brief Allocate skymap pixels
  ***************************************************************************/
-void GSkymap::alloc_pixels(void)
+void GSkyMap::alloc_pixels(void)
 {
     // Compute data size
     int size = m_num_pixels * m_num_maps;
@@ -1998,7 +1998,7 @@ void GSkymap::alloc_pixels(void)
  *
  * @param[in] map Sky map.
  ***************************************************************************/
-void GSkymap::copy_members(const GSkymap& map)
+void GSkyMap::copy_members(const GSkyMap& map)
 {
     // Copy attributes
     m_num_pixels = map.m_num_pixels;
@@ -2034,7 +2034,7 @@ void GSkymap::copy_members(const GSkymap& map)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GSkymap::free_members(void)
+void GSkyMap::free_members(void)
 {
     // Free memory
     if (m_proj   != NULL) delete m_proj;
@@ -2079,7 +2079,7 @@ void GSkymap::free_members(void)
  *
  * @todo Remove cd and pv2 parameters.
  ***************************************************************************/
-void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
+void GSkyMap::set_wcs(const std::string& wcs, const std::string& coords,
                       const double& crval1, const double& crval2,
                       const double& crpix1, const double& crpix2,
                       const double& cdelt1, const double& cdelt2,
@@ -2133,7 +2133,7 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
  * several HEALPix maps into a single column. Alternatively, multiple maps
  * may be stored in multiple columns.
  ***************************************************************************/
-void GSkymap::read_healpix(const GFitsTable& table)
+void GSkyMap::read_healpix(const GFitsTable& table)
 {
     // Determine number of rows and columns in table
     int nrows = table.nrows();
@@ -2251,7 +2251,7 @@ void GSkymap::read_healpix(const GFitsTable& table)
  *            WCS image has an invalid dimension or covers a too large
  *            range.
  ***************************************************************************/
-void GSkymap::read_wcs(const GFitsImage& image)
+void GSkyMap::read_wcs(const GFitsImage& image)
 {
     // Allocate WCS
     alloc_wcs(image);
@@ -2346,7 +2346,7 @@ void GSkymap::read_wcs(const GFitsImage& image)
  * @exception GException::wcs_invalid
  *            WCS projection of FITS file not supported by GammaLib.
  ***************************************************************************/
-void GSkymap::alloc_wcs(const GFitsImage& image)
+void GSkyMap::alloc_wcs(const GFitsImage& image)
 {
     // Get standard keywords
     std::string ctype1 = image.string("CTYPE1");
@@ -2386,7 +2386,7 @@ void GSkymap::alloc_wcs(const GFitsImage& image)
  * This method allocates a binary table HDU that contains the Healpix data.
  * Deallocation of the table has to be done by the client.
  ***************************************************************************/
-GFitsBinTable* GSkymap::create_healpix_hdu(void) const
+GFitsBinTable* GSkyMap::create_healpix_hdu(void) const
 {
     // Initialise result to NULL pointer
     GFitsBinTable* hdu = NULL;
@@ -2445,7 +2445,7 @@ GFitsBinTable* GSkymap::create_healpix_hdu(void) const
  *
  * @todo Set additional keywords.
  ***************************************************************************/
-GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
+GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
 {
     // Initialise result to NULL pointer
     GFitsImageDouble* hdu = NULL;
@@ -2534,7 +2534,7 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
  *             a34
  *
  ***************************************************************************/
-double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
+double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                            const GSkyDir& dir3, const GSkyDir& dir4) const
 {
     // Initialise solid angle
@@ -2622,7 +2622,7 @@ double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
  *         3
  *
  ***************************************************************************/
-double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
+double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                            const GSkyDir& dir3) const
 {
     // Initialise solid angle
@@ -2657,10 +2657,10 @@ double GSkymap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
  * @param[in] map Skymap.
  * @return Skymap containing the square root of every element.
  ***************************************************************************/
-GSkymap sqrt(const GSkymap& map)
+GSkyMap sqrt(const GSkyMap& map)
 {
     // Initialise result vector
-    GSkymap result(map);
+    GSkyMap result(map);
 
     // Loop over all maps
     for (int i = 0; i < map.nmaps(); ++i) {

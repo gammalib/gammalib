@@ -98,7 +98,7 @@ GCTAEventCube::GCTAEventCube(const std::string& filename) : GEventCube()
  * Construct instance of events cube from sky map, energy boundaries and
  * Good Time Intervals.
  ***************************************************************************/
-GCTAEventCube::GCTAEventCube(const GSkymap& map, const GEbounds& ebds,
+GCTAEventCube::GCTAEventCube(const GSkyMap& map, const GEbounds& ebds,
                              const GGti& gti) : GEventCube()
 {
     // Initialise members
@@ -448,7 +448,7 @@ int GCTAEventCube::number(void) const
 /***********************************************************************//**
  * @brief Set event cube from sky map
  ***************************************************************************/
-void GCTAEventCube::map(const GSkymap& map)
+void GCTAEventCube::map(const GSkyMap& map)
 {
     // Store sky map
     m_map = map;
@@ -610,7 +610,7 @@ void GCTAEventCube::free_members(void)
  * @param[in] hdu Image HDU.
  *
  * This method reads a CTA counts map from a FITS HDU. The counts map is
- * stored in a GSkymap object.
+ * stored in a GSkyMap object.
  ***************************************************************************/
 void GCTAEventCube::read_cntmap(const GFitsImage& hdu)
 {

@@ -37,7 +37,7 @@ collected by the :doxy:`GObservations` container class).
 The data of binned observations are stored by the
 :doxy:`GCTAEventCube` class. The :doxy:`GCTAEventCube` class holds the
 binned event data in form of a sky map, implemented by the
-:doxy:`GSkymap` class. The sky coordinates of all sky map pixels
+:doxy:`GSkyMap` class. The sky coordinates of all sky map pixels
 are stored in an array of CTA instrument directions, implemented
 by the :doxy:`GCTAInstDir` class which holds a single :doxy:`GSkyDir`
 object. The mean energies of the event cube

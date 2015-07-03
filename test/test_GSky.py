@@ -96,7 +96,7 @@ class Test(GPythonTestSuite):
             dir = pixels.inx2dir(i)
             inx = pixels.dir2inx(dir)
             msg = map + " inx2dir/dir2inx check for pixel " + str(i)
-            err = map + " GSkymap trouble with pixel " + str(i) + " (" + str(inx) + \
+            err = map + " GSkyMap trouble with pixel " + str(i) + " (" + str(inx) + \
                 "), RA=" + str(dir.ra() * 180 / pi) + ", Dec=" + str(dir.dec() * 180 / pi)
             self.test_assert(i == inx, msg, err)
 
@@ -110,7 +110,7 @@ class Test(GPythonTestSuite):
                 dra -= 2.0 * pi
             ddec = abs(dir.dec() - dir_new.dec())
             msg = map + " dir check for pixel " + str(i)
-            err = map + " GSkymap trouble with pixel " + str(i) + " (" + str(dra) + \
+            err = map + " GSkyMap trouble with pixel " + str(i) + " (" + str(dra) + \
                 "," + str(ddec) + ")"
             self.test_assert(not (dra > 1.0e-9 or ddec > 1.0e-9), msg, err)
 
@@ -132,7 +132,7 @@ class Test(GPythonTestSuite):
             pass
 
         # Create skymap
-        pixels = GSkymap(proj, "CEL", 83.6331, 22.0145, -3.7, 2.6, 5, 5, 20)
+        pixels = GSkyMap(proj, "CEL", 83.6331, 22.0145, -3.7, 2.6, 5, 5, 20)
         for map in range(pixels.nmaps()):
             for i in range(pixels.npix()):
                 pixels[i, map] = i + map * pixels.npix()
@@ -161,14 +161,14 @@ class Test(GPythonTestSuite):
             pass
 
         # Create HEALPix skymap
-        pixels = GSkymap("GAL", 2, "RING", 2)
+        pixels = GSkyMap("GAL", 2, "RING", 2)
         for i in range(pixels.npix()):
             pixels[i] = i + 1.0
             pixels[i, 1] = i + 1.0 + 1000.0
         pixels.save(file1)
 
         # Load HEALPix skymap
-        pixels = GSkymap(file1)
+        pixels = GSkyMap(file1)
 
         # Control coordinate and pixel transformations
         self.test_skymap_pixels(pixels, "HEALPix")
@@ -184,7 +184,7 @@ class Test(GPythonTestSuite):
         pixels.save(file2, True)
 
         # Load again HEALPix skymap
-        pixels = GSkymap(file1)
+        pixels = GSkyMap(file1)
 
         # Return
         return
@@ -323,7 +323,7 @@ class Test(GPythonTestSuite):
         Test the skymap operators.
         """
         # Setup skymaps
-        map    = GSkymap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
+        map    = GSkyMap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
         map[0] = 1.0
         map[1] = 2.0
         map[2] = 3.0

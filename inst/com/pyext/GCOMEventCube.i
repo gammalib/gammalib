@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCOMEventCube(void);
     explicit GCOMEventCube(const std::string& filename);
-    explicit GCOMEventCube(const GSkymap& map, const GEbounds& ebds,
+    explicit GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
                            const GGti& gti, const double& phimin,
                            const double& dphi);
     GCOMEventCube(const GCOMEventCube& cube);
@@ -60,9 +60,9 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    void                   map(const GSkymap& map, const double& phimin,
+    void                   map(const GSkyMap& map, const double& phimin,
                                const double& dphi);
-    const GSkymap&         map(void) const;
+    const GSkyMap&         map(void) const;
     int                    nchi(void) const;
     int                    npsi(void) const;
     int                    nphi(void) const;

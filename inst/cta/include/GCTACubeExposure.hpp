@@ -31,7 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GFits.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GObservations.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventCube.hpp"
@@ -75,7 +75,7 @@ public:
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs, GLog* log = NULL);
-    const GSkymap&     cube(void) const;
+    const GSkyMap&     cube(void) const;
     const GEbounds&    ebounds(void) const;
     const GGti&        gti(void) const;
     const GNodeArray&  elogmeans(void) const;
@@ -102,7 +102,7 @@ protected:
 
     // Members
     mutable std::string m_filename;  //!< Filename
-    GSkymap             m_cube;      //!< Average Exposure cube
+    GSkyMap             m_cube;      //!< Average Exposure cube
     GEbounds            m_ebounds;   //!< Energy bounds for the Exposure cube
     GNodeArray          m_elogmeans; //!< Mean energy for the Exposure cube
     GGti                m_gti;       //!< Good time interval for the Exposure cube
@@ -136,11 +136,11 @@ std::string GCTACubeExposure::classname(void) const
  *
  * @return Exposure cube.
  *
- * Returns the GSkymap object that is used to store the exposure cube
+ * Returns the GSkyMap object that is used to store the exposure cube
  * information.
  ***************************************************************************/
 inline
-const GSkymap& GCTACubeExposure::cube(void) const
+const GSkyMap& GCTACubeExposure::cube(void) const
 {
     return (m_cube);
 }

@@ -606,7 +606,7 @@ void TestGModel::test_diffuse_cube(void)
     // Test skymap value constructor
     test_try("Test skymap value constructor");
     try {
-        GSkymap map("GAL", 16, "RING", 10);
+        GSkyMap map("GAL", 16, "RING", 10);
         GEnergies energies;
         for (int i = 0; i < 10; ++i) {
             energies.append(GEnergy(double(i+1.0), "MeV"));
@@ -644,7 +644,7 @@ void TestGModel::test_diffuse_cube(void)
                                         "Model filename \"Help me!\" expected.");
 
         // Test cube method
-        model.cube(GSkymap("GAL", 16, "RING", 10));
+        model.cube(GSkyMap("GAL", 16, "RING", 10));
         test_value(model.cube().npix(), 3072);
 
         // Test operator access
@@ -703,7 +703,7 @@ void TestGModel::test_diffuse_map(void)
     // Test skymap value constructor
     test_try("Test skymap value constructor");
     try {
-        GSkymap map("GAL", 16, "RING", 10);
+        GSkyMap map("GAL", 16, "RING", 10);
         GModelSpatialDiffuseMap model(map, 3.0);
         test_value(model.value(), 3.0);
         test_assert(model.filename() == "", "Expected \"\"");
@@ -736,7 +736,7 @@ void TestGModel::test_diffuse_map(void)
                                         "Model filename \""+m_map_file+"\" expected.");
 
         // Test map method
-        model.map(GSkymap("GAL", 16, "RING", 10));
+        model.map(GSkyMap("GAL", 16, "RING", 10));
         test_value(model.map().npix(), 3072);
 
         // Test operator access

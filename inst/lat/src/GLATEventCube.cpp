@@ -447,7 +447,7 @@ int GLATEventCube::number(void) const
 /***********************************************************************//**
  * @brief Set event cube from sky map
  ***************************************************************************/
-void GLATEventCube::map(const GSkymap& map)
+void GLATEventCube::map(const GSkyMap& map)
 {
     // Store sky map
     m_map = map;
@@ -575,7 +575,7 @@ std::string GLATEventCube::diffname(const int& index) const
  *
  * Returns pointer to diffuse model sky map.
  ***************************************************************************/
-GSkymap* GLATEventCube::diffrsp(const int& index) const
+GSkyMap* GLATEventCube::diffrsp(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
@@ -741,7 +741,7 @@ void GLATEventCube::free_members(void)
  * @param[in] hdu Image HDU.
  *
  * This method reads a Fermi/LAT counts map from a FITS image. The counts map
- * is stored in a GSkymap object, and a pointer is set up to access the
+ * is stored in a GSkyMap object, and a pointer is set up to access the
  * pixels individually. Recall that skymap pixels are stored in the order
  * (ix,iy,ebin).
  ***************************************************************************/
@@ -767,12 +767,12 @@ void GLATEventCube::read_cntmap(const GFitsImage& hdu)
  *            Source map not compatible with sky map
  *
  * This method reads a LAT source map from a FITS image. The source map is
- * stored in a GSkymap object and is given in units of counts/pixel/MeV.
+ * stored in a GSkyMap object and is given in units of counts/pixel/MeV.
  ***************************************************************************/
 void GLATEventCube::read_srcmap(const GFitsImage& hdu)
 {
     // Allocate skymap
-    GSkymap* map = new GSkymap;
+    GSkyMap* map = new GSkyMap;
 
     // Read skymap
     map->read(hdu);

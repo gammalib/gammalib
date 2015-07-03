@@ -140,7 +140,7 @@
 #include "GSkyDir.hpp"
 #include "GHorizDir.hpp"
 #include "GSkyPixel.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GSkyRegions.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"

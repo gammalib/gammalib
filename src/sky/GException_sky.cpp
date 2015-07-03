@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GException_sky.cpp  -  sky exception handlers             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2015 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,7 +33,7 @@
 
 
 /***********************************************************************//**
- * @brief General GSkymap error
+ * @brief General GSkyMap error
  *
  * @param[in] origin Method that throws the error.
  * @param[in] message Error message.

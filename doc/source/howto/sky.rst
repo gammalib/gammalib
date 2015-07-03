@@ -14,8 +14,8 @@ Python:
 .. code-block:: python
 
     >>> import gammalib
-    >>> healpix = gammalib.GSkymap("healpix.fits")
-    >>> map = gammalib.GSkymap("CAR","GAL",0.0,0.0,0.5,0.5,100,100)
+    >>> healpix = gammalib.GSkyMap("healpix.fits")
+    >>> map = gammalib.GSkyMap("CAR","GAL",0.0,0.0,0.5,0.5,100,100)
     >>> map += healpix
     >>> map.save("carmap.fits")
 
@@ -24,8 +24,8 @@ C++:
 .. code-block:: cpp
 
     #include "GammaLib.hpp"
-    GSkymap healpix("healpix.fits");
-    GSkymap map("CAR","GAL",0.0,0.0,0.5,0.5,100,100);
+    GSkyMap healpix("healpix.fits");
+    GSkyMap map("CAR","GAL",0.0,0.0,0.5,0.5,100,100);
     map += healpix;
     map.save("carmap.fits");
     

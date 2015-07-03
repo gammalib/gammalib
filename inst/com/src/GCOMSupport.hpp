@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMSupport.hpp - COMPTEL support functions              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,13 +28,13 @@
 #define GCOMSUPPORT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Prototypes _________________________________________________________ */
-void com_wcs_mer2car(GSkymap& map);
+void com_wcs_mer2car(GSkyMap& map);
 
 #endif /* GCOMSUPPORT_HPP */

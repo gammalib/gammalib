@@ -3,7 +3,7 @@
 # This script makes an image from a radial model and verifies that the
 # model is correctly normalized.
 #
-# Copyright (C) 2011-2013 Juergen Knoedlseder
+# Copyright (C) 2011-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ def test_radial_model(name, model, clobber=True):
     """
     # Make a 2D FITS image (cartesian projection, celestial coordinates)
     ra, dec, binsz, npix = 0, 0, 0.01, 300
-    image = gammalib.GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, 1)
+    image = gammalib.GSkyMap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, 1)
 
     # Fill the image
     energy = gammalib.GEnergy()

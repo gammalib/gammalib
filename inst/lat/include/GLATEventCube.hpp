@@ -38,7 +38,7 @@
 #include "GFits.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
 
 
@@ -78,11 +78,11 @@ public:
 
     // Other methods
     void              time(const GTime& time);
-    void              map(const GSkymap& map);
+    void              map(const GSkyMap& map);
     void              enodes(const GNodeArray& enodes);
     void              ontime(const double& ontime);
     const GTime&      time(void) const;
-    const GSkymap&    map(void) const;
+    const GSkyMap&    map(void) const;
     const GNodeArray& enodes(void) const;
     const double&     ontime(void) const;
     int               nx(void) const;
@@ -91,7 +91,7 @@ public:
     int               ebins(void) const;
     int               ndiffrsp(void) const;
     std::string       diffname(const int& index) const;
-    GSkymap*          diffrsp(const int& index) const;
+    GSkyMap*          diffrsp(const int& index) const;
     double            maxrad(const GSkyDir& dir) const;
 
 protected:
@@ -110,14 +110,14 @@ protected:
 
     // Protected data area
     GLATEventBin             m_bin;          //!< Actual energy bin
-    GSkymap                  m_map;          //!< Counts map stored as sky map
+    GSkyMap                  m_map;          //!< Counts map stored as sky map
     GTime                    m_time;         //!< Event cube mean time
     double                   m_ontime;       //!< Event cube ontime (sec)
     std::vector<GLATInstDir> m_dirs;         //!< Array of event directions
     std::vector<double>      m_solidangle;   //!< Array of solid angles (sr)
     std::vector<GEnergy>     m_energies;     //!< Array of log mean energies
     std::vector<GEnergy>     m_ewidth;       //!< Array of energy bin widths
-    std::vector<GSkymap*>    m_srcmap;       //!< Pointers to source maps
+    std::vector<GSkyMap*>    m_srcmap;       //!< Pointers to source maps
     std::vector<std::string> m_srcmap_names; //!< Source map names
     GNodeArray               m_enodes;       //!< Energy nodes
 };
@@ -192,7 +192,7 @@ const GTime& GLATEventCube::time(void) const
  * @return Sky map.
  ***************************************************************************/
 inline
-const GSkymap& GLATEventCube::map(void) const
+const GSkyMap& GLATEventCube::map(void) const
 {
     return m_map;
 }

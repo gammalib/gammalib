@@ -32,7 +32,7 @@
 #include <vector>
 #include "GEventCube.hpp"
 #include "GCTAEventBin.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
 #include "GEnergy.hpp"
@@ -55,7 +55,7 @@ public:
     // Constructors and destructors
     GCTAEventCube(void);
     explicit GCTAEventCube(const std::string& filename);
-    GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
+    GCTAEventCube(const GSkyMap& map, const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -82,8 +82,8 @@ public:
     // Other methods
     const GTime&           time(void) const;
     const GEnergy&         energy(const int& index) const;
-    void                   map(const GSkymap& map);
-    const GSkymap&         map(void) const;
+    void                   map(const GSkyMap& map);
+    const GSkyMap&         map(void) const;
     int                    nx(void) const;
     int                    ny(void) const;
     int                    npix(void) const;
@@ -103,7 +103,7 @@ protected:
     void         set_bin(const int& index);
 
     // Protected members
-    GSkymap                  m_map;        //!< Counts map stored as sky map
+    GSkyMap                  m_map;        //!< Counts map stored as sky map
     GCTAEventBin             m_bin;        //!< Actual event bin
     GTime                    m_time;       //!< Event cube mean time
     std::vector<GCTAInstDir> m_dirs;       //!< Array of event directions
@@ -149,7 +149,7 @@ int GCTAEventCube::dim(void) const
  * cube.
  ***************************************************************************/
 inline
-const GSkymap& GCTAEventCube::map(void) const
+const GSkyMap& GCTAEventCube::map(void) const
 {
     return (m_map);
 }

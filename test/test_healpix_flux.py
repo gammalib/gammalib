@@ -37,10 +37,10 @@ print("Pixels %d" % npix)
 for index in range(npix):
 
     # Allocate HealPix map
-    map = gammalib.GSkymap("GAL", nside, "RING")
+    map = gammalib.GSkyMap("GAL", nside, "RING")
 
     # Create WCS map, set Healpix index and merge into WCS map
-    wcs = gammalib.GSkymap("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 3600, 1800)
+    wcs = gammalib.GSkyMap("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 3600, 1800)
     map[index] = 1.0
     wcs += map
 

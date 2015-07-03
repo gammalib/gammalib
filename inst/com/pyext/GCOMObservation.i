@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,9 +71,9 @@ public:
     void           ewidth(const double& ewidth);
     const double&  obs_id(void) const;
     const double&  ewidth(void) const;
-    const GSkymap& drb(void) const;
-    const GSkymap& drg(void) const;
-    const GSkymap& drx(void) const;
+    const GSkyMap& drb(void) const;
+    const GSkyMap& drg(void) const;
+    const GSkyMap& drx(void) const;
 };
 
 

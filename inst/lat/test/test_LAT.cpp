@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_LAT.cpp - test LAT classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -331,7 +331,7 @@ void TestGLATLtCube::test_one_ltcube(const std::string& datadir, const double& r
     // Create livetime skymap (no phi dependence)
     test_try("Create livetime skymap (no phi dependence)");
     try {
-        GSkymap map("GAL", 64, "RING", 1);
+        GSkyMap map("GAL", 64, "RING", 1);
         GLATLtCube ltcube(lat_ltcube);
         GEnergy energy;
         for (int i = 0; i < map.npix(); ++i) {
@@ -348,7 +348,7 @@ void TestGLATLtCube::test_one_ltcube(const std::string& datadir, const double& r
     // Create livetime skymap (phi dependence)
     test_try("Create livetime skymap (phi dependence)");
     try {
-        GSkymap map("GAL", 64, "RING", 1);
+        GSkyMap map("GAL", 64, "RING", 1);
         GLATLtCube ltcube(lat_ltcube);
         GEnergy energy;
         for (int i = 0; i < map.npix(); ++i) {

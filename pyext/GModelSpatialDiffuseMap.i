@@ -42,7 +42,7 @@ public:
     GModelSpatialDiffuseMap(const std::string& filename,
                             const double&      value = 1.0,
                             const bool&        normalize = true);
-    GModelSpatialDiffuseMap(const GSkymap& map,
+    GModelSpatialDiffuseMap(const GSkyMap& map,
                             const double&  value = 1.0,
                             const bool&    normalize = true);
     GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
@@ -70,8 +70,8 @@ public:
     void               value(const double& value);
     const std::string& filename(void) const;
     void               load(const std::string& filename);
-    const GSkymap&     map(void) const;
-    void               map(const GSkymap& map);
+    const GSkyMap&     map(void) const;
+    void               map(const GSkyMap& map);
     bool               normalize(void) const;
 };
 

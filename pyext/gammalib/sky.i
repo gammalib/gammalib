@@ -101,7 +101,7 @@
 %include "GSkyDir.i"
 %include "GHorizDir.i"
 %include "GSkyPixel.i"
-%include "GSkymap.i"
+%include "GSkyMap.i"
 %include "GSkyRegions.i"
 %include "GSkyRegion.i"
 %include "GSkyRegionCircle.i"

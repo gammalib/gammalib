@@ -790,10 +790,10 @@ void GCOMObservation::load_drx(const std::string& drxname)
  * Compares the dimension and the WCS definition of a sky map to that of the
  * event cube. If both are identical, true is returned, false otherwise.
  ***************************************************************************/
-bool GCOMObservation::check_map(const GSkymap& map) const
+bool GCOMObservation::check_map(const GSkyMap& map) const
 {
     // Get reference to event cube map
-    const GSkymap& ref = dynamic_cast<GCOMEventCube*>(m_events)->map();
+    const GSkyMap& ref = dynamic_cast<GCOMEventCube*>(m_events)->map();
 
     // Compare dimensions
     bool same_dimension = ((map.nx()    == ref.nx()) &&

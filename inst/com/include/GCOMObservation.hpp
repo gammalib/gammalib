@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.hpp - COMPTEL observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,7 @@
 #include "GObservation.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GCOMResponse.hpp"
 #include "GCaldb.hpp"
 
@@ -87,9 +87,9 @@ public:
     void           ewidth(const double& ewidth) { m_ewidth=ewidth; }
     const double&  obs_id(void) const { return m_obs_id; }
     const double&  ewidth(void) const { return m_ewidth; }
-    const GSkymap& drb(void) const { return m_drb; }
-    const GSkymap& drg(void) const { return m_drg; }
-    const GSkymap& drx(void) const { return m_drx; }
+    const GSkyMap& drb(void) const { return m_drb; }
+    const GSkyMap& drg(void) const { return m_drg; }
+    const GSkyMap& drx(void) const { return m_drx; }
 
 protected:
     // Protected methods
@@ -100,7 +100,7 @@ protected:
     void load_drb(const std::string& drbname);
     void load_drg(const std::string& drgname);
     void load_drx(const std::string& drxname);
-    bool check_map(const GSkymap& map) const;
+    bool check_map(const GSkyMap& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
 
@@ -110,9 +110,9 @@ protected:
     std::string  m_drbname;     //!< DRB filename
     std::string  m_drgname;     //!< DRG filename
     std::string  m_drxname;     //!< DRX filename
-    GSkymap      m_drb;         //!< Background model
-    GSkymap      m_drg;         //!< Geometry factors
-    GSkymap      m_drx;         //!< Exposure map
+    GSkyMap      m_drb;         //!< Background model
+    GSkyMap      m_drg;         //!< Geometry factors
+    GSkyMap      m_drx;         //!< Exposure map
     GSkyDir      m_pointing;    //!< Pointing direction
     GCOMResponse m_response;    //!< Response functions
     double       m_obs_id;      //!< Observation ID

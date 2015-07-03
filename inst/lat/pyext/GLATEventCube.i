@@ -59,11 +59,11 @@ public:
 
     // Other methods
     void              time(const GTime& time);
-    void              map(const GSkymap& map);
+    void              map(const GSkyMap& map);
     void              enodes(const GNodeArray& enodes);
     void              ontime(const double& ontime);
     const GTime&      time(void) const;
-    const GSkymap&    map(void) const;
+    const GSkyMap&    map(void) const;
     const GNodeArray& enodes(void);
     const double&     ontime(void) const;
     int               nx(void) const;
@@ -72,7 +72,7 @@ public:
     int               ebins(void) const;
     int               ndiffrsp(void) const;
     std::string       diffname(const int& index) const;
-    GSkymap*          diffrsp(const int& index) const;
+    GSkyMap*          diffrsp(const int& index) const;
     double            maxrad(const GSkyDir& dir) const;
 };
 

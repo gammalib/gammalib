@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    createskymap.cpp - Create sky map                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,7 +49,7 @@ int main(void) {
     double dec(0.0);
     double binsz(0.01);
     int    npix(300);
-    GSkymap image("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, 1);
+    GSkyMap image("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, 1);
 
     // Fill the sky map with the model image
     GEnergy energy; // Dummy (not relevant as model is not energy dependent)

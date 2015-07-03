@@ -1,5 +1,5 @@
 /***************************************************************************
- *                         GSkymap.i - Sky map class                       *
+ *                         GSkyMap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkymap.i
+ * @file GSkyMap.i
  * @brief Sky map class SWIG file.
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GTools.hpp"
 %}
 
@@ -71,7 +71,7 @@ static int skymap_tuple(PyObject *input, int *ptr) {
 %}
 
 // This is the typemap that makes use of the function defined above
-%typemap(in) int GSkymapInx[ANY](int temp[3]) {
+%typemap(in) int GSkyMapInx[ANY](int temp[3]) {
    if (!skymap_tuple($input,temp)) {
       return NULL;
    }
@@ -79,8 +79,8 @@ static int skymap_tuple(PyObject *input, int *ptr) {
 }
 
 // This typecheck verifies that all arguments are integers. The typecheck
-// is needed for using "int GSkymapInx" in overloaded methods.
-%typemap(typecheck) int GSkymapInx[ANY] {
+// is needed for using "int GSkyMapInx" in overloaded methods.
+%typemap(typecheck) int GSkyMapInx[ANY] {
     $1 = 1;
     if (PySequence_Check($input)) {
         int size = PyObject_Length($input);
@@ -101,21 +101,21 @@ static int skymap_tuple(PyObject *input, int *ptr) {
 
 
 /***********************************************************************//**
- * @class GSkymap
+ * @class GSkyMap
  *
- * @brief GSkymap class interface definition
+ * @brief GSkyMap class interface definition
  ***************************************************************************/
-class GSkymap : public GBase {
+class GSkyMap : public GBase {
 
 public:
     // Constructors and destructors
-    GSkymap(void);
-    explicit GSkymap(const std::string& filename);
-    explicit GSkymap(const std::string& coords,
+    GSkyMap(void);
+    explicit GSkyMap(const std::string& filename);
+    explicit GSkyMap(const std::string& coords,
                      const int&         nside,
                      const std::string& order,
                      const int&         nmaps = 1);
-    explicit GSkymap(const std::string& wcs,
+    explicit GSkyMap(const std::string& wcs,
                      const std::string& coords,
                      const double&      x,
                      const double&      y,
@@ -124,27 +124,27 @@ public:
                      const int&         nx,
                      const int&         ny,
                      const int&         nmaps = 1);
-    GSkymap(const GSkymap& map);
-    virtual ~GSkymap(void);
+    GSkyMap(const GSkyMap& map);
+    virtual ~GSkyMap(void);
 
     // Operators
-    GSkymap&      operator+=(const GSkymap& map);
-    GSkymap&      operator+=(const double& value);
-    GSkymap&      operator-=(const GSkymap& map);
-    GSkymap&      operator-=(const double& value);
-    GSkymap&      operator*=(const GSkymap& map);
-    GSkymap&      operator*=(const double& factor);
-    GSkymap       operator+(const GSkymap& map) const;
-    GSkymap       operator-(const GSkymap& map) const;
-    GSkymap       operator*(const GSkymap& map) const;
-    GSkymap       operator/(const GSkymap& map) const;
+    GSkyMap&      operator+=(const GSkyMap& map);
+    GSkyMap&      operator+=(const double& value);
+    GSkyMap&      operator-=(const GSkyMap& map);
+    GSkyMap&      operator-=(const double& value);
+    GSkyMap&      operator*=(const GSkyMap& map);
+    GSkyMap&      operator*=(const double& factor);
+    GSkyMap       operator+(const GSkyMap& map) const;
+    GSkyMap       operator-(const GSkyMap& map) const;
+    GSkyMap       operator*(const GSkyMap& map) const;
+    GSkyMap       operator/(const GSkyMap& map) const;
     double&       operator()(const int& index, const int& map = 0);
     double&       operator()(const GSkyPixel& pixel, const int& map = 0);
     double        operator()(const GSkyDir& dir, const int& map = 0) const;
 
     // Methods
     void                  clear(void);
-    GSkymap*              clone(void) const;
+    GSkyMap*              clone(void) const;
     std::string           classname(void) const;
     const int&            npix(void) const;
     const int&            nx(void) const;
@@ -166,7 +166,7 @@ public:
     const GSkyProjection* projection(void) const;
     void                  projection(const GSkyProjection& proj);
     const double*         pixels(void) const;
-    GSkymap               extract(const int& map, const int& nmaps = 1) const;
+    GSkyMap               extract(const int& map, const int& nmaps = 1) const;
     void                  stack_maps(void);
     void                  load(const std::string& filename);
     void                  save(const std::string& filename, bool clobber = false) const;
@@ -176,18 +176,18 @@ public:
 
 
 /***********************************************************************//**
- * @brief GSkymap class extension
+ * @brief GSkyMap class extension
  *
  * @todo Implement __getitem__ and __setitem__ methods for GSkyPixel and
  * GSkyDir
  ***************************************************************************/
-%extend GSkymap {
-    double __getitem__(int GSkymapInx[]) {
-        if (GSkymapInx[0] == 1) {
-            return (*self)(GSkymapInx[1]);
+%extend GSkyMap {
+    double __getitem__(int GSkyMapInx[]) {
+        if (GSkyMapInx[0] == 1) {
+            return (*self)(GSkyMapInx[1]);
         }
         else {
-            return (*self)(GSkymapInx[1], GSkymapInx[2]);
+            return (*self)(GSkyMapInx[1], GSkyMapInx[2]);
         }
     }
     /*
@@ -195,12 +195,12 @@ public:
         return (*self)(pixel);
     }
     */
-    void __setitem__(int GSkymapInx[], double value) {
-        if (GSkymapInx[0] == 1) {
-            (*self)(GSkymapInx[1]) = value;
+    void __setitem__(int GSkyMapInx[], double value) {
+        if (GSkyMapInx[0] == 1) {
+            (*self)(GSkyMapInx[1]) = value;
         }
         else {
-            (*self)(GSkymapInx[1], GSkymapInx[2]) = value;
+            (*self)(GSkyMapInx[1], GSkyMapInx[2]) = value;
         }
     }
     /*
@@ -208,29 +208,29 @@ public:
         (*self)(pixel) = value;
     }
     */
-    GSkymap copy() {
+    GSkyMap copy() {
         return (*self);
     }
-    GSkymap sqrt() {
+    GSkyMap sqrt() {
         return sqrt(*self);
     }
     // Python 2.x operator/=
-    GSkymap __idiv__(const GSkymap& map) {
+    GSkyMap __idiv__(const GSkyMap& map) {
         self->operator/=(map);
         return (*self);
     }
     // Python 3.x operator/=
-    GSkymap __itruediv__(const GSkymap& map) {
+    GSkyMap __itruediv__(const GSkyMap& map) {
         self->operator/=(map);
         return (*self);
     }
     // Python 2.x operator/=
-    GSkymap __idiv__(const double& factor) {
+    GSkyMap __idiv__(const double& factor) {
         self->operator/=(factor);
         return (*self);
     }
     // Python 3.x operator/=
-    GSkymap __itruediv__(const double& factor) {
+    GSkyMap __itruediv__(const double& factor) {
         self->operator/=(factor);
         return (*self);
     }

@@ -175,7 +175,7 @@ GCTACubeExposure::GCTACubeExposure(const std::string&   wcs,
     set_eng_axis();
 
     // Create sky map
-    m_cube = GSkymap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
+    m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
 
     // Return
     return;

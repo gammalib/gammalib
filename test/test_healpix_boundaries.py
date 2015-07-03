@@ -23,7 +23,7 @@
 import gammalib
 import matplotlib.pyplot as plt
 
-map   = gammalib.GSkymap("GAL", 1, "RING")
+map   = gammalib.GSkyMap("GAL", 1, "RING")
 print(map)
 
 # Create figures

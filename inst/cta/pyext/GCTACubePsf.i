@@ -75,7 +75,7 @@ public:
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs, GLog* log = NULL);
-    const GSkymap&     map(void) const;
+    const GSkyMap&     map(void) const;
     const GEbounds&    ebounds(void) const;
     const GNodeArray&  deltas(void) const;
     const GNodeArray&  elogmeans(void) const;

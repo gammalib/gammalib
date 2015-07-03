@@ -692,7 +692,7 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     pnt.dir(skyDir);
 
     // Setup skymap (10 energy layers)
-    GSkymap map("CAR", "CEL", src_ra, src_dec, 0.5, 0.5, 10, 10, nebins);
+    GSkyMap map("CAR", "CEL", src_ra, src_dec, 0.5, 0.5, 10, 10, nebins);
 
     // Setup time interval
     GGti  gti;

@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 #include "GCTACubeSource.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GFunction.hpp"
 #include "GCTAResponseCube.hpp"
 
@@ -92,7 +92,7 @@ protected:
     void free_members(void);
 
     // Data members
-    GSkymap m_cube;  //!< Diffuse map convolved with IRF
+    GSkyMap m_cube;  //!< Diffuse map convolved with IRF
 };
 
 

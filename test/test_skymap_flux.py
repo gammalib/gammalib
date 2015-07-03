@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # ==========================================================================
-# This script tests the accuracy of the GSkymap flux computation.
+# This script tests the accuracy of the GSkyMap flux computation.
 #
 # --------------------------------------------------------------------------
 #
@@ -31,9 +31,9 @@ na = 3600
 dr_rad = dr * gammalib.deg2rad
 da_rad = da * gammalib.deg2rad
 
-# Allocate GSkymap
-map = gammalib.GSkymap("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 360, 180)
-#map = gammalib.GSkymap("GAL", 64, "RING")
+# Allocate GSkyMap
+map = gammalib.GSkyMap("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 360, 180)
+#map = gammalib.GSkyMap("GAL", 64, "RING")
 
 # Loop over all pixels
 for index in range(map.npix()):

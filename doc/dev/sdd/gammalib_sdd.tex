@@ -85,16 +85,16 @@ A Python interface allows scripting of library components.
 \subsection{Skymaps}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{{\tt GSkymap}}
+\subsubsection{{\tt GSkyMap}}
 
-The {\tt GSkymap} class holds a single skymap (or a set of skymaps with identical coordinates)
+The {\tt GSkyMap} class holds a single skymap (or a set of skymaps with identical coordinates)
 in a specific world coordinate projection (see {\tt GWcs}).
 Three different constructors exist:
 \begin{verbatim}
-  GSkymap(void);
-  GSkymap(std::string wcs, std::string coordsys, int nside, std::string ordering,
+  GSkyMap(void);
+  GSkyMap(std::string wcs, std::string coordsys, int nside, std::string ordering,
           int nmaps = 1);
-  GSkymap(std::string wcs, std::string coordsys, GSkyDir dir, int nlon, int nlat, 
+  GSkyMap(std::string wcs, std::string coordsys, GSkyDir dir, int nlon, int nlat, 
           double dlon, double dlat, int nmaps = 1);
 \end{verbatim}
 The first one creates an instance of an empty skymap.
@@ -124,7 +124,7 @@ Two coordinate systems are implemented ({\tt coordsys}):
 {\tt GAL} indicates the galactic system (galactic longitude and latitude), and
 {\tt CEL} indicates equatorial or celestial system (Right Ascension and declination).
 
-The following methods are defined for {\tt GSkymap}:
+The following methods are defined for {\tt GSkyMap}:
 \begin{verbatim}
   void        read(std::string filename);     //!< Read skymap from FITS file
   void        read(const GFitsHDU* hdu);      //!< Read skymap from FITS HDU
@@ -146,7 +146,7 @@ The following methods are defined for {\tt GSkymap}:
   void        smooth_gaussian(double sigma);  //!< Smooth skymap using Gaussian kernel
 \end{verbatim}
 
-The {\tt GSkymap} class contains:
+The {\tt GSkyMap} class contains:
 \begin{verbatim}
   GWcs*   m_wcs;     //!< Pointer to World Coordinate System projection
   double* m_pixels;  //!< Pointer to sky map pixels

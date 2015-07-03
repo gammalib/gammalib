@@ -31,7 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GFits.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GObservations.hpp"
 #include "GCTAObservation.hpp"
 #include "GNodeArray.hpp"
@@ -83,7 +83,7 @@ public:
     std::string        classname(void) const;
     void               set(const GCTAObservation& obs);
     void               fill(const GObservations& obs, GLog* log = NULL);
-    const GSkymap&     map(void) const;
+    const GSkyMap&     map(void) const;
     const GEbounds&    ebounds(void) const;
     const GNodeArray&  deltas(void) const;
     const GNodeArray&  elogmeans(void) const;
@@ -109,7 +109,7 @@ protected:
 
     // Data
     mutable std::string m_filename;          //!< Filename
-    GSkymap             m_cube;              //!< PSF cube
+    GSkyMap             m_cube;              //!< PSF cube
     GEbounds            m_ebounds;           //!< Energy bounds for the PSF cube
     GNodeArray          m_elogmeans;         //!< Mean log10TeV energy for the PSF cube
     GNodeArray          m_deltas;            //!< Delta bins (deg) for the PSF cube
@@ -151,7 +151,7 @@ std::string GCTACubePsf::classname(void) const
  * cube.
  ***************************************************************************/
 inline
-const GSkymap& GCTACubePsf::map(void) const
+const GSkyMap& GCTACubePsf::map(void) const
 {
     return (m_cube);
 }

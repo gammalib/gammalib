@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GSkymap.hpp - Sky map class                       *
+ *                       GSkyMap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSkymap.hpp
+ * @file GSkyMap.hpp
  * @brief Sky map class definition
  * @author Juergen Knoedlseder
  */
@@ -44,7 +44,7 @@
 
 
 /***********************************************************************//**
- * @class GSkymap
+ * @class GSkyMap
  *
  * @brief Sky map class
  *
@@ -77,19 +77,19 @@
  *     GSkyPixel pixel = map.dir2pix(dir);     // Sky direction to pixel
  *  
  ***************************************************************************/
-class GSkymap : public GBase {
+class GSkyMap : public GBase {
 
-	friend GSkymap sqrt(const GSkymap& map);
+	friend GSkyMap sqrt(const GSkyMap& map);
 
 public:
     // Constructors and destructors
-    GSkymap(void);
-    explicit GSkymap(const std::string& filename);
-    explicit GSkymap(const std::string& coords,
+    GSkyMap(void);
+    explicit GSkyMap(const std::string& filename);
+    explicit GSkyMap(const std::string& coords,
                      const int&         nside,
                      const std::string& order,
                      const int&         nmaps = 1);
-    explicit GSkymap(const std::string& wcs,
+    explicit GSkyMap(const std::string& wcs,
                      const std::string& coords,
                      const double&      x,
                      const double&      y,
@@ -98,24 +98,24 @@ public:
                      const int&         nx,
                      const int&         ny,
                      const int&         nmaps = 1);
-    GSkymap(const GSkymap& map);
-    virtual ~GSkymap(void);
+    GSkyMap(const GSkyMap& map);
+    virtual ~GSkyMap(void);
 
     // Operators
-    GSkymap&      operator=(const GSkymap& map);
-    GSkymap&      operator=(const double& value);
-    GSkymap&      operator+=(const GSkymap& map);
-    GSkymap&      operator+=(const double& value);
-    GSkymap&      operator-=(const GSkymap& map);
-    GSkymap&      operator-=(const double& value);
-    GSkymap&      operator*=(const GSkymap& map);
-    GSkymap&      operator*=(const double& factor);
-    GSkymap&      operator/=(const GSkymap& map);
-    GSkymap&      operator/=(const double& factor);
-    GSkymap       operator+(const GSkymap& map) const;
-    GSkymap       operator-(const GSkymap& map) const;
-    GSkymap       operator*(const GSkymap& map) const;
-    GSkymap       operator/(const GSkymap& map) const;
+    GSkyMap&      operator=(const GSkyMap& map);
+    GSkyMap&      operator=(const double& value);
+    GSkyMap&      operator+=(const GSkyMap& map);
+    GSkyMap&      operator+=(const double& value);
+    GSkyMap&      operator-=(const GSkyMap& map);
+    GSkyMap&      operator-=(const double& value);
+    GSkyMap&      operator*=(const GSkyMap& map);
+    GSkyMap&      operator*=(const double& factor);
+    GSkyMap&      operator/=(const GSkyMap& map);
+    GSkyMap&      operator/=(const double& factor);
+    GSkyMap       operator+(const GSkyMap& map) const;
+    GSkyMap       operator-(const GSkyMap& map) const;
+    GSkyMap       operator*(const GSkyMap& map) const;
+    GSkyMap       operator/(const GSkyMap& map) const;
     double&       operator()(const int& index, const int& map = 0);
     const double& operator()(const int& index, const int& map = 0) const;
     double&       operator()(const GSkyPixel& pixel, const int& map = 0);
@@ -124,7 +124,7 @@ public:
 
     // Methods
     void                  clear(void);
-    GSkymap*              clone(void) const;
+    GSkyMap*              clone(void) const;
     std::string           classname(void) const;
     const int&            npix(void) const;
     const int&            nx(void) const;
@@ -146,7 +146,7 @@ public:
     const GSkyProjection* projection(void) const;
     void                  projection(const GSkyProjection& proj);
     const double*         pixels(void) const;
-    GSkymap               extract(const int& map, const int& nmaps = 1) const;
+    GSkyMap               extract(const int& map, const int& nmaps = 1) const;
     void                  stack_maps(void);
     void                  load(const std::string& filename);
     void                  save(const std::string& filename, bool clobber = false) const;
@@ -158,7 +158,7 @@ private:
     // Private methods
     void              init_members(void);
     void              alloc_pixels(void);
-    void              copy_members(const GSkymap& map);
+    void              copy_members(const GSkyMap& map);
     void              free_members(void);
     void              set_wcs(const std::string& wcs, const std::string& coords,
                               const double& crval1, const double& crval2,
@@ -200,9 +200,9 @@ private:
  * Returns the sum of two sky maps.
  ***************************************************************************/
 inline
-GSkymap GSkymap::operator+(const GSkymap& map) const
+GSkyMap GSkyMap::operator+(const GSkyMap& map) const
 {
-    GSkymap result = *this;
+    GSkyMap result = *this;
     result        += map;
     return result;
 }
@@ -217,9 +217,9 @@ GSkymap GSkymap::operator+(const GSkymap& map) const
  * Returns the difference of two sky maps.
  ***************************************************************************/
 inline
-GSkymap GSkymap::operator-(const GSkymap& map) const
+GSkyMap GSkyMap::operator-(const GSkyMap& map) const
 {
-    GSkymap result = *this;
+    GSkyMap result = *this;
     result        -= map;
     return result;
 }
@@ -234,9 +234,9 @@ GSkymap GSkymap::operator-(const GSkymap& map) const
  * Returns the product of two sky maps.
  ***************************************************************************/
 inline
-GSkymap GSkymap::operator*(const GSkymap& map) const
+GSkyMap GSkyMap::operator*(const GSkyMap& map) const
 {
-    GSkymap result = *this;
+    GSkyMap result = *this;
     result        *= map;
     return result;
 }
@@ -251,9 +251,9 @@ GSkymap GSkymap::operator*(const GSkymap& map) const
  * Returns the ratio of two sky maps.
  ***************************************************************************/
 inline
-GSkymap GSkymap::operator/(const GSkymap& map) const
+GSkyMap GSkyMap::operator/(const GSkyMap& map) const
 {
-    GSkymap result = *this;
+    GSkyMap result = *this;
     result        /= map;
     return result;
 }
@@ -262,12 +262,12 @@ GSkymap GSkymap::operator/(const GSkymap& map) const
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GSkymap").
+ * @return String containing the class name ("GSkyMap").
  ***************************************************************************/
 inline
-std::string GSkymap::classname(void) const
+std::string GSkyMap::classname(void) const
 {
-    return ("GSkymap");
+    return ("GSkyMap");
 }
 
 
@@ -279,7 +279,7 @@ std::string GSkymap::classname(void) const
  * Returns the number of pixels in one sky map.
  ***************************************************************************/
 inline
-const int& GSkymap::npix(void) const
+const int& GSkyMap::npix(void) const
 {
     return m_num_pixels;
 }
@@ -295,7 +295,7 @@ const int& GSkymap::npix(void) const
  * the method returns 0.
  ***************************************************************************/
 inline
-const int& GSkymap::nx(void) const
+const int& GSkyMap::nx(void) const
 {
     return m_num_x;
 }
@@ -311,7 +311,7 @@ const int& GSkymap::nx(void) const
  * the method returns 0.
  ***************************************************************************/
 inline
-const int& GSkymap::ny(void) const
+const int& GSkyMap::ny(void) const
 {
     return m_num_y;
 }
@@ -323,7 +323,7 @@ const int& GSkymap::ny(void) const
  * @return Number of maps in the sky map object.
  ***************************************************************************/
 inline
-const int& GSkymap::nmaps(void) const
+const int& GSkyMap::nmaps(void) const
 {
     return m_num_maps;
 }
@@ -335,7 +335,7 @@ const int& GSkymap::nmaps(void) const
  * @return Pointer to sky projection (NULL if no projection is defined).
  ***************************************************************************/
 inline
-const GSkyProjection* GSkymap::projection(void) const
+const GSkyProjection* GSkyMap::projection(void) const
 {
     return m_proj;
 }
@@ -347,7 +347,7 @@ const GSkyProjection* GSkymap::projection(void) const
  * @return Pointer to pixel data.
  ***************************************************************************/
 inline
-const double* GSkymap::pixels(void) const
+const double* GSkyMap::pixels(void) const
 {
     return m_pixels;
 }

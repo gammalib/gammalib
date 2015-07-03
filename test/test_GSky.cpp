@@ -55,11 +55,11 @@ void TestGSky::set(void){
     // Append tests
     append(static_cast<pfunction>(&TestGSky::test_GWcs),"Test GWcs");
     append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),"Test GSkyPixel");
-    append(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_construct),"Test Healpix GSkymap constructors");
-    append(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
-    append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
-    append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
-    append(static_cast<pfunction>(&TestGSky::test_GSkymap),"Test GSkymap");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_construct),"Test Healpix GSkyMap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_healpix_io),"Test Healpix GSkyMap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_construct),"Test WCS GSkyMap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_io),"Test WCS GSkyMap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap),"Test GSkyMap");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
@@ -511,15 +511,15 @@ void TestGSky::test_GWcs(void)
 
 
 /***************************************************************************
- * @brief GSkymap_healpix_construct
+ * @brief GSkyMap_healpix_construct
  ***************************************************************************/
-void TestGSky::test_GSkymap_healpix_construct(void)
+void TestGSky::test_GSkyMap_healpix_construct(void)
 {
 
     // Test void constructor
     test_try("Test void constructor");
     try {
-        GSkymap map;
+        GSkyMap map;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -529,30 +529,30 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test correct Healpix constructors
     test_try("Test correct Healpix constructors");
     try {
-        GSkymap ring1("GAL", 1, "RING", 1);
-        GSkymap ring2("GAL", 2, "RING", 1);
-        GSkymap ring4("GAL", 4, "RING", 1);
-        GSkymap ring8("GAL", 8, "RING", 1);
-        GSkymap ring16("GAL", 16, "RING", 1);
-        GSkymap ring32("GAL", 32, "RING", 1);
-        GSkymap ring64("GAL", 64, "RING", 1);
-        GSkymap ring128("GAL", 128, "RING", 1);
-        GSkymap ring256("GAL", 256, "RING", 1);
-        GSkymap ring512("GAL", 512, "RING", 1);
-        GSkymap nest1("GAL", 1, "NEST", 1);
-        GSkymap nest2("GAL", 2, "NEST", 1);
-        GSkymap nest4("GAL", 4, "NEST", 1);
-        GSkymap nest8("GAL", 8, "NEST", 1);
-        GSkymap nest16("GAL", 16, "NEST", 1);
-        GSkymap nest32("GAL", 32, "NEST", 1);
-        GSkymap nest64("GAL", 64, "NEST", 1);
-        GSkymap nest128("GAL", 128, "NEST", 1);
-        GSkymap nest256("GAL", 256, "NEST", 1);
-        GSkymap nest512("GAL", 512, "NEST", 1);
-        GSkymap map1("CEL", 1, "RING", 1);
-        GSkymap map2("CEL", 1, "RING", 2);
-        GSkymap map3("EQU", 1, "RING", 1);
-        GSkymap map4("EQU", 1, "NESTED", 1);
+        GSkyMap ring1("GAL", 1, "RING", 1);
+        GSkyMap ring2("GAL", 2, "RING", 1);
+        GSkyMap ring4("GAL", 4, "RING", 1);
+        GSkyMap ring8("GAL", 8, "RING", 1);
+        GSkyMap ring16("GAL", 16, "RING", 1);
+        GSkyMap ring32("GAL", 32, "RING", 1);
+        GSkyMap ring64("GAL", 64, "RING", 1);
+        GSkyMap ring128("GAL", 128, "RING", 1);
+        GSkyMap ring256("GAL", 256, "RING", 1);
+        GSkyMap ring512("GAL", 512, "RING", 1);
+        GSkyMap nest1("GAL", 1, "NEST", 1);
+        GSkyMap nest2("GAL", 2, "NEST", 1);
+        GSkyMap nest4("GAL", 4, "NEST", 1);
+        GSkyMap nest8("GAL", 8, "NEST", 1);
+        GSkyMap nest16("GAL", 16, "NEST", 1);
+        GSkyMap nest32("GAL", 32, "NEST", 1);
+        GSkyMap nest64("GAL", 64, "NEST", 1);
+        GSkyMap nest128("GAL", 128, "NEST", 1);
+        GSkyMap nest256("GAL", 256, "NEST", 1);
+        GSkyMap nest512("GAL", 512, "NEST", 1);
+        GSkyMap map1("CEL", 1, "RING", 1);
+        GSkyMap map2("CEL", 1, "RING", 2);
+        GSkyMap map3("EQU", 1, "RING", 1);
+        GSkyMap map4("EQU", 1, "NESTED", 1);
 
         test_try_success();
     }
@@ -563,8 +563,8 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test Healpix copy constructor
     test_try("Test Healpix copy constructor");
     try {
-        GSkymap ring1("GAL", 1, "RING", 1);
-        GSkymap ring2 = ring1;
+        GSkyMap ring1("GAL", 1, "RING", 1);
+        GSkyMap ring2 = ring1;
 
         test_try_success();
     }
@@ -575,7 +575,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid coordsys in constructor
     test_try("Test invalid coordsys in constructor");
     try {
-        GSkymap map("HOR", 1, "RING", 1);
+        GSkyMap map("HOR", 1, "RING", 1);
         test_try_failure();
     }
     catch (GException::wcs_bad_coords &e) {
@@ -588,7 +588,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid nside in constructor
     test_try("Test invalid nside in constructor");
     try {
-        GSkymap map("GAL", 3, "RING", 1);
+        GSkyMap map("GAL", 3, "RING", 1);
         test_try_failure();
     }
     catch (GException::wcs_hpx_bad_nside &e) {
@@ -601,7 +601,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid ordering in constructor
     test_try("Test invalid ordering in constructor");
     try {
-        GSkymap map("GAL", 2, "SPHERICAL", 1);
+        GSkyMap map("GAL", 2, "SPHERICAL", 1);
         test_try_failure();
     }
     catch (GException::wcs_hpx_bad_ordering &e) {
@@ -615,7 +615,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid nmaps in constructor
     test_try("Test invalid nmaps in constructor");
     try {
-        GSkymap map("GAL", 2, "NEST", 0);
+        GSkyMap map("GAL", 2, "NEST", 0);
         test_try_failure();
     }
     catch (GException::skymap_bad_par &e) {
@@ -632,15 +632,15 @@ void TestGSky::test_GSkymap_healpix_construct(void)
 
 
 /***************************************************************************
- * @brief GSkymap_healpix_io
+ * @brief GSkyMap_healpix_io
  ***************************************************************************/
-void TestGSky::test_GSkymap_healpix_io(void)
+void TestGSky::test_GSkyMap_healpix_io(void)
 {
     // Set filenames
     const std::string file1 = "test_skymap_hpx_1.fits";
 
     // Define Healpix map for comparison
-    GSkymap refmap("GAL", 4, "RING", 1);
+    GSkyMap refmap("GAL", 4, "RING", 1);
 
     // Test Healpix map saving
     test_try("Test Healpix map saving");
@@ -658,7 +658,7 @@ void TestGSky::test_GSkymap_healpix_io(void)
     // Test Healpix map loading
     test_try("Test Healpix map loading");
     try {
-        GSkymap map;
+        GSkyMap map;
         map.load(file1);
         int diff = 0;
         for (int pix = 0; pix < refmap.npix(); ++pix) {
@@ -678,7 +678,7 @@ void TestGSky::test_GSkymap_healpix_io(void)
     // Test Healpix map instantiation
     test_try("Test Healpix map instantiation");
     try {
-        GSkymap map(file1);
+        GSkyMap map(file1);
         int diff = 0;
         for (int pix = 0; pix < refmap.npix(); ++pix) {
             if (map(pix) != refmap(pix))
@@ -699,9 +699,9 @@ void TestGSky::test_GSkymap_healpix_io(void)
 
 
 /***************************************************************************
- * @brief GSkymap_wcs_construct
+ * @brief GSkyMap_wcs_construct
  ***************************************************************************/
-void TestGSky::test_GSkymap_wcs_construct(void)
+void TestGSky::test_GSkyMap_wcs_construct(void)
 {
     // Set precision
     double eps = 1.0e-5;
@@ -709,7 +709,7 @@ void TestGSky::test_GSkymap_wcs_construct(void)
     // Test void constructor
     test_try("Test void constructor");
     try {
-        GSkymap map;
+        GSkyMap map;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -719,7 +719,7 @@ void TestGSky::test_GSkymap_wcs_construct(void)
     // Test non-Healpix constructors
     test_try("Test non-Healpix constructors");
     try {
-        GSkymap map1("CAR", "GAL", 0.0, 0.0, 1.0, 1.0, 100, 100);
+        GSkyMap map1("CAR", "GAL", 0.0, 0.0, 1.0, 1.0, 100, 100);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -729,7 +729,7 @@ void TestGSky::test_GSkymap_wcs_construct(void)
     // Test CAR projection
     test_try("Test CAR projection");
     try {
-        GSkymap map1("CAR", "GAL", 138.817, 37.293, 0.521, 0.931, 100, 100);
+        GSkyMap map1("CAR", "GAL", 138.817, 37.293, 0.521, 0.931, 100, 100);
         GSkyDir dir;
         for (int l = -180; l < 180; ++l) {
             for (int b = -90; b < 90; ++b) {
@@ -755,17 +755,17 @@ void TestGSky::test_GSkymap_wcs_construct(void)
 
 
 /***************************************************************************
- * @brief GSkymap_wcs_io
+ * @brief GSkyMap_wcs_io
  ***************************************************************************/
-void TestGSky::test_GSkymap_wcs_io(void)
+void TestGSky::test_GSkyMap_wcs_io(void)
 {
     // Set filenames
     const std::string file1 = "test_skymap_wcs_1.fits";
     const std::string file2 = "test_skymap_wcs_2.fits";
 
     // Define WCS map for comparison
-    GSkymap refmap1("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 100, 100);
-    GSkymap refmap2("CAR", "CEL", 0.0, 0.0, -0.3, 0.3, 200, 200);
+    GSkyMap refmap1("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 100, 100);
+    GSkyMap refmap2("CAR", "CEL", 0.0, 0.0, -0.3, 0.3, 200, 200);
 
     // Test WCS map saving
     test_try("Test WCS map saving");
@@ -787,7 +787,7 @@ void TestGSky::test_GSkymap_wcs_io(void)
     // Test WCS map loading (1)
     test_try("Test WCS map loading (1)");
     try {
-        GSkymap map;
+        GSkyMap map;
         map.load(file1);
         int diff = 0;
         for (int pix = 0; pix < refmap1.npix(); ++pix) {
@@ -807,7 +807,7 @@ void TestGSky::test_GSkymap_wcs_io(void)
     // Test WCS map loading (2)
     test_try("Test WCS map loading (2)");
     try {
-        GSkymap map;
+        GSkyMap map;
         map.load(file2);
         int diff = 0;
         for (int pix = 0; pix < refmap2.npix(); ++pix) {
@@ -830,16 +830,16 @@ void TestGSky::test_GSkymap_wcs_io(void)
 
 
 /***************************************************************************
- * @brief GSkymap
+ * @brief GSkyMap
  *
- * This method tests the GSkymap class.
+ * This method tests the GSkyMap class.
  ***************************************************************************/
-void TestGSky::test_GSkymap(void)
+void TestGSky::test_GSkyMap(void)
 {
     // Define several maps for comparison
-    GSkymap map_src("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);
-    GSkymap map_dst("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
-    GSkymap map_new("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
+    GSkyMap map_src("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);
+    GSkyMap map_dst("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
+    GSkyMap map_new("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
 
     // Fill map pixels
     double total_src = 0.0;
@@ -870,8 +870,8 @@ void TestGSky::test_GSkymap(void)
     total_dst /= 100.0;
     total_new /= 100.0;
     total_ref /= 100.0;
-	test_value(total_dst, total_ref, 1.0e-3, "Test operator+=(GSkymap)");
-	test_value(total_new, total_ref, 1.0e-3, "Test operator+(GSkymap)");
+	test_value(total_dst, total_ref, 1.0e-3, "Test operator+=(GSkyMap)");
+	test_value(total_new, total_ref, 1.0e-3, "Test operator+(GSkyMap)");
 
     // Subtract pixels from destination map
     map_new  = map_dst - map_src;
@@ -887,11 +887,11 @@ void TestGSky::test_GSkymap(void)
             total_new += map_dst(pix,k);
         }
     }
-	test_value(total_dst, 0.0, 1.0e-3, "Test operator-=(GSkymap)");
-	test_value(total_new, 0.0, 1.0e-3, "Test operator-(GSkymap)");
+	test_value(total_dst, 0.0, 1.0e-3, "Test operator-=(GSkyMap)");
+	test_value(total_new, 0.0, 1.0e-3, "Test operator-(GSkyMap)");
 
     // Check map multiplication
-    GSkymap test_map  = map_src;
+    GSkyMap test_map  = map_src;
     test_map         *= map_src;
     map_new           = map_src * map_src;
     double total_test = 0.0;
@@ -904,8 +904,8 @@ void TestGSky::test_GSkymap(void)
             total_ref  += map_src(pix,k) * map_src(pix,k);
         }
     }
-	test_value(total_test, total_ref, 1.0e-3, "Test operator*=(GSkymap)");
-	test_value(total_new,  total_ref, 1.0e-3, "Test operator*(GSkymap)");
+	test_value(total_test, total_ref, 1.0e-3, "Test operator*=(GSkyMap)");
+	test_value(total_new,  total_ref, 1.0e-3, "Test operator*(GSkyMap)");
 
     // Check map division
     test_map   = map_src;
@@ -921,8 +921,8 @@ void TestGSky::test_GSkymap(void)
             total_ref  += map_src(pix,k) / map_src(pix,k);
         }
     }
-	test_value(total_test, total_ref, 1.0e-3, "Test operator/=(GSkymap)");
-	test_value(total_new,  total_ref, 1.0e-3, "Test operator/(GSkymap)");
+	test_value(total_test, total_ref, 1.0e-3, "Test operator/=(GSkyMap)");
+	test_value(total_new,  total_ref, 1.0e-3, "Test operator/(GSkyMap)");
 
     // Check map scaling
     test_map   = map_src;
@@ -975,7 +975,7 @@ void TestGSky::test_GSkymap(void)
     map_dst.save("test_map_dst.fits", true);
 
     // Test map stacking
-    GSkymap map_stacked = map_src;
+    GSkyMap map_stacked = map_src;
     map_stacked.stack_maps();
     double total_stacked = 0.0;
     for (int pix = 0; pix < map_stacked.npix(); ++pix) {
@@ -985,7 +985,7 @@ void TestGSky::test_GSkymap(void)
 	test_value(map_stacked.nmaps(), 1, "Test stack_maps() method");    
 
     // Test map number changing
-    GSkymap map_more = map_src;
+    GSkyMap map_more = map_src;
     map_more.nmaps(4);
     double total_more = 0.0;
     for (int k = 0; k < map_more.nmaps(); ++k) {
@@ -995,7 +995,7 @@ void TestGSky::test_GSkymap(void)
     }
 	test_value(total_more, total_src, 1.0e-3, "Test nmaps() method with more maps");
 	test_value(map_more.nmaps(), 4, "Test nmaps() method with more maps");    
-    GSkymap map_less = map_src;
+    GSkyMap map_less = map_src;
     map_less.nmaps(1);
     double total_less = 0.0;
     for (int k = 0; k < map_less.nmaps(); ++k) {
@@ -1007,7 +1007,7 @@ void TestGSky::test_GSkymap(void)
 	test_value(map_less.nmaps(), 1, "Test nmaps() method with less maps");    
 
     // Test map extraction
-    GSkymap map_extract = map_src.extract(0);
+    GSkyMap map_extract = map_src.extract(0);
     double total_extract = 0.0;
     for (int k = 0; k < map_extract.nmaps(); ++k) {
         for (int pix = 0; pix < map_extract.npix(); ++pix) {

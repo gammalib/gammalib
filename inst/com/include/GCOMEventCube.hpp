@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCOMEventCube.hpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,7 @@
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
 #include "GSkyDir.hpp"
-#include "GSkymap.hpp"
+#include "GSkyMap.hpp"
 #include "GEbounds.hpp"
 #include "GGti.hpp"
 #include "GEnergy.hpp"
@@ -54,7 +54,7 @@ public:
     // Constructors and destructors
     GCOMEventCube(void);
     explicit GCOMEventCube(const std::string& filename);
-    explicit GCOMEventCube(const GSkymap& map, const GEbounds& ebds,
+    explicit GCOMEventCube(const GSkyMap& map, const GEbounds& ebds,
                            const GGti& gti, const double& phimin,
                            const double& dphi);
     GCOMEventCube(const GCOMEventCube& cube);
@@ -81,9 +81,9 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                   map(const GSkymap& map, const double& phimin,
+    void                   map(const GSkyMap& map, const double& phimin,
                                const double& dphi);
-    const GSkymap&         map(void) const { return m_map; }
+    const GSkyMap&         map(void) const { return m_map; }
     int                    nchi(void) const { return m_map.nx(); }
     int                    npsi(void) const { return m_map.ny(); }
     int                    nphi(void) const { return m_map.nmaps(); }
@@ -104,7 +104,7 @@ protected:
     // Protected members
     GCOMEventBin         m_bin;        //!< Actual event bin
     GCOMInstDir          m_dir;        //!< Actual event direction
-    GSkymap              m_map;        //!< Counts map stored as sky map
+    GSkyMap              m_map;        //!< Counts map stored as sky map
     GTime                m_time;       //!< Event cube mean time
     double               m_ontime;     //!< Event cube ontime (sec)
     GEnergy              m_energy;     //!< Event cube mean energy

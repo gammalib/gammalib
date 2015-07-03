@@ -405,7 +405,7 @@ double GLATResponse::irf(const GLATEventBin& event,
         nodes.set_value(srcEng.log10MeV());
 
         // Compute diffuse response
-        GSkymap*      map    = cube->diffrsp(idiff);
+        GSkyMap*      map    = cube->diffrsp(idiff);
         const double* pixels = map->pixels() + event.ipix();
         rsp                  = nodes.wgt_left()  * pixels[nodes.inx_left()  * map->npix()] +
                                nodes.wgt_right() * pixels[nodes.inx_right() * map->npix()];

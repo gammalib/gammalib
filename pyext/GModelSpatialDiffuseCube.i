@@ -41,7 +41,7 @@ public:
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
     GModelSpatialDiffuseCube(const std::string& filename,
                              const double&      value = 1.0);
-    GModelSpatialDiffuseCube(const GSkymap&   map,
+    GModelSpatialDiffuseCube(const GSkyMap&   map,
                              const GEnergies& energies,
                              const double&    value = 1.0);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
@@ -72,8 +72,8 @@ public:
     void                       value(const double& value);
     const std::string&         filename(void) const;
     void                       filename(const std::string& filename);
-    const GSkymap&             cube(void) const;
-    void                       cube(const GSkymap& cube);
+    const GSkyMap&             cube(void) const;
+    void                       cube(const GSkyMap& cube);
     GEnergies                  energies(void);
     void                       energies(const GEnergies& energies);
     const GModelSpectralNodes& spectrum(void) const;

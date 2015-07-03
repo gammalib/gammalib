@@ -59,7 +59,7 @@ public:
     void                load(const std::string& filename);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
-    const GSkymap&      cube(void) const;
+    const GSkyMap&      cube(void) const;
     const GEbounds&     ebounds(void) const;
     const GNodeArray&   elogmeans(void) const;
     const std::string&  filename(void) const;

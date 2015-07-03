@@ -31,7 +31,7 @@ def eval_model(model, binsz=0.01, nbins=1000):
     interpolate the skymap into a finer grid.
     """
     # Create CAR skymap
-    map = GSkymap("CAR", "CEL", 201.3651, -43.0191, binsz, binsz, nbins, nbins)
+    map = GSkyMap("CAR", "CEL", 201.3651, -43.0191, binsz, binsz, nbins, nbins)
 
     # Fill map
     for i in range(map.npix()):

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMSupport.cpp - COMPTEL support functions              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,7 +51,7 @@
  * Nothing is done for all other sky map. This method can thus be
  * transparently be applied to the sky maps read from COMPTEL data files.
  ***************************************************************************/
-void com_wcs_mer2car(GSkymap& map)
+void com_wcs_mer2car(GSkyMap& map)
 {
     // Get WCS poiunter
     const GWcs* wcs = dynamic_cast<const GWcs*>(map.projection());

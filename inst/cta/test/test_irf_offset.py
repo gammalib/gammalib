@@ -6,7 +6,7 @@
 # It creates a set of models for different offset angles and evaluates the
 # counts map for this set of models.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ def observation(ra=0.0, dec=0.0, binsz=0.05, npix=200, ebins=10):
     tmin = GTime(0.0)
     tmax = GTime(1800.0)
     gti.append(tmin, tmax)
-    map = GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
+    map = GSkyMap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
     cube = GCTAEventCube(map, ebounds, gti)
     obs.events(cube)
     obs.ontime(1800.0)

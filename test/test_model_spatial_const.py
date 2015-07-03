@@ -33,7 +33,7 @@ def test_mc(samples=100000):
     model = gammalib.GModelSpatialDiffuseConst(1.0)
 
     # Create WCS map
-    map = gammalib.GSkymap("AIT", "GAL", 0.0, 0.0, -1.0, 1.0, 360, 180)
+    map = gammalib.GSkyMap("AIT", "GAL", 0.0, 0.0, -1.0, 1.0, 360, 180)
 
     # Set fixed parameters
     energy = gammalib.GEnergy()

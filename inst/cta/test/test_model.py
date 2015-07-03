@@ -2,7 +2,7 @@
 # ==========================================================================
 # This script tests the model computations using the CTA response function.
 #
-# Copyright (C) 2011-2014 Jurgen Knodlseder
+# Copyright (C) 2011-2015 Jurgen Knodlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -192,7 +192,7 @@ def observation(ra=83.6331, dec=22.0145, emin=0.1, emax=100.0,
     tmin    = gammalib.GTime(0.0)
     tmax    = gammalib.GTime(duration)
     gti.append(tmin, tmax)
-    map     = gammalib.GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
+    map     = gammalib.GSkyMap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
     cube    = gammalib.GCTAEventCube(map, ebounds, gti)
     obs.events(cube)
 

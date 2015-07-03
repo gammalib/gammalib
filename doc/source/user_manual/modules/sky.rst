@@ -19,9 +19,9 @@ module and their relations.
 
 The sky module provides classes to handle sky maps, sky coordinates
 and sky regions.
-Sky maps are implemented by the :doxy:`GSkymap` class which stores
+Sky maps are implemented by the :doxy:`GSkyMap` class which stores
 intensities for a defined grid of sky coordinates.
-A :doxy:`GSkymap` object may hold several sky maps with identical
+A :doxy:`GSkyMap` object may hold several sky maps with identical
 pixelisation, for example to represent the energy-dependence of the
 sky intensities.
 The relation between sky coordinates and pixel coordinates is
