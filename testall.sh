@@ -40,20 +40,12 @@ cd $base
 echo
 echo "=====> examples/python"
 cd examples/python
+./example_model_xml_io.py
+./example_radial_models.py
 ./matrix_howto.py
 ./models_howto.py
 ./xml_howto.py
 ./xml_html_create.py
-cd $base
-
-
-# test
-# ====
-echo
-echo "=====> test"
-cd test
-./example_model_xml_io.py
-./example_radial_models.py
 cd $base
 
 
