@@ -6,7 +6,7 @@
 #
 # --------------------------------------------------------------------------
 #
-# Copyright (C) 2013 Juergen Knoedlseder
+# Copyright (C) 2013-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #
 # ==========================================================================
 import math
-from gammalib import GEnergy, GTime, GRan, GModels, GEbounds, GSkyDir
+import gammalib
 
 # ======================== #
 # Simulate CTA observation #
@@ -33,20 +33,20 @@ def simulate(xmlname, e_min, e_max, area, duration, dir, radius):
     Simulate CTA observation.
     """
     # Allocate MC parameters
-    emin = GEnergy()
-    emax = GEnergy()
-    tmin = GTime(0.0)
-    tmax = GTime(duration)
+    emin = gammalib.GEnergy()
+    emax = gammalib.GEnergy()
+    tmin = gammalib.GTime(0.0)
+    tmax = gammalib.GTime(duration)
 
     # Define MC parameters
     emin.TeV(e_min)
     emax.TeV(e_max)
 
     # Allocate random number generator
-    ran = GRan()
+    ran = gammalib.GRan()
 
     # Load models and extract first model
-    models = GModels(xmlname)
+    models = gammalib.GModels(xmlname)
     model = models[0]
     #print(model)
     #print(model.spatial())
@@ -79,7 +79,8 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, dir, radius, eb
         plt.title("MC simulated photon spectrum (" + str(e_min) + '-' + str(e_max) + " TeV)")
 
         # Setup energy range covered by data
-        ebds = GEbounds(ebins, GEnergy(e_min, "TeV"), GEnergy(e_max, "TeV"))
+        ebds = gammalib.GEbounds(ebins, gammalib.GEnergy(e_min, "TeV"),
+                                        gammalib.GEnergy(e_max, "TeV"))
 
         # Create energy axis
         energy = []
@@ -96,10 +97,10 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, dir, radius, eb
         error = [math.sqrt(c) for c in counts]
 
         # Get model values
-        models = GModels(xmlname)
+        models = gammalib.GModels(xmlname)
         mod    = models[0]
         model  = []
-        t      = GTime()
+        t      = gammalib.GTime()
         mod.spatial().set_mc_cone(dir, radius)
         for i in range(ebds.size()):
             eng    = ebds.elogmean(i)
@@ -172,7 +173,7 @@ if __name__ == '__main__':
     e_max    = 100.0              # 100 TeV
     area     = 1.0                # 1 cm2
     duration = 1.0                # 1 sec
-    dir      = GSkyDir()
+    dir      = gammalib.GSkyDir()
     dir.radec_deg(84.17263, 22.01444)
     radius   = 1.0
 

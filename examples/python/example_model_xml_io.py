@@ -3,7 +3,7 @@
 # This script builds a set of models, saves the models into an XML file
 # and loads the models back into memory.
 #
-# Copyright (C) 2011-2013 Juergen Knoedlseder
+# Copyright (C) 2011-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # =====================================================================
 import gammalib
-from gammalib import GEnergy
 
 #
 # Set the location / centre of the source model to
@@ -34,7 +33,7 @@ centre.radec_deg(42.0, 43.0)
 # Spectral index: -2.1
 # ===================================================
 point_spatial  = gammalib.GModelSpatialPointSource(centre)
-point_spectrum = gammalib.GModelSpectralPlaw(1.0e-7, -2.1, GEnergy(100.0, "MeV"))
+point_spectrum = gammalib.GModelSpectralPlaw(1.0e-7, -2.1, gammalib.GEnergy(100.0, "MeV"))
 point = gammalib.GModelSky(point_spatial, point_spectrum)
 point.name('My point source')
 
@@ -45,7 +44,7 @@ point.name('My point source')
 # Spectral index: -2.4
 # ===================================================
 gauss_spatial  = gammalib.GModelSpatialRadialGauss(centre, 3.0)
-gauss_spectrum = gammalib.GModelSpectralPlaw(4.2e-7, -2.4, GEnergy(100.0, "MeV"))
+gauss_spectrum = gammalib.GModelSpectralPlaw(4.2e-7, -2.4, gammalib.GEnergy(100.0, "MeV"))
 gauss = gammalib.GModelSky(gauss_spatial, gauss_spectrum)
 gauss.name('My Gaussian source')
 

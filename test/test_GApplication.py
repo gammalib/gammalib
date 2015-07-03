@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib application module.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import GPythonTestSuite, GLog, GApplicationPars
+import gammalib
 
 
 # ========================================== #
 # Test class for GammaLib application module #
 # ========================================== #
-class Test(GPythonTestSuite):
+class Test(gammalib.GPythonTestSuite):
     """
     Test class for GammaLib application module.
     """
@@ -33,7 +33,7 @@ class Test(GPythonTestSuite):
         Constructor.
         """
         # Call base class constructor
-        GPythonTestSuite.__init__(self)
+        gammalib.GPythonTestSuite.__init__(self)
 
         # Set members
         self.logfile = "test_logger.log"
@@ -62,7 +62,7 @@ class Test(GPythonTestSuite):
         Test GLog.
         """
         # Allocate logger
-        log = GLog(self.logfile, True)
+        log = gammalib.GLog(self.logfile, True)
 
         # Test print methods
         log("Test __call__(std::string)")
@@ -158,7 +158,7 @@ class Test(GPythonTestSuite):
         # Test GApplicationPars constructor with bad filename.
         self.test_try("Test GApplicationPars constructor with bad filename")
         try:
-            pars = GApplicationPars("testme.par")
+            pars = gammalib.GApplicationPars("testme.par")
             self.test_try_failure("Exception not thrown.")
         except:
             self.test_try_success()
