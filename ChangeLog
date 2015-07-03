@@ -1,8 +1,9 @@
-2015-07-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-07-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
+        Remove deadtime correction from GCTAModelCubeBackground (#1503)
         Add GCTAObservation::object() method
         Correct model gradient computation
         Correct check of pixel containment in sky map (GSkymap::contains())

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-2 July 2015
+3 July 2015
 
 
 1. Introduction
@@ -149,6 +149,10 @@ event list file.
 The OBJECT attribute of an event file is now stored in to m_object member of
 GCTAObservation, and object() methods have been added to set and get the
 attribute value.
+
+The deadtime correction has been removed from GCTAModelCubeBackground as the
+background cube rates are already given per livetime. We formerly did the
+correction twice (#1503).
 
 
 21. COMPTEL interface
