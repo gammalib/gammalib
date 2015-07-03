@@ -909,8 +909,8 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Append comment markup
     case MT_COMMENT:
         {
-            GXmlComment comment(segment);
-            (*current)->append(comment);
+            // Append comment
+            (*current)->append(GXmlComment(segment));
         }
         break;
 
@@ -956,8 +956,8 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Processing tag
     case MT_PROCESSING:
         {
-            GXmlPI pi(segment);
-            (*current)->append(pi);
+            // Append PI
+            (*current)->append(GXmlPI(segment));
         }
         break;
 
@@ -989,9 +989,8 @@ void GXml::process_text(GXmlNode** current, const std::string& segment)
         size_t pos = segment.find_first_not_of("\x20\x09\x0d\x0a\x85");
         if (pos != std::string::npos) {
 
-            // Allocate and append node
-            GXmlText* node = new GXmlText(segment);
-            (*current)->append(*node);
+            // Append node
+            (*current)->append(GXmlText(segment));
 
         } // endif: there was not only whitespace
 
