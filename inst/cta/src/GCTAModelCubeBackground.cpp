@@ -353,6 +353,24 @@ double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
     // livetime, hence no deadtime correction is needed here.
     double value = spat * spec * temp;
 
+    // Multiply factors to spectral gradients
+    if (spectral() != NULL) {
+        double fact = spat * temp;
+        if (fact != 1.0) {
+            for (int i = 0; i < spectral()->size(); ++i)
+                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
+        }
+    }
+
+    // Multiply factors to temporal gradients
+    if (temporal() != NULL) {
+        double fact = spat * spec;
+        if (fact != 1.0) {
+            for (int i = 0; i < temporal()->size(); ++i)
+                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
+        }
+    }
+
     // Return value
     return value;
 }
