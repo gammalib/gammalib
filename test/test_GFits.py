@@ -17,16 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
+import math
 import os
 import sys
-
+import gammalib
 
 # =================================== #
 # Test class for GammaLib FITS module #
 # =================================== #
-class Test(GPythonTestSuite):
+class Test(gammalib.GPythonTestSuite):
     """
     Test class for GammaLib FITS module.
     """
@@ -35,7 +34,7 @@ class Test(GPythonTestSuite):
         Constructor.
         """
         # Call base class constructor
-        GPythonTestSuite.__init__(self)
+        gammalib.GPythonTestSuite.__init__(self)
 
         # Return
         return
@@ -69,21 +68,21 @@ class Test(GPythonTestSuite):
             pass
 
         # Create FITS file
-        fits = GFits(file1, True)
+        fits = gammalib.GFits(file1, True)
         sys.stdout.write(".")
 
         # Create images
         nx = 10
         ny = 10
-        img1 = GFitsImageByte(nx, ny)
-        img2 = GFitsImageDouble(nx, ny)
-        img3 = GFitsImageFloat(nx, ny)
-        img4 = GFitsImageLong(nx, ny)
-        img5 = GFitsImageLongLong(nx, ny)
-        img6 = GFitsImageSByte(nx, ny)
-        img7 = GFitsImageShort(nx, ny)
-        img8 = GFitsImageULong(nx, ny)
-        img9 = GFitsImageUShort(nx, ny)
+        img1 = gammalib.GFitsImageByte(nx, ny)
+        img2 = gammalib.GFitsImageDouble(nx, ny)
+        img3 = gammalib.GFitsImageFloat(nx, ny)
+        img4 = gammalib.GFitsImageLong(nx, ny)
+        img5 = gammalib.GFitsImageLongLong(nx, ny)
+        img6 = gammalib.GFitsImageSByte(nx, ny)
+        img7 = gammalib.GFitsImageShort(nx, ny)
+        img8 = gammalib.GFitsImageULong(nx, ny)
+        img9 = gammalib.GFitsImageUShort(nx, ny)
         for x in range(nx):
             for y in range(ny):
                 img1[x, y] = x + y * nx
@@ -127,17 +126,17 @@ class Test(GPythonTestSuite):
 
         # Create table columns
         nrows = 10
-        col1 = GFitsTableBitCol("BIT", nrows)
-        col2 = GFitsTableBoolCol("BOOLEAN", nrows)
-        col3 = GFitsTableByteCol("BYTE", nrows)
-        col4 = GFitsTableDoubleCol("DOUBLE", nrows)
-        col5 = GFitsTableFloatCol("FLOAT", nrows)
-        col6 = GFitsTableLongCol("LONG", nrows)
-        col7 = GFitsTableLongLongCol("LONGLONG", nrows)
-        col8 = GFitsTableShortCol("SHORT", nrows)
-        col9 = GFitsTableStringCol("STRING", nrows, 20)
-        col10 = GFitsTableULongCol("ULONG", nrows)
-        col11 = GFitsTableUShortCol("USHORT", nrows)
+        col1 = gammalib.GFitsTableBitCol("BIT", nrows)
+        col2 = gammalib.GFitsTableBoolCol("BOOLEAN", nrows)
+        col3 = gammalib.GFitsTableByteCol("BYTE", nrows)
+        col4 = gammalib.GFitsTableDoubleCol("DOUBLE", nrows)
+        col5 = gammalib.GFitsTableFloatCol("FLOAT", nrows)
+        col6 = gammalib.GFitsTableLongCol("LONG", nrows)
+        col7 = gammalib.GFitsTableLongLongCol("LONGLONG", nrows)
+        col8 = gammalib.GFitsTableShortCol("SHORT", nrows)
+        col9 = gammalib.GFitsTableStringCol("STRING", nrows, 20)
+        col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
+        col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
         for i in range(nrows):
             col1[i] = i % 2
             col2[i] = i % 2
@@ -153,7 +152,7 @@ class Test(GPythonTestSuite):
         sys.stdout.write(".")
 
         # Set ASCII table
-        tbl_ascii = GFitsAsciiTable()
+        tbl_ascii = gammalib.GFitsAsciiTable()
         # tbl_ascii.append(col1) # Need to implement ?/!
         # tbl_ascii.append(col2) # Need to implement ?/!
         tbl_ascii.append(col3)
@@ -170,7 +169,7 @@ class Test(GPythonTestSuite):
         sys.stdout.write(".")
 
         # Set binary table
-        tbl_bin = GFitsBinTable()
+        tbl_bin = gammalib.GFitsBinTable()
         tbl_bin.append(col1)
         tbl_bin.append(col2)
         tbl_bin.append(col3)
@@ -196,7 +195,7 @@ class Test(GPythonTestSuite):
         sys.stdout.write(".")
 
         # Re-open FITS file
-        fits = GFits(file1)
+        fits = gammalib.GFits(file1)
         sys.stdout.write(".")
 
         # Get double precision image, take square root of pixel and save in
@@ -204,7 +203,7 @@ class Test(GPythonTestSuite):
         img_double = fits.image("Double")
         for x in range(nx):
             for y in range(ny):
-                img_double[x, y] = sqrt(img_double[x, y])
+                img_double[x, y] = math.sqrt(img_double[x, y])
         sys.stdout.write(".")
 
         # Save into another FITS file

@@ -17,10 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
-import os
-import sys
+from gammalib import GPythonTestSuite, GLog, GApplicationPars
 
 
 # ========================================== #

@@ -6,6 +6,7 @@ pyext/build/
 .libs
 .deps
 test/*.fits
+examples/python/*.fits
 inst/cta/test/*.xml
 inst/cta/test/*.fits
 inst/cta/test/*.fits.gz

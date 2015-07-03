@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # =====================================================================
-from gammalib import *
+import gammalib
 
 
 # ============================ #
@@ -30,11 +30,11 @@ def test_radial_model(name, model, clobber=True):
     """
     # Make a 2D FITS image (cartesian projection, celestial coordinates)
     ra, dec, binsz, npix = 0, 0, 0.01, 300
-    image = GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, 1)
+    image = gammalib.GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, 1)
 
     # Fill the image
-    energy = GEnergy()
-    time   = GTime()
+    energy = gammalib.GEnergy()
+    time   = gammalib.GTime()
     for inx in range(image.npix()):
         dir        = image.inx2dir(inx)
         theta      = centre.dist(dir)
@@ -62,10 +62,15 @@ if __name__ == '__main__':
     Test radial model integration.
     """
     # Set model location / centre
-    centre = GSkyDir()
+    centre = gammalib.GSkyDir()
     centre.radec_deg(0.3, 0.1)
 
     # Test models
-    test_radial_model(name='gauss', model=GModelSpatialRadialGauss(centre, 0.3))
-    test_radial_model(name='disk',  model=GModelSpatialRadialDisk(centre, 0.8))
-    test_radial_model(name='shell', model=GModelSpatialRadialShell(centre, 0.5, 0.1))
+    model = gammalib.GModelSpatialRadialGauss(centre, 0.3)
+    test_radial_model(name='gauss', model=model)
+
+    model = gammalib.GModelSpatialRadialDisk(centre, 0.8)
+    test_radial_model(name='disk',  model=model)
+
+    model = gammalib.GModelSpatialRadialShell(centre, 0.5, 0.1)
+    test_radial_model(name='shell', model=model)

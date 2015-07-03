@@ -22,9 +22,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
-
+import math
+from gammalib import GEnergy, GTime, GRan, GModels, GEbounds, GSkyDir
 
 # ======================== #
 # Simulate CTA observation #
@@ -94,7 +93,7 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, dir, radius, eb
             counts[index] = counts[index] + 1.0
 
         # Create error bars
-        error = [sqrt(c) for c in counts]
+        error = [math.sqrt(c) for c in counts]
 
         # Get model values
         models = GModels(xmlname)

@@ -18,9 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
 import math
-
+from gammalib import GEnergy, GModelSpectralFunc, GRan, GModelSpectralPlaw
 
 # ================================= #
 # Generate file function from model #
@@ -74,7 +73,7 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.flux(e_min, e_max)
         flux_ff = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp up emax from above first node
@@ -87,7 +86,7 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.flux(e_min, e_max)
         flux_ff = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from above last node
@@ -99,7 +98,7 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.flux(e_min, e_max)
         flux_ff = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from below last node
@@ -112,14 +111,14 @@ def compare_photon_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.flux(e_min, e_max)
         flux_ff = file_function.flux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Print summary
     if n_violate == 0:
-        print "compare_photon_flux: All tests satisfied accuracy."
+        print("compare_photon_flux: All tests satisfied accuracy.")
     else:
-        print "compare_photon_flux: " + str(n_violate) + " tests exceeded accuracy."
+        print("compare_photon_flux: " + str(n_violate) + " tests exceeded accuracy.")
 
     # Return
     return
@@ -149,7 +148,7 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp up emax from above first node
@@ -162,7 +161,7 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from above last node
@@ -174,7 +173,7 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Ramp down emin from below last node
@@ -187,14 +186,14 @@ def compare_energy_flux(model, file_function, emin=8.7, emax=1123.0, steps=13):
         flux_model = model.eflux(e_min, e_max)
         flux_ff = file_function.eflux(e_min, e_max)
         if (abs(flux_model - flux_ff) > eps):
-            print e_min, e_max, flux_model, flux_ff, flux_model - flux_ff
+            print(e_min, e_max, flux_model, flux_ff, flux_model - flux_ff)
             n_violate += 1
 
     # Print summary
     if n_violate == 0:
-        print "compare_energy_flux: All tests satisfied accuracy."
+        print("compare_energy_flux: All tests satisfied accuracy.")
     else:
-        print "compare_energy_flux: " + str(n_violate) + " tests exceeded accuracy."
+        print("compare_energy_flux: " + str(n_violate) + " tests exceeded accuracy.")
 
     # Return
     return
@@ -218,7 +217,7 @@ def test_mc(file_function, trials=10):
 
 # Loop over trials
     for i in range(trials):
-        print file_function.mc(e_min, e_max, ran)
+        print(file_function.mc(e_min, e_max, ran))
 
     # Return
     return
