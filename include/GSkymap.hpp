@@ -112,6 +112,10 @@ public:
     GSkymap&      operator*=(const double& factor);
     GSkymap&      operator/=(const GSkymap& map);
     GSkymap&      operator/=(const double& factor);
+    GSkymap       operator+(const GSkymap& map) const;
+    GSkymap       operator-(const GSkymap& map) const;
+    GSkymap       operator*(const GSkymap& map) const;
+    GSkymap       operator/(const GSkymap& map) const;
     double&       operator()(const int& index, const int& map = 0);
     const double& operator()(const int& index, const int& map = 0) const;
     double&       operator()(const GSkyPixel& pixel, const int& map = 0);
@@ -185,6 +189,74 @@ private:
     mutable GSkyDir   m_last_dir;   //!< Last sky direction
     mutable GBilinear m_interpol;   //!< Bilinear interpolator
 };
+
+
+/***********************************************************************//**
+ * @brief Binary sky map addition
+ *
+ * @param[in] map Sky map.
+ * @return Sky map to which @p map was added.
+ *
+ * Returns the sum of two sky maps.
+ ***************************************************************************/
+inline
+GSkymap GSkymap::operator+(const GSkymap& map) const
+{
+    GSkymap result = *this;
+    result        += map;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary sky map subtraction
+ *
+ * @param[in] map Sky map.
+ * @return Sky map to which @p map was added.
+ *
+ * Returns the difference of two sky maps.
+ ***************************************************************************/
+inline
+GSkymap GSkymap::operator-(const GSkymap& map) const
+{
+    GSkymap result = *this;
+    result        -= map;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary sky map multiplication
+ *
+ * @param[in] map Sky map.
+ * @return Sky map multiplied by @p map.
+ *
+ * Returns the product of two sky maps.
+ ***************************************************************************/
+inline
+GSkymap GSkymap::operator*(const GSkymap& map) const
+{
+    GSkymap result = *this;
+    result        *= map;
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary sky map division
+ *
+ * @param[in] map Sky map.
+ * @return Sky map divided by @p map.
+ *
+ * Returns the ratio of two sky maps.
+ ***************************************************************************/
+inline
+GSkymap GSkymap::operator/(const GSkymap& map) const
+{
+    GSkymap result = *this;
+    result        /= map;
+    return result;
+}
 
 
 /***********************************************************************//**

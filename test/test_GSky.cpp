@@ -831,12 +831,15 @@ void TestGSky::test_GSkymap_wcs_io(void)
 
 /***************************************************************************
  * @brief GSkymap
+ *
+ * This method tests the GSkymap class.
  ***************************************************************************/
 void TestGSky::test_GSkymap(void)
 {
     // Define several maps for comparison
     GSkymap map_src("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 2);
     GSkymap map_dst("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
+    GSkymap map_new("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
 
     // Fill map pixels
     double total_src = 0.0;
@@ -848,61 +851,78 @@ void TestGSky::test_GSkymap(void)
     }
 
     // Add pixels to destination map
+    map_new  = map_dst + map_src;
     map_dst += map_src;
 
     // Check total in destination map. Note that the total in the destination
     // map should be 100 times the total in the source map as the operator
     // is expected to perform strict bi-linear interpolation
     double total_dst = 0.0;
+    double total_new = 0.0;
     double total_ref = 0.0;
     for (int pix = 0; pix < map_dst.npix(); ++pix) {
         for (int k = 0; k < map_dst.nmaps(); ++k) {
             total_dst += map_dst(pix,k);
+            total_new += map_new(pix,k);
             total_ref += map_src(map_dst.pix2dir(pix),k);
         }
     }
     total_dst /= 100.0;
+    total_new /= 100.0;
     total_ref /= 100.0;
 	test_value(total_dst, total_ref, 1.0e-3, "Test operator+=(GSkymap)");
+	test_value(total_new, total_ref, 1.0e-3, "Test operator+(GSkymap)");
 
     // Subtract pixels from destination map
+    map_new  = map_dst - map_src;
     map_dst -= map_src;
 
     // Check total in destination map. Note that the total in the destination
     // map should be zero.
     total_dst = 0.0;
+    total_new = 0.0;
     for (int pix = 0; pix < map_dst.npix(); ++pix) {
         for (int k = 0; k < map_dst.nmaps(); ++k) {
             total_dst += map_dst(pix,k);
+            total_new += map_dst(pix,k);
         }
     }
 	test_value(total_dst, 0.0, 1.0e-3, "Test operator-=(GSkymap)");
+	test_value(total_new, 0.0, 1.0e-3, "Test operator-(GSkymap)");
 
     // Check map multiplication
     GSkymap test_map  = map_src;
     test_map         *= map_src;
+    map_new           = map_src * map_src;
     double total_test = 0.0;
     total_ref         = 0.0;
+    total_new         = 0.0;
     for (int pix = 0; pix < test_map.npix(); ++pix) {
         for (int k = 0; k < test_map.nmaps(); ++k) {
             total_test += test_map(pix,k);
+            total_new  += map_new(pix,k);
             total_ref  += map_src(pix,k) * map_src(pix,k);
         }
     }
 	test_value(total_test, total_ref, 1.0e-3, "Test operator*=(GSkymap)");
+	test_value(total_new,  total_ref, 1.0e-3, "Test operator*(GSkymap)");
 
     // Check map division
     test_map   = map_src;
     test_map  /= map_src;
+    map_new    = map_src / map_src;
     total_test = 0.0;
     total_ref  = 0.0;
+    total_new  = 0.0;
     for (int pix = 0; pix < test_map.npix(); ++pix) {
         for (int k = 0; k < test_map.nmaps(); ++k) {
             total_test += test_map(pix,k);
+            total_new  += map_new(pix,k);
             total_ref  += map_src(pix,k) / map_src(pix,k);
         }
     }
 	test_value(total_test, total_ref, 1.0e-3, "Test operator/=(GSkymap)");
+	test_value(total_new,  total_ref, 1.0e-3, "Test operator/(GSkymap)");
 
     // Check map scaling
     test_map   = map_src;

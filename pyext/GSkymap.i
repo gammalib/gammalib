@@ -134,6 +134,10 @@ public:
     GSkymap&      operator-=(const double& value);
     GSkymap&      operator*=(const GSkymap& map);
     GSkymap&      operator*=(const double& factor);
+    GSkymap       operator+(const GSkymap& map) const;
+    GSkymap       operator-(const GSkymap& map) const;
+    GSkymap       operator*(const GSkymap& map) const;
+    GSkymap       operator/(const GSkymap& map) const;
     double&       operator()(const int& index, const int& map = 0);
     double&       operator()(const GSkyPixel& pixel, const int& map = 0);
     double        operator()(const GSkyDir& dir, const int& map = 0) const;
