@@ -3,6 +3,7 @@
         * Version 0.11.0 released
         =========================
 
+        GSkymap::operator/=(GSkymap) operator now ignores division by zero
         Remove deadtime correction from GCTAModelCubeBackground (#1503)
         Add GCTAObservation::object() method
         Correct model gradient computation

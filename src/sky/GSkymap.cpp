@@ -48,7 +48,7 @@
 #define G_OP_UNARY_ADD                        "GSkymap::operator+=(GSkymap&)"
 #define G_OP_UNARY_SUB                        "GSkymap::operator-=(GSkymap&)"
 #define G_OP_UNARY_MUL                        "GSkymap::operator-=(GSkymap&)"
-#define G_OP_UNARY_DIV                        "GSkymap::operator-=(GSkymap&)"
+#define G_OP_UNARY_DIV                        "GSkymap::operator/=(GSkymap&)"
 #define G_OP_UNARY_DIV2                        "GSkymap::operator/=(double&)"
 #define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
 #define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
@@ -506,7 +506,7 @@ GSkymap& GSkymap::operator*=(const GSkymap& map)
         // Loop over all layers
         for (int layer = 0; layer < nmaps(); ++layer) {
 
-            // Subtract value
+            // Multiply value
             (*this)(index, layer) *= map(dir, layer);
 
         } // endfor: looped over all layers
@@ -551,15 +551,13 @@ GSkymap& GSkymap::operator*=(const double& factor)
  * @exception GException::invalid_value
  *            Mismatch between number of maps in skymap object.
  *
- * Divides the content of @p map from the skymap. The operator only works
- * on sky maps with an identical number of layers. The content is divided
- * by bi-linearily interpolating the values in the source sky map, allowing
- * thus for a reprojection of sky map values.
+ * Divides the content of the actual skymap by the skymap @p map. The operator
+ * only works on sky maps with an identical number of layers. The content is
+ * divided by bi-linearily interpolating the values in the skymap @p map,
+ * allowing thus for a reprojection of sky map values.
  *
- * @todo The method is not optimized for speed as the transformation is done
- * for each layer separately. A private method should be introduced that
- * does the transformation, allowing to loop more effectively over the
- * layers.
+ * On return, all pixels in @p map that are zero are silently set to zero in
+ * the skymap.
  ***************************************************************************/
 GSkymap& GSkymap::operator/=(const GSkymap& map)
 {
@@ -572,7 +570,7 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
         throw GException::invalid_value(G_OP_UNARY_DIV, msg);
     }
 
-    // Loop over all pixels of sky map
+    // Loop over all pixels of destination sky map
     for (int index = 0; index < npix(); ++index) {
 
         // Get sky direction of actual pixel
@@ -581,16 +579,20 @@ GSkymap& GSkymap::operator/=(const GSkymap& map)
         // Loop over all layers
         for (int layer = 0; layer < nmaps(); ++layer) {
 
-            // Check for division by zero
-            if (map(dir,layer) == 0.0) {
-                std::string msg = "Trying to divide by zero."
-                                  " Map entries have to be strictly non-zero"
-                                  " for division";
-                throw GException::invalid_value(G_OP_UNARY_DIV, msg);
-            }
+            // Get map value if the map by which the division will be done.
+            // The map is accessed using the sky direction, hence inter-
+            // polating properly the map. If we're outside the map, zero
+            // is returned.
+            double value = map(dir, layer);
 
-            // Subtract value
-            (*this)(index, layer) /= map(dir, layer);
+            // Divide destination pixel by value. In case of a division by
+            // zero set the destination pixel also to zero.
+            if (value == 0.0) {
+                (*this)(index, layer) = 0.0;
+            }
+            else {
+                (*this)(index, layer) /= value;
+            }
 
         } // endfor: looped over all layers
 

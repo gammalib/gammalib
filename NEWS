@@ -97,6 +97,9 @@ effects in the sky map access operator was that pixels outside the valid sky map
 array were accessed, leading to unpredictable results at the edge of the images.
 This quite severe bug was now corrected.
 
+The GSkymap::operator/=(GSkymap) operator now sets all pixels to zero for which the
+nominator is zero. No exception is thrown any longer.
+
 
 13. Support module
 ------------------
