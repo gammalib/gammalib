@@ -389,13 +389,27 @@ void TestGCTAResponse::test_response_psf(void)
             sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
                    gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
                    gammalib::deg2rad;
+            //sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
+            //       gammalib::twopi * r * gammalib::deg2rad;
             
             // since 'sum' already totals to 1.0, its also a 'fraction',
             // which we can plug back into containment_radius(), to compare
             // with the origial radius 'r'
-            rcont = rsp.psf()->containment_radius(sum, eng.log10TeV());
-            std::cout << "psf | en=" << en.print() << "  r=" << r << "  rcont=" << rcont << "  sum=" << sum << std::endl;
-            test_value( rcont, r*gammalib::deg2rad, 0.001, "PSF containment radius for "+eng.print());
+            if ( sum < 1.0 && sum > 0.0 ) {
+              rcont = rsp.psf()->containment_radius(sum, eng.log10TeV());
+              char percent[50] ;
+              sprintf( percent, "%8.5f", sum*100.0 ) ;
+              test_value( rcont, r*gammalib::deg2rad, 0.1, "PSF containment radius for "+eng.print()+" and " + percent + "% containment");
+            }
+            //std::cout << "psf | en=" << eng.print() << "  r=" << r << "  rcont=" << rcont << "  sum=" << sum << std::endl;
+            //char status[30] = "" ;
+            //if ( fabs(r-rcont) > 0.006 ) {
+            //  sprintf( status, "fail!" ) ;
+            //}
+            //else {
+            //  sprintf( status, "ok" ) ;
+            //}
+            //printf( "psf_gauss | en=%5.1f  r=%7.5f  rcont=%9.3e  fabs(r-rcont)=%9.3e  sum=%9.3e  %5s\n", eng.TeV(), r, rcont, fabs(r-rcont), sum, status ) ;
         }
         test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
         
@@ -436,13 +450,27 @@ void TestGCTAResponse::test_response_psf_king(void)
             sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
                    gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
                    gammalib::deg2rad;
+            //sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
+            //       gammalib::twopi * dr * gammalib::deg2rad;
             
             // since 'sum' already totals to 1.0, its also a 'fraction',
             // which we can plug back into containment_radius(), to compare
             // with the origial radius 'r'
-            rcont = rsp.psf()->containment_radius(sum, eng.log10TeV());
-            std::cout << "psf_king | en=" << en.print() << "  r=" << r << "  rcont=" << rcont << "  sum=" << sum << std::endl;
-            test_value( rcont, r*gammalib::deg2rad, 0.001, "PSF king containment radius for "+eng.print());
+            if ( sum > 0.0 && sum < 1.0 ) {
+              rcont = rsp.psf()->containment_radius(sum, eng.log10TeV());
+              char percent[50] ;
+              sprintf( percent, "%8.5f", sum*100.0 ) ;
+              test_value( rcont, r*gammalib::deg2rad, 0.1, "PSF king containment radius for "+eng.print()+" and " + percent + "% containment");
+            }
+            //std::cout << "psf_king | en=" << eng.print() << "  r=" << r << "  rcont=" << rcont << "  sum=" << sum << std::endl;
+            //char status[30] = "" ;
+            //if ( fabs(r-rcont) > 0.006 ) {
+            //  sprintf( status, "fail!" ) ;
+            //}
+            //else {
+            //  sprintf( status, "ok" ) ;
+            //}
+            //printf( "psf_king | en=%5.1f  r=%7.5f  rcont=%9.3e  fabs(r-rcont)=%9.3e  sum=%9.3e  %5s\n", eng.TeV(), r, rcont, fabs(r-rcont), sum, status ) ;
         }
         test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
         
