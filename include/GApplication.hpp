@@ -84,6 +84,7 @@ public:
     void               log_trailer(void);
     void               log_parameters(void);
     std::string        print(const GChatter& chatter = NORMAL) const;
+    const GApplicationPars& pars(void)const{return m_pars;};
 
     // Public members
     GLog log;   //!< Application logger

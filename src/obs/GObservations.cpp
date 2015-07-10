@@ -872,21 +872,23 @@ std::string GObservations::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Number of observations"));
         result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of models"));
+        result.append(gammalib::str(m_models.size()));
         result.append("\n"+gammalib::parformat("Number of predicted events"));
         result.append(gammalib::str(npred()));
 
-        // NORMAL: Append observations
-        if (chatter >= NORMAL) {
+        // EXPLICIT: Append observations
+        if (chatter >= EXPLICIT) {
             for (int i = 0; i < size(); ++i) {
                 result.append("\n");
                 result.append((*this)[i]->print());
             }
-        } // endif: chatter was normal
-
-        // EXPLICIT: Append models
-        if (chatter >= EXPLICIT) {
-            result.append("\n"+m_models.print());
         } // endif: chatter was explicit
+
+        // VERBOSE: Append models
+        if (chatter == VERBOSE) {
+            result.append("\n"+m_models.print());
+        } // endif: chatter was verbose
 
     } // endif: chatter was not silent
 
