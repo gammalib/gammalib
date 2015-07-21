@@ -84,7 +84,7 @@ public:
     void               read(const GFits& fits);
     void               write(GFits& file) const;
     void               load(const std::string& filename);
-    void               save(const std::string& filename, const bool& clobber) const;
+    void               save(const std::string& filename, const bool& clobber = false) const;
     const std::string& filename(void) const;
 };
 
