@@ -104,6 +104,7 @@ public:
     GEnergy        ewidth(const int& index) const;
     bool           contains(const GEnergy& eng) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
+    bool           is_in_range(const GEnergy& emin, const GEnergy& emax) const;
 
 
 protected:
