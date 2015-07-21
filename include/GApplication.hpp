@@ -84,6 +84,7 @@ public:
     void               log_trailer(void);
     void               log_parameters(void);
     std::string        print(const GChatter& chatter = NORMAL) const;
+    const GApplicationPars& pars(void) const;
 
     // Public members
     GLog log;   //!< Application logger
@@ -207,6 +208,19 @@ const std::string& GApplication::log_filename(void) const
 
     // Return
     return (m_logfile);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns application parameters
+ *
+ * @return Application parameters.
+ ***************************************************************************/
+inline
+const GApplicationPars& GApplication::pars(void) const
+{
+    // Return
+    return (m_pars);
 }
 
 #endif /* GAPPLICATION_HPP */
