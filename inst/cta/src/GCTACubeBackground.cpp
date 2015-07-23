@@ -327,6 +327,9 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
         // Extract region of interest from CTA observation
         GCTARoi roi = cta->roi();
 
+        // Extract energy boundaries from CTA observation
+        GEbounds obs_ebounds = cta->ebounds();
+
         // Check for RoI sanity
         if (!roi.is_valid()) {
             std::string msg = "No RoI information found in input observation "
@@ -346,6 +349,15 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
             // Get event bin
             GCTAEventBin* bin = eventcube[i];
+
+            // Determine energy bin index. Skip if bin is not fully contained
+            // within the energy boundaries of the observation
+            int index = m_ebounds.index(bin->energy());
+            if (index == -1 || 
+                !obs_ebounds.contains(m_ebounds.emin(index),
+                                      m_ebounds.emax(index))) {
+                continue;
+            }
 
             // Continue only if binned in contained in ROI
             if (roi.contains(*bin)) {

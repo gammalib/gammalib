@@ -487,6 +487,9 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
         // Extract region of interest from CTA observation
         GCTARoi roi = cta->roi();
 
+        // Extract energy boundaries from CTA observation
+        GEbounds obs_ebounds = cta->ebounds();
+
         // Check for RoI sanity
         if (!roi.is_valid()) {
             std::string msg = "No RoI information found in input observation "
@@ -536,6 +539,12 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
 
                 // Loop over all energy bins
                 for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+
+                    // Skip if pixel is not within observation energy boundaries
+                    if (!obs_ebounds.contains(m_ebounds.emin(iebin),
+                                              m_ebounds.emax(iebin))) {
+                        continue;
+                    }
 
                     // Get logE/TeV
                     double logE = m_ebounds.elogmean(iebin).log10TeV();

@@ -423,6 +423,9 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
         // Extract region of interest from CTA observation
         GCTARoi roi = cta->roi();
 
+        // Extract energy boundaries from CTA observation
+        GEbounds obs_ebounds = cta->ebounds();
+
         // Check for RoI sanity
         if (!roi.is_valid()) {
             std::string msg = "No RoI information found in input observation "
@@ -473,12 +476,19 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
                 // Loop over all exposure cube energy bins
                 for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-                    // Get logE/TeV
-                    double logE = m_ebounds.elogmean(iebin).log10TeV();
+                    // Only add exposure to pixel if energy bin is inside 
+                    // observation energy boundaries
+                    if (obs_ebounds.contains(m_ebounds.emin(iebin),
+                                             m_ebounds.emax(iebin))) {
 
-                    // Add to exposure cube (effective area * livetime)
-                    m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                            cta->livetime();
+                        // Get logE/TeV
+                        double logE = m_ebounds.elogmean(iebin).log10TeV();
+
+                        // Add to exposure cube (effective area * livetime)
+                        m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                                cta->livetime();
+
+                    } // endif: energy bin was inside observation energy boundaries
 
                 } // endfor: looped over energy bins
 

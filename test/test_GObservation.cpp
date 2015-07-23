@@ -242,6 +242,16 @@ void TestGObservation::test_ebounds(void)
         test_try_failure(e);
     }
 
+    // Check energy containment
+    GEbounds containment(1, GEnergy(100.0, "MeV"), GEnergy(1000.0, "MeV"));
+    test_assert(containment.contains(GEnergy(200.0, "MeV")), "Energy 200 MeV should be contained.");
+    test_assert(!containment.contains(GEnergy(10.0, "MeV")), "Energy 10 MeV should not be contained.");
+    test_assert(!containment.contains(GEnergy(2000.0, "MeV")), "Energy 2000 MeV should not be contained.");
+    test_assert(containment.contains(GEnergy(200.0, "MeV"), GEnergy(800.0, "MeV")), "Energy bin [200,800] MeV should be contained.");
+    test_assert(!containment.contains(GEnergy(80.0, "MeV"), GEnergy(800.0, "MeV")), "Energy bin [80,800] MeV should not be contained.");
+    test_assert(!containment.contains(GEnergy(200.0, "MeV"), GEnergy(2000.0, "MeV")), "Energy bin [200,2000] MeV should not be contained.");
+    test_assert(!containment.contains(GEnergy(80.0, "MeV"), GEnergy(2000.0, "MeV")), "Energy bin [80,2000] MeV should not be contained.");
+
     // Return
     return;
 }

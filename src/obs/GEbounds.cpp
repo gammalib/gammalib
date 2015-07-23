@@ -995,6 +995,34 @@ bool GEbounds::contains(const GEnergy& eng) const
 
 
 /***********************************************************************//**
+ * @brief Checks whether energy boundaries contain and energy bin
+ *
+ * @param[in] emin Minimum energy of bin to be checked.
+ * @param[in] emax Maximum energy of bin to be checked.
+ * @return True if energy bin [emin, emax] is fully contained inside energy
+ * the boundaries, false otherwiese
+ *
+ * Checks if the energy interval [@p emin, @p emax ] falls is fully contained
+ * by energy boundaries
+ *
+ * @todo This method is so far only correct for contiguous energy boundaries.
+ ***************************************************************************/
+bool GEbounds::contains(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Initialise result
+    bool contained = false;
+
+    // Check if emin, emax is fully contained within this ebounds
+    if (emin >= m_emin && emax <= m_emax) {
+        contained = true;
+    }
+
+    // Return result
+    return contained;
+}
+
+
+/***********************************************************************//**
  * @brief Print energy boundaries
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
