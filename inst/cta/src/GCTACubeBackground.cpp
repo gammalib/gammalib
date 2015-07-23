@@ -350,9 +350,12 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             // Get event bin
             GCTAEventBin* bin = eventcube[i];
 
-            // Determine energy bin index. Skip if bin is not full contained within the energy boundaries of the observation
+            // Determine energy bin index. Skip if bin is not fully contained
+            // within the energy boundaries of the observation
             int index = m_ebounds.index(bin->energy());
-            if (index == -1 || !obs_ebounds.is_in_range(m_ebounds.emin(index), m_ebounds.emax(index))) {
+            if (index == -1 || 
+                !obs_ebounds.contains(m_ebounds.emin(index),
+                                      m_ebounds.emax(index))) {
                 continue;
             }
 

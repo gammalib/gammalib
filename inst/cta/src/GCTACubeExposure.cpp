@@ -476,8 +476,10 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
                 // Loop over all exposure cube energy bins
                 for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
-                    //  Only add exposure to pixel if energy bin is inside observation energy boundaries
-                    if (obs_ebounds.is_in_range(m_ebounds.emin(iebin), m_ebounds.emax(iebin))) {
+                    // Only add exposure to pixel if energy bin is inside 
+                    // observation energy boundaries
+                    if (obs_ebounds.contains(m_ebounds.emin(iebin),
+                                             m_ebounds.emax(iebin))) {
 
                         // Get logE/TeV
                         double logE = m_ebounds.elogmean(iebin).log10TeV();

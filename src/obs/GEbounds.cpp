@@ -995,6 +995,34 @@ bool GEbounds::contains(const GEnergy& eng) const
 
 
 /***********************************************************************//**
+ * @brief Checks whether energy boundaries contain and energy bin
+ *
+ * @param[in] emin Minimum energy of bin to be checked.
+ * @param[in] emax Maximum energy of bin to be checked.
+ * @return True if energy bin [emin, emax] is fully contained inside energy
+ * the boundaries, false otherwiese
+ *
+ * Checks if the energy interval [@p emin, @p emax ] falls is fully contained
+ * by energy boundaries
+ *
+ * @todo This method is so far only correct for contiguous energy boundaries.
+ ***************************************************************************/
+bool GEbounds::contains(const GEnergy& emin, const GEnergy& emax) const
+{
+    // Initialise result
+    bool contained = false;
+
+    // Check if emin, emax is fully contained within this ebounds
+    if (emin >= m_emin && emax <= m_emax) {
+        contained = true;
+    }
+
+    // Return result
+    return contained;
+}
+
+
+/***********************************************************************//**
  * @brief Print energy boundaries
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -1037,32 +1065,6 @@ std::string GEbounds::print(const GChatter& chatter) const
 
     // Return
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Checks whether energy boundaries contain energy bins boundaries
- *
- * @param[in] emin Minimum energy of bin to be checked.
- * @param[in] emax Maximum energy of bin to be checked.
- * @return True if passed energy range [emin; emax] is fully contained inside energy
- *  boundaries, false otherwiese
- *
- * Checks if the energy interval [@p emin ; @p emax ] falls in into the energy boundaries
- *
- ***************************************************************************/
-bool GEbounds::is_in_range(const GEnergy& emin, const GEnergy& emax) const
-{
-    // Initialise result
-    bool in_range = false;
-
-    // Check if emin, emax is fully contained within this ebounds
-    if (emin >= m_emin && emax <= m_emax) {
-        in_range = true;
-    }
-
-    // Return result
-    return in_range;
 }
 
 
