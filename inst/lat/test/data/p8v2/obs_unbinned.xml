@@ -1,0 +1,8 @@
+<observation_list title="observation library">
+  <observation name="Crab" id="00001" instrument="LAT">
+    <parameter name="FT1"          file="$(PACKAGE_SOURCE)/inst/lat/test/data/p8v2/ft1.fits"/>
+    <parameter name="FT2"          file="$(PACKAGE_SOURCE)/inst/lat/test/data/p8v2/ft2.fits"/>
+    <parameter name="LiveTimeCube" file="$(PACKAGE_SOURCE)/inst/lat/test/data/p8v2/ltcube.fits"/>
+    <parameter name="IRF"          value="P8R2_SOURCE_V6"/>
+  </observation>
+</observation_list>
