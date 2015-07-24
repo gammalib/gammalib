@@ -43,6 +43,7 @@
 const std::string lat_caldb = PACKAGE_SOURCE"/inst/lat/caldb";
 const std::string dirPass6  = PACKAGE_SOURCE"/inst/lat/test/data/p6v3";
 const std::string dirPass7  = PACKAGE_SOURCE"/inst/lat/test/data/p7v6";
+const std::string dirPass8  = PACKAGE_SOURCE"/inst/lat/test/data/p8v2";
 
 
 /***********************************************************************//**
@@ -71,6 +72,7 @@ void TestGLATResponse::set(void)
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGLATResponse::test_response_p6), "Test P6 response");
     append(static_cast<pfunction>(&TestGLATResponse::test_response_p7), "Test P7 response");
+    append(static_cast<pfunction>(&TestGLATResponse::test_response_p8), "Test P8 response");
 
     // Return
     return;
@@ -100,6 +102,7 @@ void TestGLATLtCube::set(void)
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p6), "Test P6 livetime cube");
     append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p7), "Test P7 livetime cube");
+    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p8), "Test P8 livetime cube");
 
     // Return
     return;
@@ -129,8 +132,10 @@ void TestGLATObservation::set(void)
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p6), "Test P6 unbinned observation");
     append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p7), "Test P7 unbinned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p8), "Test P8 unbinned observation");
     append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p6), "Test P6 binned observation");
     append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p7), "Test P7 binned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p8), "Test P8 binned observation");
 
     // Return
     return;
@@ -160,6 +165,7 @@ void TestGLATOptimize::set(void)
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p6), "Test P6 binned optimizer");
     append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p7), "Test P7 binned optimizer");
+    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p8), "Test P8 binned optimizer");
 
     // Return
     return;
@@ -205,6 +211,19 @@ void TestGLATResponse::test_response_p7(void)
 
 
 /***********************************************************************//**
+ * @brief Test Fermi/LAT Pass 8 response handling
+ ***************************************************************************/
+void TestGLATResponse::test_response_p8(void)
+{
+    // Test Pass 8 IRFs
+    test_one_response("P8R2_SOURCE_V6");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test one specific response
  *
  * @param[in] irf Instrument response function.
@@ -225,11 +244,8 @@ void TestGLATResponse::test_one_response(const std::string& irf)
     try {
         GLATResponse rsp;
         rsp.caldb(lat_caldb);
-        std::cout << ".";
         rsp.load(irf+"::front");
-        std::cout << ".";
         rsp.load(irf+"::back");
-        std::cout << ".";
         rsp.load(irf);
         test_try_success();
     }
@@ -279,6 +295,21 @@ void TestGLATLtCube::test_ltcube_p7(void)
 {
     // Test various datasets
     test_one_ltcube(dirPass7, 248009.734604);
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test livetime cube handling
+ *
+ * Verifies handling of Fermi/LAT Pass 8 livetime cube.
+ ***************************************************************************/
+void TestGLATLtCube::test_ltcube_p8(void)
+{
+    // Test various datasets
+    test_one_ltcube(dirPass8, 31911.50386047);
 
     // Exit test
     return;
@@ -398,6 +429,21 @@ void TestGLATObservation::test_unbinned_obs_p7(void)
 
 
 /***********************************************************************//**
+ * @brief Test unbinned observation handling
+ *
+ * Verifies handling of Pass 8 unbinned data. 
+ ***************************************************************************/
+void TestGLATObservation::test_unbinned_obs_p8(void)
+{
+    // Test various datasets
+    test_one_unbinned_obs(dirPass8);
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test binned observation handling
  *
  * Verifies the ability to handle Pass 6 binned Fermi/LAT data.
@@ -422,6 +468,22 @@ void TestGLATObservation::test_binned_obs_p7(void)
 {
     // Test various datasets
     test_one_binned_obs(dirPass7, "P7SOURCE_V6");
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned observation handling
+ *
+ * Verifies the ability to handle Pass 8 binned Fermi/LAT data.
+ ***************************************************************************/
+void TestGLATObservation::test_binned_obs_p8(void)
+{
+    // Test various datasets
+    test_one_binned_obs(dirPass8, "P8R2_SOURCE_V6");
 
     // Exit test
     return;
@@ -672,6 +734,37 @@ void TestGLATOptimize::test_binned_optimizer_p7(void)
 
     // Test various datasets
     test_one_binned_optimizer(dirPass7, "P7SOURCE_V6", fit_results);
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned optimizer handling
+ *
+ * Verifies the ability to handle binned Pass 8 Fermi/LAT optimization.
+ ***************************************************************************/
+void TestGLATOptimize::test_binned_optimizer_p8(void)
+{
+    // Set expected fit results
+    double fit_results[] = {1, 0,
+                            2.37468, 0.4548979,
+                            1, 0,
+                            1, 0,
+                            0.8419824722, 0.06340531926,
+                            1, 0,
+                            83.6331, 0,
+                            22.0145, 0,
+                            1.922525774e-06, 1.209507237e-07,
+                            -2.12421, 0.0493105484,
+                            100, 0,
+                            500000, 0,
+                            1, 0};
+
+    // Test various datasets
+    test_one_binned_optimizer(dirPass8, "P8R2_SOURCE_V6", fit_results);
 
     // Exit test
     return;
