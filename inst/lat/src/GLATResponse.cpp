@@ -609,9 +609,9 @@ std::cout << psfname << std::endl;
 std::cout << edispname << std::endl;
 */
         // Load IRFs
-        GLATAeff*  aeff  = new GLATAeff(aeffname);
-        GLATPsf*   psf   = new GLATPsf(psfname);
-        GLATEdisp* edisp = new GLATEdisp(edispname);
+        GLATAeff*  aeff  = new GLATAeff(aeffname, type_names[i]);
+        GLATPsf*   psf   = new GLATPsf(psfname, type_names[i]);
+        GLATEdisp* edisp = new GLATEdisp(edispname, type_names[i]);
 
         // Push them on the response stack
         m_aeff.push_back(aeff);

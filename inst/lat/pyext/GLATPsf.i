@@ -39,7 +39,7 @@ class GLATPsf : public GBase {
 public:
     // Constructors and destructors
     GLATPsf(void);
-    explicit GLATPsf(const std::string& filename);
+    GLATPsf(const std::string& filename, const std::string& evtype);
     GLATPsf(const GLATPsf& psf);
     virtual ~GLATPsf(void);
 
@@ -51,7 +51,8 @@ public:
     void        clear(void);
     GLATPsf*    clone(void) const;
     std::string classname(void) const;
-    void        load(const std::string& filename);
+    void        load(const std::string& filename,
+                     const std::string& evtype);
     void        save(const std::string& filename,
                      const bool& clobber = false);
     void        read(const GFits& file);

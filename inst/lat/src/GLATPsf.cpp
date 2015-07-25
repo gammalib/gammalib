@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATPsf.cpp - Fermi-LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,17 +71,18 @@ GLATPsf::GLATPsf(void)
 /***********************************************************************//**
  * @brief File constructor
  *
- * @param[in] filename FITS file name.
+ * @param[in] filename Point spread function file name.
+ * @param[in] evtype Event type.
  *
  * Construct instance by loading the point spread function from FITS file.
  ***************************************************************************/
-GLATPsf::GLATPsf(const std::string& filename)
+GLATPsf::GLATPsf(const std::string& filename, const std::string& evtype)
 {
     // Initialise class members
     init_members();
 
     // Load PSF from FITS file
-    load(filename);
+    load(filename, evtype);
 
     // Return
     return;
@@ -216,12 +217,16 @@ GLATPsf* GLATPsf::clone(void) const
 /***********************************************************************//**
  * @brief Load point spread function from FITS file
  *
- * @param[in] filename FITS file.
+ * @param[in] filename Point spread function file name.
+ * @param[in] evtype Event type.
  *
  * Loads Fermi/LAT point spread function from FITS file.
  ***************************************************************************/
-void GLATPsf::load(const std::string& filename)
+void GLATPsf::load(const std::string& filename, const std::string& evtype)
 {
+    // Store event type
+    m_evtype = evtype;
+
     // Open FITS file
     GFits fits(filename);
 
@@ -274,14 +279,26 @@ void GLATPsf::save(const std::string& filename, const bool& clobber)
  ***************************************************************************/
 void GLATPsf::read(const GFits& fits)
 {
-    // Clear instance
+    // Clear instance (keep event type)
+    std::string evtype = m_evtype;
     clear();
+    m_evtype = evtype;
 
-    // Get pointer to PSF parameters table
-    const GFitsTable& hdu_rpsf = *fits.table("RPSF");
+    // Set extension names
+    std::string rpsf    = "RPSF";
+    std::string scaling = "PSF_SCALING_PARAMS";
+    if (!fits.contains(rpsf)) {
+        rpsf += "_" + m_evtype;
+    }
+    if (!fits.contains(scaling)) {
+        scaling += "_" + m_evtype;
+    }
 
-    // Get pointer to PSF scaling parameters table
-    const GFitsTable& hdu_scale = *fits.table("PSF_SCALING_PARAMS");
+    // Get PSF parameters table
+    const GFitsTable& hdu_rpsf = *fits.table(rpsf);
+
+    // Get PSF scaling parameters table
+    const GFitsTable& hdu_scale = *fits.table(scaling);
 
     // Determine PSF version (default version is version 1)
     int version = (hdu_rpsf.has_card("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
@@ -567,6 +584,7 @@ std::string GLATPsf::print(const GChatter& chatter) const
 void GLATPsf::init_members(void)
 {
     // Initialise members
+    m_evtype.clear();
     m_psf = NULL;
     
     // Return
@@ -582,6 +600,9 @@ void GLATPsf::init_members(void)
 void GLATPsf::copy_members(const GLATPsf& psf)
 {
     // Copy members
+    m_evtype = psf.m_evtype;
+
+    // Clone members
     if (psf.m_psf != NULL) {
         m_psf = psf.m_psf->clone();
     }

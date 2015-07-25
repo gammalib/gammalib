@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,7 +48,7 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    explicit GLATEdisp(const std::string& filename);
+    GLATEdisp(const std::string& filename, const std::string& evtype);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
@@ -62,7 +62,8 @@ public:
     void         clear(void);
     GLATEdisp*   clone(void) const;
     std::string  classname(void) const;
-    void         load(const std::string& filename);
+    void         load(const std::string& filename,
+                      const std::string& evtype);
     void         save(const std::string& filename,
                       const bool& clobber = false);
     void         read(const GFits& file);
@@ -84,6 +85,7 @@ private:
     void write_edisp(GFits& file) const;
     
     // Protected members
+    std::string         m_evtype;       //!< Event type
     GLATResponseTable   m_edisp_bins;   //!< Energy dispersion energy and cos theta binning
     std::vector<double> m_norm;         //!< Energy dispersion normalization
     std::vector<double> m_ls1;          //!< Energy dispersion ...

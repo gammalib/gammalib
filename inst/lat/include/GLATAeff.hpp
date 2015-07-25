@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATAeff.hpp - Fermi/LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,7 @@ class GLATAeff : public GBase {
 public:
     // Constructors and destructors
     GLATAeff(void);
-    explicit GLATAeff(const std::string& filename);
+    GLATAeff(const std::string& filename, const std::string& evtype);
     GLATAeff(const GLATAeff& aeff);
     virtual ~GLATAeff(void);
 
@@ -68,7 +68,8 @@ public:
     void          clear(void);
     GLATAeff*     clone(void) const;
     std::string   classname(void) const;
-    void          load(const std::string& filename);
+    void          load(const std::string& filename,
+                       const std::string& evtype);
     void          save(const std::string& filename,
                        const bool &clobber = false);
     void          read(const GFits& file);
@@ -95,6 +96,7 @@ private:
     void write_efficiency(GFits& file) const;
     
     // Protected members
+    std::string         m_evtype;       //!< Event type
     GLATResponseTable   m_aeff_bins;    //!< Aeff energy and cos theta binning
     std::vector<double> m_aeff;         //!< Aeff array
     double              m_min_ctheta;   //!< Minimum valid cos(theta)

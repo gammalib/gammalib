@@ -21,7 +21,7 @@
 /**
  * @file GLATAeff.i
  * @brief Fermi/LAT effective area class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,7 +39,7 @@ class GLATAeff : public GBase {
 public:
     // Constructors and destructors
     GLATAeff(void);
-    explicit GLATAeff(const std::string& filename);
+    GLATAeff(const std::string& filename, const std::string& evtype);
     GLATAeff(const GLATAeff& aeff);
     virtual ~GLATAeff(void);
 
@@ -49,23 +49,24 @@ public:
                       const double& phi);
 
     // Methods
-    void         clear(void);
-    GLATAeff*    clone(void) const;
-    std::string  classname(void) const;
-    void         load(const std::string filename);
-    void         save(const std::string filename,
-                      const bool& clobber = false);
-    void         read(const GFits& file);
-    void         write(GFits& file) const;
-    int          size(void) const;
-    int          nenergies(void) const;
-    int          ncostheta(void) const;
-    double       costhetamin(void) const;
-    void         costhetamin(const double& ctheta);
-    bool         has_phi(void) const;
-    bool         has_efficiency(void) const;
-    double       efficiency_factor1(const GEnergy& srcEng) const;
-    double       efficiency_factor2(const GEnergy& srcEng) const;
+    void          clear(void);
+    GLATAeff*     clone(void) const;
+    std::string   classname(void) const;
+    void          load(const std::string& filename,
+                       const std::string& evtype);
+    void          save(const std::string& filename,
+                       const bool &clobber = false);
+    void          read(const GFits& file);
+    void          write(GFits& file) const;
+    int           size(void) const;
+    int           nenergies(void) const;
+    int           ncostheta(void) const;
+    const double& costhetamin(void) const;
+    void          costhetamin(const double& ctheta);
+    bool          has_phi(void) const;
+    bool          has_efficiency(void) const;
+    double        efficiency_factor1(const GEnergy& srcEng) const;
+    double        efficiency_factor2(const GEnergy& srcEng) const;
 };
 
 

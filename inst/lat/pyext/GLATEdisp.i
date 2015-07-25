@@ -21,7 +21,7 @@
 /**
  * @file GLATEdisp.i
  * @brief Fermi/LAT energy dispersion class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,7 +39,7 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    explicit GLATEdisp(const std::string filename);
+    GLATEdisp(const std::string& filename, const std::string& evtype);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
@@ -50,7 +50,8 @@ public:
     void         clear(void);
     GLATEdisp*   clone(void) const;
     std::string  classname(void) const;
-    void         load(const std::string filename);
+    void         load(const std::string& filename,
+                      const std::string& evtype);
     void         save(const std::string filename,
                       const bool& clobber = false);
     void         read(const GFits& file);
@@ -58,8 +59,6 @@ public:
     int          size(void) const;
     int          nenergies(void) const;
     int          ncostheta(void) const;
-    //double       costhetamin(void) const;
-    //void         costhetamin(const double& ctheta);
     bool         has_phi(void) const;
 };
 
