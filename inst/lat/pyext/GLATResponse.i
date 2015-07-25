@@ -61,8 +61,8 @@ public:
 
     // Other Methods
     int                size(void) const;
-    void               caldb(const std::string& caldb);
-    const std::string& caldb(void) const;
+    void               caldb(const GCaldb& caldb);
+    const GCaldb&      caldb(void) const;
     const std::string& rspname(void) const;
     void               load(const std::string& rspname);
     void               save(const std::string& rspname) const;

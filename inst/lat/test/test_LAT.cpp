@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       test_LAT.cpp - test LAT classes                   *
+ *                  test_LAT.cpp - test Fermi/LAT classes                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -190,7 +190,7 @@ TestGLATOptimize* TestGLATOptimize::clone(void) const
 void TestGLATResponse::test_response_p6(void)
 {
     // Test Pass 6 IRFs
-    test_one_response("P6_v3_diff");
+    test_one_response("P6_V3_DIFFUSE");
 
     // Return
     return;
@@ -243,7 +243,6 @@ void TestGLATResponse::test_one_response(const std::string& irf)
     test_try("Test loading the response");
     try {
         GLATResponse rsp;
-        rsp.caldb(lat_caldb);
         rsp.load(irf+"::front");
         rsp.load(irf+"::back");
         rsp.load(irf);
@@ -257,7 +256,6 @@ void TestGLATResponse::test_one_response(const std::string& irf)
     test_try("Test saving the response");
     try {
         GLATResponse rsp;
-        rsp.caldb(lat_caldb);
         rsp.load(irf);
         rsp.save(fitsfile);
         test_try_success();
@@ -451,7 +449,7 @@ void TestGLATObservation::test_unbinned_obs_p8(void)
 void TestGLATObservation::test_binned_obs_p6(void)
 {
     // Test various datasets
-    test_one_binned_obs(dirPass6, "P6_v3_diff");
+    test_one_binned_obs(dirPass6, "P6_V3_DIFFUSE");
 
     // Exit test
     return;
@@ -553,7 +551,6 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
     // Test XML loading
     test_try("Test XML loading");
     try {
-        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_unbin_xml);
         obs.save(file1);
         test_try_success();
@@ -652,7 +649,7 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     test_try("Test mean PSF");
     try {
         run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
-        run.response(irf, lat_caldb);
+        run.response(irf);
         GSkyDir dir;
         GLATMeanPsf psf(dir, run);
         test_try_success();
@@ -664,7 +661,6 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     // Test XML loading
     test_try("Test XML loading");
     try {
-        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_bin_xml);
         obs.save(file1);
         test_try_success();
@@ -702,7 +698,7 @@ void TestGLATOptimize::test_binned_optimizer_p6(void)
                             1, 0};
 
     // Test various datasets
-    test_one_binned_optimizer(dirPass6, "P6_v3_diff", fit_results);
+    test_one_binned_optimizer(dirPass6, "P6_V3_DIFFUSE", fit_results);
 
     // Exit test
     return;
@@ -797,7 +793,7 @@ void TestGLATOptimize::test_one_binned_optimizer(const std::string& datadir,
     test_try("Setup for optimization");
     try {
         run.load_binned(lat_srcmap, lat_expmap, lat_ltcube);
-        run.response(irf, lat_caldb);
+        run.response(irf);
         obs.append(run);
         test_try_success();
     }
@@ -846,6 +842,9 @@ int main(void)
 
     // Check if data directory exists
     bool has_data = (access(PACKAGE_SOURCE"/inst/lat/test/data", R_OK) == 0);
+
+    // Set CALDB
+    setenv("CALDB", lat_caldb.c_str(), 1);
 
     // Initially assume that we pass all tests
     bool success = true;

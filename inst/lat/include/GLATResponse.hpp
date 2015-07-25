@@ -30,19 +30,28 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GLATEventAtom.hpp"
-#include "GLATEventBin.hpp"
+#include "GCaldb.hpp"
+//#include "GEvent.hpp"
+//#include "GModel.hpp"
+//#include "GObservation.hpp"
+#include "GResponse.hpp"
+//#include "GLATEventAtom.hpp"
+//#include "GLATEventBin.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
 #include "GLATEdisp.hpp"
 #include "GLATMeanPsf.hpp"
-#include "GEvent.hpp"
-#include "GModel.hpp"
-#include "GObservation.hpp"
-#include "GResponse.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GSource;
+class GEvent;
+class GPhoton;
+class GObservation;
+class GEnergy;
+class GTime;
+class GModelSky;
+class GLATEventAtom;
+class GLATEventBin;
 
 
 /***********************************************************************//**
@@ -82,8 +91,8 @@ public:
 
     // Other Methods
     int                size(void) const;
-    void               caldb(const std::string& caldb);
-    const std::string& caldb(void) const;
+    void               caldb(const GCaldb& caldb);
+    const GCaldb&      caldb(void) const;
     const std::string& rspname(void) const;
     void               load(const std::string& rspname);
     void               save(const std::string& rspname) const;
@@ -108,10 +117,10 @@ private:
     void free_members(void);
 
     // Private members
-    std::string               m_caldb;      //!< Name of or path to the calibration database
+    GCaldb                    m_caldb;      //!< Calibration database
     std::string               m_rspname;    //!< Name of the instrument response
-    bool                      m_has_front;   //!< Front IRF loaded?
-    bool                      m_has_back;    //!< Back IRF loaded?
+    bool                      m_has_front;  //!< Front IRF loaded?
+    bool                      m_has_back;   //!< Back IRF loaded?
     bool                      m_force_mean; //!< Use mean PSF in any case
     std::vector<GLATAeff*>    m_aeff;       //!< Effective areas
     std::vector<GLATPsf*>     m_psf;        //!< Point spread functions
@@ -174,9 +183,24 @@ int GLATResponse::size(void) const
  * @return Calibration database.
  ***************************************************************************/
 inline
-const std::string& GLATResponse::caldb(void) const
+const GCaldb& GLATResponse::caldb(void) const
 {
     return m_caldb;
+}
+
+
+/***********************************************************************//**
+ * @brief Set calibration database
+ *
+ * @param[in] caldb Calibration database.
+ *
+ * Sets the calibration database for the Fermi/LAT response.
+ ***************************************************************************/
+inline
+void GLATResponse::caldb(const GCaldb& caldb)
+{
+    m_caldb = caldb;
+    return;
 }
 
 

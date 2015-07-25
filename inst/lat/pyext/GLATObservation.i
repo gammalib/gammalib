@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATObservation.i - Fermi/LAT observation class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,8 +61,7 @@ public:
     void              load_binned(const std::string& cntmap_name,
                                   const std::string& expmap_name,
                                   const std::string& ltcube_name);
-    void              response(const std::string& irfname,
-                               const std::string& caldb = "");    
+    void              response(const std::string& irfname);    
     const GLATLtCube* ltcube(void) const;
 };
 

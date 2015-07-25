@@ -194,32 +194,6 @@ GLATResponse* GLATResponse::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set path to the calibration database
- *
- * @param[in] caldb Path to calibration database
- *
- * @exception GException::caldb_not_found
- *            Calibration database repository not found.
- *
- * This method stores the CALDB root directory as the path to the LAT
- * calibration database.
- *
- * @todo Make use of the LAT CALDB to translate IRF names into filenames.
- ***************************************************************************/
-void GLATResponse::caldb(const std::string& caldb)
-{
-    // Allocate calibration database
-    GCaldb db(caldb);
-
-    // Store the path to the calibration database
-    m_caldb = db.rootdir();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Return value of point source IRF
  *
  * @param[in] event Observed event.
@@ -541,81 +515,110 @@ GEbounds GLATResponse::ebounds(const GEnergy& obsEnergy) const
 /***********************************************************************//**
  * @brief Load Fermi LAT response from calibration database
  *
- * @param[in] rspname Response name (name/name::front/name::back).
+ * @param[in] rspname Response name.
  *
- * @exception GException::rsp_invalid_type
+ * @exception GException::invalid_argument
  *            Invalid response type encountered.
  *
  * Loads the specified Fermi LAT response from the calibration database.
+ * The following response names are supported (case insensitive):
  *
- * @todo Add a more generic calibration database interface. For this we need
- *       first to develop a clear vision about how the calibration database
- *       is organized. Probably it is best to introduce a generic base class
- *       for the calibration database and each instrument implements then
- *       it's specific interface.
+ *      name (is equivalent to front+back)
+ *      name::front
+ *      name::back
+ *      name::psf
+ *      name::edisp
  ***************************************************************************/
 void GLATResponse::load(const std::string& rspname)
 {
-    // Save calibration database name
-    std::string caldb = m_caldb;
+    // Set 
+    static const std::string type_names[] = {"FRONT",
+                                             "BACK",
+                                             "PSF0",
+                                             "PSF1",
+                                             "PSF2",
+                                             "PSF3",
+                                             "EDISP0",
+                                             "EDISP1",
+                                             "EDISP2",
+                                             "EDISP3"};
 
-    // Clear instance
+    // Clear instance but conserve calibration database
+    GCaldb caldb = m_caldb;
     clear();
-
-    // Restore calibration database name
     m_caldb = caldb;
 
-    // Determine response types to be loaded
+    // Determine response types to be loaded. If no event type has been
+    // specified then load both front and back response.
+    int event_type = 0;
     std::vector<std::string> array = gammalib::split(rspname, ":");
     if (array.size() == 1) {
-        m_rspname  = array[0];
+        m_rspname   = array[0];
         m_has_front = true;
         m_has_back  = true;
+        event_type  = 3;
     }
     else if (array.size() == 3) {
-        m_rspname = array[0];
-        if (gammalib::strip_whitespace(gammalib::tolower(array[2])) == "front") {
+        m_rspname          = array[0];
+        std::string evtype = gammalib::strip_whitespace(gammalib::tolower(array[2]));
+        if (evtype == "front") {
             m_has_front = true;
+            event_type  = 1;
         }
-        else if (gammalib::strip_whitespace(gammalib::tolower(array[2])) == "back") {
-            m_has_back  = true;
+        else if (evtype == "back") {
+            m_has_back = true;
+            event_type = 2;
+        }
+        else if (evtype == "psf") {
+            event_type = 60;
+        }
+        else if (evtype == "edisp") {
+            event_type = 960;
         }
         else {
-            throw GException::rsp_invalid_type(G_LOAD, array[2]);
+            std::string msg = "Invalid response type \""+array[2]+"\".";
+            throw GException::invalid_argument(G_LOAD, msg);
         }
     }
     else {
-        throw GException::rsp_invalid_type(G_LOAD, m_rspname);
+        std::string msg = "Invalid response \""+m_rspname+"\".";
+        throw GException::invalid_argument(G_LOAD, msg);
     }
 
-    // Set caldb access path
-    caldb += "/data/glast/lat/bcf/";
+    // Loop over all possible response types
+    for (int i = 0; i < 10; ++i) {
 
-    // Load front IRF if requested
-    if (m_has_front) {
-        std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_front.fits";
-        std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_front.fits";
-        std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_front.fits";
+        // Set bitmask for this response type
+        int bitmask = 1 << i;
+
+        // Fall through if this response type is not requested
+        if ((event_type & bitmask) == 0) {
+            continue;
+        }
+
+        // Get response using the GCaldb interface
+        std::string expr      = "VERSION("+gammalib::toupper(m_rspname)+")";
+        std::string aeffname  = m_caldb.filename(type_names[i],"","EFF_AREA","","",expr);
+        std::string psfname   = m_caldb.filename(type_names[i],"","RPSF","","",expr);
+        std::string edispname = m_caldb.filename(type_names[i],"","EDISP","","",expr);
+/*
+std::cout << type_names[i] << std::endl;
+std::cout << expr << std::endl;
+std::cout << aeffname << std::endl;
+std::cout << psfname << std::endl;
+std::cout << edispname << std::endl;
+*/
+        // Load IRFs
         GLATAeff*  aeff  = new GLATAeff(aeffname);
         GLATPsf*   psf   = new GLATPsf(psfname);
         GLATEdisp* edisp = new GLATEdisp(edispname);
-        m_aeff.push_back(aeff);
-        m_psf.push_back(psf);
-        m_edisp.push_back(edisp);
-    }
 
-    // Load back IRF if requested
-    if (m_has_back) {
-        std::string aeffname  = caldb + "ea/aeff_"  + m_rspname + "_back.fits";
-        std::string psfname   = caldb + "psf/psf_"   + m_rspname + "_back.fits";
-        std::string edispname = caldb + "edisp/edisp_" + m_rspname + "_back.fits";
-        GLATAeff*  aeff  = new GLATAeff(aeffname);
-        GLATPsf*   psf   = new GLATPsf(psfname);
-        GLATEdisp* edisp = new GLATEdisp(edispname);
+        // Push them on the response stack
         m_aeff.push_back(aeff);
         m_psf.push_back(psf);
         m_edisp.push_back(edisp);
-    }
+
+    } // endfor: looped over response types
 
     // Return
     return;
@@ -737,7 +740,8 @@ std::string GLATResponse::print(const GChatter& chatter) const
         result.append("=== GLATResponse ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("Calibration database")+m_caldb);
+        result.append("\n"+gammalib::parformat("Caldb mission")+m_caldb.mission());
+        result.append("\n"+gammalib::parformat("Caldb instrument")+m_caldb.instrument());
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
         result.append("\n"+gammalib::parformat("Section(s)"));
         if (m_has_front && m_has_back) {
@@ -778,28 +782,23 @@ std::string GLATResponse::print(const GChatter& chatter) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Do we need the handoff stuff there???
  ***************************************************************************/
 void GLATResponse::init_members(void)
 {
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_has_front   = false;
-    m_has_back    = false;
+    m_has_front  = false;
+    m_has_back   = false;
     m_force_mean = false;
     m_aeff.clear();
     m_psf.clear();
     m_edisp.clear();
     m_ptsrc.clear();
-    
-    // By default use HANDOFF response database.
-    char* handoff = std::getenv("HANDOFF_IRF_DIR");
-    if (handoff != NULL) {
-        m_caldb.assign(handoff);
-    }
 
+    // Open Fermi/LAT calibration database
+    m_caldb.open("glast", "lat");
+    
     // Return
     return;
 }
@@ -815,8 +814,8 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
     // Copy members
     m_caldb      = rsp.m_caldb;
     m_rspname    = rsp.m_rspname;
-    m_has_front   = rsp.m_has_front;
-    m_has_back    = rsp.m_has_back;
+    m_has_front  = rsp.m_has_front;
+    m_has_back   = rsp.m_has_back;
     m_force_mean = rsp.m_force_mean;
 
     // Clone Aeff
