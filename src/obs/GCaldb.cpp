@@ -420,8 +420,14 @@ std::string GCaldb::cifname(const std::string& mission, const std::string& instr
 
     // Verify that CIF exists
     if (access(cif.c_str(), F_OK) != 0) {
-        throw GException::file_not_found(G_CIFNAME, cif,
-              "Calibration Index File (CIF) not found.");
+
+        // Check gzipped version
+        cif += ".gz";
+        if (access(cif.c_str(), F_OK) != 0) {
+            throw GException::file_not_found(G_CIFNAME, cif,
+                  "Calibration Index File (CIF) not found.");
+        }
+        
     }
 
     // Return cif
