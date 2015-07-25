@@ -100,8 +100,6 @@ private:
     GLATResponseTable   m_aeff_bins;    //!< Aeff energy and cos theta binning
     std::vector<double> m_aeff;         //!< Aeff array
     double              m_min_ctheta;   //!< Minimum valid cos(theta)
-    bool                m_front;        //!< Response is for front section
-    bool                m_back;         //!< Response is for back section
     GLATEfficiency*     m_eff_func1;    //!< Efficiency functor 1
     GLATEfficiency*     m_eff_func2;    //!< Efficiency functor 2
 };

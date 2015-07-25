@@ -463,16 +463,7 @@ std::string GLATAeff::print(const GChatter& chatter) const
                       gammalib::str(nenergies()));
         result.append("\n"+gammalib::parformat("Number of cos theta bins") +
                       gammalib::str(ncostheta()));
-        result.append("\n"+gammalib::parformat("Detector section"));
-        if (m_front) {
-            result.append("front");
-        }
-        else if (m_back) {
-            result.append("back");
-        }
-        else {
-            result.append("unknown");
-        }
+        result.append("\n"+gammalib::parformat("Detector section")+m_evtype);
         result.append("\n"+gammalib::parformat("Efficiency factors"));
         if (has_efficiency()) {
             result.append("present");
@@ -504,8 +495,6 @@ void GLATAeff::init_members(void)
     m_aeff_bins.clear();
     m_aeff.clear();
     m_min_ctheta = 0.0;
-    m_front      = false;
-    m_back       = false;
     m_eff_func1  = NULL;
     m_eff_func2  = NULL;
 
@@ -526,8 +515,6 @@ void GLATAeff::copy_members(const GLATAeff& aeff)
     m_aeff_bins  = aeff.m_aeff_bins;
     m_aeff       = aeff.m_aeff;
     m_min_ctheta = aeff.m_min_ctheta;
-    m_front      = aeff.m_front;
-    m_back       = aeff.m_back;
 
     // Clone functors
     m_eff_func1 = (aeff.m_eff_func1 != NULL) ? aeff.m_eff_func1->clone() : NULL;
@@ -601,9 +588,11 @@ void GLATAeff::read_aeff(const GFitsTable& hdu)
     } // endif: there were effective area bins
 
     // Set detector section using the DETNAM keyword in the HDU
+    /*
     std::string detnam = gammalib::strip_whitespace(hdu.string("DETNAM"));
     m_front            = (detnam == "FRONT");
     m_back             = (detnam == "BACK");
+    */
 
     // Return
     return;
