@@ -77,21 +77,13 @@ GModelSpatialRadialShell::GModelSpatialRadialShell(void) : GModelSpatialRadial()
  * @param[in] dir Sky position of shell centre.
  * @param[in] radius Inner shell radius (degrees).
  * @param[in] width Shell width (degrees).
- * @param[in] small_angle Use small angle approximation (default to true).
  *
  * Constructs the shell model from the shell centre (@p dir), the inner
- * shell @p radius, and the shell @p width. The optional parameters
- * @p small_angle specifies whether the small angle approximation
- * should be used or not. The small angle approximation is (a little) faster,
- * but incorrect for shells larger than a few degrees.
- *
- * @todo Measure speed difference between small angle approximation and
- *       full computation.
+ * shell @p radius, and the shell @p width.
  ***************************************************************************/
 GModelSpatialRadialShell::GModelSpatialRadialShell(const GSkyDir& dir,
                                                    const double&  radius,
-                                                   const double&  width,
-                                                   const bool&    small_angle) :
+                                                   const double&  width) :
                           GModelSpatialRadial()
 {
     // Initialise members
@@ -101,7 +93,6 @@ GModelSpatialRadialShell::GModelSpatialRadialShell(const GSkyDir& dir,
     this->dir(dir);
     this->radius(radius);
     this->width(width);
-    this->small_angle(small_angle);
 
     // Return
     return;
@@ -249,28 +240,7 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  * model is a radial function \f$f(\theta)\f$, where \f$\theta\f$ is the
  * angular separation between shell centre and the actual location.
  *
- * In the small angle approximation,
- * \f[
- * S_{\rm p}(\vec{p} | E, t) = {\tt m\_norm} \left \{
- *  \begin{array}{l l}
- *     \displaystyle
- *     \sqrt{ \theta_{\rm out}^2 - \theta^2 } -
- *     \sqrt{ \theta_{\rm in}^2  - \theta^2 }
- *     & \mbox{if $\theta \le \theta_{\rm in}$} \\
- *     \\
- *    \displaystyle
- *     \sqrt{ \theta_{\rm out}^2 - \theta^2 }
- *     & \mbox{if $\theta_{\rm in} < \theta \le \theta_{\rm out}$} \\
- *     \\
- *    \displaystyle
- *    0 & \mbox{if $\theta > \theta_{\rm out}$}
- *  \end{array}
- *  \right .
- * \f]
- * where \f${\tt m\_norm}\f$ is a normalization constant (see the update()
- * method).
- *
- * In the general form that is also valid for large angles
+ * The function is given by
  * \f[
  * S_{\rm p}(\vec{p} | E, t) = {\tt m\_norm} \left \{
  *  \begin{array}{l l}
@@ -299,28 +269,20 @@ double GModelSpatialRadialShell::eval(const double&  theta,
     // Update precomputation cache
     update();
 
-    // Set x appropriately for the small angle approximation or not
-    double x;
-    if (m_small_angle) {
-        x = theta * theta;
-    }
-    else {
-        x  = std::sin(theta);
-        x *= x;
-    }
+    // Set x appropriately
+    double x = std::sin(theta);
+    x *= x;
 
-    // Compute value
-    double value = 0.0;
+    // Compute result
+    double result = 0.0;
     if (x < m_x_out) {
-        value = std::sqrt(m_x_out - x);
+        result = std::sqrt(m_x_out - x);
         if (x < m_x_in) {
-            value -= std::sqrt(m_x_in - x);
+            result -= std::sqrt(m_x_in - x);
         }
+        result *= m_norm;
     }
     
-    // Normalise value
-    double result = m_norm * value;
-
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (gammalib::is_notanumber(result) || gammalib::is_infinite(result)) {
@@ -328,11 +290,9 @@ double GModelSpatialRadialShell::eval(const double&  theta,
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (result=" << result;
         std::cout << ", m_norm=" << m_norm;
-        std::cout << ", value=" << value;
         std::cout << ", x=" << x;
         std::cout << ", m_x_out=" << m_x_out;
         std::cout << ", m_x_in=" << m_x_in;
-        std::cout << ", m_small_angle=" << m_small_angle;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -381,17 +341,15 @@ GSkyDir GModelSpatialRadialShell::mc(const GEnergy& energy,
 
     // Simulate offset from photon arrival direction
     #if defined(G_DEBUG_MC)
-    int    n_samples = 0;
+    int    n_samples     = 0;
     #endif
-    double theta_max     = this->theta_max();
-    double sin_theta_max = std::sin(theta_max);
-    double u_max         = (m_small_angle) ? m_norm * sin_theta_max * theta_max
-                                           : m_norm * sin_theta_max * sin_theta_max;
+    double sin_theta_max = std::sin(m_theta_out);
+    double u_max         = m_norm * sin_theta_max * sin_theta_max;
     double value         = 0.0;
     double u             = 1.0;
     double theta         = 0.0;
     do {
-        theta = ran.uniform() * theta_max;
+        theta = ran.uniform() * m_theta_out;
         value = eval(theta, energy, time) * std::sin(theta);
         u     = ran.uniform() * u_max;
         #if defined(G_DEBUG_MC)
@@ -684,9 +642,6 @@ void GModelSpatialRadialShell::init_members(void)
     m_pars.push_back(&m_radius);
     m_pars.push_back(&m_width);
 
-    // Initialise other members
-    m_small_angle = false;
-
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius and width shell is not meaningful
     m_last_radius = 0.0;
@@ -716,7 +671,6 @@ void GModelSpatialRadialShell::copy_members(const GModelSpatialRadialShell& mode
     // Copy members
     m_radius      = model.m_radius;
     m_width       = model.m_width;
-    m_small_angle = model.m_small_angle;
 
     // Copy precomputation cache
     m_last_radius = model.m_last_radius;
@@ -753,13 +707,6 @@ void GModelSpatialRadialShell::free_members(void)
  * m_theta_in contains the inner shell radius in radians, while m_theta_out
  * contains the outer shell radius in radians.
  *
- * In the small angle approximation, 
- * \f${\tt m\_x\_in} = {\tt m\_theta\_in}^2\f$,
- * \f${\tt m\_x\_out} = {\tt m\_theta\_out}^2\f$, and
- * \f[{\tt m\_norm} = \frac{3}{2 \pi}
- *    \frac{1}{\left( {\tt m\_theta\_out}^3 - {\tt m\_theta\_in}^3 \right)}\f].
- *
- * In the general case that is also valid for large angles,
  * \f${\tt m\_x\_in} = \sin^2 {\tt m\_theta\_in}\f$,
  * \f${\tt m\_x\_out} = \sin^2 {\tt m\_theta\_out}\f$, and
  * \f[{\tt m\_norm} = \frac{1}{2 \pi}
@@ -786,25 +733,17 @@ void GModelSpatialRadialShell::update() const
         m_last_width  = width();
         
         // Perform precomputations
-        m_theta_in   = radius() * gammalib::deg2rad;
-        m_theta_out  = (radius() + width()) * gammalib::deg2rad;
-        if (m_small_angle) {
-            m_x_in       = m_theta_in  * m_theta_in;
-            m_x_out      = m_theta_out * m_theta_out;
-            double denom = c1 * (m_x_out*m_theta_out - m_x_in*m_theta_in);
-            m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
-        } 
-        else {
-            double sin_theta_in  = std::sin(m_theta_in);
-            double sin_theta_out = std::sin(m_theta_out);
-            double term1         = (f1(m_theta_out) - f1(m_theta_in)) * c2;
-            double term2         = f2(m_theta_out);
-            double term3         = f2(m_theta_in);
-            double denom         = gammalib::twopi * (term1 + term2 - term3);
-            m_norm               = (denom > 0.0) ? 1.0 / denom : 0.0;
-            m_x_in               = sin_theta_in*sin_theta_in;
-            m_x_out              = sin_theta_out * sin_theta_out;
-        }
+        m_theta_in           = radius() * gammalib::deg2rad;
+        m_theta_out          = (radius() + width()) * gammalib::deg2rad;
+        double sin_theta_in  = std::sin(m_theta_in);
+        double sin_theta_out = std::sin(m_theta_out);
+        double term1         = (f1(m_theta_out) - f1(m_theta_in)) * c2;
+        double term2         = f2(m_theta_out);
+        double term3         = f2(m_theta_in);
+        double denom         = gammalib::twopi * (term1 + term2 - term3);
+        m_norm               = (denom > 0.0) ? 1.0 / denom : 0.0;
+        m_x_in               = sin_theta_in  * sin_theta_in;
+        m_x_out              = sin_theta_out * sin_theta_out;
 
     } // endif: update required
     

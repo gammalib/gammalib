@@ -40,8 +40,7 @@ public:
     GModelSpatialRadialShell(void);
     GModelSpatialRadialShell(const GSkyDir& dir,
                              const double&  radius,
-                             const double&  width,
-                             const bool&    small_angle = true);
+                             const double&  width);
     explicit GModelSpatialRadialShell(const GXmlElement& xml);
     GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
     virtual ~GModelSpatialRadialShell(void);
@@ -69,10 +68,8 @@ public:
     // Other methods
     double  radius(void) const;
     double  width(void) const;
-    bool    small_angle(void) const;
     void    radius(const double& radius);
     void    width(const double& width);
-    void    small_angle(const bool& small_angle);
 };
 
 

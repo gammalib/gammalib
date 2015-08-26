@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-3 July 2015
+30 August 2015
 
 
 1. Introduction
@@ -19,6 +19,8 @@ optimizer.
 
 The GSkymap class has been renamed to GSkyMap to be consistent with the other
 classes in the sky module.
+
+The small angle approximation has been removed from GModelSpatialRadialShell.
 
 
 3. Configuration
@@ -61,6 +63,9 @@ as obtained using the sky direction access operator.
 The algorithm used to draw random numbers in GModelSpatialDiffuseConst::mc()
 was wrong (sky directions were not distributed isotropically on the sky). This
 has now been fixed (#1480).
+
+The small angle approximation has been removed from GModelSpatialRadialShell
+as this complexifies the class and the approximation is not really needed.
 
 
 9. Numerics module

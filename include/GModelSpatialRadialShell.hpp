@@ -61,8 +61,7 @@ public:
     GModelSpatialRadialShell(void);
     GModelSpatialRadialShell(const GSkyDir& dir,
                              const double&  radius,
-                             const double&  width,
-                             const bool&    small_angle = true);
+                             const double&  width);
     explicit GModelSpatialRadialShell(const GXmlElement& xml);
     GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
     virtual ~GModelSpatialRadialShell(void);
@@ -92,12 +91,10 @@ public:
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double      radius(void) const;
-    double      width(void) const;
-    const bool& small_angle(void) const;
-    void        radius(const double& radius);
-    void        width(const double& width);
-    void        small_angle(const bool& small_angle);
+    double radius(void) const;
+    double width(void) const;
+    void   radius(const double& radius);
+    void   width(const double& width);
 
 protected:
     // Protected methods
@@ -111,15 +108,14 @@ protected:
     // Protected members
     GModelPar       m_radius;        //!< Inner shell radius (deg)
     GModelPar       m_width;         //!< Shell thickness (deg)
-    bool            m_small_angle;   //!< Use small angle approximate formulae
 
     // Cached members used for pre-computations
     mutable double  m_last_radius;   //!< Last shell radius (deg)
     mutable double  m_last_width;    //!< Last shell width (deg)
     mutable double  m_theta_in;      //!< Inner shell radius (rad)
-    mutable double  m_x_in;          //!< m_theta_in^2 or sin(m_theta_in)^2
+    mutable double  m_x_in;          //!< sin(m_theta_in)^2
     mutable double  m_theta_out;     //!< Outer shell radius (rad)
-    mutable double  m_x_out;         //!< m_theta_out^2 or sin(m_theta_out)^2
+    mutable double  m_x_out;         //!< sin(m_theta_out)^2
     mutable double  m_norm;          //!< Shell normalization
 };
 
@@ -204,37 +200,6 @@ inline
 void GModelSpatialRadialShell::width(const double& width)
 {
     m_width.value(width);
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return shell approximation flag
- *
- * @return True if small angle approximation is taken.
- *
- * Signals if the small angle approximation is taken.
- ***************************************************************************/
-inline
-const bool& GModelSpatialRadialShell::small_angle(void) const
-{
-    return (m_small_angle);
-}
-
-
-/***********************************************************************//**
- * @brief Set shell approximation flag
- *
- * @param[in] small_angle Shell approximation flag.
- *
- * Sets the shell approximation flag. True specifies that the small angle
- * approximation shall be taken, false specifies that the correct spherical
- * computation shall be used.
- ***************************************************************************/
-inline
-void GModelSpatialRadialShell::small_angle(const bool& small_angle)
-{
-    m_small_angle = small_angle;
     return;
 }
 
