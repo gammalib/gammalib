@@ -408,6 +408,51 @@ std::string GCTAAeff2D::print(const GChatter& chatter) const
 }
 
 
+/***********************************************************************//**
+ * @brief Return maximum effective area at a given energy
+ *
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
+ * @param[in] etrue Use true energy (true/false). Not used.
+ * @return String containing effective area information.
+ ***************************************************************************/
+double GCTAAeff2D::max(const double& logE,
+        const double& zenith,
+        const double& azimuth,
+        const bool& etrue) const
+{
+    // Set parameter index
+     int index = (etrue) ? 0 : 1;
+
+     int n_theta = m_aeff.axis(1);
+
+     // Initialise maximum effective area
+     double max_aeff = 0.0;
+
+     // Compute stepsize
+     double theta_step = m_aeff.axis_hi(1, n_theta - 1) / (double(n_theta) - 1.0);
+
+     // Loop over theta values
+     for(int i = 0; i < m_aeff.axis(1); i++) {
+
+         // Compute theta
+         double theta = i * theta_step;
+
+         // Get effective area value in cm2
+         double aeff = m_aeff(index, logE, theta);
+
+         // Adjust maximum effective area if necessary
+         if (aeff > max_aeff) {
+             max_aeff = aeff;
+         }
+     } // endfor: loop over theta values
+
+     // Return effective area value
+     return max_aeff;
+
+}
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =

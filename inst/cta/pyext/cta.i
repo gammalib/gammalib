@@ -195,6 +195,7 @@
 %include "GCTACubePsf.i"
 %include "GCTAModelCubeBackground.i"
 %include "GCTAModelIrfBackground.i"
+%include "GCTAModelAeffBackground.i"
 %include "GCTAModelRadial.i"
 %include "GCTAModelRadialRegistry.i"
 %include "GCTAModelRadialGauss.i"

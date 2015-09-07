@@ -73,6 +73,10 @@ public:
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
+    virtual double max(const double& logE,
+                             const double& zenith,
+                             const double& azimuth,
+                             const bool& etrue = true) const = 0;
 
 protected:
     // Methods

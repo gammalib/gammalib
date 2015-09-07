@@ -49,6 +49,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAPointing.cpp \
           src/GCTAModelCubeBackground.cpp \
           src/GCTAModelIrfBackground.cpp \
+          src/GCTAModelAeffBackground.cpp \
           src/GCTAModelRadialRegistry.cpp \
           src/GCTAModelRadial.cpp \
           src/GCTAModelRadialGauss.cpp \
@@ -97,6 +98,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTACubeSourceDiffuse.hpp \
                      include/GCTAModelCubeBackground.hpp \
                      include/GCTAModelIrfBackground.hpp \
+                     include/GCTAModelAeffBackground.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \

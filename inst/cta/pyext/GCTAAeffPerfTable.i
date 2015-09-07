@@ -58,6 +58,10 @@ public:
     std::string        classname(void) const;
     void               load(const std::string& filename);
     std::string        filename(void) const;
+    double max(const double& logE,
+                       const double& zenith,
+                       const double& azimuth,
+                       const bool& etrue = true) const;
 
     // Methods
     int            size(void) const;

@@ -67,6 +67,10 @@ public:
     void        load(const std::string& filename);
     std::string filename(void) const;
     std::string print(const GChatter& chatter = NORMAL) const;
+    double max(const double& logE,
+                                 const double& zenith,
+                                 const double& azimuth,
+                                 const bool& etrue = true) const;
 
     // Methods
     const GCTAResponseTable& table(void) const;
