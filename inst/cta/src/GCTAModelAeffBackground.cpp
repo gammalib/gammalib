@@ -315,9 +315,12 @@ double GCTAModelAeffBackground::eval(const GEvent& event,
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
+    // Set DETX and DETY in instrument direction
+    GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
+
     // Set theta and phi from instrument coordinates
-    double theta = std::sqrt(dir->detx() * dir->detx() + dir->dety() * dir->dety());
-    double phi = gammalib::atan2d(dir->dety(), dir->detx()) * gammalib::deg2rad;
+    double theta = std::sqrt(inst_dir.detx() * inst_dir.detx() + inst_dir.dety() * inst_dir.dety());
+    double phi = gammalib::atan2d(inst_dir.dety(), inst_dir.detx()) * gammalib::deg2rad;
 
     // Evaluate function
     double logE = event.energy().log10TeV();
@@ -384,17 +387,20 @@ double GCTAModelAeffBackground::eval_gradients(const GEvent& event,
         throw GException::invalid_argument(G_EVAL, msg);
     }
 
+    // Set DETX and DETY in instrument direction
+    GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
+
     // Set theta and phi from instrument coordinates
-    double theta = std::sqrt(dir->detx() * dir->detx() + dir->dety() * dir->dety());
-    double phi = gammalib::atan2d(dir->dety() * gammalib::rad2deg, dir->detx() * gammalib::rad2deg) * gammalib::deg2rad;
+    double theta = std::sqrt(inst_dir.detx() * inst_dir.detx() + inst_dir.dety() * inst_dir.dety());
+    double phi = gammalib::atan2d(inst_dir.dety(), inst_dir.detx()) * gammalib::deg2rad;
 
     // Evaluate function
     double logE = event.energy().log10TeV();
     double spat = (*aeff)(logE, theta, phi, cta->pointing().zenith(), cta->pointing().azimuth(), false);
     double spec = (spectral() != NULL)
-                  ? spectral()->eval(event.energy(), event.time()) : 1.0;
+                  ? spectral()->eval_gradients(event.energy(), event.time()) : 1.0;
     double temp = (temporal() != NULL)
-                  ? temporal()->eval(event.time()) : 1.0;
+                  ? temporal()->eval_gradients(event.time()) : 1.0;
 
     // Compute value
     double value = spat * spec * temp;
@@ -437,7 +443,7 @@ double GCTAModelAeffBackground::eval_gradients(const GEvent& event,
  * @exception GException::invalid_argument
  *            The specified observation is not a CTA observation.
  *
- * Spatially integrates the instrumental background model for a given
+ * Spatially integrates the effective area background model for a given
  * measured event energy and event time. This method also applies a deadtime
  * correction factor, so that the normalization of the model is a real rate
  * (counts/MeV/s).
@@ -488,7 +494,7 @@ double GCTAModelAeffBackground::npred(const GEnergy&      obsEng,
             // Get log10 of energy in TeV
             double logE = obsEng.log10TeV();
 
-            // Spatially integrate radial component
+            // Spatially integrate effective area component
             npred = this->aeff_integral(obs, logE);
 
             // Store result in Npred cache
@@ -606,11 +612,15 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs, GRan& ran) c
         list->ebounds(ebounds);
         list->gti(gti);
 
-        GEbounds spectral_ebounds = GEbounds(20, ebounds.emin(), ebounds.emax(), true);
+        // Set up spectral model to draw random energies from
+        // Here we use a fixed energy sampling for an
+        // instance of GModelSpectralNodes. This is analogous to
+        // to the mc-method GCTAModelIrfBackground
+        GEbounds spectral_ebounds = GEbounds(m_n_mc_energies, ebounds.emin(), ebounds.emax(), true);
         GModelSpectralNodes spectral;
         for (int i = 0; i < spectral_ebounds.size(); ++i) {
             GEnergy energy = spectral_ebounds.elogmean(i);
-            double intensity = this->aeff_integral(obs, energy.log10TeV());
+            double intensity = aeff_integral(obs, energy.log10TeV());
             double  norm      = m_spectral->eval(energy, events->tstart());
             spectral.append(energy, norm * intensity);
         }
@@ -701,7 +711,6 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs, GRan& ran) c
 
                      } while (ran.uniform() > acceptance_fraction);
 
-
                      // Convert CTA pointing direction in instrument system
                      GCTAInstDir mc_dir(pnt.dir());
 
@@ -760,11 +769,11 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs, GRan& ran) c
 
 
 /***********************************************************************//**
- * @brief Read CTA instrument background model from XML element
+ * @brief Read CTA effective area background model from XML element
  *
  * @param[in] xml XML element.
  *
- * Set up CTA instrument background model from the information provided by
+ * Set up CTA effective area background model from the information provided by
  * an XML element. The XML element is expected to have the following
  * structure
  *
@@ -837,11 +846,11 @@ void GCTAModelAeffBackground::read(const GXmlElement& xml)
 
 
 /***********************************************************************//**
- * @brief Write CTA instrument background model into XML element
+ * @brief Write CTA effective area background model into XML element
  *
  * @param[in] xml XML element.
  *
- * Write CTA instrument background model information into an XML element.
+ * Write CTA effective area background model information into an XML element.
  * The XML element will have the following structure
  *
  *     <source name="..." type="..." instrument="...">
@@ -926,10 +935,10 @@ void GCTAModelAeffBackground::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print CTA instrument background model information
+ * @brief Print CTA effective area background model information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing CTA instrument background model information.
+ * @return String containing CTA effective area background model information.
  ***************************************************************************/
 std::string GCTAModelAeffBackground::print(const GChatter& chatter) const
 {
@@ -996,6 +1005,7 @@ void GCTAModelAeffBackground::init_members(void)
     // Initialise members
     m_spectral = NULL;
     m_temporal = NULL;
+    m_n_mc_energies = 30;
 
     // Initialise Npred cache
     m_npred_names.clear();
@@ -1011,7 +1021,7 @@ void GCTAModelAeffBackground::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] bgd CTA background model.
+ * @param[in] bgd CTA effective area background model.
  ***************************************************************************/
 void GCTAModelAeffBackground::copy_members(const GCTAModelAeffBackground& bgd)
 {
@@ -1020,6 +1030,7 @@ void GCTAModelAeffBackground::copy_members(const GCTAModelAeffBackground& bgd)
     m_npred_energies = bgd.m_npred_energies;
     m_npred_times    = bgd.m_npred_times;
     m_npred_values   = bgd.m_npred_values;
+    m_n_mc_energies = bgd.m_n_mc_energies;
 
     // Clone spectral and temporal model components
     m_spectral = (bgd.m_spectral != NULL) ? bgd.m_spectral->clone() : NULL;
@@ -1212,9 +1223,6 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs, const dou
         throw GException::invalid_argument(G_NPRED, msg);
     }
 
-    // Get reference to ROI centre
-    const GSkyDir& roi_centre = events->roi().centre().dir();
-
     // Get ROI radius in radians
     double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
@@ -1250,7 +1258,7 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs, const dou
 
 
 /***********************************************************************//**
- * @brief Kernel for offset angle integration of background model
+ * @brief Kernel for offset angle integration of effective area background model
  *
  * @param[in] theta Offset angle from ROI centre (radians).
  *
@@ -1306,7 +1314,7 @@ double GCTAModelAeffBackground::npred_roi_kern_theta::eval(const double& theta)
 
 
 /***********************************************************************//**
- * @brief Kernel for azimuth angle integration of background model
+ * @brief Kernel for azimuth angle integration of effective area background model
  *
  * @param[in] phi Azimuth angle around ROI centre (radians).
  *
@@ -1316,12 +1324,7 @@ double GCTAModelAeffBackground::npred_roi_kern_theta::eval(const double& theta)
  *    B(\theta, \phi | E, t)
  * \f]
  *
- * using
  *
- * \f[ {\rm detx} = \theta \cos \phi \f]
- * \f[ {\rm dety} = \theta \sin \phi \f]
- *
- * @todo Verify correct orientation of detx and dety with respect to phi
  ***************************************************************************/
 double GCTAModelAeffBackground::npred_roi_kern_phi::eval(const double& phi)
 {

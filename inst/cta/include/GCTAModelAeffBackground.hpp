@@ -101,7 +101,7 @@ private:
                              m_iter(iter) { }
         double eval(const double& theta);
     protected:
-        const GCTAAeff* m_aeff;  //!< Pointer to background
+        const GCTAAeff* m_aeff;  //!< Pointer to effectve area
         const double&         m_logE; //!< Log10 of energy
         const int&            m_iter; //!< Romberg iterations
     };
@@ -117,7 +117,7 @@ private:
                            m_theta(theta) { }
         double eval(const double& phi);
     protected:
-        const GCTAAeff* m_aeff;   //!< Pointer to background
+        const GCTAAeff* m_aeff;   //!< Pointer to effective area
         const double&         m_logE;  //!< Log10 of energy
         const double&         m_theta; //!< Offset angle (radians)
     };
@@ -125,6 +125,7 @@ private:
     // Members
     GModelSpectral* m_spectral;   //!< Spectral model
     GModelTemporal* m_temporal;   //!< Temporal model
+    int        m_n_mc_energies; // Energy sampling for MC spectrum
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names

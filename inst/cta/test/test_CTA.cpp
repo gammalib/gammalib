@@ -1221,8 +1221,8 @@ void TestGCTAModel::test_model_aeff_bgd(void)
         const GXmlElement& lib = *xml.element("source_library", 0);
         const GXmlElement& src = *lib.element("source", 0);
         GCTAModelIrfBackground model(src);
-        test_value(model["Prefactor"].value(), 1.0);
-        test_value(model["Index"].value(), 0.0);
+        test_value(model["Prefactor"].value(), 1.0e-14);
+        test_value(model["Index"].value(), -2.4);
         test_value(model["PivotEnergy"].value(), 1.0e6);
         test_assert(model.is_constant(), "Model is expected to be constant.");
         test_try_success();
@@ -1234,10 +1234,10 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     // Test spectral constuctor
     test_try("Test spectral constuctor");
     try {
-        GModelSpectralPlaw plaw(1.0, 0.0, GEnergy(1.0, "TeV"));
+        GModelSpectralPlaw plaw(1.0e-14, -2.4, GEnergy(1.0, "TeV"));
         GCTAModelAeffBackground model(plaw);
-        test_value(model["Prefactor"].value(), 1.0);
-        test_value(model["Index"].value(), 0.0);
+        test_value(model["Prefactor"].value(), 1.0e-14);
+        test_value(model["Index"].value(), -2.4);
         test_value(model["PivotEnergy"].value(), 1.0e6);
         test_assert(model.is_constant(), "Model is expected to be constant.");
         test_try_success();
@@ -1249,8 +1249,8 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     // Test XML loading of instrumental background
     GModels models(cta_aeff_bgd_xml);
     GModel* model = models["My model"];
-    test_value((*model)["Prefactor"].value(), 1.0);
-    test_value((*model)["Index"].value(), 0.0);
+    test_value((*model)["Prefactor"].value(), 1e-14);
+    test_value((*model)["Index"].value(), -2.4);
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
 
@@ -1258,8 +1258,8 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     models.save("test.xml");
     models.load("test.xml");
     model = models["My model"];
-    test_value((*model)["Prefactor"].value(), 1.0);
-    test_value((*model)["Index"].value(), 0.0);
+    test_value((*model)["Prefactor"].value(), 1.0e-14);
+    test_value((*model)["Index"].value(), -2.4);
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
 
