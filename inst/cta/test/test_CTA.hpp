@@ -92,6 +92,7 @@ public:
     virtual std::string    classname(void) const { return "TestGCTAModel"; }
     void                   test_model_cube_bgd(void);
     void                   test_model_irf_bgd(void);
+    void                   test_model_aeff_bgd(void);
 };
 
 

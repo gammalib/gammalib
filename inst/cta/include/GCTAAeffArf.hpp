@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeffArf.hpp - CTA ARF effective area class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,6 +71,10 @@ public:
     std::string  classname(void) const;
     void         load(const std::string& filename);
     std::string  filename(void) const;
+    double       max(const double& logE,
+                     const double& zenith,
+                     const double& azimuth,
+                     const bool&   etrue = true) const;
     std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Methods

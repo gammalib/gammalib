@@ -73,6 +73,7 @@
 #include "GCTACubeSourceDiffuse.hpp"
 #include "GCTAModelCubeBackground.hpp"
 #include "GCTAModelIrfBackground.hpp"
+#include "GCTAModelAeffBackground.hpp"
 #include "GCTAModelRadial.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialGauss.hpp"
