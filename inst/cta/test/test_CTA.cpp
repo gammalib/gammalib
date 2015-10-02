@@ -58,7 +58,7 @@ const std::string cta_model_xml    = datadir+"/crab.xml";
 const std::string cta_rsp_xml      = datadir+"/rsp_models.xml";
 const std::string cta_cube_bgd_xml = datadir+"/cta_model_cube_bgd.xml";
 const std::string cta_irf_bgd_xml  = datadir+"/cta_model_irf_bgd.xml";
-const std::string cta_aeff_bgd_xml  = datadir+"/cta_model_aeff_bgd.xml";
+const std::string cta_aeff_bgd_xml = datadir+"/cta_model_aeff_bgd.xml";
 const std::string cta_caldb_king   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king     = "irf_file.fits";
 const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
@@ -1266,6 +1266,7 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Test unbinned observation handling

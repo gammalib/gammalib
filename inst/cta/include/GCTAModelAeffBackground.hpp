@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAModelAeffBackground.hpp - CTA Aeff background model class       *
+ *       GCTAModelAeffBackground.hpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2015 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,22 +58,22 @@ public:
     GCTAModelAeffBackground& operator=(const GCTAModelAeffBackground& bgd);
 
     // Implemented pure virtual methods
-    virtual void                    clear(void);
+    virtual void                     clear(void);
     virtual GCTAModelAeffBackground* clone(void) const;
-    virtual std::string             classname(void) const;
-    virtual std::string             type(void) const;
-    virtual bool                    is_constant(void) const;
-    virtual double                  eval(const GEvent& event,
-                                         const GObservation& obs) const;
-    virtual double                  eval_gradients(const GEvent& event,
-                                                   const GObservation& obs) const;
-    virtual double                  npred(const GEnergy& obsEng,
-                                          const GTime& obsTime,
+    virtual std::string              classname(void) const;
+    virtual std::string              type(void) const;
+    virtual bool                     is_constant(void) const;
+    virtual double                   eval(const GEvent& event,
                                           const GObservation& obs) const;
-    virtual GCTAEventList*          mc(const GObservation& obs, GRan& ran) const;
-    virtual void                    read(const GXmlElement& xml);
-    virtual void                    write(GXmlElement& xml) const;
-    virtual std::string             print(const GChatter& chatter = NORMAL) const;
+    virtual double                   eval_gradients(const GEvent& event,
+                                                    const GObservation& obs) const;
+    virtual double                   npred(const GEnergy& obsEng,
+                                           const GTime& obsTime,
+                                           const GObservation& obs) const;
+    virtual GCTAEventList*           mc(const GObservation& obs, GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
+    virtual std::string              print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GModelSpectral* spectral(void) const;
@@ -85,47 +85,47 @@ private:
     void            copy_members(const GCTAModelAeffBackground& bgd);
     void            free_members(void);
     void            set_pointers(void);
-    double        aeff_integral(const GObservation& obs, const double& logE) const;
     bool            valid_model(void) const;
     GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
+    double          aeff_integral(const GObservation& obs, const double& logE) const;
 
     // ROI integration kernel over theta
     class npred_roi_kern_theta : public GFunction {
     public:
         npred_roi_kern_theta(const GCTAAeff* aeff,
-                             const double&         logE,
-                             const int&            iter) :
+                             const double&   logE,
+                             const int&      iter) :
                              m_aeff(aeff),
                              m_logE(logE),
                              m_iter(iter) { }
         double eval(const double& theta);
     protected:
         const GCTAAeff* m_aeff;  //!< Pointer to effectve area
-        const double&         m_logE; //!< Log10 of energy
-        const int&            m_iter; //!< Romberg iterations
+        const double&   m_logE;  //!< Log10 of energy
+        const int&      m_iter;  //!< Romberg iterations
     };
 
     // ROI integration kernel over phi
     class npred_roi_kern_phi : public GFunction {
     public:
         npred_roi_kern_phi(const GCTAAeff* aeff,
-                           const double&         logE,
-                           const double&         theta) :
+                           const double&   logE,
+                           const double&   theta) :
                            m_aeff(aeff),
                            m_logE(logE),
                            m_theta(theta) { }
         double eval(const double& phi);
     protected:
         const GCTAAeff* m_aeff;   //!< Pointer to effective area
-        const double&         m_logE;  //!< Log10 of energy
-        const double&         m_theta; //!< Offset angle (radians)
+        const double&   m_logE;   //!< Log10 of energy
+        const double&   m_theta;  //!< Offset angle (radians)
     };
 
     // Members
-    GModelSpectral* m_spectral;   //!< Spectral model
-    GModelTemporal* m_temporal;   //!< Temporal model
-    int        m_n_mc_energies; // Energy sampling for MC spectrum
+    GModelSpectral* m_spectral;      //!< Spectral model
+    GModelTemporal* m_temporal;      //!< Temporal model
+    int             m_n_mc_energies; //!< Energy sampling for MC spectrum
 
     // Npred cache
     mutable std::vector<std::string> m_npred_names;    //!< Model names

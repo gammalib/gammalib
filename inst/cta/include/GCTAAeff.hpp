@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeff.hpp - CTA effective area base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,11 +72,11 @@ public:
     virtual std::string classname(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
     virtual std::string filename(void) const = 0;
+    virtual double      max(const double& logE,
+                            const double& zenith,
+                            const double& azimuth,
+                            const bool&   etrue = true) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
-    virtual double max(const double& logE,
-                             const double& zenith,
-                             const double& azimuth,
-                             const bool& etrue = true) const = 0;
 
 protected:
     // Methods

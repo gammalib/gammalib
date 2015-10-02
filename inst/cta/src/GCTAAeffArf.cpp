@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeffArf.cpp - CTA ARF effective area class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -429,6 +429,33 @@ void GCTAAeffArf::remove_thetacut(const GCTAResponseIrf& rsp)
 
 
 /***********************************************************************//**
+ * @brief Return maximum effective area at a given energy
+ *
+ * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
+ * @param[in] etrue Use true energy (true/false). Not used.
+ * @return Maximum effective area (cm2).
+ ***************************************************************************/
+double GCTAAeffArf::max(const double& logE,
+                        const double& zenith,
+                        const double& azimuth,
+                        const bool&   etrue) const
+{
+    // Get effective area value in cm2
+    double aeff_max = m_logE.interpolate(logE, m_aeff);
+
+    // Make sure that effective area is not negative
+    if (aeff_max < 0.0) {
+        aeff_max = 0.0;
+    }
+
+    // Return result
+    return aeff_max;
+}
+
+
+/***********************************************************************//**
  * @brief Print effective area information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -476,34 +503,6 @@ std::string GCTAAeffArf::print(const GChatter& chatter) const
     return result;
 }
 
-
-/***********************************************************************//**
- * @brief Return maximum effective area at a given energy
- *
- * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
- * @param[in] etrue Use true energy (true/false). Not used.
- * @return String containing effective area information.
- ***************************************************************************/
-double GCTAAeffArf::max(const double& logE,
-        const double& zenith,
-        const double& azimuth,
-        const bool& etrue) const
-{
-
-    // Get effective area value in cm2
-    double aeff_max = m_logE.interpolate(logE, m_aeff);
-
-    // Make sure that effective area is not negative
-    if (aeff_max < 0.0) {
-        aeff_max = 0.0;
-    }
-
-    // Return result
-    return aeff_max;
-
-}
 
 /*==========================================================================
  =                                                                         =

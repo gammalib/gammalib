@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAModelAeffBackground.cpp - CTA Aeff background model class       *
+ *       GCTAModelAeffBackground.cpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2015 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,17 +43,17 @@
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelAeffBackground g_cta_aeff_background_seed;
-const GModelRegistry         g_cta_aeff_background_registry(&g_cta_aeff_background_seed);
+const GModelRegistry          g_cta_aeff_background_registry(&g_cta_aeff_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL         "GCTAModelAeffBackground::eval(GEvent&, GObservation&)"
-#define G_EVAL_GRADIENTS    "GCTAModelAeffBackground::eval_gradients(GEvent&,"\
+#define G_EVAL        "GCTAModelAeffBackground::eval(GEvent&, GObservation&)"
+#define G_EVAL_GRADIENTS   "GCTAModelAeffBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
-#define G_NPRED             "GCTAModelAeffBackground::npred(GEnergy&, GTime&,"\
+#define G_NPRED            "GCTAModelAeffBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_MC               "GCTAModelAeffBackground::mc(GObservation&, GRan&)"
-#define G_XML_SPECTRAL   "GCTAModelAeffBackground::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL   "GCTAModelAeffBackground::xml_temporal(GXmlElement&)"
+#define G_MC              "GCTAModelAeffBackground::mc(GObservation&, GRan&)"
+#define G_XML_SPECTRAL  "GCTAModelAeffBackground::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL  "GCTAModelAeffBackground::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -116,7 +116,7 @@ GCTAModelAeffBackground::GCTAModelAeffBackground(void) : GModelData()
  * If no temporal component is found a constant model is assumed.
  ***************************************************************************/
 GCTAModelAeffBackground::GCTAModelAeffBackground(const GXmlElement& xml) :
-                        GModelData(xml)
+                         GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -143,7 +143,7 @@ GCTAModelAeffBackground::GCTAModelAeffBackground(const GXmlElement& xml) :
  * definition of the spectral components.
  ***************************************************************************/
 GCTAModelAeffBackground::GCTAModelAeffBackground(const GModelSpectral& spectral) :
-                        GModelData()
+                         GModelData()
 {
     // Initialise members
     init_members();
@@ -169,7 +169,7 @@ GCTAModelAeffBackground::GCTAModelAeffBackground(const GModelSpectral& spectral)
  * @param[in] aeff CTA instrument background model.
  ***************************************************************************/
 GCTAModelAeffBackground::GCTAModelAeffBackground(const GCTAModelAeffBackground& aeff) :
-                        GModelData(aeff)
+                         GModelData(aeff)
 {
     // Initialise class members
     init_members();
@@ -281,8 +281,8 @@ GCTAModelAeffBackground* GCTAModelAeffBackground::clone(void) const
  *
  * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
  ***************************************************************************/
-double GCTAModelAeffBackground::eval(const GEvent& event,
-                                    const GObservation& obs) const
+double GCTAModelAeffBackground::eval(const GEvent&       event,
+                                     const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -319,12 +319,16 @@ double GCTAModelAeffBackground::eval(const GEvent& event,
     GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
 
     // Set theta and phi from instrument coordinates
-    double theta = std::sqrt(inst_dir.detx() * inst_dir.detx() + inst_dir.dety() * inst_dir.dety());
-    double phi = gammalib::atan2d(inst_dir.dety(), inst_dir.detx()) * gammalib::deg2rad;
+    double theta = std::sqrt(inst_dir.detx() * inst_dir.detx() +
+                             inst_dir.dety() * inst_dir.dety());
+    double phi   = gammalib::atan2d(inst_dir.dety(), inst_dir.detx()) *
+                   gammalib::deg2rad;
 
     // Evaluate function
     double logE = event.energy().log10TeV();
-    double spat = (*aeff)(logE, theta, phi, cta->pointing().zenith(), cta->pointing().azimuth(), false);
+    double spat = (*aeff)(logE, theta, phi,
+                          cta->pointing().zenith(),
+                          cta->pointing().azimuth(), false);
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time()) : 1.0;
     double temp = (temporal() != NULL)
@@ -353,8 +357,8 @@ double GCTAModelAeffBackground::eval(const GEvent& event,
  *
  * @todo Make sure that DETX and DETY are always set in GCTAInstDir.
  ***************************************************************************/
-double GCTAModelAeffBackground::eval_gradients(const GEvent& event,
-                                              const GObservation& obs) const
+double GCTAModelAeffBackground::eval_gradients(const GEvent&       event,
+                                               const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
@@ -391,12 +395,16 @@ double GCTAModelAeffBackground::eval_gradients(const GEvent& event,
     GCTAInstDir inst_dir = cta->pointing().instdir(dir->dir());
 
     // Set theta and phi from instrument coordinates
-    double theta = std::sqrt(inst_dir.detx() * inst_dir.detx() + inst_dir.dety() * inst_dir.dety());
-    double phi = gammalib::atan2d(inst_dir.dety(), inst_dir.detx()) * gammalib::deg2rad;
+    double theta = std::sqrt(inst_dir.detx() * inst_dir.detx() +
+                             inst_dir.dety() * inst_dir.dety());
+    double phi   = gammalib::atan2d(inst_dir.dety(), inst_dir.detx()) *
+                   gammalib::deg2rad;
 
     // Evaluate function
     double logE = event.energy().log10TeV();
-    double spat = (*aeff)(logE, theta, phi, cta->pointing().zenith(), cta->pointing().azimuth(), false);
+    double spat = (*aeff)(logE, theta, phi,
+                          cta->pointing().zenith(),
+                          cta->pointing().azimuth(), false);
     double spec = (spectral() != NULL)
                   ? spectral()->eval_gradients(event.energy(), event.time()) : 1.0;
     double temp = (temporal() != NULL)
@@ -449,8 +457,8 @@ double GCTAModelAeffBackground::eval_gradients(const GEvent& event,
  * (counts/MeV/s).
  ***************************************************************************/
 double GCTAModelAeffBackground::npred(const GEnergy&      obsEng,
-                                     const GTime&        obsTime,
-                                     const GObservation& obs) const
+                                      const GTime&        obsTime,
+                                      const GObservation& obs) const
 {
     // Set number of iterations for Romberg integration.
     static const int iter_theta = 6;
@@ -556,7 +564,8 @@ double GCTAModelAeffBackground::npred(const GEnergy&      obsEng,
  * For each event in the returned event list, the sky direction, the nominal
  * coordinates (DETX and DETY), the energy and the time will be set.
  ***************************************************************************/
-GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs, GRan& ran) const
+GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs,
+                                           GRan& ran) const
 {
     // Initialise new event list
     GCTAEventList* list = new GCTAEventList;
@@ -605,23 +614,24 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs, GRan& ran) c
         const GGti&     gti     = events->gti();
 
         // Get maximum offset value for simulations
-        double max_theta = pnt.dir().dist(roi.centre().dir()) + roi.radius() * gammalib::deg2rad;
+        double max_theta     = pnt.dir().dist(roi.centre().dir()) +
+                               roi.radius() * gammalib::deg2rad;
+        double cos_max_theta = std::cos(max_theta);
 
         // Set simulation region for result event list
         list->roi(roi);
         list->ebounds(ebounds);
         list->gti(gti);
 
-        // Set up spectral model to draw random energies from
-        // Here we use a fixed energy sampling for an
-        // instance of GModelSpectralNodes. This is analogous to
-        // to the mc-method GCTAModelIrfBackground
+        // Set up spectral model to draw random energies from. Here we use
+        // a fixed energy sampling for an instance of GModelSpectralNodes.
+        // This is analogous to to the GCTAModelIrfBackground::mc method.
         GEbounds spectral_ebounds = GEbounds(m_n_mc_energies, ebounds.emin(), ebounds.emax(), true);
         GModelSpectralNodes spectral;
         for (int i = 0; i < spectral_ebounds.size(); ++i) {
-            GEnergy energy = spectral_ebounds.elogmean(i);
+            GEnergy energy   = spectral_ebounds.elogmean(i);
             double intensity = aeff_integral(obs, energy.log10TeV());
-            double  norm      = m_spectral->eval(energy, events->tstart());
+            double  norm     = m_spectral->eval(energy, events->tstart());
             spectral.append(energy, norm * intensity);
         }
 
@@ -690,44 +700,46 @@ GCTAEventList* GCTAModelAeffBackground::mc(const GObservation& obs, GRan& ran) c
                     double max_aeff = aeff->max(energy.log10TeV(), pnt.zenith(), pnt.azimuth(), false);
 
                     // Initialise randomised coordinates
-                     double offset = 0.0;
-                     double phi = 0.0;
+                    double offset = 0.0;
+                    double phi    = 0.0;
 
-                     // Initialise acceptance fraction for rejection method
-                     double acceptance_fraction = 0.0;
+                    // Initialise acceptance fraction for rejection method
+                    double acceptance_fraction = 0.0;
 
-                     // Start rejection method loop
-                     do {
+                    // Start rejection method loop
+                    do {
 
-                         // Throw random offset and azimuth angle in considered range
-                         offset = std::sqrt(ran.uniform()) * max_theta;
-                         phi = ran.uniform() * gammalib::twopi;
+                        // Throw random offset and azimuth angle in
+                        // considered range
+                        offset = std::acos(1.0 - ran.uniform() *
+                                           (1.0 - cos_max_theta));
+                        phi    = ran.uniform() * gammalib::twopi;
 
-                         // Compute function value at this offset angle
-                         double value  = (*aeff)(energy.log10TeV(), offset, phi, pnt.zenith(), pnt.azimuth(), false);
+                        // Compute function value at this offset angle
+                        double value = (*aeff)(energy.log10TeV(), offset, phi, pnt.zenith(), pnt.azimuth(), false);
 
-                         // Compute acceptance fraction
-                         acceptance_fraction = value / max_aeff;
+                        // Compute acceptance fraction
+                        acceptance_fraction = value / max_aeff;
 
-                     } while (ran.uniform() > acceptance_fraction);
+                    } while (ran.uniform() > acceptance_fraction);
 
-                     // Convert CTA pointing direction in instrument system
-                     GCTAInstDir mc_dir(pnt.dir());
+                    // Convert CTA pointing direction in instrument system
+                    GCTAInstDir mc_dir(pnt.dir());
 
-                     // Rotate pointing direction by offset and azimuth angle
-                     mc_dir.dir().rotate_deg(phi * gammalib::rad2deg, offset * gammalib::rad2deg);
+                    // Rotate pointing direction by offset and azimuth angle
+                    mc_dir.dir().rotate_deg(phi * gammalib::rad2deg, offset * gammalib::rad2deg);
 
-                     // Compute DETX and DETY coordinates
-                     double detx(0.0);
-                     double dety(0.0);
-                     if (offset > 0.0 ) {
-                         detx = offset * std::cos(phi);
-                         dety = offset * std::sin(phi);
-                     }
+                    // Compute DETX and DETY coordinates
+                    double detx(0.0);
+                    double dety(0.0);
+                    if (offset > 0.0 ) {
+                        detx = offset * std::cos(phi);
+                        dety = offset * std::sin(phi);
+                    }
 
-                     // Set DETX and DETY coordinates
-                     mc_dir.detx(detx);
-                     mc_dir.dety(dety);
+                    // Set DETX and DETY coordinates
+                    mc_dir.detx(detx);
+                    mc_dir.dety(dety);
 
                     // Allocate event
                     GCTAEventAtom event;
@@ -1003,9 +1015,9 @@ std::string GCTAModelAeffBackground::print(const GChatter& chatter) const
 void GCTAModelAeffBackground::init_members(void)
 {
     // Initialise members
-    m_spectral = NULL;
-    m_temporal = NULL;
-    m_n_mc_energies = 30;
+    m_spectral      = NULL;
+    m_temporal      = NULL;
+    m_n_mc_energies = 100;
 
     // Initialise Npred cache
     m_npred_names.clear();
@@ -1030,7 +1042,7 @@ void GCTAModelAeffBackground::copy_members(const GCTAModelAeffBackground& bgd)
     m_npred_energies = bgd.m_npred_energies;
     m_npred_times    = bgd.m_npred_times;
     m_npred_values   = bgd.m_npred_values;
-    m_n_mc_energies = bgd.m_n_mc_energies;
+    m_n_mc_energies  = bgd.m_n_mc_energies;
 
     // Clone spectral and temporal model components
     m_spectral = (bgd.m_spectral != NULL) ? bgd.m_spectral->clone() : NULL;
@@ -1182,7 +1194,21 @@ GModelTemporal* GCTAModelAeffBackground::xml_temporal(const GXmlElement& tempora
 }
 
 
-double GCTAModelAeffBackground::aeff_integral(const GObservation& obs, const double& logE) const
+/***********************************************************************//**
+ * @brief Spatially integrate effective area for given energy
+ *
+ * @param[in] obs Observation.
+ * @param[in] logE Log10 of reference energy in TeV.
+ * @return Spatially integrated effective area for given energy.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid observation encountered.
+ *
+ * Spatially integrates the effective area for a given reference energy
+ * over the region of interest.
+ ***************************************************************************/
+double GCTAModelAeffBackground::aeff_integral(const GObservation& obs,
+                                              const double&       logE) const
 {
     // Initialise result
     double value = 0.0;
@@ -1228,8 +1254,8 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs, const dou
 
     // Setup integration function
     GCTAModelAeffBackground::npred_roi_kern_theta integrand(aeff,
-                                                           logE,
-                                                           iter_phi);
+                                                            logE,
+                                                            iter_phi);
 
     // Setup integration
     GIntegral integral(&integrand);
@@ -1261,6 +1287,7 @@ double GCTAModelAeffBackground::aeff_integral(const GObservation& obs, const dou
  * @brief Kernel for offset angle integration of effective area background model
  *
  * @param[in] theta Offset angle from ROI centre (radians).
+ * @return Integration kernel value.
  *
  * Computes
  *
@@ -1317,14 +1344,13 @@ double GCTAModelAeffBackground::npred_roi_kern_theta::eval(const double& theta)
  * @brief Kernel for azimuth angle integration of effective area background model
  *
  * @param[in] phi Azimuth angle around ROI centre (radians).
+ * @return Integration kernel value.
  *
  * Computes
  *
  * \f[
  *    B(\theta, \phi | E, t)
  * \f]
- *
- *
  ***************************************************************************/
 double GCTAModelAeffBackground::npred_roi_kern_phi::eval(const double& phi)
 {
@@ -1338,8 +1364,7 @@ double GCTAModelAeffBackground::npred_roi_kern_phi::eval(const double& phi)
                               "(" + gammalib::str(phi) + ")";
         std::string message = " NaN/Inf encountered (value=" +
                               gammalib::str(value) + ", theta=" +
-                              gammalib::str(m_theta) + ", phi=" +
-                              gammalib::str(phi) + ")";
+                              gammalib::str(m_theta) + ")";
         gammalib::warning(origin, message);
     }
     #endif
