@@ -1,8 +1,9 @@
-2015-08-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-10-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
+        Add GCTAModelAeffBackground class
         Remove small angle approximation from GModelSpatialRadialShell
         Rename GSkymap to GSkyMap
         Add binary operators to GSkymap class

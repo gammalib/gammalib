@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-30 August 2015
+2 October 2015
 
 
 1. Introduction
@@ -166,6 +166,11 @@ attribute value.
 The deadtime correction has been removed from GCTAModelCubeBackground as the
 background cube rates are already given per livetime. We formerly did the
 correction twice (#1503).
+
+The GCTAModelAeffBackground class has been added to generate a background model
+from the effective area information (#1525). The usage of this model is similar
+to that of the IRF background model. The model type in the XML file is
+"CTAAeffBackground".
 
 
 21. COMPTEL interface
