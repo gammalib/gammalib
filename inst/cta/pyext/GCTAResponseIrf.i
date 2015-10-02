@@ -143,6 +143,8 @@ public:
     void                  edisp(GCTAEdisp* edisp);
     const GCTABackground* background(void) const;
     void                  background(GCTABackground* background);
+    const double&         lo_save_thres(void) const;
+    const double&         hi_save_thres(void) const;
 
     // Low-level response methods
     double aeff(const double& theta,
