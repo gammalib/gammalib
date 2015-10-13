@@ -73,8 +73,8 @@ public:
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime& time,
                                         GRan& ran) const;
-    virtual double                   norm(const GSkyDir& dir,
-                                          const double&  radius) const;
+    virtual double                   mc_norm(const GSkyDir& dir,
+                                             const double&  radius) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
     virtual void                     read(const GXmlElement& xml);
@@ -89,6 +89,8 @@ public:
     const GSkyMap&     map(void) const;
     void               map(const GSkyMap& map);
     bool               normalize(void) const;
+    void               set_mc_cone(const GSkyDir& centre,
+                                   const double&  radius) const;
 
 protected:
     // Protected methods
@@ -98,16 +100,18 @@ protected:
     void prepare_map(void);
 
     // Protected members
-    GModelPar           m_value;         //!< Value
-    GSkyMap             m_map;           //!< Skymap
-    std::string         m_filename;      //!< Name of skymap
-    std::vector<double> m_mc_cache;      //!< Monte Carlo cache
-    std::vector<double> m_mc_max;        //!< Monte Carlo maximum
-    bool                m_normalize;     //!< Normalize map (default: true)
-    bool                m_has_normalize; //!< XML has normalize attribute
-    double              m_norm;          //!< Map normalization
-    GSkyDir             m_centre;        //!< Centre of bounding circle
-    double              m_radius;        //!< Radius of bounding circle
+    GModelPar   m_value;         //!< Value
+    GSkyMap     m_map;           //!< Skymap
+    std::string m_filename;      //!< Name of skymap
+    GSkyDir     m_centre;        //!< Centre of bounding circle
+    double      m_radius;        //!< Radius of bounding circle
+    bool        m_normalize;     //!< Normalize map (default: true)
+    bool        m_has_normalize; //!< XML has normalize attribute
+
+    // MC simulation cache
+    mutable double              m_mc_norm;  //!< Map normalization
+    mutable std::vector<double> m_mc_cache; //!< Monte Carlo cache
+    mutable std::vector<double> m_mc_max;   //!< Monte Carlo maximum
 };
 
 
@@ -221,22 +225,6 @@ inline
 bool GModelSpatialDiffuseMap::normalize(void) const
 {
     return (m_normalize);
-}
-
-
-/***********************************************************************//**
- * @brief Return normalization of diffuse map
- *
- * @return Normalization.
- *
- * Returns the normalization of a diffuse map. The normalization is given
- * by the model value times the integrated flux in the sky map.
- ***************************************************************************/
-inline
-double GModelSpatialDiffuseMap::norm(const GSkyDir& dir,
-                                     const double&  radius) const
-{
-    return (m_norm * value());
 }
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

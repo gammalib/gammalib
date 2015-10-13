@@ -335,6 +335,9 @@ double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
  * that follows the intensity distribution that is obtained when calling the
  * interpolation operator. This assures that even for coarse binning of the
  * sky map the simulation corresponds to the model.
+ *
+ * Note that the set_mc_cone() method needs to be called before this method
+ * is called the first time.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
                                     const GTime&   time,
@@ -438,6 +441,31 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
 
     // Return sky direction
     return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of diffuse map for Monte Carlo simulations
+ *
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (degrees).
+ * @return Normalization.
+ *
+ * Returns the normalization of a diffuse map. The normalization is given
+ * by the model value times the integrated flux in the sky map over a
+ * circular region.
+ ***************************************************************************/
+double GModelSpatialDiffuseMap::mc_norm(const GSkyDir& dir,
+                                        const double&  radius) const
+{
+    // Set the MC cone
+    set_mc_cone(dir, radius);
+
+    // Retrieve normalization
+    double norm = m_mc_norm * value();
+
+    // Return normalization
+    return norm;
 }
 
 
@@ -609,6 +637,172 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
+ * @brief Set Monte Carlo simulation cone
+ *
+ * @param[in] centre Simulation cone centre.
+ * @param[in] radius Simulation cone radius (degrees).
+ *
+ * Sets the simulation cone centre and radius that defines the directions
+ * that will be simulated using the mc() method.
+ *
+ * The method initialises a cache for Monte Carlo sampling of the skymap.
+ * This Monte Carlo cache consists of a linear array that maps a value
+ * between 0 and 1 into the skymap pixel. A second array contains the
+ * maximum expected value for each pixel which is also used in Monte Carlo
+ * sampling.
+ ***************************************************************************/
+void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
+                                          const double&  radius) const
+{
+    // Initialise cache
+    m_mc_cache.clear();
+    m_mc_max.clear();
+    m_mc_norm = 0.0;
+
+    // Determine number of skymap pixels
+    int npix = m_map.npix();
+
+    // Continue only if there are pixels
+    if (npix > 0) {
+
+        // Reserve space for all pixels in cache
+        m_mc_cache.reserve(npix+1);
+        m_mc_max.reserve(npix);
+
+        // Set first cache value to 0
+        m_mc_cache.push_back(0.0);
+
+        // Initialise cache with cumulative pixel fluxes and compute
+        // total flux in skymap for normalization. Negative pixels are
+        // excluded from the cumulative map. Invalid pixels are also
+        // filtered.
+        double sum = 0.0;
+        for (int i = 0; i < npix; ++i) {
+
+            // Derive effective pixel radius from half opening angle
+            // that corresponds to the pixel's solid angle. For security,
+            // the radius is enhanced by 50%.
+            double pixel_radius =
+                   std::acos(1.0 - m_map.solidangle(i)/gammalib::twopi) *
+                   gammalib::rad2deg * 1.5;
+
+            // Add up flux with simulation cone radius + effective pixel
+            // radius. The effective pixel radius is added to make sure
+            // that all pixels that overlap with the simulation cone are
+            // taken into account. There is no problem of having even
+            // pixels outside the simulation cone taken into account as
+            // long as the mc() method has an explicit test of whether a
+            // simulated event is contained in the simulation cone.
+            double distance = centre.dist_deg(m_map.pix2dir(i));
+            if (distance <= radius+pixel_radius) {
+                double flux = m_map.flux(i);
+                if (flux > 0.0) {
+                    sum += flux;
+                }
+        	}
+
+            // Push back flux
+            m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
+
+        } // endfor: looped over pixels
+
+        // Normalize fluxes in the cache so that the values in the cache
+        // run from 0 to 1.
+        if (sum > 0.0) {
+            for (int i = 0; i < npix; ++i) {
+                m_mc_cache[i] /= sum;
+            }
+            if (normalize()) {
+                m_mc_norm = 1.0;
+            }
+            else {
+                m_mc_norm = sum;
+            }
+        }
+
+        // Make sure that last pixel in the cache is >1
+        m_mc_cache[npix] = 1.0001;
+
+        // Do we have a HealPix map?
+        if (m_map.projection()->code() == "HPX") {
+
+            // Get pointer on HealPix projection
+            const GHealpix* healpix =
+                  static_cast<const GHealpix*>(m_map.projection());
+
+            // Compute maximum value that may occur from bilinear
+            // interpolation within this pixel and push this value on the
+            // stack. We do this by checking values of all neighbours.
+            for (int i = 0; i < npix; ++i) {
+
+                // Get neighbours
+                std::vector<int> neighbours = healpix->neighbours(i);
+
+                // Loop over neighbours
+                double max = m_map(i);
+                for (int j = 0; j < neighbours.size(); ++j) {
+                    if (neighbours[j] != -1) {
+                        double value = m_map(neighbours[j]);
+                        if (value > max) {
+                            max = value;
+                        }
+                    }
+                }
+
+                // Store maximum
+                m_mc_max.push_back(max);
+            
+            } // endfor: looped over pixels
+
+        } // endif: Healpix projection
+
+        // ... no, then we have a WCS map
+        else {
+        
+            // Compute maximum value that may occur from bilinear
+            // interpolation within this pixel and push this value on the
+            // stack. We do this by checking the map values at the corners
+            // and the centre of each edge.
+            for (int i = 0; i < npix; ++i) {
+                GSkyPixel pixel = m_map.inx2pix(i);
+                double    max   = m_map(pixel);
+                for (int ix = -1; ix < 2; ++ix) {
+                    for (int iy = -1; iy < 2; ++iy) {
+                        if (ix != 0 || iy != 0) {
+                            GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
+                            if (m_map.contains(edge)) {
+                                GSkyDir dir  = m_map.pix2dir(edge);
+                                double value = m_map(dir);
+                                if (value > max) {
+                                    max = value;
+                                }
+                            }
+                        }
+                    }
+                }
+                m_mc_max.push_back(max);
+            }
+
+        } // endelse: computed maximum pixel value
+
+        // Dump cache values for debugging
+        #if defined(G_DEBUG_CACHE)
+        std::cout << "GModelSpatialDiffuseMap::set_mc_cone: cache";
+        std::cout << std::endl;
+        for (int i = 0; i < m_mc_cache.size(); ++i) {
+            std::cout << "i=" << i;
+            std::cout << " c=" << m_mc_cache[i] << std::endl;
+        }
+        #endif
+
+    } // endif: there were cube pixels
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print map information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -628,7 +822,7 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
         // Append parameters
         result.append("\n"+gammalib::parformat("Sky map file")+m_filename);
         result.append("\n"+gammalib::parformat("Map normalization"));
-        result.append(gammalib::str(m_norm)+" ph/cm2/s");
+        result.append(gammalib::str(m_mc_norm)+" ph/cm2/s");
         if (normalize()) {
             result.append(" [normalized]");
         }
@@ -707,13 +901,15 @@ void GModelSpatialDiffuseMap::init_members(void)
     // Initialise other members
     m_map.clear();
     m_filename.clear();
-    m_mc_cache.clear();
-    m_mc_max.clear();
     m_normalize     = true;
     m_has_normalize = false;
-    m_norm          = 0.0;
     m_centre.clear();
     m_radius        = 0.0;
+
+    // Initialise MC cache
+    m_mc_norm = 0.0;
+    m_mc_cache.clear();
+    m_mc_max.clear();
 
     // Return
     return;
@@ -731,13 +927,15 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_value         = model.m_value;
     m_map           = model.m_map;
     m_filename      = model.m_filename;
-    m_mc_cache      = model.m_mc_cache;
-    m_mc_max        = model.m_mc_max;
     m_normalize     = model.m_normalize;
     m_has_normalize = model.m_has_normalize;
-    m_norm          = model.m_norm;
     m_centre        = model.m_centre;
     m_radius        = model.m_radius;
+
+    // Copy MC cache
+    m_mc_norm       = model.m_mc_norm;
+    m_mc_cache      = model.m_mc_cache;
+    m_mc_max        = model.m_mc_max;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -765,20 +963,12 @@ void GModelSpatialDiffuseMap::free_members(void)
  * flux in the map amounts to 1 ph/cm2/s. Negative skymap pixels are set to
  * zero intensity.
  *
- * The method also initialises a cache for Monte Carlo sampling of the
- * skymap. This Monte Carlo cache consists of a linear array that maps a
- * value between 0 and 1 into the skymap pixel. A second array contains the
- * maximum expected value for each pixel which is also used in Monte Carlo
- * sampling.
- *
  * Note that if the GSkyMap object contains multiple maps, only the first
  * map is used.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::prepare_map(void)
 {
-    // Initialise cache, centre and radius
-    m_mc_cache.clear();
-    m_mc_max.clear();
+    // Initialise centre and radius
     m_centre.clear();
     m_radius = 0.0;
 
@@ -788,85 +978,20 @@ void GModelSpatialDiffuseMap::prepare_map(void)
     // Continue only if there are skymap pixels
     if (npix > 0) {
 
-        // Reserve space for all pixels in cache
-        m_mc_cache.reserve(npix+1);
-        m_mc_max.reserve(npix);
-
-        // Set first cache value to 0
-        m_mc_cache.push_back(0.0);
-
-        // Initialise cache with cumulative pixel fluxes and compute total
-        // flux in skymap for normalization. Negative pixels are set to
-        // zero intensity in the skymap. Invalid pixels are also filtered.
-        double sum = 0.0;
+        // Set negative or invalid pixels to zero intensity.
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map.flux(i);
+            double flux = m_map(i);
             if (flux < 0.0 ||
                 gammalib::is_notanumber(flux) ||
                 gammalib::is_infinite(flux)) {
                 m_map(i) = 0.0;
-                flux     = 0.0;
-            }
-            sum += flux;
-            m_mc_cache.push_back(sum);
-        }
-
-        // Normalize fluxes in the cache so that the values in the cache
-        // run from 0 to 1. Optionally also normalize the sky map.
-        if (sum > 0.0) {
-            if (normalize()) {
-                for (int i = 0; i < npix; ++i) {
-                    m_map(i)      /= sum;
-                    m_mc_cache[i] /= sum;
-                }
-                m_norm = 1.0;
-            }
-            else {
-                for (int i = 0; i < npix; ++i) {
-                    m_mc_cache[i] /= sum;
-                }
-                m_norm = sum;
             }
         }
-
-        // Make sure that last pixel in the cache is >1
-        m_mc_cache[npix] = 1.0001;
 
         // If we have a HealPix map then set radius to 180 deg
         if (m_map.projection()->code() == "HPX") {
-
-            // Get pointer on HealPix projection
-            const GHealpix* healpix =
-                static_cast<const GHealpix*>(m_map.projection());
-
-            // Set the map radius to full sky
             m_radius = 180.0;
-
-            // Compute maximum value that may occur from bilinear
-            // interpolation within this pixel and push this value on the
-            // stack. We do this by checking values of all neighbours.
-            for (int i = 0; i < npix; ++i) {
-
-                // Get neighbours
-                std::vector<int> neighbours = healpix->neighbours(i);
-
-                // Loop over neighbours
-                double max = m_map(i);
-                for (int k = 0; k < neighbours.size(); ++k) {
-                    if (neighbours[k] != -1) {
-                        double value = m_map(neighbours[k]);
-                        if (value > max) {
-                            max = value;
-                        }
-                    }
-                }
-
-                // Store maximum
-                m_mc_max.push_back(max);
-            
-            } // endfor: looped over pixels
-
-        } // endif: Healpix projection
+        }
 
         // ... otherwise compute map centre and radius
         else {
@@ -883,52 +1008,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
                 }
             }
 
-            // Compute maximum value that may occur from bilinear
-            // interpolation within this pixel and push this value on the
-            // stack. We do this by checking the map values at the corners
-            // and the centre of each edge.
-            for (int i = 0; i < npix; ++i) {
-                GSkyPixel pixel = m_map.inx2pix(i);
-                double    max   = m_map(pixel);
-                for (int ix = -1; ix < 2; ++ix) {
-                    for (int iy = -1; iy < 2; ++iy) {
-                        if (ix != 0 || iy != 0) {
-                            GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
-                            if (m_map.contains(edge)) {
-                                GSkyDir dir  = m_map.pix2dir(edge);
-                                double value = m_map(dir);
-                                if (value > max) {
-                                    max = value;
-                                }
-                            }
-                        }
-                    }
-                }
-                m_mc_max.push_back(max);
-            }
-
         } // endelse: computed map centre and radius
-
-        // Dump preparation results
-        #if defined(G_DEBUG_PREPARE)
-        double sum_control = 0.0;
-        for (int i = 0; i < npix; ++i) {
-            double flux = m_map.flux(i);
-            if (flux >= 0.0) {
-                sum_control += flux;
-            }
-        }
-        std::cout << "Total flux before normalization: " << sum << std::endl;
-        std::cout << "Total flux after normalization : " << sum_control << std::endl;
-        #endif
-
-        // Dump cache values for debugging
-        #if defined(G_DEBUG_CACHE)
-        for (int i = 0; i < npix+1; ++i) {
-            std::cout << "i=" << i;
-            std::cout << " c=" << m_mc_cache[i] << std::endl;
-        }
-        #endif
 
     } // endif: there were skymap pixels
 

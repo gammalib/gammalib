@@ -58,8 +58,8 @@ public:
     virtual GSkyDir                  mc(const GEnergy& energy,
                                         const GTime& time,
                                         GRan& ran) const;
-    virtual double                   norm(const GSkyDir& dir,
-                                          const double&  radius) const;
+    virtual double                   mc_norm(const GSkyDir& dir,
+                                             const double&  radius) const;
     virtual bool                     contains(const GSkyDir& dir,
                                               const double&  margin = 0.0) const;
     virtual void                     read(const GXmlElement& xml);
@@ -73,6 +73,8 @@ public:
     const GSkyMap&     map(void) const;
     void               map(const GSkyMap& map);
     bool               normalize(void) const;
+    void               set_mc_cone(const GSkyDir& centre,
+                                   const double&  radius) const;
 };
 
 
