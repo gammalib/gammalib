@@ -78,7 +78,7 @@ public:
     void                       energies(const GEnergies& energies);
     const GModelSpectralNodes& spectrum(void) const;
     void                       set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius);
+                                           const double&  radius) const;
 };
 
 

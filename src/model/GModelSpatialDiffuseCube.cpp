@@ -720,6 +720,30 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
 
 
 /***********************************************************************//**
+ * @brief Set map cube
+ *
+ * @param[in] cube Sky map.
+ *
+ * Set the map cube of the spatial map cube model.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::cube(const GSkyMap& cube)
+{
+    // Clear filename and signal map as unloaded
+    m_filename.clear();
+    m_loaded = false;
+
+    // Assign map
+    m_cube = cube;
+
+    // Update Monte Carlo cache
+    update_mc_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set energies for map cube
  *
  * @param[in] energies Sky map energies.
@@ -814,7 +838,7 @@ GEnergies GModelSpatialDiffuseCube::energies(void)
  * that will be simulated using the mc() method.
  ***************************************************************************/
 void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius)
+                                           const double&  radius) const
 {
     // Initialise cache
     m_mc_cache.clear();
@@ -1110,8 +1134,6 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_mc_cache.clear();
     m_mc_max.clear();
     m_mc_spectrum.clear();
-    m_mc_cone_dir.clear();
-    m_mc_cone_rad = 0.0;
 
     // Return
     return;
@@ -1137,8 +1159,6 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     m_mc_cache    = model.m_mc_cache;
     m_mc_max      = model.m_mc_max;
     m_mc_spectrum = model.m_mc_spectrum;
-    m_mc_cone_dir = model.m_mc_cone_dir;
-    m_mc_cone_rad = model.m_mc_cone_rad;
 
     // Set parameter pointer(s)
     m_pars.clear();

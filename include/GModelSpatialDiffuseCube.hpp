@@ -100,7 +100,7 @@ public:
     void                       energies(const GEnergies& energies);
     const GModelSpectralNodes& spectrum(void) const;
     void                       set_mc_cone(const GSkyDir& centre,
-                                           const double&  radius);
+                                           const double&  radius) const;
 
 protected:
     // Protected methods
@@ -113,17 +113,17 @@ protected:
     void update_mc_cache(void);
 
     // Protected members
-    GModelPar           m_value;       //!< Value
-    std::string         m_filename;    //!< Name of map cube
-    bool                m_loaded;      //!< Signals if map cube has been loaded
-    GSkyMap             m_cube;        //!< Map cube
-    GNodeArray          m_logE;        //!< Log10(energy) values of the maps
-    GEbounds            m_ebounds;     //!< Energy bounds of the maps
-    std::vector<double> m_mc_cache;    //!< Monte Carlo cache
-    std::vector<double> m_mc_max;      //!< Maximum values for MC
-    GModelSpectralNodes m_mc_spectrum; //!< Map cube spectrum
-    GSkyDir             m_mc_cone_dir; //!< Monte Carlo simulation cone centre
-    double              m_mc_cone_rad; //!< Monte Carlo simulation cone radius
+    GModelPar    m_value;       //!< Value
+    std::string  m_filename;    //!< Name of map cube
+    bool         m_loaded;      //!< Signals if map cube has been loaded
+    GSkyMap      m_cube;        //!< Map cube
+    GNodeArray   m_logE;        //!< Log10(energy) values of the maps
+    GEbounds     m_ebounds;     //!< Energy bounds of the maps
+
+    // Monte Carlo cache
+    mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
+    mutable std::vector<double> m_mc_max;      //!< Maximum values for MC
+    mutable GModelSpectralNodes m_mc_spectrum; //!< Map cube spectrum
 };
 
 
@@ -254,24 +254,6 @@ const GSkyMap& GModelSpatialDiffuseCube::cube(void) const
 
 
 /***********************************************************************//**
- * @brief Set map cube
- *
- * @param[in] cube Sky map.
- *
- * Set the map cube of the spatial map cube model.
- ***************************************************************************/
-inline
-void GModelSpatialDiffuseCube::cube(const GSkyMap& cube)
-{
-    m_filename.clear();
-    m_loaded = false;
-    m_cube   = cube;
-    update_mc_cache();
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Get map cube spectrum
  *
  * @return Map cube spectrum.
@@ -283,6 +265,7 @@ const GModelSpectralNodes& GModelSpatialDiffuseCube::spectrum(void) const
 {
     return (m_mc_spectrum);
 }
+
 
 /***********************************************************************//**
  * @brief Return normalization of diffuse cube for Monte Carlo simulations
