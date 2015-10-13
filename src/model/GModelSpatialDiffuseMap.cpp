@@ -768,7 +768,7 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
                 double    max   = m_map(pixel);
                 for (int ix = -1; ix < 2; ++ix) {
                     for (int iy = -1; iy < 2; ++iy) {
-                        if (ix != 0 || iy != 0) {
+                        if (ix != 0 && iy != 0) {
                             GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
                             if (m_map.contains(edge)) {
                                 GSkyDir dir  = m_map.pix2dir(edge);
