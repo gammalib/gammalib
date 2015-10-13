@@ -67,8 +67,8 @@ public:
     virtual GSkyDir                    mc(const GEnergy& energy,
                                           const GTime& time,
                                           GRan& ran) const;
-    virtual double                     norm(const GSkyDir& dir,
-                                            const double&  radius) const;
+    virtual double                     mc_norm(const GSkyDir& dir,
+                                               const double&  radius) const;
     virtual bool                       contains(const GSkyDir& dir,
                                                 const double&  margin = 0.0) const;
     virtual void                       read(const GXmlElement& xml);
@@ -146,16 +146,19 @@ void GModelSpatialDiffuseConst::value(const double& value)
 
 
 /***********************************************************************//**
- * @brief Return normalization of constant diffuse source
+ * @brief Return normalization of constant diffuse source for Monte Carlo
+ *        simulations
  *
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (degrees).
  * @return Normalization.
  *
  * Returns the normalization of a constant diffuse source. The normalization
- * is given by the model value.
+ * is given by the model value and does not depend on @p dir and @p radius.
  ***************************************************************************/
 inline
-double GModelSpatialDiffuseConst::norm(const GSkyDir& dir,
-                                       const double&  radius) const
+double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
+                                          const double&  radius) const
 {
     return (value());
 }

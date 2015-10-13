@@ -794,7 +794,7 @@ GPhotons GModelSky::mc(const double& area,
         // Determine the spatial model normalization within the simulation
         // cone and check whether the model will produce any photons in that
         // cone.
-        double norm      = m_spatial->norm(dir, radius);
+        double norm      = m_spatial->mc_norm(dir, radius);
         bool   use_model = (norm > 0.0) ? true : false;
 
         // Continue only if model overlaps with simulation region
@@ -821,8 +821,8 @@ GPhotons GModelSky::mc(const double& area,
                 for (int i = 0; i < nodes->nodes(); ++i) {
                     GEnergy energy    = nodes->energy(i);
                     double  intensity = nodes->intensity(i);
-                    double  norm      = m_spectral->eval(energy, tmin);
-                    nodes->intensity(i, norm*intensity);
+                    double  value     = m_spectral->eval(energy, tmin);
+                    nodes->intensity(i, value*intensity);
                 }
                 
                 // Signal that node function needs to be de-allocated later

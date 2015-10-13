@@ -65,7 +65,7 @@ public:
     // Implemented virtual methods
     virtual double eval(const GPhoton& photon) const;
     virtual double eval_gradients(const GPhoton& photon) const;
-    virtual double norm(const GSkyDir& dir, const double&  radius) const;
+    virtual double mc_norm(const GSkyDir& dir, const double&  radius) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;
 

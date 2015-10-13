@@ -84,7 +84,7 @@ public:
     virtual GClassCode code(void) const;
     virtual double     eval(const GPhoton& photon) const;
     virtual double     eval_gradients(const GPhoton& photon) const;
-    virtual double     norm(const GSkyDir& dir, const double&  radius) const;
+    virtual double     mc_norm(const GSkyDir& dir, const double&  radius) const;
     virtual void       read(const GXmlElement& xml);
     virtual void       write(GXmlElement& xml) const;
 
@@ -181,17 +181,19 @@ void GModelSpatialRadial::dec(const double& dec)
 
 
 /***********************************************************************//**
- * @brief Return normalization of radial source
+ * @brief Return normalization of radial source for Monte Carlo simulations
  *
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (degrees).
  * @return Normalization.
  *
  * Returns the normalization for a radial source within a circular region.
- * The normalization is 1 if the radial source falls within the circle, 0
- * otherwise
+ * The normalization is 1 if the radial source falls within the circle
+ * defined by @p dir and @p radius, 0 otherwise.
  ***************************************************************************/
 inline
-double GModelSpatialRadial::norm(const GSkyDir& dir,
-                                 const double&  radius) const
+double GModelSpatialRadial::mc_norm(const GSkyDir& dir,
+                                    const double&  radius) const
 {
     double norm = (dir.dist_deg(this->dir()) <= radius+theta_max()) ? 1.0 : 0.0;
     return (norm);

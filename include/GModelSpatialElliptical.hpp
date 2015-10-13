@@ -86,7 +86,7 @@ public:
     virtual GClassCode code(void) const;
     virtual double     eval(const GPhoton& photon) const;
     virtual double     eval_gradients(const GPhoton& photon) const;
-    virtual double     norm(const GSkyDir& dir, const double&  radius) const;
+    virtual double     mc_norm(const GSkyDir& dir, const double&  radius) const;
     virtual void       read(const GXmlElement& xml);
     virtual void       write(GXmlElement& xml) const;
 
@@ -281,17 +281,20 @@ void GModelSpatialElliptical::semimajor(const double& semimajor)
 
 
 /***********************************************************************//**
- * @brief Return normalization of elliptical source
+ * @brief Return normalization of elliptical source for Monte Carlo
+ *        simulations
  *
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (degrees).
  * @return Normalization.
  *
  * Returns the normalization for an elliptical source within a circular
  * region. The normalization is 1 if the elliptical source falls within
- * the circle, 0 otherwise
+ * the circle define by @p dir and @p radius, 0 otherwise.
  ***************************************************************************/
 inline
-double GModelSpatialElliptical::norm(const GSkyDir& dir,
-                                     const double&  radius) const
+double GModelSpatialElliptical::mc_norm(const GSkyDir& dir,
+                                        const double&  radius) const
 {
     double norm = (dir.dist_deg(this->dir()) <= radius+theta_max()) ? 1.0 : 0.0;
     return (norm);

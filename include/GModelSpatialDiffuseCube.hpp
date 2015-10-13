@@ -78,8 +78,8 @@ public:
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
-    virtual double                    norm(const GSkyDir& dir,
-                                           const double&  radius) const;
+    virtual double                    mc_norm(const GSkyDir& dir,
+                                              const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
     virtual void                      read(const GXmlElement& xml);
@@ -285,16 +285,18 @@ const GModelSpectralNodes& GModelSpatialDiffuseCube::spectrum(void) const
 }
 
 /***********************************************************************//**
- * @brief Return normalization of diffuse cube
+ * @brief Return normalization of diffuse cube for Monte Carlo simulations
  *
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (degrees).
  * @return Normalization.
  *
  * Returns the normalization of a diffuse cube. The normalization is given
- * by the model value.
+ * by the model value. The @p dir and @p radius parameters are not used.
  ***************************************************************************/
 inline
-double GModelSpatialDiffuseCube::norm(const GSkyDir& dir,
-                                      const double&  radius) const
+double GModelSpatialDiffuseCube::mc_norm(const GSkyDir& dir,
+                                         const double&  radius) const
 {
     return (value());
 }

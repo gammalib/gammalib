@@ -71,8 +71,8 @@ public:
     virtual GSkyDir                   mc(const GEnergy& energy,
                                          const GTime& time,
                                          GRan& ran) const;
-    virtual double                    norm(const GSkyDir& dir,
-                                           const double&  radius) const;
+    virtual double                    mc_norm(const GSkyDir& dir,
+                                              const double&  radius) const;
     virtual bool                      contains(const GSkyDir& dir,
                                                const double&  margin = 0.0) const;
     virtual void                      read(const GXmlElement& xml);
@@ -198,17 +198,19 @@ void GModelSpatialPointSource::dec(const double& dec)
 
 
 /***********************************************************************//**
- * @brief Return normalization of point source
+ * @brief Return normalization of point source for Monte Carlo simulations
  *
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (degrees).
  * @return Normalization.
  *
  * Returns the normalization for a point source within a circular region.
- * The normalization is 1 if the point source falls within circle, 0 
- * otherwise
+ * The normalization is 1 if the point source falls within the circle
+ * defined by @p dir and @p radius, 0 otherwise.
  ***************************************************************************/
 inline
-double GModelSpatialPointSource::norm(const GSkyDir& dir,
-                                      const double&  radius) const
+double GModelSpatialPointSource::mc_norm(const GSkyDir& dir,
+                                         const double&  radius) const
 {
     double norm = (dir.dist_deg(this->dir()) <= radius) ? 1.0 : 0.0;
     return (norm);
