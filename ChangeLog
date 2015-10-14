@@ -1,8 +1,9 @@
-2015-10-09  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-10-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
+        Correctly handle MC simulations for unnormalized diffuse maps (#1548)
         Improve precision of shell model in unbinned analysis (#1521)
         Add GCTAModelAeffBackground class
         Remove small angle approximation from GModelSpatialRadialShell

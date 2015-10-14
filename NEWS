@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-9 October 2015
+14 October 2015
 
 
 1. Introduction
@@ -66,6 +66,14 @@ has now been fixed (#1480).
 
 The small angle approximation has been removed from GModelSpatialRadialShell
 as this complexifies the class and the approximation is not really needed.
+
+A GModelSpatialDiffuseMap::set_mc_cone method has been introduced to handle
+correctly Monte Carlo simulations for unnormalized diffuse maps. This method
+now computes the normalization for a map within the acceptance cone which is
+then returned by the GModelSpatialDiffuseMap::mc_norm method.
+
+The GModelSpatial::norm method has been renamed to GModelSpatial::mc_norm so that
+the usage of this method is now explicitly given by the method name.
 
 
 9. Numerics module
