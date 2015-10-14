@@ -2529,7 +2529,7 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
 {
     // Set number of iterations for Romberg integration.
     // These values have been determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1299
+    // https://cta-redmine.irap.omp.eu/issues/1248
     static const int iter_rho = 5;
     static const int iter_phi = 5;
 
