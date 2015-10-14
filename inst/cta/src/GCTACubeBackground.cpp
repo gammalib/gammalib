@@ -50,13 +50,14 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_LOG_INTERPOLATION   //!< Energy interpolate log10(background rate)
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_MC_INIT
 //#define G_DEBUG_CACHE
-#define G_LOG_INTERPOLATION   //!< Energy interpolate log10(background rate)
 
 /* __ Constants __________________________________________________________ */
+const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -354,8 +355,8 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             // within the energy boundaries of the observation
             int index = m_ebounds.index(bin->energy());
             if (index == -1 || 
-                !obs_ebounds.contains(m_ebounds.emin(index),
-                                      m_ebounds.emax(index))) {
+                !obs_ebounds.contains(m_ebounds.emin(index)+g_energy_margin,
+                                      m_ebounds.emax(index)-g_energy_margin)) {
                 continue;
             }
 

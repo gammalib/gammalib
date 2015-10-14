@@ -49,6 +49,7 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -541,8 +542,8 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
                 for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
 
                     // Skip if pixel is not within observation energy boundaries
-                    if (!obs_ebounds.contains(m_ebounds.emin(iebin),
-                                              m_ebounds.emax(iebin))) {
+                    if (!obs_ebounds.contains(m_ebounds.emin(iebin)+g_energy_margin,
+                                              m_ebounds.emax(iebin)-g_energy_margin)) {
                         continue;
                     }
 

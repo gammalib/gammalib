@@ -47,6 +47,7 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -478,8 +479,8 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
 
                     // Only add exposure to pixel if energy bin is inside 
                     // observation energy boundaries
-                    if (obs_ebounds.contains(m_ebounds.emin(iebin),
-                                             m_ebounds.emax(iebin))) {
+                    if (obs_ebounds.contains(m_ebounds.emin(iebin)+g_energy_margin,
+                                             m_ebounds.emax(iebin)-g_energy_margin)) {
 
                         // Get logE/TeV
                         double logE = m_ebounds.elogmean(iebin).log10TeV();
