@@ -2113,13 +2113,6 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
                                    const GSource&      source,
                                    const GObservation& obs) const
 {
-    // Set number of iterations for Romberg integration.
-    // These values have been determined after careful testing, see
-    // https://cta-redmine.irap.omp.eu/issues/1299
-    // https://cta-redmine.irap.omp.eu/issues/1521
-    static const int iter_rho = 6;
-    static const int iter_phi = 6;
-
     // Retrieve CTA pointing
     const GCTAPointing& pnt = retrieve_pnt(G_IRF_RADIAL, obs);
     const GCTAInstDir&  dir = retrieve_dir(G_IRF_RADIAL, event);
@@ -2129,6 +2122,25 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
           dynamic_cast<const GModelSpatialRadial*>(source.model());
     if (model == NULL) {
         throw GCTAException::bad_model_type(G_IRF_RADIAL);
+    }
+
+    // Get pointer on shell model (will be NULL for other models)
+    const GModelSpatialRadialShell* shell =
+          dynamic_cast<const GModelSpatialRadialShell*>(model);
+
+    // Set number of iterations for Romberg integration.
+    // These values have been determined after careful testing, see
+    // https://cta-redmine.irap.omp.eu/issues/1299
+    // https://cta-redmine.irap.omp.eu/issues/1521
+    // Unless we have a shell model the number of iterations is set
+    // to 5. Only for a shell model we used an increased number of
+    // iterations to cover the case of a shell that has a width
+    // comparable to the angular resolution of CTA.
+    int iter_rho = 5;
+    int iter_phi = 5;
+    if (shell != NULL) {
+        iter_rho = 6;
+        iter_phi = 6;
     }
 
     // Get event attributes
@@ -2230,7 +2242,6 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
         // If we have a shell model then add an integration boundary for the
         // shell radius as a function discontinuity will occur at this
         // location
-        const GModelSpatialRadialShell* shell = dynamic_cast<const GModelSpatialRadialShell*>(model);
         if (shell != NULL) {
             double shell_radius = shell->radius() * gammalib::deg2rad;
             if (shell_radius > rho_min && shell_radius < rho_max) {
