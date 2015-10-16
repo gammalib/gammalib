@@ -2335,8 +2335,8 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     // These values have been determined after careful testing, see
     // https://cta-redmine.irap.omp.eu/issues/1299
     // https://cta-redmine.irap.omp.eu/issues/1521
-    static const int iter_rho = 6;
-    static const int iter_phi = 6;
+    static const int iter_rho = 5;
+    static const int iter_phi = 5;
 
     // Retrieve CTA pointing
     const GCTAPointing& pnt = retrieve_pnt(G_IRF_ELLIPTICAL, obs);
