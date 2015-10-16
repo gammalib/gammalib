@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-14 October 2015
+16 October 2015
 
 
 1. Introduction
@@ -180,11 +180,10 @@ from the effective area information (#1525). The usage of this model is similar
 to that of the IRF background model. The model type in the XML file is
 "CTAAeffBackground".
 
-The precision for the IRF computation of radial an elliptical models has been
-increased to reduce a bias in the fitting of the shell model for unbinned analysis
-(see #1521). There is still a slight bias for the shell parameters in an
-unbinned analysis when the width of the shell becomes comparable to the angular
-resolution.
+The precision for the IRF computation of radial shell models has been increased
+to reduce a bias in the fitting of the model for unbinned analysis (#1521). There
+is still a slight bias for the shell parameters in an unbinned analysis when the
+width of the shell becomes comparable to the angular resolution.
 
 
 21. COMPTEL interface
