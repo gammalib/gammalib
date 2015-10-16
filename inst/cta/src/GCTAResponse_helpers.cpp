@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAResponse_helpers.cpp
- * @brief CTA response hepler classes implementation
+ * @brief CTA response helper classes implementation
  * @author Juergen Knoedlseder
  */
 
@@ -46,7 +46,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_INTEGRAL                             //!< Debug integration
-#define G_DEBUG_MODEL_ZERO           //!< Debug check for zero model values
+//#define G_DEBUG_MODEL_ZERO           //!< Debug check for zero model values
 
 /* __ Constants __________________________________________________________ */
 const double g_kulge_radius = 1.0e-12;         //!< Tiny angle (radians)
