@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile for gammalib Python extension module                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2014 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2015 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -32,19 +32,19 @@ if WITH_PYTHON
 # Set instrument specific SWIG targets
 if WITH_INST_MWL
   MWL_SWIG_TARGETS = gammalib/mwl_wrap.cpp gammalib/mwl.py
-  MWL_TESTS        = $(abs_top_srcdir)/inst/mwl/test/test_MWL.py
+  MWL_TESTS        = ../inst/mwl/test/test_MWL.py
 endif
 if WITH_INST_CTA
   CTA_SWIG_TARGETS = gammalib/cta_wrap.cpp gammalib/cta.py
-  CTA_TESTS        = $(abs_top_srcdir)/inst/cta/test/test_CTA.py
+  CTA_TESTS        = ../inst/cta/test/test_CTA.py
 endif
 if WITH_INST_LAT
   LAT_SWIG_TARGETS = gammalib/lat_wrap.cpp gammalib/lat.py
-  LAT_TESTS        = $(abs_top_srcdir)/inst/lat/test/test_LAT.py
+  LAT_TESTS        = ../inst/lat/test/test_LAT.py
 endif
 if WITH_INST_COM
   COM_SWIG_TARGETS = gammalib/com_wrap.cpp gammalib/com.py
-  COM_TESTS        = $(abs_top_srcdir)/inst/com/test/test_COM.py
+  COM_TESTS        = ../inst/com/test/test_COM.py
 endif
 INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
                     $(CTA_SWIG_TARGETS) \
@@ -53,23 +53,23 @@ INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
 
 # Test scripts to be distributed in $(pyexecdir)/ctools/tests
 testscripts = gammalib/tests/__init__.py \
-              $(abs_top_srcdir)/test/test_python.py \
-              $(abs_top_srcdir)/test/test_GApplication.py \
-              $(abs_top_srcdir)/test/test_GFits.py \
-              $(abs_top_srcdir)/test/test_GLinalg.py \
-              $(abs_top_srcdir)/test/test_GModel.py \
-              $(abs_top_srcdir)/test/test_GNumerics.py \
-              $(abs_top_srcdir)/test/test_GObservation.py \
-              $(abs_top_srcdir)/test/test_GOptimizer.py \
-              $(abs_top_srcdir)/test/test_GSky.py \
-              $(abs_top_srcdir)/test/test_GSupport.py \
-              $(abs_top_srcdir)/test/test_GTest.py \
-              $(abs_top_srcdir)/test/test_GVO.py \
-              $(abs_top_srcdir)/test/test_GXml.py \
-              $(abs_top_srcdir)/test/test_GXspec.py \
+              ../test/test_python.py \
+              ../test/test_GApplication.py \
+              ../test/test_GFits.py \
+              ../test/test_GLinalg.py \
+              ../test/test_GModel.py \
+              ../test/test_GNumerics.py \
+              ../test/test_GObservation.py \
+              ../test/test_GOptimizer.py \
+              ../test/test_GSky.py \
+              ../test/test_GSupport.py \
+              ../test/test_GTest.py \
+              ../test/test_GVO.py \
+              ../test/test_GXml.py \
+              ../test/test_GXspec.py \
               $(MWL_TESTS) $(CTA_TESTS) $(LAT_TESTS) $(COM_TESTS)
-testdata    = $(abs_top_srcdir)/test/data/initial_coords.txt \
-              $(abs_top_srcdir)/test/data/fk5_to_galactic.txt
+testdata    = ../test/data/initial_coords.txt \
+              ../test/data/fk5_to_galactic.txt
 
 # Distribute scripts
 EXTRA_DIST       = $(testscripts) $(testdata)
@@ -80,21 +80,21 @@ testdata_DATA    = $(testdata)
 
 # Distribute test data
 if WITH_INST_CTA
-  testdatacta       = $(abs_top_srcdir)/inst/cta/test/data/irf_1dc.xml \
-                      $(abs_top_srcdir)/inst/cta/test/data/irf_unbinned.xml \
-                      $(abs_top_srcdir)/inst/cta/test/data/crab_events.fits.gz \
-                      $(abs_top_srcdir)/inst/cta/test/data/crab_cntmap.fits.gz
+  testdatacta       = ../inst/cta/test/data/irf_1dc.xml \
+                      ../inst/cta/test/data/irf_unbinned.xml \
+                      ../inst/cta/test/data/crab_events.fits.gz \
+                      ../inst/cta/test/data/crab_cntmap.fits.gz
   testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
   testdatacta_DATA  = $(testdatacta)
-  testcaldbcta      = $(abs_top_srcdir)/inst/cta/test/caldb/cta_dummy_irf.dat \
-                      $(abs_top_srcdir)/inst/cta/test/caldb/prod1_gauss.fits \
-                      $(abs_top_srcdir)/inst/cta/test/caldb/prod1_king.fits
+  testcaldbcta      = ../inst/cta/test/caldb/cta_dummy_irf.dat \
+                      ../inst/cta/test/caldb/prod1_gauss.fits \
+                      ../inst/cta/test/caldb/prod1_king.fits
   testcaldbctadir   = $(pyexecdir)/gammalib/tests/cta/caldb
   testcaldbcta_DATA = $(testcaldbcta)
-  testdc1cta        = $(abs_top_srcdir)/inst/cta/test/caldb/dc1/arf.fits \
-                      $(abs_top_srcdir)/inst/cta/test/caldb/dc1/psf.fits \
-                      $(abs_top_srcdir)/inst/cta/test/caldb/dc1/psf_magic.fits \
-                      $(abs_top_srcdir)/inst/cta/test/caldb/dc1/rmf.fits
+  testdc1cta        = ../inst/cta/test/caldb/dc1/arf.fits \
+                      ../inst/cta/test/caldb/dc1/psf.fits \
+                      ../inst/cta/test/caldb/dc1/psf_magic.fits \
+                      ../inst/cta/test/caldb/dc1/rmf.fits
   testdc1ctadir     = $(pyexecdir)/gammalib/tests/cta/caldb/dc1
   testdc1cta_DATA   = $(testdc1cta)
 endif
