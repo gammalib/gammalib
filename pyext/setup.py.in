@@ -244,6 +244,14 @@ for entry in bad_entries:
     del locals()[entry]
 del gammalib.gammalib
 """)
+
+# Add test function
+# see https://cta-redmine.irap.omp.eu/issues/1486
+file.write("""
+def test():
+    from gammalib.tests import test_python
+    test_python.test(installed=True)
+""")
 file.close()
 
 # Set data files to install.

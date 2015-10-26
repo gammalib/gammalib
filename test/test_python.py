@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the GammaLib Python bindings.
 #
-# Copyright (C) 2012-2014 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
+import gammalib
 import sys
+import os
 import test_GApplication
 import test_GLinalg
 import test_GModel
@@ -64,15 +64,15 @@ except:
     has_com = False
 
 
-# ======================== #
-# Main routine entry point #
-# ======================== #
-if __name__ == '__main__':
+# ================== #
+# Perform unit tests #
+# ================== #
+def test(installed=False):
     """
     Perform unit testing for Python interface.
     """
     # Allocate test suites
-    suites = GTestSuites("Python interface testing")
+    suites = gammalib.GTestSuites("Python interface testing")
 
     # Allocate test suites and append them to the container
     suite1  = test_GApplication.Test()
@@ -129,6 +129,8 @@ if __name__ == '__main__':
     if has_cta:
         suite_cta = test_CTA.Test()
         suite_cta.set()
+        if installed:
+            suite_cta.caldb_path("cta/caldb")
         suites.append(suite_cta)
 
     # Optionally handle LAT suite
@@ -143,11 +145,56 @@ if __name__ == '__main__':
         suite_com.set()
         suites.append(suite_com)
 
+    # If we have an installed version then create a temporary
+    # directory and copy over all information that is needed
+    if installed:
+
+        # Create temporary working directory
+        import tempfile
+        path = tempfile.mkdtemp()
+        os.chdir(path)
+
+        # Get tests directory
+        import inspect
+        testdir = inspect.getfile(gammalib.tests)
+        head, tail = os.path.split(testdir)
+
+        # Copy over test data
+        os.system("cp -r %s %s" % (head+"/data", "data"))
+        os.system("cp -r %s %s" % (head+"/cta",  "cta"))
+
+        # Special post processing for CTA files. This is needed because
+        # the XML files contain absolute PATH information. This is a kluge
+        # that works for now, but it's not a very maintainable way to
+        # handle this
+        if has_cta:
+            xml = gammalib.GXml("cta/data/irf_unbinned.xml")
+            elements = xml.element("observation_list").element("observation")
+            for element in elements:
+                filename   = element.attribute("file")
+                head, tail = os.path.split(filename)
+                head, dir  = os.path.split(head)
+                filename   = "cta/"+dir+"/"+tail
+                element.attribute("file", filename)
+            xml.save("cta/data/irf_unbinned.xml")
+            xml = gammalib.GXml("cta/data/irf_1dc.xml")
+            elements = xml.element("observation_list").element("observation")
+            for element in elements:
+                filename   = element.attribute("file")
+                head, tail = os.path.split(filename)
+                head, dir  = os.path.split(head)
+                if dir == "dc1":
+                    dir = "caldb/dc1"
+                filename   = "cta/"+dir+"/"+tail
+                element.attribute("file", filename)
+            xml.save("cta/data/irf_1dc.xml")
+
     # Run test suite
     success = suites.run()
 
-    # Save test results
-    suites.save("reports/GPython.xml")
+    # If we have a non-installed version then save test results
+    if not installed:
+        suites.save("reports/GPython.xml")
 
     # Set return code
     if success:
@@ -155,8 +202,19 @@ if __name__ == '__main__':
     else:
         rc = 1
 
-    # Print a linefeed
-    # sys.stdout.write("\n")
+    # Return
+    return rc
+
+
+# ======================== #
+# Main routine entry point #
+# ======================== #
+if __name__ == '__main__':
+    """
+    Perform unit testing for Python interface.
+    """
+    # Run tests
+    rc = test()
 
     # Exit with return code
     sys.exit(rc)

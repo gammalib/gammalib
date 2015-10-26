@@ -32,20 +32,72 @@ if WITH_PYTHON
 # Set instrument specific SWIG targets
 if WITH_INST_MWL
   MWL_SWIG_TARGETS = gammalib/mwl_wrap.cpp gammalib/mwl.py
+  MWL_TESTS        = $(abs_top_srcdir)/inst/mwl/test/test_MWL.py
 endif
 if WITH_INST_CTA
   CTA_SWIG_TARGETS = gammalib/cta_wrap.cpp gammalib/cta.py
+  CTA_TESTS        = $(abs_top_srcdir)/inst/cta/test/test_CTA.py
 endif
 if WITH_INST_LAT
   LAT_SWIG_TARGETS = gammalib/lat_wrap.cpp gammalib/lat.py
+  LAT_TESTS        = $(abs_top_srcdir)/inst/lat/test/test_LAT.py
 endif
 if WITH_INST_COM
   COM_SWIG_TARGETS = gammalib/com_wrap.cpp gammalib/com.py
+  COM_TESTS        = $(abs_top_srcdir)/inst/com/test/test_COM.py
 endif
 INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
                     $(CTA_SWIG_TARGETS) \
                     $(LAT_SWIG_TARGETS) \
                     $(COM_SWIG_TARGETS)
+
+# Test scripts to be distributed in $(pyexecdir)/ctools/tests
+testscripts = gammalib/tests/__init__.py \
+              $(abs_top_srcdir)/test/test_python.py \
+              $(abs_top_srcdir)/test/test_GApplication.py \
+              $(abs_top_srcdir)/test/test_GFits.py \
+              $(abs_top_srcdir)/test/test_GLinalg.py \
+              $(abs_top_srcdir)/test/test_GModel.py \
+              $(abs_top_srcdir)/test/test_GNumerics.py \
+              $(abs_top_srcdir)/test/test_GObservation.py \
+              $(abs_top_srcdir)/test/test_GOptimizer.py \
+              $(abs_top_srcdir)/test/test_GSky.py \
+              $(abs_top_srcdir)/test/test_GSupport.py \
+              $(abs_top_srcdir)/test/test_GTest.py \
+              $(abs_top_srcdir)/test/test_GVO.py \
+              $(abs_top_srcdir)/test/test_GXml.py \
+              $(abs_top_srcdir)/test/test_GXspec.py \
+              $(MWL_TESTS) $(CTA_TESTS) $(LAT_TESTS) $(COM_TESTS)
+testdata    = $(abs_top_srcdir)/test/data/initial_coords.txt \
+              $(abs_top_srcdir)/test/data/fk5_to_galactic.txt
+
+# Distribute scripts
+EXTRA_DIST       = $(testscripts) $(testdata)
+testscriptsdir   = $(pyexecdir)/gammalib/tests
+testscripts_DATA = $(testscripts)
+testdatadir      = $(pyexecdir)/gammalib/tests/data
+testdata_DATA    = $(testdata)
+
+# Distribute test data
+if WITH_INST_CTA
+  testdatacta       = $(abs_top_srcdir)/inst/cta/test/data/irf_1dc.xml \
+                      $(abs_top_srcdir)/inst/cta/test/data/irf_unbinned.xml \
+                      $(abs_top_srcdir)/inst/cta/test/data/crab_events.fits.gz \
+                      $(abs_top_srcdir)/inst/cta/test/data/crab_cntmap.fits.gz
+  testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
+  testdatacta_DATA  = $(testdatacta)
+  testcaldbcta      = $(abs_top_srcdir)/inst/cta/test/caldb/cta_dummy_irf.dat \
+                      $(abs_top_srcdir)/inst/cta/test/caldb/prod1_gauss.fits \
+                      $(abs_top_srcdir)/inst/cta/test/caldb/prod1_king.fits
+  testcaldbctadir   = $(pyexecdir)/gammalib/tests/cta/caldb
+  testcaldbcta_DATA = $(testcaldbcta)
+  testdc1cta        = $(abs_top_srcdir)/inst/cta/test/caldb/dc1/arf.fits \
+                      $(abs_top_srcdir)/inst/cta/test/caldb/dc1/psf.fits \
+                      $(abs_top_srcdir)/inst/cta/test/caldb/dc1/psf_magic.fits \
+                      $(abs_top_srcdir)/inst/cta/test/caldb/dc1/rmf.fits
+  testdc1ctadir     = $(pyexecdir)/gammalib/tests/cta/caldb/dc1
+  testdc1cta_DATA   = $(testdc1cta)
+endif
 
 # Sources that are required for the build. All targets in the list will be built
 # before anything. These are honored by 'make all', 'make check' and 'make install'.
