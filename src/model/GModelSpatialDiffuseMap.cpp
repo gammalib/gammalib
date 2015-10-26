@@ -676,7 +676,8 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
         // total flux in skymap for normalization. Negative pixels are
         // excluded from the cumulative map. Invalid pixels are also
         // filtered.
-        double sum = 0.0;
+        double sum     = 0.0;
+        double sum_map = 0.0;
         for (int i = 0; i < npix; ++i) {
 
             // Derive effective pixel radius from half opening angle
@@ -693,12 +694,13 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
             // pixels outside the simulation cone taken into account as
             // long as the mc() method has an explicit test of whether a
             // simulated event is contained in the simulation cone.
-            double distance = centre.dist_deg(m_map.pix2dir(i));
-            if (distance <= radius+pixel_radius) {
-                double flux = m_map.flux(i);
-                if (flux > 0.0) {
+            double flux = m_map.flux(i);
+            if (flux > 0.0) {
+                double distance = centre.dist_deg(m_map.pix2dir(i));
+                if (distance <= radius+pixel_radius) {
                     sum += flux;
                 }
+                sum_map += flux; // sum up total flux in map
         	}
 
             // Push back flux
@@ -712,16 +714,17 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
             for (int i = 0; i < npix; ++i) {
                 m_mc_cache[i] /= sum;
             }
-            if (normalize()) {
-                m_mc_norm = 1.0;
-            }
-            else {
-                m_mc_norm = sum;
-            }
         }
 
         // Make sure that last pixel in the cache is >1
         m_mc_cache[npix] = 1.0001;
+
+        // Set the normalization factor for the MC simulations as the
+        // fraction of the flux that is comprised within the simulation
+        // cone
+        if (sum_map > 0.0) {
+            m_mc_norm = sum / sum_map;
+        }
 
         // Do we have a HealPix map?
         if (m_map.projection()->code() == "HPX") {
@@ -978,13 +981,28 @@ void GModelSpatialDiffuseMap::prepare_map(void)
     // Continue only if there are skymap pixels
     if (npix > 0) {
 
-        // Set negative or invalid pixels to zero intensity.
+        // Initialise flux sum
+        double sum = 0.0;
+
+        // Compute flux sum and set negative or invalid pixels to zero
+        // intensity.
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i);
+            double flux = m_map.flux(i);
             if (flux < 0.0 ||
                 gammalib::is_notanumber(flux) ||
                 gammalib::is_infinite(flux)) {
                 m_map(i) = 0.0;
+                flux     = 0.0;
+            }
+            sum += flux;
+        }
+
+        // Optionally normalize the sky map.
+        if (sum > 0.0) {
+            if (normalize()) {
+                for (int i = 0; i < npix; ++i) {
+                    m_map(i) /= sum;
+                }
             }
         }
 
