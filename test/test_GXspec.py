@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib xspec module.
 #
-# Copyright (C) 2013 Juergen Knoedlseder
+# Copyright (C) 2013-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,15 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
-import os
+import gammalib
 
 
 # ==================================== #
 # Test class for GammaLib xspec module #
 # ==================================== #
-class Test(GPythonTestSuite):
+class Test(gammalib.GPythonTestSuite):
     """
     Test class for GammaLib xspec module.
     """
@@ -35,7 +33,7 @@ class Test(GPythonTestSuite):
         Constructor.
         """
         # Call base class constructor
-        GPythonTestSuite.__init__(self)
+        gammalib.GPythonTestSuite.__init__(self)
 
         # Return
         return
@@ -63,8 +61,8 @@ class Test(GPythonTestSuite):
         """
         # Allocate GPha object and check its size
         nmeasured = 10
-        emeasured = GEbounds(nmeasured, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"))
-        pha       = GPha(emeasured)
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
+        pha       = gammalib.GPha(emeasured)
         self.test_value(pha.size(), nmeasured)
 
         # Set and retrieve a value
@@ -82,8 +80,8 @@ class Test(GPythonTestSuite):
         """
         # Allocate GArf object and check its size
         nmeasured = 10
-        emeasured = GEbounds(nmeasured, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"))
-        arf       = GArf(emeasured)
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
+        arf       = gammalib.GArf(emeasured)
         self.test_value(arf.size(), nmeasured)
 
         # Set and retrieve a value
@@ -102,9 +100,9 @@ class Test(GPythonTestSuite):
         # Allocate GRmf object and check its size
         ntrue     = 20
         nmeasured = 10
-        etrue     = GEbounds(ntrue, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"))
-        emeasured = GEbounds(nmeasured, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"))
-        rmf       = GRmf(etrue, emeasured)
+        etrue     = gammalib.GEbounds(ntrue, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
+        emeasured = gammalib.GEbounds(nmeasured, gammalib.GEnergy(1.0, "TeV"), gammalib.GEnergy(10.0, "TeV"))
+        rmf       = gammalib.GRmf(etrue, emeasured)
         self.test_value(rmf.size(), ntrue*nmeasured)
         self.test_value(rmf.ntrue(), ntrue)
         self.test_value(rmf.nmeasured(), nmeasured)

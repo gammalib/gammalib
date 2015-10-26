@@ -1,8 +1,9 @@
-2015-10-16  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-10-26  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
+        Add Python unit test function to gammalib module (#1486)
         Increase CTA IRF integration precision for shell model (#1521)
         Correctly handle MC simulations for unnormalized diffuse maps (#1548)
         Improve precision of shell model in unbinned analysis (#1521)

@@ -17,9 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
+import gammalib
 import os
+import math
 
 
 # =========== #
@@ -49,7 +49,7 @@ def loadtxt(filename):
 # ================================== #
 # Test class for GammaLib sky module #
 # ================================== #
-class Test(GPythonTestSuite):
+class Test(gammalib.GPythonTestSuite):
     """
     Test class for GammaLib sky module.
     """
@@ -58,7 +58,7 @@ class Test(GPythonTestSuite):
         Constructor.
         """
         # Call base class constructor
-        GPythonTestSuite.__init__(self)
+        gammalib.GPythonTestSuite.__init__(self)
 
         # Return
         return
@@ -82,7 +82,6 @@ class Test(GPythonTestSuite):
         self.append(self.test_fk5_to_galactic, "Test FK5 to Galactic coordinate conversion")
         self.append(self.test_operators, "Test skymap operators")
 
-        
         # Return
         return
 
@@ -97,17 +96,17 @@ class Test(GPythonTestSuite):
             inx = pixels.dir2inx(dir)
             msg = map + " inx2dir/dir2inx check for pixel " + str(i)
             err = map + " GSkyMap trouble with pixel " + str(i) + " (" + str(inx) + \
-                "), RA=" + str(dir.ra() * 180 / pi) + ", Dec=" + str(dir.dec() * 180 / pi)
+                "), RA=" + str(dir.ra() * 180 / math.pi) + ", Dec=" + str(dir.dec() * 180 / math.pi)
             self.test_assert(i == inx, msg, err)
 
         # Control SkyDir coordinate transformation for all pixels
         for i in range(pixels.npix()):
             dir     = pixels.inx2dir(i)
-            dir_new = GSkyDir()
+            dir_new = gammalib.GSkyDir()
             dir_new.lb(dir.l(), dir.b())
             dra     = abs(dir.ra() - dir_new.ra())
             if (dra >= 5.0):
-                dra -= 2.0 * pi
+                dra -= 2.0 * math.pi
             ddec = abs(dir.dec() - dir_new.dec())
             msg = map + " dir check for pixel " + str(i)
             err = map + " GSkyMap trouble with pixel " + str(i) + " (" + str(dra) + \
@@ -132,7 +131,7 @@ class Test(GPythonTestSuite):
             pass
 
         # Create skymap
-        pixels = GSkyMap(proj, "CEL", 83.6331, 22.0145, -3.7, 2.6, 5, 5, 20)
+        pixels = gammalib.GSkyMap(proj, "CEL", 83.6331, 22.0145, -3.7, 2.6, 5, 5, 20)
         for map in range(pixels.nmaps()):
             for i in range(pixels.npix()):
                 pixels[i, map] = i + map * pixels.npix()
@@ -161,14 +160,14 @@ class Test(GPythonTestSuite):
             pass
 
         # Create HEALPix skymap
-        pixels = GSkyMap("GAL", 2, "RING", 2)
+        pixels = gammalib.GSkyMap("GAL", 2, "RING", 2)
         for i in range(pixels.npix()):
             pixels[i] = i + 1.0
             pixels[i, 1] = i + 1.0 + 1000.0
         pixels.save(file1)
 
         # Load HEALPix skymap
-        pixels = GSkyMap(file1)
+        pixels = gammalib.GSkyMap(file1)
 
         # Control coordinate and pixel transformations
         self.test_skymap_pixels(pixels, "HEALPix")
@@ -184,7 +183,7 @@ class Test(GPythonTestSuite):
         pixels.save(file2, True)
 
         # Load again HEALPix skymap
-        pixels = GSkyMap(file1)
+        pixels = gammalib.GSkyMap(file1)
 
         # Return
         return
@@ -288,21 +287,21 @@ class Test(GPythonTestSuite):
         for (ra, dec), (glon, glat) in coordinates:
 
             # Create point A in FK5 J2000 coordinates
-            input_point = GSkyDir()
+            input_point = gammalib.GSkyDir()
             input_point.radec_deg(ra, dec)
 
             # Convert point A to Galactic coordinates
             ll, bb = input_point.l_deg(), input_point.b_deg()
-            actual_point = GSkyDir()
+            actual_point = gammalib.GSkyDir()
             actual_point.lb_deg(ll, bb)
 
             # Compute offset to reference result
-            reference_point = GSkyDir()
+            reference_point = gammalib.GSkyDir()
             reference_point.lb_deg(glon, glat)
 
             # Compute distance and remember maximum
             this_dist = actual_point.dist_deg(reference_point)
-            max_dist = max(max_dist, this_dist)
+            max_dist  = max(max_dist, this_dist)
 
         # Convert max_dist from deg to milli-arcsec
         max_dist *= 1e3 * 3600
@@ -323,7 +322,7 @@ class Test(GPythonTestSuite):
         Test the skymap operators.
         """
         # Setup skymaps
-        map    = GSkyMap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
+        map    = gammalib.GSkyMap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
         map[0] = 1.0
         map[1] = 2.0
         map[2] = 3.0

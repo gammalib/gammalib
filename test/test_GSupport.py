@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib support module.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,15 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-from gammalib import *
-from math import *
-import os
+import gammalib
+import math
 
 
 # =============================== #
 # Test class for GammaLib support #
 # =============================== #
-class Test(GPythonTestSuite):
+class Test(gammalib.GPythonTestSuite):
     """
     Test class for GammaLib support.
     """
@@ -35,7 +34,7 @@ class Test(GPythonTestSuite):
         Constructor.
         """
         # Call base class constructor
-        GPythonTestSuite.__init__(self)
+        gammalib.GPythonTestSuite.__init__(self)
 
         # Return
         return
@@ -62,15 +61,15 @@ class Test(GPythonTestSuite):
         Test GNodeArray class.
         """
         # Set-up vector and data array. Test all vector elements.
-        vector = GVector(20)
-        data = GVector(20)
+        vector = gammalib.GVector(20)
+        data   = gammalib.GVector(20)
         for i in range(20):
             vector[i] = 10.0 + i * 5.0
-            data[i] = sin(0.15 * (vector[i] - 10.0))
-            self.test_value(data[i], sin(0.15 * i * 5.0))
+            data[i]   = math.sin(0.15 * (vector[i] - 10.0))
+            self.test_value(data[i], math.sin(0.15 * i * 5.0))
 
         # Set-up node array
-        array = GNodeArray()
+        array = gammalib.GNodeArray()
         array.nodes(vector)
 
         # Get values
@@ -79,9 +78,9 @@ class Test(GPythonTestSuite):
         for i in range(100):
             x = i - 10
             array.set_value(x)
-            inx_left = array.inx_left()
+            inx_left  = array.inx_left()
             inx_right = array.inx_right()
-            wgt_left = array.wgt_left()
+            wgt_left  = array.wgt_left()
             wgt_right = array.wgt_right()
             y = wgt_left * data[inx_left] + wgt_right * data[inx_right]
             x_val.append(x)
@@ -90,21 +89,20 @@ class Test(GPythonTestSuite):
         # Return
         return
 
-
     # Test GUrlFile class
     def test_url_file(self):
         """
         Test GUrlFile class.
         """
         # Test file writing
-        url = GUrlFile("test_url.dat", "w")
+        url = gammalib.GUrlFile("test_url.dat", "w")
         self.test_value(url.write("abcd", 4), 4)
         url.put_char(ord("e"))
         url.close()
 
         # Test file reading
         buffer = ""
-        url = GUrlFile("test_url.dat", "r")
+        url    = gammalib.GUrlFile("test_url.dat", "r")
         buffer = url.read(99)
         self.test_assert(buffer == "abcde",
                          "Expected \"abcde\" in file, found \""+
@@ -120,7 +118,7 @@ class Test(GPythonTestSuite):
         Test GUrlString class.
         """
         # Test writing
-        url = GUrlString()
+        url = gammalib.GUrlString()
         self.test_value(url.write("abcd", 4), 4)
         url.put_char(ord("e"))
 
