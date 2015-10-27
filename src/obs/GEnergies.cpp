@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEnergies.cpp - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,6 +41,8 @@
 #define G_AT                                            "GEnergies::at(int&)"
 #define G_INSERT                          "GEnergies::insert(int&, GEnergy&)"
 #define G_REMOVE                                    "GEnergies::remove(int&)"
+#define G_SET_LIN              "GEnergies::set_lin(int&, GEnergy&, GEnergy&)"
+#define G_SET_LOG              "GEnergies::set_log(int&, GEnergy&, GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -101,6 +103,37 @@ GEnergies::GEnergies(const GEnergies& energies)
 
     // Copy members
     copy_members(energies);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Interval constructor
+ *
+ * @param[in] num Number of energies.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ * @param[in] log Use logarithmic spacing? (defaults to true).
+ *
+ * Constructs energy container by defining @p num energies between @p emin
+ * and @p emax. The @p log parameter controls whether the energy spacing is
+ * logarihmic (default) or linear.
+ ***************************************************************************/
+GEnergies::GEnergies(const int& num, const GEnergy& emin, const GEnergy& emax,
+                     const bool& log)
+{
+    // Initialise members
+    init_members();
+
+    // Set intervals
+    if (log) {
+        this->set_log(num, emin, emax);
+    }
+    else {
+        this->set_lin(num, emin, emax);
+    }
 
     // Return
     return;
@@ -342,6 +375,157 @@ void GEnergies::extend(const GEnergies& energies)
 
     } // endif: energy container was not empty
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set linearly spaced energies
+ *
+ * @param[in] num Number of energies.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid number of energies or minimum and maximum energy
+ *            requested.
+ *
+ * Creates @p num linearly spaced energies running from @p emin to @p emax.
+ ***************************************************************************/
+void GEnergies::set_lin(const int&     num,
+                        const GEnergy& emin,
+                        const GEnergy& emax)
+{
+    // Initialise members
+    clear();
+
+    // Check validity of number of energies
+    if (num < 0) {
+        std::string msg = "Negative number of energies "+gammalib::str(num)+
+                          " specified. Specify a non-negative number of "
+                          "energies.";
+        throw GException::invalid_argument(G_SET_LIN, msg);
+    }
+
+    // Check validity of energies
+    if (emin > emax) {
+        std::string msg = "Minimum energy "+emin.print()+" is larger than "
+                          "maximum energy "+emax.print()+". Specify "
+                          "a minimum energy that does not exceed the "
+                          "maximum energy.";
+        throw GException::invalid_argument(G_SET_LIN, msg);
+    }
+
+    // Case A: we have 1 energy
+    if (num == 1) {
+
+        // Check that emin and emax are equal
+        if (emin != emax) {
+            std::string msg = "Single energy is requested but the minimum "
+                              "energy "+emin.print()+" differs from the "
+                              "maximum energy "+emax.print()+". Specify "
+                              "identical energies.";
+            throw GException::invalid_argument(G_SET_LIN, msg);
+        }
+
+        // Append energy
+        append(emin);
+
+    }
+
+    // Case B: more than 1 energy requested
+    else if (num > 1) {
+
+        // Compute bin width
+        GEnergy ebin = (emax - emin)/double(num-1); 
+
+        // Append energies
+        GEnergy energy = emin;
+        for (int i = 0; i < num; ++i) {
+            append(energy);
+            energy += ebin;
+        }
+
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set logarithmically spaced energies
+ *
+ * @param[in] num Number of energies.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid number of energies or minimum and maximum energy
+ *            requested.
+ *
+ * Creates @p num logarithmically spaced energies running from @p emin to
+ * @p emax.
+ ***************************************************************************/
+void GEnergies::set_log(const int&     num,
+                        const GEnergy& emin,
+                        const GEnergy& emax)
+{
+    // Initialise members
+    clear();
+
+    // Check validity of number of energies
+    if (num < 0) {
+        std::string msg = "Negative number of energies "+gammalib::str(num)+
+                          " specified. Specify a non-negative number of "
+                          "energies.";
+        throw GException::invalid_argument(G_SET_LOG, msg);
+    }
+
+    // Check validity of energies
+    if (emin > emax) {
+        std::string msg = "Minimum energy "+emin.print()+" is larger than "
+                          "maximum energy "+emax.print()+". Specify "
+                          "a minimum energy that does not exceed the "
+                          "maximum energy.";
+        throw GException::invalid_argument(G_SET_LOG, msg);
+    }
+
+    // Case A: we have 1 energy
+    if (num == 1) {
+
+        // Check that emin and emax are equal
+        if (emin != emax) {
+            std::string msg = "Single energy is requested but the minimum "
+                              "energy "+emin.print()+" differs from the "
+                              "maximum energy "+emax.print()+". Specify "
+                              "identical energies.";
+            throw GException::invalid_argument(G_SET_LOG, msg);
+        }
+
+        // Append energy
+        append(emin);
+
+    }
+
+    // Case B: more than 1 energy requested
+    else if (num > 1) {
+
+        // Compute bin width
+        double elogmin = std::log10(emin.MeV());
+        double elogmax = std::log10(emax.MeV());
+        double elogbin = (elogmax - elogmin)/double(num-1);
+
+        // Append energies
+        GEnergy energy;
+        for (int i = 0; i < num; ++i) {
+            energy.MeV(std::pow(10.0, double(i)*elogbin + elogmin));
+            append(energy);
+        }
+
+    }
+
     // Return
     return;
 }

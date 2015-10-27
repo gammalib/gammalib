@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-26 October 2015
+27 October 2015
 
 
 1. Introduction
@@ -89,6 +89,10 @@ likelihood function is smooth.
 
 The number of integration iterations for the energy dispersion was changed from
 4 to 5 to make it compatible with the default integration order.
+
+An interval constructor and the set_lin() and set_log() methods have been added
+to the GEnergies class to allow quick creation of a linear or logarithmic series
+of energies.
 
 
 11. Optimization module

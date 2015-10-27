@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2014 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ class Test(gammalib.GPythonTestSuite):
 
         # Append tests
         self.append(self.test_energy, "Test GEnergy class")
+        self.append(self.test_energies, "Test GEnergies class")
         self.append(self.test_time, "Test GTime class")
 
         # Return
@@ -97,6 +98,20 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
+    # Test GEnergies class
+    def test_energies(self):
+        """
+        Test GEnergies class.
+        """
+        # Setup 3 logarithmic energies
+        energies = gammalib.GEnergies(3, gammalib.GEnergy(1.0, "MeV"),
+                                         gammalib.GEnergy(100.0, "MeV"))
+        self.test_value(energies[0].MeV(), 1.0);
+        self.test_value(energies[1].MeV(), 10.0);
+        self.test_value(energies[2].MeV(), 100.0);
+
+        # Return
+        return
 
     # Test GTime class
     def test_time(self):

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GEnergies.hpp - Energy container class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,6 +52,8 @@ public:
     GEnergies(const std::string& filename,
               const std::string& extname = "ENERGIES");
     GEnergies(const GEnergies& energies);
+    GEnergies(const int& num, const GEnergy& emin, const GEnergy& emax,
+              const bool& log = true);
     virtual ~GEnergies(void);
  
     // Operators
@@ -72,9 +74,14 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GEnergies& energies);
+    void           set_lin(const int& num, const GEnergy& emin,
+                                           const GEnergy& emax);
+    void           set_log(const int& num, const GEnergy& emin,
+                                           const GEnergy& emax);
     void           load(const std::string& filename,
                         const std::string& extname = "ENERGIES");
-    void           save(const std::string& filename, const bool& clobber = false,
+    void           save(const std::string& filename,
+                        const bool&        clobber = false,
                         const std::string& extname = "ENERGIES") const;
     void           read(const GFitsTable& table);
     void           write(GFits& file,
