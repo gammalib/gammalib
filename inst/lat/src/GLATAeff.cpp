@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATAeff.cpp - Fermi-LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -341,6 +341,9 @@ void GLATAeff::write(GFits& fits) const
 {
     // Write effective area
     write_aeff(fits);
+
+    // Write efficiency factors
+    write_efficiency(fits);
 
     // Return
     return;

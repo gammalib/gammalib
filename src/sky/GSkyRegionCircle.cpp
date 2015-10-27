@@ -282,7 +282,7 @@ void GSkyRegionCircle::read(const std::string& line)
 
 	// Split the string into 2 parts seperated by #
 	std::vector<std::string> substrings = gammalib::split(line,"#");
-	std::string region_def = (substrings.size() > 0) ? substrings[0] : "";
+	std::string region_def = (!substrings.empty())   ? substrings[0] : "";
 	std::string comment    = (substrings.size() > 1) ? substrings[1] : "";
 
 	// Finding the circle

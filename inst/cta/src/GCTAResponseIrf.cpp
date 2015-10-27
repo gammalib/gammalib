@@ -913,7 +913,7 @@ void GCTAResponseIrf::read(const GXmlElement& xml)
 void GCTAResponseIrf::write(GXmlElement& xml) const
 {
     // Determine number of existing parameter nodes in XML element
-    int npars = xml.elements("parameter");
+    //int npars = xml.elements("parameter");
 
     // If we have a calibration database and response name, then set
     // the information ...

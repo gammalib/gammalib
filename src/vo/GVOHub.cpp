@@ -778,7 +778,7 @@ void GVOHub::request_set_xml_rpc_callback(const GXml&      xml,
     if (i != -1) {
 
         // Get callback URL
-        std::string client_url = get_callback_url(xml);
+        //std::string client_url = get_callback_url(xml);
 
         // Set callback URL
         m_clients[i].url = get_callback_url(xml);

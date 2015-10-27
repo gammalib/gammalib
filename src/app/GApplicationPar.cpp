@@ -1084,7 +1084,8 @@ void GApplicationPar::check_value_real(const std::string& value) const
 void GApplicationPar::check_value_string(const std::string& value) const
 {
     // Check for options
-    bool has_options = check_options(value);
+    //bool has_options = check_options(value);
+    check_options(value);
 
     // Return
     return;
@@ -1107,7 +1108,8 @@ void GApplicationPar::check_value_string(const std::string& value) const
 void GApplicationPar::check_value_filename(const std::string& value) const
 {
     // Check for options
-    bool has_options = check_options(value);
+    //bool has_options = check_options(value);
+    check_options(value);
 
     // Return
     return;

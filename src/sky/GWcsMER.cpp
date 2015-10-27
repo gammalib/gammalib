@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GWcsMER.cpp - Mercator's (MER) projection class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -435,7 +435,7 @@ void GWcsMER::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     }
 
     // Initialise status code and statistics
-    int status    = 0;
+    //int status    = 0;
     int n_invalid = 0;
 
     // Do phi dependence

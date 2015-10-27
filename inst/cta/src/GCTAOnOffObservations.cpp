@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAOnOffObservations.cpp - ON/OFF Observation container class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Pierrick Martin                                  *
+ *  copyright (C) 2013-2015 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -580,11 +580,11 @@ void GCTAOnOffObservations::read(const GXml& xml)
         // Get attributes
         std::string name       = obs->attribute("name");
         std::string id         = obs->attribute("id");
-        std::string instrument = obs->attribute("instrument");
+        //std::string instrument = obs->attribute("instrument");
 
         // Allocate observation 
-		// (only CTA at the moment, implement registry if more)
-        GCTAOnOffObservation*  ptr = new GCTAOnOffObservation;
+        // (only CTA at the moment, implement registry if more)
+        GCTAOnOffObservation* ptr = new GCTAOnOffObservation;
 
         // If observation is valid then read its definition from XML file
         if (ptr != NULL) {
@@ -600,8 +600,7 @@ void GCTAOnOffObservations::read(const GXml& xml)
 
         // ... otherwise throw an exception
         else {
-			std::string msg =
-			"Problem allocating GCTAOnOffObservation object.";
+            std::string msg = "Problem allocating GCTAOnOffObservation object.";
             throw GException::invalid_instrument(G_READ, msg);
         }
 

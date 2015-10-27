@@ -461,8 +461,8 @@ double GCTAModelAeffBackground::npred(const GEnergy&      obsEng,
                                       const GObservation& obs) const
 {
     // Set number of iterations for Romberg integration.
-    static const int iter_theta = 6;
-    static const int iter_phi   = 6;
+    //static const int iter_theta = 6;
+    //static const int iter_phi   = 6;
 
     // Initialise result
     double npred     = 0.0;

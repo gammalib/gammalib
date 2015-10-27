@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.cpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -518,7 +518,7 @@ double GCTAModelIrfBackground::npred(const GEnergy&      obsEng,
             }
 
             // Get reference to ROI centre
-            const GSkyDir& roi_centre = events->roi().centre().dir();
+            //const GSkyDir& roi_centre = events->roi().centre().dir();
 
             // Get ROI radius in radians
             double roi_radius = events->roi().radius() * gammalib::deg2rad;

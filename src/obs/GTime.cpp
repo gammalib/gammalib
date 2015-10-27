@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -742,7 +742,7 @@ double GTime::leap_seconds(const double& mjd) const
 
     // Extract MJD day and MJD fraction
     long   day      = (long)mjd;
-    double fraction = mjd - (double)day;
+    //double fraction = mjd - (double)day;
 
     // Find the leap second MJD that is equal or larger to the specified
     // day

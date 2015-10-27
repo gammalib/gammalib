@@ -996,7 +996,7 @@ void GCTACubePsf::set_eng_axis(void)
     m_elogmeans.clear();
 
     // Compute nodes
-    for (int i = 0; i < m_ebounds.size(); ++i) {
+    for (int i = 0; i < bins; ++i) {
      
         // Append logE/TeV
         m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());

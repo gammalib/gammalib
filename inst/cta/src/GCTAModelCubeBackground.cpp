@@ -284,7 +284,7 @@ double GCTAModelCubeBackground::eval(const GEvent&       event,
     const GCTACubeBackground& bgd = rsp->background();
 
     // Evaluate function
-    double logE = event.energy().log10TeV();
+    //double logE = event.energy().log10TeV();
     double spat = bgd((*dir), event.energy());
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time()) : 1.0;
@@ -340,7 +340,7 @@ double GCTAModelCubeBackground::eval_gradients(const GEvent&       event,
     const GCTACubeBackground& bgd = rsp->background();
 
     // Evaluate function
-    double logE = event.energy().log10TeV();
+    //double logE = event.energy().log10TeV();
     double spat = bgd((*dir), event.energy());
     double spec = (spectral() != NULL)
                   ? spectral()->eval_gradients(event.energy(), event.time())

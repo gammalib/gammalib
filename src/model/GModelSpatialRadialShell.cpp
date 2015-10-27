@@ -722,7 +722,7 @@ void GModelSpatialRadialShell::free_members(void)
 void GModelSpatialRadialShell::update() const
 {
     // Set constants
-    const double c1 = gammalib::twopi / 3.0;
+    //const double c1 = gammalib::twopi / 3.0;
     const double c2 = 1.0 / (2.0 * gammalib::sqrt_two);
 
     // Update if radius or width have changed
