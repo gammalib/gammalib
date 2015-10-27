@@ -138,10 +138,10 @@ class Test(gammalib.GPythonTestSuite):
         col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
         col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
         for i in range(nrows):
-            #col1[i] = i % 2
-            #col2[i] = i % 2
-            col1[i] = bool(i % 2)  # New swig version
-            col2[i] = bool(i % 2)  # New swig version
+            #col1[i] = i % 2        # Old swig version
+            #col2[i] = i % 2        # Old swig version
+            col1[i] = bool(i % 2)  # New swig version (3.x.y)
+            col2[i] = bool(i % 2)  # New swig version (3.x.y)
             col3[i] = i
             col4[i] = i * 0.01
             col5[i] = i * 0.01
