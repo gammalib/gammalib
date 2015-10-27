@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib FITS module.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2015 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -138,8 +138,10 @@ class Test(gammalib.GPythonTestSuite):
         col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
         col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
         for i in range(nrows):
-            col1[i] = i % 2
-            col2[i] = i % 2
+            #col1[i] = i % 2
+            #col2[i] = i % 2
+            col1[i] = bool(i % 2)  # New swig version
+            col2[i] = bool(i % 2)  # New swig version
             col3[i] = i
             col4[i] = i * 0.01
             col5[i] = i * 0.01

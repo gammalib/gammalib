@@ -131,7 +131,7 @@ endif
 CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 
 # Set SWIG compile command
-SWIGCOMPILE = $(SWIG) -c++ -python -Wall -DSWIG_PYTHON_LEGACY_BOOL
+SWIGCOMPILE = $(SWIG) -c++ -python -Wall
 
 # Things we want to do when 'make' is invoked.
 all-local: build

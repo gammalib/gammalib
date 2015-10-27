@@ -87,6 +87,20 @@ public:
         (*self)[name] = val;
         return;
     }
+    void __setitem__(const std::string& name, const bool& val) {
+        GApplicationPar& par = (*self)[name];
+        if (par.type() == "b") {
+            par.boolean(val);
+        }
+        else {
+            std::string msg = "Attempt to set \""+par.type()+
+                              "\" parameter \""+name+"\" with boolean "
+                              "value \""+gammalib::str(val)+"\".";
+            throw GException::invalid_argument("__setitem__(std::string, int)",
+                                               msg);
+        }
+        return;
+    }
     void __setitem__(const std::string& name, const int& val) {
         GApplicationPar& par = (*self)[name];
         if (par.type() == "r") {
@@ -94,9 +108,6 @@ public:
         } 
         else if (par.type() == "i") {
             par.integer(val);
-        }
-        else if (par.type() == "b") {
-            par.boolean(val);
         }
         else {
             std::string msg = "Attempt to set \""+par.type()+
