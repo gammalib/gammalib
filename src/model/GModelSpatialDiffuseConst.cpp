@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseConst.cpp - Spatial isotropic model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -98,11 +98,11 @@ GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Value constructor
  *
- * @param[in] value Isotropic value.
+ * @param[in] value Isotropic intensity value (units sr^-1).
  *
- * Constructs isotropic spatial model by assigning the value of the diffuse
- * emission. This constructor explicitly sets the m_value parameter of the
- * model.
+ * Constructs isotropic spatial model by assigning the intensity @p value of
+ * the diffuse emission. This constructor explicitly sets the m_value
+ * parameter of the model.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const double& value) :
                            GModelSpatialDiffuse()
@@ -228,38 +228,49 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate function (in units of sr^-1)
  *
  * @param[in] photon Incident photon (ignored).
- * @return Model value.
+ * @return Model value (units of sr^-1).
  *
  * Evaluates the spatial part for an isotropic source model. By definition
- * this value is independent from the sky direction.
+ * the model value is independent from the sky direction. The model value is
+ * given by the value parameter divided by the solid angle of the sphere
+ * \f$4 \pi\f$.
  ***************************************************************************/
 double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
 {
-    // Return value
-    return (m_value.value());
+    // Set normalization constant
+    const double norm = 1.0 / gammalib::fourpi;
+
+    // Compute model value
+    double value = norm * m_value.value();
+
+    // Return model value
+    return (value);
 }
 
 
 /***********************************************************************//**
- * @brief Evaluate function and gradients
+ * @brief Evaluate function and gradients (in units of sr^-1)
  *
  * @param[in] photon Incident photon (ignored).
- * @return Model value.
+ * @return Model value (units of sr^-1).
  *
- * Evaluates the spatial part for an isotropic source model and set the
- * parameter gradient. By definition, the value and gradient is independent
- * from the sky direction. The value is 1, the parameter gradient is 0.
+ * Evaluates the spatial part for an isotropic source model and sets the
+ * parameter gradient. By definition, the model value and gradient are
+ * independent from the sky direction.
  ***************************************************************************/
 double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
 {
-    // Compute function value
-    double value = m_value.value();
+    // Set normalization constant
+    const double norm = 1.0 / gammalib::fourpi;
+
+    // Compute model value
+    double value = norm * m_value.value();
 
     // Compute partial derivatives of the parameter values
-    double g_norm = (m_value.is_free()) ? m_value.scale() : 0.0;
+    double g_norm = (m_value.is_free()) ? norm * m_value.scale() : 0.0;
 
     // Set gradient (circumvent const correctness)
     const_cast<GModelSpatialDiffuseConst*>(this)->m_value.factor_gradient(g_norm);
@@ -277,7 +288,8 @@ double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Returns an arbitrary position on the celestial sphere.
+ * Returns an arbitrary position on the celestial sphere. This position is
+ * independent of event @p energy and arrival @p time.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseConst::mc(const GEnergy& energy,
                                       const GTime&   time,
