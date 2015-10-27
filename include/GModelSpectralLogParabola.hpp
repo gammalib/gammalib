@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.hpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Michael Mayer                               *
+ *  copyright (C) 2012-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -135,13 +135,13 @@ protected:
 
     	// Members
     protected:
-    	const double&  m_norm;       //!< Normalization
-    	const double&  m_index;	     //!< Spectral index at pivot
-    	const double&  m_curvature;  //!< Curvature
-    	const GEnergy& m_pivot;	     //!< Pivot energy
+    	double  m_norm;      //!< Normalization
+    	double  m_index;	 //!< Spectral index at pivot
+    	double  m_curvature; //!< Curvature
+    	GEnergy m_pivot;	 //!< Pivot energy
     };
 
-    // Class to determine the integral energyflux, derviation of flux_kern
+    // Class to determine the integral energy flux, derviation of flux_kern
     class eflux_kern : public flux_kern {
     public:
     	// Constructor

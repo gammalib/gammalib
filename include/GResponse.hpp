@@ -31,6 +31,7 @@
 #include <string>
 #include "GBase.hpp"
 #include "GFunction.hpp"
+#include "GTime.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GEvent;
@@ -38,7 +39,6 @@ class GPhoton;
 class GSource;
 class GEnergy;
 class GEbounds;
-class GTime;
 class GObservation;
 class GModelSky;
 

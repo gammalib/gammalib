@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralGauss.hpp - Spectral Gaussian model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Christoph Deil & Ellis Owen                      *
+ *  copyright (C) 2014-2015 by Christoph Deil & Ellis Owen                 *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -116,9 +116,9 @@ protected:
                      m_sigma(sigma) {}
         double eval(const double& eng);
     protected:
-        const double& m_norm;      //!< Normalization
-        const double& m_mean;      //!< Mean
-        const double& m_sigma;     //!< Sigma
+        double m_norm;  //!< Normalization
+        double m_mean;  //!< Mean
+        double m_sigma; //!< Sigma
     };
 
     // Protected members

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralExpPlaw.hpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -124,10 +124,10 @@ protected:
                     m_inv_ecut(1.0/ecut) {}
         double eval(const double& eng);
     protected:
-        const double& m_norm;      //!< Normalization
-        const double& m_index;     //!< Index
-        double        m_inv_pivot; //!< 1 / Pivot energy
-        double        m_inv_ecut;  //!< 1 / Cut off energy
+        double m_norm;      //!< Normalization
+        double m_index;     //!< Index
+        double m_inv_pivot; //!< 1 / Pivot energy
+        double m_inv_ecut;  //!< 1 / Cut off energy
     };
 
     // Energy flux integration kernel
@@ -143,10 +143,10 @@ protected:
                      m_inv_ecut(1.0/ecut) {}
         double eval(const double& eng);
     protected:
-        const double& m_norm;      //!< Normalization
-        const double& m_index;     //!< Index
-        double        m_inv_pivot; //!< 1 / Pivot energy
-        double        m_inv_ecut;  //!< 1 / Cut off energy
+        double m_norm;      //!< Normalization
+        double m_index;     //!< Index
+        double m_inv_pivot; //!< 1 / Pivot energy
+        double m_inv_ecut;  //!< 1 / Cut off energy
     };
 
     // Protected members

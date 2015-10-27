@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralSuperExpPlaw.hpp - Super exp. cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Michael Mayer                                    *
+ *  copyright (C) 2014-2015 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -131,11 +131,11 @@ protected:
                     m_index2(index2) {}
         double eval(const double& eng);
     protected:
-        const double& m_norm;      //!< Normalization
-        const double& m_index1;    //!< Index1
-        double        m_inv_pivot; //!< 1 / Pivot energy
-        double        m_inv_ecut;  //!< 1 / Cut off energy
-        const double& m_index2;    //!< Index2
+        double m_norm;      //!< Normalization
+        double m_index1;    //!< Index1
+        double m_inv_pivot; //!< 1 / Pivot energy
+        double m_inv_ecut;  //!< 1 / Cut off energy
+        double m_index2;    //!< Index2
     };
 
     // Energy flux integration kernel
@@ -153,11 +153,11 @@ protected:
                      m_index2(index2) {}
         double eval(const double& eng);
     protected:
-        const double& m_norm;      //!< Normalization
-        const double& m_index1;    //!< Index1
-        double        m_inv_pivot; //!< 1 / Pivot energy
-        double        m_inv_ecut;  //!< 1 / Cut off energy
-        const double& m_index2;    //!< Index2
+        double m_norm;      //!< Normalization
+        double m_index1;    //!< Index1
+        double m_inv_pivot; //!< 1 / Pivot energy
+        double m_inv_ecut;  //!< 1 / Cut off energy
+        double m_index2;    //!< Index2
     };
 
     // Protected members
