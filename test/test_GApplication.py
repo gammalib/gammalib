@@ -99,8 +99,8 @@ class Test(gammalib.GPythonTestSuite):
         # Set reference
         ref = []
         ref.append("Test __call__(std::string)\n")
-        #ref.append("1\n")
-        ref.append("true\n") # New swig version
+        #ref.append("1\n")    # Old swig version
+        ref.append("true\n") # New swig version (3.x.y)
         ref.append("41\n")
         ref.append("3.1415\n")
         ref.append(" This is a parameter .......: \n")
@@ -146,7 +146,11 @@ class Test(gammalib.GPythonTestSuite):
         lines = file.readlines()
         file.close()
         for i, line in enumerate(lines):
-            self.test_assert(line == ref[i], "Test "+calls[i]+": "+line)
+            if ref[i] == "true":
+                self.test_assert(line == ref[i] or line == "1",
+                                 "Test "+calls[i]+": "+line)
+            else:
+                self.test_assert(line == ref[i], "Test "+calls[i]+": "+line)
 
         # Return
         return
