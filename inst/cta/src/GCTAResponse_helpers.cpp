@@ -199,8 +199,8 @@ double cta_npsf_kern_rad_azsym::eval(const double& delta)
     if (phi > 0) {
     
         // Compute PSF value
-        value = m_rsp.psf(delta, m_theta, m_phi, m_zenith, m_azimuth, m_logE) * 
-                          phi * std::sin(delta);
+        value = m_rsp->psf(delta, m_theta, m_phi, m_zenith, m_azimuth, m_logE) * 
+                           phi * std::sin(delta);
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -235,9 +235,9 @@ double cta_nroi_kern::eval(const double& logEsrc)
     srcEng.MeV(expx);
 
     // Compute response components
-    double nroi_spatial  = m_rsp.nroi(m_model, srcEng, m_srcTime, m_obsEng, m_obsTime, m_obs);
-    double nroi_spectral = m_model.spectral()->eval(srcEng, m_srcTime);
-    double nroi_temporal = m_model.temporal()->eval(m_srcTime);
+    double nroi_spatial  = m_rsp->nroi(*m_model, srcEng, m_srcTime, m_obsEng, m_obsTime, *m_obs);
+    double nroi_spectral = m_model->spectral()->eval(srcEng, m_srcTime);
+    double nroi_temporal = m_model->temporal()->eval(m_srcTime);
     
     // Compute response
     double nroi = nroi_spatial * nroi_spectral * nroi_temporal * expx;
@@ -301,7 +301,7 @@ double cta_irf_radial_kern_rho::eval(const double& rho)
             }
 
             // Evaluate sky model
-            double model = m_model.eval(rho_kluge, m_srcEng, m_srcTime);
+            double model = m_model->eval(rho_kluge, m_srcEng, m_srcTime);
 
             // Debug: test if model is non positive
             #if defined(G_DEBUG_MODEL_ZERO)
@@ -422,12 +422,12 @@ double cta_irf_radial_kern_omega::eval(const double& omega)
     double azimuth = 0.0;
 
     // Evaluate IRF
-    double irf = m_rsp.aeff(offset, azimuth, m_zenith, m_azimuth, m_srcLogEng) *
-                 m_rsp.psf(delta, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
+    double irf = m_rsp->aeff(offset, azimuth, m_zenith, m_azimuth, m_srcLogEng) *
+                 m_rsp->psf(delta, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
 
     // Optionally take energy dispersion into account
-    if (m_rsp.use_edisp() && irf > 0.0) {
-        irf *= m_rsp.edisp(m_obsEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
+    if (m_rsp->use_edisp() && irf > 0.0) {
+        irf *= m_rsp->edisp(m_obsEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
     }
     
     // Compile option: Check for NaN/Inf
@@ -499,7 +499,7 @@ double cta_nroi_radial_kern_rho::eval(const double& rho)
             }
 
             // Get radial model value
-            double model = m_model.eval(rho_kluge, m_srcEng, m_srcTime);
+            double model = m_model->eval(rho_kluge, m_srcEng, m_srcTime);
 
             // Debug: test if model is non positive
             #if defined(G_DEBUG_MODEL_ZERO)
@@ -521,12 +521,12 @@ double cta_nroi_radial_kern_rho::eval(const double& rho)
 
                 // Setup phi integration kernel
                 cta_nroi_radial_kern_omega integrand(m_rsp,
+                                                     m_obs,
+                                                     m_rot,
                                                      m_srcEng,
                                                      m_srcTime,
                                                      m_obsEng,
                                                      m_obsTime,
-                                                     m_obs,
-                                                     m_rot,
                                                      sin_rho,
                                                      cos_rho);
 
@@ -578,7 +578,7 @@ double cta_nroi_radial_kern_omega::eval(const double& omega)
     GVector native(-cos_omega*m_sin_rho, sin_omega*m_sin_rho, m_cos_rho);
 
     // Rotate from native into celestial system
-    GVector cel = m_rot * native;
+    GVector cel = *m_rot * native;
 
     // Set sky direction
     GSkyDir srcDir;
@@ -588,7 +588,7 @@ double cta_nroi_radial_kern_omega::eval(const double& omega)
     GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
     // Compute point source Nroi for this sky direction
-    double nroi = m_rsp.nirf(photon, m_obsEng, m_obsTime, m_obs);
+    double nroi = m_rsp->nirf(photon, m_obsEng, m_obsTime, *m_obs);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
@@ -850,14 +850,14 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
     double omega_model = omega + m_posangle_obs;
 
     // Evaluate sky model
-    double model = m_model.eval(m_rho, omega_model, m_srcEng, m_srcTime);
+    double model = m_model->eval(m_rho, omega_model, m_srcEng, m_srcTime);
 
     // Debug: test if model is non positive
     #if defined(G_DEBUG_MODEL_ZERO)
     if (model <= 0.0) {
-        double m_semiminor_rad = m_model.semiminor() * gammalib::deg2rad;
-        double m_semimajor_rad = m_model.semimajor() * gammalib::deg2rad;
-        double diff_angle      = omega_model - m_model.posangle() * gammalib::deg2rad;
+        double m_semiminor_rad = m_model->semiminor() * gammalib::deg2rad;
+        double m_semimajor_rad = m_model->semimajor() * gammalib::deg2rad;
+        double diff_angle      = omega_model - m_model->posangle() * gammalib::deg2rad;
         double cosinus         = std::cos(diff_angle);
         double sinus           = std::sin(diff_angle);
         double arg1            = m_semiminor_rad * cosinus;
@@ -885,14 +885,14 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
         double phi   = 0.0; //TODO: Implement IRF Phi dependence
 
         // Evaluate IRF * model
-        irf = m_rsp.aeff(theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
-              m_rsp.psf(delta, theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
+        irf = m_rsp->aeff(theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
+              m_rsp->psf(delta, theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
               model;
 
         // Optionally take energy dispersion into account
-        if (m_rsp.use_edisp() && irf > 0.0) {
-            irf *= m_rsp.edisp(m_obsEng, theta, phi, 
-                               m_zenith, m_azimuth, m_srcLogEng);
+        if (m_rsp->use_edisp() && irf > 0.0) {
+            irf *= m_rsp->edisp(m_obsEng, theta, phi, 
+                                m_zenith, m_azimuth, m_srcLogEng);
         }
 
         // Compile option: Check for NaN/Inf
@@ -979,13 +979,13 @@ double cta_nroi_elliptical_kern_rho::eval(const double& rho)
 
             // Setup phi integration kernel
             cta_nroi_elliptical_kern_omega integrand(m_rsp,
+                                                     m_obs,
                                                      m_model,
+                                                     m_rot,
                                                      m_srcEng,
                                                      m_srcTime,
                                                      m_obsEng,
                                                      m_obsTime,
-                                                     m_obs,
-                                                     m_rot,
                                                      rho_kluge,
                                                      sin_rho,
                                                      cos_rho,
@@ -1123,14 +1123,14 @@ double cta_nroi_elliptical_kern_omega::eval(const double& omega)
     double omega_model = omega + m_posangle_roi;
 
     // Evaluate sky model
-    double model = m_model.eval(m_rho, omega_model, m_srcEng, m_srcTime);
+    double model = m_model->eval(m_rho, omega_model, m_srcEng, m_srcTime);
 
     // Debug: test if model is non positive
     #if defined(G_DEBUG_MODEL_ZERO)
     if (model <= 0.0) {
-        double m_semiminor_rad = m_model.semiminor() * gammalib::deg2rad;
-        double m_semimajor_rad = m_model.semimajor() * gammalib::deg2rad;
-        double diff_angle      = omega_model - m_model.posangle() * gammalib::deg2rad;
+        double m_semiminor_rad = m_model->semiminor() * gammalib::deg2rad;
+        double m_semimajor_rad = m_model->semimajor() * gammalib::deg2rad;
+        double diff_angle      = omega_model - m_model->posangle() * gammalib::deg2rad;
         double cosinus         = std::cos(diff_angle);
         double sinus           = std::sin(diff_angle);
         double arg1            = m_semiminor_rad * cosinus;
@@ -1155,7 +1155,7 @@ double cta_nroi_elliptical_kern_omega::eval(const double& omega)
         GVector native(-cos_omega*m_sin_rho, sin_omega*m_sin_rho, m_cos_rho);
 
         // Rotate from native into celestial system
-        GVector cel = m_rot * native;
+        GVector cel = *m_rot * native;
 
         // Set sky direction
         GSkyDir srcDir;
@@ -1165,7 +1165,7 @@ double cta_nroi_elliptical_kern_omega::eval(const double& omega)
         GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
         // Compute Nroi for this sky direction
-        nroi = m_rsp.nirf(photon, m_obsEng, m_obsTime, m_obs) * model;
+        nroi = m_rsp->nirf(photon, m_obsEng, m_obsTime, *m_obs) * model;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
@@ -1228,7 +1228,7 @@ double cta_irf_diffuse_kern_theta::eval(const double& theta)
         // integration as the PSF is so far azimuthally symmetric. Once
         // we introduce asymmetries, we have to move this done into the
         // Phi kernel method/
-        double psf = m_rsp.psf(theta, m_theta, m_phi, m_zenith, m_azimuth, m_srcLogEng);
+        double psf = m_rsp->psf(theta, m_theta, m_phi, m_zenith, m_azimuth, m_srcLogEng);
 
         // Continue only if PSF is positive
         if (psf > 0.0) {
@@ -1244,13 +1244,13 @@ double cta_irf_diffuse_kern_theta::eval(const double& theta)
             // Setup kernel for azimuthal integration
             cta_irf_diffuse_kern_phi integrand(m_rsp,
                                                m_model,
+                                               m_rot,
                                                m_zenith,
                                                m_azimuth,
                                                m_srcEng,
                                                m_srcTime,
                                                m_srcLogEng,
                                                m_obsEng,
-                                               m_rot,
                                                sin_theta,
                                                cos_theta,
                                                sin_ph,
@@ -1335,14 +1335,14 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
     GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
 
     // Rotate from native into celestial system
-    GVector cel = m_rot * native;
+    GVector cel = *m_rot * native;
 
     // Set sky direction
     GSkyDir srcDir;
     srcDir.celvector(cel);
 
     // Get sky intensity for this sky direction
-    double intensity = m_model.eval(GPhoton(srcDir, m_srcEng, m_srcTime));
+    double intensity = m_model->eval(GPhoton(srcDir, m_srcEng, m_srcTime));
 
     // Continue only if sky intensity is positive
     if (intensity > 0.0) {
@@ -1355,12 +1355,12 @@ double cta_irf_diffuse_kern_phi::eval(const double& phi)
 
         // Evaluate model times the effective area
         irf = intensity *
-              m_rsp.aeff(offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
+              m_rsp->aeff(offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
 
         // Optionally take energy dispersion into account
-        if (m_rsp.use_edisp() && irf > 0.0) {
-            irf *= m_rsp.edisp(m_obsEng, offset, azimuth,
-                               m_zenith, m_azimuth, m_srcLogEng);
+        if (m_rsp->use_edisp() && irf > 0.0) {
+            irf *= m_rsp->edisp(m_obsEng, offset, azimuth,
+                                m_zenith, m_azimuth, m_srcLogEng);
         }
 
         // Compile option: Check for NaN/Inf
@@ -1424,13 +1424,13 @@ double cta_nroi_diffuse_kern_theta::eval(const double& theta)
 
         // Setup phi integration kernel
         cta_nroi_diffuse_kern_phi integrand(m_rsp,
+                                            m_obs,
                                             m_model,
+                                            m_rot,
                                             m_srcEng,
                                             m_srcTime,
                                             m_obsEng,
                                             m_obsTime,
-                                            m_obs,
-                                            m_rot,
                                             theta,
                                             sin_theta);
 
@@ -1491,7 +1491,7 @@ double cta_nroi_diffuse_kern_phi::eval(const double& phi)
     GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
 
     // Rotate from native into celestial system
-    GVector cel = m_rot * native;
+    GVector cel = *m_rot * native;
 
     // Set sky direction
     GSkyDir srcDir;
@@ -1501,13 +1501,13 @@ double cta_nroi_diffuse_kern_phi::eval(const double& phi)
     GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
     // Get sky intensity for this photon
-    double intensity = m_model.eval(photon);
+    double intensity = m_model->eval(photon);
 
     // Continue only if sky intensity is positive
     if (intensity > 0.0) {
 
         // Compute Nroi for this sky direction
-        nroi = m_rsp.nirf(photon, m_obsEng, m_obsTime, m_obs) * intensity;
+        nroi = m_rsp->nirf(photon, m_obsEng, m_obsTime, *m_obs) * intensity;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
@@ -2181,8 +2181,8 @@ double cta_psf_diffuse_kern_delta::eval(const double& delta)
             double cos_delta = std::cos(delta);
 
             // Setup kernel for azimuthal integration of the diffuse model
-            cta_psf_diffuse_kern_phi integrand(m_model, m_srcEng, m_srcTime,
-                                               m_rot,
+            cta_psf_diffuse_kern_phi integrand(m_model, m_rot,
+                                               m_srcEng, m_srcTime,
                                                sin_delta, cos_delta);
 
             // Setup untegration
@@ -2233,7 +2233,7 @@ double cta_psf_diffuse_kern_phi::eval(const double& phi)
     GVector native(-cos_phi*m_sin_delta, sin_phi*m_sin_delta, m_cos_delta);
 
     // Rotate from native into celestial system
-    GVector cel = m_rot * native;
+    GVector cel = *m_rot * native;
 
     // Set sky direction
     GSkyDir srcDir;

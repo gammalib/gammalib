@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAResponse_helpers.hpp
- * @brief CTA response hepler classes definition
+ * @brief CTA response helper classes definition
  * @author Juergen Knoedlseder
  */
 
@@ -74,7 +74,7 @@ namespace gammalib {
  ***************************************************************************/
 class cta_npsf_kern_rad_azsym : public GFunction {
 public:
-    cta_npsf_kern_rad_azsym(const GCTAResponseIrf& rsp,
+    cta_npsf_kern_rad_azsym(const GCTAResponseIrf* rsp,
                             const double&          roi,
                             const double&          psf,
                             const double&          logE,
@@ -95,7 +95,7 @@ public:
                             m_azimuth(azimuth) { }
     double eval(const double& delta);
 protected:
-    const GCTAResponseIrf& m_rsp;     //!< CTA response function
+    const GCTAResponseIrf* m_rsp;     //!< CTA response function
     double                 m_roi;     //!< ROI radius in radians
     double                 m_cosroi;  //!< Cosine of ROI radius
     double                 m_psf;     //!< PSF-ROI centre distance in radians
@@ -121,26 +121,26 @@ protected:
  ***************************************************************************/
 class cta_nroi_kern : public GFunction {
 public:
-    cta_nroi_kern(const GModelSky&       model,
-                  const GCTAResponseIrf& rsp,
+    cta_nroi_kern(const GCTAResponseIrf* rsp,
+                  const GObservation*    obs,
+                  const GModelSky*       model,
                   const GTime&           srcTime,
                   const GEnergy&         obsEng,
-                  const GTime&           obsTime,
-                  const GObservation&    obs) :
-                  m_model(model),
+                  const GTime&           obsTime) :
                   m_rsp(rsp),
+                  m_obs(obs),
+                  m_model(model),
                   m_srcTime(srcTime),
                   m_obsEng(obsEng),
-                  m_obsTime(obsTime),
-                  m_obs(obs) {}
+                  m_obsTime(obsTime) {}
     double eval(const double& logEsrc);
 protected:
-    const GModelSky&       m_model;
-    const GCTAResponseIrf& m_rsp;     //!< CTA response function
-    const GObservation&    m_obs;
-    GTime                  m_srcTime;
-    GEnergy                m_obsEng;
-    GTime                  m_obsTime;
+    const GCTAResponseIrf* m_rsp;     //!< CTA response function
+    const GObservation*    m_obs;     //!< Observation
+    const GModelSky*       m_model;   //!< Sky model
+    GTime                  m_srcTime; //!< True arrival time
+    GEnergy                m_obsEng;  //!< Measured energy
+    GTime                  m_obsTime; //!< Measured arrival time
 };
 
 
@@ -174,8 +174,8 @@ protected:
  ***************************************************************************/
 class cta_irf_radial_kern_rho : public GFunction {
 public:
-    cta_irf_radial_kern_rho(const GCTAResponseIrf&     rsp,
-                            const GModelSpatialRadial& model,
+    cta_irf_radial_kern_rho(const GCTAResponseIrf*     rsp,
+                            const GModelSpatialRadial* model,
                             const double&              zenith,
                             const double&              azimuth,
                             const GEnergy&             srcEng,
@@ -207,8 +207,8 @@ public:
                             m_iter(iter) { }
     double eval(const double& rho);
 protected:
-    const GCTAResponseIrf&     m_rsp;           //!< CTA response
-    const GModelSpatialRadial& m_model;         //!< Radial spatial model
+    const GCTAResponseIrf*     m_rsp;           //!< CTA response
+    const GModelSpatialRadial* m_model;         //!< Radial spatial model
     double                     m_zenith;        //!< Zenith angle
     double                     m_azimuth;       //!< Azimuth angle
     GEnergy                    m_srcEng;        //!< True photon energy
@@ -248,7 +248,7 @@ protected:
  ***************************************************************************/
 class cta_irf_radial_kern_omega : public GFunction {
 public:
-    cta_irf_radial_kern_omega(const GCTAResponseIrf& rsp,
+    cta_irf_radial_kern_omega(const GCTAResponseIrf* rsp,
                               const double&          zenith,
                               const double&          azimuth,
                               const double&          srcLogEng,
@@ -276,7 +276,7 @@ public:
                               m_sin_ph(sin_ph) { }
     double eval(const double& omega);
 protected:
-    const GCTAResponseIrf& m_rsp;       //!< CTA response
+    const GCTAResponseIrf* m_rsp;       //!< CTA response
     double                 m_zenith;    //!< Zenith angle
     double                 m_azimuth;   //!< Azimuth angle
     double                 m_srcLogEng; //!< True photon energy
@@ -324,26 +324,26 @@ protected:
  ***************************************************************************/
 class cta_nroi_radial_kern_rho : public GFunction {
 public:
-    cta_nroi_radial_kern_rho(const GCTAResponseIrf&     rsp,
-                             const GModelSpatialRadial& model,
+    cta_nroi_radial_kern_rho(const GCTAResponseIrf*     rsp,
+                             const GCTAObservation*     obs,
+                             const GModelSpatialRadial* model,
+                             const GMatrix*             rot,
                              const GEnergy&             srcEng,
                              const GTime&               srcTime,
                              const GEnergy&             obsEng,
                              const GTime&               obsTime,
-                             const GCTAObservation&     obs,
-                             const GMatrix&             rot,
                              const double&              dist,
                              const double&              radius,
                              const double&              omega0,
                              const int&                 iter) :
                              m_rsp(rsp),
+                             m_obs(obs),
                              m_model(model),
+                             m_rot(rot),
                              m_srcEng(srcEng),
                              m_srcTime(srcTime),
                              m_obsEng(obsEng),
                              m_obsTime(obsTime),
-                             m_obs(obs),
-                             m_rot(rot),
                              m_dist(dist),
                              m_cos_dist(std::cos(dist)),
                              m_sin_dist(std::sin(dist)),
@@ -353,10 +353,10 @@ public:
                              m_iter(iter) { }
     double eval(const double& rho);
 protected:
-    const GCTAResponseIrf&     m_rsp;        //!< CTA response
-    const GModelSpatialRadial& m_model;      //!< Radial spatial model
-    const GCTAObservation&     m_obs;        //!< CTA observation
-    const GMatrix&             m_rot;        //!< Rotation matrix
+    const GCTAResponseIrf*     m_rsp;        //!< CTA response
+    const GCTAObservation*     m_obs;        //!< CTA observation
+    const GModelSpatialRadial* m_model;      //!< Radial spatial model
+    const GMatrix*             m_rot;        //!< Rotation matrix
     GEnergy                    m_srcEng;     //!< True photon energy
     GTime                      m_srcTime;    //!< True photon arrival time
     GEnergy                    m_obsEng;     //!< Observed photon energy
@@ -393,29 +393,29 @@ protected:
  ***************************************************************************/
 class cta_nroi_radial_kern_omega : public GFunction {
 public:
-    cta_nroi_radial_kern_omega(const GCTAResponseIrf& rsp,
+    cta_nroi_radial_kern_omega(const GCTAResponseIrf* rsp,
+                               const GCTAObservation* obs,
+                               const GMatrix*         rot,
                                const GEnergy&         srcEng,
                                const GTime&           srcTime,
                                const GEnergy&         obsEng,
                                const GTime&           obsTime,
-                               const GCTAObservation& obs,
-                               const GMatrix&         rot,
                                double                 sin_rho,
                                double                 cos_rho) :
                                m_rsp(rsp),
+                               m_obs(obs),
+                               m_rot(rot),
                                m_srcEng(srcEng),
                                m_srcTime(srcTime),
                                m_obsEng(obsEng),
                                m_obsTime(obsTime),
-                               m_obs(obs),
-                               m_rot(rot),
                                m_cos_rho(cos_rho),
                                m_sin_rho(sin_rho) { }
     double eval(const double& omega);
 protected:
-    const GCTAResponseIrf& m_rsp;     //!< CTA response
-    const GCTAObservation& m_obs;     //!< CTA observation
-    GMatrix                m_rot;     //!< Rotation matrix
+    const GCTAResponseIrf* m_rsp;     //!< CTA response
+    const GCTAObservation* m_obs;     //!< CTA observation
+    const GMatrix*         m_rot;     //!< Rotation matrix
     GEnergy                m_srcEng;  //!< True photon energy
     GTime                  m_srcTime; //!< True photon arrival time
     GEnergy                m_obsEng;  //!< Observed photon energy
@@ -456,8 +456,8 @@ protected:
  ***************************************************************************/
 class cta_irf_elliptical_kern_rho : public GFunction {
 public:
-    cta_irf_elliptical_kern_rho(const GCTAResponseIrf&         rsp,
-                                const GModelSpatialElliptical& model,
+    cta_irf_elliptical_kern_rho(const GCTAResponseIrf*         rsp,
+                                const GModelSpatialElliptical* model,
                                 const double&                  semimajor,
                                 const double&                  semiminor,
                                 const double&                  posangle,
@@ -497,8 +497,8 @@ public:
                                 m_iter(iter) { }
     double eval(const double& rho);
 public:
-    const GCTAResponseIrf&         m_rsp;           //!< CTA response
-    const GModelSpatialElliptical& m_model;         //!< Elliptical model
+    const GCTAResponseIrf*         m_rsp;           //!< CTA response
+    const GModelSpatialElliptical* m_model;         //!< Elliptical model
     double                         m_semimajor;     //!< Ellipse boundary semimajor axis
     double                         m_semiminor;     //!< Ellipse boundary semiminor axis
     double                         m_posangle;      //!< Ellipse boundary position angle
@@ -543,8 +543,8 @@ public:
  ***************************************************************************/
 class cta_irf_elliptical_kern_omega : public GFunction {
 public:
-    cta_irf_elliptical_kern_omega(const GCTAResponseIrf&         rsp,
-                                  const GModelSpatialElliptical& model,
+    cta_irf_elliptical_kern_omega(const GCTAResponseIrf*         rsp,
+                                  const GModelSpatialElliptical* model,
                                   const double&                  zenith,
                                   const double&                  azimuth,
                                   const GEnergy&                 srcEng,
@@ -575,8 +575,8 @@ public:
                                   m_sin_ph(sin_ph) { }
     double eval(const double& omega);
 public:
-    const GCTAResponseIrf&         m_rsp;          //!< CTA response
-    const GModelSpatialElliptical& m_model;        //!< Spatial model
+    const GCTAResponseIrf*         m_rsp;          //!< CTA response
+    const GModelSpatialElliptical* m_model;        //!< Spatial model
     double                         m_zenith;       //!< Zenith angle
     double                         m_azimuth;      //!< Azimuth angle
     GEnergy                        m_srcEng;       //!< True photon energy
@@ -626,8 +626,10 @@ public:
  ***************************************************************************/
 class cta_nroi_elliptical_kern_rho : public GFunction {
 public:
-    cta_nroi_elliptical_kern_rho(const GCTAResponseIrf&         rsp,
-                                 const GModelSpatialElliptical& model,
+    cta_nroi_elliptical_kern_rho(const GCTAResponseIrf*         rsp,
+                                 const GCTAObservation*         obs,
+                                 const GModelSpatialElliptical* model,
+                                 const GMatrix*                 rot,
                                  const double&                  semimajor,
                                  const double&                  semiminor,
                                  const double&                  posangle,
@@ -635,14 +637,14 @@ public:
                                  const GTime&                   srcTime,
                                  const GEnergy&                 obsEng,
                                  const GTime&                   obsTime,
-                                 const GCTAObservation&         obs,
-                                 const GMatrix&                 rot,
                                  const double&                  rho_roi,
                                  const double&                  posangle_roi,
                                  const double&                  radius_roi,
                                  const int&                     iter) :
                                  m_rsp(rsp),
+                                 m_obs(obs),
                                  m_model(model),
+                                 m_rot(rot),
                                  m_semimajor(semimajor),
                                  m_semiminor(semiminor),
                                  m_posangle(posangle),
@@ -650,8 +652,6 @@ public:
                                  m_srcTime(srcTime),
                                  m_obsEng(obsEng),
                                  m_obsTime(obsTime),
-                                 m_obs(obs),
-                                 m_rot(rot),
                                  m_rho_roi(rho_roi),
                                  m_cos_rho_roi(std::cos(rho_roi)),
                                  m_sin_rho_roi(std::sin(rho_roi)),
@@ -661,10 +661,10 @@ public:
                                  m_iter(iter) { }
     double eval(const double& rho);
 protected:
-    const GCTAResponseIrf&         m_rsp;            //!< CTA response
-    const GModelSpatialElliptical& m_model;          //!< Elliptical model
-    const GCTAObservation&         m_obs;            //!< CTA observation
-    const GMatrix&                 m_rot;            //!< Rotation matrix
+    const GCTAResponseIrf*         m_rsp;            //!< CTA response
+    const GCTAObservation*         m_obs;            //!< CTA observation
+    const GModelSpatialElliptical* m_model;          //!< Elliptical model
+    const GMatrix*                 m_rot;            //!< Rotation matrix
     double                         m_semimajor;      //!< Ellipse boundary semimajor axis
     double                         m_semiminor;      //!< Ellipse boundary semiminor axis
     double                         m_posangle;       //!< Ellipse boundary position angle
@@ -706,36 +706,36 @@ protected:
  ***************************************************************************/
 class cta_nroi_elliptical_kern_omega : public GFunction {
 public:
-    cta_nroi_elliptical_kern_omega(const GCTAResponseIrf&         rsp,
-                                   const GModelSpatialElliptical& model,
+    cta_nroi_elliptical_kern_omega(const GCTAResponseIrf*         rsp,
+                                   const GCTAObservation*         obs,
+                                   const GModelSpatialElliptical* model,
+                                   const GMatrix*                 rot,
                                    const GEnergy&                 srcEng,
                                    const GTime&                   srcTime,
                                    const GEnergy&                 obsEng,
                                    const GTime&                   obsTime,
-                                   const GCTAObservation&         obs,
-                                   const GMatrix&                 rot,
                                    const double&                  rho,
                                    const double&                  sin_rho,
                                    const double&                  cos_rho,
                                    const double&                  posangle_roi) :
                                    m_rsp(rsp),
+                                   m_obs(obs),
                                    m_model(model),
+                                   m_rot(rot),
                                    m_srcEng(srcEng),
                                    m_srcTime(srcTime),
                                    m_obsEng(obsEng),
                                    m_obsTime(obsTime),
-                                   m_obs(obs),
-                                   m_rot(rot),
                                    m_rho(rho),
                                    m_sin_rho(sin_rho),
                                    m_cos_rho(cos_rho),
                                    m_posangle_roi(posangle_roi) { }
     double eval(const double& omega);
 protected:
-    const GCTAResponseIrf&         m_rsp;          //!< CTA response
-    const GModelSpatialElliptical& m_model;        //!< Model
-    const GCTAObservation&         m_obs;          //!< Pointer to observation
-    const GMatrix&                 m_rot;          //!< Rotation matrix
+    const GCTAResponseIrf*         m_rsp;          //!< CTA response
+    const GCTAObservation*         m_obs;          //!< CTA observation
+    const GModelSpatialElliptical* m_model;        //!< Elliptical model
+    const GMatrix*                 m_rot;          //!< Rotation matrix
     GEnergy                        m_srcEng;       //!< True photon energy
     GTime                          m_srcTime;      //!< True photon arrival time
     GEnergy                        m_obsEng;       //!< Observed photon energy
@@ -779,8 +779,9 @@ protected:
  ***************************************************************************/
 class cta_irf_diffuse_kern_theta : public GFunction {
 public:
-    cta_irf_diffuse_kern_theta(const GCTAResponseIrf& rsp,
-                               const GModelSpatial&   model,
+    cta_irf_diffuse_kern_theta(const GCTAResponseIrf* rsp,
+                               const GModelSpatial*   model,
+                               const GMatrix*         rot,
                                const double&          theta,
                                const double&          phi,
                                const double&          zenith,
@@ -789,11 +790,11 @@ public:
                                const GTime&           srcTime,
                                const double&          srcLogEng,
                                const GEnergy&         obsEng,
-                               const GMatrix&         rot,
                                const double&          eta,
                                const int&             iter) :
                                m_rsp(rsp),
                                m_model(model),
+                               m_rot(rot),
                                m_theta(theta),
                                m_phi(phi),
                                m_zenith(zenith),
@@ -802,15 +803,14 @@ public:
                                m_srcTime(srcTime),
                                m_srcLogEng(srcLogEng),
                                m_obsEng(obsEng),
-                               m_rot(rot),
                                m_sin_eta(std::sin(eta)),
                                m_cos_eta(std::cos(eta)),
                                m_iter(iter) { }
     double eval(const double& theta);
 protected:
-    const GCTAResponseIrf& m_rsp;        //!< CTA response
-    const GModelSpatial&   m_model;      //!< Spatial model
-    const GMatrix&         m_rot;        //!< Rotation matrix
+    const GCTAResponseIrf* m_rsp;        //!< CTA response
+    const GModelSpatial*   m_model;      //!< Spatial model
+    const GMatrix*         m_rot;        //!< Rotation matrix
     double                 m_theta;      //!< Photon offset angle
     double                 m_phi;        //!< Photon azimuth angle
     double                 m_zenith;     //!< Pointing zenith angle
@@ -851,37 +851,37 @@ protected:
  ***************************************************************************/
 class cta_irf_diffuse_kern_phi : public GFunction {
 public:
-    cta_irf_diffuse_kern_phi(const GCTAResponseIrf& rsp,
-                             const GModelSpatial&   model,
+    cta_irf_diffuse_kern_phi(const GCTAResponseIrf* rsp,
+                             const GModelSpatial*   model,
+                             const GMatrix*         rot,
                              const double&          zenith,
                              const double&          azimuth,
                              const GEnergy&         srcEng,
                              const GTime&           srcTime,
                              const double&          srcLogEng,
                              const GEnergy&         obsEng,
-                             const GMatrix&         rot,
                              const double&          sin_theta,
                              const double&          cos_theta,
                              const double&          sin_ph,
                              const double&          cos_ph) :
                              m_rsp(rsp),
                              m_model(model),
+                             m_rot(rot),
                              m_zenith(zenith),
                              m_azimuth(azimuth),
                              m_srcEng(srcEng),
                              m_srcTime(srcTime),
                              m_srcLogEng(srcLogEng),
                              m_obsEng(obsEng),
-                             m_rot(rot),
                              m_sin_theta(sin_theta),
                              m_cos_theta(cos_theta),
                              m_sin_ph(sin_ph),
                              m_cos_ph(cos_ph) { }
     double eval(const double& phi);
 protected:
-    const GCTAResponseIrf& m_rsp;        //!< CTA response
-    const GModelSpatial&   m_model;      //!< Spatial model
-    const GMatrix&         m_rot;        //!< Rotation matrix
+    const GCTAResponseIrf* m_rsp;        //!< CTA response
+    const GModelSpatial*   m_model;      //!< Spatial model
+    const GMatrix*         m_rot;        //!< Rotation matrix
     double                 m_zenith;     //!< Zenith angle
     double                 m_azimuth;    //!< Azimuth angle
     GEnergy                m_srcEng;     //!< True photon energy
@@ -927,30 +927,30 @@ protected:
  ***************************************************************************/
 class cta_nroi_diffuse_kern_theta : public GFunction {
 public:
-    cta_nroi_diffuse_kern_theta(const GCTAResponseIrf& rsp,
-                                const GModelSpatial&   model,
+    cta_nroi_diffuse_kern_theta(const GCTAResponseIrf* rsp,
+                                const GCTAObservation* obs,
+                                const GModelSpatial*   model,
+                                const GMatrix*         rot,
                                 const GEnergy&         srcEng,
                                 const GTime&           srcTime,
                                 const GEnergy&         obsEng,
                                 const GTime&           obsTime,
-                                const GCTAObservation& obs,
-                                const GMatrix&         rot,
                                 const int&             iter) :
                                 m_rsp(rsp),
+                                m_obs(obs),
                                 m_model(model),
+                                m_rot(rot),
                                 m_srcEng(srcEng),
                                 m_srcTime(srcTime),
                                 m_obsEng(obsEng),
                                 m_obsTime(obsTime),
-                                m_obs(obs),
-                                m_rot(rot),
                                 m_iter(iter) { }
     double eval(const double& theta);
 protected:
-    const GCTAResponseIrf& m_rsp;        //!< CTA response
-    const GModelSpatial&   m_model;      //!< Spatial model
-    const GCTAObservation& m_obs;        //!< CTA observation
-    const GMatrix&         m_rot;        //!< Rotation matrix
+    const GCTAResponseIrf* m_rsp;        //!< CTA response
+    const GCTAObservation* m_obs;        //!< CTA observation
+    const GModelSpatial*   m_model;      //!< Spatial model
+    const GMatrix*         m_rot;        //!< Rotation matrix
     GEnergy                m_srcEng;     //!< True photon energy
     GTime                  m_srcTime;    //!< True photon arrival time
     GEnergy                m_obsEng;     //!< Observed photon energy
@@ -981,33 +981,33 @@ protected:
  ***************************************************************************/
 class cta_nroi_diffuse_kern_phi : public GFunction {
 public:
-    cta_nroi_diffuse_kern_phi(const GCTAResponseIrf& rsp,
-                              const GModelSpatial&   model,
+    cta_nroi_diffuse_kern_phi(const GCTAResponseIrf* rsp,
+                              const GCTAObservation* obs,
+                              const GModelSpatial*   model,
+                              const GMatrix*         rot,
                               const GEnergy&         srcEng,
                               const GTime&           srcTime,
                               const GEnergy&         obsEng,
                               const GTime&           obsTime,
-                              const GCTAObservation& obs,
-                              const GMatrix&         rot,
                               const double&          theta,
                               const double&          sin_theta) :
                               m_rsp(rsp),
+                              m_obs(obs),
                               m_model(model),
+                              m_rot(rot),
                               m_srcEng(srcEng),
                               m_srcTime(srcTime),
                               m_obsEng(obsEng),
                               m_obsTime(obsTime),
-                              m_obs(obs),
-                              m_rot(rot),
                               m_theta(theta),
                               m_cos_theta(std::cos(theta)),
                               m_sin_theta(sin_theta) { }
     double eval(const double& phi);
 protected:
-    const GCTAResponseIrf& m_rsp;        //!< CTA response
-    const GModelSpatial&   m_model;      //!< Spatial model
-    const GCTAObservation& m_obs;        //!< CTA observation
-    const GMatrix&         m_rot;        //!< Rotation matrix
+    const GCTAResponseIrf* m_rsp;        //!< CTA response
+    const GCTAObservation* m_obs;        //!< CTA observation
+    const GModelSpatial*   m_model;      //!< Spatial model
+    const GMatrix*         m_rot;        //!< Rotation matrix
     GEnergy                m_srcEng;     //!< True photon energy
     GTime                  m_srcTime;    //!< True photon arrival time
     GEnergy                m_obsEng;     //!< Observed photon energy
@@ -1314,7 +1314,7 @@ public:
     double eval(const double& omega);
 public:
     const GCTAResponseCube*        m_rsp;          //!< CTA response
-    const GModelSpatialElliptical* m_model;        //!< Spatial model
+    const GModelSpatialElliptical* m_model;        //!< Elliptical model
     GSkyDir                        m_srcDir;       //!< True photon sky direction
     GEnergy                        m_srcEng;       //!< True photon energy
     GTime                          m_srcTime;      //!< True photon time
@@ -1334,24 +1334,24 @@ class cta_psf_diffuse_kern_delta : public GFunction {
 public:
     cta_psf_diffuse_kern_delta(const GCTAResponseCube* rsp,
                                const GModelSpatial*    model,
+                               const GMatrix*          rot,
                                const GSkyDir&          srcDir,
                                const GEnergy&          srcEng,
                                const GTime&            srcTime,
-                               const GMatrix&          rot,
                                const int&              iter) :
                                m_rsp(rsp),
                                m_model(model),
+                               m_rot(rot),
                                m_srcDir(srcDir),
                                m_srcEng(srcEng),
                                m_srcTime(srcTime),
-                               m_rot(rot),
                                m_iter (iter),
                                m_psf_max(rsp->psf()(srcDir, 0.0, srcEng)) { }
     double eval(const double& delta);
 protected:
     const GCTAResponseCube* m_rsp;     //!< Response cube
     const GModelSpatial*    m_model;   //!< Spatial model
-    const GMatrix&          m_rot;     //!< Rotation matrix
+    const GMatrix*          m_rot;     //!< Rotation matrix
     GSkyDir                 m_srcDir;  //!< True photon arrival direction
     GEnergy                 m_srcEng;  //!< True photon energy
     GTime                   m_srcTime; //!< True photon arrival time
@@ -1368,21 +1368,21 @@ protected:
 class cta_psf_diffuse_kern_phi : public GFunction {
 public:
     cta_psf_diffuse_kern_phi(const GModelSpatial* model,
+                             const GMatrix*       rot,
                              const GEnergy&       srcEng,
                              const GTime&         srcTime,
-                             const GMatrix&       rot,
                              const double&        sin_delta,
                              const double&        cos_delta) :
                              m_model(model),
+                             m_rot(rot),
                              m_srcEng(srcEng),
                              m_srcTime(srcTime),
-                             m_rot(rot),
                              m_sin_delta(sin_delta),
                              m_cos_delta(cos_delta) { }
     double eval(const double& phi);
 protected:
     const GModelSpatial* m_model;     //!< Spatial model
-    const GMatrix&       m_rot;       //!< Rotation matrix
+    const GMatrix*       m_rot;       //!< Rotation matrix
     GEnergy              m_srcEng;    //!< True photon energy
     GTime                m_srcTime;   //!< True photon arrival time
     double               m_sin_delta; //!< sin(delta)

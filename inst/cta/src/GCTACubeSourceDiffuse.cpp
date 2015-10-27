@@ -382,8 +382,9 @@ double GCTACubeSourceDiffuse::psf(const GCTAResponseCube* rsp,
     // Setup integration kernel. We take here the observed photon arrival
     // direction as the true photon arrival direction because the PSF does
     // not vary significantly over a small region.
-    cta_psf_diffuse_kern_delta integrand(rsp, model, obsDir, srcEng, srcTime,
-                                         rot, iter_phi);
+    cta_psf_diffuse_kern_delta integrand(rsp, model, &rot,
+                                         obsDir, srcEng, srcTime,
+                                         iter_phi);
 
     // Setup integration
     GIntegral integral(&integrand);

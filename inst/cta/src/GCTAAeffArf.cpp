@@ -377,7 +377,7 @@ void GCTAAeffArf::remove_thetacut(const GCTAResponseIrf& rsp)
         for (int i = 0; i < m_aeff.size(); ++i) {
     
             // Setup integration kernel for on-axis PSF
-            cta_npsf_kern_rad_azsym integrand(rsp,
+            cta_npsf_kern_rad_azsym integrand(&rsp,
                                               rmax,
                                               0.0,
                                               m_logE[i],

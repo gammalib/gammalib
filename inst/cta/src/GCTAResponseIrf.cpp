@@ -498,7 +498,7 @@ double GCTAResponseIrf::nroi(const GModelSky&    model,
             if (emax > emin) {
 
                 // Setup integration function
-                cta_nroi_kern integrand(model, *this, srcTime, obsEng, obsTime, obs);
+                cta_nroi_kern integrand(this, &obs, &model, srcTime, obsEng, obsTime);
                 GIntegral integral(&integrand);
 
                 // Set fixed number of iterations
@@ -1852,7 +1852,7 @@ double GCTAResponseIrf::npsf(const GSkyDir&      srcDir,
         if (rmax > rmin) {
 
             // Setup integration kernel
-            cta_npsf_kern_rad_azsym integrand(*this,
+            cta_npsf_kern_rad_azsym integrand(this,
                                               roi_radius,
                                               roi_psf_distance,
                                               srcLogEng,
@@ -2208,8 +2208,8 @@ double GCTAResponseIrf::irf_radial(const GEvent&       event,
     if (rho_max > rho_min) {
 
         // Setup integration kernel
-        cta_irf_radial_kern_rho integrand(*this,
-                                          *model,
+        cta_irf_radial_kern_rho integrand(this,
+                                          model,
                                           zenith,
                                           azimuth,
                                           srcEng,
@@ -2423,8 +2423,8 @@ double GCTAResponseIrf::irf_elliptical(const GEvent&       event,
     if (rho_max > rho_min) {
 
         // Setup integration kernel
-        cta_irf_elliptical_kern_rho integrand(*this,
-                                              *model,
+        cta_irf_elliptical_kern_rho integrand(this,
+                                              model,
                                               semimajor,
                                               semiminor,
                                               posangle,
@@ -2617,8 +2617,9 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
             GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
-            cta_irf_diffuse_kern_theta integrand(*this,
-                                                 *model,
+            cta_irf_diffuse_kern_theta integrand(this,
+                                                 model,
+                                                 &rot,
                                                  theta,
                                                  phi,
                                                  zenith,
@@ -2627,7 +2628,6 @@ double GCTAResponseIrf::irf_diffuse(const GEvent&       event,
                                                  srcTime,
                                                  srcLogEng,
                                                  obsEng,
-                                                 rot,
                                                  eta,
                                                  iter_phi);
 
@@ -2828,14 +2828,14 @@ double GCTAResponseIrf::nroi_radial(const GModelSky&    model,
         double omega0 = centre.posang(roi.centre().dir());
 
         // Setup integration kernel
-        cta_nroi_radial_kern_rho integrand(*this,
-                                           *spatial,
+        cta_nroi_radial_kern_rho integrand(this,
+                                           &cta,
+                                           spatial,
+                                           &rot,
                                            srcEng,
                                            srcTime,
                                            obsEng,
                                            obsTime,
-                                           cta,
-                                           rot,
                                            roi_model_distance,
                                            roi_psf_radius,
                                            omega0,
@@ -3033,8 +3033,10 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
         double posangle_roi = centre.posang(roi.centre().dir());
 
         // Setup integration kernel
-        cta_nroi_elliptical_kern_rho integrand(*this,
-                                               *spatial,
+        cta_nroi_elliptical_kern_rho integrand(this,
+                                               &cta,
+                                               spatial,
+                                               &rot,
                                                semimajor,
                                                semiminor,
                                                posangle,
@@ -3042,8 +3044,6 @@ double GCTAResponseIrf::nroi_elliptical(const GModelSky&    model,
                                                srcTime,
                                                obsEng,
                                                obsTime,
-                                               cta,
-                                               rot,
                                                rho_roi,
                                                posangle_roi,
                                                radius_roi,
@@ -3213,14 +3213,14 @@ double GCTAResponseIrf::nroi_diffuse(const GModelSky&    model,
             GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
-            cta_nroi_diffuse_kern_theta integrand(*this,
-                                                  *spatial,
+            cta_nroi_diffuse_kern_theta integrand(this,
+                                                  &cta,
+                                                  spatial,
+                                                  &rot,
                                                   srcEng,
                                                   srcTime,
                                                   obsEng,
                                                   obsTime,
-                                                  cta,
-                                                  rot,
                                                   iter_phi);
 
             // Integrate over model's zenith angle
