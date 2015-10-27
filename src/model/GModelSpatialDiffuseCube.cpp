@@ -286,31 +286,16 @@ GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
  ***************************************************************************/
 double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
 {
-    // Initialise value
-    double value = 0.0;
+    // Get log-log interpolated cube intensity
+    double intensity = cube_intensity(photon);
 
-    // Fetch cube
-    fetch_cube();
+    // Set the intensity times the scaling factor as model value
+    double value = intensity * m_value.value();
 
-    // Continue only if there is energy information for the map cube
-    if (m_logE.size() > 0) {
-
-        // Compute diffuse model value by interpolation in log10(energy)
-        m_logE.set_value(photon.energy().log10MeV());
-        double intensity = m_logE.wgt_left() *
-                           m_cube(photon.dir(), m_logE.inx_left()) +
-                           m_logE.wgt_right() *
-                           m_cube(photon.dir(), m_logE.inx_right());
-
-        // Set the intensity times the scaling factor as model value
-        value = intensity * m_value.value();
-
-        // Make sure that value is not negative
-        if (value < 0.0) {
-            value = 0.0;
-        }
-
-    } // endif: energy information was available
+    // Make sure that value is not negative
+    if (value < 0.0) {
+        value = 0.0;
+    }
 
     // Return value
     return value;
@@ -328,30 +313,14 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
  ***************************************************************************/
 double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 {
-    // Initialise intensity
-    double intensity = 0.0;
-
-    // Fetch cube
-    fetch_cube();
-
-    // Continue only if there is energy information for the map cube
-    if (m_logE.size() > 0) {
-
-        // Compute diffuse model value by interpolation in log10(energy)
-        m_logE.set_value(photon.energy().log10MeV());
-        intensity = m_logE.wgt_left() *
-                    m_cube(photon.dir(), m_logE.inx_left()) +
-                    m_logE.wgt_right() *
-                    m_cube(photon.dir(), m_logE.inx_right());
-
-
-    } // endif: energy information was available
+    // Get log-log interpolated cube intensity
+    double intensity = cube_intensity(photon);
 
     // Compute the model value
     double value = intensity * m_value.value();
 
-	// Compute partial derivatives of the parameter value
-	double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
+    // Compute partial derivatives of the parameter value
+    double g_value = (m_value.is_free()) ? intensity * m_value.scale() : 0.0;
 
     // Make sure that value is not negative
     if (value < 0.0) {
@@ -359,8 +328,8 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
         g_value = 0.0;
     }
 
-	// Set gradient to 0 (circumvent const correctness)
-	const_cast<GModelSpatialDiffuseCube*>(this)->m_value.factor_gradient(g_value);
+    // Set gradient to 0 (circumvent const correctness)
+    const_cast<GModelSpatialDiffuseCube*>(this)->m_value.factor_gradient(g_value);
 
     // Return value
     return value;
@@ -417,28 +386,15 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
         }
 
         // Determine the map that corresponds best to the specified energy.
-        // This is not 100% clean, as ideally some map interpolation should
-        // be done to the exact energy specified. However, as long as the map
-        // does not change drastically with energy, taking the closest map
-        // seems to be fine.
-        int i = m_ebounds.index(energy);
-        if (i < 0) {
-            if (energy <= m_ebounds.emin()) {
-                i = 0;
-            }
-            else if (energy >= m_ebounds.emax()) {
-                i = m_ebounds.size()-1;
-            }
-            else {
-                std::string msg = "The specified energy "+energy.print()+" does"
-                                  " not fall in any of the energy boundaries of"
-                                  " the map cube.\n"
-                                  "Please make sure that the map cube energies"
-                                  " are properly defined.";
-                throw GException::invalid_value(G_MC, msg);
-            }
+        // We first get the maps that are bounding the specified energy and then
+        // select randomly a map according to the log-interpolation
+        // weights
+        m_logE.set_value(energy.log10MeV());
+        int i = m_logE.inx_left();
+        if (ran.uniform() > m_logE.wgt_left()) {
+            i = m_logE.inx_right();
         }
-        
+
         // Get uniform random number
         double u = ran.uniform();
 
@@ -461,7 +417,7 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
         // Convert sky map index to sky map pixel
         GSkyPixel pixel = m_cube.inx2pix(index);
 
-    	// If we have a 2D pixel then randomize pixel values and convert them
+        // If we have a 2D pixel then randomize pixel values and convert them
         // into a sky direction
         if (pixel.is_2D()) {
 
@@ -476,7 +432,7 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                 dir = m_cube.pix2dir(test);
 
                 // Get map value at that sky direction
-                double value = m_cube(dir);
+                double value = m_cube(dir,i);
 
                 // Get uniform random number up to the maximum
                 double uniform = ran.uniform() * m_mc_max[low];
@@ -524,7 +480,7 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                 }
 
                 // Get map value at that sky direction
-                double value = m_cube(randomized_dir);
+                double value = m_cube(randomized_dir,i);
 
                 // Get uniform random number up to the maximum
                 double uniform = ran.uniform() * m_mc_max[low];
@@ -533,14 +489,14 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                 if (uniform <= value) {
                     break;
                 }
-                
+
             } // endwhile
 
             // Store randomize sky position
             dir = randomized_dir;
-            
+
         } // endelse: we had a HealPix map
-    
+
     } // endif: there were pixels in sky map
 
     // Return sky direction
@@ -838,7 +794,8 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
 
         // Reserve space for all pixels in cache
         m_mc_cache.reserve((npix+1)*nmaps);
-        m_mc_max.reserve(npix*nmaps);
+        m_mc_max.reserve((npix+1)*nmaps);
+        m_mc_spectrum.reserve(nmaps);
 
         // Loop over all maps
         for (int i = 0; i < nmaps; ++i) {
@@ -852,8 +809,9 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             // Initialise cache with cumulative pixel fluxes and compute
             // total flux in skymap for normalization. Negative pixels are
             // excluded from the cumulative map.
-            double total_flux = 0.0;
-        	for (int k = 0; k < npix; ++k) {
+            double sum     = 0.0;
+            double sum_map = 0.0;
+            for (int k = 0; k < npix; ++k) {
 
                 // Derive effective pixel radius from half opening angle
                 // that corresponds to the pixel's solid angle. For security,
@@ -869,25 +827,26 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // pixels outside the simulation cone taken into account as
                 // long as the mc() method has an explicit test of whether a
                 // simulated event is contained in the simulation cone.
-                double distance = centre.dist_deg(m_cube.pix2dir(k));
-                if (distance <= radius+pixel_radius) {
-                    double flux = m_cube.flux(k,i);
-                    if (flux > 0.0) {
-                        total_flux += flux;
+                double flux = m_cube.flux(k,i);
+                if (flux > 0.0) {
+                    double distance = centre.dist_deg(m_cube.pix2dir(k));
+                    if (distance <= radius+pixel_radius) {
+                        sum += flux;
                     }
+                    sum_map += flux; // sum up total flux in map
                 }
 
                 // Push back flux
-        		m_mc_cache.push_back(total_flux); // units: ph/cm2/s/MeV
-        	}
+                m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
+            }
 
             // Normalize cumulative pixel fluxes so that the values in the
             // cache run from 0 to 1
-            if (total_flux > 0.0) {
-        		for (int k = 0; k < npix; ++k) {
-        			m_mc_cache[k+offset] /= total_flux;
-        		}
-        	}
+            if (sum > 0.0) {
+                for (int k = 0; k < npix; ++k) {
+                    m_mc_cache[k+offset] /= sum;
+                }
+            }
 
             // Make sure that last pixel in the cache is >1
             m_mc_cache[npix+offset] = 1.0001;
@@ -896,10 +855,10 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             if (m_logE.size() == nmaps) {
                 GEnergy energy;
                 energy.log10MeV(m_logE[i]);
-                
+
                 // Only append node if flux > 0
-                if (total_flux > 0.0) {
-                	m_mc_spectrum.append(energy, total_flux);
+                if (sum > 0.0) {
+                    m_mc_spectrum.append(energy, sum);
                 }
 
             }
@@ -930,16 +889,16 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                         }
                     }
 
-                // Store maximum
-                m_mc_max.push_back(max);
-            
+                    // Store maximum
+                    m_mc_max[k+offset] = max;
+
                 } // endfor: looped over pixels
 
             } // endif: Healpix projection
 
             // ... no, then we have a WCS map
             else {
-        
+
                 // Compute maximum value that may occur from bilinear
                 // interpolation within this pixel and push this value on the
                 // stack. We do this by checking the map values at the corners
@@ -949,7 +908,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                     double    max   = m_cube(pixel,i);
                     for (int ix = -1; ix < 2; ++ix) {
                         for (int iy = -1; iy < 2; ++iy) {
-                            if (ix != 0 || iy != 0) {
+                            if (ix != 0 && iy != 0) {
                                 GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
                                 if (m_cube.contains(edge)) {
                                     GSkyDir dir  = m_cube.pix2dir(edge);
@@ -961,10 +920,13 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                             }
                         }
                     }
-                    m_mc_max.push_back(max);
+                    m_mc_max[k+offset] = max;
                 }
 
             } // endelse: computed maximum pixel value
+
+            // Make sure that last pixel in the maximum cache has a well defined value
+            m_mc_max[npix+offset] = 0.0;
 
         } // endfor: looped over all maps
 
@@ -974,7 +936,8 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
         std::cout << std::endl;
         for (int i = 0; i < m_mc_cache.size(); ++i) {
             std::cout << "i=" << i;
-            std::cout << " c=" << m_mc_cache[i] << std::endl;
+            std::cout << " cache=" << m_mc_cache[i];
+            std::cout << " max=" << m_mc_max[i] << std::endl;
         }
         #endif
 
@@ -1032,7 +995,7 @@ void GModelSpatialDiffuseCube::save(const std::string& filename,
 
     // Write event cube
     write(fits);
-    
+
     // Save FITS file
     fits.saveto(filename, clobber);
 
@@ -1245,7 +1208,7 @@ void GModelSpatialDiffuseCube::fetch_cube(void) const
         {
             const_cast<GModelSpatialDiffuseCube*>(this)->load_cube(m_filename);
         } // end of pragma
-        
+
     } // endif: file not
 
     // Return
@@ -1277,7 +1240,7 @@ void GModelSpatialDiffuseCube::load_cube(const std::string& filename)
 
     // Get expanded filename
     std::string fname = gammalib::expand_env(filename);
-    
+
     // Load cube
     m_cube.load(fname);
 
@@ -1375,10 +1338,54 @@ void GModelSpatialDiffuseCube::update_mc_cache(void)
     // Set centre and radius to all sky
     GSkyDir centre;
     double  radius = 360.0;
-    
+
     // Compute cache
     set_mc_cone(centre, radius);
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute cube intensity by log-log interpolation
+ *
+ * @param[in] photon Incident photon.
+ * @return Cube intensity value.
+ ***************************************************************************/
+double GModelSpatialDiffuseCube::cube_intensity(const GPhoton& photon) const
+{
+    // Fetch cube
+    fetch_cube();
+
+    // Initialise intensity value
+    double intensity = 0.0;
+
+    // Continue only if there is energy information for the map cube
+    if (m_logE.size() > 0) {
+
+        // Set energy for interpolation in log-energy
+        m_logE.set_value(photon.energy().log10MeV());
+
+        // Compute map cube intensity for the left and right map
+        double left_intensity  = m_cube(photon.dir(), m_logE.inx_left());
+        double right_intensity = m_cube(photon.dir(), m_logE.inx_right());
+
+        // Perform log-log interpolation
+        if (left_intensity > 0.0 && right_intensity > 0.0) {
+            double log_intensity = m_logE.wgt_left()  * std::log10(left_intensity) +
+                                   m_logE.wgt_right() * std::log10(right_intensity);
+            intensity = std::pow(10.0, log_intensity);
+        }
+        else if (left_intensity > 0.0) {
+            intensity = left_intensity;
+        }
+        else if (right_intensity > 0.0) {
+            intensity = right_intensity;
+        }
+
+    } // endif: energy information was available
+
+    // Return intensity
+    return intensity;
 }

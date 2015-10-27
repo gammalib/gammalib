@@ -353,12 +353,12 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
     if (npix > 0) {
 
         // Get pixel index from CDF
-    	int index = ran.cdf(m_mc_cache);
+        int index = ran.cdf(m_mc_cache);
 
-    	// Convert sky map index to sky map pixel
-    	GSkyPixel pixel = m_map.inx2pix(index);
+        // Convert sky map index to sky map pixel
+        GSkyPixel pixel = m_map.inx2pix(index);
 
-    	// If we have a 2D pixel then randomize pixel values and convert them
+        // If we have a 2D pixel then randomize pixel values and convert them
         // into a sky direction
         if (pixel.is_2D()) {
 
@@ -429,12 +429,12 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
                 if (uniform <= value) {
                     break;
                 }
-                
+
             } // endwhile
 
             // Store randomize sky position
             dir = randomized_dir;
-            
+
         } // endelse: we had a HealPix map
 
     } // endif: there were pixels in sky map
@@ -701,7 +701,7 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
                     sum += flux;
                 }
                 sum_map += flux; // sum up total flux in map
-        	}
+            }
 
             // Push back flux
             m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
@@ -754,14 +754,14 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
 
                 // Store maximum
                 m_mc_max.push_back(max);
-            
+
             } // endfor: looped over pixels
 
         } // endif: Healpix projection
 
         // ... no, then we have a WCS map
         else {
-        
+
             // Compute maximum value that may occur from bilinear
             // interpolation within this pixel and push this value on the
             // stack. We do this by checking the map values at the corners
@@ -1013,7 +1013,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         // ... otherwise compute map centre and radius
         else {
-        
+
             // Get map centre
             GSkyPixel centre(m_map.nx()/2.0, m_map.ny()/2.0);
             m_centre = m_map.pix2dir(centre);

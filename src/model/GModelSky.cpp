@@ -824,7 +824,7 @@ GPhotons GModelSky::mc(const double& area,
                     double  value     = m_spectral->eval(energy, tmin);
                     nodes->intensity(i, value*intensity);
                 }
-                
+
                 // Signal that node function needs to be de-allocated later
                 free_spectral = true;
 

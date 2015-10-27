@@ -111,13 +111,14 @@ public:
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GModelSpatialDiffuseCube& model);
-    void free_members(void);
-    void fetch_cube(void) const;
-    void load_cube(const std::string& filename);
-    void set_energy_boundaries(void);
-    void update_mc_cache(void);
+    void   init_members(void);
+    void   copy_members(const GModelSpatialDiffuseCube& model);
+    void   free_members(void);
+    void   fetch_cube(void) const;
+    void   load_cube(const std::string& filename);
+    void   set_energy_boundaries(void);
+    void   update_mc_cache(void);
+    double cube_intensity(const GPhoton& photon) const;
 
     // Protected members
     GModelPar    m_value;       //!< Value
