@@ -203,7 +203,7 @@ double GResponse::convolve(const GModelSky&    model,
                 if (emax > emin) {
 
                     // Setup integration function
-                    edisp_kern integrand(this, model, event, srcTime, obs, grad);
+                    edisp_kern integrand(this, &obs, &model, &event, srcTime, grad);
                     GIntegral  integral(&integrand);
 
                     // Set number of iterations
@@ -425,7 +425,7 @@ double GResponse::edisp_kern::eval(const double& x)
     eng.MeV(expx);
 
     // Get function value
-    double value = m_parent->eval_prob(m_model, m_event, eng, m_srcTime, m_obs, m_grad);
+    double value = m_parent->eval_prob(*m_model, *m_event, eng, m_srcTime, *m_obs, m_grad);
 
     // Save value if needed
     #if defined(G_NAN_CHECK)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -138,19 +138,19 @@ protected:
     class model_func : public GFunction {
     public:
         model_func(const GObservation* parent,
-                   const GModel&       model,
+                   const GModel*       model,
                    GModelPar*          par,
-                   const GEvent&       event) :
+                   const GEvent*       event) :
                    m_parent(parent),
                    m_model(model),
                    m_par(par),
                    m_event(event) { }
         double eval(const double& x);
     protected:
-        const GObservation* m_parent; //!< Pointer to parent
-        const GModel&       m_model;  //!< Reference to model
-        GModelPar*          m_par;    //!< Pointer to parameter
-        const GEvent&       m_event;  //!< Reference to event
+        const GObservation* m_parent; //!< Observation
+        const GModel*       m_model;  //!< Model
+        GModelPar*          m_par;    //!< Model parameter
+        const GEvent*       m_event;  //!< Event
     };
 
     // Npred methods
@@ -165,8 +165,8 @@ protected:
                    m_model(model) { }
         double eval(const double& x);
     protected:
-        const GObservation* m_parent; //!< Pointer to parent
-        const GModel*       m_model;  //!< Pointer to source model
+        const GObservation* m_parent; //!< Observation
+        const GModel*       m_model;  //!< Model
     };
 
     class npred_spec_kern : public GFunction {
@@ -179,25 +179,25 @@ protected:
                         m_time(obsTime) { }
         double eval(const double& x);
     protected:
-        const GObservation* m_parent; //!< Pointer to parent
-        const GModel*       m_model;  //!< Pointer to source model
-        const GTime*        m_time;   //!< Pointer to time
+        const GObservation* m_parent; //!< Observation
+        const GModel*       m_model;  //!< Model
+        const GTime*        m_time;   //!< Time
     };
 
     // Npred gradient kernel classes
     class npred_func : public GFunction {
     public:
         npred_func(const GObservation* parent,
-                   const GModel&       model,
+                   const GModel*       model,
                    GModelPar*          par) :
                    m_parent(parent),
                    m_model(model),
                    m_par(par) { }
         double eval(const double& x);
     protected:
-        const GObservation* m_parent; //!< Pointer to parent
-        const GModel&       m_model;  //!< Reference to model
-        GModelPar*          m_par;    //!< Pointer to parameter
+        const GObservation* m_parent; //!< Observation
+        const GModel*       m_model;  //!< Model
+        GModelPar*          m_par;    //!< Model parameter
     };
 
     // Protected data area

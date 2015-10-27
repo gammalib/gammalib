@@ -580,7 +580,7 @@ double GObservation::model_grad(const GModel&    model,
             //ptr->remove_range(); // Not needed in principle
 
             // Setup derivative function
-            GObservation::model_func function(this, model, ptr, event);
+            GObservation::model_func function(this, &model, ptr, &event);
             GDerivative              derivative(&function);
 
             // If we are too close to the minimum boundary use a right sided
@@ -700,7 +700,7 @@ double GObservation::npred_grad(const GModel& model, const GModelPar& par) const
             //ptr->remove_range(); // Not needed in principle
 
             // Setup derivative function
-            GObservation::npred_func function(this, model, ptr);
+            GObservation::npred_func function(this, &model, ptr);
             GDerivative              derivative(&function);
 
             // If we are too close to the minimum boundary use a right sided
@@ -1323,7 +1323,7 @@ double GObservation::model_func::eval(const double& x)
     m_par->factor_value(x);
 
     // Compute model value
-    double value = m_model.eval(m_event, *m_parent);
+    double value = m_model->eval(*m_event, *m_parent);
 
     // Return value
     return value;
@@ -1347,7 +1347,7 @@ double GObservation::npred_func::eval(const double& x)
     m_par->factor_value(x);
 
     // Compute Npred value
-    double npred = m_parent->npred(m_model);
+    double npred = m_parent->npred(*m_model);
 
     // Return value
     return npred;

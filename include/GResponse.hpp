@@ -116,25 +116,25 @@ protected:
     class edisp_kern : public GFunction {
     public:
         edisp_kern(const GResponse*    parent,
-                   const GModelSky&    model,
-                   const GEvent&       event,
+                   const GObservation* obs,
+                   const GModelSky*    model,
+                   const GEvent*       event,
                    const GTime&        srcTime,
-                   const GObservation& obs,
                    const bool&         grad) :
                    m_parent(parent),
+                   m_obs(obs),
                    m_model(model),
                    m_event(event),
                    m_srcTime(srcTime),
-                   m_obs(obs),
                    m_grad(grad) { }
         double eval(const double& x);
     protected:
-        const GResponse*    m_parent;  //!< Pointer to parent class
-        const GModelSky&    m_model;   //!< Reference to model
-        const GEvent&       m_event;   //!< Reference to event
-        const GTime&        m_srcTime; //!< Reference to true time
-        const GObservation& m_obs;     //!< Reference to observation
-        const bool&         m_grad;    //!< Reference to gradient flag
+        const GResponse*    m_parent;  //!< Response
+        const GObservation* m_obs;     //!< Observation
+        const GModelSky*    m_model;   //!< Sky model
+        const GEvent*       m_event;   //!< Event
+        GTime               m_srcTime; //!< True arrival time
+        bool                m_grad;    //!< Gradient flag
     };
 };
 
