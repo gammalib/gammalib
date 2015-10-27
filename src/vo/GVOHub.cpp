@@ -54,7 +54,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_CONSOLE_DUMP
-#define G_SHOW_MESSAGE
+//#define G_SHOW_MESSAGE
 
 
 /*==========================================================================
