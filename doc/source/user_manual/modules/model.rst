@@ -44,7 +44,7 @@ The ``GObservation::npred`` method performs an integration over observed
 time, observed energy and observed arrival direction. 
 The integrate over observed time is for the moment a simple multiplication
 with ontime.
-The intergal over observed energy is performed by the 
+The integral over observed energy is performed by the 
 ``GObservation::npred_spec`` method that calls the
 :doxy:`GModel::eval_gradients` method.
 For :doxy:`GModelSky` models this method calls the :doxy:`GResponse::nroi`
@@ -59,11 +59,203 @@ method that needs to be implement for each instruments.
    *Call tree for model evaluation*
 
 
-Spectral models
-~~~~~~~~~~~~~~~
+Sky models
+~~~~~~~~~~
+
+Sky models describe the spatial, spectral and temporal properties of a 
+gamma-ray source using the following factorization:
+
+.. math::
+   M(\alpha,\delta,E,t) = M_{\rm spatial}(\alpha,\delta | E,t) \times
+                          M_{\rm spectral}(E | t) \times 
+                          M_{\rm temporal}(t)
+
+The spatial model component :math:`M_{\rm spatial}(\alpha,\delta|E,t)`
+is defined by the abstract :doxy:`GModelSpatial` class, the spectral
+model component :math:`M_{\rm spectral}(E|t)` is defined by the
+abstract :doxy:`GModelSpectral` class and the temporal component
+:math:`M_{\rm temporal}(t)` is defined by the abstract
+:doxy:`GModelTemporal` class.
+
+The spatial model component describes the energy and time dependent
+morphology of the source.
+It satisfies
+
+.. math::
+   \int_{\Omega} M_{\rm spatial}(\alpha,\delta|E,t) d\Omega = 1
+
+for all :math:`E` and :math:`t`, hence the spatial component does not
+impact the spatially integrated spectral and temporal properties of the
+source (the integration is done here over the spatial parameters
+:math:`\alpha` and :math:`\delta` in a spherical coordinate system).
+
+The spectral model component describes the spatially integrated time
+dependent spectral distribution of the source.
+It satisfies
+
+.. math::
+   \int_{E} M_{\rm spectral}(E | t) dE = \Phi
+
+for all :math:`t`, where :math:`\Phi` is the spatially and spectrally
+integrated total source flux. The spectral component does not impact
+the temporal properties of the integrated flux :math:`\Phi`.
+
+The temporal model component describes the relative variation of the
+source flux with respect to the mean value given by the spectral model
+component.
+
+
+Spatial components
+^^^^^^^^^^^^^^^^^^
+
+Point source
+============
+
+.. code-block:: xml
+
+  <source name="Crab" type="PointSource">
+    <spatialModel type="SkyDirFunction">
+      <parameter name="RA"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Radial disk
+===========
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="DiskFunction">
+      <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      <parameter name="Radius" scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Radial Gaussian
+===============
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="GaussFunction">
+      <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      <parameter name="Sigma" scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Radial shell
+============
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="ShellFunction">
+      <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
+      <parameter name="Width"  scale="1.0" value="0.10"    min="0.01" max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Elliptical disk
+===============
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="EllipticalDisk">
+      <parameter name="RA"          scale="1.0" value="83.6331" min="-360"  max="360" free="1"/>
+      <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"   max="90"  free="1"/>
+      <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
+      <parameter name="MinorRadius" scale="1.0" value="0.5"     min="0.001" max="10"  free="1"/>
+      <parameter name="MajorRadius" scale="1.0" value="2.0"     min="0.001" max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Elliptical Gaussian
+===================
+
+.. code-block:: xml
+
+  <source name="Crab" type="ExtendedSource">
+    <spatialModel type="EllipticalGauss">
+      <parameter name="RA"          scale="1.0" value="83.6331" min="-360"  max="360" free="1"/>
+      <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"   max="90"  free="1"/>
+      <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
+      <parameter name="MinorRadius" scale="1.0" value="0.5"     min="0.001" max="10"  free="1"/>
+      <parameter name="MajorRadius" scale="1.0" value="2.0"     min="0.001" max="10"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Isotropic source
+================
+
+.. code-block:: xml
+
+  <source name="Crab" type="DiffuseSource">
+    <spatialModel type="ConstantValue">
+       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Diffuse map
+===========
+
+.. code-block:: xml
+
+  <source name="Crab" type="DiffuseSource">
+    <spatialModel type="SpatialMap" file="map.fits">
+       <parameter name="Prefactor" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+Diffuse map cube
+================
+
+.. code-block:: xml
+
+  <source name="Crab" type="DiffuseSource">
+    <spatialModel type="MapCubeFunction" file="map_cube.fits">
+      <parameter name="Normalization" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+
+Spectral components
+^^^^^^^^^^^^^^^^^^^
 
 Constant
-^^^^^^^^
+========
 
 The :doxy:`GModelSpectralConst` class implements the constant function
 
@@ -84,7 +276,7 @@ The XML format for specifying a constant is:
 
 
 Node function
-^^^^^^^^^^^^^
+=============
 
 The generalisation of the broken power law is the node function, which is 
 defined by a set of energy and intensity values, the so called nodes, 
@@ -110,13 +302,18 @@ function is arbitrary).
 
 
 File function
-^^^^^^^^^^^^^
+=============
 
 A function defined using an input ASCII file with columns of energy and
-differential flux values. The energy units are assumed to be MeV and the
-flux units are assumed to be
+differential flux values.
+The energy values are assumed to be in units of MeV, the flux values are
+normally assumed to be in units of
 :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`.
-The only parameter is a multiplicative normalization:
+The only exception to this rule is the isotropic diffuse model
+:doxy:`GModelSpatialDiffuseConst` for which the flux values are given
+in units of :math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1} {\rm sr}^{-1}`.
+
+The only parameter of the model is a multiplicative normalization:
 
 .. math::
     \frac{dN}{dE} = N_0 \left. \frac{dN}{dE} \right\rvert_{\rm file}
@@ -140,7 +337,7 @@ expanded.
 
 
 Power law
-^^^^^^^^^
+=========
 
 The :doxy:`GModelSpectralPlaw` class implements the power law function
 
@@ -188,15 +385,18 @@ The XML format for specifying a power law defined by the integral flux is:
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
    </spectrum>
 
-**NOTE:** The UpperLimit and LowerLimit parameters are always treated as fixed and,
-as should be apparent from this definition, the flux given by the Integral parameter 
-is over the range (LowerLimit, UpperLimit). Use of this model allows the errors on the
-integrated flux to be evaluated directly by likelihood, obviating the need to propagate
-the errors if one is using the PowerLaw form.
+.. note::
+
+   The UpperLimit and LowerLimit parameters are always treated as fixed and,
+   as should be apparent from this definition, the flux given by the Integral
+   parameter is over the range (LowerLimit, UpperLimit). Use of this model
+   allows the errors on the integrated flux to be evaluated directly by
+   likelihood, obviating the need to propagate the errors if one is using
+   the PowerLaw form.
 
 
 Exponentially cut-off power law
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+===============================
 
 The :doxy:`GModelSpectralExpPlaw` class implements the exponentially 
 cut-off power law function
@@ -225,7 +425,7 @@ The XML format for specifying an exponentially cut-off power law is:
 
 
 Super exponentially cut-off power law
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=====================================
 
 The :doxy:`GModelSpectralSuperExpPlaw` class implements the super
 exponentially cut-off power law function
@@ -256,7 +456,7 @@ where the parameters in the XML definition have the following mappings:
 
 
 Broken power law
-^^^^^^^^^^^^^^^^
+================
 
 The :doxy:`GModelSpectralBrokenPlaw` class implements the broken power law function
 
@@ -289,7 +489,7 @@ The XML format for specifying a broken power law is:
 
 
 Gaussian
-^^^^^^^^
+========
 
 The :doxy:`GModelSpectralGauss` class implements the gaussian function
 
@@ -315,7 +515,7 @@ The XML format for specifying a Gaussian is:
 
 
 Log parabola
-^^^^^^^^^^^^
+============
 
 The :doxy:`GModelSpectralLogParabola` class implements the log parabola function
 
@@ -356,3 +556,25 @@ where
 
 * ``alpha`` = -``Index``
 * ``beta`` = -``Curvature``
+
+
+Temporal components
+^^^^^^^^^^^^^^^^^^^
+
+Constant
+========
+
+The only temporal model component that exists so far is the constant model
+that is implemented by the :doxy:`GModelTemporalConst` class.
+
+The XML format for specifying a constant temporal model is:
+
+.. code-block:: xml
+
+   <temporalModel type="Constant">
+     <parameter name="Normalization" scale="1.0" value="1.0" min="0.1" max="10.0" free="0"/>
+   </temporalModel>
+
+
+Background models
+~~~~~~~~~~~~~~~~~
