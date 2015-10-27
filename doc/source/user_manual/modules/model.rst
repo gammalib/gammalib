@@ -114,13 +114,9 @@ File function
 
 A function defined using an input ASCII file with columns of energy and
 differential flux values. The energy units are assumed to be MeV and the
-flux values are assumed to 
-:math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`
-(the only exception being a model for which the spatial component is
-a constant diffuse model :doxy:`GModelSpatialDiffuseConst`; in this case,
-the units are 
-:math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1} {\rm sr}^{-1}`).
-The sole parameter is a multiplicative normalization:
+flux units are assumed to be
+:math:`{\rm cm}^{-2} {\rm s}^{-1} {\rm MeV}^{-1}`.
+The only parameter is a multiplicative normalization:
 
 .. math::
     \frac{dN}{dE} = N_0 \left. \frac{dN}{dE} \right\rvert_{\rm file}
