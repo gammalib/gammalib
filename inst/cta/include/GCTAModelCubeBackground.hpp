@@ -37,7 +37,6 @@
 #include "GEvent.hpp"
 #include "GObservation.hpp"
 #include "GXmlElement.hpp"
-#include "GFunction.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
 #include "GModelSpatial.hpp"

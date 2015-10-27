@@ -95,7 +95,7 @@ private:
             return (f*std::sin(x));
         }
     private:
-        const double& m_sigma;
+        double m_sigma;
     };
 
     // Members

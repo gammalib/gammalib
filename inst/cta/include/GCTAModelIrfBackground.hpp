@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelIrfBackground.hpp - CTA IRF background model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Juergen Knoedlseder                              *
+ *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -101,8 +101,8 @@ private:
         double eval(const double& theta);
     protected:
         const GCTABackground* m_bgd;  //!< Pointer to background
-        const double&         m_logE; //!< Log10 of energy
-        const int&            m_iter; //!< Romberg iterations
+        double                m_logE; //!< Log10 of energy
+        int                   m_iter; //!< Romberg iterations
     };
 
     // ROI integration kernel over phi
@@ -117,8 +117,8 @@ private:
         double eval(const double& phi);
     protected:
         const GCTABackground* m_bgd;   //!< Pointer to background
-        const double&         m_logE;  //!< Log10 of energy
-        const double&         m_theta; //!< Offset angle (radians)
+        double                m_logE;  //!< Log10 of energy
+        double                m_theta; //!< Offset angle (radians)
     };
 
     // Members

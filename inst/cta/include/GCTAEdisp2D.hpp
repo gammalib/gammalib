@@ -125,8 +125,8 @@ private:
         double eval(const double& x);
     protected:
         const GCTAEdisp2D*  m_parent;  //!< Pointer to parent class
-        const double&       m_logEsrc; //!< True photon energy
-        const double&       m_theta;   //!< Offset angle
+        double              m_logEsrc; //!< True photon energy
+        double              m_theta;   //!< Offset angle
     };
 
     // Members

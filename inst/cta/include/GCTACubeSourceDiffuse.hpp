@@ -32,7 +32,6 @@
 #include <vector>
 #include "GCTACubeSource.hpp"
 #include "GSkyMap.hpp"
-#include "GFunction.hpp"
 #include "GCTAResponseCube.hpp"
 
 /* __ Type definitions ___________________________________________________ */

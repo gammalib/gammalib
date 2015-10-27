@@ -102,8 +102,8 @@ private:
         double eval(const double& theta);
     protected:
         const GCTAAeff* m_aeff;  //!< Pointer to effectve area
-        const double&   m_logE;  //!< Log10 of energy
-        const int&      m_iter;  //!< Romberg iterations
+        double          m_logE;  //!< Log10 of energy
+        int             m_iter;  //!< Romberg iterations
     };
 
     // ROI integration kernel over phi
@@ -118,8 +118,8 @@ private:
         double eval(const double& phi);
     protected:
         const GCTAAeff* m_aeff;   //!< Pointer to effective area
-        const double&   m_logE;   //!< Log10 of energy
-        const double&   m_theta;  //!< Offset angle (radians)
+        double          m_logE;   //!< Log10 of energy
+        double          m_theta;  //!< Offset angle (radians)
     };
 
     // Members

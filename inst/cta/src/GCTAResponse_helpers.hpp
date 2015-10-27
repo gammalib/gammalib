@@ -96,54 +96,17 @@ public:
     double eval(const double& delta);
 protected:
     const GCTAResponseIrf& m_rsp;     //!< CTA response function
-    const double&          m_roi;     //!< ROI radius in radians
+    double                 m_roi;     //!< ROI radius in radians
     double                 m_cosroi;  //!< Cosine of ROI radius
-    const double&          m_psf;     //!< PSF-ROI centre distance in radians
+    double                 m_psf;     //!< PSF-ROI centre distance in radians
     double                 m_cospsf;  //!< Cosine of PSF-ROI centre distance
     double                 m_sinpsf;  //!< Sine of PSF-ROI centre distance
-    const double&          m_logE;    //!< Log10 of true photon energy (E/TeV).
-    const double&          m_theta;   //!< Offset angle of source in camera system
-    const double&          m_phi;     //!< Azimuth angle of source in camera system
-    const double&          m_zenith;  //!< Zenith angle of source in Earth system
-    const double&          m_azimuth; //!< Azimuth angle of source in Earth system
+    double                 m_logE;    //!< Log10 of true photon energy (E/TeV).
+    double                 m_theta;   //!< Offset angle of source in camera system
+    double                 m_phi;     //!< Azimuth angle of source in camera system
+    double                 m_zenith;  //!< Zenith angle of source in Earth system
+    double                 m_azimuth; //!< Azimuth angle of source in Earth system
 };
-
-
-/***********************************************************************//**
- * @class cta_nedisp_kern
- *
- * @brief Integration kernel for nedisp() method
- *
- * This class implements the integration kernel for the nedisp() method.
- * The cta_nedisp_kern::eval method evaluates the energy dispersion for a
- * given log10 of true photon energy as function of the log10 of observed
- * event energy.
- ***************************************************************************/
-/*
-class cta_nedisp_kern : public GFunction {
-public:
-    cta_nedisp_kern(const GCTAResponseIrf& rsp,
-                    const double&          logEsrc,
-                    const double&          theta,
-                    const double&          phi,
-                    const double&          zenith,
-                    const double&          azimuth) :
-                    m_rsp(rsp),
-                    m_logEsrc(logEsrc),
-                    m_theta(theta),
-                    m_phi(phi),
-                    m_zenith(zenith),
-                    m_azimuth(azimuth) { }
-    double eval(const double& logEobs);
-protected:
-    const GCTAResponseIrf& m_rsp;     //!< CTA response function
-    const double&          m_logEsrc; //!< Log10 of true photon energy (E/TeV).
-    const double&          m_theta;   //!< Offset angle of source in camera system
-    const double&          m_phi;     //!< Azimuth angle of source in camera system
-    const double&          m_zenith;  //!< Zenith angle of source in Earth system
-    const double&          m_azimuth; //!< Azimuth angle of source in Earth system
-};
-*/
 
 
 /***********************************************************************//**
@@ -174,10 +137,10 @@ public:
 protected:
     const GModelSky&       m_model;
     const GCTAResponseIrf& m_rsp;     //!< CTA response function
-    const GTime&           m_srcTime;
-    const GEnergy&         m_obsEng;
-    const GTime&           m_obsTime;
     const GObservation&    m_obs;
+    GTime                  m_srcTime;
+    GEnergy                m_obsEng;
+    GTime                  m_obsTime;
 };
 
 
@@ -246,22 +209,22 @@ public:
 protected:
     const GCTAResponseIrf&     m_rsp;           //!< CTA response
     const GModelSpatialRadial& m_model;         //!< Radial spatial model
-    const double&              m_zenith;        //!< Zenith angle
-    const double&              m_azimuth;       //!< Azimuth angle
-    const GEnergy&             m_srcEng;        //!< True photon energy
-    const GTime&               m_srcTime;       //!< True photon time
-    const double&              m_srcLogEng;     //!< True photon log10 energy
-    const GEnergy&             m_obsEng;        //!< Measured event energy
-    const double&              m_zeta;          //!< Distance model centre - measured photon
+    double                     m_zenith;        //!< Zenith angle
+    double                     m_azimuth;       //!< Azimuth angle
+    GEnergy                    m_srcEng;        //!< True photon energy
+    GTime                      m_srcTime;       //!< True photon time
+    double                     m_srcLogEng;     //!< True photon log10 energy
+    GEnergy                    m_obsEng;        //!< Measured event energy
+    double                     m_zeta;          //!< Distance model centre - measured photon
     double                     m_cos_zeta;      //!< Cosine of zeta
     double                     m_sin_zeta;      //!< Sine of zeta
-    const double&              m_lambda;        //!< Distance model centre - pointing
+    double                     m_lambda;        //!< Distance model centre - pointing
     double                     m_cos_lambda;    //!< Cosine of lambda
     double                     m_sin_lambda;    //!< Sine of lambda
-    const double&              m_omega0;        //!< Azimuth of pointing in model system
-    const double&              m_delta_max;     //!< Maximum PSF radius
+    double                     m_omega0;        //!< Azimuth of pointing in model system
+    double                     m_delta_max;     //!< Maximum PSF radius
     double                     m_cos_delta_max; //!< Cosine of maximum PSF radius
-    const int&                 m_iter;          //!< Integration iterations
+    int                        m_iter;          //!< Integration iterations
 };
 
 
@@ -313,19 +276,19 @@ public:
                               m_sin_ph(sin_ph) { }
     double eval(const double& omega);
 protected:
-    const GCTAResponseIrf& m_rsp;           //!< CTA response
-    const double&          m_zenith;        //!< Zenith angle
-    const double&          m_azimuth;       //!< Azimuth angle
-    const double&          m_srcLogEng;     //!< True photon energy
-    const GEnergy&         m_obsEng;        //!< Measured event energy
-    const double&          m_zeta;          //!< Distance model centre - measured photon
-    const double&          m_lambda;        //!< Distance model centre - pointing
-    const double&          m_omega0;        //!< Azimuth of pointing in model system
-    const double&          m_rho;           //!< ...
-    const double&          m_cos_psf;       //!< Cosine term for PSF offset angle computation
-    const double&          m_sin_psf;       //!< Sine term for PSF offset angle computation
-    const double&          m_cos_ph;        //!< Cosine term for photon offset angle computation
-    const double&          m_sin_ph;        //!< Sine term for photon offset angle computation
+    const GCTAResponseIrf& m_rsp;       //!< CTA response
+    double                 m_zenith;    //!< Zenith angle
+    double                 m_azimuth;   //!< Azimuth angle
+    double                 m_srcLogEng; //!< True photon energy
+    GEnergy                m_obsEng;    //!< Measured event energy
+    double                 m_zeta;      //!< Distance model centre - measured photon
+    double                 m_lambda;    //!< Distance model centre - pointing
+    double                 m_omega0;    //!< Azimuth of pointing in model system
+    double                 m_rho;       //!< ...
+    double                 m_cos_psf;   //!< Cosine term for PSF offset angle computation
+    double                 m_sin_psf;   //!< Sine term for PSF offset angle computation
+    double                 m_cos_ph;    //!< Cosine term for photon offset angle computation
+    double                 m_sin_ph;    //!< Sine term for photon offset angle computation
 };
 
 
@@ -392,19 +355,19 @@ public:
 protected:
     const GCTAResponseIrf&     m_rsp;        //!< CTA response
     const GModelSpatialRadial& m_model;      //!< Radial spatial model
-    const GEnergy&             m_srcEng;     //!< True photon energy
-    const GTime&               m_srcTime;    //!< True photon arrival time
-    const GEnergy&             m_obsEng;     //!< Observed photon energy
-    const GTime&               m_obsTime;    //!< Observed photon arrival time
     const GCTAObservation&     m_obs;        //!< CTA observation
     const GMatrix&             m_rot;        //!< Rotation matrix
-    const double&              m_dist;       //!< Distance model-ROI centre
+    GEnergy                    m_srcEng;     //!< True photon energy
+    GTime                      m_srcTime;    //!< True photon arrival time
+    GEnergy                    m_obsEng;     //!< Observed photon energy
+    GTime                      m_obsTime;    //!< Observed photon arrival time
+    double                     m_dist;       //!< Distance model-ROI centre
     double                     m_cos_dist;   //!< Cosine of distance model-ROI centre
     double                     m_sin_dist;   //!< Sine of distance model-ROI centre
-    const double&              m_radius;     //!< ROI+PSF radius
+    double                     m_radius;     //!< ROI+PSF radius
     double                     m_cos_radius; //!< Cosine of ROI+PSF radius
-    const double&              m_omega0;     //!< Position angle of ROI
-    const int&                 m_iter;       //!< Integration iterations
+    double                     m_omega0;     //!< Position angle of ROI
+    int                        m_iter;       //!< Integration iterations
 };
 
 
@@ -450,15 +413,15 @@ public:
                                m_sin_rho(sin_rho) { }
     double eval(const double& omega);
 protected:
-    const GCTAResponseIrf& m_rsp;        //!< CTA response
-    const GEnergy&         m_srcEng;     //!< True photon energy
-    const GTime&           m_srcTime;    //!< True photon arrival time
-    const GEnergy&         m_obsEng;     //!< Observed photon energy
-    const GTime&           m_obsTime;    //!< Observed photon arrival time
-    const GCTAObservation& m_obs;        //!< CTA observation
-    const GMatrix&         m_rot;        //!< Rotation matrix
-    double                 m_cos_rho;    //!< Cosine of offset angle
-    double                 m_sin_rho;    //!< Sine of offset angle
+    const GCTAResponseIrf& m_rsp;     //!< CTA response
+    const GCTAObservation& m_obs;     //!< CTA observation
+    GMatrix                m_rot;     //!< Rotation matrix
+    GEnergy                m_srcEng;  //!< True photon energy
+    GTime                  m_srcTime; //!< True photon arrival time
+    GEnergy                m_obsEng;  //!< Observed photon energy
+    GTime                  m_obsTime; //!< Observed photon arrival time
+    double                 m_cos_rho; //!< Cosine of offset angle
+    double                 m_sin_rho; //!< Sine of offset angle
 };
 
 
@@ -536,26 +499,26 @@ public:
 public:
     const GCTAResponseIrf&         m_rsp;           //!< CTA response
     const GModelSpatialElliptical& m_model;         //!< Elliptical model
-    const double&                  m_semimajor;     //!< Ellipse boundary semimajor axis
-    const double&                  m_semiminor;     //!< Ellipse boundary semiminor axis
-    const double&                  m_posangle;      //!< Ellipse boundary position angle
-    const double&                  m_zenith;        //!< Zenith angle
-    const double&                  m_azimuth;       //!< Azimuth angle
-    const GEnergy&                 m_srcEng;        //!< True photon energy
-    const GTime&                   m_srcTime;       //!< True photon time
-    const double&                  m_srcLogEng;     //!< True photon log energy
-    const GEnergy&                 m_obsEng;        //!< Measured event energy
-    const double&                  m_rho_obs;       //!< Distance of model centre from measured photon
+    double                         m_semimajor;     //!< Ellipse boundary semimajor axis
+    double                         m_semiminor;     //!< Ellipse boundary semiminor axis
+    double                         m_posangle;      //!< Ellipse boundary position angle
+    double                         m_zenith;        //!< Zenith angle
+    double                         m_azimuth;       //!< Azimuth angle
+    GEnergy                        m_srcEng;        //!< True photon energy
+    GTime                          m_srcTime;       //!< True photon time
+    double                         m_srcLogEng;     //!< True photon log energy
+    GEnergy                        m_obsEng;        //!< Measured event energy
+    double                         m_rho_obs;       //!< Distance of model centre from measured photon
     double                         m_cos_rho_obs;   //!< Cosine of m_rho_obs
     double                         m_sin_rho_obs;   //!< Sine of m_rho_obs
-    const double&                  m_posangle_obs;  //!< Photon position angle measured from model centre
-    const double&                  m_rho_pnt;       //!< Distance of model centre from pointing
+    double                         m_posangle_obs;  //!< Photon position angle measured from model centre
+    double                         m_rho_pnt;       //!< Distance of model centre from pointing
     double                         m_cos_rho_pnt;   //!< Cosine of m_rho_pnt
     double                         m_sin_rho_pnt;   //!< Sine of m_rho_pnt
-    const double&                  m_omega_pnt;     //!< Azimuth of pointing in model system
-    const double&                  m_delta_max;     //!< Maximum PSF radius
+    double                         m_omega_pnt;     //!< Azimuth of pointing in model system
+    double                         m_delta_max;     //!< Maximum PSF radius
     double                         m_cos_delta_max; //!< Cosine of maximum PSF radius
-    const int&                     m_iter;          //!< Integration iterations
+    int                            m_iter;          //!< Integration iterations
 };
 
 
@@ -614,19 +577,19 @@ public:
 public:
     const GCTAResponseIrf&         m_rsp;          //!< CTA response
     const GModelSpatialElliptical& m_model;        //!< Spatial model
-    const double&                  m_zenith;       //!< Zenith angle
-    const double&                  m_azimuth;      //!< Azimuth angle
-    const GEnergy&                 m_srcEng;       //!< True photon energy
-    const GTime&                   m_srcTime;      //!< True photon time
-    const double&                  m_srcLogEng;    //!< True photon log energy
-    const GEnergy&                 m_obsEng;       //!< Measured event energy
-    const double&                  m_posangle_obs; //!< Measured photon position angle from model centre
-    const double&                  m_omega_pnt;    //!< Azimuth of pointing in model system
-    const double&                  m_rho;          //!< Model zenith angle
-    const double&                  m_cos_psf;      //!< Cosine term for PSF offset angle computation
-    const double&                  m_sin_psf;      //!< Sine term for PSF offset angle computation
-    const double&                  m_cos_ph;       //!< Cosine term for photon offset angle computation
-    const double&                  m_sin_ph;       //!< Sine term for photon offset angle computation
+    double                         m_zenith;       //!< Zenith angle
+    double                         m_azimuth;      //!< Azimuth angle
+    GEnergy                        m_srcEng;       //!< True photon energy
+    GTime                          m_srcTime;      //!< True photon time
+    double                         m_srcLogEng;    //!< True photon log energy
+    GEnergy                        m_obsEng;       //!< Measured event energy
+    double                         m_posangle_obs; //!< Measured photon position angle from model centre
+    double                         m_omega_pnt;    //!< Azimuth of pointing in model system
+    double                         m_rho;          //!< Model zenith angle
+    double                         m_cos_psf;      //!< Cosine term for PSF offset angle computation
+    double                         m_sin_psf;      //!< Sine term for PSF offset angle computation
+    double                         m_cos_ph;       //!< Cosine term for photon offset angle computation
+    double                         m_sin_ph;       //!< Sine term for photon offset angle computation
 };
 
 
@@ -700,22 +663,22 @@ public:
 protected:
     const GCTAResponseIrf&         m_rsp;            //!< CTA response
     const GModelSpatialElliptical& m_model;          //!< Elliptical model
-    const double&                  m_semimajor;      //!< Ellipse boundary semimajor axis
-    const double&                  m_semiminor;      //!< Ellipse boundary semiminor axis
-    const double&                  m_posangle;       //!< Ellipse boundary position angle
-    const GEnergy&                 m_srcEng;         //!< True photon energy
-    const GTime&                   m_srcTime;        //!< True photon arrival time
-    const GEnergy&                 m_obsEng;         //!< Observed photon energy
-    const GTime&                   m_obsTime;        //!< Observed photon arrival time
     const GCTAObservation&         m_obs;            //!< CTA observation
     const GMatrix&                 m_rot;            //!< Rotation matrix
-    const double&                  m_rho_roi;        //!< Distance between model and ROI centre
+    double                         m_semimajor;      //!< Ellipse boundary semimajor axis
+    double                         m_semiminor;      //!< Ellipse boundary semiminor axis
+    double                         m_posangle;       //!< Ellipse boundary position angle
+    GEnergy                        m_srcEng;         //!< True photon energy
+    GTime                          m_srcTime;        //!< True photon arrival time
+    GEnergy                        m_obsEng;         //!< Observed photon energy
+    GTime                          m_obsTime;        //!< Observed photon arrival time
+    double                         m_rho_roi;        //!< Distance between model and ROI centre
     double                         m_cos_rho_roi;    //!< Cosine of m_rho_roi
     double                         m_sin_rho_roi;    //!< Sine of m_rho_roi
-    const double&                  m_posangle_roi;   //!< Position angle of ROI
-    const double&                  m_radius_roi;     //!< ROI+PSF radius
+    double                         m_posangle_roi;   //!< Position angle of ROI
+    double                         m_radius_roi;     //!< ROI+PSF radius
     double                         m_cos_radius_roi; //!< Cosine of m_radius_roi
-    const int&                     m_iter;           //!< Integration iterations
+    int                            m_iter;           //!< Integration iterations
 };
 
 
@@ -771,16 +734,16 @@ public:
 protected:
     const GCTAResponseIrf&         m_rsp;          //!< CTA response
     const GModelSpatialElliptical& m_model;        //!< Model
-    const GEnergy&                 m_srcEng;       //!< True photon energy
-    const GTime&                   m_srcTime;      //!< True photon arrival time
-    const GEnergy&                 m_obsEng;       //!< Observed photon energy
-    const GTime&                   m_obsTime;      //!< Observed photon arrival time
     const GCTAObservation&         m_obs;          //!< Pointer to observation
     const GMatrix&                 m_rot;          //!< Rotation matrix
-    const double&                  m_rho;
-    const double&                  m_sin_rho;      //!< Sine of offset angle
-    const double&                  m_cos_rho;      //!< Cosine of offset angle
-    const double&                  m_posangle_roi; //!< Position angle of ROI
+    GEnergy                        m_srcEng;       //!< True photon energy
+    GTime                          m_srcTime;      //!< True photon arrival time
+    GEnergy                        m_obsEng;       //!< Observed photon energy
+    GTime                          m_obsTime;      //!< Observed photon arrival time
+    double                         m_rho;
+    double                         m_sin_rho;      //!< Sine of offset angle
+    double                         m_cos_rho;      //!< Cosine of offset angle
+    double                         m_posangle_roi; //!< Position angle of ROI
 };
 
 
@@ -847,22 +810,22 @@ public:
 protected:
     const GCTAResponseIrf& m_rsp;        //!< CTA response
     const GModelSpatial&   m_model;      //!< Spatial model
-    const double&          m_theta;      //!< Photon offset angle
-    const double&          m_phi;        //!< Photon azimuth angle
-    const double&          m_zenith;     //!< Pointing zenith angle
-    const double&          m_azimuth;    //!< Pointing azimuth angle
-    const GEnergy&         m_srcEng;     //!< True photon energy
-    const GTime&           m_srcTime;    //!< True photon arrival time
-    const double&          m_srcLogEng;  //!< True photon log energy
-    const GEnergy&         m_obsEng;     //!< Measured event energy
     const GMatrix&         m_rot;        //!< Rotation matrix
+    double                 m_theta;      //!< Photon offset angle
+    double                 m_phi;        //!< Photon azimuth angle
+    double                 m_zenith;     //!< Pointing zenith angle
+    double                 m_azimuth;    //!< Pointing azimuth angle
+    GEnergy                m_srcEng;     //!< True photon energy
+    GTime                  m_srcTime;    //!< True photon arrival time
+    double                 m_srcLogEng;  //!< True photon log energy
+    GEnergy                m_obsEng;     //!< Measured event energy
     double                 m_sin_eta;    //!< Sine of angular distance between
                                          //   observed photon direction and
                                          //   camera centre
     double                 m_cos_eta;    //!< Cosine of angular distance between
                                          //   observed photon direction and
                                          //   camera centre
-    const int&             m_iter;       // Integration iterations
+    int                    m_iter;       // Integration iterations
 };
 
 
@@ -918,17 +881,17 @@ public:
 protected:
     const GCTAResponseIrf& m_rsp;        //!< CTA response
     const GModelSpatial&   m_model;      //!< Spatial model
-    const double&          m_zenith;     //!< Zenith angle
-    const double&          m_azimuth;    //!< Azimuth angle
-    const GEnergy&         m_srcEng;     //!< True photon energy
-    const GTime&           m_srcTime;    //!< True photon arrival time
-    const double&          m_srcLogEng;  //!< True photon log energy
-    const GEnergy&         m_obsEng;     //!< Measured event energy
     const GMatrix&         m_rot;        //!< Rotation matrix
-    const double&          m_sin_theta;  //!< Sine of offset angle
-    const double&          m_cos_theta;  //!< Cosine of offset angle
-    const double&          m_sin_ph;     //!< Sine term in angular distance equation
-    const double&          m_cos_ph;     //!< Cosine term in angular distance equation    
+    double                 m_zenith;     //!< Zenith angle
+    double                 m_azimuth;    //!< Azimuth angle
+    GEnergy                m_srcEng;     //!< True photon energy
+    GTime                  m_srcTime;    //!< True photon arrival time
+    double                 m_srcLogEng;  //!< True photon log energy
+    GEnergy                m_obsEng;     //!< Measured event energy
+    double                 m_sin_theta;  //!< Sine of offset angle
+    double                 m_cos_theta;  //!< Cosine of offset angle
+    double                 m_sin_ph;     //!< Sine term in angular distance equation
+    double                 m_cos_ph;     //!< Cosine term in angular distance equation    
 };
 
 
@@ -986,13 +949,13 @@ public:
 protected:
     const GCTAResponseIrf& m_rsp;        //!< CTA response
     const GModelSpatial&   m_model;      //!< Spatial model
-    const GEnergy&         m_srcEng;     //!< True photon energy
-    const GTime&           m_srcTime;    //!< True photon arrival time
-    const GEnergy&         m_obsEng;     //!< Observed photon energy
-    const GTime&           m_obsTime;    //!< Observed photon arrival time
     const GCTAObservation& m_obs;        //!< CTA observation
     const GMatrix&         m_rot;        //!< Rotation matrix
-    const int&             m_iter;       //!< Integration iterations
+    GEnergy                m_srcEng;     //!< True photon energy
+    GTime                  m_srcTime;    //!< True photon arrival time
+    GEnergy                m_obsEng;     //!< Observed photon energy
+    GTime                  m_obsTime;    //!< Observed photon arrival time
+    int                    m_iter;       //!< Integration iterations
 };
 
 
@@ -1043,15 +1006,15 @@ public:
 protected:
     const GCTAResponseIrf& m_rsp;        //!< CTA response
     const GModelSpatial&   m_model;      //!< Spatial model
-    const GEnergy&         m_srcEng;     //!< True photon energy
-    const GTime&           m_srcTime;    //!< True photon arrival time
-    const GEnergy&         m_obsEng;     //!< Observed photon energy
-    const GTime&           m_obsTime;    //!< Observed photon arrival time
     const GCTAObservation& m_obs;        //!< CTA observation
     const GMatrix&         m_rot;        //!< Rotation matrix
-    const double&          m_theta;      //!< Offset angle (radians)
+    GEnergy                m_srcEng;     //!< True photon energy
+    GTime                  m_srcTime;    //!< True photon arrival time
+    GEnergy                m_obsEng;     //!< Observed photon energy
+    GTime                  m_obsTime;    //!< Observed photon arrival time
+    double                 m_theta;      //!< Offset angle (radians)
     double                 m_cos_theta;  //!< Cosine of offset angle
-    const double&          m_sin_theta;  //!< Sine of offset angle
+    double                 m_sin_theta;  //!< Sine of offset angle
 };
 
 
@@ -1107,15 +1070,15 @@ public:
 public:
     const GCTAResponseCube*    m_rsp;           //!< CTA response
     const GModelSpatialRadial* m_model;         //!< Radial model
-    const GSkyDir&             m_srcDir;        //!< True photon arrival direction
-    const GEnergy&             m_srcEng;        //!< True photon energy
-    const GTime&               m_srcTime;       //!< True photon time
-    const double&              m_rho_obs;       //!< Distance of model centre from measured photon
+    GSkyDir                    m_srcDir;        //!< True photon arrival direction
+    GEnergy                    m_srcEng;        //!< True photon energy
+    GTime                      m_srcTime;       //!< True photon time
+    double                     m_rho_obs;       //!< Distance of model centre from measured photon
     double                     m_cos_rho_obs;   //!< Cosine of m_rho_obs
     double                     m_sin_rho_obs;   //!< Sine of m_rho_obs
-    const double&              m_delta_max;     //!< Maximum PSF radius
+    double                     m_delta_max;     //!< Maximum PSF radius
     double                     m_cos_delta_max; //!< Cosine of maximum PSF radius
-    const int&                 m_iter;          //!< Integration iterations
+    int                        m_iter;          //!< Integration iterations
 };
 
 
@@ -1156,11 +1119,11 @@ public:
 public:
     const GCTAResponseCube*    m_rsp;     //!< CTA response
     const GModelSpatialRadial* m_model;   //!< Radial model
-    const GSkyDir&             m_srcDir;  //!< True photon sky direction
-    const GEnergy&             m_srcEng;  //!< True photon energy
-    const GTime&               m_srcTime; //!< True photon time
-    const double&              m_cos_psf; //!< Cosine term for PSF offset angle computation
-    const double&              m_sin_psf; //!< Sine term for PSF offset angle computation
+    GSkyDir                    m_srcDir;  //!< True photon sky direction
+    GEnergy                    m_srcEng;  //!< True photon energy
+    GTime                      m_srcTime; //!< True photon time
+    double                     m_cos_psf; //!< Cosine term for PSF offset angle computation
+    double                     m_sin_psf; //!< Sine term for PSF offset angle computation
 };
 
 
@@ -1194,15 +1157,15 @@ public:
 protected:
     const GCTAResponseCube*    m_rsp;           //!< Response cube
     const GModelSpatialRadial* m_model;         //!< Radial model
-    const GSkyDir&             m_srcDir;        //!< True photon arrival direction
-    const GEnergy&             m_srcEng;        //!< True photon energy
-    const GTime&               m_srcTime;       //!< True photon arrival time
-    const double&              m_delta_mod;     //!< Distance of model from Psf
+    GSkyDir                    m_srcDir;        //!< True photon arrival direction
+    GEnergy                    m_srcEng;        //!< True photon energy
+    GTime                      m_srcTime;       //!< True photon arrival time
+    double                     m_delta_mod;     //!< Distance of model from Psf
     double                     m_cos_delta_mod; //!< Cosine of m_delta_mod
     double                     m_sin_delta_mod; //!< Sine of m_delta_mod
-    const double&              m_theta_max;     //!< Maximum model radius
+    double                     m_theta_max;     //!< Maximum model radius
     double                     m_cos_theta_max; //!< Cosine of m_theta_max
-    const int&                 m_iter;          //!< Integration iterations
+    int                        m_iter;          //!< Integration iterations
 };
 
 
@@ -1226,10 +1189,10 @@ public:
     double eval(const double& phi);
 protected:
     const GModelSpatialRadial* m_model;     //!< Radial model
-    const GEnergy&             m_srcEng;    //!< True photon energy
-    const GTime&               m_srcTime;   //!< True photon arrival time
-    const double&              m_sin_fact;  //!< sin(delta)*sin(delta_mod)
-    const double&              m_cos_fact;  //!< cos(delta)*cos(delta_mod)
+    GEnergy                    m_srcEng;    //!< True photon energy
+    GTime                      m_srcTime;   //!< True photon arrival time
+    double                     m_sin_fact;  //!< sin(delta)*sin(delta_mod)
+    double                     m_cos_fact;  //!< cos(delta)*cos(delta_mod)
 };
 
 
@@ -1294,19 +1257,19 @@ public:
 public:
     const GCTAResponseCube*        m_rsp;           //!< CTA response
     const GModelSpatialElliptical* m_model;         //!< Elliptical model
-    const double&                  m_semimajor;     //!< Ellipse boundary semimajor axis
-    const double&                  m_semiminor;     //!< Ellipse boundary semiminor axis
-    const double&                  m_posangle;      //!< Ellipse boundary position angle
-    const GSkyDir&                 m_srcDir;        //!< True photon arrival direction
-    const GEnergy&                 m_srcEng;        //!< True photon energy
-    const GTime&                   m_srcTime;       //!< True photon time
-    const double&                  m_rho_obs;       //!< Distance of model centre from measured photon
+    double                         m_semimajor;     //!< Ellipse boundary semimajor axis
+    double                         m_semiminor;     //!< Ellipse boundary semiminor axis
+    double                         m_posangle;      //!< Ellipse boundary position angle
+    GSkyDir                        m_srcDir;        //!< True photon arrival direction
+    GEnergy                        m_srcEng;        //!< True photon energy
+    GTime                          m_srcTime;       //!< True photon time
+    double                         m_rho_obs;       //!< Distance of model centre from measured photon
     double                         m_cos_rho_obs;   //!< Cosine of m_rho_obs
     double                         m_sin_rho_obs;   //!< Sine of m_rho_obs
-    const double&                  m_posangle_obs;  //!< Photon position angle measured from model centre
-    const double&                  m_delta_max;     //!< Maximum PSF radius
+    double                         m_posangle_obs;  //!< Photon position angle measured from model centre
+    double                         m_delta_max;     //!< Maximum PSF radius
     double                         m_cos_delta_max; //!< Cosine of maximum PSF radius
-    const int&                     m_iter;          //!< Integration iterations
+    int                            m_iter;          //!< Integration iterations
 };
 
 
@@ -1352,13 +1315,13 @@ public:
 public:
     const GCTAResponseCube*        m_rsp;          //!< CTA response
     const GModelSpatialElliptical* m_model;        //!< Spatial model
-    const GSkyDir&                 m_srcDir;       //!< True photon sky direction
-    const GEnergy&                 m_srcEng;       //!< True photon energy
-    const GTime&                   m_srcTime;      //!< True photon time
-    const double&                  m_posangle_obs; //!< Measured photon position angle from model centre
-    const double&                  m_rho;          //!< Model zenith angle
-    const double&                  m_cos_psf;      //!< Cosine term for PSF offset angle computation
-    const double&                  m_sin_psf;      //!< Sine term for PSF offset angle computation
+    GSkyDir                        m_srcDir;       //!< True photon sky direction
+    GEnergy                        m_srcEng;       //!< True photon energy
+    GTime                          m_srcTime;      //!< True photon time
+    double                         m_posangle_obs; //!< Measured photon position angle from model centre
+    double                         m_rho;          //!< Model zenith angle
+    double                         m_cos_psf;      //!< Cosine term for PSF offset angle computation
+    double                         m_sin_psf;      //!< Sine term for PSF offset angle computation
 };
 
 
@@ -1388,11 +1351,11 @@ public:
 protected:
     const GCTAResponseCube* m_rsp;     //!< Response cube
     const GModelSpatial*    m_model;   //!< Spatial model
-    const GSkyDir&          m_srcDir;  //!< True photon arrival direction
-    const GEnergy&          m_srcEng;  //!< True photon energy
-    const GTime&            m_srcTime; //!< True photon arrival time
     const GMatrix&          m_rot;     //!< Rotation matrix
-    const int&              m_iter;    //!< Romberg iterations
+    GSkyDir                 m_srcDir;  //!< True photon arrival direction
+    GEnergy                 m_srcEng;  //!< True photon energy
+    GTime                   m_srcTime; //!< True photon arrival time
+    int                     m_iter;    //!< Romberg iterations
     double                  m_psf_max; //!< Maximum PSF value
 };
 
@@ -1419,11 +1382,11 @@ public:
     double eval(const double& phi);
 protected:
     const GModelSpatial* m_model;     //!< Spatial model
-    const GEnergy&       m_srcEng;    //!< True photon energy
-    const GTime&         m_srcTime;   //!< True photon arrival time
     const GMatrix&       m_rot;       //!< Rotation matrix
-    const double&        m_sin_delta; //!< sin(delta)
-    const double&        m_cos_delta; //!< cos(delta)
+    GEnergy              m_srcEng;    //!< True photon energy
+    GTime                m_srcTime;   //!< True photon arrival time
+    double               m_sin_delta; //!< sin(delta)
+    double               m_cos_delta; //!< cos(delta)
 };
 
 #endif /* GCTARESPONSE_HELPERS_HPP */
