@@ -78,6 +78,13 @@ the usage of this method is now explicitly given by the method name.
 save() and write() methods have been added to GModelSpatialDiffuseCube that allow
 the saving of a diffuse cube spatial model to disk or into a FITS objects.
 
+The computations in GModelSpatialDiffuseCube were not precise enough to allow
+an accurate modelling of the simulated events. The eval() and eval_gradients()
+methods now use a log-log interpolation. Furthermore, the map is selected
+in mc() randomly based on the interpolation weights of th neighbouring maps.
+And some bugs related to the map indexing and maximum map value computation
+have been corrected.
+
 
 9. Numerics module
 ------------------
