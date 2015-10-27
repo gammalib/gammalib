@@ -804,8 +804,9 @@ void GFitsTable::data_open(void* vptr)
                 throw GException::fits_error(G_DATA_OPEN, 0, msg);
             }
         }
-        else
+        else {
             status = 0;
+        }
 
         // Get column unit (optional, leave blank if not found)
         char unit[80];
