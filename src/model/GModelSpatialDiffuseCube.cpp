@@ -34,6 +34,7 @@
 #include "GHealpix.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRegistry.hpp"
+#include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 
@@ -700,26 +701,6 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Load cube into the model class
- *
- * @param[in] filename cube file.
- *
- * Loads cube into the model class.
- ***************************************************************************/
-void GModelSpatialDiffuseCube::load(const std::string& filename)
-{
-    // Load cube
-    load_cube(filename);
-
-    // Update Monte Carlo cache
-    update_mc_cache();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Set map cube
  *
  * @param[in] cube Sky map.
@@ -1009,6 +990,76 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
         #endif
 
     } // endif: there were cube pixels and maps
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load cube into the model class
+ *
+ * @param[in] filename cube file.
+ *
+ * Loads cube into the model class.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::load(const std::string& filename)
+{
+    // Load cube
+    load_cube(filename);
+
+    // Update Monte Carlo cache
+    update_mc_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save cube into FITS file
+ *
+ * @param[in] filename Cube FITS file name.
+ * @param[in] clobber Overwrite existing FITS file (default=false).
+ *
+ * Saves spatial cube model into a FITS file.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::save(const std::string& filename,
+                                    const bool&        clobber) const
+{
+    // Create empty FITS file
+    GFits fits;
+
+    // Write event cube
+    write(fits);
+    
+    // Save FITS file
+    fits.saveto(filename, clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write skymap into FITS file
+ *
+ * @param[in] file FITS file pointer.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::write(GFits& file) const
+{
+    // Write cube
+    m_cube.write(file);
+
+    // Create energy intervals
+    GEnergies energies;
+    for (int i = 0; i < m_logE.size(); ++i) {
+        double energy = std::pow(10.0, m_logE[i]);
+        energies.append(GEnergy(energy, "MeV"));
+    }
+
+    // Write energy intervals
+    energies.write(file);
 
     // Return
     return;

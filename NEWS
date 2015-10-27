@@ -75,6 +75,9 @@ then returned by the GModelSpatialDiffuseMap::mc_norm method.
 The GModelSpatial::norm method has been renamed to GModelSpatial::mc_norm so that
 the usage of this method is now explicitly given by the method name.
 
+save() and write() methods have been added to GModelSpatialDiffuseCube that allow
+the saving of a diffuse cube spatial model to disk or into a FITS objects.
+
 
 9. Numerics module
 ------------------

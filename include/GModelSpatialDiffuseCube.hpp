@@ -40,6 +40,9 @@
 #include "GEbounds.hpp"
 #include "GEnergies.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GFits;
+
 
 /***********************************************************************//**
  * @class GModelSpatialDiffuseCube
@@ -89,7 +92,6 @@ public:
     // Other methods
     int                        maps(void) const;
     int                        pixels(void) const;
-    void                       load(const std::string& filename);
     double                     value(void) const;
     void                       value(const double& value);
     const std::string&         filename(void) const;
@@ -101,6 +103,11 @@ public:
     const GModelSpectralNodes& spectrum(void) const;
     void                       set_mc_cone(const GSkyDir& centre,
                                            const double&  radius) const;
+    void                       load(const std::string& filename);
+    void                       save(const std::string& filename,
+                                    const bool& clobber = false) const;
+    //void                       read(const GFits& file);
+    void                       write(GFits& file) const;
 
 protected:
     // Protected methods

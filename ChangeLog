@@ -3,6 +3,7 @@
         * Version 0.11.0 released
         =========================
 
+        Add save() and write() methods to GModelSpatialDiffuseCube
         Add interval constructor and set methods to GEnergies class
         Add Python unit test function to gammalib module (#1486)
         Increase CTA IRF integration precision for shell model (#1521)
