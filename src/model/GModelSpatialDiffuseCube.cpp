@@ -773,6 +773,11 @@ GEnergies GModelSpatialDiffuseCube::energies(void)
  *
  * Sets the simulation cone centre and radius that defines the directions
  * that will be simulated using the mc() method.
+ *
+ * @todo I disabled the selection of only pixels within an acceptance code
+ *       as these led to problems for maps that were larger than the ROI.
+ *       I still need to understand why, and use the selection cone for a
+ *       more efficient Monte Carlo simulation.
  ***************************************************************************/
 void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                                            const double&  radius) const
@@ -816,9 +821,11 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // Derive effective pixel radius from half opening angle
                 // that corresponds to the pixel's solid angle. For security,
                 // the radius is enhanced by 50%.
+                /*
                 double pixel_radius =
                        std::acos(1.0 - m_cube.solidangle(k)/gammalib::twopi) *
                        gammalib::rad2deg * 1.5;
+                */
 
                 // Add up flux with simulation cone radius + effective pixel
                 // radius. The effective pixel radius is added to make sure
@@ -829,10 +836,10 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // simulated event is contained in the simulation cone.
                 double flux = m_cube.flux(k,i);
                 if (flux > 0.0) {
-                    double distance = centre.dist_deg(m_cube.pix2dir(k));
-                    if (distance <= radius+pixel_radius) {
+                    //double distance = centre.dist_deg(m_cube.pix2dir(k));
+                    //if (distance <= radius+pixel_radius) {
                         sum += flux;
-                    }
+                    //}
                     sum_map += flux; // sum up total flux in map
                 }
 
@@ -851,8 +858,10 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             // Make sure that last pixel in the cache is >1
             m_mc_cache[npix+offset] = 1.0001;
 
-            // Store centre flux in node array
+            // Store flux as spectral node
             if (m_logE.size() == nmaps) {
+
+                // Compute mean energy
                 GEnergy energy;
                 energy.log10MeV(m_logE[i]);
 
