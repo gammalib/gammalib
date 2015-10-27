@@ -23,16 +23,78 @@ following:
     :label: irf
 
 Three different formats are implemented to specify the response
-information for CTA: Performance Tables, Xspec response files and
-Response Tables.
-The following sections describe these formats.
+information for CTA:
+Response Tables,
+Xspec response files, and
+Performance tables.
 
 
-.. _sec_cta_perftable:
+.. _sec_cta_response_formats:
+
+Response formats
+^^^^^^^^^^^^^^^^
+
+Response tables
+===============
+
+The CTA response table class :doxy:`GCTAResponseTable` provides a generic 
+handle for multi-dimensional response information. It is based on the 
+response format used for storing response information for the
+Fermi/LAT telescope. In this format, all information is stored in
+a single row of a FITS binary table. Each element of the row contains
+a vector column, that describes the axes of the  multi-dimensional response
+cube and the response information. Note that this class may in the future
+be promoted to the GammaLib core, as a similar class has been implemented
+in the Fermi/LAT interface.
+
+As an example for the format of a response table, the effective area component
+is shown below.
+Response information is stored in a n-dimensional cube, and each axis
+of this cube is described by the lower and upper edges of the axis bins.
+In this example the effective area is stored as a 2D matrix with the
+first axis being energy and the second axis being offaxis angle.
+Effective area information is stored for true (``EFFAREA``) and
+reconstructed (``EFFAREA_RECO``) energy.
+Vector columns are used to store all information.
+
+.. figure:: irf-aeff.png
+   :width: 100%
+
+All components of the response ar stored in a single FITS file, and each 
+component of the response factorisation is stored in a binary table of that
+FITS file.
+In addition, the response files contain an additional table that
+describes the background rate as function of energy and position in
+the field of view.
+An example of a CTA response file is shown below:
+
+.. figure:: irf-file.png
+   :width: 100%
+
+
+Xspec response format
+=====================
+
+For the first CTA Consortium Data Challenge (1DC) the response information
+was provided in a format that was inspired from the one use for Xspec.
+Effective area information after applying a theta cut was given by so
+called ancilliary response files (ARF files).
+The energy dispersion was provided as a Redistribution Matrix File (RMF 
+files).
+There is no Point Spread Function information defined for Xspec, and for 
+the sake of the 1DC, a simple one-dimensional vector had been implemented.
+
+GammaLib still supports handling of the 1DC files, but there are no plans 
+to use this format in the future.
+
 
 Performance table
-^^^^^^^^^^^^^^^^^
+=================
 
+Performance tables specify the CTA on-axis performance as function
+of energy and have been provided by the Monte Carlo group of the
+CTA Consortium for a variety of configurations.
+Performance tables are plain ASCII files.
 Below an example of a CTA performance table::
 
   log(E)     Area     r68     r80  ERes. BG Rate    Diff Sens
@@ -68,30 +130,11 @@ Below an example of a CTA performance table::
       systematics and statistics and at least 10 photons.
 
 
-Xspec response format
-^^^^^^^^^^^^^^^^^^^^^
-
-To be written ...
-
-
-.. _sec_cta_rsptable:
-
-Response table
-^^^^^^^^^^^^^^
-
-The CTA response table class :doxy:`GCTAResponseTable` provides a generic 
-handle for multi-dimensional response information. It is based on the 
-response format used for storing response information for the
-*Fermi*/LAT telescope. In this format, all information is stored in
-a single row of a FITS binary table. Each element of the row contains
-a vector column, that describes the axes of the  multi-dimensional response
-cube and the response information. Note that this class may in the future
-be promoted to the GammaLib core, as a similar class has been implemented
-in the *Fermi*/LAT interface. 
-
+Response components
+^^^^^^^^^^^^^^^^^^^
 
 Effective area
-^^^^^^^^^^^^^^
+==============
 
 The :math:`A_{\rm eff}(d, p, E, t)` term is described by the abstract
 :doxy:`GCTAAeff` base class. The effective area is determined using
@@ -125,33 +168,14 @@ allocated if an extension named ``SPECRESP`` is found; otherwise,
 :doxy:`GCTAAeffPerfTable` is allocated.
 
 
-GCTAAeffPerfTable
-"""""""""""""""""
+GCTAAeff2D
+""""""""""
 
-:doxy:`GCTAAeffPerfTable` reads the effective area information from an ASCII
-file that has been defined by the CTA Monte Carlo workpackage
-(see :ref:`sec_cta_perftable`). This file provides the full effective detection
-area in units of :math:`m^2` after the background cut as function of
-the base 10 logarithm of the true photon energy. No theta cut is
-applied. For a given energy, the effective area is computed by 
-interpolating the performance table in the base 10 logarithm of energy.
-Effective areas will always be non-negative.
-As the response table provides only the on-axis effective area,
-off-axis effective areas are estimated assuming that the radial 
-distribution follows a Gaussian distribution in offset angle squared:
-
-.. math::
-    A_{\rm eff}(\theta) = A_{\rm eff}(0)
-    \exp \left( -\frac{1}{2} \frac{\theta^4}{\sigma^2} \right)
-    :label: cta_aeff_offset
-
-where :math:`\sigma` characterises the size of the field of view. The
-:math:`\sigma` parameter is set and retrieved using the 
-:doxy:`GCTAAeffPerfTable::sigma` methods. When response information is
-specified by an XML file (see :ref:`sec_cta_xml`), the :math:`\sigma`
-parameter can be set using the optional ``sigma`` attribute.
-If the :math:`\sigma` parameter is not explicitly set,
-:math:`\sigma=3 \, {\rm deg}^2` is assumed as default.
+:doxy:`GCTAAeff2D` reads the full effective area as function of energies
+and off-axis angle from a FITS table. The FITS table is expected to be
+in the :ref:`sec_cta_rsptable` format. From this two-dimensional table,
+the effective area values are determine by bi-linear interpolation in
+the base 10 logarithm of photon energy and the offset angle.
 
 
 GCTAAeffArf
@@ -209,11 +233,130 @@ is used for the off-axis dependence, with the supplied ARF values being
 taken as the on-axis values.
 
 
-GCTAAeff2D
-""""""""""
+GCTAAeffPerfTable
+"""""""""""""""""
 
-:doxy:`GCTAAeff2D` reads the full effective area as function of energies
-and off-axis angle from a FITS table. The FITS table is expected to be
-in the :ref:`sec_cta_rsptable` format. From this two-dimensional table,
-the effective area values are determine by bi-linear interpolation in
-the base 10 logarithm of photon energy and the offset angle.
+:doxy:`GCTAAeffPerfTable` reads the effective area information from an ASCII
+file that has been defined by the CTA Monte Carlo workpackage
+(see :ref:`sec_cta_perftable`). This file provides the full effective detection
+area in units of :math:`m^2` after the background cut as function of
+the base 10 logarithm of the true photon energy. No theta cut is
+applied. For a given energy, the effective area is computed by 
+interpolating the performance table in the base 10 logarithm of energy.
+Effective areas will always be non-negative.
+As the response table provides only the on-axis effective area,
+off-axis effective areas are estimated assuming that the radial 
+distribution follows a Gaussian distribution in offset angle squared:
+
+.. math::
+    A_{\rm eff}(\theta) = A_{\rm eff}(0)
+    \exp \left( -\frac{1}{2} \frac{\theta^4}{\sigma^2} \right)
+    :label: cta_aeff_offset
+
+where :math:`\sigma` characterises the size of the field of view. The
+:math:`\sigma` parameter is set and retrieved using the 
+:doxy:`GCTAAeffPerfTable::sigma` methods. When response information is
+specified by an XML file (see :ref:`sec_cta_xml`), the :math:`\sigma`
+parameter can be set using the optional ``sigma`` attribute.
+If the :math:`\sigma` parameter is not explicitly set,
+:math:`\sigma=3 \, {\rm deg}^2` is assumed as default.
+
+
+Point spread function
+=====================
+
+The :math:`PSF(p' | d, p, E, t)` term is described by the abstract
+:doxy:`GCTAPsf` base class. The point spread function is determined using
+the:
+ 
+.. code-block:: cpp
+ 
+    double GCTAPsf::operator()(const double& delta,
+                               const double& logE, 
+                               const double& theta = 0.0, 
+                               const double& phi = 0.0,
+                               const double& zenith = 0.0,
+                               const double& azimuth = 0.0,
+                               const bool&   etrue = true) const;
+
+operator, where 
+``delta`` is the angle between true and measured photon arrival direction
+and ``logE`` is the base 10 logarithm of the photon energy.
+If ``etrue`` is true, ``logE`` is the true photon energy; otherwise,
+``logE`` is the measured photon energy.
+``theta`` and ``phi`` are the offset and azimuth angle of the incident
+photon with respect to the camera pointing,
+``zenith`` and ``azimuth`` are the zenith and azimuth angle of the
+camera pointing.
+
+GCTAPsf2D
+"""""""""
+
+GCTAPsfKing
+"""""""""""
+
+GCTAPsfVector
+"""""""""""""
+
+GCTAPsfPerfTable
+""""""""""""""""
+
+
+Energy dispersion
+=================
+
+The :math:`E_{\rm disp}(E' | d, p, E, t)` term is described by the abstract
+:doxy:`GCTAEdisp` base class. The energy dispersion is determined using
+the:
+ 
+.. code-block:: cpp
+ 
+    double GCTAEdisp::operator()(const double& logEobs, 
+                                 const double& logEsrc, 
+                                 const double& theta = 0.0, 
+                                 const double& phi = 0.0,
+                                 const double& zenith = 0.0,
+                                 const double& azimuth = 0.0) const;
+
+operator, where 
+``logEobs`` is the base 10 logarithm of the measured energy,
+``logEsrc`` is the base 10 logarithm of the true energy,
+``theta`` and ``phi`` are the offset and azimuth angle of the incident
+photon with respect to the camera pointing, and
+``zenith`` and ``azimuth`` are the zenith and azimuth angle of the
+camera pointing.
+
+
+GCTAEdisp2D
+"""""""""""
+
+GCTAEdispRmf
+""""""""""""
+
+GCTAEdispPerfTable
+""""""""""""""""""
+
+
+Background template
+===================
+
+The background is described by the abstract :doxy:`GCTABackground` base
+class. The background is determined using the:
+ 
+.. code-block:: cpp
+ 
+    double GCTABackground::operator()(const double& logE, 
+                                      const double& detx, 
+                                      const double& dety) const;
+
+operator, where 
+``logE`` is the base 10 logarithm of the measured energy, and
+``detx`` and ``dety`` are the measured arrival directions in the
+nominal camera system.
+
+
+GCTABackground3D
+""""""""""""""""
+
+GCTABackgroundPerfTable
+"""""""""""""""""""""""

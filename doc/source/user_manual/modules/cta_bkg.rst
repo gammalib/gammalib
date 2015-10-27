@@ -30,6 +30,23 @@ This allows to adjust the energy distribution of the background template
 to the data.
 In the above example the background rates are multiplied with a power law.
 
+.. note::
+
+  In case that no background information is available in the instrument
+  response function a first order background model can be obtained by
+  using the effective area as a spatial template for the background.
+  The XML model description has the following format:
+
+  .. code-block:: xml
+  
+     <source name="Background" type="CTAAeffBackground" instrument="CTA">
+         <spectrum type="PowerLaw">
+             <parameter name="Prefactor" scale="1e-14" value="1.0"  min="1e-3" max="1e3"    free="1"/>
+             <parameter name="Index"     scale="1.0"   value="-2.4" min="-5.0" max="+5.0"   free="1"/>
+             <parameter name="Scale"     scale="1e6"   value="1.0"  min="0.01" max="1000.0" free="0"/>
+         </spectrum>
+     </source>
+
 For stacked analysis there is an equivalent model that makes use of the 
 background model provided in the ``BkgCube`` parameter of the observation
 definition XML file:
@@ -47,7 +64,7 @@ definition XML file:
 The structure of the XML model is identical to the one shown before, but 
 the type of the model is now ``CTACubeBackground``.
 
-Finally, a third type of background model exists that assumes that the 
+Another type of background model exists that assumes that the 
 spatial and spectral component of the background can be factorised and 
 that the spatial component is radially symmetric.
 This background model is rather simplistic, and is mainly still there for 

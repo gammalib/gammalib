@@ -96,7 +96,10 @@ These boundaries are specified as optional attributes in the XML file, e.g.
         ...
     </observation>
 
-**Note that the energy boundaries are specified in units of TeV.**
+.. note::
+
+   Energy boundaries in the observation XML file are specified in units
+   of TeV.
 
 In case that neither an event list nor an event cube is available, a
 CTA observation can be defined by specifying the pointing direction,
@@ -115,5 +118,7 @@ Here an example of the expected XML format:
        <parameter name="Calibration" database="prod2" response="South_50h" />
    </observation>
 
-Note that the time reference for the Good Time Intervals is specified 
-using the ``TimeReference`` parameter.
+.. note::
+
+   The time reference for the Good Time Intervals is specified 
+   using the ``TimeReference`` parameter.
