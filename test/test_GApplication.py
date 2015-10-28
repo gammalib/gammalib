@@ -147,7 +147,7 @@ class Test(gammalib.GPythonTestSuite):
         file.close()
         for i, line in enumerate(lines):
             if ref[i] == "true\n":
-                self.test_assert(line == ref[i] or line == "1",
+                self.test_assert(line == ref[i] or line == "1\n",
                                  "Test "+calls[i]+": "+line)
             else:
                 self.test_assert(line == ref[i], "Test "+calls[i]+": "+line)
