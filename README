@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 0.11.0 (2 October 2015)
+Version: 0.11.0 (27 October 2015)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -181,7 +181,7 @@ If everything works successfully you should see
 or
 
 ============================================================================
-Testsuite summary for gammalib 0.10.0
+Testsuite summary for gammalib 0.11.0
 ============================================================================
 # TOTAL: 20
 # PASS:  20
