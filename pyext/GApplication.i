@@ -109,6 +109,9 @@ public:
         else if (par.type() == "i") {
             par.integer(val);
         }
+        else if (par.type() == "b") {
+            par.boolean(val);
+        }
         else {
             std::string msg = "Attempt to set \""+par.type()+
                               "\" parameter \""+name+"\" with integer "
