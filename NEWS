@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 0.11.0
 
 Author(s) : Juergen Knoedlseder
 
-27 October 2015
+28 October 2015
 
 
 1. Introduction
@@ -36,6 +36,10 @@ assure that the PFILES environment variable will always take precedence over the
 users pfiles directory, and if the paramter file is missing in the directory
 pointed by the PFILES environment variable, it will be copied over from the
 syspfiles directory.
+
+The GApplication class now has a need_help() method that returns true is the
+--help option is specified on the command line. This allows the client to display
+any help information.
 
 
 5. Base module

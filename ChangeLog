@@ -1,8 +1,9 @@
-2015-10-27  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-10-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released
         =========================
 
+        Add need_help() method to GApplication (#572)
         Correct GModelSpatialDiffuseCube computations (#1559)
         Add save() and write() methods to GModelSpatialDiffuseCube
         Add interval constructor and set methods to GEnergies class
