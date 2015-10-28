@@ -70,6 +70,7 @@ public:
     void               log_header(void);
     void               log_trailer(void);
     void               log_parameters(void);
+    const bool&        need_help(void) const;
 
     // Public members
     GLog log;   //!< Application logger

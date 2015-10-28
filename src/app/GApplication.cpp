@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -131,15 +131,32 @@ GApplication::GApplication(const std::string& name, const std::string& version,
         m_args.push_back(gammalib::strip_whitespace(argv[i]));
     }
 
-    // Initialise application parameters
-    m_pars.load(par_filename(), m_args);
+    // Catch --help option before doing anything else. The actual action
+    // needs to be done by the client, but we skip the loading of the
+    // parameter file and the opening of the logger if the help option
+    // was specified.
+    m_need_help = false;
+    if (m_args.size() >= 2) {
+        if (m_args[1] == "--help") {
+            m_need_help = true;
+        }
+    }
 
-    // Set log filename and chattiness
-    set_log_filename();
-    set_log_chatter();
+    // If no --help option has been specified then proceed with loading
+    // the parameter file and opening the logger
+    if (!m_need_help) {
 
-    // Initialise the application logger
-    logFileOpen();
+        // Initialise application parameters
+        m_pars.load(par_filename(), m_args);
+
+        // Set log filename and chattiness
+        set_log_filename();
+        set_log_chatter();
+
+        // Initialise the application logger
+        logFileOpen();
+
+    } // endif: no --help option specified
 
     // Return
     return;
@@ -579,6 +596,7 @@ void GApplication::init_members(void)
     m_logfile.clear();
     m_args.clear();
     m_pars.clear();
+    m_need_help = false;
 
     // Save the execution calendar start time
     std::time(&m_tstart);
@@ -602,14 +620,15 @@ void GApplication::copy_members(const GApplication& app)
     log = app.log;
 
     // Copy protected attributes
-    m_name    = app.m_name;
-    m_version = app.m_version;
-    m_parfile = app.m_parfile;
-    m_logfile = app.m_logfile;
-    m_args    = app.m_args;
-    m_tstart  = app.m_tstart;
-    m_cstart  = app.m_cstart;
-    m_pars    = app.m_pars;
+    m_name      = app.m_name;
+    m_version   = app.m_version;
+    m_parfile   = app.m_parfile;
+    m_logfile   = app.m_logfile;
+    m_args      = app.m_args;
+    m_tstart    = app.m_tstart;
+    m_cstart    = app.m_cstart;
+    m_pars      = app.m_pars;
+    m_need_help = app.m_need_help;
 
     // Return
     return;

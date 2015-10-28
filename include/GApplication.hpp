@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -83,6 +83,7 @@ public:
     void               log_header(void);
     void               log_trailer(void);
     void               log_parameters(void);
+    const bool&        need_help(void) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Public members
@@ -105,6 +106,7 @@ protected:
     std::time_t              m_tstart;     //!< Calendar start time of execution
     std::clock_t             m_cstart;     //!< Clock start time of execution
     GApplicationPars         m_pars;       //!< Application parameters
+    bool                     m_need_help;  //!< --help specified
 };
 
 
@@ -207,6 +209,19 @@ const std::string& GApplication::log_filename(void) const
 
     // Return
     return (m_logfile);
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if --help option has been specified
+ *
+ * @return True if --help option has been specified.
+ ***************************************************************************/
+inline
+const bool& GApplication::need_help(void) const
+{
+    // Return
+    return (m_need_help);
 }
 
 #endif /* GAPPLICATION_HPP */
