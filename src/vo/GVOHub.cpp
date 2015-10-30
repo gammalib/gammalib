@@ -361,7 +361,7 @@ void GVOHub::start_hub(void)
     while (1) {
 
         // Accept connection from the client 
-    	socklen_t socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
+    	int socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
     	if (socket < 0) {
             std::string msg = "Client connection to socket not accepted.";
             throw GException::runtime_error(G_START_HUB, msg);
