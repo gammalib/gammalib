@@ -724,10 +724,14 @@ void GModelSpatialEllipticalGauss::free_members(void)
  *
  * Computes the normalization
  * \f[
- *    {\tt m\_norm} = \frac{1}{2 \pi (1 - \cos a) (1 - \cos b)}
+ *    {\tt m\_norm} = \frac{1}{2 \pi \times a \times b}
  * \f]
+ * where 
+ * \f$a\f$ is the semi-major axis and
+ * \f$b\f$ is the semi-minor axis of the ellipse.
  *
- * @todo check this formula
+ * @todo Generalize normalization to the sphere (for the moment only accurate
+ *       in the small angle approximation).
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::update() const
 {
@@ -748,7 +752,10 @@ void GModelSpatialEllipticalGauss::update() const
         m_minor_rad = m_last_minor * gammalib::deg2rad;
         m_major_rad = m_last_major * gammalib::deg2rad;
 
-        // Perform precomputations
+        // Perform precomputations. Note that I verified the normalization
+        // by numerical integration of the resulting Gaussian. Note also
+        // also that the normalization is only correct in the small angle
+        // approximation.
         m_minor2     = m_minor_rad * m_minor_rad;
         m_major2     = m_major_rad * m_major_rad;
         double denom = gammalib::twopi * m_minor_rad * m_major_rad;
