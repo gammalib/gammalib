@@ -36,6 +36,11 @@
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
+namespace {
+    const double c_theta_max    = 3.0; //!< semiaxis multiplied for theta_max()
+    const double c_max_exponent = 0.5 * c_theta_max * c_theta_max;
+    const double c_fraction     = 1.0 - std::exp(-c_max_exponent);
+}
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialEllipticalGauss g_elliptical_gauss_seed;
@@ -48,6 +53,7 @@ const GModelSpatialRegistry g_elliptical_gauss_registry(&g_elliptical_gauss_seed
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_SMALL_ANGLE_APPROXIMATION      //!< Use small angle approximation
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -73,14 +79,14 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(void) :
 
 
 /***********************************************************************//**
- * @brief Elliptical Gauss constructor
+ * @brief Elliptical Gaussian constructor
  *
- * @param[in] dir Sky position of gauss centre.
+ * @param[in] dir Centre of elliptical Gaussian.
  * @param[in] semimajor Semi-major axis (degrees).
  * @param[in] semiminor Semi-minor axis (degrees).
  * @param[in] posangle Position angle of semi-major axis (degrees).
  *
- * Construct elliptical gauss model from sky position of the ellipse centre
+ * Construct elliptical Gaussian model from the ellipse centre direction
  * (@p dir), the @p semimajor and @p semiminor axes, and the position
  * angle (@p posangle).
  ***************************************************************************/
@@ -109,7 +115,7 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * Constructs elliptical gauss model by extracting information from an XML
+ * Constructs elliptical Gaussian model by extracting information from an XML
  * element. See the read() method for more information about the expected
  * structure of the XML element.
  ***************************************************************************/
@@ -130,7 +136,7 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GXmlElement& xm
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Elliptical gauss model.
+ * @param[in] model Elliptical Gaussian model.
  ***************************************************************************/
 GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const GModelSpatialEllipticalGauss& model) :
                               GModelSpatialElliptical(model)
@@ -169,7 +175,7 @@ GModelSpatialEllipticalGauss::~GModelSpatialEllipticalGauss(void)
  * @brief Assignment operator
  *
  * @param[in] model Elliptical gauss model.
- * @return Elliptical gauss model.
+ * @return Elliptical Gaussian model.
  ***************************************************************************/
 GModelSpatialEllipticalGauss& GModelSpatialEllipticalGauss::operator=(const GModelSpatialEllipticalGauss& model)
 {
@@ -202,7 +208,7 @@ GModelSpatialEllipticalGauss& GModelSpatialEllipticalGauss::operator=(const GMod
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear elliptical gauss model
+ * @brief Clear elliptical Gaussian model
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::clear(void)
 {
@@ -222,13 +228,13 @@ void GModelSpatialEllipticalGauss::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone elliptical gauss model
+ * @brief Clone elliptical Gaussian model
  *
- * @return Pointer to deep copy of elliptical gauss model.
+ * @return Pointer to deep copy of elliptical Gaussian model.
  ***************************************************************************/
 GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
 {
-    // Clone elliptical gauss model
+    // Clone elliptical Gaussian model
     return new GModelSpatialEllipticalGauss(*this);
 }
 
@@ -242,47 +248,50 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  * @param[in] time Photon arrival time.
  * @return Model value.
  *
- * Evaluates the spatial component for an elliptical gauss source model. The
- * source model is an elliptical gaussian function
- * \f$S_{\rm p}(\theta, \phi | E, t)\f$, where
- * \f$\theta\f$ is the angular separation between elliptical gauss centre and
- * the actual location and \f$\phi\f$ the position angle with respect to the
- * model centre, counted counterclockwise from North.
+ * Evaluates the spatial component for an elliptical Gaussian source model.
  *
- * The function \f$f(\theta, \phi)\f$ is given by
+ * The elliptical Gaussian function is defined by
+ * \f$S_{\rm p}(\theta, \phi | E, t)\f$, where
+ * \f$\theta\f$ is the angular separation between elliptical Gaussian centre
+ * and the actual location and \f$\phi\f$ the position angle with respect to
+ * the model centre, counted counterclockwise from North.
+ *
+ * The function \f$S_{\rm p}(\theta, \phi | E, t)\f$ is given by
  *
  * \f[
- * S_{\rm p}(\theta, \phi | E, t) = \left \{
- *  \begin{array}{l l}
- *     {\tt m\_norm}
- *     & \mbox{if} \, \, \theta \le \theta_0 \\
- *     \\
- *     0 & \mbox{else}
- *  \end{array}
- *  \right .
+ * S_{\rm p}(\theta, \phi | E, t) = {\tt m\_norm} \times
+ * \exp \left( -\frac{\theta^2}{2 r_{rm eff}} \right)
  * \f]
  *
- * where \f$\theta_0\f$ is the effective radius of the ellipse on the sphere
- * given by
+ * where the effective ellipse radius \f$r_{rm eff}\f$ towards a given
+ * position angle is given by
  *
- * \f[\theta_0\ =
- *    \frac{ab}{\sqrt{b^2 \cos^2(\phi-\phi_0) + a^2 \sin^2(\phi-\phi_0)}}\f]
- *
- * and
+ * \f[
+ * r_{rm eff} = \frac{ab}
+ *                   {\sqrt{\left( a \sin (\phi - \phi_0) \right)^2 +
+ *                    \sqrt{\left( b \cos (\phi - \phi_0) \right)^2}
+ * \f]
+ * and  
  * \f$a\f$ is the semi-major axis of the ellipse,
  * \f$b\f$ is the semi-minor axis, and
  * \f$\phi_0\f$ is the position angle of the ellipse, counted
  * counterclockwise from North.
+ * \f${\tt m\_norm}\f$ is a normalization constant given by
  *
- * The normalisation constant \f${\tt m\_norm}\f$ which is the inverse of the
- * solid angle subtended by an ellipse is given by
  * \f[
  *    {\tt m\_norm} = \frac{1}{2 \pi \times a \times b}
  * \f]
  *
  * @warning
- * The normalization of the elliptical Gaussian is only valid in the small
- * angle approximation.
+ * The above formula for an elliptical Gaussian are accurate for small
+ * angles, with semimajor and semiminor axes below a few degrees. This
+ * should be fine for most use cases, but you should be aware that the
+ * ellipse will get distorted for larger angles.
+ *
+ * @warning
+ * For numerical reasons the elliptical Gaussian will be truncated for
+ * \f$\theta\f$ angles that correspond to 3.0 times the effective ellipse
+ * radius.
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
                                           const double&  posangle,
@@ -298,6 +307,18 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
         // Update precomputation cache
         update();
 
+        // Perform computations to compute exponent
+        #if defined(G_SMALL_ANGLE_APPROXIMATION)
+        double rel_posangle  = posangle - this->posangle() * gammalib::deg2rad;
+        double cosinus       = std::cos(rel_posangle);
+        double sinus         = std::sin(rel_posangle);
+        double arg1          = m_minor_rad * cosinus;
+        double arg2          = m_major_rad * sinus;
+        double r_ellipse     = m_minor_rad * m_major_rad /
+                               std::sqrt(arg1*arg1 + arg2*arg2); //!< small angle
+        double r_relative    = theta/r_ellipse;
+        double exponent      = 0.5*r_relative*r_relative;
+        #else
         // Perform computations
         double sinphi = std::sin(posangle);
         double cosphi = std::cos(posangle);
@@ -308,10 +329,13 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
         double term3 = m_term3 * sinphi * cosphi;
 
         // Compute exponent
-        double exponent = theta * theta * (term1 + term2 + term3);
+        double exponent = theta * theta * (term1 + term2 + term3);        
+        #endif
 
-        // Set value
-        value = m_norm * std::exp(-exponent);
+        // Set value if the exponent is within the truncation region
+        if (exponent <= c_max_exponent) {
+            value = m_norm * std::exp(-exponent);
+        }
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -344,7 +368,7 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
  * @return Model value.
  *
  * Evaluates the function value. No gradient computation is implemented as
- * Elliptical models will be convolved with the instrument response and thus
+ * elliptical models will be convolved with the instrument response and thus
  * require the numerical computation of the derivatives.
  *
  * See the eval() method for more information.
@@ -367,7 +391,12 @@ double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Draws an arbitrary sky position from the 2D gauss distribution.
+ * Draws an arbitrary sky direction from the elliptical Gaussian model.
+ *
+ * @warning
+ * For numerical reasons the elliptical Gaussian will be truncated for
+ * \f$\theta\f$ angles that correspond to 3.0 times the effective ellipse
+ * radius.
  ***************************************************************************/
 GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
                                          const GTime&   time,
@@ -382,10 +411,18 @@ GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
     photon.time(time);
 
     // Draw gaussian offset from each axis
-    double theta1 = semimajor() * ran.normal();
-    double theta2 = semiminor() * ran.normal();
+    double ran_major;
+    double ran_minor;
+    do {
+        ran_major = ran.normal();
+    } while (ran_major > c_theta_max);
+    do {
+        ran_minor = ran.normal();
+    } while (ran_minor > c_theta_max);
+    double theta1 = semimajor() * ran_major;
+    double theta2 = semiminor() * ran_minor;
 
-    // Compute total offset from model centre
+    // Compute total offset from model centre in small angle approximation
     double theta = std::sqrt(theta1 * theta1 + theta2 * theta2);
 
     // Compute rotation angle, taking into account given position angle
@@ -431,19 +468,17 @@ bool GModelSpatialEllipticalGauss::contains(const GSkyDir& dir,
  *
  * @return Returns maximum model radius.
  *
- * Returns the maximum of \f$2.5\f$ semimajor() and \f$2.5\f$ semiminor() as
+ * Returns the maximum of 3.0 semimajor() and 3.0 semiminor() as
  * approximate edge of the Gaussian. This limit is of course arbitrary, but
  * allows to limit the integration region for response computation. The value
- * of 2.5 has been determined by experiment. Ideally, a large value should
- * be used to properly take into account the tails of the distribution, but
- * this apparently leads to fit convergence problems (#1561).
+ * of 3.0 has been determined by experiment (#1561).
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::theta_max(void) const
 {
     // Set maximum model radius
     double theta_max = (semimajor() > semiminor())
-                       ? semimajor() * gammalib::deg2rad * 2.5
-                       : semiminor() * gammalib::deg2rad * 2.5;
+                       ? semimajor() * gammalib::deg2rad * c_theta_max
+                       : semiminor() * gammalib::deg2rad * c_theta_max;
 
     // Return value
     return theta_max;
@@ -690,7 +725,7 @@ void GModelSpatialEllipticalGauss::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Elliptical gauss model.
+ * @param[in] model Elliptical Gaussian model.
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGauss& model)
 {
@@ -739,9 +774,6 @@ void GModelSpatialEllipticalGauss::free_members(void)
  * @warning
  * The normalization of the elliptical Gaussian is only valid in the small
  * angle approximation.
- *
- * @todo Generalize normalization to the sphere (for the moment only accurate
- *       in the small angle approximation).
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::update() const
 {
@@ -768,12 +800,14 @@ void GModelSpatialEllipticalGauss::update() const
         // approximation.
         m_minor2     = m_minor_rad * m_minor_rad;
         m_major2     = m_major_rad * m_major_rad;
-        double denom = gammalib::twopi * m_minor_rad * m_major_rad;
+        double denom = gammalib::twopi * m_minor_rad * m_major_rad *
+                       c_fraction;
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
 
     // Update chache if position angle changed
+    #if !defined(G_SMALL_ANGLE_APPROXIMATION)
     if (m_last_posangle != posangle()) {
 
         // Signal parameter changes
@@ -805,6 +839,7 @@ void GModelSpatialEllipticalGauss::update() const
         m_term3 = 0.5 * (m_sin2pos / m_major2 - m_sin2pos / m_minor2);
 
     } // endif: something has changed
+    #endif
 
     // Return
     return;
