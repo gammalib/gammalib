@@ -37,7 +37,7 @@
 
 /* __ Constants __________________________________________________________ */
 namespace {
-    const double c_theta_max    = 3.0; //!< semiaxis multiplied for theta_max()
+    const double c_theta_max    = 2.5; //!< semiaxis multiplied for theta_max()
     const double c_max_exponent = 0.5 * c_theta_max * c_theta_max;
     const double c_fraction     = 1.0 - std::exp(-c_max_exponent);
 }
@@ -290,7 +290,7 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  *
  * @warning
  * For numerical reasons the elliptical Gaussian will be truncated for
- * \f$\theta\f$ angles that correspond to 3 times the effective ellipse
+ * \f$\theta\f$ angles that correspond to 2.5 times the effective ellipse
  * radius.
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
@@ -315,7 +315,7 @@ double GModelSpatialEllipticalGauss::eval(const double&  theta,
         double arg1          = m_minor_rad * cosinus;
         double arg2          = m_major_rad * sinus;
         double r_ellipse     = m_minor_rad * m_major_rad /
-                               std::sqrt(arg1*arg1 + arg2*arg2);
+                               std::sqrt(arg1*arg1 + arg2*arg2); //!< small angle
         double r_relative    = theta/r_ellipse;
         double exponent      = 0.5*r_relative*r_relative;
         #else
@@ -395,7 +395,7 @@ double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
  *
  * @warning
  * For numerical reasons the elliptical Gaussian will be truncated for
- * \f$\theta\f$ angles that correspond to 3 times the effective ellipse
+ * \f$\theta\f$ angles that correspond to 2.5 times the effective ellipse
  * radius.
  ***************************************************************************/
 GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
@@ -422,7 +422,7 @@ GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
     double theta1 = semimajor() * ran_major;
     double theta2 = semiminor() * ran_minor;
 
-    // Compute total offset from model centre
+    // Compute total offset from model centre in small angle approximation
     double theta = std::sqrt(theta1 * theta1 + theta2 * theta2);
 
     // Compute rotation angle, taking into account given position angle
@@ -468,10 +468,10 @@ bool GModelSpatialEllipticalGauss::contains(const GSkyDir& dir,
  *
  * @return Returns maximum model radius.
  *
- * Returns the maximum of \f$3\f$ semimajor() and \f$3\f$ semiminor() as
+ * Returns the maximum of 2.5 semimajor() and 2.5 semiminor() as
  * approximate edge of the Gaussian. This limit is of course arbitrary, but
  * allows to limit the integration region for response computation. The value
- * of 3 has been determined by experiment (#1561).
+ * of 2.5 has been determined by experiment (#1561).
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::theta_max(void) const
 {
