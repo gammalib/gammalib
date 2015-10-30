@@ -36,6 +36,11 @@
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
+namespace {
+    const double c_theta_max    = 2.0; //!< semiaxis multiplied for theta_max()
+    const double c_max_exponent = 0.5 * c_theta_max * c_theta_max;
+    const double c_fraction     = 1.0 - std::exp(-c_max_exponent);
+}
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialEllipticalGauss g_elliptical_gauss_seed;
@@ -242,12 +247,13 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  * @param[in] time Photon arrival time.
  * @return Model value.
  *
- * Evaluates the spatial component for an elliptical gauss source model. The
- * source model is an elliptical gaussian function
+ * Evaluates the spatial component for an elliptical Gaussian source model.
+ *
+ * The source model is an elliptical Gaussian function
  * \f$S_{\rm p}(\theta, \phi | E, t)\f$, where
- * \f$\theta\f$ is the angular separation between elliptical gauss centre and
- * the actual location and \f$\phi\f$ the position angle with respect to the
- * model centre, counted counterclockwise from North.
+ * \f$\theta\f$ is the angular separation between elliptical Gaussian centre
+ * and the actual location and \f$\phi\f$ the position angle with respect to
+ * the model centre, counted counterclockwise from North.
  *
  * The function \f$f(\theta, \phi)\f$ is given by
  *
@@ -367,7 +373,10 @@ double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Draws an arbitrary sky position from the 2D gauss distribution.
+ * Draws an arbitrary sky direction from the 2D ellipital Gaussian model.
+ * The drawn sky direction will be truncated to \f$2 \sigma\f$ offsets from
+ * the ellipse centre, where \f$\sigma\f$ is the effective Gaussian size
+ * in the direction of a specific position angle.
  ***************************************************************************/
 GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
                                          const GTime&   time,
@@ -382,8 +391,16 @@ GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
     photon.time(time);
 
     // Draw gaussian offset from each axis
-    double theta1 = semimajor() * ran.normal();
-    double theta2 = semiminor() * ran.normal();
+    double ran_major;
+    double ran_minor;
+    do {
+        ran_major = ran.normal();
+    } while (ran_major > c_theta_max);
+    do {
+        ran_minor = ran.normal();
+    } while (ran_minor > c_theta_max);
+    double theta1 = semimajor() * ran_major;
+    double theta2 = semiminor() * ran_minor;
 
     // Compute total offset from model centre
     double theta = std::sqrt(theta1 * theta1 + theta2 * theta2);
@@ -431,10 +448,10 @@ bool GModelSpatialEllipticalGauss::contains(const GSkyDir& dir,
  *
  * @return Returns maximum model radius.
  *
- * Returns the maximum of \f$2.5\f$ semimajor() and \f$2.5\f$ semiminor() as
+ * Returns the maximum of \f$2\f$ semimajor() and \f$2\f$ semiminor() as
  * approximate edge of the Gaussian. This limit is of course arbitrary, but
  * allows to limit the integration region for response computation. The value
- * of 2.5 has been determined by experiment. Ideally, a large value should
+ * of 2 has been determined by experiment. Ideally, a large value should
  * be used to properly take into account the tails of the distribution, but
  * this apparently leads to fit convergence problems (#1561).
  ***************************************************************************/
@@ -442,8 +459,8 @@ double GModelSpatialEllipticalGauss::theta_max(void) const
 {
     // Set maximum model radius
     double theta_max = (semimajor() > semiminor())
-                       ? semimajor() * gammalib::deg2rad * 2.5
-                       : semiminor() * gammalib::deg2rad * 2.5;
+                       ? semimajor() * gammalib::deg2rad * c_theta_max
+                       : semiminor() * gammalib::deg2rad * c_theta_max;
 
     // Return value
     return theta_max;
@@ -768,7 +785,8 @@ void GModelSpatialEllipticalGauss::update() const
         // approximation.
         m_minor2     = m_minor_rad * m_minor_rad;
         m_major2     = m_major_rad * m_major_rad;
-        double denom = gammalib::twopi * m_minor_rad * m_major_rad;
+        double denom = gammalib::twopi * m_minor_rad * m_major_rad *
+                       c_fraction;
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
