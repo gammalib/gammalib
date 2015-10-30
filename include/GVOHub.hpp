@@ -138,7 +138,7 @@ protected:
     std::string         m_hub_path;  //!< Hub path
     std::string         m_version;   //!< The version of the SAMP Standard Profile implemented by the hub
     std::string         m_hub_id;    //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
-    socklen_t           m_socket;    //!< Hub socket
+    int                 m_socket;    //!< Hub socket
     bool                m_shutdown;  //!< Shutdown request
     std::vector<client> m_clients;   //!< Clients
 };
