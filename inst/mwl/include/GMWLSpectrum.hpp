@@ -144,7 +144,7 @@ int GMWLSpectrum::dim(void) const
 inline
 int GMWLSpectrum::naxis(const int& axis) const
 {
-    return m_data.size();
+    return (int)m_data.size();
 }
 
 

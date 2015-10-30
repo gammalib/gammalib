@@ -140,7 +140,7 @@ int GCTAEventList::size(void) const
 inline
 int GCTAEventList::number(void) const
 {
-    return (m_events.size());
+    return (int)m_events.size();
 }
 
 
