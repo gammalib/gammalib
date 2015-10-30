@@ -1252,7 +1252,24 @@ GSkyPixel GSkyMap::dir2pix(const GSkyDir& dir) const
  * @exception GException::invalid_value
  *            No valid sky projection found.
  *
- * Returns the flux in the pixel with the specified @p index.
+ * Returns the flux in the pixel with the specified @p index. The flux is
+ * computed by integrating the intensity over the solid angle subtended by
+ * the pixel.
+ * Integration is done by dividing the pixel into wedges, computing the
+ * intensitites at the cornes of each wedge, averaging these intensities,
+ * and multiplying it with the solid angle of each wedge. This provides an
+ * approximation of the true pixel flux which is accurate to better than
+ * about 5%.
+ * 
+ * For a HealPix pixelisation, the pixel is divided into 12 wedges. For a
+ * WCS pixelisation, the pixel is divided into 8 wedges.
+ *
+ * @warning
+ * This method only returns correct values once the skymap is completely
+ * setup with values. Do not use this method during a setup operation as
+ * the method uses neighboring pixels for interpolation. If the map is not
+ * completely setup the neighboring pixels may still be empty, hence the
+ * flux interpolation will be wrong.
  ***************************************************************************/
 double GSkyMap::flux(const int& index, const int& map) const
 {
@@ -1290,6 +1307,13 @@ double GSkyMap::flux(const int& index, const int& map) const
  * 
  * For a HealPix pixelisation, the pixel is divided into 12 wedges. For a
  * WCS pixelisation, the pixel is divided into 8 wedges.
+ *
+ * @warning
+ * This method only returns correct values once the skymap is completely
+ * setup with values. Do not use this method during a setup operation as
+ * the method uses neighboring pixels for interpolation. If the map is not
+ * completely setup the neighboring pixels may still be empty, hence the
+ * flux interpolation will be wrong.
  ***************************************************************************/
 double GSkyMap::flux(const GSkyPixel& pixel, const int& map) const
 {
