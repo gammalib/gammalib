@@ -37,7 +37,7 @@
 
 /* __ Constants __________________________________________________________ */
 namespace {
-    const double c_theta_max    = 2.5; //!< semiaxis multiplied for theta_max()
+    const double c_theta_max    = 3.0; //!< semiaxis multiplied for theta_max()
     const double c_max_exponent = 0.5 * c_theta_max * c_theta_max;
     const double c_fraction     = 1.0 - std::exp(-c_max_exponent);
 }
@@ -290,7 +290,7 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  *
  * @warning
  * For numerical reasons the elliptical Gaussian will be truncated for
- * \f$\theta\f$ angles that correspond to 2.5 times the effective ellipse
+ * \f$\theta\f$ angles that correspond to 3.0 times the effective ellipse
  * radius.
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
@@ -395,7 +395,7 @@ double GModelSpatialEllipticalGauss::eval_gradients(const double&  theta,
  *
  * @warning
  * For numerical reasons the elliptical Gaussian will be truncated for
- * \f$\theta\f$ angles that correspond to 2.5 times the effective ellipse
+ * \f$\theta\f$ angles that correspond to 3.0 times the effective ellipse
  * radius.
  ***************************************************************************/
 GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
@@ -468,10 +468,10 @@ bool GModelSpatialEllipticalGauss::contains(const GSkyDir& dir,
  *
  * @return Returns maximum model radius.
  *
- * Returns the maximum of 2.5 semimajor() and 2.5 semiminor() as
+ * Returns the maximum of 3.0 semimajor() and 3.0 semiminor() as
  * approximate edge of the Gaussian. This limit is of course arbitrary, but
  * allows to limit the integration region for response computation. The value
- * of 2.5 has been determined by experiment (#1561).
+ * of 3.0 has been determined by experiment (#1561).
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::theta_max(void) const
 {
