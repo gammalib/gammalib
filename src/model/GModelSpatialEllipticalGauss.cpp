@@ -404,7 +404,7 @@ GSkyDir GModelSpatialEllipticalGauss::mc(const GEnergy& energy,
 
 
 /***********************************************************************//**
- * @brief Checks where model contains specified sky direction
+ * @brief Checks whether model contains specified sky direction
  *
  * @param[in] dir Sky direction.
  * @param[in] margin Margin to be added to sky direction (degrees)
@@ -431,16 +431,19 @@ bool GModelSpatialEllipticalGauss::contains(const GSkyDir& dir,
  *
  * @return Returns maximum model radius.
  *
- * Returns \f$5 \sigma\f$ as approximate edge of the Gaussian. This limit
- * is of course arbitrary, but allows to limit the integration region for
- * response computation.
+ * Returns the maximum of \f$2.5\f$ semimajor() and \f$2.5\f$ semiminor() as
+ * approximate edge of the Gaussian. This limit is of course arbitrary, but
+ * allows to limit the integration region for response computation. The value
+ * of 2.5 has been determined by experiment. Ideally, a large value should
+ * be used to properly take into account the tails of the distribution, but
+ * this apparently leads to fit convergence problems (#1561).
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::theta_max(void) const
 {
     // Set maximum model radius
     double theta_max = (semimajor() > semiminor())
-                       ? semimajor() * gammalib::deg2rad * 5.0
-                       : semiminor() * gammalib::deg2rad * 5.0;
+                       ? semimajor() * gammalib::deg2rad * 2.5
+                       : semiminor() * gammalib::deg2rad * 2.5;
 
     // Return value
     return theta_max;
