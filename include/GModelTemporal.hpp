@@ -134,7 +134,7 @@ const GModelPar& GModelTemporal::operator[](const int& index) const
 inline
 int GModelTemporal::size(void) const
 {
-    return (m_pars.size());
+    return (int)m_pars.size();
 }
 
 #endif /* GMODELTEMPORAL_HPP */

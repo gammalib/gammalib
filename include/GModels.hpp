@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModels.hpp - Model container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -248,7 +248,7 @@ const GModel* GModels::operator[](const int& index) const
 inline
 int GModels::size(void) const
 {
-    return (m_models.size());
+    return (int)m_models.size();
 }
 
 

@@ -184,7 +184,7 @@ const double& GNodeArray::operator[](const int& index) const
 inline
 int GNodeArray::size(void) const
 {
-    return (m_node.size());
+    return (int)m_node.size();
 }
 
 

@@ -149,7 +149,7 @@ const GEnergy& GEnergies::operator[](const int& index) const
 inline
 int GEnergies::size(void) const
 {
-    return (m_energies.size());
+    return (int)m_energies.size();
 }
 
 

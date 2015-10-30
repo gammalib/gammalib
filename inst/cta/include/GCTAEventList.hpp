@@ -128,7 +128,7 @@ std::string GCTAEventList::classname(void) const
 inline
 int GCTAEventList::size(void) const
 {
-    return (m_events.size());
+    return (int)m_events.size();
 }
 
 

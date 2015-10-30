@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectral.hpp - Abstract spectral model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -155,7 +155,7 @@ const GModelPar& GModelSpectral::operator[](const int& index) const
 inline
 int GModelSpectral::size(void) const
 {
-    return (m_pars.size());
+    return (int)m_pars.size();
 }
 
 #endif /* GMODELSPECTRAL_HPP */

@@ -278,7 +278,7 @@ int GLATEventCube::ebins(void) const
 inline
 int GLATEventCube::ndiffrsp(void) const
 {
-    return m_srcmap.size();
+    return (int)m_srcmap.size();
 }
 
 #endif /* GLATEVENTCUBE_HPP */
