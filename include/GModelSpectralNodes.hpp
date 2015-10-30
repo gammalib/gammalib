@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpectralNodes.hpp - Spectral nodes model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -201,7 +201,7 @@ std::string GModelSpectralNodes::type(void) const
 inline
 int GModelSpectralNodes::nodes(void) const
 {
-    return (m_energies.size());
+    return (int)m_energies.size();
 }
 
 #endif /* GMODELSPECTRALNODES_HPP */

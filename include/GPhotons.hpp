@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPhotons.hpp - Photon container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -99,7 +99,7 @@ std::string GPhotons::classname(void) const
 inline
 int GPhotons::size(void) const
 {
-    return m_photons.size();
+    return (int)m_photons.size();
 }
 
 

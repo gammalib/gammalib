@@ -138,8 +138,8 @@ public:
     GSkyMap       operator-(const GSkyMap& map) const;
     GSkyMap       operator*(const GSkyMap& map) const;
     GSkyMap       operator/(const GSkyMap& map) const;
-    double&       operator()(const int& index, const int& map = 0);
-    double&       operator()(const GSkyPixel& pixel, const int& map = 0);
+    double        operator()(const int& index, const int& map = 0);
+    double        operator()(const GSkyPixel& pixel, const int& map = 0);
     double        operator()(const GSkyDir& dir, const int& map = 0) const;
 
     // Methods

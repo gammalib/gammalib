@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.hpp - XSPEC Pulse Height Analyzer class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -154,7 +154,7 @@ const double& GPha::operator[](const int& index) const
 inline
 int GPha::size(void) const
 {
-    return (m_counts.size());
+    return (int)m_counts.size();
 }
 
 

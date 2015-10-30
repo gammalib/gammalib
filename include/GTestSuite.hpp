@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GTestSuite.hpp - Abstract test suite base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -129,7 +129,7 @@ protected:
 inline
 int GTestSuite::size(void) const
 {
-    return m_tests.size();
+    return (int)m_tests.size();
 }
 
 

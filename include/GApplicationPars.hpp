@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPars.hpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -160,7 +160,7 @@ const GApplicationPar& GApplicationPars::operator[](const int& index) const
 inline
 int GApplicationPars::size(void) const
 {
-    return (m_pars.size());
+    return (int)m_pars.size();
 }
 
 

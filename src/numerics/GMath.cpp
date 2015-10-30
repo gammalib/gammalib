@@ -420,12 +420,12 @@ double gammalib::erfinv(const double& arg)
     double result;
 
     // Return NAN if out of range
-    if (std::abs(arg > 1.0)) {
+    if (std::abs(arg) > 1.0) {
         result = std::atof("NAN");
     }
     
     // Return maximum double if at range limit
-    else if (std::abs(arg == 1.0)) {
+    else if (std::abs(arg) == 1.0) {
         result = copysign(1.0, arg) * DBL_MAX;
     }
 

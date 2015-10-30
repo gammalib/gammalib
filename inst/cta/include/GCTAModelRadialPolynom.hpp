@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialPolynom.hpp - Radial Polynom CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -139,7 +139,7 @@ std::string GCTAModelRadialPolynom::type(void) const
 inline
 int GCTAModelRadialPolynom::size(void) const
 {
-    return (m_coeffs.size());
+    return (int)m_coeffs.size();
 }
 
 #endif /* GCTAMODELRADIALPOLYNOM_HPP */

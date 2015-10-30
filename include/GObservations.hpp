@@ -238,7 +238,7 @@ const GObservation* GObservations::operator[](const int& index) const
 inline
 int GObservations::size(void) const
 {
-    return (m_obs.size());
+    return (int)m_obs.size();
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GFits.hpp - FITS file class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -231,7 +231,7 @@ const GFitsHDU* GFits::operator[](const std::string& extname) const
 inline
 int GFits::size(void) const
 {
-    return (m_hdu.size());
+    return (int)m_hdu.size();
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAOnOffObservations.hpp - CTA on-off observation container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Pierrick Martin                             *
+ *  copyright (C) 2013-2015 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -158,7 +158,7 @@ const GCTAOnOffObservation* GCTAOnOffObservations::operator[](const int& index) 
 inline
 int GCTAOnOffObservations::size(void) const
 {
-    return (m_obs.size());
+    return (int)m_obs.size();
 }
 
 

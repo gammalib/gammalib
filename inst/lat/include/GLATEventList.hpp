@@ -115,7 +115,7 @@ std::string GLATEventList::classname(void) const
 inline
 int GLATEventList::size(void) const
 {
-    return m_events.size();
+    return (int)m_events.size();
 }
 
 
@@ -127,7 +127,7 @@ int GLATEventList::size(void) const
 inline
 int GLATEventList::number(void) const
 {
-    return m_events.size();
+    return (int)m_events.size();
 }
 
 

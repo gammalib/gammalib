@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAModelRadial.hpp - Radial model abstract base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,7 @@ public:
     virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
-    int size(void) const { return m_pars.size(); }
+    int size(void) const { return (int)m_pars.size(); }
 
 protected:
     // Protected methods

@@ -157,7 +157,7 @@ const GModelPar& GModelSpatial::operator[](const int& index) const
 inline
 int GModelSpatial::size(void) const
 {
-    return (m_pars.size());
+    return (int)m_pars.size();
 }
 
 #endif /* GMODELSPATIAL_HPP */

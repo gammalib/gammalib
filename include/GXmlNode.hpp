@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.hpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -125,7 +125,7 @@ protected:
 inline
 int GXmlNode::size(void) const
 {
-    return m_nodes.size();
+    return (int)m_nodes.size();
 }
 
 

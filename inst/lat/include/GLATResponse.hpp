@@ -164,7 +164,7 @@ bool GLATResponse::use_tdisp(void) const
 inline
 int GLATResponse::size(void) const
 {
-    return m_aeff.size();
+    return (int)m_aeff.size();
 }
 
 
