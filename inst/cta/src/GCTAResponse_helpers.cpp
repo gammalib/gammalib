@@ -864,11 +864,15 @@ double cta_irf_elliptical_kern_omega::eval(const double& omega)
         double arg2            = m_semimajor_rad * sinus;
         double r_ellipse       = m_semiminor_rad * m_semimajor_rad /
                                  std::sqrt(arg1*arg1 + arg2*arg2);
-        std::cout << "*** WARNING: cta_irf_elliptical_kern_omega::eval";
+        std::cout << "*** WARNING: cta_irf_elliptical_kern_omega::eval:";
         std::cout << " zero model for (rho,omega)=(";
         std::cout << m_rho*gammalib::rad2deg << ",";
         std::cout << omega*gammalib::rad2deg << ")";
-        std::cout << " rho-r_ellipse=" << (m_rho-r_ellipse) << " radians";
+        std::cout << " semiminor=" << m_semiminor_rad;
+        std::cout << " semimajor=" << m_semimajor_rad;
+        std::cout << " posang=" << m_model->posangle() * gammalib::deg2rad;
+        std::cout << " rel_posang=" << diff_angle * gammalib::deg2rad;
+        std::cout << " rho/r_ellipse=" << (m_rho/r_ellipse);
         std::cout << std::endl;
     }
     #endif
