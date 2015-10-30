@@ -276,10 +276,13 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  *
  * The normalisation constant \f${\tt m\_norm}\f$ which is the inverse of the
  * solid angle subtended by an ellipse is given by
+ * \f[
+ *    {\tt m\_norm} = \frac{1}{2 \pi \times a \times b}
+ * \f]
  *
- * @todo Quote formula for ellipse solid angle
- *
- * (see the update() method).
+ * @warning
+ * The normalization of the elliptical Gaussian is only valid in the small
+ * angle approximation.
  ***************************************************************************/
 double GModelSpatialEllipticalGauss::eval(const double&  theta,
                                           const double&  posangle,
@@ -729,6 +732,10 @@ void GModelSpatialEllipticalGauss::free_members(void)
  * where 
  * \f$a\f$ is the semi-major axis and
  * \f$b\f$ is the semi-minor axis of the ellipse.
+ *
+ * @warning
+ * The normalization of the elliptical Gaussian is only valid in the small
+ * angle approximation.
  *
  * @todo Generalize normalization to the sphere (for the moment only accurate
  *       in the small angle approximation).
