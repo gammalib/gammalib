@@ -446,6 +446,7 @@ void GCTACubePsf::set(const GCTAObservation& obs)
  * @brief Fill PSF cube from observation container
  *
  * @param[in] obs Observation container.
+ * @param[in] log Pointer towards logger (default: NULL).
  ***************************************************************************/
 void GCTACubePsf::fill(const GObservations& obs, GLog* log)
 {
