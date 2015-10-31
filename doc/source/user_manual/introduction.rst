@@ -1,45 +1,49 @@
+.. _um_intro:
+
 Introduction
 ============
 
 Scope
 -----
 
-This User Manual provides a complete description of the GammaLib C++ library.
-It is equally well suited for beginners as for experienced users.
+This User Manual provides a complete description of the GammaLib C++ library
+and its Python module. It is equally well suited for beginners as for
+experienced users.
 
 Overview
 --------
 
 GammaLib is a self-contained, instrument independent, open source,
-multi-platform C++ library that implements all code required for the
-scientific analysis of astronomical gamma-ray data. GammaLib works with
-high-level data, which are data that are already calibrated and that
-generally come in form of event lists or histograms.
+multi-platform C++ library and Python module that implements all code
+required for the scientific analysis of astronomical gamma-ray data.
+GammaLib works with high-level data, which are data that are already
+calibrated and that generally come in form of event lists or histograms.
 
-GammaLib does not rely on any third-party software, with the only exception of
-the cfitsio library from HEASARC that is used to implement the FITS
-interface. This makes GammaLib basically independent of any other software
+Except for HEASARC's cfitsio library that is used to implement the FITS
+interface, GammaLib does not rely on any other third-party software.
+This makes GammaLib basically independent of any other software
 package, increasing the maintainability and enhancing the portability of
 the library.
 
-GammaLib potentially supports any gamma-ray astronomy instrument. Large parts of
-the code treat gamma-ray observations in an abstract representation, and
-do neither depend on the characteristics of the employed instrument, nor
-on the particular formats in which data and instrument response
+GammaLib potentially supports any gamma-ray astronomy instrument. Large
+parts of the code treat gamma-ray observations in an abstract representation,
+and do neither depend on the characteristics of the employed instrument,
+nor on the particular formats in which data and instrument response
 functions are delivered. Instrument specific aspects are implemented as
 isolated and well defined modules that interact with the rest of the
 library through a common interface. This philosophy also enables the
 joint analysis of data from different instruments, providing a framework
 that allows for consistent broad-band spectral fitting or imaging.
 
-GammaLib source code is freely available under the GNU General Public license
-version 3. The latest source code can be downloaded from
-https://sourceforge.net/projects/gammalib/.
-The issue tracker can be found at 
-https://cta-redmine.irap.omp.eu/projects/gammalib/issues.
-Further information and documentation on GammaLib can be found at
-http://cta.irap.omp.eu/gammalib/.
-The present document applies to GammaLib version 0.10.
+GammaLib source code is freely available under the GNU General Public
+license version 3. Relevant links for download, issues and documentation
+are:
+
+* Download: http://cta.irap.omp.eu/ctools/download.html
+* Issue tracker: https://cta-redmine.irap.omp.eu/projects/gammalib/issues
+* Documentation: http://cta.irap.omp.eu/gammalib/
+
+The present document applies to GammaLib version 0.11.
 
 GammaLib is designed to compile on any POSIX compliant platform. So far, 
 GammaLib has been successfully compiled and tested on Mac OS X, OpenBSD, OpenSolaris
@@ -66,12 +70,6 @@ correspond to the folders in the source code distribution):
    (model), sky maps and sky coordinates (sky), and for the generation
    of analysis executables in form of ftools (app).
 
--  **Instrument specific modules**
-
-   GammaLib support the analysis of data from the Cherenkov Telescope Array
-   (cta), the *Fermi*/LAT telescope (lat), the COMPTEL telescope (com),
-   and any multi-wavelength information in form of spectral data points (mwl).
-
 -  **Core services**
 
    GammaLib comprise modules for numerical computations (numerics), linear
@@ -81,22 +79,29 @@ correspond to the folders in the source code distribution):
 -  **Interfaces**
 
    are implemented for reading and writing of FITS files (fits), XML
-   files (xml), Xspec data (xspec) and Virtual Observatory 
-   interoperability (vo).
+   files (xml), and Virtual Observatory interoperability (vo).
+
+-  **Instrument specific modules**
+
+   GammaLib support the analysis of data from the Cherenkov Telescope Array
+   (cta), the Fermi/LAT telescope (lat), the COMPTEL telescope (com),
+   and any multi-wavelength information in form of spectral data points (mwl).
 
 .. _fig_structure:
 
 .. figure:: structure.png
-   :width: 100%
+   :width: 75%
+   :align: center
 
-   GammaLib structure
+   *GammaLib structure*
 
+GammaLib is developed by a team of enthousiastic gamma-ray 
+astronomers with support from engineers.
+We regularily organise
+`coding sprints <https://cta-redmine.irap.omp.eu/projects/ctools/wiki/Coding_sprints>`_
+where key developers but also newcomers meet to discuss the developments 
+and next steps, and advance with the coding of the software.
 
-GammaLib can be used as C++ application program interface (API) or as a Python
-module (provided that Python is installed on your system). The GammaLib Python
-bindings were built using `swig <http://www.swig.org/>`_ version 3.0.2, and are
-shipped together with the source code. This enables using all
-GammaLib functionalities from within Python.
 
 The development of GammaLib has been initiated by scientists from `IRAP (Institut
 de Recherche en Astrophysique et Planetologie) <http://www.irap.omp.eu/>`_, an
@@ -104,11 +109,8 @@ astrophysics laboratory of CNRS and of the `University Paul Sabatier
 <http://www.univ-tlse3.fr/>`_ situated in
 Toulouse, France. GammaLib is based on past experience gained in developing
 software for gamma-ray space missions, such as the COMPTEL telescope
-aboard *CGRO*, the SPI telescope aboard *INTEGRAL*, and the LAT
-telescope aboard *Fermi*. Initial elements of GammaLib can be found in the
-``spi_toolslib`` that is part of the Off-line Science Analysis (OSA)
-software distributed by ISDC for the science analysis of *INTEGRAL*
-data. The development of GammaLib is nowadays mainly driven by the advances in
-ground-based gamma-ray astronomy, and in particular by the development
-of the CTA observatory.
+aboard CGRO, the SPI telescope aboard INTEGRAL, and the LAT
+telescope aboard Fermi. Today, the development of GammaLib is mainly driven
+by the needs in ground-based gamma-ray astronomy, and in particular by the
+development of the CTA observatory.
 

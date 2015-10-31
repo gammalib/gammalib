@@ -1,3 +1,5 @@
+.. _um_getting:
+
 Getting GammaLib
 ================
 
@@ -63,11 +65,12 @@ Installing cfitsio
 HEASARC's cfitsio library comes on many Linux distributions as
 pre-compiled binary, and there are good chances that the package is
 already installed on your system. For Mac OS X, cfitsio can be installed
-from Mac Ports. If you use a pre-compiled binary, make sure that also
-the developer package is installed on your system. The developer package
-provides the ``cfitsio.h`` header file which is needed to compile in FITS
-file support in GammaLib. Please refer to the documentation of your Linux
-distribution to learn how to install pre-compiled binary packages (note
+from `MacPorts <https://www.macports.org/>`_ or
+`Homebrew <http://brew.sh/>`_. If you use a pre-compiled binary, make sure
+that also the developer package is installed on your system. The developer
+package provides the ``cfitsio.h`` header file which is needed to compile
+in FITS file support in GammaLib. Please refer to the documentation of your
+Linux distribution to learn how to install pre-compiled binary packages (note
 that the installation of pre-compiled binary packages usually requires
 system administrator privileges).
 
@@ -75,12 +78,12 @@ If you need (or prefer) to install cfitsio from source, you can download
 the latest source code from http://heasarc.gsfc.nasa.gov/fitsio.
 Detailed installation instructions can also be found on this site. We
 recommend that you install cfitsio as a shared library in the same
-directory in which you will install , so that cfitsio is automatically
+directory in which you will install GammaLib, so that cfitsio is automatically
 found by the GammaLib configure script. By default, GammaLib gets installed
 into the directory ``/usr/local/gamma``.
 
-You can install version 3.290 of cfitsio (the latest version that was
-available during writing this manual) by executing the following command
+You can install version 3.290 of cfitsio (the version that was
+available when writing this manual) by executing the following command
 sequence ($ denotes the UNIX shell prompt)::
 
     $ wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3290.tar.gz
@@ -140,12 +143,13 @@ Downloading
 ~~~~~~~~~~~
 
 To get the latest version of GammaLib, please visit the site
-https://sourceforge.net/projects/gammalib/. The code can be downloaded
-from this site by clicking on the download button. Alternatively, the
-code can be downloaded and unpacked from the UNIX prompt using::
+http://cta.irap.omp.eu/ctools/download.html. The code can be downloaded
+from this site by selection the gammalib package from the table.
+Alternatively, the code can be downloaded and unpacked from the UNIX prompt
+using::
 
-    $ wget --no-check-certificate https://downloads.sourceforge.net/project/gammalib/gammalib/gammalib-0.10.0.tar.gz
-    $ tar xfz gammalib-0.10.0.tar.gz
+    $ wget --no-check-certificate http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-0.11.0.tar.gz
+    $ tar xfz gammalib-0.11.0.tar.gz
 
 The GammaLib source code can also be cloned using git. This method is
 recommended if you plan to contribute to the development of the GammaLib
@@ -154,11 +158,13 @@ GammaLib using::
 
     $ git clone https://cta-git.irap.omp.eu/gammalib
 
-In case that you get::
+In case that you get:
+
+.. code-block:: bash
 
     error: SSL certificate problem, verify that the CA cert is OK.
 
-you may add::
+you should add::
 
     $ export GIT_SSL_NO_VERIFY=true
 
@@ -175,7 +181,7 @@ source code directory and type ::
     $ ./configure
 
 to configure the library for compilation. Make sure that you type
-``./configure`` and not simply configure to ensure that the configuration
+``./configure`` and not simply ``configure`` to ensure that the configuration
 script in the current directory is invoked and not some other
 system-wide configuration script.
 
@@ -223,7 +229,7 @@ gives the directories in which the cfitsio library and the header file
 resides), whether readline and ncurses have been found, and whether
 Python including the Python.h header file is available. Although none of
 these items is mandatory, we highly recommend to install cfitsio to
-support FITS file reading and writing (see section [sec:cfitsio]), and
+support FITS file reading and writing (see :ref:`sec_cfitsio`), and
 to install Python to enable GammaLib scripting.
 
 If cfitsio is installed on your system but not found by the configure
@@ -245,16 +251,16 @@ has to prefix the header file path. With the same method, you may
 specify any non-standard location for the readline and ncurses
 libraries.
 
-The configuration script also checks for the presence of swig, which is
-used for building the Python wrapper files. Normally, swig is not needed
-to create the Python bindings as the necessary wrapper files are shipped
-with the GammaLib source code. If you plan, however, to modify or to extend the
-Python interface, you will need swig to rebuild the Python wrappers
-following changes to the interface.
+The configuration script also checks for the presence of `swig <http://www.swig.org/>`_,
+which is used for building the Python wrapper files. Normally,
+`swig <http://www.swig.org/>`_ is not needed to create the Python bindings as the
+necessary wrapper files are shipped with the GammaLib source code. If you plan, however,
+to modify or to extend the Python interface, you will need `swig <http://www.swig.org/>`_ 
+to rebuild the Python wrappers following changes to the interface.
 
 The configuration summary informs also about all instrument dependent
 interfaces that will be compiled into the GammaLib library. By default, all
-available interfaces (multi-wavelength, *Fermi*-LAT, COMPTEL and CTA) will be
+available interfaces (multi-wavelength, Fermi/LAT, COMPTEL and CTA) will be
 compiled into GammaLib. If you wish to disable a particular interface, you may
 use the configure options ``--without-mwl``, ``--without-lat``, 
 ``--without-com`` or ``--without-cta``.
@@ -262,17 +268,16 @@ For example, ::
 
     $ ./configure --without-mwl --without-lat --without-com
 
-will compile GammaLib without the multi-wavelength, the *Fermi*-LAT and 
+will compile GammaLib without the multi-wavelength, the Fermi/LAT and 
 the COMPTEL interfaces. In this case, only CTA data analysis will be supported.
 
-GammaLib uses `Doxygen <http://www.doxygen.org/>`_ for code documentation, 
-and the latest GammaLib reference manual can be found at
-http://gammalib.sourceforge.net/doxygen/. In case that you want to
-install the reference manual also locally on your machine, Doxygen is
-needed to create the reference manual from the source code. Doxygen is
+GammaLib uses `Doxygen <http://www.doxygen.org/>`_ for code documentation.
+In case that you want to install the reference manual also locally on your
+machine, `Doxygen <http://www.doxygen.org/>`_ is needed to create the reference
+manual from the source code. `Doxygen <http://www.doxygen.org/>`_ is
 also needed if you plan to modify or extend the GammaLib library to allow
 rebuilding the reference documentation after changes. Please read see
-section [sec:doxygen] to learn how to build and to install the reference
+:ref:`sec_doxygen` to learn how to build and to install the reference
 manual locally.
 
 Finally, there exist a number of options that define how exactly GammaLib
@@ -398,8 +403,8 @@ Testing
 ~~~~~~~
 
 GammaLib comes with an extensive unit test that allows to validate the library
-prior to installation. **We highly recommend to run this unit test
-before installing the library (see section [sec:install]).**
+prior to installation. We highly recommend to run this unit test
+before installing the library (see :ref:`sec_install`).
 
 To run the unit test type::
 
@@ -407,9 +412,9 @@ To run the unit test type::
 
 This will start a test of all GammaLib modules by using dedicated executables
 which will print some progress and success information into the
-terminal. After completion of all tests (and assuming that all
+console. After completion of all tests (and assuming that all
 instrument dependent modules are enabled), you should see the following
-message in your terminal::
+message in your console::
 
     ===================
     All 20 tests passed
@@ -491,8 +496,8 @@ as this would considerably increase the size of the tarball. In case
 that you want to install the reference manual also locally on your
 machine, you first have to create the documentation using Doxygen.
 
-Assuming that Doxygen is available on your machine (see section
-:ref:`sec_configure`) you can create the reference documentation by typing ::
+Assuming that Doxygen is available on your machine (see :ref:`sec_configure`)
+you can create the reference documentation by typing ::
 
     $ make doxygen
 
@@ -532,35 +537,87 @@ requested class.
 Getting support
 ---------------
 
-Any question, bug report, or suggested enhancement related to GammaLib should be
-submitted via the Tracker on https://cta-redmine.irap.omp.eu/projects/gammalib
-or by sending an e-mail to the mailing list.
+Any questions, bug reports, or suggested enhancements related to
+GammaLib should be submitted via the
+`issue tracker <https://cta-redmine.irap.omp.eu/projects/gammalib/issues/new>`_
+or the
+`mailing list <mailto:ctools@irap.omp.eu>`_.
 
 .. _sec_known_problems:
 
-Known problems
---------------
+Known issues
+------------
 
-* Python support
-   GammaLib comes with Python wrappers so that all classes can be directly
-   used from Python. To compile-in Python support, GammaLib needs the
-   Python.h header file, which on many distributions is not installed by
-   default. To make Python.h available, install the Python developer
-   package in your distribution using the package manager. Otherwise you
-   will not be able to use GammaLib from Python.
+.. topic:: Many (but not all) unit tests fails
 
-* Mac OS X
-   The Python development package is not installed as default on Mac OS X,
-   and consequently, the Python.h header file is missing that is needed to
-   compile in the Python bindings. The configure script recognises this
-   fact and adjust the build procedure accordingly, but you will not be
-   able to use GammaLib from Python. So better install the Python
-   development package before installing GammaLib (see above).
+   Occasionally it may happen that the cfitsio library is not found when
+   configuring GammaLib. The library will compile successfully without
+   cfitsio, but in that case FITS I/O will not be supported. Consequently,
+   many unit tests will fail. If you are sure that cfitsio is installed,
+   but the path where the library and the path where the ``fitsio.h`` header
+   reside are non-standard, you may add the paths explicitly during
+   configuration using::
 
-* Solaris
-   Although GammaLib builds on Solaris using the Sun compiler, there are
+      $ ./configure LDFLAGS='-L/path/to/cftsio/library' CPPFLAGS='-I/path/to/fitsio.h/header'
+
+   The same logic applies for finding the readline and ncurses libraries,
+   although these libraries are not manadatory for getting the full
+   GammaLib functionalities.
+
+.. topic:: Python module does not work
+
+   GammaLib includes a Python module that is built from so called wrapper 
+   files that are autogenerated using the `swig <http://www.swig.org/>`_
+   tool. These wrapper files are shipped with a GammaLib release, but if
+   you use the code from git you need `swig <http://www.swig.org/>`_
+   to generate the wrapper files during the build step. In any case,
+   to compile the Python module GammaLib needs the ``Python.h`` header file
+   which may not necessarily be installed on your system. Check the output
+   of ``./configure`` to examine the configuration that GammaLib has
+   detected. You may see the following::
+
+    * Python                       (yes)
+    * Python.h                     (yes)
+    * Python wrappers              (yes)
+    * swig                         (yes)
+
+   Recall, if the wrappers exist you do not need `swig <http://www.swig.org/>`_,
+   but if the wrappers don't exist you need `swig <http://www.swig.org/>`_.
+   If the ``Python.h`` header file does not exist then install the Python
+   development package.
+
+.. topic:: Python unit test fail on El Capitan
+
+    On Mac OS X 10.11 (El Capitan) the Python unit tests fail when GammaLib 
+    is not installed due to the way the ``DYLD_LIBRARY_PATH`` environment
+    variable is handled by the operating system. A (not very elegant)
+    workaround is to install GammaLib before running the unit test using 
+    ``make check``.
+
+
+.. topic:: Mac OS X
+
+   Dependent on the Mac OS X version you are using, not everything that
+   is needed to install GammaLib may be available (e.g. automake, libtool, 
+   etc...). The easiest way to get the needed software is using a package 
+   management system such as `MacPorts <https://www.macports.org/>`_ or 
+   `Homebrew <http://brew.sh/>`_. On a fresh El Capitan install you need 
+   for example the following from `Homebrew <http://brew.sh/>`_::
+
+     $ brew install automake
+     $ brew install libtool
+     $ brew install cfitsio
+     $ brew install swig
+
+   `swig <http://www.swig.org/>`_ is only necessary if you installed the 
+   code from git. Dependening on your system, you also may need to install
+   the Python development package.
+
+.. topic:: Solaris
+
+   Although GammaLib builds on Solaris using the Sun compiler, there are
    problems with global symbols in shared libraries and exception catching,
-   which prevents the FITS interface to work correctly. GammaLib has
+   which prevents the FITS interface to work correctly. GammaLib has
    however been built and tested successfully using the GNU compiler, and
    this is the only build method that is currently supported. Problems have
    also been encountered when compiling cfitsio versions more recent than
@@ -568,16 +625,17 @@ Known problems
    and are likely to be solved in the future. For the time being, it is
    recommended to use cfitsio version 3.250 on Solaris.
 
-* OpenSolaris
+.. topic:: OpenSolaris
+
    On OpenSolaris, the same problems concerning the SunStudio compiler
    occur as for Solaris, and also here, the GNU compiler is the recommended
-   tool to build GammaLib. Also here, cfitsio version 3.250 is the
+   tool to build GammaLib. Also here, cfitsio version 3.250 is the
    recommended library as more recent version feature relocation
-   problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
-   2009.06. Make sure to create the symbolic links ::
+   problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
+   2009.06. Make sure to create the following symbolic links if they do
+   not yet exist on your system ::
 
       $ ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
       $ ln -s /usr/bin/g++4.3.2 /usr/bin/g++
 
-   which are not there by default to avoid excess warnings during
-   compilation.
+   They avoid excess warnings during compilation.

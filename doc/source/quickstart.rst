@@ -1,26 +1,36 @@
+.. _quickstart:
+
 Getting started
 ===============
+
+.. _firststeps:
 
 First steps with GammaLib
 -------------------------
 
 GammaLib comes with a Python interface, and as first step you should
 verify that the Python interface works correctly. You do this by
-typing::
+typing:
+
+.. code-block:: python
 
    >>> import gammalib
+   >>> gammalib.test()
 
-If everything works fine you should just get a new Python prompt after
-importing GammaLib. If you get an error message, make sure that you've
-setup correctly the GammaLib environment. You basically need the
+The first command loads the GammaLib Python module, the second command 
+executes the Python unit tests. If all tests are ok the GammaLib Python
+module has been installed successfully. In case of problems, make sure 
+that you've setup correctly the GammaLib environment. You basically need the
 ``PYTHONPATH`` variable set to GammaLib's Python site-package, and you also
 have to make sure that GammaLib and any dependent library (cfitsio,
 readline, ncurses) is in the library load path (eventually you may need
-to adjust ``LD_LIBRARY_PATH``). This is all done automatically if you set
-up the environment as described
-`here <installation.html#Setting_up_your_environment>`_.
+to adjust ``LD_LIBRARY_PATH``, or ``DYLD_LIBRARY_PATH`` if you are on Mac 
+OS X). This is all done automatically if you set up the environment as 
+described :ref:`here <setup>`.
 
-Now try::
+Now try:
+
+.. code-block:: python
 
    >>> models = gammalib.GModels()
    >>> print(models)
@@ -31,7 +41,9 @@ Now try::
 You just alloacted your first GammaLib object, which is an empty model
 container.
 
-Now let's append a model to this container. For this, type::
+Now let's append a model to this container. For this, type:
+
+.. code-block:: python
 
     >>> pos = gammalib.GSkyDir()
     >>> pos.radec_deg(83.6331, 22.0145)
@@ -68,8 +80,8 @@ spatial component of a sky model using ``GModelSpatialPointSource``. As the name
 suggests, the spatial component is a point source. Next, you defined the
 spectral component using ``GModelSpactralPlaw``: a power law with
 normalisation of 1 and a spectral index of -2. Then, you combined the spatial
-and spectral components in a point source model using ``GModelSky``. And
-finally you appended the point source to the model container allocated
+and spectral components in a sky model using ``GModelSky``. And
+finally you appended the sky model to the model container allocated
 previously using the append method. When you then print the model
 container you see that is contains now one model with 6 parameters.
 Among them, you find the specified source position (parameters ``RA`` and
@@ -79,7 +91,9 @@ normalisation has been set to 100 MeV (parameter ``PivotEnergy``)
 and the temporal component has been set by default to a constant (parameter ``Constant``).
 
 Suppose you want to change one of these parameters, such as the
-``PivotEnergy`` that you want to set to 1 TeV. This can be done using::
+``PivotEnergy`` that you want to set to 1 TeV. This can be done using:
+
+.. code-block:: python
 
    >>> models[0]['PivotEnergy'].value(1e6)
    >>> print(models)
@@ -95,11 +109,15 @@ the container using ``models[0]`` (counting in GammaLib always starts from
 value of a particular parameter.
 
 After all this hard work, you may save your model into a XML file by
-typing::
+typing:
+
+.. code-block:: python
 
    >>> models.save('test.xml')
 
-and you can load it from an XML file in memory using::
+and you can load it from an XML file in memory using:
+
+.. code-block:: python
 
    >>> new_models = gammalib.GModels('test.xml')
    >>> print(new_models)
@@ -117,6 +135,6 @@ Getting Help
 
 Any questions, bug reports, or suggested enhancements related to
 GammaLib should be submitted via the
-`issue tracker <https://cta-redmine.irap.omp.eu/projects/gammalib>`_
+`issue tracker <https://cta-redmine.irap.omp.eu/projects/gammalib/issues/new>`_
 or the
-`mailing list <mailto:gammalib-users@lists.soureforge.net>`_.
+`mailing list <mailto:ctools@irap.omp.eu>`_.
