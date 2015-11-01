@@ -22,13 +22,32 @@ Below you will find a list of known issues.
    many unit tests will fail. If you are sure that cfitsio is installed,
    but the path where the library and the path where the ``fitsio.h`` header
    reside are non-standard, you may add the paths explicitly during
-   configuration using::
+   configuration using:
+
+   .. code-block:: bash
 
       $ ./configure LDFLAGS='-L/path/to/cftsio/library' CPPFLAGS='-I/path/to/fitsio.h/header'
 
    The same logic applies for finding the readline and ncurses libraries,
    although these libraries are not manadatory for getting the full
    GammaLib functionalities.
+
+   Alternatively, cfitsio can be found when compiling GammaLib but not 
+   when using the shared library.  To solve the issue, locate the 
+   directory where the shared ``libcfitsio`` library resides and then type
+
+   .. code-block:: bash
+
+      $ export LD_LIBRARY_PATH=/directory/to/lib:$LD_LIBRARY_PATH
+
+   on Unix based systems or
+
+   .. code-block:: bash
+
+      $ export DYLD_LIBRARY_PATH=/directory/to/lib:$DYLD_LIBRARY_PATH
+   
+   on Mac OS X (``/directory/to/lib`` should be replaced by the correct
+   library path on your system).
 
 .. _issue_python:
 
@@ -73,7 +92,9 @@ Below you will find a list of known issues.
    etc...). The easiest way to get the needed software is using a package 
    management system such as `MacPorts <https://www.macports.org/>`_ or 
    `Homebrew <http://brew.sh/>`_. On a fresh El Capitan install you need 
-   for example the following from `Homebrew <http://brew.sh/>`_::
+   for example the following from `Homebrew <http://brew.sh/>`_:
+
+   .. code-block:: bash
 
      $ brew install automake
      $ brew install libtool
@@ -108,7 +129,9 @@ Below you will find a list of known issues.
    recommended library as more recent version feature relocation
    problems. GammaLib has been tested using gcc 4.3.2 on OpenSolaris
    2009.06. Make sure to create the following symbolic links if they do
-   not yet exist on your system ::
+   not yet exist on your system:
+
+   .. code-block:: bash
 
       $ ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
       $ ln -s /usr/bin/g++4.3.2 /usr/bin/g++
