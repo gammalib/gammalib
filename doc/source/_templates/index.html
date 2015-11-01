@@ -2,45 +2,46 @@
 body %}
 <h1>{{ _('GammaLib') }}</h1>
 
-<h2 style="margin-bottom: 0">{%trans%}About{%endtrans%}</h2>
-
-<p>{%trans%} The GammaLib is a versatile toolbox for the high-level
-	analysis of astronomical gamma-ray data. It is implemented as a C++
-	library that is fully scriptable in the Python scripting language. The
-	library provides core functionalities such as data input and output,
-	interfaces for parameter specifications, and a reporting and logging
-	interface. It implements instruments specific functionalities such as
-	instrument response functions and data formats. Instrument specific
-	functionalities share a common interface to allow for extension of the
-	GammaLib to include new gamma-ray instruments. The GammaLib provides an
-	abstract data analysis framework that enables simultaneous
-	multi-mission analysis. {%endtrans%}</p>
+<p>{%trans%} GammaLib is a versatile toolbox for the high-level analysis
+of astronomical gamma-ray data. It consists of a C++ library and a
+Python module that exposes the full functionality of the library
+to Python. The library provides an abstract data analysis framework
+that is independent of any specific gamma-ray telescope. Instrument
+specific aspects, such as handling of data formats and response
+functions, are implemented as isolated and well defined modules sharing
+an identical abstract interface. This enables a joint multi-instrument
+analysis of data, allowing for consistent broad-band spectral fitting
+or imaging. So far, GammaLib supports analysis of data obtained with
+COMPTEL, Fermi/LAT, and Cherenkov telescopes (CTA, H.E.S.S., MAGIC,
+VERITAS). {%endtrans%}</p>
 
 <p>{%trans%} Except for HEASARC's cfitsio library that is used to implement
-the FITS interface, GammaLib does not rely on any other third-party 
-software.
-Large parts of the code treat gamma-ray observations in an abstract
-representation, and do neither depend on the characteristics of the
-employed instrument, nor on the particular formats in which data and
-instrument response functions are delivered. Instrument specific
-aspects are implemented as isolated and well defined modules that
-interact with the rest of the library through a common interface. This
-philosophy also enables the joint analysis of data from different
-instruments, providing a framework that allows for consistent
-broad-band spectral fitting or imaging. So far, GammaLib supports
-analysis of COMPTEL, Fermi/LAT, and Cherenkov telescope data 
-(CTA, H.E.S.S., MAGIC, VERITAS). {%endtrans%}</p>
+the FITS interface, GammaLib does not rely on any third-party 
+software. All functionalities are implemented natively. {%endtrans%}</p>
+
+<p>{%trans%} ctools are developed by a team of enthousiastic gamma-ray
+astronomers with support from engineers. We regularily organise
+<a href=https://cta-redmine.irap.omp.eu/projects/ctools/wiki/Coding_sprints>coding sprints</a>
+where key developers but also newcomers meet to discuss the developments 
+and next steps, and advance with the coding of the software. {%endtrans%}</p>
 
 <p>{%trans%} GammaLib is free software distributed under the
 <a href="http://www.gnu.org/licenses/gpl.html">GNU GPL license version 3</a> {%endtrans%}</p>
 
-<h2 style="margin-bottom: 0">{%trans%}Documentation{%endtrans%}</h2>
+<h2 style="margin-bottom: 0">{%trans%}Getting started{%endtrans%}</h2>
 
 <ul>
 <li><a class="smalllink" href="{{ pathto("installation") }}">{%trans%}Installation{%endtrans%}</a></li> 
 <li><a class="smalllink" href="{{ pathto("quickstart") }}">{%trans%}Quickstart{%endtrans%}</a></li> 
+</ul>
+
+<h2 style="margin-bottom: 0">{%trans%}Documentation{%endtrans%}</h2>
+
+<ul>
 <li><a class="smalllink" href="{{ pathto("user_manual/index") }}">{%trans%}User Manual{%endtrans%}</a></li> 
 <li><a class="smalllink" href="{{ pathto("howto/index") }}">{%trans%}How To{%endtrans%}</a></li> 
+<li><a class="smalllink" href="{{ pathto("faq") }}">{%trans%}Frequently asked questions{%endtrans%}</a></li> 
+<li><a class="smalllink" href="{{ pathto("issues") }}">{%trans%}Known issues{%endtrans%}</a></li> 
 <li><a class="smalllink" href="{{ pathto("coding/index") }}">{%trans%}Coding conventions{%endtrans%}</a></li> 
 <li><a class="smalllink" href="doxygen/index.html">{%trans%}Code documentation (Doxygen){%endtrans%}</a></li> 
 </ul>
@@ -49,5 +50,5 @@ analysis of COMPTEL, Fermi/LAT, and Cherenkov telescope data
 
 <ul>
 	<li><a href="https://cta-redmine.irap.omp.eu/projects/gammalib">Developer's pages</a></li>
-	<li><a href="https://www.ohloh.net/p/GammaLib">Gammalib on Ohloh</a>{% endblock %}</li>
+	<li><a href="https://www.openhub.net/p/GammaLib">Gammalib on Open HUB</a>{% endblock %}</li>
 </ul>

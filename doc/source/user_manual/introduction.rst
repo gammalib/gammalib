@@ -49,7 +49,7 @@ GammaLib is designed to compile on any POSIX compliant platform. So far,
 GammaLib has been successfully compiled and tested on Mac OS X, OpenBSD, OpenSolaris
 (using the gcc compiler) and many Linux flavours. Pre-packed binary
 versions of the code are also available for Mac OS X. For known problems
-with specific platforms, please refer to the :ref:`sec_known_problems`
+with specific platforms, please refer to the :ref:`issues`
 section.
 
 GammaLib makes heavily use of C++ classes. Instrument independency is achieved
@@ -101,7 +101,6 @@ We regularily organise
 `coding sprints <https://cta-redmine.irap.omp.eu/projects/ctools/wiki/Coding_sprints>`_
 where key developers but also newcomers meet to discuss the developments 
 and next steps, and advance with the coding of the software.
-
 
 The development of GammaLib has been initiated by scientists from `IRAP (Institut
 de Recherche en Astrophysique et Planetologie) <http://www.irap.omp.eu/>`_, an
