@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GCsv.i - Column separated values table class               *
+ *               GCsv.i - Comma-separated values table class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCsv.hpp
- * @brief Column separated values table class definition
+ * @brief Comma-separated values table class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -80,7 +80,7 @@ static int csv_tuple(PyObject *input, int *ptr) {
 /***********************************************************************//**
  * @class GCsv
  *
- * @brief Column separated values table class definition
+ * @brief Comma-separated values table class definition
  ***************************************************************************/
 class GCsv : public GBase {
 public:

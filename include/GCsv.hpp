@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GCsv.hpp - Column separated values table class              *
+ *              GCsv.hpp - Comma-separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCsv.hpp
- * @brief Column separated values table class definition
+ * @brief Comma-separated values table class definition
  * @author Juergen Knoedlseder
  */
 
@@ -36,10 +36,10 @@
 /***********************************************************************//**
  * @class GCsv
  *
- * @brief Column separated values table class
+ * @brief Comma-separated values table class
  *
  * This class implements a table of std::string elements that is loaded
- * from a column separated value ASCII file. The column separation string
+ * from a comma-separated value ASCII file. The comma-separation string
  * can be specified upon loading of the file (by default the class assumes
  * that elements are separated by a white space).
  *
