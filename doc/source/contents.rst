@@ -9,8 +9,14 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
+   about
+   download
    installation
    quickstart
    user_manual/index
    howto/index
+   faq
+   issues
    coding/index
+   develop
+   help

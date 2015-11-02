@@ -150,8 +150,8 @@ Python rules
 ------------
 
 All code must be compatible with Python 2.6, 2.7 as well as 3.2 or later.
-As of 2014 most users still have Python 2, even though Python 3 has been
-out for five years, so using Python 3 features is out of the question.
+As of 2015 most users still have Python 2, even though Python 3 has been
+out for seven years, so using Python 3 features is out of question.
 Also GammaLib is mostly a C++ library with only some high-level analysis
 scripts (e.g. running a complete simulation or analysis or plotting some results)
 that are simple Python code and wouldn't profit much from using new Python 3 features.

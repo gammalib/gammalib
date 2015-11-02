@@ -34,6 +34,8 @@ Performance tables.
 Response formats
 ^^^^^^^^^^^^^^^^
 
+.. _sec_cta_rsptable:
+
 Response tables
 ===============
 
@@ -72,6 +74,8 @@ An example of a CTA response file is shown below:
    :width: 100%
 
 
+.. _sec_cta_xspec:
+
 Xspec response format
 =====================
 
@@ -87,6 +91,7 @@ the sake of the 1DC, a simple one-dimensional vector had been implemented.
 GammaLib still supports handling of the 1DC files, but there are no plans 
 to use this format in the future.
 
+.. _sec_cta_perftable:
 
 Performance table
 =================

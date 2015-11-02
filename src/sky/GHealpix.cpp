@@ -559,7 +559,7 @@ void GHealpix::ordering(const std::string& ordering)
 /***********************************************************************//**
  * @brief Return neighbouring pixels of a pixel
  *
- * @param[in] pix Pixel index.
+ * @param[in] pixel Pixel index.
  * @return Array of neighbouring pixels.
  *
  * Returns the 8 neighbours of a given pixel. The method returns a vector
