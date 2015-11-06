@@ -4,6 +4,7 @@
         =========================
 
         Perform __init__.py creation only in build step (#1569)
+        Remove access by name methods from GSkyRegions (#1564)
 
 
 2015-10-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

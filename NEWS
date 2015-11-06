@@ -65,7 +65,14 @@ None
 
 12. Sky module
 --------------
-None
+Remove the following methods from GSkyRegions as we have not identified a use case
+where this access is needed (#1564):
+* set(std::string, GSkyRegion)
+* insert(std::string, GSkyRegion)
+* remove(std::string)
+* operator[](std::string)
+* contains(std::string)
+* get_index(std::string)
 
 
 13. Support module
