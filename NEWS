@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 0.11.0
+New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-28 October 2015
+6 November 2015
 
 
 1. Introduction
@@ -13,33 +13,19 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-The GOptimizerLM logger constructor now takes a pointer to a logger instead of
-a reference. This allows setting of a NULL pointer, disabling the logging of the
-optimizer.
-
-The GSkymap class has been renamed to GSkyMap to be consistent with the other
-classes in the sky module.
-
-The small angle approximation has been removed from GModelSpatialRadialShell.
+None
 
 
 3. Configuration
 -----------------
-None
+The __init__.py file in the pyext/gammalib folder is now only created during
+build but not during the install. This should avoid problems during installation
+related to file access rights (#1569).
 
 
 4. Application module
 ---------------------
-GammaLib applications now only look for the application parameter file in the
-users pfiles directory if the PFILES environment variable has been not set. This
-assure that the PFILES environment variable will always take precedence over the
-users pfiles directory, and if the paramter file is missing in the directory
-pointed by the PFILES environment variable, it will be copied over from the
-syspfiles directory.
-
-The GApplication class now has a need_help() method that returns true is the
---help option is specified on the command line. This allows the client to display
-any help information.
+None
 
 
 5. Base module
@@ -59,35 +45,7 @@ None
 
 8. Model module
 ---------------
-Implement a rejection method for Monte Carlo simulations of photons in
-GModelSpatialDiffuseMap and GModelSpatialDiffuseCube. This assures that the
-simulated photon distribution follows the intensity distribution of the skymap
-as obtained using the sky direction access operator.
-
-The algorithm used to draw random numbers in GModelSpatialDiffuseConst::mc()
-was wrong (sky directions were not distributed isotropically on the sky). This
-has now been fixed (#1480).
-
-The small angle approximation has been removed from GModelSpatialRadialShell
-as this complexifies the class and the approximation is not really needed.
-
-A GModelSpatialDiffuseMap::set_mc_cone method has been introduced to handle
-correctly Monte Carlo simulations for unnormalized diffuse maps. This method
-now computes the normalization for a map within the acceptance cone which is
-then returned by the GModelSpatialDiffuseMap::mc_norm method.
-
-The GModelSpatial::norm method has been renamed to GModelSpatial::mc_norm so that
-the usage of this method is now explicitly given by the method name.
-
-save() and write() methods have been added to GModelSpatialDiffuseCube that allow
-the saving of a diffuse cube spatial model to disk or into a FITS objects.
-
-The computations in GModelSpatialDiffuseCube were not precise enough to allow
-an accurate modelling of the simulated events. The eval() and eval_gradients()
-methods now use a log-log interpolation. Furthermore, the map is selected
-in mc() randomly based on the interpolation weights of th neighbouring maps.
-And some bugs related to the map indexing and maximum map value computation
-have been corrected.
+None
 
 
 9. Numerics module
@@ -97,44 +55,17 @@ None
 
 10. Observation module
 ----------------------
-Integration in npred() is now done using a fixed number of Romberg iterations
-instead of using the integration precision. This will assure that the log-
-likelihood function is smooth.
-
-The number of integration iterations for the energy dispersion was changed from
-4 to 5 to make it compatible with the default integration order.
-
-An interval constructor and the set_lin() and set_log() methods have been added
-to the GEnergies class to allow quick creation of a linear or logarithmic series
-of energies.
+None
 
 
 11. Optimization module
 -----------------------
-The gradient computation has been corrected. Instead of multiplying the gradient
-factor with the scale factor we have to divide the gradient factor by the scale
-factor.
-
-An logger() method has been added to GOptimizerLM to set the logger for an
-optimizer (before, a logger could only be set during construction).
+None
 
 
 12. Sky module
 --------------
-Added the flux() method that provides estimates for the flux value of a pixel. The
-flux is defined as the intensity (computed by bilinear interpolation over the pixel)
-multiplied by the solid angle of the pixel.
-
-The pixel containment check has been corrected. Before, the containment check returned
-true even if the pixel was by one beyond the skymap limits. On of the unwanted side
-effects in the sky map access operator was that pixels outside the valid sky map
-array were accessed, leading to unpredictable results at the edge of the images.
-This quite severe bug was now corrected.
-
-The GSkymap::operator/=(GSkymap) operator now sets all pixels to zero for which the
-nominator is zero. No exception is thrown any longer.
-
-Add +, -, * and / binary operators to the GSkymap class.
+None
 
 
 13. Support module
@@ -174,34 +105,7 @@ None
 
 20. CTA interface
 -----------------
-All integrations are now done using a fixed number of Romberg iterations
-instead of using the integration precision. This will assure that the log-
-likelihood function is smooth.
-
-The number of integration iterations for the energy dispersion was changed from
-4 to 5 to make it compatible with the default integration order.
-
-An is_valid() method has been added to GCTARoi that returns true if the ROI
-has a positive radius. DS keywords are only written for a valid ROI into the
-event list file.
-
-The OBJECT attribute of an event file is now stored in to m_object member of
-GCTAObservation, and object() methods have been added to set and get the
-attribute value.
-
-The deadtime correction has been removed from GCTAModelCubeBackground as the
-background cube rates are already given per livetime. We formerly did the
-correction twice (#1503).
-
-The GCTAModelAeffBackground class has been added to generate a background model
-from the effective area information (#1525). The usage of this model is similar
-to that of the IRF background model. The model type in the XML file is
-"CTAAeffBackground".
-
-The precision for the IRF computation of radial shell models has been increased
-to reduce a bias in the fitting of the model for unbinned analysis (#1521). There
-is still a slight bias for the shell parameters in an unbinned analysis when the
-width of the shell becomes comparable to the angular resolution.
+None
 
 
 21. COMPTEL interface
