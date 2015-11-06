@@ -436,8 +436,11 @@ int GCTAEventCube::number(void) const
 
     // Sum event cube
     if (size() > 0 && pixels != NULL) {
-        for (int i = 0; i < size(); ++i)
-            number += pixels[i];
+        for (int i = 0; i < size(); ++i) {
+            if (pixels[i] > 0.0) {
+                number += pixels[i];
+            }
+        }
     }
 
     // Return
