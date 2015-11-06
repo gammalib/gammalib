@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.hpp - Sky region container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Pierrick Martin                             *
+ *  copyright (C) 2013-2015 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
