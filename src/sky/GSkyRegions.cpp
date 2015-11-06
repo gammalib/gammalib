@@ -159,58 +159,6 @@ GSkyRegions& GSkyRegions::operator=(const GSkyRegions& regions)
 }
 
 
-/***********************************************************************//**
- * @brief Return pointer to region
- *
- * @param[in] name region name.
- *
- * @exception GException::invalid_argument
- *            region with specified name not found in container.
- *
- * Returns a pointer to the region with the specified @p name.
- ***************************************************************************/
-GSkyRegion* GSkyRegions::operator[](const std::string& name)
-{
-    // Get region index
-    int index = get_index(name);
-
-    // Throw exception if region name was not found
-    if (index == -1) {
-		std::string msg ="Region with name \""+name+"\" not found in container.";
-        throw GException::invalid_argument(G_ACCESS, msg);
-    }
-
-    // Return pointer
-    return m_regions[index];
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to region (const version)
- *
- * @param[in] name region name.
- *
- * @exception GException::invalid_argument
- *            region with specified name not found in container.
- *
- * Returns a const pointer to the region with the specified @p name.
- ***************************************************************************/
-const GSkyRegion* GSkyRegions::operator[](const std::string& name) const
-{
-    // Get region index
-    int index = get_index(name);
-
-    // Throw exception if region name was not found
-    if (index == -1) {
-		std::string msg ="Region with name \""+name+"\" not found in container.";
-        throw GException::invalid_argument(G_ACCESS, msg);		
-    }
-
-    // Return pointer
-    return m_regions[index];
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                            Public methods                               =
@@ -315,65 +263,6 @@ GSkyRegion* GSkyRegions::set(const int& index, const GSkyRegion& region)
     }
     #endif
 
-    // Check if a region with specified name does not yet exist
-    int inx = get_index(region.name());
-    if (inx != -1 && inx != index) {
-        std::string msg =
-            "Attempt to set region with name \""+region.name()+"\" in region"
-            " container at index "+gammalib::str(index)+", but a region with"
-            " the same name exists already at index "+gammalib::str(inx)+
-            " in the container.\n"
-			"Every region in the region container needs a unique name.";
-        throw GException::invalid_value(G_SET1, msg);		
-    }
-
-    // Delete any existing region
-    if (m_regions[index] != NULL) delete m_regions[index];
-
-    // Assign new region by cloning
-    m_regions[index] = region.clone();
-
-    // Return pointer to region
-    return m_regions[index];
-}
-
-
-/***********************************************************************//**
- * @brief Set region in container
- *
- * @param[in] name region name.
- * @param[in] region region pointer.
- * @return Pointer to deep copy of region.
- *
- * @exception GException::invalid_argument
- *            region with specified name not found in container.
- * @exception GException::invalid_value
- *            Name of region exists already in container.
- *
- * Set region in the container. A deep copy of the region will be made.
- ***************************************************************************/
-GSkyRegion* GSkyRegions::set(const std::string& name, const GSkyRegion& region)
-{
-    // Get parameter index
-    int index = get_index(name);
-
-    // Throw exception if parameter name was not found
-    if (index == -1) {
-        throw GException::invalid_argument(G_SET2, name);
-    }
-
-    // Check if a region with specified name does not yet exist
-    int inx = get_index(region.name());
-    if (inx != -1 && inx != index) {
-        std::string msg =
-            "Attempt to set region with name \""+region.name()+"\" in region"
-            " container at index "+gammalib::str(index)+", but a region with"
-            " the same name exists already at index "+gammalib::str(inx)+
-            " in the container.\n"
-            "Every region in the region container needs a unique name.";
-        throw GException::invalid_value(G_SET2, msg);
-    }
-
     // Delete any existing region
     if (m_regions[index] != NULL) delete m_regions[index];
 
@@ -399,17 +288,6 @@ GSkyRegion* GSkyRegions::set(const std::string& name, const GSkyRegion& region)
  ***************************************************************************/
 GSkyRegion* GSkyRegions::append(const GSkyRegion& region)
 {
-    // Check if a region with specified name does not yet exist
-    int inx = get_index(region.name());
-    if (inx != -1) {
-        std::string msg = 
-            "Attempt to append region with name \""+region.name()+"\" to region"
-            " container, but a region with the same name exists already at"
-            " index "+gammalib::str(inx)+" in the container.\n"
-            "Every region in the region container needs a unique name.";
-        throw GException::invalid_value(G_APPEND, msg);
-    }
-
     // Create deep copy of region
     GSkyRegion* ptr = region.clone();
 
@@ -451,66 +329,6 @@ GSkyRegion* GSkyRegions::insert(const int& index, const GSkyRegion& region)
         }
     }
     #endif
-
-    // Check if a region with specified name does not yet exist
-    int inx = get_index(region.name());
-    if (inx != -1) {
-        std::string msg =
-            "Attempt to insert region with name \""+region.name()+"\" in region"
-            " container before index "+gammalib::str(index)+", but a region"
-            " with the same name exists already at index "+gammalib::str(inx)+
-            " in the container.\n"
-            "Every region in the region container needs a unique name.";
-        throw GException::invalid_value(G_INSERT1, msg);
-    }
-
-    // Create deep copy of region
-    GSkyRegion* ptr = region.clone();
-
-    // Inserts deep copy of region
-    m_regions.insert(m_regions.begin()+index, ptr);
-
-    // Return pointer to region
-    return ptr;
-}
-
-
-/***********************************************************************//**
- * @brief Insert region into container
- *
- * @param[in] name region name.
- * @param[in] region region.
- * @return Pointer to deep copy of region.
- *
- * @exception GException::invalid_argument
- *            region with specified name not found in container.
- * @exception GException::invalid_value
- *            Name of region exists already in container.
- *
- * Inserts a @p region into the container before the region with the specified
- * @p name.
- ***************************************************************************/
-GSkyRegion* GSkyRegions::insert(const std::string& name, const GSkyRegion& region)
-{
-    // Get parameter index
-    int index = get_index(name);
-
-    // Throw exception if parameter name was not found
-    if (index == -1) {
-        throw GException::invalid_argument(G_INSERT2, name);
-    }
-
-    // Check if a region with specified name does not yet exist
-    int inx = get_index(region.name());
-    if (inx != -1) {
-        std::string msg =
-            "Attempt to insert region with name \""+region.name()+"\" in region"
-            " container before index "+gammalib::str(index)+", but a region"
-            " with the same name exists already at index "+gammalib::str(inx)+
-            " in the container.\n"
-            "Every region in the region container needs a unique name.";
-        throw GException::invalid_value(G_INSERT2, msg);
-    }
 
     // Create deep copy of region
     GSkyRegion* ptr = region.clone();
@@ -554,37 +372,6 @@ void GSkyRegions::remove(const int& index)
 
 
 /***********************************************************************//**
- * @brief Remove region from container
- *
- * @param[in] name region name.
- *
- * @exception GException::invalid_argument
- *            region with specified name not found in container.
- *
- * Remove region of specified @p name from container.
- ***************************************************************************/
-void GSkyRegions::remove(const std::string& name)
-{
-    // Get parameter index
-    int index = get_index(name);
-
-    // Throw exception if region name was not found
-    if (index == -1) {
-        throw GException::invalid_argument(G_REMOVE2, name);
-    }
-
-    // Delete region
-    delete m_regions[index];
-
-    // Erase region component from container
-    m_regions.erase(m_regions.begin() + index);
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Append region container
  *
  * @param[in] regions region container.
@@ -607,18 +394,6 @@ void GSkyRegions::extend(const GSkyRegions& regions)
         // Loop over all region components and append pointers to deep copies 
         for (int i = 0; i < num; ++i) {
 
-            // Check if region name does not yet exist
-            int inx = get_index(regions[i]->name());
-            if (inx != -1) {
-                std::string msg =
-                    "Attempt to append region with name \""+regions[i]->name()+
-                    "\" to region container, but a region with the same name"
-                    " exists already at index "+gammalib::str(inx)+" in the"
-                    " container.\n"
-                    "Every region in the region container needs a unique name.";
-                throw GException::invalid_value(G_EXTEND, msg);
-            }
-
             // Append region to container
             m_regions.push_back(regions[i]->clone());
 
@@ -628,25 +403,6 @@ void GSkyRegions::extend(const GSkyRegions& regions)
     
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Signals if region name exists
- *
- * @param[in] name region name.
- * @return True if region with specified @p name exists.
- *
- * Searches all region names for a match with the specified @p name. If the
- * specified name has been found, true is returned.
- ***************************************************************************/
-bool GSkyRegions::contains(const std::string& name) const
-{
-    // Get region index
-    int index = get_index(name);
-
-    // Return
-    return (index != -1);
 }
 
 
@@ -931,29 +687,3 @@ void GSkyRegions::free_members(void)
     return;
 }
 
-
-/***********************************************************************//**
- * @brief Return region index by name
- *
- * @param[in] name region name.
- * @return region index (-1 if region name has not been found)
- *
- * Returns region index based on the specified @p name. If no region with the
- * specified @p name is found the method returns -1.
- ***************************************************************************/
-int GSkyRegions::get_index(const std::string& name) const
-{
-    // Initialise index
-    int index = -1;
-
-    // Search region with specified name
-    for (int i = 0; i < size(); ++i) {
-        if (m_regions[i]->name() == name) {
-            index = i;
-            break;
-        }
-    }
-
-    // Return index
-    return index;
-}
