@@ -51,7 +51,7 @@ INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
                     $(LAT_SWIG_TARGETS) \
                     $(COM_SWIG_TARGETS)
 
-# Test scripts to be distributed in $(pyexecdir)/ctools/tests
+# Test scripts to be distributed in $(pyexecdir)/gammalib/tests
 testscripts = gammalib/tests/__init__.py \
               ../test/test_python.py \
               ../test/test_GApplication.py \
@@ -139,6 +139,14 @@ all-local: build
 # Build the gammalib extension module
 build: $(BUILT_SOURCES)
 	@PYTHON_BUILD_PREFIX@ $(PYTHON) setup.py build_ext
+if IS_ELCAPITAN
+	for f in build/gammalib/_*.so; do \
+		echo "Post process module "$$f; \
+		install_name_tool -change $(libdir)/libgamma.0.dylib @rpath/libgamma.0.dylib $$f; \
+		install_name_tool -add_rpath $(libdir) $$f; \
+		install_name_tool -add_rpath $(abs_top_srcdir)/src/.libs $$f; \
+	done
+endif
 
 # Do nothing for 'make check'
 #check-local:
