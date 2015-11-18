@@ -90,18 +90,42 @@ AC_CANONICAL_HOST
 #                                                                           #
 # A special kluge was added for Mac OS X >=10.7. As Apple switched to clang #
 # we search from this version on for the clang compiler.                    #
+#                                                                           #
+# We also signal whether Mac OS X >=10.11 (El Capitan).                     #
 #############################################################################
+# Set default Mac OS X version flags
+osx_lion=no
+osx_el_capitan=no
+
 # Set default compiler lists
 cxx_list="g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++"
 cc_list="gcc cc cl.exe clang"
 
-# Check if we have Mac OS X >= 10.7
+# Check if we have Mac OS X >= 10.7 and >= 10.11
 if test `uname -s` = "Darwin"; then
-  if test `sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'` '>' 10.6; then
+  version=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'`
+  if ! awk "{ exit ($version >= 10.7) }" < /dev/null; then
     cxx_list="clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC"
     cc_list="clang gcc cc cl.exe"
+    osx_lion=yes
+  fi
+  if ! awk "{ exit ($version >= 10.11) }" < /dev/null; then
+    osx_el_capitan=yes
   fi
 fi
+AC_MSG_CHECKING([for Mac OS X >= 10.7])
+if [test "x$osx_lion" = "xyes"]; then
+        AC_MSG_RESULT(yes)
+else
+        AC_MSG_RESULT(no)
+fi
+AC_MSG_CHECKING([for Mac OS X >= 10.11])
+if [test "x$osx_el_capitan" = "xyes"]; then
+        AC_MSG_RESULT(yes)
+else
+        AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(IS_ELCAPITAN, test "x$osx_el_capitan" = "xyes")
 
 # Our language is C++
 AC_LANG(C++)
