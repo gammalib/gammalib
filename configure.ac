@@ -103,13 +103,13 @@ cc_list="gcc cc cl.exe clang"
 
 # Check if we have Mac OS X >= 10.7 and >= 10.11
 if test `uname -s` = "Darwin"; then
-  version=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'`
-  if ! awk "{ exit ($version >= 10.7) }" < /dev/null; then
+  version=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/' | sed -e 's/\.//g'`
+  if [ test $version -ge 107 ]; then
     cxx_list="clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC"
     cc_list="clang gcc cc cl.exe"
     osx_lion=yes
   fi
-  if ! awk "{ exit ($version >= 10.11) }" < /dev/null; then
+  if [ test $version -ge 1011 ]; then
     osx_el_capitan=yes
   fi
 fi
