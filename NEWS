@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-6 November 2015
+19 November 2015
 
 
 1. Introduction
@@ -21,6 +21,11 @@ None
 The __init__.py file in the pyext/gammalib folder is now only created during
 build but not during the install. This should avoid problems during installation
 related to file access rights (#1569).
+
+A special post processing of the Python module libraries has been added for
+Mac OS X 10.11 and higher (El Capitan). This post processing is a replacement for
+setting DYLD_LIBRARY_PATH during unit testing since the environment variable is
+ignored in certain circumstances by El Capitan.
 
 
 4. Application module
