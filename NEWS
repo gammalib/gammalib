@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-19 November 2015
+22 November 2015
 
 
 1. Introduction
@@ -82,7 +82,8 @@ where this access is needed (#1564):
 
 13. Support module
 ------------------
-None
+The gammalib::expand_env() function now handles ~, ~user, ~+ and ~- following the
+logic implemented for the bash shell.
 
 
 14. XML module
