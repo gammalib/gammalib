@@ -35,6 +35,7 @@
 #include <sys/select.h>    // select() function
 #include <sys/types.h>
 #include <sys/socket.h>    // recv() function
+#include <pwd.h>
 #include <cmath>
 #include <cfloat>
 #include <cctype>
@@ -114,6 +115,12 @@ std::string gammalib::strip_chars(const std::string& arg,
  * ${\<name\>}, $(\<name\>) and $\<name\> (in the last case the terminating
  * delimiter is either a / or a blank character or the end of the string).
  * Environment variables occuring within single quotes (') are ignored.
+ * Environment variables that do not exist will be kept as specified.
+ *
+ * The method also replaces ~ or ~user by the user's home directory, ~+
+ * by the value of the PWD environment variable and ~- by the value of the
+ * OLDPWD variable. If the user or the PWD or OLDPWD variable are not found,
+ * no replacement is done.
  *
  * This function has been inspired by the function ape_util_expand_env_var
  * from ape_util.c in the ape software developed at HEASARC.
@@ -121,9 +128,9 @@ std::string gammalib::strip_chars(const std::string& arg,
 std::string gammalib::expand_env(const std::string& arg)
 {
     // Set environment variable delimiters
-    static const char* begin_delim[] = { "$ENV{", "$ENV(", "${", "$(", "$" };
-    static const char* end_delim[]   = { "}", ")", "}", ")", "/" };
-    static const int   num_delim     = 5;
+    static const char* begin_delim[] = { "$ENV{", "$ENV(", "${", "$(", "$", "~" };
+    static const char* end_delim[]   = { "}", ")", "}", ")", "/", "/" };
+    static const int   num_delim     = 6;
 
     // Initialise result with argument
     std::string result = arg;
@@ -171,7 +178,7 @@ std::string gammalib::expand_env(const std::string& arg)
         if (begin_length > 0) {
 
             // Search for the termination delimiter of the environment
-            // variable. There is a special case for delimiter 4:
+            // variable. There is a special case for delimiters 4 and 5:
             // It has always an end_length of zero as the / is not a real
             // delimiter, but just an indicator that the environment variable
             // ends. Another indicator is a blank. If the end of the
@@ -179,7 +186,7 @@ std::string gammalib::expand_env(const std::string& arg)
             size_t i_start    = index + begin_length;
             size_t i_end      = i_start;
             size_t end_length = 0;
-            if (delim_idx == 4) {
+            if (delim_idx == 4 || delim_idx == 5) {
                 while (i_end < result.length() &&
                        result.compare(i_end, 1, "/") != 0 &&
                        result.compare(i_end, 1, " ") != 0) {
@@ -196,21 +203,52 @@ std::string gammalib::expand_env(const std::string& arg)
 
             // If termination delimiter has been found then expand the
             // environment variable
-            if (i_end < result.length() || delim_idx == 4) {
+            if (i_end < result.length() || delim_idx == 4 || delim_idx == 5) {
 
                 // Extract environment variable name
                 std::string name        = result.substr(i_start, i_end-i_start);
                 size_t      name_length = name.length();
 
-                // Erase delimiters and environment variable
-                result.erase(index, begin_length+name_length+end_length);
+                // Initialise pointer on environment variable
+                const char* env = NULL;
 
-                // Get the environment variable from the operating system
-                const char* env = std::getenv(name.c_str());
+                // Handle ~
+                if (delim_idx == 5) {
+                    if (name_length == 0) {
+                        if ((env = std::getenv("HOME")) == NULL) {
+                            struct passwd *pw = getpwuid(getuid());
+                            if (pw != NULL) {
+                                env = pw->pw_dir;
+                            }
+                        }
+                    }
+                    else {
+                        if (name == "+") {
+                            env = std::getenv("PWD");
+                        }
+                        else if (name == "-") {
+                            env = std::getenv("OLDPWD");
+                        }
+                        else {
+                            struct passwd *pw = getpwnam(name.c_str());
+                            if (pw != NULL) {
+                                env = pw->pw_dir;
+                            }
+                        }
+                    }
+                }
+
+                // ... otherwise get the environment variable
+                else {
+                    env = std::getenv(name.c_str());
+                }
 
                 // If the environment variable has been found then replace
                 // it by its value
                 if (env != NULL) {
+
+                    // Erase delimiters and environment variable
+                    result.erase(index, begin_length+name_length+end_length);
 
                     // Set replacement string and its length
                     std::string replace(env);
@@ -223,6 +261,12 @@ std::string gammalib::expand_env(const std::string& arg)
                     index += replace_length;
 
                 } // endif: environment variable has been found
+
+                // If no environment variable has been found then set
+                // index=i_end+1
+                else {
+                    index = i_end + 1;
+                }
 
             } // endif: termination delimiter found
 
