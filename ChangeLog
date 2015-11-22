@@ -9,6 +9,7 @@
         * Version 1.0.0 released
         =========================
 
+        Handle ~ in filenames (#1580)
         Perform __init__.py creation only in build step (#1569)
         Remove access by name methods from GSkyRegions (#1564)
         Resolve Python test problem on El Capitan (#1563)

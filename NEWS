@@ -68,7 +68,8 @@ None
 
 13. Support module
 ------------------
-None
+The gammalib::expand_env() function now handles ~, ~user, ~+ and ~- following the
+logic implemented for the bash shell.
 
 
 14. XML module
