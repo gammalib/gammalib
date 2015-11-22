@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 1.0.0
+New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-19 November 2015
+22 November 2015
 
 
 1. Introduction
@@ -18,14 +18,7 @@ None
 
 3. Configuration
 -----------------
-The __init__.py file in the pyext/gammalib folder is now only created during
-build but not during the install. This should avoid problems during installation
-related to file access rights (#1569).
-
-A special post processing of the Python module libraries has been added for
-Mac OS X 10.11 and higher (El Capitan). This post processing is a replacement for
-setting DYLD_LIBRARY_PATH during unit testing since the environment variable is
-ignored in certain circumstances by El Capitan.
+None
 
 
 4. Application module
@@ -70,14 +63,7 @@ None
 
 12. Sky module
 --------------
-Remove the following methods from GSkyRegions as we have not identified a use case
-where this access is needed (#1564):
-* set(std::string, GSkyRegion)
-* insert(std::string, GSkyRegion)
-* remove(std::string)
-* operator[](std::string)
-* contains(std::string)
-* get_index(std::string)
+None
 
 
 13. Support module
