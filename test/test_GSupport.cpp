@@ -170,14 +170,14 @@ void TestGSupport::test_expand_env(void)
 
     // Non existing environment variable within string
     s_in  = "My $(HOMEIXYZ) is my castle.";
-    s_ref = "My  is my castle.";
+    s_ref = "My $(HOMEIXYZ) is my castle.";
     s_out = gammalib::expand_env(s_in);
     test_assert(s_out == s_ref,"Non existing environment variable within string",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Empty environment variable within string
     s_in  = "My $() is my castle.";
-    s_ref = "My  is my castle.";
+    s_ref = "My $() is my castle.";
     s_out = gammalib::expand_env(s_in);
     test_assert(s_out == s_ref,"Empty environment variable within string",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
@@ -217,11 +217,19 @@ void TestGSupport::test_expand_env(void)
     test_assert(s_out == s_ref,"$ENV{HOME}${HOME}$ENV(HOME)$(HOME) only string",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
-    // Debugging
-    //std::cout << std::endl;
-    //std::cout << s_in << std::endl;
-    //std::cout << s_ref << std::endl;
-    //std::cout << s_out << std::endl;
+    // Test ~
+    s_in  = "My castle is ~";
+    s_ref = gammalib::expand_env("My castle is $(HOME)");
+    s_out = gammalib::expand_env(s_in);
+    test_assert(s_out == s_ref,"String with ~",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
+
+    // Test ~+
+    s_in  = "My castle is ~+";
+    s_ref = gammalib::expand_env("My castle is $(PWD)");
+    s_out = gammalib::expand_env(s_in);
+    test_assert(s_out == s_ref,"String with ~+",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Exit test
     return;
