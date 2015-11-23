@@ -517,7 +517,7 @@ bool GVOClient::find_hub(void)
     if (!lockurl.empty()) {
 
         // If we have a file:// prefix then strip it now. This is a kluge
-        // and should be remplaced by a method that allows opening any kind
+        // and should be replaced by a method that allows opening any kind
         // of URL
         if (lockurl.compare(0, 7, "file://") == 0) {
             lockurl = lockurl.substr(7, std::string::npos);
@@ -955,7 +955,6 @@ std::string GVOClient::receive_string(void) const
         int n       = 0;
         do {
             n = gammalib::recv(m_socket, buffer, 1000, 0, timeout);
-            //n = recv(m_socket, buffer, 1000, 0);
             if (n > 0) {
                 buffer[n] = '\0';
                 result.append(std::string(buffer));
@@ -1074,7 +1073,7 @@ std::string GVOClient::get_hub_lockfile(void) const
     char* hub_ptr = std::getenv("SAMP_HUB");
     if (hub_ptr != NULL) {
 
-        // Check for mandatory std-lockurl: prefix (no other prefixe is
+        // Check for mandatory std-lockurl: prefix (no other prefix is
         // supported so far)
         std::string lockurl = std::string(hub_ptr);
         if (lockurl.compare(0, 12, "std-lockurl:") == 0) {
@@ -1084,7 +1083,7 @@ std::string GVOClient::get_hub_lockfile(void) const
 
         } // endif: std-lockurl: prefix found
   
-    }
+    } // endif: SAMP_HUB environment variable found
 
     // ... otherwise the lockfile should be $HOME/.samp
     else {
