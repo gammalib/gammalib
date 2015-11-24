@@ -370,6 +370,12 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(map[1], 3.0)
         self.test_value(map[2], 5.0)
         self.test_value(map[3], 7.0)
+
+        # Access operator (tests also proper iteration)
+        sum = 0.0
+        for pix in map:
+            sum += pix
+        self.test_value(sum, 16.0)        
         
         # Return
         return
