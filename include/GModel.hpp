@@ -315,7 +315,7 @@ void GModel::tscalc(const bool& tscalc)
 /***********************************************************************//**
  * @brief Signals that model has scales
  *
- * @return True is model has scale factors.
+ * @return True if model has scale factors.
  ***************************************************************************/
 inline
 bool GModel::has_scales(void) const
@@ -327,11 +327,12 @@ bool GModel::has_scales(void) const
 /***********************************************************************//**
  * @brief Signals that model has Test Statistics value
  *
- * @return True is model has TS value.
+ * @return True if model has TS value.
  ***************************************************************************/
 inline
 const bool& GModel::has_ts(void) const
 {
     return m_has_ts;
 }
+
 #endif /* GMODEL_HPP */

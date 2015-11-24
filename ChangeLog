@@ -1,7 +1,9 @@
-2015-11-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-11-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
+
+        Add GModel::has_ts() method (#1578)
 
 
 2015-11-19  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
