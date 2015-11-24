@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-22 November 2015
+24 November 2015
 
 
 1. Introduction
@@ -43,7 +43,8 @@ None
 
 8. Model module
 ---------------
-None
+Added GModel::has_ts() method that signals if a TS value has been computed
+for a given model.
 
 
 9. Numerics module
