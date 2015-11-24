@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-22 November 2015
+24 November 2015
 
 
 1. Introduction
@@ -78,6 +78,10 @@ where this access is needed (#1564):
 * operator[](std::string)
 * contains(std::string)
 * get_index(std::string)
+
+The Python extension GSkyMap::__getitem__ now checks the validity of the index and
+map number and throws an out_of_range exception if the parameters are not valid.
+This is required on some platforms to properly catch the end in iterations (#1581).
 
 
 13. Support module
