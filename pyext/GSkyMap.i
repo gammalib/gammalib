@@ -183,11 +183,21 @@ public:
  ***************************************************************************/
 %extend GSkyMap {
     double __getitem__(int GSkyMapInx[]) {
+        if (GSkyMapInx[1] < 0 || GSkyMapInx[1] >= self->npix()) {
+            throw GException::out_of_range("__getitem__(int)", "Sky map index",
+                                           GSkyMapInx[1], self->npix());
+        }
         if (GSkyMapInx[0] == 1) {
             return (*self)(GSkyMapInx[1]);
         }
         else {
-            return (*self)(GSkyMapInx[1], GSkyMapInx[2]);
+            if (GSkyMapInx[2] >= 0 && GSkyMapInx[2] < self->nmaps()) {
+                return (*self)(GSkyMapInx[1], GSkyMapInx[2]);
+            }
+            else {
+                throw GException::out_of_range("__getitem__(int)", "Sky map number",
+                                               GSkyMapInx[2], self->nmaps());
+            }
         }
     }
     /*
@@ -196,11 +206,21 @@ public:
     }
     */
     void __setitem__(int GSkyMapInx[], double value) {
+        if (GSkyMapInx[1] < 0 || GSkyMapInx[1] >= self->npix()) {
+            throw GException::out_of_range("__setitem__(int)", "Sky map index",
+                                           GSkyMapInx[1], self->npix());
+        }
         if (GSkyMapInx[0] == 1) {
             (*self)(GSkyMapInx[1]) = value;
         }
         else {
-            (*self)(GSkyMapInx[1], GSkyMapInx[2]) = value;
+            if (GSkyMapInx[2] >= 0 && GSkyMapInx[2] < self->nmaps()) {
+                (*self)(GSkyMapInx[1], GSkyMapInx[2]) = value;
+            }
+            else {
+                throw GException::out_of_range("__setitem__(int)", "Sky map number",
+                                               GSkyMapInx[2], self->nmaps());
+            }
         }
     }
     /*
