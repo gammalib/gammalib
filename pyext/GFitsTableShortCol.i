@@ -71,16 +71,44 @@ public:
  ***************************************************************************/
 %extend GFitsTableShortCol {
     short __getitem__(int GFitsTableColInx[]) {
-        if (GFitsTableColInx[0] == 1)
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+            throw GException::out_of_range("__getitem__()", "Row index",
+                                           GFitsTableColInx[1], self->length());
+        }
+        if (GFitsTableColInx[0] == 1) {
             return (*self)(GFitsTableColInx[1]);
-        else
-            return (*self)(GFitsTableColInx[1], GFitsTableColInx[2]);
+        }
+        else {
+            if (GFitsTableColInx[2] >= 0 &&
+                GFitsTableColInx[2] < self->elements(GFitsTableColInx[1])) {
+                return (*self)(GFitsTableColInx[1], GFitsTableColInx[2]);
+            }
+            else {
+                throw GException::out_of_range("__getitem__()", "Column index",
+                                               GFitsTableColInx[2],
+                                               self->elements(GFitsTableColInx[1]));
+            }
+        }
     }
     void __setitem__(int GFitsTableColInx[], short value) {
-        if (GFitsTableColInx[0] == 1)
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+            throw GException::out_of_range("__setitem__()", "Row index",
+                                           GFitsTableColInx[1], self->length());
+        }
+        if (GFitsTableColInx[0] == 1) {
             (*self)(GFitsTableColInx[1]) = value;
-        else
-            (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+        }
+        else {
+            if (GFitsTableColInx[2] >= 0 && GFitsTableColInx[2] <
+                self->elements(GFitsTableColInx[1])) {
+                (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+            }
+            else {
+                throw GException::out_of_range("__setitem__()", "Column index",
+                                               GFitsTableColInx[2],
+                                               self->elements(GFitsTableColInx[1]));
+            }
+        }
     }
     GFitsTableShortCol copy() {
         return (*self);
