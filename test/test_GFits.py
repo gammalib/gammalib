@@ -48,6 +48,7 @@ class Test(gammalib.GPythonTestSuite):
 
         # Append tests
         self.append(self.test_fits, "Test GFits")
+        self.append(self.test_fits_table_columns, "Test FITS table columns")
 
         # Return
         return
@@ -218,3 +219,49 @@ class Test(gammalib.GPythonTestSuite):
 
         # Return
         return
+
+    def test_fits_table_columns(self):
+        """
+        Test FITS table columns
+        """
+        # Create table columns
+        nrows = 10
+        col1  = gammalib.GFitsTableBitCol("BIT", nrows)
+        col2  = gammalib.GFitsTableBoolCol("BOOLEAN", nrows)
+        col3  = gammalib.GFitsTableByteCol("BYTE", nrows)
+        col4  = gammalib.GFitsTableDoubleCol("DOUBLE", nrows)
+        col5  = gammalib.GFitsTableFloatCol("FLOAT", nrows)
+        col6  = gammalib.GFitsTableLongCol("LONG", nrows)
+        col7  = gammalib.GFitsTableLongLongCol("LONGLONG", nrows)
+        col8  = gammalib.GFitsTableShortCol("SHORT", nrows)
+        col9  = gammalib.GFitsTableStringCol("STRING", nrows, 20)
+        col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
+        col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
+
+        # Test iterators
+        for row in col1:
+            pass
+        for row in col2:
+            pass
+        for row in col3:
+            pass
+        for row in col4:
+            pass
+        for row in col5:
+            pass
+        for row in col6:
+            pass
+        for row in col7:
+            pass
+        for row in col8:
+            pass
+        for row in col9:
+            pass
+        for row in col10:
+            pass
+        for row in col11:
+            pass
+
+        # Return
+        return
+        
