@@ -66,6 +66,10 @@ None
 --------------
 None
 
+The Python extension GSkyMap::__getitem__ now checks the validity of the index and
+map number and throws an out_of_range exception if the parameters are not valid.
+This is required on some platforms to properly catch the end in iterations (#1581).
+
 
 13. Support module
 ------------------
