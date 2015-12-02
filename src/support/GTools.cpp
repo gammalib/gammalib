@@ -61,6 +61,7 @@
  * @brief Strip leading and trailing whitespace from string
  *
  * @param[in] arg String from which whitespace should be stripped.
+ * @return String with stripped whitespace.
  ***************************************************************************/
 std::string gammalib::strip_whitespace(const std::string& arg)
 {
@@ -74,6 +75,7 @@ std::string gammalib::strip_whitespace(const std::string& arg)
  *
  * @param[in] arg String from which character should be stripped.
  * @param[in] chars Character(s) to be stripped.
+ * @return String with stripped characters.
  ***************************************************************************/
 std::string gammalib::strip_chars(const std::string& arg,
                                   const std::string& chars)
@@ -108,7 +110,8 @@ std::string gammalib::strip_chars(const std::string& arg,
 /***********************************************************************//**
  * @brief Expand environment variables in string
  *
- * @param[in] arg String
+ * @param[in] arg String.
+ * @return String with expected environment variables.
  *
  * Expands any environment variable that is found in a string. Valid
  * delimiters for environment variables are $ENV{\<name\>}, $ENV(\<name\>),
@@ -329,6 +332,7 @@ std::string gammalib::filepath(const std::string& pathname,
  * @brief Convert unsigned short integer value into string
  *
  * @param[in] value Unsigned short integer to be converted into string.
+ * @return String with unsigned short integer value.
  ***************************************************************************/
 std::string gammalib::str(const unsigned short int& value)
 {
@@ -342,6 +346,7 @@ std::string gammalib::str(const unsigned short int& value)
  * @brief Convert unsigned integer value into string
  *
  * @param[in] value Unsigned integer to be converted into string.
+ * @return String with unsigned integer value.
  ***************************************************************************/
 std::string gammalib::str(const unsigned int& value)
 {
@@ -355,6 +360,7 @@ std::string gammalib::str(const unsigned int& value)
  * @brief Convert unsigned long integer value into string
  *
  * @param[in] value Unsigned long integer to be converted into string.
+ * @return String with unsigned long integer value.
  ***************************************************************************/
 std::string gammalib::str(const unsigned long int& value)
 {
@@ -368,6 +374,7 @@ std::string gammalib::str(const unsigned long int& value)
  * @brief Convert unsigned long long integer value into string
  *
  * @param[in] value Unsigned long long integer to be converted into string.
+ * @return String with unsigned long long integer value.
  ***************************************************************************/
 std::string gammalib::str(const unsigned long long int& value)
 {
@@ -381,6 +388,7 @@ std::string gammalib::str(const unsigned long long int& value)
  * @brief Convert short integer value into string
  *
  * @param[in] value Short integer to be converted into string.
+ * @return String with short integer value.
  ***************************************************************************/
 std::string gammalib::str(const short int& value)
 {
@@ -394,6 +402,7 @@ std::string gammalib::str(const short int& value)
  * @brief Convert integer value into string
  *
  * @param[in] value Integer to be converted into string.
+ * @return String with integer value.
  ***************************************************************************/
 std::string gammalib::str(const int& value)
 {
@@ -407,6 +416,7 @@ std::string gammalib::str(const int& value)
  * @brief Convert long integer value into string
  *
  * @param[in] value Long integer to be converted into string.
+ * @return String with long integer value.
  ***************************************************************************/
 std::string gammalib::str(const long int& value)
 {
@@ -420,6 +430,7 @@ std::string gammalib::str(const long int& value)
  * @brief Convert long long integer value into string
  *
  * @param[in] value Long long integer to be converted into string.
+ * @return String with long long integer value.
  ***************************************************************************/
 std::string gammalib::str(const long long int& value)
 {
@@ -434,6 +445,7 @@ std::string gammalib::str(const long long int& value)
  *
  * @param[in] value Single precision value to be converted into string.
  * @param[in] precision Floating point precision (optional).
+ * @return String with single precision value.
  ***************************************************************************/
 std::string gammalib::str(const float& value, const int& precision)
 {
@@ -455,6 +467,7 @@ std::string gammalib::str(const float& value, const int& precision)
  *
  * @param[in] value Double precision value to be converted into string.
  * @param[in] precision Floating point precision (optional).
+ * @return String with double precision value.
  ***************************************************************************/
 std::string gammalib::str(const double& value, const int& precision)
 {
@@ -475,6 +488,7 @@ std::string gammalib::str(const double& value, const int& precision)
  * @brief Convert string to C string
  *
  * @param[in] arg String to be converted.
+ * @return C string.
  *
  * Allocates a C string with the content of a C++ string.
  ***************************************************************************/
@@ -500,6 +514,7 @@ char* gammalib::tochar(const std::string& arg)
  * @brief Convert string into short value
  *
  * @param[in] arg String to be converted.
+ * @return Short value.
  ***************************************************************************/
 short gammalib::toshort(const std::string& arg)
 {
@@ -514,6 +529,7 @@ short gammalib::toshort(const std::string& arg)
  * @brief Convert string into unsigned short value
  *
  * @param[in] arg String to be converted.
+ * @return Unsigned short value.
  ***************************************************************************/
 unsigned short gammalib::toushort(const std::string& arg)
 {
@@ -528,6 +544,7 @@ unsigned short gammalib::toushort(const std::string& arg)
  * @brief Convert string into integer value
  *
  * @param[in] arg String to be converted.
+ * @return Integer value.
  ***************************************************************************/
 int gammalib::toint(const std::string& arg)
 {
@@ -542,6 +559,7 @@ int gammalib::toint(const std::string& arg)
  * @brief Convert string into unsigned integer value
  *
  * @param[in] arg String to be converted.
+ * @return Unsigned integer value.
  ***************************************************************************/
 unsigned int gammalib::touint(const std::string& arg)
 {
@@ -556,6 +574,7 @@ unsigned int gammalib::touint(const std::string& arg)
  * @brief Convert string into long value
  *
  * @param[in] arg String to be converted.
+ * @return Long value.
  ***************************************************************************/
 long gammalib::tolong(const std::string& arg)
 {
@@ -570,6 +589,7 @@ long gammalib::tolong(const std::string& arg)
  * @brief Convert string into unsigned long value
  *
  * @param[in] arg String to be converted.
+ * @return Unsigned long value.
  ***************************************************************************/
 unsigned long gammalib::toulong(const std::string& arg)
 {
@@ -584,6 +604,7 @@ unsigned long gammalib::toulong(const std::string& arg)
  * @brief Convert string into long long value
  *
  * @param[in] arg String to be converted.
+ * @return Long long value.
  ***************************************************************************/
 long long gammalib::tolonglong(const std::string& arg)
 {
@@ -598,6 +619,7 @@ long long gammalib::tolonglong(const std::string& arg)
  * @brief Convert string into unsigned long long value
  *
  * @param[in] arg String to be converted.
+ * @return Unsigned long long value.
  ***************************************************************************/
 unsigned long long gammalib::toulonglong(const std::string& arg)
 {
@@ -609,9 +631,10 @@ unsigned long long gammalib::toulonglong(const std::string& arg)
 
 
 /***********************************************************************//**
- * @brief Convert string into float value
+ * @brief Convert string into single precision value
  *
  * @param[in] arg String to be converted.
+ * @return Single precision value.
  ***************************************************************************/
 float gammalib::tofloat(const std::string& arg)
 {
@@ -623,9 +646,10 @@ float gammalib::tofloat(const std::string& arg)
 
 
 /***********************************************************************//**
- * @brief Convert string into double value
+ * @brief Convert string into double precision value
  *
  * @param[in] arg String to be converted.
+ * @return Double precision value.
  ***************************************************************************/
 double gammalib::todouble(const std::string& arg)
 {
@@ -640,6 +664,7 @@ double gammalib::todouble(const std::string& arg)
  * @brief Convert string to upper case
  *
  * @param[in] arg String to be converted to upper case.
+ * @return String converted to upper case.
  ***************************************************************************/
 std::string gammalib::toupper(const std::string& arg)
 {
@@ -653,6 +678,7 @@ std::string gammalib::toupper(const std::string& arg)
  * @brief Convert string to lower case
  *
  * @param[in] arg String to be converted to upper case.
+ * @return String converted to lower case.
  ***************************************************************************/
 std::string gammalib::tolower(const std::string& arg)
 {
@@ -667,6 +693,7 @@ std::string gammalib::tolower(const std::string& arg)
  *
  * @param[in] s String to be splitted.
  * @param[in] sep Separator(s).
+ * @return Vector of split strings.
  *
  * Splits a string on the basis of one or multiple separator characters. The
  * separator characters are provided by the @p sep argument. Subsequent
@@ -738,6 +765,7 @@ std::vector<std::string> gammalib::split(const std::string& s,
  *
  * @param[in] s String to be filled.
  * @param[in] n Number of fillings.
+ * @return Filled strings.
  *
  * Replicates a given string n time.
  ***************************************************************************/
@@ -762,6 +790,7 @@ std::string gammalib::fill(const std::string& s, const int& n)
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
  * @param[in] c Fill character.
+ * @return Left justified string.
  *
  * Left justify string by adding whitespace to the right to achieve a length
  * of n characters.
@@ -785,6 +814,7 @@ std::string gammalib::left(const std::string& s, const int& n, const char& c)
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
  * @param[in] c Fill character.
+ * @return Right justified string.
  *
  * Right justify string by adding whitespace to the left to achieve a length
  * of n characters.
@@ -808,6 +838,7 @@ std::string gammalib::right(const std::string& s, const int& n, const char& c)
  * @param[in] s String to be centred.
  * @param[in] n Requested total width.
  * @param[in] c Left fill character.
+ * @return Centred string.
  *
  * Centre string by adding whitespace to the left and the right to achieve a
  * length of n characters.
@@ -832,6 +863,7 @@ std::string gammalib::centre(const std::string& s, const int& n, const char& c)
  *
  * @param[in] s String to be converted.
  * @param[in] indent Indentation of parameter (default: 0).
+ * @return Parameter string.
  *
  * Converts and string into the parameter format of type "s ......: " with a
  * total length of G_PARFORMAT_LENGTH.
@@ -857,6 +889,7 @@ std::string gammalib::parformat(const std::string& s, const int& indent)
  * @param[in] emax Maximum energy.
  * @param[in] epivot Pivot energy.
  * @param[in] gamma Spectral index.
+ * @return Photon flux under power law.
  *
  * Analytically computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} 
@@ -903,6 +936,7 @@ double gammalib::plaw_photon_flux(const double& emin, const double& emax,
  * @param[in] emax Maximum energy.
  * @param[in] epivot Pivot energy.
  * @param[in] gamma Spectral index.
+ * @return Energy flux under power law.
  *
  * Analytically computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} 
@@ -971,8 +1005,9 @@ GEnergy gammalib::elogmean(const GEnergy& a, const GEnergy& b)
  * @brief Checks if file exists
  *
  * @param[in] filename File name.
+ * @return True if file exists, false otherwise.
  *
- * Checks if a file exists. If a directory with the same name if found, false
+ * Checks if a file exists. If a directory with the same name is found, false
  * is returned. The function expands any environment variable prior to
  * checking.
  ***************************************************************************/
@@ -998,9 +1033,31 @@ bool gammalib::file_exists(const std::string& filename)
 
 
 /***********************************************************************//**
+ * @brief Checks if either uncompressed or compressed file exists
+ *
+ * @param[in] filename Uncompressed file name (withput ".gz" extension)
+ * @return True if file exists, false otherwise.
+ *
+ * Checks if a file exists, either as an uncompressed file or with a ".gz"
+ * extension. If a directory with the same name is found, false is returned.
+ * The function expands any environment variable prior to checking.
+ ***************************************************************************/
+bool gammalib::file_exists_gzip(const std::string& filename)
+{
+    // Get result
+    bool result = gammalib::file_exists(filename) ||
+                  gammalib::file_exists(filename+".gz");
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Checks if directory exists
  *
  * @param[in] dirname Directory name.
+ * @return True if directory exists, false otherwise.
  *
  * Checks if a directory exists. The function expands any environment
  * variable prior to checking.
@@ -1030,6 +1087,7 @@ bool gammalib::dir_exists(const std::string& dirname)
  * @brief Checks if file is a FITS file
  *
  * @param[in] filename File name.
+ * @return True if file is a FITS file.
  *
  * Checks if the specified file is a FITS file.
  ***************************************************************************/
@@ -1044,7 +1102,7 @@ bool gammalib::is_fits(const std::string& filename)
         // Open file
         GFits fits(filename);
 
-        // If we're still alive then close file and result result to true
+        // If we're still alive then close file and set result to true
         fits.close();
         result = true;
 
@@ -1065,6 +1123,7 @@ bool gammalib::is_fits(const std::string& filename)
  *
  * @param[in] str string you want to search in.
  * @param[in] substring string you are looking for in str.
+ * @return True if a string contains a sub string.
  *
  * Checks if substring is contained in str
  ***************************************************************************/
@@ -1326,6 +1385,7 @@ bool gammalib::xml_has_par(const GXmlElement& xml, const std::string& name)
  * @param[in] origin Method requesting parameter.
  * @param[in] xml XML element.
  * @param[in] name Parameter name.
+ * @return Pointer to parameter XML element.
  *
  * @exception GException::invalid_value
  *            Invalid XML format encountered.
@@ -1377,6 +1437,7 @@ GXmlElement* gammalib::xml_need_par(const std::string& origin,
  * @param[in] origin Method requesting parameter.
  * @param[in] xml XML element.
  * @param[in] name Parameter name.
+ * @return Pointer to parameter XML element.
  *
  * @exception GException::invalid_value
  *            Invalid XML format encountered.

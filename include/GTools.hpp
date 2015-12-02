@@ -96,6 +96,7 @@ namespace gammalib {
                                               const double& gamma);
     GEnergy                  elogmean(const GEnergy& a, const GEnergy& b);
     bool                     file_exists(const std::string& filename);
+    bool                     file_exists_gzip(const std::string& filename);
     bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);
     bool                     is_notanumber(const double& x);
@@ -135,7 +136,7 @@ namespace gammalib {
 inline
 bool gammalib::is_infinite(const double& x)
 {
-  return (x < -DBL_MAX || x > DBL_MAX);
+    return (x < -DBL_MAX || x > DBL_MAX);
 }
 
 
@@ -147,12 +148,12 @@ bool gammalib::is_infinite(const double& x)
  *
  * Signals if the argument @p x is not a number.
  *
- * This function is a very simple kludge. It may not work on all systems.
+ * This function is a very simple kluge. It may not work on all systems.
  ***************************************************************************/
 inline
 bool gammalib::is_notanumber(const double& x)
 {
-  return (x != x);
+    return (x != x);
 }
 
 #endif /* GTOOLS_HPP */
