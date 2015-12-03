@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-24 November 2015
+2 December 2015
 
 
 1. Introduction
@@ -109,7 +109,8 @@ None
 
 20. CTA interface
 -----------------
-None
+The IRF loaders now check the existence of the file before loading, and now throw
+appropriate error messages in case that the files do not exist (#1586).
 
 
 21. COMPTEL interface
