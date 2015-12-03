@@ -257,6 +257,11 @@ def test():
     from gammalib.tests import test_python
     test_python.test(installed=True)
 """)
+
+    # Add version
+    file.write("\n__version__ = '@PACKAGE_VERSION@'\n")
+    
+    # Close file
     file.close()
 
 # Set data files to install.
