@@ -21,6 +21,7 @@
 import gammalib
 import sys
 import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import test_GApplication
 import test_GLinalg
 import test_GModel
