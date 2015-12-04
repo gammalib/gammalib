@@ -271,8 +271,8 @@ class Test(gammalib.GPythonTestSuite):
         # Load 1DC CTA observation (ARF, PSF, RMF)
         self.test_try("Test 1DC responses")
         try:
-            filname = self.caldb + "/../data/irf_1dc.xml"
-            obs     = gammalib.GObservations(filname)
+            filename = self.caldb + "/../data/irf_1dc.xml"
+            obs      = gammalib.GObservations(filename)
             self.test_try_success()
         except:
             self.test_try_failure("Unable to load 1DC responses.")
