@@ -203,8 +203,8 @@ def test(installed=False):
     else:
         rc = 1
 
-    # Return
-    return rc
+    # Exit with return code
+    sys.exit(rc)
 
 
 # ======================== #
@@ -215,7 +215,4 @@ if __name__ == '__main__':
     Perform unit testing for Python interface.
     """
     # Run tests
-    rc = test()
-
-    # Exit with return code
-    sys.exit(rc)
+    test()
