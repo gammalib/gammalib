@@ -41,7 +41,7 @@ To clone the gammalib source code, type
 
 .. code-block:: bash
 
-   $ git clone https://cta-git.irap.omp.eu/gammalib
+   $ git clone https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
   
 This will create a gammalib directory under the current working directory
 that will contain the gammalib source code. In case that the cloning does
