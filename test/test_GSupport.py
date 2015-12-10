@@ -51,6 +51,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_node_array, "Test GNodeArray")
         self.append(self.test_url_file,   "Test GUrlFile")
         self.append(self.test_url_string, "Test GUrlString")
+        self.append(self.test_filename,   "Test GFilename")
 
         # Return
         return
@@ -106,7 +107,7 @@ class Test(gammalib.GPythonTestSuite):
         buffer = url.read(99)
         self.test_assert(buffer == "abcde",
                          "Expected \"abcde\" in file, found \""+
-                         buffer+"\n");
+                         buffer+"\"")
         url.close()
 
         # Return
@@ -128,9 +129,41 @@ class Test(gammalib.GPythonTestSuite):
         buffer = url.read(99)
         self.test_assert(buffer == "abcde",
                          "Expected \"abcde\" in file, found \""+
-                         buffer+"\n");
+                         buffer+"\"")
         url.close()
 
         # Return
         return
        
+    # Test GFilename class
+    def test_filename(self):
+        """
+        Test GFilename class.
+        """
+        # Test assigning file names
+        filename = gammalib.GFilename("myfile.fits")
+        self.test_assert(filename.filename() == "myfile.fits",
+                         "Expected \"myfile.fits\", found \""+
+                         filename.filename()+"\"")
+        filename = gammalib.GFilename("myfile.fits[EVENTS]")
+        self.test_assert(filename.filename() == "myfile.fits",
+                         "Expected \"myfile.fits\", found \""+
+                         filename.filename()+"\"")
+        self.test_assert(filename.extname() == "EVENTS",
+                         "Expected extension \"EVENTS\", found \""+
+                         filename.extname()+"\"")
+        filename = gammalib.GFilename("myfile.fits[0]")
+        self.test_assert(filename.filename() == "myfile.fits",
+                         "Expected \"myfile.fits\", found \""+
+                         filename.filename()+"\"")
+        self.test_value(filename.extno(), 0)
+        filename = gammalib.GFilename("myfile.fits[0,2]")
+        self.test_assert(filename.filename() == "myfile.fits",
+                         "Expected \"myfile.fits\", found \""+
+                         filename.filename()+"\"")
+        self.test_value(filename.extno(), 0)
+        self.test_value(filename.extver(), 2)
+        
+        # Return
+        return
+        
