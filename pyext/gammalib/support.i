@@ -71,3 +71,4 @@
 %include "GUrl.i"
 %include "GUrlFile.i"
 %include "GUrlString.i"
+%include "GFilename.i"

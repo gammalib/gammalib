@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GSupport.hpp - test support module                  *
+ *                       GFilename.i - Filename class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2015 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,45 +19,54 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GSupport.hpp
- * @brief Testing of support module
- * @author Jean-Baptiste Cayrou
+ * @file GFilename.i
+ * @brief Filename class interface definition
+ * @author Juergen Knoedlseder
  */
-
-#ifndef TEST_GSUPPORT_HPP
-#define TEST_GSUPPORT_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GFilename.hpp"
+%}
 
 
 /***********************************************************************//**
- * @class TestGSupport
+ * @class GFilename
  *
- * @brief Test suite for support module
+ * @brief Filename class
  ***************************************************************************/
-class TestGSupport : public GTestSuite {
+class GFilename : public GBase {
 
 public:
     // Constructors and destructors
-    TestGSupport(void) : GTestSuite() { }
-    virtual ~TestGSupport(void) { }
+    GFilename(void);
+    GFilename(const std::string& filename);
+    GFilename(const GFilename& filename);
+    GFilename(const char* filename);
+    virtual ~GFilename(void);
 
     // Methods
-    virtual void          set(void);
-    virtual TestGSupport* clone(void) const;
-    virtual std::string   classname(void) const { return "TestGSupport"; }
-    void                  test_tools(void);
-    void                  test_expand_env(void);
-    void                  test_node_array(void);
-    void                  test_bilinear(void);
-    void                  test_url_file(void);
-    void                  test_url_string(void);
-    void                  test_filename(void);
-
-private:
-    // Private methods
-    void test_node_array_interpolation(const int& num, const double* nodes);
+    void               clear(void);
+    GFilename*         clone(void) const;
+    std::string        classname(void) const;
+    bool               empty(void) const;
+    int                size(void) const;
+    int                length(void) const;
+    const std::string& filename(void) const;
+    const std::string& extname(void) const;
+    const int&         extno(void) const;
+    const int&         extver(void) const;
+    bool               has_extname(void) const;
+    bool               has_extno(void) const;
+    bool               has_extver(void) const;
+    void               default_extname(const std::string& extname);
 };
 
-#endif /* TEST_GSUPPORT_HPP */
+
+/***********************************************************************//**
+ * @brief GFilename class extension
+ ***************************************************************************/
+%extend GFilename {
+    GFilename copy() {
+        return (*self);
+    }
+};
