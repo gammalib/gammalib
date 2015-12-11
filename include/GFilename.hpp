@@ -60,13 +60,12 @@ public:
     int                size(void) const;
     int                length(void) const;
     const std::string& filename(void) const;
-    const std::string& extname(void) const;
+    std::string        extname(const std::string& defaultname = "") const;
     const int&         extno(void) const;
     const int&         extver(void) const;
     bool               has_extname(void) const;
     bool               has_extno(void) const;
     bool               has_extver(void) const;
-    void               default_extname(const std::string& extname);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -143,18 +142,6 @@ inline
 const std::string& GFilename::filename(void) const
 {
     return (m_filename);
-}
-
-
-/***********************************************************************//**
- * @brief Return extension name
- *
- * @return String containing extension name.
- ***************************************************************************/
-inline
-const std::string& GFilename::extname(void) const
-{
-    return (m_extname);
 }
 
 

@@ -200,21 +200,27 @@ GFilename* GFilename::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set default extension name
+ * @brief Return extension name
  *
- * @param[in] extname Extension name.
+ * @param[in] defaultname Default extension name (default: "").
+ * @return String containing extension name.
  *
- * If the object has no extension name then set the extension name.
+ * Returns the extension name. If no extension name is given the name
+ * provided by the @p defaultname argument will be used. By default, the
+ * @p defaultname parameter is an empty string.
  ***************************************************************************/
-void GFilename::default_extname(const std::string& extname)
+std::string GFilename::extname(const std::string& defaultname) const
 {
-    // Set extension name if it has not yet been set
+    // Set the extension name
+    std::string extname = m_extname;
+
+    // If no extension name is set, the use the default extension name
     if (!has_extname()) {
-        m_extname = extname;
+        extname = defaultname;
     }
 
-    // Return
-    return;
+    // Return extension name
+    return (extname);
 }
 
 

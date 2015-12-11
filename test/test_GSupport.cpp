@@ -760,13 +760,11 @@ void TestGSupport::test_filename(void)
 
     // Test default extension name
     filename = "myfile.fits";
-    filename.default_extname("EVENTS");
-    test_assert(filename.extname() == "EVENTS",
+    test_assert(filename.extname("EVENTS") == "EVENTS",
                 "Expected \"EVENTS\" extension name, "
                 "found \""+filename.extname()+"\"");
     filename = "myfile.fits[LUCKY]";
-    filename.default_extname("EVENTS");
-    test_assert(filename.extname() == "LUCKY",
+    test_assert(filename.extname("EVENTS") == "LUCKY",
                 "Expected \"LUCKY\" extension name, "
                 "found \""+filename.extname()+"\"");
 
