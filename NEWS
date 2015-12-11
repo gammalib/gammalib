@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-2 December 2015
+11 December 2015
 
 
 1. Introduction
@@ -88,6 +88,10 @@ This is required on some platforms to properly catch the end in iterations (#158
 ------------------
 The gammalib::expand_env() function now handles ~, ~user, ~+ and ~- following the
 logic implemented for the bash shell.
+
+The GFilename class has been added to deal with filenames in the future. This class
+handles the decomposition of the string into a filename and an extension name in the
+cfitsio style, allowing to specify the extension name, number and version.
 
 
 14. XML module
