@@ -7,7 +7,6 @@ User Manual
 
    introduction
    getting
-   quickstart
    modules/index
    internals
    manual/index

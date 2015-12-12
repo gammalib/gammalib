@@ -8,7 +8,7 @@ C++ rules
 ---------
 
 All GammaLib C++ code must be compatible with ISO standard C++98.
-Do not use C++11 features.
+Do not use C++11 features
 (see `here <http://en.wikipedia.org/wiki/C%2B%2B#Standardization>`__
 if you don't know what C++98 and C++11 is and note that C++03 is
 just a minor correction of C++98).
@@ -189,16 +189,12 @@ Code semantics
 
      >>> import gammalib
      >>> energy = gammalib.GEnergy(10, 'TeV')
-     >>> import numpy as np
-     >>> import matplotlib.pyplot as plt  
 
   In interactive sessions (`IPython <http://ipython.org/>`_ is recommended) to save
   typing you can use ``import *`` to import everything into your local namespace::
   
      >>> from gammalib import *
      >>> energy = GEnergy(10, 'TeV')
-     >>> from numpy import *
-     >>> from matplotlib.pyplot import *
   
   Using ``import *`` in Python scripts is not recommended. Some reason are given in
   `this section <http://docs.python.org/3/howto/doanddont.html#from-module-import>`__

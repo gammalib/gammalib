@@ -38,10 +38,17 @@ and a string storage, respectively. As most of the classes are unrelated,
 they will be described individually in the following sections.
 
 
-Column Separated Value tables
+Bilinear interpolation
+~~~~~~~~~~~~~~~~~~~~~~
+
+The :doxy:`GBilinear` class handles bilinear interpolation of values in a 
+two-dimensional table.
+
+
+Comma-Separated Value tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :doxy:`GCsv` class handles column separated value tables. Column separated 
+The :doxy:`GCsv` class handles comma-separated value tables. Comma-separated 
 value tables are ASCII files representing a table, where individual table
 columns a separated by a specific character (for example a whitespace or a 
 comma).
@@ -112,6 +119,37 @@ Runtime exceptions              Usage
 :doxy:`feature_not_implemented` The method has not been implemented.
 =============================== =====
 
+
+Filename handling
+~~~~~~~~~~~~~~~~~
+
+The :doxy:`GFilename` class handles file names in GammaLib, including 
+extensions for FITS files in the cfitsio format. The following file name 
+formats are supported ::
+
+   myfile.fits
+   myfile.fits[EVENTS]
+   myfile.fits[EVENTS,2]
+   myfile.fits[3,2]
+
+The class decomposes the input string into the filename and the extension.
+The filename can be access using the :doxy:`GFilename::filename`
+method, the extension name using the :doxy:`GFilename::extname` method,
+the extension number using the :doxy:`GFilename::extno` method and the 
+extension version using the :doxy:`GFilename::extver` method. The latter
+three methods take an argument that specifies the default value that 
+should be used in case that no extension information is specified. Below
+a usage example that extracts by default the ``EBOUNDS`` table from a
+FITS file:
+
+.. code-block:: cpp
+   :linenos:
+
+    GFits     file;
+    GFilename fname(filename);
+    file.open(fname.filename());
+    const GFitsTable& table = *file.table(fname.extname("EBOUNDS"));
+ 
 
 Linear interpolation
 ~~~~~~~~~~~~~~~~~~~~
@@ -279,9 +317,11 @@ Function                       Description
 ``gammalib::plaw_energy_flux`` Compute energy flux under a power law.
 ``gammalib::elogmean``         Computes geometric mean of energy.
 ``gammalib::file_exists``      Check whether a file exists.
+``gammalib::file_exists_gzip`` Check whether a file (or a gzipped version of it) exists.
 ``gammalib::dir_exists``       Check whether a directory exists.
 ``gammalib::is_infinite``      Check whether a double precision value is infinite.
 ``gammalib::is_notanumber``    Check whether a double precision value is not a number.
+``gammalib::is_fits``          Check whether a file is a FITS file.
 ``gammalib::contains``         Check whether a string contains a sub-string.
 ``gammalib::warning``          Dump warning in console.
 ``gammalib::xml2str``          Converts XML to string.
