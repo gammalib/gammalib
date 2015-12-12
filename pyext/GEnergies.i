@@ -41,8 +41,7 @@ class GEnergies : public GContainer {
 public:
     // Constructors and destructors
     GEnergies(void);
-    GEnergies(const std::string& filename,
-              const std::string& extname = "ENERGIES");
+    explicit GEnergies(const std::string& filename);
     GEnergies(const GEnergies& energies);
     GEnergies(const int& num, const GEnergy& emin, const GEnergy& emax,
               const bool& log = true);
@@ -64,13 +63,12 @@ public:
                                         const GEnergy& emax);
     void        set_log(const int& num, const GEnergy& emin,
                                         const GEnergy& emax);
-    void        load(const std::string& filename,
-                     const std::string& extname = "ENERGIES");
+    void        load(const std::string& filename);
     void        save(const std::string& filename,
-                     const bool&        clobber = false,
-                     const std::string& extname = "ENERGIES") const;
+                     const bool&        clobber = false) const;
     void        read(const GFitsTable& table);
-    void        write(GFits& file, const std::string& extname = "ENERGIES") const;
+    void        write(GFits& file,
+                      const std::string& extname = "ENERGIES") const;
 };
 
 

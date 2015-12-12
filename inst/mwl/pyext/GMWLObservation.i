@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.i - Multi-wavelength observation class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,12 +39,11 @@
  * instrument. The spectral points are given in physical units.
  ***************************************************************************/
 class GMWLObservation : public GObservation {
+
 public:
     // Constructors and destructors
     GMWLObservation(void);
     explicit GMWLObservation(const std::string& filename);
-    explicit GMWLObservation(const std::string& filename, const int& extno);
-    explicit GMWLObservation(const std::string& filename, const std::string& extname);
     GMWLObservation(const GMWLObservation& obs);
     virtual ~GMWLObservation(void);
 
@@ -63,8 +62,6 @@ public:
 
     // Other methods
     void               load(const std::string& filename);
-    void               load(const std::string& filename, const int& extno);
-    void               load(const std::string& filename, const std::string& extname);
     const std::string& filename(void) const;
     const std::string& extno(void) const;
     const std::string& extname(void) const;
