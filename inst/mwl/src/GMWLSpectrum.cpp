@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GMWLSpectrum.cpp - Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GEnergy.hpp"
@@ -259,70 +260,25 @@ GMWLSpectrum* GMWLSpectrum::clone(void) const
  ***************************************************************************/
 void GMWLSpectrum::load(const std::string& filename)
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Clear object
     clear();
 
     // Open FITS file
-    GFits file(filename);
+    GFits file(fname.filename());
 
     // Read spectrum
-    read(file);
-
-    // Close FITS file
-    file.close();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load spectrum from FITS file
- *
- * @param[in] filename FITS file name.
- * @param[in] extname FITS extension name.
- *
- * This method loads a spectrum from the specified extension from a FITS
- * file.
- ***************************************************************************/
-void GMWLSpectrum::load(const std::string& filename, const std::string& extname)
-{
-    // Clear object
-    clear();
-
-    // Open FITS file
-    GFits file(filename);
-
-    // Read spectrum from FITS file
-    read(file, extname);
-
-    // Close FITS file
-    file.close();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load spectrum from FITS file
- *
- * @param[in] filename FITS file name.
- * @param[in] extno FITS extension number.
- *
- * This method loads a spectrum from the specified extension number from a
- * FITS file.
- ***************************************************************************/
-void GMWLSpectrum::load(const std::string& filename, const int& extno)
-{
-    // Clear object
-    clear();
-
-    // Open FITS file
-    GFits file(filename);
-
-    // Read spectrum from FITS file
-    read(file, extno);
+    if (fname.has_extno()) {
+        read(file, fname.extno());
+    }
+    else if (fname.has_extname()) {
+        read(file, fname.extname());
+    }
+    else {
+        read(file);
+    }
 
     // Close FITS file
     file.close();
@@ -336,7 +292,7 @@ void GMWLSpectrum::load(const std::string& filename, const int& extno)
  * @brief Save spectrum
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file (default=false).
+ * @param[in] clobber Overwrite existing file (default: false).
  *
  * @todo To be implemented.
  ***************************************************************************/

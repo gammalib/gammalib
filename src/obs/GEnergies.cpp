@@ -30,6 +30,7 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
 #include "GEnergies.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -71,20 +72,19 @@ GEnergies::GEnergies(void)
 
 
 /***********************************************************************//**
- * @brief Load constructor
+ * @brief FITS file constructor
  *
- * @param[in] filename FITS filename.
- * @param[in] extname Energies extension name (defaults to "ENERGIES")
+ * @param[in] filename FITS file name.
  *
- * Constructs energy container by loading energies from FITS file.
+ * Constructs energy container from a FITS file.
  ***************************************************************************/
-GEnergies::GEnergies(const std::string& filename, const std::string& extname)
+GEnergies::GEnergies(const std::string& filename)
 {
     // Initialise members
     init_members();
 
     // Load energies
-    load(filename, extname);
+    load(filename);
 
     // Return
     return;
@@ -534,21 +534,26 @@ void GEnergies::set_log(const int&     num,
 /***********************************************************************//**
  * @brief Load energies from FITS file
  *
- * @param[in] filename FITS filename.
- * @param[in] extname Energies extension name (defaults to "ENERGIES")
+ * @param[in] filename FITS file name.
  *
  * Loads the energies from FITS file.
+ *
+ * If no extension name is provided, the energies are loaded from the
+ * "ENERGIES" extension.
  ***************************************************************************/
-void GEnergies::load(const std::string& filename, const std::string& extname)
+void GEnergies::load(const std::string& filename)
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Allocate FITS file
     GFits file;
 
     // Open FITS file
-    file.open(filename);
+    file.open(fname.filename());
 
     // Get energies table
-    const GFitsTable& table = *file.table(extname);
+    const GFitsTable& table = *file.table(fname.extname("ENERGIES"));
 
     // Read energies from table
     read(table);
@@ -566,24 +571,25 @@ void GEnergies::load(const std::string& filename, const std::string& extname)
  *
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite any existing energies extension?
- * @param[in] extname Energies extension name (defaults to "ENERGIES")
  *
- * Saves energies into extension @p extname of a FITS file. If the file does
- * not exist it is created. If the file exists the energies are appended as
- * extension. If another energies extension exists already it is overwritten
- * if @p clobber=true.
+ * Saves energies into a FITS file.
+ *
+ * If no extension name is provided, the energies are saved into an
+ * "ENERGIES" extension.
  ***************************************************************************/
-void GEnergies::save(const std::string& filename, const bool& clobber,
-                     const std::string& extname) const
+void GEnergies::save(const std::string& filename, const bool& clobber) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Allocate FITS file
     GFits file;
 
     // Write energies to FITS file
-    write(file, extname);
+    write(file, fname.extname("ENERGIES"));
 
     // Save to file
-    file.saveto(filename, clobber);
+    file.saveto(fname.filename(), clobber);
 
     // Return
     return;
@@ -637,7 +643,7 @@ void GEnergies::read(const GFitsTable& table)
  * @brief Write energies into FITS object
  *
  * @param[in] file FITS file.
- * @param[in] extname Energy extension name (defaults to "ENERGIES")
+ * @param[in] extname Energy extension name (default: "ENERGIES")
  *
  * Writes energies into FITS object.
  ***************************************************************************/

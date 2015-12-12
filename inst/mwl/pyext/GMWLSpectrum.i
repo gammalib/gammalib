@@ -57,8 +57,6 @@ public:
     virtual int           number(void) const;
 
     // Other methods
-    void               load(const std::string& filename, const std::string& extname);
-    void               load(const std::string& filename, const int& extno);
     void               read(const GFits& file, const std::string& extname);
     void               read(const GFits& file, const int& extno);
     const std::string& telescope(void) const;
