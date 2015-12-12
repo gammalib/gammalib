@@ -61,8 +61,8 @@ public:
     int                length(void) const;
     const std::string& filename(void) const;
     std::string        extname(const std::string& defaultname = "") const;
-    const int&         extno(void) const;
-    const int&         extver(void) const;
+    int         extno(const int& defaultextno = 1) const;
+    int         extver(const int& defaultextver = 1) const;
     bool               has_extname(void) const;
     bool               has_extno(void) const;
     bool               has_extver(void) const;
@@ -142,30 +142,6 @@ inline
 const std::string& GFilename::filename(void) const
 {
     return (m_filename);
-}
-
-
-/***********************************************************************//**
- * @brief Return extension number
- *
- * @return Extension number (-1 if not set).
- ***************************************************************************/
-inline
-const int& GFilename::extno(void) const
-{
-    return (m_extno);
-}
-
-
-/***********************************************************************//**
- * @brief Return extension version
- *
- * @return Extension version (0 if not set).
- ***************************************************************************/
-inline
-const int& GFilename::extver(void) const
-{
-    return (m_extver);
 }
 
 

@@ -225,6 +225,57 @@ std::string GFilename::extname(const std::string& defaultname) const
 
 
 /***********************************************************************//**
+ * @brief Return extension number
+ *
+ * @param[in] defaultextno Default extension number (default: 1).
+ * @return Integer containing extension number.
+ *
+ * Returns the extension number. If no extension number is given the number
+ * provided by the @p defaultextno argument will be used. By default, the
+ * @p defaultextno parameter is set to 1.
+ ***************************************************************************/
+int GFilename::extno(const int& defaultextno) const
+{
+    // Set the extension number
+    int extno = m_extno;
+
+    // If no extension number is set, the use the default extension number
+    if (!has_extno()) {
+        extno = defaultextno;
+    }
+
+    // Return extension number
+    return (extno);
+}
+
+
+/***********************************************************************//**
+ * @brief Return extension version number
+ *
+ * @param[in] defaultextver Default extension version number (default: 1).
+ * @return Integer containing extension version number.
+ *
+ * Returns the extension version number. If no extension version number is given the number
+ * provided by the @p defaultextver argument will be used. By default, the
+ * @p defaultextver parameter is set to 1.
+ ***************************************************************************/
+int GFilename::extver(const int& defaultextver) const
+{
+    // Set the extension version number
+    int extver = m_extver;
+
+    // If no extension number is set, the use the default extension version number
+    if (!has_extver()) {
+        extver = defaultextver;
+    }
+
+    // Return extension number
+    return (extver);
+}
+
+
+
+/***********************************************************************//**
  * @brief Print file name information
  *
  * @param[in] chatter Chattiness (default: NORMAL).
