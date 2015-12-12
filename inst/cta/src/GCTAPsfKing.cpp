@@ -39,7 +39,7 @@
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                    "GCTAPsfKing::read(GFitsTable& table)"
+#define G_READ                               "GCTAPsfKing::read(GFitsTable&)"
 #define G_CONTAINMENT_RADIUS       "GCTAPsfKing::containment_radius(double&,"\
                        " double&, double&, double&, double&, double&, bool&)"
 #define G_UPDATE                      "GCTAPsfKing::update(double&, double&)"
@@ -81,8 +81,7 @@ GCTAPsfKing::GCTAPsfKing(void) : GCTAPsf()
  *
  * @param[in] filename PSF FITS file.
  *
- * Construct instance by loading the point spread function information from
- * a FITS file that contains the PSF information in form of a column.
+ * Constructs point spread function from a FITS file.
  ***************************************************************************/
 GCTAPsfKing::GCTAPsfKing(const std::string& filename) : GCTAPsf()
 {
@@ -276,17 +275,18 @@ GCTAPsfKing* GCTAPsfKing::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Read PSF from FITS file
+ * @brief Read point spread function from FITS table
  *
  * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
  *            FITS file format differs from expectation.
  *
- * Reads the PSF from the FITS table. The
- * data are stored in m_psf which is of type GCTAResponseTable. 
- * The energy axis will be set to log10. The offset angle axis and 
- * sigma parameter columns will be set to radians.
+ * Reads the point spread function from the FITS @p table.
+ *
+ * The data are stored in m_psf which is of type GCTAResponseTable. The
+ * energy axis will be set to log10. The offset angle axis and sigma
+ * parameter columns will be set to radians.
  ***************************************************************************/
 void GCTAPsfKing::read(const GFitsTable& table)
 {
@@ -327,16 +327,18 @@ void GCTAPsfKing::read(const GFitsTable& table)
 
 
 /***********************************************************************//**
- * @brief Write CTA PSF table into FITS binary table object.
+ * @brief Write point spread function into FITS table
  *
- * @param[in] hdu FITS binary table.
+ * @param[in] table FITS binary table.
  *
- * @todo Add necessary keywords.
+ * Writes point spread function into a FITS binary @p table.
+ *
+ * @todo Add keywords.
  ***************************************************************************/
-void GCTAPsfKing::write(GFitsBinTable& hdu) const
+void GCTAPsfKing::write(GFitsBinTable& table) const
 {
     // Write background table
-    m_psf.write(hdu);
+    m_psf.write(table);
 
     // Return
     return;
@@ -344,15 +346,14 @@ void GCTAPsfKing::write(GFitsBinTable& hdu) const
 
 
 /***********************************************************************//**
- * @brief Load point spread function from binary table
+ * @brief Load point spread function from FITS file
  *
- * @param[in] filename Performance table file name.
+ * @param[in] filename FITS file name.
  *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
+ * Loads the point spread function from a FITS file.
  *
- * This method loads the point spread function information from a PSF
- * response table.
+ * If no extension name is provided, the point spread function will be loaded
+ * from the "POINT SPREAD FUNCTION" extension.
  ***************************************************************************/
 void GCTAPsfKing::load(const std::string& filename)
 {
@@ -379,12 +380,15 @@ void GCTAPsfKing::load(const std::string& filename)
 }
 
 /***********************************************************************//**
- * @brief Save PSF table into FITS file
+ * @brief Save point spread function table into FITS file
  *
- * @param[in] filename PSF table FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the PSF table into a FITS file.
+ * Save the point spread function into a FITS file.
+ *
+ * If no extension name is provided, the point spread function will be saved
+ * into the "POINT SPREAD FUNCTION" extension.
  ***************************************************************************/
 void GCTAPsfKing::save(const std::string& filename, const bool& clobber) const
 {

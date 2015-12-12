@@ -37,7 +37,7 @@
 #include "GCTAAeff2D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                     "GCTAAeff2D::read(GFitsTable&)"
+#define G_READ                                "GCTAAeff2D::read(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -72,8 +72,7 @@ GCTAAeff2D::GCTAAeff2D(void) : GCTAAeff()
  *
  * @param[in] filename FITS file name.
  *
- * Construct instance by loading the effective area information from a FITS
- * file.
+ * Constructs effective area from a FITS file.
  ***************************************************************************/
 GCTAAeff2D::GCTAAeff2D(const std::string& filename) : GCTAAeff()
 {
@@ -238,12 +237,13 @@ GCTAAeff2D* GCTAAeff2D::clone(void) const
 /***********************************************************************//**
  * @brief Read effective area from FITS table
  *
- * @param[in] table FITS table pointer.
+ * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
  *            FITS file format differs from expectation.
  *
- * Reads the effective area form the FITS table.
+ * Reads the effective area form the FITS @p table.
+ *
  * The data are stored in m_aeff which is of type GCTAResponseTable. The
  * energy axis will be set to log10, the offset angle axis to radians.
  ***************************************************************************/
@@ -287,23 +287,25 @@ void GCTAAeff2D::read(const GFitsTable& table)
 
 
 /***********************************************************************//**
- * @brief Write CTA effective area table into FITS binary table object.
+ * @brief Write effective area into FITS binary table
  *
- * @param[in] hdu FITS binary table.
+ * @param[in] table FITS binary table.
  *
- * @todo Add necessary keywords.
+ * Writes effective area into the FITS binary @p table.
+ *
+ * @todo Add keywords.
  ***************************************************************************/
-void GCTAAeff2D::write(GFitsBinTable& hdu) const
+void GCTAAeff2D::write(GFitsBinTable& table) const
 {
     // Create a copy of the response table
-    GCTAResponseTable table(m_aeff);
+    GCTAResponseTable aeff(m_aeff);
 
     // Convert area from cm2 to m2
-    table.scale(0, 1.0e-4);
-    table.scale(1, 1.0e-4);
+    aeff.scale(0, 1.0e-4);
+    aeff.scale(1, 1.0e-4);
 
     // Write response table
-    table.write(hdu);
+    aeff.write(table);
 
     // Return
     return;
@@ -313,9 +315,12 @@ void GCTAAeff2D::write(GFitsBinTable& hdu) const
 /***********************************************************************//**
  * @brief Load effective area from FITS file
  *
- * @param[in] filename FITS file.
+ * @param[in] filename FITS file name.
  *
- * This method loads the effective area information from a FITS file.
+ * Loads the effective area from a FITS file.
+ *
+ * If no extension name is provided, the effective area will be loaded from
+ * the "EFFECTIVE AREA" extension.
  ***************************************************************************/
 void GCTAAeff2D::load(const std::string& filename)
 {
@@ -343,12 +348,15 @@ void GCTAAeff2D::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save effectiva area table into FITS file
+ * @brief Save effectiva area into FITS file
  *
- * @param[in] filename Effective area table FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the effectiva area table into a FITS file.
+ * Save the effectiva area into a FITS file.
+ *
+ * If no extension name is provided, the effective area will be saved into
+ * the "EFFECTIVE AREA" extension.
  ***************************************************************************/
 void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
 {

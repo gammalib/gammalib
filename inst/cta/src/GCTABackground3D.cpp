@@ -37,7 +37,7 @@
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                               "GCTABackground3D::read(GFitsTable& table)"
+#define G_READ                          "GCTABackground3D::read(GFitsTable&)"
 #define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
 #define G_INIT_MC_CACHE                   "GCTABackground3D::init_mc_cache()"
 
@@ -77,7 +77,7 @@ GCTABackground3D::GCTABackground3D(void) : GCTABackground()
  *
  * @param[in] filename FITS file name.
  *
- * Construct instance by loading the background information from a FITS file.
+ * Constructs background from a FITS file.
  ***************************************************************************/
 GCTABackground3D::GCTABackground3D(const std::string& filename) :
                   GCTABackground()
@@ -304,17 +304,18 @@ GCTABackground3D* GCTABackground3D::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Read background from FITS file
+ * @brief Read background from FITS table
  *
  * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
  *            FITS file format differs from expectation.
  *
- * Reads the background from the FITS table. The data
- * are stored in m_background which is of type GCTAResponseTable. The DETX
- * and DETY axes will be set to radians, the energy axis will be set to
- * log10.
+ * Reads the background from the FITS @p table.
+ *
+ * The data are stored in m_background which is of type GCTAResponseTable.
+ * The DETX and DETY axes will be set to radians, the energy axis will be set
+ * to log10.
  ***************************************************************************/
 void GCTABackground3D::read(const GFitsTable& table)
 {
@@ -359,16 +360,18 @@ void GCTABackground3D::read(const GFitsTable& table)
 }
 
 /***********************************************************************//**
- * @brief Write CTA background table into FITS binary table object.
+ * @brief Write background into FITS table
  *
- * @param[in] hdu FITS binary table.
+ * @param[in] table FITS binary table.
+ *
+ * Writes background into a FITS binary @p table.
  *
  * @todo Add necessary keywords.
  ***************************************************************************/
-void GCTABackground3D::write(GFitsBinTable& hdu) const
+void GCTABackground3D::write(GFitsBinTable& table) const
 {
     // Write background table
-    m_background.write(hdu);
+    m_background.write(table);
 
     // Return
     return;
@@ -378,9 +381,12 @@ void GCTABackground3D::write(GFitsBinTable& hdu) const
 /***********************************************************************//**
  * @brief Load background from FITS file
  *
- * @param[in] filename FITS file.
+ * @param[in] filename FITS file name.
  *
- * This method loads the background information from a FITS file.
+ * Loads the background from a FITS file.
+ *
+ * If no extension name is provided, the background will be loaded from the
+ * "BACKGROUND" extension.
  ***************************************************************************/
 void GCTABackground3D::load(const std::string& filename)
 {
@@ -408,12 +414,15 @@ void GCTABackground3D::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save background table into FITS file
+ * @brief Save background into FITS file
  *
  * @param[in] filename background table FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the background table into a FITS file.
+ * Save the background into a FITS file.
+ *
+ * If no extension name is provided, the background will be saved into the
+ * "BACKGROUND" extension.
  ***************************************************************************/
 void GCTABackground3D::save(const std::string& filename, const bool& clobber) const
 {
