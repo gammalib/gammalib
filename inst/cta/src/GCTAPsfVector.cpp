@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFilename.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAPsfVector.hpp"
@@ -256,20 +257,23 @@ GCTAPsfVector* GCTAPsfVector::clone(void) const
  ***************************************************************************/
 void GCTAPsfVector::load(const std::string& filename)
 {
-    // Open PSF FITS file
-    GFits file(filename);
+    // Create file name
+    GFilename fname(filename);
 
-    // Get PSF table
-    const GFitsTable& table = *file.table(1);
+    // Allocate FITS file
+    GFits file;
 
-    // Read PSF
+    // Open FITS file
+    file.open(fname.filename());
+
+    // Get PSFa table
+    const GFitsTable& table = *file.table(fname.extname("PSF"));
+
+    // Read PSF from table
     read(table);
 
-    // Close PSF FITS file
+    // Close FITS file
     file.close();
-
-    // Store filename
-    m_filename = filename;
 
     // Return
     return;

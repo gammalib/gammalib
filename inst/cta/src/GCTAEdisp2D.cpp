@@ -33,6 +33,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
+#include "GFilename.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -238,17 +239,23 @@ GCTAEdisp2D* GCTAEdisp2D::clone(void) const
  ***************************************************************************/
 void GCTAEdisp2D::load(const std::string& filename)
 {
-    // Open FITS file
-    GFits fits(filename);
+    // Create file name
+    GFilename fname(filename);
 
-    // Read energy dispersion from file
-    read(fits);
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(fname.filename());
+
+    // Get energy dispersion table
+    const GFitsTable& table = *file.table(fname.extname("ENERGY DISPERSION"));
+
+    // Read energy dispersion from table
+    read(table);
 
     // Close FITS file
-    fits.close();
-
-    // Store filename
-    m_filename = filename;
+    file.close();
 
     // Return
     return;
@@ -268,13 +275,10 @@ void GCTAEdisp2D::load(const std::string& filename)
  * The method assures that the energy dispersion information is properly
  * normalised.
  ***************************************************************************/
-void GCTAEdisp2D::read(const GFits& fits)
+void GCTAEdisp2D::read(const GFitsTable& table)
 {
     // Clear response table
     m_edisp.clear();
-
-    // Get energy dispersion table
-    const GFitsTable& table = *fits.table("ENERGY DISPERSION");
 
     // Read energy dispersion table
     m_edisp.read(table);
@@ -399,17 +403,20 @@ void GCTAEdisp2D::write(GFitsBinTable& hdu) const
  ***************************************************************************/
 void GCTAEdisp2D::save(const std::string& filename, const bool& clobber) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Create binary table
     GFitsBinTable table;
-    table.extname("ENERGY DISPERSION");
+    table.extname(fname.extname("ENERGY DISPERSON"));
 
-    // Write the Energy dispersion table
+    // Write the energy dispersion table
     write(table);
 
     // Create FITS file, append table, and write into the file
     GFits fits;
     fits.append(table);
-    fits.saveto(filename, clobber);
+    fits.saveto(fname.filename(), clobber);
 
     // Return
     return;

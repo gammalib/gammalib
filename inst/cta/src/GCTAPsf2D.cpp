@@ -32,13 +32,14 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GMath.hpp"
+#include "GFilename.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAPsf2D.hpp"
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                      "GCTAPsf2D::read(GFits&)"
+#define G_READ                                      "GCTAPsf2D::read(GFitsTable& table)"
 #define G_LOAD                                "GCTAPsf2D::load(std::string&)"
 #define G_CONTAINMENT_RADIUS         "GCTAPsf2D::containment_radius(double&,"\
                        " double&, double&, double&, double&, double&, bool&)"
@@ -276,23 +277,20 @@ GCTAPsf2D* GCTAPsf2D::clone(void) const
 /***********************************************************************//**
  * @brief Read PSF from FITS file
  *
- * @param[in] fits FITS file pointer.
+ * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
  *            FITS file format differs from expectation.
  *
- * Reads the PSF from the FITS file extension "POINT SPREAD FUNCTION". The data
+ * Reads the PSF from the FITS table. The data
  * are stored in m_psf which is of type GCTAResponseTable. 
  * The energy axis will be set to log10. The offset angle axis and 
  * sigma parameter columns will be set to radians.
  ***************************************************************************/
-void GCTAPsf2D::read(const GFits& fits)
+void GCTAPsf2D::read(const GFitsTable& table)
 {
     // Clear response table
     m_psf.clear();
-
-    // Get PSF table
-    const GFitsTable& table = *fits.table("POINT SPREAD FUNCTION");
 
     // Read PSF table
     m_psf.read(table);
@@ -367,17 +365,23 @@ void GCTAPsf2D::write(GFitsBinTable& hdu) const
  ***************************************************************************/
 void GCTAPsf2D::load(const std::string& filename)
 {
-    // Open PSF FITS file
-    GFits fits(filename);
+    // Create file name
+    GFilename fname(filename);
 
-    // Read fits file
-    read(fits);
+    // Allocate FITS file
+    GFits file;
 
-    // Close PSF FITS file
-    fits.close();
+    // Open FITS file
+    file.open(fname.filename());
 
-    // Store filename
-    m_filename = filename;
+    // Get PSFa table
+    const GFitsTable& table = *file.table(fname.extname("POINT SPREAD FUNCTION"));
+
+    // Read PSF from table
+    read(table);
+
+    // Close FITS file
+    file.close();
 
     // Return
     return;
@@ -394,9 +398,12 @@ void GCTAPsf2D::load(const std::string& filename)
  ***************************************************************************/
 void GCTAPsf2D::save(const std::string& filename, const bool& clobber) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Create binary table
     GFitsBinTable table;
-    table.extname("POINT SPREAD FUNCTION");
+    table.extname(fname.extname("POINT SPREAD FUNCTION"));
 
     // Write the PSF table
     write(table);
@@ -404,7 +411,7 @@ void GCTAPsf2D::save(const std::string& filename, const bool& clobber) const
     // Create FITS file, append table, and write into the file
     GFits fits;
     fits.append(table);
-    fits.saveto(filename, clobber);
+    fits.saveto(fname.filename(), clobber);
 
     // Return
     return;

@@ -30,13 +30,14 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTable.hpp"
 #include "GCTAAeff2D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                     "GCTAAeff2D::read(GFits&)"
+#define G_READ                                     "GCTAAeff2D::read(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -235,24 +236,21 @@ GCTAAeff2D* GCTAAeff2D::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Read effective area from FITS file
+ * @brief Read effective area from FITS table
  *
- * @param[in] fits FITS file pointer.
+ * @param[in] table FITS table pointer.
  *
  * @exception GException::invalid_value
  *            FITS file format differs from expectation.
  *
- * Reads the effective area form the FITS file extension "EFFECTIVE AREA".
+ * Reads the effective area form the FITS table.
  * The data are stored in m_aeff which is of type GCTAResponseTable. The
  * energy axis will be set to log10, the offset angle axis to radians.
  ***************************************************************************/
-void GCTAAeff2D::read(const GFits& fits)
+void GCTAAeff2D::read(const GFitsTable& table)
 {
     // Clear response table
     m_aeff.clear();
-
-    // Get effective area table
-    const GFitsTable& table = *fits.table("EFFECTIVE AREA");
 
     // Read effective area table
     m_aeff.read(table);
@@ -321,17 +319,23 @@ void GCTAAeff2D::write(GFitsBinTable& hdu) const
  ***************************************************************************/
 void GCTAAeff2D::load(const std::string& filename)
 {
-    // Open FITS file
-    GFits fits(filename);
+    // Create file name
+    GFilename fname(filename);
 
-    // Read effective area from file
-    read(fits);
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(fname.filename());
+
+    // Get effective area table
+    const GFitsTable& table = *file.table(fname.extname("EFFECTIVE AREA"));
+
+    // Read effective area from table
+    read(table);
 
     // Close FITS file
-    fits.close();
-
-    // Store filename
-    m_filename = filename;
+    file.close();
 
     // Return
     return;
@@ -348,9 +352,12 @@ void GCTAAeff2D::load(const std::string& filename)
  ***************************************************************************/
 void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Create binary table
     GFitsBinTable table;
-    table.extname("EFFECTIVE AREA");
+    table.extname(fname.extname("EFFECTIVE AREA"));
 
     // Write the Effective area table
     write(table);
@@ -358,7 +365,7 @@ void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
     // Create FITS file, append table, and write into the file
     GFits fits;
     fits.append(table);
-    fits.saveto(filename, clobber);
+    fits.saveto(fname.filename(), clobber);
 
     // Return
     return;
