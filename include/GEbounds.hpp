@@ -60,8 +60,7 @@ public:
     GEbounds(const GEnergy& emin, const GEnergy& emax);
     GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
              const bool& log = true);
-    GEbounds(const std::string& filename,
-             const std::string& extname = "EBOUNDS");
+    GEbounds(const std::string& filename);
     virtual ~GEbounds(void);
 
     // Operators
@@ -82,11 +81,9 @@ public:
     void           extend(const GEbounds& ebds);
     void           set_lin(const int& num, const GEnergy& emin, const GEnergy& emax);
     void           set_log(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void           load(const std::string& filename,
-                        const std::string& extname = "EBOUNDS");
+    void           load(const std::string& filename);
     void           save(const std::string& filename,
                         const bool& clobber = false,
-                        const std::string& extname = "EBOUNDS",
                         const std::string& unit = "keV") const;
     void           read(const GFitsTable& table);
     void           write(GFits& file,
