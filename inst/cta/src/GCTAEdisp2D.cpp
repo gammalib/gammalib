@@ -267,7 +267,7 @@ void GCTAEdisp2D::load(const std::string& filename)
 /***********************************************************************//**
  * @brief Read energy dispersion from FITS table
  *
- * @param[in] fits FITS table.
+ * @param[in] table FITS table.
  *
  * Reads the energy dispersion form the FITS @p table.
  *
