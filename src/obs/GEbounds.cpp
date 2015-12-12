@@ -77,6 +77,46 @@ GEbounds::GEbounds(void)
 
 
 /***********************************************************************//**
+ * @brief FITS file constructor
+ *
+ * @param[in] filename FITS file name.
+ *
+ * Constructs energy boundaries from a FITS file.
+ ***************************************************************************/
+GEbounds::GEbounds(const std::string& filename)
+{
+    // Initialise members
+    init_members();
+
+    // Load FITS file
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief XML element constructor
+ *
+ * @param[in] xml XML element.
+ *
+ * Constructs energy boundaries from an XML element.
+ ***************************************************************************/
+GEbounds::GEbounds(const GXmlElement& xml)
+{
+    // Initialise members
+    init_members();
+
+    // Read energy boundaries from XML element
+    read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] ebds Energy boundaries.
@@ -95,32 +135,12 @@ GEbounds::GEbounds(const GEbounds& ebds)
 
 
 /***********************************************************************//**
- * @brief XML element constructor
- *
- * @param[in] xml XML element.
- *
- * Constructs energy bounds from an XML element.
- ***************************************************************************/
-GEbounds::GEbounds(const GXmlElement& xml)
-{
-    // Initialise members
-    init_members();
-
-    // Read energy boundaries from XML element
-    read(xml);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Single energy band constructor
  *
  * @param[in] emin Minimum energy of the interval.
  * @param[in] emax Maximum energy of the interval.
  *
- * Constructs energy bounds for one (emin, emax) energy band.
+ * Constructs energy boundaries for one (emin, emax) energy band.
  ***************************************************************************/
 GEbounds::GEbounds(const GEnergy& emin, const GEnergy& emax)
 {
@@ -160,24 +180,6 @@ GEbounds::GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
     else {
         this->set_lin(num, emin, emax);
     }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load constructor
- *
- * @param[in] filename FITS filename.
- ***************************************************************************/
-GEbounds::GEbounds(const std::string& filename)
-{
-    // Initialise members
-    init_members();
-
-    // Load FITS file
-    load(filename);
 
     // Return
     return;
@@ -570,6 +572,9 @@ void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
  * @param[in] filename FITS file name.
  *
  * Loads the energy boundaries from a FITS file.
+ *
+ * If no extension name is provided, the energy boundaries are loaded from
+ * the "EBOUNDS" extension.
  ***************************************************************************/
 void GEbounds::load(const std::string& filename)
 {
@@ -603,7 +608,10 @@ void GEbounds::load(const std::string& filename)
  * @param[in] clobber Overwrite any existing file  (default: false)?
  * @param[in] unit Energy units (default: "keV")
  *
- * Saves the energy boundaries into a FITS file.
+ * Saves energy boundaries into a FITS file.
+ *
+ * If no extension name is provided, the energy boundaries are saved into
+ * an "EBOUNDS" extension.
  ***************************************************************************/
 void GEbounds::save(const std::string& filename,
                     const bool&        clobber,

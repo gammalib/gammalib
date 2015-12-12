@@ -36,9 +36,11 @@
  * @brief Good Time Interval class
  ***************************************************************************/
 class GGti : public GBase {
+
 public:
     // Constructors and destructors
     GGti(void);
+    explicit GGti(const std::string& filename);
     GGti(const GGti& gti);
     GGti(const GTime& tstart, const GTime& tstop);
     explicit GGti(const GXmlElement& xml);
@@ -59,11 +61,9 @@ public:
     void                  remove(const int& index);
     void                  reserve(const int& num);
     void                  extend(const GGti& gti);
-    void                  load(const std::string& filename,
-                               const std::string& extname = "GTI");
+    void                  load(const std::string& filename);
     void                  save(const std::string& filename,
-                               const bool& clobber = false,
-                               const std::string& extname = "GTI") const;
+                               const bool& clobber = false) const;
     void                  read(const GFitsTable& table);
     void                  write(GFits& file,
                                 const std::string& extname = "GTI") const;

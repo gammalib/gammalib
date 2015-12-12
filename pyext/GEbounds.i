@@ -39,12 +39,12 @@ class GEbounds : public GContainer {
 public:
     // Constructors and destructors
     GEbounds(void);
-    GEbounds(const GEbounds& ebds);
+    explicit GEbounds(const std::string& filename);
     explicit GEbounds(const GXmlElement& xml);
+    GEbounds(const GEbounds& ebds);
     GEbounds(const GEnergy& emin, const GEnergy& emax);
     GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
              const bool& log = true);
-    GEbounds(const std::string& filename);
     virtual ~GEbounds(void);
 
     // Methods
