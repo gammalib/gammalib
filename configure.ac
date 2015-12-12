@@ -39,13 +39,23 @@ AC_CONFIG_HEADER([config.h])
 
 
 #############################################################################
-# Library versioning                                                        #
+# Library versioning (current:revision:age)                                 #
 # ------------------------------------------------------------------------- #
-# See the libtool manual for an explanation.  Currently, library versioning #
-# is not yet used for GammaLib as we're still in the development cycle.     #
-# Users have to make sure that they link against the correct library.       #
+# Here are a set of rules to update your library version information:       #
+# 1. Update the version information only immediately before a public        #
+#    release of your software. More frequent updates are unnecessary,       #
+#    and only guarantee that the current interface number gets larger       #
+#    faster.                                                                #
+# 2. If the library source code has changed at all since the last update,   #
+#    then increment revision.                                               #
+# 3. If any interfaces have been added, removed, or changed since the last  #
+#    update, increment current, and set revision to 0.                      #
+# 4. If any interfaces have been added since the last public release, then  #
+#    increment age.                                                         #
+# 5. If any interfaces have been removed or changed since the last public   #
+#    release, then set age to 0.                                            #
 #############################################################################
-GAMMALIB_LT_VERSION="0:0:0"
+GAMMALIB_LT_VERSION="1:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
 
 
