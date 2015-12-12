@@ -227,21 +227,21 @@ std::string GFilename::extname(const std::string& defaultname) const
 /***********************************************************************//**
  * @brief Return extension number
  *
- * @param[in] defaultextno Default extension number (default: 1).
+ * @param[in] defaultno Default extension number (default: -11).
  * @return Integer containing extension number.
  *
  * Returns the extension number. If no extension number is given the number
- * provided by the @p defaultextno argument will be used. By default, the
- * @p defaultextno parameter is set to 1.
+ * provided by the @p defaultno argument will be used. By default, the
+ * @p defaultno parameter is set to -1.
  ***************************************************************************/
-int GFilename::extno(const int& defaultextno) const
+int GFilename::extno(const int& defaultno) const
 {
     // Set the extension number
     int extno = m_extno;
 
     // If no extension number is set, the use the default extension number
     if (!has_extno()) {
-        extno = defaultextno;
+        extno = defaultno;
     }
 
     // Return extension number
@@ -252,27 +252,26 @@ int GFilename::extno(const int& defaultextno) const
 /***********************************************************************//**
  * @brief Return extension version number
  *
- * @param[in] defaultextver Default extension version number (default: 1).
+ * @param[in] defaultver Default extension version number (default: 0).
  * @return Integer containing extension version number.
  *
- * Returns the extension version number. If no extension version number is given the number
- * provided by the @p defaultextver argument will be used. By default, the
- * @p defaultextver parameter is set to 1.
+ * Returns the extension version number. If no extension version number is
+ * given the number provided by the @p defaultver argument will be used. By
+ * default, the @p defaultextver parameter is set to 0.
  ***************************************************************************/
-int GFilename::extver(const int& defaultextver) const
+int GFilename::extver(const int& defaultver) const
 {
-    // Set the extension version number
+    // Set the extension version
     int extver = m_extver;
 
-    // If no extension number is set, the use the default extension version number
+    // If no extension version is set, the use the default extension version
     if (!has_extver()) {
-        extver = defaultextver;
+        extver = defaultver;
     }
 
-    // Return extension number
+    // Return extension version
     return (extver);
 }
-
 
 
 /***********************************************************************//**
