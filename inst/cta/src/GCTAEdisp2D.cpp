@@ -33,6 +33,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
+#include "GFilename.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -73,8 +74,7 @@ GCTAEdisp2D::GCTAEdisp2D(void) : GCTAEdisp()
  *
  * @param[in] filename FITS file name.
  *
- * Construct instance by loading the energy dispersion information from a
- * FITS file.
+ * Constructs energy dispersion from a FITS file.
  ***************************************************************************/
 GCTAEdisp2D::GCTAEdisp2D(const std::string& filename) : GCTAEdisp()
 {
@@ -232,23 +232,32 @@ GCTAEdisp2D* GCTAEdisp2D::clone(void) const
 /***********************************************************************//**
  * @brief Load energy dispersion from FITS file
  *
- * @param[in] filename FITS file.
+ * @param[in] filename FITS file name.
  *
- * This method loads the energy dispersion information from a FITS file.
+ * Loads the energy dispersion from a FITS file.
+ *
+ * If no extension name is provided, the energy dispersion will be loaded
+ * from the "ENERGY DISPERSION" extension.
  ***************************************************************************/
 void GCTAEdisp2D::load(const std::string& filename)
 {
-    // Open FITS file
-    GFits fits(filename);
+    // Create file name
+    GFilename fname(filename);
 
-    // Read energy dispersion from file
-    read(fits);
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(fname.filename());
+
+    // Get energy dispersion table
+    const GFitsTable& table = *file.table(fname.extname("ENERGY DISPERSION"));
+
+    // Read energy dispersion from table
+    read(table);
 
     // Close FITS file
-    fits.close();
-
-    // Store filename
-    m_filename = filename;
+    file.close();
 
     // Return
     return;
@@ -256,25 +265,21 @@ void GCTAEdisp2D::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Read energy dispersion from FITS file
+ * @brief Read energy dispersion from FITS table
  *
- * @param[in] fits FITS file pointer.
+ * @param[in] fits FITS table.
  *
- * Reads the energy dispersion form the FITS file extension
- * "ENERGY DISPERSION". The data are stored in m_edisp which is of type
- * GCTAResponseTable. The energy axis will be set to log10, the offset
- * angle axis to radians.
+ * Reads the energy dispersion form the FITS @p table.
  *
- * The method assures that the energy dispersion information is properly
- * normalised.
+ * The data are stored in m_edisp which is of type GCTAResponseTable. The
+ * energy axis will be set to log10, the offset angle axis to radians.
+ *
+ * The method assures that the energy dispersion is properly normalised.
  ***************************************************************************/
-void GCTAEdisp2D::read(const GFits& fits)
+void GCTAEdisp2D::read(const GFitsTable& table)
 {
     // Clear response table
     m_edisp.clear();
-
-    // Get energy dispersion table
-    const GFitsTable& table = *fits.table("ENERGY DISPERSION");
 
     // Read energy dispersion table
     m_edisp.read(table);
@@ -373,16 +378,18 @@ void GCTAEdisp2D::read(const GFits& fits)
 
 
 /***********************************************************************//**
- * @brief Write CTA energy dispersion table into FITS binary table object.
+ * @brief Write energy dispersion into FITS binary table
  *
- * @param[in] hdu FITS binary table.
+ * @param[in] table FITS binary table.
  *
- * @todo Add necessary keywords.
+ * Writes the energy dispersion into the FITS binary @p table.
+ *
+ * @todo Add keywords.
  ***************************************************************************/
-void GCTAEdisp2D::write(GFitsBinTable& hdu) const
+void GCTAEdisp2D::write(GFitsBinTable& table) const
 {
     // Write background table
-    m_edisp.write(hdu);
+    m_edisp.write(table);
 
     // Return
     return;
@@ -392,24 +399,30 @@ void GCTAEdisp2D::write(GFitsBinTable& hdu) const
 /***********************************************************************//**
  * @brief Save energy dispersion table into FITS file
  *
- * @param[in] filename Energy dispersion table FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the energy dispersion table into a FITS file.
+ * Save the energy dispersion table into FITS file.
+ *
+ * If no extension name is provided, the energy dispersion will be saved into
+ * the "ENERGY DISPERSION" extension.
  ***************************************************************************/
 void GCTAEdisp2D::save(const std::string& filename, const bool& clobber) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Create binary table
     GFitsBinTable table;
-    table.extname("ENERGY DISPERSION");
+    table.extname(fname.extname("ENERGY DISPERSION"));
 
-    // Write the Energy dispersion table
+    // Write the energy dispersion table
     write(table);
 
     // Create FITS file, append table, and write into the file
     GFits fits;
     fits.append(table);
-    fits.saveto(filename, clobber);
+    fits.saveto(fname.filename(), clobber);
 
     // Return
     return;

@@ -75,8 +75,8 @@ public:
     bool                       is_valid(void) const;
     const GCTAResponseTable&   table(void) const;
     void                       table(const GCTAResponseTable& table);
-    void                       read(const GFits& file);
-    void                       write(GFitsBinTable& hdu) const;
+    void                       read(const GFitsTable& table);
+    void                       write(GFitsBinTable& table) const;
     void                       save(const std::string& filename,
                                     const bool& clobber = false) const;
 

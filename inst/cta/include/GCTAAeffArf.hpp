@@ -85,7 +85,7 @@ public:
     const double& thetacut(void) const;
     void          scale(const double& scale);
     const double& scale(void) const;
-    void          read(const GFitsTable& hdu);
+    void          read(const GFitsTable& table);
     void          remove_thetacut(const GCTAResponseIrf& rsp);
     
 private:

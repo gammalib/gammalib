@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFilename.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAPsfVector.hpp"
@@ -74,8 +75,7 @@ GCTAPsfVector::GCTAPsfVector(void) : GCTAPsf()
  *
  * @param[in] filename PSF FITS file.
  *
- * Construct instance by loading the point spread function information from
- * a FITS file that contains the PSF information in form of a column.
+ * Constructs point spread function vector from a FITS file.
  ***************************************************************************/
 GCTAPsfVector::GCTAPsfVector(const std::string& filename) : GCTAPsf()
 {
@@ -247,29 +247,34 @@ GCTAPsfVector* GCTAPsfVector::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load point spread function from performance table
+ * @brief Load point spread function from FITS file
  *
- * @param[in] filename Performance table file name.
+ * @param[in] filename FITS file name.
  *
- * This method loads the point spread function information from a FITS file
- * that contains the PSF width in a single column.
+ * Loads the point spread function from a FITS file.
+ *
+ * If no extension name is provided, the point spread function will be loaded
+ * from the "PSF" extension.
  ***************************************************************************/
 void GCTAPsfVector::load(const std::string& filename)
 {
-    // Open PSF FITS file
-    GFits file(filename);
+    // Create file name
+    GFilename fname(filename);
 
-    // Get PSF table
-    const GFitsTable& table = *file.table(1);
+    // Allocate FITS file
+    GFits file;
 
-    // Read PSF
+    // Open FITS file
+    file.open(fname.filename());
+
+    // Get PSFa table
+    const GFitsTable& table = *file.table(fname.extname("PSF"));
+
+    // Read PSF from table
     read(table);
 
-    // Close PSF FITS file
+    // Close FITS file
     file.close();
-
-    // Store filename
-    m_filename = filename;
 
     // Return
     return;
@@ -277,12 +282,13 @@ void GCTAPsfVector::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Read CTA PSF vector
+ * @brief Read point spread function vector from FITS table
  *
  * @param[in] table FITS table.
  *
- * This method reads a CTA PSF vector from the FITS HDU. Note that the
- * energies are converted to TeV. Conversion is done based on the units
+ * Reads a point spread function vector from the FITS @p table.
+ *
+ * The energies are converted to TeV. Conversion is done based on the units
  * provided for the energy columns. Units that are recognized are 'keV',
  * 'MeV', 'GeV', and 'TeV' (case independent).
  *
