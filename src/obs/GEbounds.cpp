@@ -29,9 +29,9 @@
 #include <config.h>
 #endif
 #include <cmath>
-//#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GEbounds.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -170,15 +170,14 @@ GEbounds::GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
  * @brief Load constructor
  *
  * @param[in] filename FITS filename.
- * @param[in] extname FITS extension name (defaults to "EBOUNDS").
  ***************************************************************************/
-GEbounds::GEbounds(const std::string& filename, const std::string& extname)
+GEbounds::GEbounds(const std::string& filename)
 {
     // Initialise members
     init_members();
 
     // Load FITS file
-    load(filename, extname);
+    load(filename);
 
     // Return
     return;
@@ -568,21 +567,23 @@ void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
 /***********************************************************************//**
  * @brief Load energy boundaries from FITS file
  *
- * @param[in] filename FITS filename.
- * @param[in] extname FITS extension name (defaults to "EBOUNDS").
+ * @param[in] filename FITS file name.
  *
- * Loads the energy boundaries from FITS file.
+ * Loads the energy boundaries from a FITS file.
  ***************************************************************************/
-void GEbounds::load(const std::string& filename, const std::string& extname)
+void GEbounds::load(const std::string& filename)
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Allocate FITS file
     GFits file;
 
     // Open FITS file
-    file.open(filename);
+    file.open(fname.filename());
 
     // Get energy boundary table
-    const GFitsTable& table = *file.table(extname);
+    const GFitsTable& table = *file.table(fname.extname("EBOUNDS"));
 
     // Read energy boundaries from table
     read(table);
@@ -598,26 +599,27 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
 /***********************************************************************//**
  * @brief Save energy boundaries into FITS file
  *
- * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing file  (defaults to false)?
- * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS").
- * @param[in] unit Energy units (defaults to "keV")
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite any existing file  (default: false)?
+ * @param[in] unit Energy units (default: "keV")
  *
- * Saves the energy boundaries into extension @p extname of a FITS file.
+ * Saves the energy boundaries into a FITS file.
  ***************************************************************************/
 void GEbounds::save(const std::string& filename,
                     const bool&        clobber,
-                    const std::string& extname,
                     const std::string& unit) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Allocate FITS file
     GFits file;
 
     // Write energy boundaries to FITS file
-    write(file, extname, unit);
+    write(file, fname.extname("EBOUNDS"), unit);
 
     // Save to file
-    file.saveto(filename, clobber);
+    file.saveto(fname.filename(), clobber);
 
     // Return
     return;
