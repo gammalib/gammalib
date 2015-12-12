@@ -768,6 +768,18 @@ void TestGSupport::test_filename(void)
                 "Expected \"LUCKY\" extension name, "
                 "found \""+filename.extname()+"\"");
 
+    // Test default extension number
+    filename = "myfile.fits";
+    test_value(filename.extno(1), 1);
+    filename = "myfile.fits[3]";
+    test_value(filename.extno(1), 3);
+
+    // Test default extension version
+    filename = "myfile.fits";
+    test_value(filename.extver(1), 1);
+    filename = "myfile.fits[3,3]";
+    test_value(filename.extver(1), 3);
+
     // Return
     return;
 }
