@@ -15,6 +15,12 @@ made since the last release of GammaLib.
 ---------------------------------
 Remove optional extname arguments from the following classes:
 - GEbounds
+- GEnergies
+- GGti
+- GNodeArray
+- GCTAPointing
+- GMWLObservation
+- GMWLSpectrum
 
 
 3. Configuration

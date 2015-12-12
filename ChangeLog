@@ -3,7 +3,7 @@
         * Version 1.0.0 released
         =========================
 
-        Remove extname arguments from classes (#XXXX)
+        Remove extname arguments from classes (#1601)
         Add GFilename class (#1599)
         Check existence of files in CTA response loading (#1586)
         GSkyMap::__getitem__ throw exception if out of bound (#1581)
