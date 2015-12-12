@@ -94,7 +94,7 @@ public:
     // Methods
     const GCTAResponseTable&   table(void) const;
     void                       table(const GCTAResponseTable& table);
-    void                       read(const GFits& file);
+    void                       read(const GFitsTable& table);
     void                       write(GFitsBinTable& hdu) const;
     void                       save(const std::string& filename,
                                     const bool& clobber = false) const;

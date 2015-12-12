@@ -31,6 +31,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
+#include "GFilename.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAAeffArf.hpp"
@@ -247,20 +248,23 @@ GCTAAeffArf* GCTAAeffArf::clone(void) const
  ***************************************************************************/
 void GCTAAeffArf::load(const std::string& filename)
 {
-    // Open ARF FITS file
-    GFits file(filename);
+    // Create file name
+    GFilename fname(filename);
+
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(fname.filename());
 
     // Get ARF table
-    const GFitsTable& table = *file.table("SPECRESP");
+    const GFitsTable& table = *file.table(fname.extname("SPECRESP"));
 
-    // Read ARF
+    // Read ARF from table
     read(table);
 
-    // Close ARF FITS file
+    // Close FITS file
     file.close();
-
-    // Store filename
-    m_filename = filename;
 
     // Return
     return;

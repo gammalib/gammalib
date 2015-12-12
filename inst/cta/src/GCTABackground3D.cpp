@@ -30,13 +30,14 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTABackground3D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                               "GCTABackground3D::read(GFits&)"
+#define G_READ                               "GCTABackground3D::read(GFitsTable& table)"
 #define G_MC                  "GCTABackground3D::mc(GEnergy&, GTime&, GRan&)"
 #define G_INIT_MC_CACHE                   "GCTABackground3D::init_mc_cache()"
 
@@ -305,23 +306,20 @@ GCTABackground3D* GCTABackground3D::clone(void) const
 /***********************************************************************//**
  * @brief Read background from FITS file
  *
- * @param[in] fits FITS file pointer.
+ * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
  *            FITS file format differs from expectation.
  *
- * Reads the background from the FITS file extension "BACKGROUND". The data
+ * Reads the background from the FITS table. The data
  * are stored in m_background which is of type GCTAResponseTable. The DETX
  * and DETY axes will be set to radians, the energy axis will be set to
  * log10.
  ***************************************************************************/
-void GCTABackground3D::read(const GFits& fits)
+void GCTABackground3D::read(const GFitsTable& table)
 {
     // Clear response table
     m_background.clear();
-
-    // Get background table
-    const GFitsTable& table = *fits.table("BACKGROUND");
 
     // Read background table
     m_background.read(table);
@@ -386,17 +384,23 @@ void GCTABackground3D::write(GFitsBinTable& hdu) const
  ***************************************************************************/
 void GCTABackground3D::load(const std::string& filename)
 {
-    // Open FITS file
-    GFits fits(filename);
+    // Create file name
+    GFilename fname(filename);
 
-    // Read background from file
-    read(fits);
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(fname.filename());
+
+    // Get background table
+    const GFitsTable& table = *file.table(fname.extname("BACKGROUND"));
+
+    // Read effective area from table
+    read(table);
 
     // Close FITS file
-    fits.close();
-
-    // Store filename
-    m_filename = filename;
+    file.close();
 
     // Return
     return;
@@ -413,9 +417,12 @@ void GCTABackground3D::load(const std::string& filename)
  ***************************************************************************/
 void GCTABackground3D::save(const std::string& filename, const bool& clobber) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Create binary table
     GFitsBinTable table;
-    table.extname("BACKGROUND");
+    table.extname(fname.extname("BACKGROUND"));
 
     // Write the background table
     write(table);
@@ -423,7 +430,7 @@ void GCTABackground3D::save(const std::string& filename, const bool& clobber) co
     // Create FITS file, append table, and write into the file
     GFits fits;
     fits.append(table);
-    fits.saveto(filename, clobber);
+    fits.saveto(fname.filename(), clobber);
 
     // Return
     return;
