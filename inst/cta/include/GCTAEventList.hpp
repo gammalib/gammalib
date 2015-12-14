@@ -89,9 +89,6 @@ protected:
     virtual void set_energies(void) { return; }
     virtual void set_times(void) { return; }
     void         read_events(const GFitsTable& hdu);
-    void         read_events_v0(const GFitsTable& hdu);
-    void         read_events_v1(const GFitsTable& hdu);
-    void         read_events_hillas(const GFitsTable& hdu);
     void         write_events(GFitsBinTable& hdu) const;
     void         write_ds_keys(GFitsHDU& hdu) const;
     int          irf_cache_init(const std::string& name) const;
@@ -100,11 +97,15 @@ protected:
     // Protected members
     GCTARoi                    m_roi;       //!< Region of interest
     std::vector<GCTAEventAtom> m_events;    //!< Events
+    std::vector<GFitsTableCol*> m_columns;   //!< Pointers to optional columns
     bool                       m_has_phase; //!< Signal presence of phase
+    bool                       m_has_detxy; //!< Signal presence of detector coordinates
 
     // IRF cache for diffuse models
     mutable std::vector<std::string>          m_irf_names;  //!< Model names
     mutable std::vector<std::vector<double> > m_irf_values; //!< IRF values
+
+
 };
 
 
