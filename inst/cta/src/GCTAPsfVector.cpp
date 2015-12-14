@@ -276,6 +276,9 @@ void GCTAPsfVector::load(const std::string& filename)
     // Close FITS file
     file.close();
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
