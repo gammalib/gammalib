@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-2 December 2015
+16 December 2015
 
 
 1. Introduction
@@ -109,8 +109,11 @@ None
 
 20. CTA interface
 -----------------
-The IRF loaders now check the existence of the file before loading, and now throw
+The IRF loaders now check the existence of the file before loading, and now throws
 appropriate error messages in case that the files do not exist (#1586).
+
+Only manadatory columns are read by GCTAEventsList, while any other columns will only
+be stored for back writing in a FITS file.
 
 
 21. COMPTEL interface

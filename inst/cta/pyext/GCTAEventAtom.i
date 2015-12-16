@@ -55,10 +55,8 @@ public:
     // Other methods
     const int&           index(void) const;
     const unsigned long& event_id(void) const;
-    const unsigned long& obs_id(void) const;
     const float&         phase(void) const;
     void                 event_id(const unsigned long& id);
-    void                 obs_id(const unsigned long& id);
     void                 phase(const float& phase);
 };
 
