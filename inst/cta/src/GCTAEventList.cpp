@@ -634,10 +634,24 @@ void GCTAEventList::free_members(void)
  *
  * @param[in] table FITS table.
  *
- * This method reads the CTA event list from a FITS table HDU into memory.
- * It reads required columns for analysis such as "EVENT_ID", "OBS_ID",
- * "RA", "DEC", "TIME" and "ENERGY". All other columns are stored as well
- * and will be written out in the write()-method.
+ * This method reads the CTA event list from a FITS table into memory.
+ * The following columns are mandatory in the FITS table:
+ *
+ *      - EVENT_ID
+ *      - TIME
+ *      - RA
+ *      - DEC
+ *      - ENERGY
+ *
+ * Optionally, the
+ *
+ *      - DETX
+ *      - DETY
+ *      - PHASE
+ *
+ * columns are read. Any other columns present in the FITS table will also be
+ * read, and written into the FITS table when the write_events() method is
+ * called.
  ***************************************************************************/
 void GCTAEventList::read_events(const GFitsTable& table)
 {
@@ -654,13 +668,25 @@ void GCTAEventList::read_events(const GFitsTable& table)
         m_events.reserve(num);
 
         // Get column pointers
-        const GFitsTableCol* ptr_eid         = table["EVENT_ID"];
-        const GFitsTableCol* ptr_time        = table["TIME"];
-        const GFitsTableCol* ptr_ra          = table["RA"];
-        const GFitsTableCol* ptr_dec         = table["DEC"];
-        const GFitsTableCol* ptr_energy      = table["ENERGY"];
+        const GFitsTableCol* ptr_eid    = table["EVENT_ID"];
+        const GFitsTableCol* ptr_time   = table["TIME"];
+        const GFitsTableCol* ptr_ra     = table["RA"];
+        const GFitsTableCol* ptr_dec    = table["DEC"];
+        const GFitsTableCol* ptr_energy = table["ENERGY"];
 
-        // Check for phase column
+        // Check for DETX and DETY columns
+        const GFitsTableCol* ptr_detx;
+        const GFitsTableCol* ptr_dety;
+        if (table.contains("DETX") && table.contains("DETY")) {
+            m_has_detxy = true;
+            ptr_detx    = table["DETX"];
+            ptr_dety    = table["DETY"];
+        }
+        else {
+            m_has_detxy = false;
+        }
+
+        // Check for PHASE column
         const GFitsTableCol* ptr_phase;
         if (table.contains("PHASE")) {
             m_has_phase = true;
@@ -670,41 +696,32 @@ void GCTAEventList::read_events(const GFitsTable& table)
             m_has_phase = false;
         }
 
-        // Check for DETX and DETY columns
-        const GFitsTableCol* ptr_detx;
-        const GFitsTableCol* ptr_dety;
-        if (table.contains("DETX") && table.contains("DETY")) {
-            m_has_detxy = true;
-            ptr_detx   = table["DETX"];
-            ptr_dety   = table["DETY"];
-        }
-        else {
-            m_has_detxy = false;
-        }
-
         // Copy data from columns into GCTAEventAtom objects
         GCTAEventAtom event;
         for (int i = 0; i < num; ++i) {
-            event.m_index     = i;
+
+            // Set mandatory information
             event.m_time.set(ptr_time->real(i), m_gti.reference());
             event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
             event.m_energy.TeV(ptr_energy->real(i));
-            event.m_event_id    = ptr_eid->integer(i);
+            event.m_event_id = ptr_eid->integer(i);
+            event.m_index    = i;
 
-            // Set detector coordinates if available
+            // If available, set detector coordinates in radians
             if (m_has_detxy) {
                 event.m_dir.detx(ptr_detx->real(i)*gammalib::deg2rad);
                 event.m_dir.dety(ptr_dety->real(i)*gammalib::deg2rad);
             }
 
-            // Set pulse phase if available
+            // If available, set pulse phase
             if (m_has_phase) {
                 event.m_phase = ptr_phase->real(i);
             }
 
             // Append event
             m_events.push_back(event);
-        }
+
+        } // endfor: looped over all events
 
         // Loop over table and find optional columns
         for (int i = 0; i < table.ncols(); ++i) {
@@ -715,13 +732,19 @@ void GCTAEventList::read_events(const GFitsTable& table)
             // Get column name
             const std::string name = col->name();
 
-            // Check if column was handled before
-            if (name  == "EVENT_ID" || name == "ENERGY" ||
-                    name == "RA" || name == "DEC" ||
-                    name == "TIME" || name == "DETX" ||
-                    name == "DETY" || name == "PHASE") {
+            // If column was mandatory or optional then skip it ...
+            if (name == "EVENT_ID" ||
+                name == "TIME"     ||
+                name == "RA"       ||
+                name == "DEC"      ||
+                name == "ENERGY"   ||
+                name == "DETX"     ||
+                name == "DETY"     ||
+                name == "PHASE") {
                 continue;
             }
+
+            // ... otherwise keep a copy
             else {
                 m_columns.push_back(col->clone());
             }
@@ -738,11 +761,26 @@ void GCTAEventList::read_events(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write CTA events into FITS table
  *
- * @param[in] hdu FITS table HDU.
+ * @param[in] table FITS binary table.
  *
- * Write the CTA event list into FITS table.
+ * Write the CTA event list into a FITS binary table.
  *
- * @todo Implement agreed column format
+ * The following mandatory columns will be written into the FITS table:
+ *
+ *      - EVENT_ID
+ *      - TIME
+ *      - RA
+ *      - DEC
+ *      - ENERGY
+ *
+ * If available, also the
+ *
+ *      - DETX
+ *      - DETY
+ *      - PHASE
+ *
+ * columns are written. Any other columns that were read by the read_events()
+ * method will be also written into the table.
  ***************************************************************************/
 void GCTAEventList::write_events(GFitsBinTable& hdu) const
 {
@@ -752,51 +790,47 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
     // If there are events then write them now
     if (size() > 0) {
 
-        // Allocate required columns
-        GFitsTableULongCol  col_eid         = GFitsTableULongCol("EVENT_ID", size());
-        GFitsTableDoubleCol col_time        = GFitsTableDoubleCol("TIME", size());
-        GFitsTableFloatCol  col_ra          = GFitsTableFloatCol("RA", size());
-        GFitsTableFloatCol  col_dec         = GFitsTableFloatCol("DEC", size());
-        GFitsTableFloatCol  col_energy      = GFitsTableFloatCol("ENERGY", size());
+        // Allocate mandatory columns
+        GFitsTableULongCol  col_eid    = GFitsTableULongCol("EVENT_ID", size());
+        GFitsTableDoubleCol col_time   = GFitsTableDoubleCol("TIME", size());
+        GFitsTableFloatCol  col_ra     = GFitsTableFloatCol("RA", size());
+        GFitsTableFloatCol  col_dec    = GFitsTableFloatCol("DEC", size());
+        GFitsTableFloatCol  col_energy = GFitsTableFloatCol("ENERGY", size());
 
-        // Fill columns
+        // Fill mandatory columns
         for (int i = 0; i < size(); ++i) {
-            col_eid(i)         = m_events[i].m_event_id;
-            col_time(i)        = m_events[i].time().convert(m_gti.reference());
-            col_ra(i)          = m_events[i].dir().dir().ra_deg();
-            col_dec(i)         = m_events[i].dir().dir().dec_deg();
-            col_energy(i)      = m_events[i].energy().TeV();
-        } // endfor: loop over columns
+            col_eid(i)    = m_events[i].m_event_id;
+            col_time(i)   = m_events[i].time().convert(m_gti.reference());
+            col_ra(i)     = m_events[i].dir().dir().ra_deg();
+            col_dec(i)    = m_events[i].dir().dir().dec_deg();
+            col_energy(i) = m_events[i].energy().TeV();
+        }
 
-        // Append columns to table
+        // Append mandatory columns to table
         hdu.append(col_eid);
         hdu.append(col_time);
         hdu.append(col_ra);
         hdu.append(col_dec);
         hdu.append(col_energy);
 
-        // Fill detector coordinates if required
+        // If available, add detector coordinates in degrees
         if (m_has_detxy) {
-            GFitsTableFloatCol  col_detx = GFitsTableFloatCol("DETX", size());
-            GFitsTableFloatCol  col_dety = GFitsTableFloatCol("DETY", size());
+            GFitsTableFloatCol col_detx = GFitsTableFloatCol("DETX", size());
+            GFitsTableFloatCol col_dety = GFitsTableFloatCol("DETY", size());
             for (int i = 0; i < size(); ++i) {
                 col_detx(i) = m_events[i].dir().detx() * gammalib::rad2deg;
                 col_dety(i) = m_events[i].dir().dety() * gammalib::rad2deg;
             }
-
-            // Append columns to table
             hdu.append(col_detx);
             hdu.append(col_dety);
         }
 
-        // Fill pulse phase if required
+        // If available, add event phase
         if (m_has_phase) {
-            GFitsTableFloatCol  col_phase = GFitsTableFloatCol("PHASE", size());
+            GFitsTableFloatCol col_phase = GFitsTableFloatCol("PHASE", size());
             for (int i = 0; i < size(); ++i) {
                 col_phase(i) = m_events[i].m_phase;
             }
-
-            // Append column to table
             hdu.append(col_phase);
         }
 

@@ -1,8 +1,9 @@
-2015-12-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-12-16  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Read only mandatary columns in GCTAEventList (#1600)
         Add GModel::has_ts() method (#1578)
 
 
