@@ -140,7 +140,7 @@ all-local: build
 build: $(BUILT_SOURCES)
 	@PYTHON_BUILD_PREFIX@ $(PYTHON) setup.py build_ext
 if IS_ELCAPITAN
-	for f in build/gammalib/_*.so; do \
+	-for f in build/gammalib/_*.so; do \
 		echo "Post process module "$$f; \
 		install_name_tool -change $(libdir)/libgamma.0.dylib @rpath/libgamma.0.dylib $$f; \
 		install_name_tool -add_rpath $(libdir) $$f; \
