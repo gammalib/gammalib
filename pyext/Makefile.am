@@ -142,7 +142,7 @@ build: $(BUILT_SOURCES)
 if IS_ELCAPITAN
 	-for f in build/gammalib/_*.so; do \
 		echo "Post process module "$$f; \
-		install_name_tool -change $(libdir)/libgamma.0.dylib @rpath/libgamma.0.dylib $$f; \
+		install_name_tool -change $(libdir)/libgamma.1.dylib @rpath/libgamma.1.dylib $$f; \
 		install_name_tool -add_rpath $(libdir) $$f; \
 		install_name_tool -add_rpath $(abs_top_srcdir)/src/.libs $$f; \
 	done
