@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.0
 
 Author(s) : Juergen Knoedlseder
 
-12 December 2015
+17 December 2015
 
 
 1. Introduction
@@ -32,7 +32,8 @@ related to file access rights (#1569).
 A special post processing of the Python module libraries has been added for
 Mac OS X 10.11 and higher (El Capitan). This post processing is a replacement for
 setting DYLD_LIBRARY_PATH during unit testing since the environment variable is
-ignored in certain circumstances by El Capitan.
+ignored in certain circumstances by El Capitan. Any errors that occur during the
+post processing will be ignored.
 
 
 4. Application module

@@ -1,8 +1,9 @@
-2015-12-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2015-12-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
         =========================
 
+        Ignore errors for El Capitan post processing (#1605)
         Remove extname arguments from classes (#1601)
         Add GFilename class (#1599)
         Check existence of files in CTA response loading (#1586)
