@@ -4,8 +4,7 @@
         =========================
 
         Ignore errors for El Capitan post processing (#1605)
-        Read only mandatary columns in GCTAEventList (#1600)
-        Add GModel::has_ts() method (#1578)
+        Read only mandatory columns in GCTAEventList (#1600)
         Remove extname arguments from classes (#1601)
         Add GFilename class (#1599)
         Check existence of files in CTA response loading (#1586)
