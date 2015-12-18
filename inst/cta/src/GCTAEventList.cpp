@@ -761,7 +761,7 @@ void GCTAEventList::read_events(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write CTA events into FITS table
  *
- * @param[in] table FITS binary table.
+ * @param[in] hdu FITS binary table.
  *
  * Write the CTA event list into a FITS binary table.
  *
