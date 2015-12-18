@@ -2,8 +2,6 @@
 
 import gammalib
 import math
-#from gammalib import *
-#from math import *
 import os
 
 
@@ -29,7 +27,7 @@ def extract_data(filename):
 
             # Load spectrum
             spectrum = gammalib.GMWLSpectrum()
-            spectrum.load(filename, extno)
+            spectrum.load(filename+"["+str(extno)+"]")
 
             # Add spectral points
             x = []
@@ -66,9 +64,9 @@ def fit_spectrum(filename, xmlname):
     """
     # Load observations
     obs     = gammalib.GObservations()
-    comptel = gammalib.GMWLObservation(filename, "COMPTEL")
-    lat     = gammalib.GMWLObservation(filename, "LAT")
-    hess    = gammalib.GMWLObservation(filename, "HESS")
+    comptel = gammalib.GMWLObservation(filename+"[COMPTEL]")
+    lat     = gammalib.GMWLObservation(filename+"[LAT]")
+    hess    = gammalib.GMWLObservation(filename+"[HESS]")
     obs.append(comptel)
     obs.append(lat)
     obs.append(hess)
