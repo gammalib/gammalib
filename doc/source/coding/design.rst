@@ -18,9 +18,11 @@ file:
     #include <config.h>
     #endif
 
-Note that **the ``config.h`` file should not be included in header files**,
-since header files are used by the outside world without any knowledge
-about ``config.h``.
+.. warning::
+
+   **The config.h file should never be included in header files.**
+   The header files are used by the outside world without any knowledge
+   about ``config.h``.
 
 One of the most commonly used configuration options used throughout
 GammaLib is related to range checking. Range checks are usually
@@ -305,11 +307,13 @@ following guidelines should be respected as far as possible:
 -  Avoid as far as possible methods that are only defined in the derived
    class.
 
-Also note that **for a derived class, ``init_members()``,
-``copy_members(const &A a)`` and ``free_members()`` should only act on derived
-class members but not on base class members**. Any exception from this
-rule needs very careful documentation since it can easily be the source
-of memory leaks.
+.. warning::
+
+   **For a derived class, init_members(), copy_members(const &A a) and
+   free_members() should only act on derived class members but not on base
+   class members**. Any exception to this rule needs very careful
+   documentation since it can easily be the source of memory leaks.
+
 
 Method naming conventions
 ^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -21,6 +21,7 @@
 import gammalib
 import sys
 import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import test_GApplication
 import test_GLinalg
 import test_GModel
@@ -174,7 +175,10 @@ def test(installed=False):
                 filename   = element.attribute("file")
                 head, tail = os.path.split(filename)
                 head, dir  = os.path.split(head)
-                filename   = "cta/"+dir+"/"+tail
+                if len(tail) > 0:
+                    filename   = "cta/"+dir+"/"+tail
+                else:
+                    filename = ""
                 element.attribute("file", filename)
             xml.save("cta/data/irf_unbinned.xml")
             xml = gammalib.GXml("cta/data/irf_1dc.xml")
@@ -185,7 +189,10 @@ def test(installed=False):
                 head, dir  = os.path.split(head)
                 if dir == "dc1":
                     dir = "caldb/dc1"
-                filename   = "cta/"+dir+"/"+tail
+                if len(tail) > 0:
+                    filename = "cta/"+dir+"/"+tail
+                else:
+                    filename = ""
                 element.attribute("file", filename)
             xml.save("cta/data/irf_1dc.xml")
 
@@ -202,8 +209,8 @@ def test(installed=False):
     else:
         rc = 1
 
-    # Return
-    return rc
+    # Exit with return code
+    sys.exit(rc)
 
 
 # ======================== #
@@ -214,7 +221,4 @@ if __name__ == '__main__':
     Perform unit testing for Python interface.
     """
     # Run tests
-    rc = test()
-
-    # Exit with return code
-    sys.exit(rc)
+    test()

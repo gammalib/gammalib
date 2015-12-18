@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GCsv.cpp - Column separated values table class              *
+ *              GCsv.cpp - Comma-separated values table class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCsv.cpp
- * @brief Column separated values table class implementation
+ * @brief Comma-separated values table class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -112,7 +112,7 @@ GCsv::GCsv(const std::string& filename, const std::string& sep)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] csv Column separated values table.
+ * @param[in] csv Comma-separated values table.
  ***************************************************************************/
 GCsv::GCsv(const GCsv& csv)
 { 
@@ -149,8 +149,8 @@ GCsv::~GCsv(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] csv Column separated values table.
- * @return Column separated values table.
+ * @param[in] csv Comma-separated values table.
+ * @return Comma-separated values table.
  ***************************************************************************/
 GCsv& GCsv::operator=(const GCsv& csv)
 { 
@@ -562,7 +562,7 @@ void GCsv::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] csv Column separated values table.
+ * @param[in] csv Comma-separated values table.
  ***************************************************************************/
 void GCsv::copy_members(const GCsv& csv)
 {

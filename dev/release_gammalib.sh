@@ -8,13 +8,11 @@ makelatex="no"
 
 echo "Checkout latest GammaLib"
 rm -rf gammalib
-git clone -b release https://cta-git.irap.omp.eu/gammalib
-#git clone -b devel https://cta-git.irap.omp.eu/gammalib
+git clone -b release https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
 rm -rf gammalib/.git
 
 # Extract version number
 version=`cat gammalib/configure.ac | grep 'AC_INIT' | awk -F"[" '{print $3}' | sed 's/],//' | sed 's/\./ /g'`
-#version=`printf "%2.2d-%2.2d-%2.2d" $version`
 version=`printf "%d.%d.%d" $version`
 echo "GammaLib version: "$version
 

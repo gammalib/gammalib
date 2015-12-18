@@ -148,15 +148,15 @@ from this site by selection the gammalib package from the table.
 Alternatively, the code can be downloaded and unpacked from the UNIX prompt
 using::
 
-    $ wget --no-check-certificate http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-0.11.0.tar.gz
-    $ tar xfz gammalib-0.11.0.tar.gz
+    $ wget --no-check-certificate http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.0.0.tar.gz
+    $ tar xfz gammalib-1.0.0.tar.gz
 
 The GammaLib source code can also be cloned using git. This method is
 recommended if you plan to contribute to the development of the GammaLib
 library. Assuming that git is installed on your system, you may clone
 GammaLib using::
 
-    $ git clone https://cta-git.irap.omp.eu/gammalib
+    $ git clone https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
 
 In case that you get:
 

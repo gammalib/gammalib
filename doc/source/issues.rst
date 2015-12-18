@@ -7,7 +7,6 @@ Below you will find a list of known issues.
 
 - :ref:`Many (but not all) unit tests fail <issue_test_fail>`
 - :ref:`Python module does not work <issue_python>`
-- :ref:`Python unit test fails on El Capitan <issue_elcapitan>`
 - :ref:`Mac OS X <issue_macosx>`
 - :ref:`Solaris <issue_solaris>`
 - :ref:`OpenSolaris <issue_opensolaris>`
@@ -72,16 +71,6 @@ Below you will find a list of known issues.
    but if the wrappers don't exist you need `swig <http://www.swig.org/>`_.
    If the ``Python.h`` header file does not exist then install the Python
    development package.
-
-.. _issue_elcapitan:
-
-.. topic:: Python unit test fails on El Capitan
-
-    On Mac OS X 10.11 (El Capitan) the Python unit tests fail when GammaLib 
-    is not installed due to the way the ``DYLD_LIBRARY_PATH`` environment
-    variable is handled by the operating system. A (not very elegant)
-    workaround is to install GammaLib before running the unit test using 
-    ``make check``.
 
 .. _issue_macosx:
 

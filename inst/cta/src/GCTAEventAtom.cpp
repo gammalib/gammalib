@@ -207,27 +207,9 @@ void GCTAEventAtom::init_members(void)
     m_dir.clear();
     m_time.clear();
     m_energy.clear();
-    m_index       = 0;
-    m_event_id    = 0;
-    m_obs_id      = 0;
-    m_multip      = 0;
-    m_telmask     = 0;
-    m_dir_err     = 0.0;
-    m_alt         = 0.0;
-    m_az          = 0.0;
-    m_corex       = 0.0;
-    m_corey       = 0.0;
-    m_core_err    = 0.0;
-    m_xmax        = 0.0;
-    m_xmax_err    = 0.0;
-    m_shwidth     = 0.0;
-    m_shlength    = 0.0;
-    m_energy_err  = 0.0;
-    m_hil_msw     = 0.0;
-    m_hil_msw_err = 0.0;
-    m_hil_msl     = 0.0;
-    m_hil_msl_err = 0.0;
-    m_phase       = 0.0;
+    m_index    = 0;
+    m_event_id = 0;
+    m_phase    = 0.0;
 
     // Return
     return;
@@ -242,30 +224,12 @@ void GCTAEventAtom::init_members(void)
 void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
 {
     // Copy members
-    m_dir         = atom.m_dir;
-    m_time        = atom.m_time;
-    m_energy      = atom.m_energy;
-    m_index       = atom.m_index;
-    m_event_id    = atom.m_event_id;
-    m_obs_id      = atom.m_obs_id;
-    m_multip      = atom.m_multip;
-    m_telmask     = atom.m_telmask; 
-    m_dir_err     = atom.m_dir_err;
-    m_alt         = atom.m_alt;
-    m_az          = atom.m_az;
-    m_corex       = atom.m_corex;
-    m_corey       = atom.m_corey;
-    m_core_err    = atom.m_core_err;
-    m_xmax        = atom.m_xmax;
-    m_xmax_err    = atom.m_xmax_err;
-    m_shwidth     = atom.m_shwidth;
-    m_shlength    = atom.m_shlength;
-    m_energy_err  = atom.m_energy_err;
-    m_hil_msw     = atom.m_hil_msw;
-    m_hil_msw_err = atom.m_hil_msw_err;
-    m_hil_msl     = atom.m_hil_msl;
-    m_hil_msl_err = atom.m_hil_msl_err;
-    m_phase       = atom.m_phase;
+    m_dir      = atom.m_dir;
+    m_time     = atom.m_time;
+    m_energy   = atom.m_energy;
+    m_index    = atom.m_index;
+    m_event_id = atom.m_event_id;
+    m_phase    = atom.m_phase;
 
     // Return
     return;

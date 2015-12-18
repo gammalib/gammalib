@@ -28,8 +28,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GCTAPointing.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
+#include "GCTAPointing.hpp"
 #include "GFits.hpp"
 #include "GHorizDir.hpp"
 
@@ -107,21 +108,19 @@ GCTAPointing::GCTAPointing(const GXmlElement& xml)
 
 
 /***********************************************************************//**
- * @brief Pointing table constructor
+ * @brief FITS file constructor
  *
- * @param[in] filename Pointing table file.
- * @param[in] extname Pointing extension name (defaults to "POINTING")
+ * @param[in] filename FITS file.
  *
- * Construct CTA pointing from a pointing table file.
+ * Construct CTA pointing from a pointing table FITS file.
  ***************************************************************************/
-GCTAPointing::GCTAPointing(const std::string& filename,
-                           const std::string& extname)
+GCTAPointing::GCTAPointing(const std::string& filename)
 {
     // Initialise members
     init_members();
 
     // Load pointing table
-    load(filename, extname);
+    load(filename);
 
     // Return
     return;
@@ -400,24 +399,28 @@ GHorizDir GCTAPointing::dir_horiz(const GTime& time) const
 
 
 /************************************************************************
- * @brief Load pointing table from a pointing file
+ * @brief Load pointings from a FITS file
  *
- * @param[in] filename Pointing table filename.
- * @param[in] extname Pointing extension name (defaults to "POINTING")
+ * @param[in] filename FITS file name.
  *
- * Loads a pointing table from a FITS file. See the read() method for
- * more information about the structure of the FITS file.
+ * Loads pointings from a pointing table FITS file.
+ *
+ * If no extension name is provided, the pointing is are loaded from the
+ * "POINTING" extension.
  ************************************************************************/
-void GCTAPointing::load(const std::string& filename, const std::string& extname)
+void GCTAPointing::load(const std::string& filename)
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Allocate FITS file
     GFits file;
 
     // Open FITS file
-    file.open(filename);
+    file.open(fname.filename());
 
     // Get pointing table
-    const GFitsTable& table = *file.table(extname);
+    const GFitsTable& table = *file.table(fname.extname("POINTING"));
 
     // Read pointing from table
     read(table);
@@ -431,7 +434,7 @@ void GCTAPointing::load(const std::string& filename, const std::string& extname)
 
 
 /************************************************************************
- * @brief Load pointing table from a pointing file
+ * @brief Read pointings from a FITS table
  *
  * @param[in] filename Pointing table filename.
  * @param[in] extname Pointing extension name (defaults to "POINTING")

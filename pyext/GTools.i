@@ -63,6 +63,7 @@ namespace gammalib {
                                               const double& gamma);
     GEnergy                  elogmean(const GEnergy& a, const GEnergy& b);
     bool                     file_exists(const std::string& filename);
+    bool                     file_exists_gzip(const std::string& filename);
     bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);
     bool                     is_notanumber(const double& x);
@@ -84,4 +85,6 @@ namespace gammalib {
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);
+    int                      recv(int fd, char *buffer, int len, int flags,
+                                  int timeout);
 }

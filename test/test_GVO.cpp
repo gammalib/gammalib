@@ -29,7 +29,7 @@
 #include <config.h>
 #endif
 #include <cstdlib>       // for system() function
-#include <unistd.h>      // for sleep() function
+#include <unistd.h>      // for sleep() and usleep() function
 #include "test_GVO.hpp"
 #include "GTools.hpp"
 
@@ -68,6 +68,21 @@ TestGVO* TestGVO::clone(void) const
  **************************************************************************/
 void TestGVO::test_GVOHub(void)
 {
+    // Kluge: wait until no Hub is online
+    GRan ran;
+    int  no_hub = 0;
+    while (no_hub < 3) {
+        GVOClient client;
+        if (!client.ping_hub()) {
+            no_hub++;
+            usleep(ran.uniform()*1.0e6);
+        }
+        else {
+            no_hub = 0;
+        }
+        usleep(ran.uniform()*1.0e6);
+    }
+
    	// Create child process
     int pid = fork();
 
@@ -122,11 +137,25 @@ void TestGVO::test_GVOHub(void)
  **************************************************************************/
 void TestGVO::test_GVOClient(void)
 {
+    // Kluge: wait until no Hub is online
+    GRan ran;
+    int  no_hub = 0;
+    while (no_hub < 3) {
+        GVOClient client;
+        if (!client.ping_hub()) {
+            no_hub++;
+            usleep(ran.uniform()*1.0e6);
+        }
+        else {
+            no_hub = 0;
+        }
+        usleep(ran.uniform()*1.0e6);
+    }
+
     // Test constructor
     test_try("GVOClient empty constructor");
     try {
         GVOClient client;
-        //std::cout << client << std::endl;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -174,6 +203,10 @@ int main(void)
 {
     // Allocate test suit container
     GTestSuites testsuites("VO module");
+
+    // Unset HOME environment variable (so that the .samp file is written
+    // into the test directory)
+    unsetenv("HOME");
 
     // Initially assume that we pass all tests
     bool success = true;

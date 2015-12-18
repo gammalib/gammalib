@@ -61,8 +61,7 @@ public:
     GCTAPointing(void);
     explicit GCTAPointing(const GSkyDir& dir);
     explicit GCTAPointing(const GXmlElement& xml);
-    GCTAPointing(const std::string& filename,
-                 const std::string& extname = "POINTING");
+    explicit GCTAPointing(const std::string& filename);
     GCTAPointing(const GCTAPointing& pnt);
     virtual ~GCTAPointing(void);
 
@@ -83,8 +82,7 @@ public:
     void           zenith(const double& zenith);  
     void           azimuth(const double& azimuth); 
     GHorizDir      dir_horiz(const GTime& time) const;
-    void           load(const std::string& filename,
-                        const std::string& extname = "POINTING");
+    void           load(const std::string& filename);
     void           read(const GFitsTable& table);
     void           read(const GXmlElement& xml);
     void           write(GXmlElement& xml) const;

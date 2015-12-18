@@ -1,7 +1,7 @@
 #############################################################################
 # Disutils setup file for gammalib Python extension module                  #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2014 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2015 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -139,6 +139,10 @@ else:
 	extra_compile_args = []
 	extra_link_args    = []
 
+# Optionally add link flag for El Capitan post-processing of modules
+if '@IS_ELCAPITAN_TRUE@' != '#':
+    extra_link_args.append('-headerpad_max_install_names')
+
 # Loop over all core modules
 for module in core_modules:
 	
@@ -225,19 +229,20 @@ for name in casts:
 	names   += "'"+name+"'"
 	n_names += 1
 
-# Create gammalib/__init__.py file
-file = open(pkg_name+'/__init__.py', 'w')
-file.write('# This file is created automatically by setup.py\n')
-file.write('# Please do not modify, unless you exactly know what you do.\n')
-file.write('__all__ = [')
-file.write(names)
-file.write(']\n')
-for module in all_modules:
-	file.write('from gammalib.'+module+' import *\n')
+# Create gammalib/__init__.py file (build only)
+if is_build:
+    file = open(pkg_name+'/__init__.py', 'w')
+    file.write('# This file is created automatically by setup.py\n')
+    file.write('# Please do not modify, unless you exactly know what you do.\n')
+    file.write('__all__ = [')
+    file.write(names)
+    file.write(']\n')
+    for module in all_modules:
+        file.write('from gammalib.'+module+' import *\n')
 
-# Remove useless and annoying `*_swigregister` entries from the namespace
-# see https://cta-redmine.irap.omp.eu/issues/832
-file.write("""
+    # Remove useless and annoying `*_swigregister` entries from the namespace
+    # see https://cta-redmine.irap.omp.eu/issues/832
+    file.write("""
 bad_entries = [entry for entry in list(locals())
                if entry.endswith('_swigregister')]
 for entry in bad_entries:
@@ -245,14 +250,19 @@ for entry in bad_entries:
 del gammalib.gammalib
 """)
 
-# Add test function
-# see https://cta-redmine.irap.omp.eu/issues/1486
-file.write("""
+    # Add test function
+    # see https://cta-redmine.irap.omp.eu/issues/1486
+    file.write("""
 def test():
     from gammalib.tests import test_python
     test_python.test(installed=True)
 """)
-file.close()
+
+    # Add version
+    file.write("\n__version__ = '@PACKAGE_VERSION@'\n")
+    
+    # Close file
+    file.close()
 
 # Set data files to install.
 data_files=[('@prefix@/share/gammalib/swig', install_files)]

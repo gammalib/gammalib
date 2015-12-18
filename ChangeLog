@@ -1,3 +1,21 @@
+2015-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+        * Version 1.0.0 released
+        =========================
+
+        Ignore errors for El Capitan post processing (#1605)
+        Read only mandatory columns in GCTAEventList (#1600)
+        Remove extname arguments from classes (#1601)
+        Add GFilename class (#1599)
+        Check existence of files in CTA response loading (#1586)
+        GSkyMap::__getitem__ throw exception if out of bound (#1581)
+        Handle ~ in filenames (#1580)
+        Add GModel::has_ts() method (#1578)
+        Perform __init__.py creation only in build step (#1569)
+        Remove access by name methods from GSkyRegions (#1564)
+        Resolve Python test problem on El Capitan (#1563)
+
+
 2015-10-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.11.0 released

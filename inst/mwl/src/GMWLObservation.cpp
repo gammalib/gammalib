@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.cpp - Multi-wavelength observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,8 +28,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GObservationRegistry.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
+#include "GObservationRegistry.hpp"
 #include "GException.hpp"
 #include "GMWLObservation.hpp"
 #include "GMWLSpectrum.hpp"
@@ -86,50 +87,6 @@ GMWLObservation::GMWLObservation(const std::string& filename) : GObservation()
 
     // Load observation
     load(filename);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief File constructor
- *
- * @param[in] filename File name.
- * @param[in] extno FITS file extension number.
- *
- * Creates instance from file.
- ***************************************************************************/
-GMWLObservation::GMWLObservation(const std::string& filename,
-                                 const int& extno) : GObservation()
-{
-    // Initialise members
-    init_members();
-
-    // Load observation
-    load(filename, extno);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief File constructor
- *
- * @param[in] filename File name.
- * @param[in] extname FITS file extension name.
- *
- * Creates instance from file.
- ***************************************************************************/
-GMWLObservation::GMWLObservation(const std::string& filename,
-                                 const std::string& extname) : GObservation()
-{
-    // Initialise members
-    init_members();
-
-    // Load observation
-    load(filename, extname);
 
     // Return
     return;
@@ -336,11 +293,11 @@ void GMWLObservation::read(const GXmlElement& xml)
             
             // Load file (this also stores the filename, extno and
             // extname)
-            if (gammalib::strip_whitespace(extno).length() > 0) {
-                load(filename, gammalib::toint(extno));
+            if (!gammalib::strip_whitespace(extno).empty()) {
+                load(filename+"["+extno+"]");
             }
-            else if (gammalib::strip_whitespace(extname).length() > 0) {
-                load(filename, extname);
+            else if (!gammalib::strip_whitespace(extname).empty()) {
+                load(filename+"["+extname+"]");
             }
             else {
                 load(filename);
@@ -442,79 +399,32 @@ void GMWLObservation::load(const std::string& filename)
     // Clear observation
     clear();
 
-    // Allocate spectrum
-    GMWLSpectrum* spec = new GMWLSpectrum;
-    m_events = spec;
-
-    // Load spectrum
-    spec->load(filename);
-
-    // Set attributes
-    name("Multi-wavelength observation");
-    id(filename);
-    m_filename   = filename;
-    m_instrument = spec->instrument();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load observation
- *
- * @param[in] filename File name.
- * @param[in] extno FITS extension number.
- ***************************************************************************/
-void GMWLObservation::load(const std::string& filename,
-                           const int&         extno)
-{
-    // Clear observation
-    clear();
+    // Create file name
+    GFilename fname(filename);
 
     // Allocate spectrum
     GMWLSpectrum* spec = new GMWLSpectrum;
     m_events = spec;
 
     // Load spectrum
-    spec->load(filename, extno);
+    if (fname.has_extno()) {
+        spec->load(filename);
+        m_extno = gammalib::str(fname.extno());
+        id(filename+"["+m_extno+"]");
+    }
+    else if (fname.has_extname()) {
+        spec->load(filename);
+        m_extname = fname.extname();
+        id(filename+"["+m_extname+"]");
+    }
+    else {
+        spec->load(filename);
+        id(filename);
+    }
 
     // Set attributes
     name("Multi-wavelength observation");
-    id(filename+"["+gammalib::str(extno)+"]");
-    m_filename   = filename;
-    m_extno      = gammalib::str(extno);
-    m_instrument = spec->instrument();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load observation
- *
- * @param[in] filename File name.
- * @param[in] extname FITS extension name.
- ***************************************************************************/
-void GMWLObservation::load(const std::string& filename,
-                           const std::string& extname)
-{
-    // Clear observation
-    clear();
-
-    // Allocate spectrum
-    GMWLSpectrum* spec = new GMWLSpectrum;
-    m_events = spec;
-
-    // Load spectrum
-    spec->load(filename, extname);
-
-    // Set attributes
-    name("Multi-wavelength observation");
-    id(filename+"["+extname+"]");
-    m_filename   = filename;
-    m_extname    = extname;
+    m_filename   = fname.filename();
     m_instrument = spec->instrument();
 
     // Return

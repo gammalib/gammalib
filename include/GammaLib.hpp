@@ -49,6 +49,7 @@
 #include "GUrl.hpp"
 #include "GUrlFile.hpp"
 #include "GUrlString.hpp"
+#include "GFilename.hpp"
 
 /* __ Linear algebra module ______________________________________________ */
 #include "GVector.hpp"

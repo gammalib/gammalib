@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GGti.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -66,6 +67,26 @@ GGti::GGti(void)
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief FITS file constructor
+ *
+ * @param[in] filename FITS file name.
+ *
+ * Constructs Good Time Intervals from a FITS file.
+ ***************************************************************************/
+GGti::GGti(const std::string& filename)
+{
+    // Initialise members
+    init_members();
+
+    // Load FITS file
+    load(filename);
 
     // Return
     return;
@@ -551,20 +572,25 @@ void GGti::extend(const GGti& gti)
  * @brief Load Good Time Intervals from FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] extname GTI extension name (defaults to "GTI")
  *
  * Loads the Good Time Intervals from FITS file.
+ *
+ * If no extension name is provided, the energy boundaries are loaded from
+ * the "GTI" extension.
  ***************************************************************************/
-void GGti::load(const std::string& filename, const std::string& extname)
+void GGti::load(const std::string& filename)
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Allocate FITS file
     GFits file;
 
     // Open FITS file
-    file.open(filename);
+    file.open(fname.filename());
 
     // Get GTI table
-    const GFitsTable& table = *file.table(extname);
+    const GFitsTable& table = *file.table(fname.extname("GTI"));
 
     // Read GTI from table
     read(table);
@@ -582,24 +608,25 @@ void GGti::load(const std::string& filename, const std::string& extname)
  *
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite any existing GTI extension?
- * @param[in] extname GTI extension name (defaults to "GTI")
  *
- * Saves Good Time Intervals into extension @p extname of a FITS file. If the
- * file does not exist it is created. If the file exists the GTI is appended
- * as extension. If another GTI exists already it is overwritten if
- * @p clobber=true.
+ * Saves Good Time Intervals into a FITS file.
+ *
+ * If no extension name is provided, the Good Time Intervals are saved into
+ * an "GTI" extension.
  ***************************************************************************/
-void GGti::save(const std::string& filename, const bool& clobber,
-                const std::string& extname) const
+void GGti::save(const std::string& filename, const bool& clobber) const
 {
+    // Create file name
+    GFilename fname(filename);
+
     // Allocate FITS file
     GFits file;
 
     // Write GTI to FITS file
-    write(file, extname);
+    write(file, fname.extname("GTI"));
 
     // Save to file
-    file.saveto(filename, clobber);
+    file.saveto(fname.filename(), clobber);
 
     // Return
     return;

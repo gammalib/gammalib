@@ -13,6 +13,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GUrl.hpp \
                      GUrlFile.hpp \
                      GUrlString.hpp \
+                     GFilename.hpp \
                      GVector.hpp \
                      GMatrixBase.hpp \
                      GMatrix.hpp \

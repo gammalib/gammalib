@@ -191,9 +191,9 @@ void TestGMWL::test_optimizer(void)
     test_try("Load multi-wavelength observations");
     try {
         obs.clear();
-        GMWLObservation comptel(crab_fits, "COMPTEL");
-        GMWLObservation lat(crab_fits, "LAT");
-        GMWLObservation hess(crab_fits, "HESS");
+        GMWLObservation comptel(crab_fits+"[COMPTEL]");
+        GMWLObservation lat(crab_fits+"[LAT]");
+        GMWLObservation hess(crab_fits+"[HESS]");
         obs.append(comptel);
         obs.append(lat);
         obs.append(hess);

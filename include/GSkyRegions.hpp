@@ -63,8 +63,6 @@ public:
     GSkyRegions&      operator=(const GSkyRegions& regions);
     GSkyRegion*       operator[](const int& index);
     const GSkyRegion* operator[](const int& index) const;
-    GSkyRegion*       operator[](const std::string& name);
-    const GSkyRegion* operator[](const std::string& name) const;
 
     // Methods
     void               clear(void);
@@ -75,15 +73,11 @@ public:
     int                size(void) const;
     bool               is_empty(void) const;
     GSkyRegion*        set(const int& index, const GSkyRegion& region);
-    GSkyRegion*        set(const std::string& name, const GSkyRegion& region);
     GSkyRegion*        append(const GSkyRegion& region);
     GSkyRegion*        insert(const int& index, const GSkyRegion& region);
-    GSkyRegion*        insert(const std::string& name, const GSkyRegion& region);
     void               remove(const int& index);
-    void               remove(const std::string& name);
     void               reserve(const int& num);
     void               extend(const GSkyRegions& regions);
-    bool               contains(const std::string& name) const;
     bool               contains(const GSkyDir& dir) const;
     bool               overlaps(const GSkyRegion& reg) const;
     void               load(const std::string& filename);
@@ -96,7 +90,6 @@ protected:
     void init_members(void);
     void copy_members(const GSkyRegions& regions);
     void free_members(void);
-    int  get_index(const std::string& name) const;
 
     // Protected members
     mutable std::string      m_filename;   //!< Filename of origin

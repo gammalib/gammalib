@@ -31,6 +31,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
+#include "GFilename.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAAeffArf.hpp"
@@ -74,8 +75,7 @@ GCTAAeffArf::GCTAAeffArf(void) : GCTAAeff()
  *
  * @param[in] filename ARF FITS file name.
  *
- * Construct instance by loading the effective area information from an
- * ARF FITS file.
+ * Constructs effective area from an ARF FITS file.
  ***************************************************************************/
 GCTAAeffArf::GCTAAeffArf(const std::string&  filename) : GCTAAeff()
 {
@@ -238,25 +238,33 @@ GCTAAeffArf* GCTAAeffArf::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load effective area from performance table
+ * @brief Load effective area from ARF FITS file
  *
- * @param[in] filename Performance table file name.
+ * @param[in] filename ARF FITS file name.
  *
- * This method loads the effective area information from an ASCII
- * performance table.
+ * Loads the effective area from an ARF FITS file.
+ *
+ * If no extension name is provided, the effective area will be loaded from
+ * the "SPECRESP" extension.
  ***************************************************************************/
 void GCTAAeffArf::load(const std::string& filename)
 {
-    // Open ARF FITS file
-    GFits file(filename);
+    // Create file name
+    GFilename fname(filename);
+
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(fname.filename());
 
     // Get ARF table
-    const GFitsTable& table = *file.table("SPECRESP");
+    const GFitsTable& table = *file.table(fname.extname("SPECRESP"));
 
-    // Read ARF
+    // Read ARF from table
     read(table);
 
-    // Close ARF FITS file
+    // Close FITS file
     file.close();
 
     // Store filename
@@ -270,11 +278,12 @@ void GCTAAeffArf::load(const std::string& filename)
 /***********************************************************************//**
  * @brief Read CTA ARF vector
  *
- * @param[in] hdu FITS table.
+ * @param[in] table FITS table.
  *
- * This method reads a CTA ARF vector from the FITS HDU. Note that the
- * energies are converted to TeV and the effective area is converted to cm2.
- * Conversion is done based on the units provided for the energy and
+ * Reads a CTA ARF vector from the FITS @p table.
+ *
+ * The energies are converted to TeV and the effective area is converted to
+ * cm2. Conversion is done based on the units provided for the energy and
  * effective area columns. Units that are recognized are 'keV', 'MeV', 'GeV',
  * 'TeV', 'm^2', 'm2', 'cm^2' and 'cm^2' (case independent).
  *
@@ -282,16 +291,16 @@ void GCTAAeffArf::load(const std::string& filename)
  *       For appropriate theta angle assignment, we would need this
  *       information in the response header.
  ***************************************************************************/
-void GCTAAeffArf::read(const GFitsTable& hdu)
+void GCTAAeffArf::read(const GFitsTable& table)
 {
     // Clear arrays
     m_logE.clear();
     m_aeff.clear();
 
     // Get pointers to table columns
-    const GFitsTableCol* energy_lo = hdu["ENERG_LO"];
-    const GFitsTableCol* energy_hi = hdu["ENERG_HI"];
-    const GFitsTableCol* specresp  = hdu["SPECRESP"];
+    const GFitsTableCol* energy_lo = table["ENERG_LO"];
+    const GFitsTableCol* energy_hi = table["ENERG_HI"];
+    const GFitsTableCol* specresp  = table["SPECRESP"];
 
     // Determine unit conversion factors (default: TeV and cm^2)
     std::string u_energy_lo = gammalib::tolower(gammalib::strip_whitespace(energy_lo->unit()));

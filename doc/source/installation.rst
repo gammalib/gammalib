@@ -5,8 +5,8 @@ Installation
 
 .. note ::
 
-   These installation instructions apply to gammalib-0.11.0 and
-   later. gammalib-0.11.0 has been built, installed and tested
+   These installation instructions apply to gammalib-1.0.0 and
+   later. gammalib-1.0.0 has been built, installed and tested
    successfully on Debian, Ubuntu, Mandriva, OpenSUSE, Scientific Linux,
    CentOS, Mac OS X, FreeBSD, and OpenSolaris (using gcc), so
    hopefully it also installs on your distribution. In case you encounter
@@ -51,7 +51,7 @@ shared library by typing ::
 
 GammaLib can also benefit from the presence of the readline library that
 provides line-editing and history capabilities for text input (GammaLib
-offers however also full functionality without having readline
+offers however full functionality without having readline
 installed). readline (which depends on ncurses) is available on most
 system as a prebuilt library, so also here we recommend to use your
 package manager to install the libraries if they are not already there.
@@ -83,7 +83,7 @@ Building GammaLib
    If you need the latest source code from the git repository that has not 
    yet been released you may also clone the gammalib git repository using ::
 
-   $ git clone https://cta-git.irap.omp.eu/gammalib
+   $ git clone https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git
 
    In case you encounter an SSL certificat problem, type ::
 
@@ -95,7 +95,7 @@ Building GammaLib
    $ git checkout devel
    $ ./autogen.sh
 
-   This will make sure that you use the validated development trunk and 
+   This will make sure that you use the development trunk. It also
    creates the configuration file that is needed to configure 
    GammaLib before compilation. Continue then with the procedure below
    starting with ``./configure``.
@@ -122,19 +122,19 @@ source files and builds the C++ library and Python module. Type
 ``./configure`` and not simply ``configure`` to ensure that the configuration
 script in the current directory is used and not some other system-wide
 configuration script. By default, the install directory is set to 
-``/usr/local/gamma``. To change the install directory an optional 
-``--prefix`` argument should be given, for example ::
+``/usr/local/gamma``. To change the install directory, provide an optional
+``--prefix`` argument, for example ::
 
    $ ./configure --prefix=/usr/local
 
 If cfitsio and/or readline is not installed in a standard location for
-libraries (such as ``/usr/lib`` or ``/usr/local/lib``), the appropriate
-location(s) can be specified using the ``LDFLAGS`` (for the library
+libraries (such as ``/usr/lib`` or ``/usr/local/lib``), you can specify
+the appropriate location(s) using the ``LDFLAGS`` (for the library
 directory) and ``CPPFLAGS`` (for the include directory) options::
 
    $ ./configure LDFLAGS='-L/opt/local/lib' CPPFLAGS='-I/opt/local/include'
 
-A full list of configuration options can be found using ::
+You can find a full list of configuration options using ::
 
    $ ./configure --help
 

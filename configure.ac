@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [0.11.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [1.0.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects])
@@ -39,13 +39,23 @@ AC_CONFIG_HEADER([config.h])
 
 
 #############################################################################
-# Library versioning                                                        #
+# Library versioning (current:revision:age)                                 #
 # ------------------------------------------------------------------------- #
-# See the libtool manual for an explanation.  Currently, library versioning #
-# is not yet used for GammaLib as we're still in the development cycle.     #
-# Users have to make sure that they link against the correct library.       #
+# Here are a set of rules to update your library version information:       #
+# 1. Update the version information only immediately before a public        #
+#    release of your software. More frequent updates are unnecessary,       #
+#    and only guarantee that the current interface number gets larger       #
+#    faster.                                                                #
+# 2. If the library source code has changed at all since the last update,   #
+#    then increment revision.                                               #
+# 3. If any interfaces have been added, removed, or changed since the last  #
+#    update, increment current, and set revision to 0.                      #
+# 4. If any interfaces have been added since the last public release, then  #
+#    increment age.                                                         #
+# 5. If any interfaces have been removed or changed since the last public   #
+#    release, then set age to 0.                                            #
 #############################################################################
-GAMMALIB_LT_VERSION="0:0:0"
+GAMMALIB_LT_VERSION="1:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
 
 
@@ -90,18 +100,42 @@ AC_CANONICAL_HOST
 #                                                                           #
 # A special kluge was added for Mac OS X >=10.7. As Apple switched to clang #
 # we search from this version on for the clang compiler.                    #
+#                                                                           #
+# We also signal whether Mac OS X >=10.11 (El Capitan).                     #
 #############################################################################
+# Set default Mac OS X version flags
+osx_lion=no
+osx_el_capitan=no
+
 # Set default compiler lists
 cxx_list="g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++"
 cc_list="gcc cc cl.exe clang"
 
-# Check if we have Mac OS X >= 10.7
+# Check if we have Mac OS X >= 10.7 and >= 10.11
 if test `uname -s` = "Darwin"; then
-  if test `sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'` '>' 10.6; then
+  version=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/' | sed -e 's/\.//g'`
+  if [ test $version -ge 107 ]; then
     cxx_list="clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC"
     cc_list="clang gcc cc cl.exe"
+    osx_lion=yes
+  fi
+  if [ test $version -ge 1011 ]; then
+    osx_el_capitan=yes
   fi
 fi
+AC_MSG_CHECKING([for Mac OS X >= 10.7])
+if [test "x$osx_lion" = "xyes"]; then
+        AC_MSG_RESULT(yes)
+else
+        AC_MSG_RESULT(no)
+fi
+AC_MSG_CHECKING([for Mac OS X >= 10.11])
+if [test "x$osx_el_capitan" = "xyes"]; then
+        AC_MSG_RESULT(yes)
+else
+        AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(IS_ELCAPITAN, test "x$osx_el_capitan" = "xyes")
 
 # Our language is C++
 AC_LANG(C++)

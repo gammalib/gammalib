@@ -55,6 +55,7 @@ void TestGSupport::set(void){
     append(static_cast<pfunction>(&TestGSupport::test_bilinear), "Test GBilinear");
     append(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
     append(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
+    append(static_cast<pfunction>(&TestGSupport::test_filename), "Test GFilename");
 
     // Return
     return;
@@ -170,14 +171,14 @@ void TestGSupport::test_expand_env(void)
 
     // Non existing environment variable within string
     s_in  = "My $(HOMEIXYZ) is my castle.";
-    s_ref = "My  is my castle.";
+    s_ref = "My $(HOMEIXYZ) is my castle.";
     s_out = gammalib::expand_env(s_in);
     test_assert(s_out == s_ref,"Non existing environment variable within string",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Empty environment variable within string
     s_in  = "My $() is my castle.";
-    s_ref = "My  is my castle.";
+    s_ref = "My $() is my castle.";
     s_out = gammalib::expand_env(s_in);
     test_assert(s_out == s_ref,"Empty environment variable within string",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
@@ -217,11 +218,19 @@ void TestGSupport::test_expand_env(void)
     test_assert(s_out == s_ref,"$ENV{HOME}${HOME}$ENV(HOME)$(HOME) only string",
                 "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
-    // Debugging
-    //std::cout << std::endl;
-    //std::cout << s_in << std::endl;
-    //std::cout << s_ref << std::endl;
-    //std::cout << s_out << std::endl;
+    // Test ~
+    s_in  = "My castle is ~";
+    s_ref = gammalib::expand_env("My castle is $(HOME)");
+    s_out = gammalib::expand_env(s_in);
+    test_assert(s_out == s_ref,"String with ~",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
+
+    // Test ~+
+    s_in  = "My castle is ~+";
+    s_ref = gammalib::expand_env("My castle is $(PWD)");
+    s_out = gammalib::expand_env(s_in);
+    test_assert(s_out == s_ref,"String with ~+",
+                "Unexpected string \""+s_out+"\" (expected \""+s_ref+"\")");
 
     // Exit test
     return;
@@ -508,7 +517,7 @@ void TestGSupport::test_url_file(void)
     std::string result = std::string(buffer, 21);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
-                result+"\n");
+                result+"\"");
     url.close();
 
     // Test file reading using get_char() method
@@ -524,7 +533,7 @@ void TestGSupport::test_url_file(void)
     } while (character != EOF);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
-                result+"\n");
+                result+"\"");
     url.close();
 
     // Test file reading using scanf() method
@@ -534,7 +543,7 @@ void TestGSupport::test_url_file(void)
     result = std::string(buffer, 21);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
-                result+"\n");
+                result+"\"");
     url.close();
 
     // Return
@@ -582,7 +591,7 @@ void TestGSupport::test_url_string(void)
     std::string result = std::string(buffer, 21);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
-                result+"\n");
+                result+"\"");
 
     // Test string reading using get_char() method
     result.clear();
@@ -597,7 +606,7 @@ void TestGSupport::test_url_string(void)
     } while (character != EOF);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
-                result+"\n");
+                result+"\"");
 
     // Test string reading using scanf() method
     char buffer2[100];
@@ -607,8 +616,169 @@ void TestGSupport::test_url_string(void)
     result = std::string(buffer2, 21);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
-                result+"\n");
+                result+"\"");
     url.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GFilename class
+ *
+ * Test the GFilename class.
+ ***************************************************************************/
+void TestGSupport::test_filename(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GFilename filename;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Set filename without extension
+    GFilename filename = "myfile.fits";
+    test_assert(filename.filename() == "myfile.fits",
+                "Expected \"myfile.fits\" filename, "
+                "found \""+filename.filename()+"\"");
+    test_assert(!filename.has_extname(),
+                "Expected that extension name is not set.");
+
+    // Set filename with extension name
+    filename = "myfile.fits[EVENTS]";
+    test_assert(filename.filename() == "myfile.fits",
+                "Expected \"myfile.fits\" filename, "
+                "found \""+filename.filename()+"\"");
+    test_assert(filename.extname() == "EVENTS",
+                "Expected \"EVENTS\" extension name, "
+                "found \""+filename.extname()+"\"");
+    test_assert(filename.has_extname(),
+                "Expected that extension name is set.");
+
+    // Set filename with extension name and version
+    filename = "myfile.fits[EVENTS,2]";
+    test_assert(filename.filename() == "myfile.fits",
+                "Expected \"myfile.fits\" filename, "
+                "found \""+filename.filename()+"\"");
+    test_assert(filename.extname() == "EVENTS",
+                "Expected \"EVENTS\" extension name, "
+                "found \""+filename.extname()+"\"");
+    test_assert(filename.has_extname(),
+                "Expected that extension name is set.");
+    test_value(filename.extver(), 2);
+    test_assert(filename.has_extver(),
+                "Expected that extension version is set.");
+
+    // Set filename with lower case extension name
+    filename = "myfile.fits[events]";
+    test_assert(filename.extname() == "EVENTS",
+                "Expected \"EVENTS\" extension name, "
+                "found \""+filename.extname()+"\"");
+
+    // Set filename with extension number and version
+    filename = "myfile.fits[1,2]";
+    test_assert(filename.filename() == "myfile.fits",
+                "Expected \"myfile.fits\" filename, "
+                "found \""+filename.filename()+"\"");
+    test_value(filename.extno(), 1);
+    test_assert(filename.has_extno(),
+                "Expected that extension number is set.");
+    test_value(filename.extver(), 2);
+    test_assert(filename.has_extver(),
+                "Expected that extension version is set.");
+
+    // Test missing closing symbol
+    test_try("Missing ] symbol");
+    try {
+        GFilename filename("myfile.fits[");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+
+    // Test character after closing symbol
+    test_try("Character after ] symbol");
+    try {
+        GFilename filename("myfile.fits[EVENTS]a");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+
+    // Test empty extension name
+    test_try("Empty extension name");
+    try {
+        GFilename filename("myfile.fits[]");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+
+    // Test invalid extension number
+    test_try("Invalid extension number");
+    try {
+        GFilename filename("myfile.fits[-1]");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+
+    // Test missing extension version
+    test_try("Missing extension version");
+    try {
+        GFilename filename("myfile.fits[EVENTS,]");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+
+    // Test invalid extension version
+    test_try("Invalid extension version");
+    try {
+        GFilename filename("myfile.fits[EVENTS,-1]");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+
+    // Test size operators
+    filename = "myfile.fits";
+    test_assert(!filename.empty(), "Non empty file name expected.");
+    test_value(filename.size(), 11);
+    test_value(filename.length(), 11);
+
+    // Test default extension name
+    filename = "myfile.fits";
+    test_assert(filename.extname("EVENTS") == "EVENTS",
+                "Expected \"EVENTS\" extension name, "
+                "found \""+filename.extname()+"\"");
+    filename = "myfile.fits[LUCKY]";
+    test_assert(filename.extname("EVENTS") == "LUCKY",
+                "Expected \"LUCKY\" extension name, "
+                "found \""+filename.extname()+"\"");
+
+    // Test default extension number
+    filename = "myfile.fits";
+    test_value(filename.extno(1), 1);
+    filename = "myfile.fits[3]";
+    test_value(filename.extno(1), 3);
+
+    // Test default extension version
+    filename = "myfile.fits";
+    test_value(filename.extver(1), 1);
+    filename = "myfile.fits[3,3]";
+    test_value(filename.extver(1), 3);
 
     // Return
     return;

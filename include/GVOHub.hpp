@@ -108,11 +108,14 @@ protected:
 
     // Low-level methods
     void        create_samp_file(void) const;
+    void        delete_samp_file(void) const;
+    int         get_socket(void);
     void        post_samp_ok(const socklen_t& sock) const;
     void        post_samp_void(const socklen_t& sock) const;
     void	    post_string(const std::string& content, const socklen_t& sock) const;
     void        notify(const std::string& url, const std::string& notification) const;
     std::string	random_string(const size_t& length) const;
+    std::string hub_url(void) const;
 
     // Protected structure
     struct client {
@@ -132,7 +135,6 @@ protected:
 
     // Protected members
     std::string         m_secret;    //!< Secret Hub key
-    std::string         m_hub_url;   //!< The XML-RPC endpoint for communication with the hub
     std::string         m_hub_host;  //!< Hub host
     std::string         m_hub_port;  //!< Hub port
     std::string         m_hub_path;  //!< Hub path

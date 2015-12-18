@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 0.11.0 (28 October 2015)
+Version: 1.0.0 (18 December 2015)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -41,8 +41,7 @@ data analysis framework that enables simultaneous multi-mission analysis.
 
 Web sites
 =========
-http://cta.irap.omp.eu/gammalib/                  - for documentation
-https://sourceforge.net/projects/gammalib/        - for downloads
+http://cta.irap.omp.eu/gammalib/                  - for end users
 https://cta-redmine.irap.omp.eu/projects/gammalib - for developers
 
 
@@ -181,7 +180,7 @@ If everything works successfully you should see
 or
 
 ============================================================================
-Testsuite summary for gammalib 0.11.0
+Testsuite summary for gammalib 1.0.0
 ============================================================================
 # TOTAL: 20
 # PASS:  20
