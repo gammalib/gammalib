@@ -175,6 +175,10 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("VO module");
 
+    // Unset HOME environment variable (so that the .samp file is written
+    // into the test directory)
+    unsetenv("HOME");
+
     // Initially assume that we pass all tests
     bool success = true;
 

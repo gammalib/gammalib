@@ -139,6 +139,7 @@ public:
     void                ts(const double& ts);
     const bool&         tscalc(void) const;
     void                tscalc(const bool& tscalc);
+    const bool&         has_ts(void) const;
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
     GModelPar           scale(const std::string& instrument) const;
@@ -314,12 +315,24 @@ void GModel::tscalc(const bool& tscalc)
 /***********************************************************************//**
  * @brief Signals that model has scales
  *
- * @return True is model has scale factors.
+ * @return True if model has scale factors.
  ***************************************************************************/
 inline
 bool GModel::has_scales(void) const
 {
     return (!m_scales.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Signals that model has Test Statistics value
+ *
+ * @return True if model has TS value.
+ ***************************************************************************/
+inline
+const bool& GModel::has_ts(void) const
+{
+    return m_has_ts;
 }
 
 #endif /* GMODEL_HPP */

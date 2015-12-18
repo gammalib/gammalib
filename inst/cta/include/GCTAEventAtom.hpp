@@ -72,10 +72,8 @@ public:
     // Other methods
     const int&           index(void) const;
     const unsigned long& event_id(void) const;
-    const unsigned long& obs_id(void) const;
     const float&         phase(void) const;
     void                 event_id(const unsigned long& id);
-    void                 obs_id(const unsigned long& id);
     void                 phase(const float& phase);
 
 protected:
@@ -90,24 +88,6 @@ protected:
     GEnergy       m_energy;         //!< Event energy
     GTime         m_time;           //!< Event time
     unsigned long m_event_id;       //!< Event identifier
-    unsigned long m_obs_id;         //!< Observation identifier
-    int           m_multip;         //!< Multiplicity
-    char          m_telmask;        //!< Telescope mask
-    float         m_dir_err;        //!< Error on event direction
-    float         m_alt;            //!< Event altitude
-    float         m_az;             //!< Event azimuth
-    float         m_corex;          //!< Position on ground (m)
-    float         m_corey;          //!< Position on ground (m)
-    float         m_core_err;       //!< Error on core reconstruction
-    float         m_xmax;           //!< Position of shower max (g/cm2)
-    float         m_xmax_err;       //!< Error on shower max (g/cm2)
-    float         m_shwidth;        //!< Shower width (m)
-    float         m_shlength;       //!< Shower length (m)
-    float         m_energy_err;     //!< Error on event energy (MeV)
-    float         m_hil_msw;        //!< Hillas MSW
-    float         m_hil_msw_err;    //!< Hillas MSW error
-    float         m_hil_msl;        //!< Hillas MSL
-    float         m_hil_msl_err;    //!< Hillas MSL error
     float         m_phase;          //!< Optional phase
 };
 
@@ -226,18 +206,6 @@ const unsigned long& GCTAEventAtom::event_id(void) const
 
 
 /***********************************************************************//**
- * @brief Return observation identifier
- *
- * @return Observation identifier.
- ***************************************************************************/
-inline
-const unsigned long& GCTAEventAtom::obs_id(void) const
-{
-    return (m_obs_id);
-}
-
-
-/***********************************************************************//**
  * @brief Return event phase
  *
  * @return Event phase.
@@ -258,19 +226,6 @@ inline
 void GCTAEventAtom::event_id(const unsigned long& id)
 {
     m_event_id = id;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set observation identifier
- *
- * @param[in] id Observation identifier.
- ***************************************************************************/
-inline
-void GCTAEventAtom::obs_id(const unsigned long& id)
-{
-    m_obs_id = id;
     return;
 }
 

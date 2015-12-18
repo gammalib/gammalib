@@ -72,6 +72,7 @@ public:
     void                ts(const double& ts);
     const bool&         tscalc(void) const;
     void                tscalc(const bool& tscalc);
+    const bool&         has_ts(void) const;
     GModelPar           scale(const std::string& instrument) const;
     void                scale(const GModelPar& par);
     std::string         ids(void) const;
