@@ -1,3 +1,11 @@
+2016-01-04  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+        * Bug fix version 1.0.1 released
+        ================================
+
+        Allow usage of numbers in FITS extension names (#1611)
+
+
 2015-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.0.0 released
