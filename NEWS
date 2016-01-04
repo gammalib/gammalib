@@ -1,4 +1,4 @@
-New Features and Important Changes in GammaLib 1.0.1
+New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
@@ -68,8 +68,7 @@ None
 
 13. Support module
 ------------------
-Correct a bug in GFilename::set_filename() that prevented using numbers in FITS
-extension names (#1611).
+None
 
 
 14. XML module
