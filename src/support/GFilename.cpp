@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GFilename.cpp - Filename class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Juergen Knoedlseder                              *
+ *  copyright (C) 2015-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -469,9 +469,17 @@ void GFilename::set_filename(const std::string& filename)
 
             } // endif: extension version provided
 
+            // If we have an empty extension name then throw an exception
+            if (extname.empty()) {
+                std::string msg = "An empty extension has been specified in "
+                                  "filename \""+fname+"\". Please correct the"
+                                  " filename.";
+                throw GException::invalid_argument(G_SET_FILENAME, msg);
+            }
+
             // If we have a purely numerical extension then convert the
             // extension name into an extension number
-            if (extname.find_first_of("0123456789") != std::string::npos) {
+            if (extname.find_first_not_of("+-0123456789") == std::string::npos) {
 
                 // Extract extension number
                 m_extno = gammalib::toint(extname);

@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 1.0.0
+New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-18 December 2015
+4 January 2016
 
 
 1. Introduction
@@ -13,27 +13,12 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-Remove optional extname arguments from the following classes:
-- GEbounds
-- GEnergies
-- GGti
-- GNodeArray
-- GCTAPointing
-- GMWLObservation
-- GMWLSpectrum
+None
 
 
 3. Configuration
 -----------------
-The __init__.py file in the pyext/gammalib folder is now only created during
-build but not during the install. This should avoid problems during installation
-related to file access rights (#1569).
-
-A special post processing of the Python module libraries has been added for
-Mac OS X 10.11 and higher (El Capitan). This post processing is a replacement for
-setting DYLD_LIBRARY_PATH during unit testing since the environment variable is
-ignored in certain circumstances by El Capitan. Any errors that occur during the
-post processing will be ignored.
+None
 
 
 4. Application module
@@ -58,8 +43,7 @@ None
 
 8. Model module
 ---------------
-Added GModel::has_ts() method that signals if a TS value has been computed
-for a given model.
+None
 
 
 9. Numerics module
@@ -79,28 +63,12 @@ None
 
 12. Sky module
 --------------
-Remove the following methods from GSkyRegions as we have not identified a use case
-where this access is needed (#1564):
-* set(std::string, GSkyRegion)
-* insert(std::string, GSkyRegion)
-* remove(std::string)
-* operator[](std::string)
-* contains(std::string)
-* get_index(std::string)
-
-The Python extension GSkyMap::__getitem__ now checks the validity of the index and
-map number and throws an out_of_range exception if the parameters are not valid.
-This is required on some platforms to properly catch the end in iterations (#1581).
+None
 
 
 13. Support module
 ------------------
-The gammalib::expand_env() function now handles ~, ~user, ~+ and ~- following the
-logic implemented for the bash shell.
-
-The GFilename class has been added to deal with filenames in the future. This class
-handles the decomposition of the string into a filename and an extension name in the
-cfitsio style, allowing to specify the extension name, number and version.
+None
 
 
 14. XML module
@@ -135,11 +103,7 @@ None
 
 20. CTA interface
 -----------------
-The IRF loaders now check the existence of the file before loading, and now throws
-appropriate error messages in case that the files do not exist (#1586).
-
-Only manadatory columns are read by GCTAEventsList, while any other columns will only
-be stored for back writing in a FITS file.
+None
 
 
 21. COMPTEL interface

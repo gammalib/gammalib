@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -678,6 +678,12 @@ void TestGSupport::test_filename(void)
     filename = "myfile.fits[events]";
     test_assert(filename.extname() == "EVENTS",
                 "Expected \"EVENTS\" extension name, "
+                "found \""+filename.extname()+"\"");
+
+    // Set filename with number in extension name
+    filename = "myfile.fits[EVENTS_2D]";
+    test_assert(filename.extname() == "EVENTS_2D",
+                "Expected \"EVENTS_2D\" extension name, "
                 "found \""+filename.extname()+"\"");
 
     // Set filename with extension number and version

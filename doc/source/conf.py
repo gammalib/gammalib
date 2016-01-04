@@ -48,7 +48,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'GammaLib'
-copyright = u'2006-2015, GammaLib developers'
+copyright = u'2006-2016, GammaLib developers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
