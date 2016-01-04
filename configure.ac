@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2015 Juergen Knoedlseder                               #
+# Copyright (C) 2006-2016 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -879,7 +879,7 @@ else
         python_path="-I$python_path"
       fi
       PYTHON_CPPFLAGS=$python_path
-      CPPFLAGS="${CPPFLAGS} ${python_path}"
+      #CPPFLAGS="${CPPFLAGS} ${python_path}"
       AC_SUBST([PYTHON_CPPFLAGS])
 
     # ... otherwise check for includes relative to exectuable (obsolete?)
@@ -1059,11 +1059,16 @@ fi
 # finally we perform system dependent checks. These are:                    #
 # - Darwin: check in /opt/local/lib                                         #
 #############################################################################
+has_editline="no"
 has_readline="no"
 use_readline="no"
+LIB_READLINE=
+LIB_NCURSES=
 LIBS_READLINE=
 LIBDIR_READLINE=
 INCDIR_READLINE=
+AC_SUBST(LIB_READLINE)
+AC_SUBST(LIB_NCURSES)
 AC_SUBST(LIBS_READLINE)
 AC_SUBST(LIBDIR_READLINE)
 AC_SUBST(INCDIR_READLINE)
@@ -1087,18 +1092,30 @@ if [test "x$with_readline" = "xyes";] then
         INCDIR_READLINE="$gammalib_prefix/include/readline"
     else
 
-        # Next search for readline in standard path
-        AC_CHECK_LIB([readline], [main],
-                     [AC_MSG_NOTICE([readline found])
-                      AC_CHECK_HEADER([readline/readline.h],
-                                      [has_readline="yes"
-                                       AC_MSG_NOTICE([readline headers found])],
+        # Next search for editline in standard path (for Mac OS X)
+        AC_CHECK_LIB([edit], [main],
+                     [AC_MSG_NOTICE([editline found])
+                      AC_CHECK_HEADER([editline/readline.h],
+                                      [has_editline="yes"
+                                       AC_MSG_NOTICE([editline headers found])],
                                       [], [])],
-                     [], [-lncurses])
+                     [], [-lcurses])
 
-        # If not found then make additional checks
-        if [test "x$has_readline" != "xyes";] then
-            case $ac_sys_system in
+        # If not found then search now for readline
+        if [test "x$has_editline" != "xyes";] then
+
+            # Next search for readline in standard path
+            AC_CHECK_LIB([readline], [main],
+                         [AC_MSG_NOTICE([readline found])
+                          AC_CHECK_HEADER([readline/readline.h],
+                                          [has_readline="yes"
+                                           AC_MSG_NOTICE([readline headers found])],
+                                          [], [])],
+                         [], [-lncurses])
+
+            # If not found then make additional checks
+            if [test "x$has_readline" != "xyes";] then
+                case $ac_sys_system in
 	            Darwin*) 
                     if [test -f /opt/local/lib/libreadline$SHAREDSUFFIX -a \
                              -f /opt/local/include/readline/readline.h]; then
@@ -1110,17 +1127,25 @@ if [test "x$with_readline" = "xyes";] then
                     ;;
                 *)
                     ;;
-            esac
+                esac
+            fi
         fi
-    
     fi
-
 fi
 
 # If we have ncurses and readline then add readline support to GammaLib
-if [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
+if [test "x$has_editline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
     use_readline="yes"
     AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+    LIB_READLINE=edit
+    LIB_NCURSES=curses
+    LIBS="${LIBS} -ledit -lcurses"
+    LIBS_READLINE="-ledit -lcurses"
+elif [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
+    use_readline="yes"
+    AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+    LIB_READLINE=readline
+    LIB_NCURSES=ncurses
     LIBS="${LIBS} -lreadline -lncurses"
     LIBS_READLINE="-lreadline -lncurses"
 fi
