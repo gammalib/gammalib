@@ -25,4 +25,4 @@ pkginclude_HEADERS = include/GMWLException.hpp \
 # Build libtool library
 noinst_LTLIBRARIES = libmwl.la
 libmwl_la_SOURCES = $(sources)
-libmwl_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libmwl_la_LDFLAGS =

@@ -110,7 +110,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
 libcta_la_SOURCES = $(sources)
-libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libcta_la_LDFLAGS =
 
 # Distribute calibration database files
 #EXTRA_DIST     = $(caldb_pinx) $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)
