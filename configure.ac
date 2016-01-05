@@ -921,6 +921,9 @@ else
 	        MACOSX_DEPLOYMENT_TARGET="$python_target"
 	        export MACOSX_DEPLOYMENT_TARGET
 	        EXPORT_MACOSX_DEPLOYMENT_TARGET=''
+            CPPFLAGS="-stdlib=libstdc++ -mmacosx-version-min=${python_target} ${CPPFLAGS}"
+            LDFLAGS="-stdlib=libstdc++ -mmacosx-version-min=${python_target} ${LDFLAGS}"
+            CXXFLAGS="-stdlib=libstdc++ -mmacosx-version-min=${python_target} ${CXXFLAGS}"
             AC_MSG_NOTICE([set MACOSX_DEPLOYMENT_TARGET to ${python_target}])
           fi
           ;;
