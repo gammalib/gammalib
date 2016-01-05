@@ -918,12 +918,10 @@ else
           AC_MSG_RESULT(${python_target})
           if [ test $python_compact_target -le 108 ]; then
             CONFIGURE_MACOSX_DEPLOYMENT_TARGET="$python_target"
-	        MACOSX_DEPLOYMENT_TARGET="$python_target"
-	        export MACOSX_DEPLOYMENT_TARGET
-	        EXPORT_MACOSX_DEPLOYMENT_TARGET=''
-            CPPFLAGS="-stdlib=libstdc++ -mmacosx-version-min=${python_target} ${CPPFLAGS}"
-            LDFLAGS="-stdlib=libstdc++ -mmacosx-version-min=${python_target} ${LDFLAGS}"
-            CXXFLAGS="-stdlib=libstdc++ -mmacosx-version-min=${python_target} ${CXXFLAGS}"
+            MACOSX_DEPLOYMENT_TARGET="$python_target"
+            export MACOSX_DEPLOYMENT_TARGET
+            EXPORT_MACOSX_DEPLOYMENT_TARGET=''
+            LIBS="${LIBS} -lstdc++"
             AC_MSG_NOTICE([set MACOSX_DEPLOYMENT_TARGET to ${python_target}])
           fi
           ;;

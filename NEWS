@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.1
 
 Author(s) : Juergen Knoedlseder
 
-4 January 2016
+5 January 2016
 
 
 1. Introduction
@@ -18,7 +18,11 @@ None
 
 3. Configuration
 -----------------
-None
+If GammaLib is compiled on Mavericks (Mac OS X 10.9) or newer but Python has been
+compiled for an earlier deployment target, a compatibility issue arises due to the
+way how class names are mangled by the compiler. This is now automatically detected
+and fixed, which should solve some compatibility issues that have been encountered
+by user using the Anaconda package on Mac OS X.
 
 
 4. Application module
