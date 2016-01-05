@@ -18,11 +18,7 @@ None
 
 3. Configuration
 -----------------
-If GammaLib is compiled on Mavericks (Mac OS X 10.9) or newer but Python has been
-compiled for an earlier deployment target, a compatibility issue arises due to the
-way how class names are mangled by the compiler. This is now automatically detected
-and fixed, which should solve some compatibility issues that have been encountered
-by user using the Anaconda package on Mac OS X.
+None
 
 
 4. Application module
