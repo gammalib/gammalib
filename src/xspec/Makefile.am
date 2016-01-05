@@ -13,4 +13,4 @@ sources = GArf.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libxspec.la
 libxspec_la_SOURCES = $(sources)
-libxspec_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libxspec_la_LDFLAGS =

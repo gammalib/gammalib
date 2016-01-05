@@ -12,4 +12,4 @@ sources = GBase.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libbase.la
 libbase_la_SOURCES = $(sources)
-libbase_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libbase_la_LDFLAGS =

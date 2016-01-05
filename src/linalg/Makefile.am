@@ -18,4 +18,4 @@ sources = GVector.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = liblinalg.la
 liblinalg_la_SOURCES = $(sources)
-liblinalg_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+liblinalg_la_LDFLAGS =

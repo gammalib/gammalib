@@ -1,5 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
+# Darwin support
+MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
+@EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
+
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src \
@@ -37,7 +41,7 @@ caldb_irfs = caldb/data/cgro/comptel/bcf/u47512_iaq.fits.gz \
 # Build libtool library
 noinst_LTLIBRARIES = libcom.la
 libcom_la_SOURCES = $(sources)
-libcom_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libcom_la_LDFLAGS =
 
 # Distribute calibration database files
 EXTRA_DIST     = $(caldb_indx) $(caldb_irfs)

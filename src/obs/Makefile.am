@@ -35,4 +35,4 @@ sources = GEnergies.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libobs.la
 libobs_la_SOURCES = $(sources)
-libobs_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libobs_la_LDFLAGS =

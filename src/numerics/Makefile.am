@@ -15,4 +15,4 @@ sources = GIntegral.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libnumerics.la
 libnumerics_la_SOURCES = $(sources)
-libnumerics_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libnumerics_la_LDFLAGS =

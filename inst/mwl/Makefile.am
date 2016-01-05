@@ -1,5 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
+# Darwin support
+MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
+@EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
+
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
@@ -25,4 +29,4 @@ pkginclude_HEADERS = include/GMWLException.hpp \
 # Build libtool library
 noinst_LTLIBRARIES = libmwl.la
 libmwl_la_SOURCES = $(sources)
-libmwl_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libmwl_la_LDFLAGS =

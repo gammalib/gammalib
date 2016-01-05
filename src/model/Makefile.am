@@ -46,4 +46,4 @@ sources = GModelPar.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libmodel.la
 libmodel_la_SOURCES = $(sources)
-libmodel_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libmodel_la_LDFLAGS =
