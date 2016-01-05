@@ -1,5 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
+# Darwin support
+MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
+@EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
+
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src \
@@ -110,7 +114,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
 # Build libtool library
 noinst_LTLIBRARIES = libcta.la
 libcta_la_SOURCES = $(sources)
-libcta_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libcta_la_LDFLAGS =
 
 # Distribute calibration database files
 #EXTRA_DIST     = $(caldb_pinx) $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)

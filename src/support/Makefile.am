@@ -20,4 +20,4 @@ sources = GException.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libsupport.la
 libsupport_la_SOURCES = $(sources)
-libsupport_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libsupport_la_LDFLAGS =

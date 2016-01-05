@@ -101,17 +101,19 @@ AC_CANONICAL_HOST
 # A special kluge was added for Mac OS X >=10.7. As Apple switched to clang #
 # we search from this version on for the clang compiler.                    #
 #                                                                           #
-# We also signal whether Mac OS X >=10.11 (El Capitan).                     #
+# We also signal whether Mac OS X >=10.9 (Mavericks) and Mac OS X >=10.11   #
+# (El Capitan).                                                             #
 #############################################################################
 # Set default Mac OS X version flags
 osx_lion=no
+osx_mavericks=no
 osx_el_capitan=no
 
 # Set default compiler lists
 cxx_list="g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++"
 cc_list="gcc cc cl.exe clang"
 
-# Check if we have Mac OS X >= 10.7 and >= 10.11
+# Check if we have Mac OS X >= 10.7, >= 10.9 and >= 10.11
 if test `uname -s` = "Darwin"; then
   version=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/' | sed -e 's/\.//g'`
   if [ test $version -ge 107 ]; then
@@ -119,12 +121,21 @@ if test `uname -s` = "Darwin"; then
     cc_list="clang gcc cc cl.exe"
     osx_lion=yes
   fi
+  if [ test $version -ge 109 ]; then
+    osx_mavericks=yes
+  fi
   if [ test $version -ge 1011 ]; then
     osx_el_capitan=yes
   fi
 fi
 AC_MSG_CHECKING([for Mac OS X >= 10.7])
 if [test "x$osx_lion" = "xyes"]; then
+        AC_MSG_RESULT(yes)
+else
+        AC_MSG_RESULT(no)
+fi
+AC_MSG_CHECKING([for Mac OS X >= 10.9])
+if [test "x$osx_mavericks" = "xyes"]; then
         AC_MSG_RESULT(yes)
 else
         AC_MSG_RESULT(no)
@@ -867,19 +878,15 @@ else
 
     # If we have distutils then get python path from distutils ...
     if test -z "$ac_distutils_result"; then
-      if test ${PYTHON_VERSION} '<' 3; then
-        python_path=`$PYTHON -c "import distutils.sysconfig; \
-                                 print distutils.sysconfig.get_python_inc();"`
-      else
-        python_path=`$PYTHON -c "import distutils.sysconfig; \
-                                 print(distutils.sysconfig.get_python_inc());"`
-      fi                                         
+
+      # Get Python path
+      python_path=`$PYTHON -c "import distutils.sysconfig; \
+                               print(distutils.sysconfig.get_python_inc());"`
       if test -n "${python_path}"; then
         AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
         python_path="-I$python_path"
       fi
       PYTHON_CPPFLAGS=$python_path
-      CPPFLAGS="${CPPFLAGS} ${python_path}"
       AC_SUBST([PYTHON_CPPFLAGS])
 
     # ... otherwise check for includes relative to exectuable (obsolete?)
@@ -895,9 +902,30 @@ else
   
     fi
 
-    # Signal missing Python headers
-    if test "x$has_python_h" = "xno"; then
-      AC_MSG_WARN([No Python header file "Python.h" found. Please install appropriate Python development package.])
+    # If we have Mavericks then get the MACOSX_DEPLOYMENT_TARGET from Python
+    # If the target is older then Mavericks then set the MACOSX_DEPLOYMENT_TARGET
+    # to this value as otherwise we get trouble with name mangling (that changed)
+    if [test "x$osx_mavericks" = "xyes"]; then
+      AC_MSG_CHECKING([Python MACOSX_DEPLOYMENT_TARGET])
+      python_target=`$PYTHON -c "from distutils import sysconfig; \
+                                 print(sysconfig.get_config_vars()[['MACOSX_DEPLOYMENT_TARGET']]);" 2> /dev/null`
+      python_compact_target=`echo $python_target | sed 's/\(10\.[[0-9]]*\).*/\1/' | sed -e 's/\.//g'`
+      case $python_compact_target in
+        (*[!0-9]*|'')
+          AC_MSG_RESULT(unknown)
+          ;;
+        (*)
+          AC_MSG_RESULT(${python_target})
+          if [ test $python_compact_target -le 108 ]; then
+            CONFIGURE_MACOSX_DEPLOYMENT_TARGET="$python_target"
+            MACOSX_DEPLOYMENT_TARGET="$python_target"
+            export MACOSX_DEPLOYMENT_TARGET
+            EXPORT_MACOSX_DEPLOYMENT_TARGET=''
+            LIBS="${LIBS} -lstdc++"
+            AC_MSG_NOTICE([set MACOSX_DEPLOYMENT_TARGET to ${python_target}])
+          fi
+          ;;
+      esac
     fi
   
   fi
@@ -1059,11 +1087,16 @@ fi
 # finally we perform system dependent checks. These are:                    #
 # - Darwin: check in /opt/local/lib                                         #
 #############################################################################
+has_editline="no"
 has_readline="no"
 use_readline="no"
+LIB_READLINE=
+LIB_NCURSES=
 LIBS_READLINE=
 LIBDIR_READLINE=
 INCDIR_READLINE=
+AC_SUBST(LIB_READLINE)
+AC_SUBST(LIB_NCURSES)
 AC_SUBST(LIBS_READLINE)
 AC_SUBST(LIBDIR_READLINE)
 AC_SUBST(INCDIR_READLINE)
@@ -1087,18 +1120,30 @@ if [test "x$with_readline" = "xyes";] then
         INCDIR_READLINE="$gammalib_prefix/include/readline"
     else
 
-        # Next search for readline in standard path
-        AC_CHECK_LIB([readline], [main],
-                     [AC_MSG_NOTICE([readline found])
-                      AC_CHECK_HEADER([readline/readline.h],
-                                      [has_readline="yes"
-                                       AC_MSG_NOTICE([readline headers found])],
+        # Next search for editline in standard path (for Mac OS X)
+        AC_CHECK_LIB([edit], [main],
+                     [AC_MSG_NOTICE([editline found])
+                      AC_CHECK_HEADER([editline/readline.h],
+                                      [has_editline="yes"
+                                       AC_MSG_NOTICE([editline headers found])],
                                       [], [])],
-                     [], [-lncurses])
+                     [], [-lcurses])
 
-        # If not found then make additional checks
-        if [test "x$has_readline" != "xyes";] then
-            case $ac_sys_system in
+        # If not found then search now for readline
+        if [test "x$has_editline" != "xyes";] then
+
+            # Next search for readline in standard path
+            AC_CHECK_LIB([readline], [main],
+                         [AC_MSG_NOTICE([readline found])
+                          AC_CHECK_HEADER([readline/readline.h],
+                                          [has_readline="yes"
+                                           AC_MSG_NOTICE([readline headers found])],
+                                          [], [])],
+                         [], [-lncurses])
+
+            # If not found then make additional checks
+            if [test "x$has_readline" != "xyes";] then
+                case $ac_sys_system in
 	            Darwin*) 
                     if [test -f /opt/local/lib/libreadline$SHAREDSUFFIX -a \
                              -f /opt/local/include/readline/readline.h]; then
@@ -1110,17 +1155,25 @@ if [test "x$with_readline" = "xyes";] then
                     ;;
                 *)
                     ;;
-            esac
+                esac
+            fi
         fi
-    
     fi
-
 fi
 
 # If we have ncurses and readline then add readline support to GammaLib
-if [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
+if [test "x$has_editline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
     use_readline="yes"
     AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+    LIB_READLINE=edit
+    LIB_NCURSES=curses
+    LIBS="${LIBS} -ledit -lcurses"
+    LIBS_READLINE="-ledit -lcurses"
+elif [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
+    use_readline="yes"
+    AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
+    LIB_READLINE=readline
+    LIB_NCURSES=ncurses
     LIBS="${LIBS} -lreadline -lncurses"
     LIBS_READLINE="-lreadline -lncurses"
 fi

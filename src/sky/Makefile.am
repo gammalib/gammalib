@@ -29,4 +29,4 @@ sources = GSkyDir.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libsky.la
 libsky_la_SOURCES = $(sources)
-libsky_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libsky_la_LDFLAGS =

@@ -19,4 +19,4 @@ sources = GXml.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libxml.la
 libxml_la_SOURCES = $(sources)
-libxml_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libxml_la_LDFLAGS =

@@ -14,4 +14,4 @@ sources = GTestCase.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libtest.la
 libtest_la_SOURCES = $(sources)
-libtest_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libtest_la_LDFLAGS =

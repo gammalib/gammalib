@@ -42,4 +42,4 @@ sources = GFitsHeaderCard.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libfits.la
 libfits_la_SOURCES = $(sources)
-libfits_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libfits_la_LDFLAGS =
