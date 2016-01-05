@@ -15,4 +15,4 @@ sources = GApplication.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libapp.la
 libapp_la_SOURCES = $(sources)
-libapp_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libapp_la_LDFLAGS =

@@ -12,4 +12,4 @@ sources = GVOClient.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libvo.la
 libvo_la_SOURCES = $(sources)
-libvo_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libvo_la_LDFLAGS =

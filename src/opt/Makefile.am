@@ -15,4 +15,4 @@ sources = GOptimizer.cpp \
 # Build libtool library
 noinst_LTLIBRARIES = libopt.la
 libopt_la_SOURCES = $(sources)
-libopt_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libopt_la_LDFLAGS =
