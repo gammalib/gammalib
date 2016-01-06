@@ -79,12 +79,12 @@ if os.path.exists('@prefix@/lib'):
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
-	sys.stdout.write("Link cfitsio into Python bindings.\n")
+	sys.stdout.write("Link cfitsio into Python module.\n")
 	libraries.append('cfitsio')
 
 # Add readline library only if available
 if '@WITH_READLINE_TRUE@' != '#':
-	sys.stdout.write("Link readline into Python bindings.\n")
+	sys.stdout.write("Link readline into Python module.\n")
 	libraries.append('@LIB_READLINE@')
 	libraries.append('@LIB_NCURSES@')
 
@@ -114,16 +114,16 @@ for extra_inc_path in extra_inc_paths:
 # Add definitions for instrument specific modules
 inst_modules = []
 if '@WITH_INST_MWL_TRUE@' != '#':
-	sys.stdout.write("Include multi-wavelength interface in gammalib Python bindings.\n")
+	sys.stdout.write("Include multi-wavelength interface in gammalib Python module.\n")
 	inst_modules.append('mwl')
 if '@WITH_INST_CTA_TRUE@' != '#':
-	sys.stdout.write("Include CTA instrument interface in gammalib Python bindings.\n")
+	sys.stdout.write("Include CTA instrument interface in gammalib Python module.\n")
 	inst_modules.append('cta')
 if '@WITH_INST_LAT_TRUE@' != '#':
-	sys.stdout.write("Include Fermi/LAT instrument interface in gammalib Python bindings.\n")
+	sys.stdout.write("Include Fermi/LAT instrument interface in gammalib Python module.\n")
 	inst_modules.append('lat')
 if '@WITH_INST_COM_TRUE@' != '#':
-	sys.stdout.write("Include COMPTEL instrument interface in gammalib Python bindings.\n")
+	sys.stdout.write("Include COMPTEL instrument interface in gammalib Python module.\n")
 	inst_modules.append('com')
 
 # Set extension definition for core modules
@@ -270,12 +270,12 @@ data_files=[('@prefix@/share/gammalib/swig', install_files)]
 # Setup
 setup(name='@PACKAGE_NAME@',
       version='@PACKAGE_VERSION@',
-      description='gammalib Python bindings',
+      description='gammalib Python module',
       author='Juergen Knoedlseder',
       author_email='@PACKAGE_BUGREPORT@',
       maintainer='Juergen Knoedlseder',
       maintainer_email='@PACKAGE_BUGREPORT@',
-      url='http://gammalib.sourceforge.net/',
+      url='http://cta.irap.omp.eu/gammalib/',
       packages=[pkg_name],
       ext_package=pkg_name,
       ext_modules=ext_modules,

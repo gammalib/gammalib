@@ -889,6 +889,32 @@ else
       PYTHON_CPPFLAGS=$python_path
       AC_SUBST([PYTHON_CPPFLAGS])
 
+      # If we have Mavericks then get the MACOSX_DEPLOYMENT_TARGET from Python
+      # If the target is older then Mavericks then set the MACOSX_DEPLOYMENT_TARGET
+      # to this value as otherwise we get trouble with name mangling (that changed)
+      if [test "x$osx_mavericks" = "xyes"]; then
+        AC_MSG_CHECKING([Python MACOSX_DEPLOYMENT_TARGET])
+        python_target=`$PYTHON -c "from distutils import sysconfig; \
+                                   print(sysconfig.get_config_vars()[['MACOSX_DEPLOYMENT_TARGET']]);" 2> /dev/null`
+        python_compact_target=`echo $python_target | sed 's/\(10\.[[0-9]]*\).*/\1/' | sed -e 's/\.//g'`
+        case $python_compact_target in
+          (*[!0-9]*|'')
+            AC_MSG_RESULT(unknown)
+            ;;
+          (*)
+            AC_MSG_RESULT(${python_target})
+            if [ test $python_compact_target -le 108 ]; then
+              CONFIGURE_MACOSX_DEPLOYMENT_TARGET="$python_target"
+              MACOSX_DEPLOYMENT_TARGET="$python_target"
+              export MACOSX_DEPLOYMENT_TARGET
+              EXPORT_MACOSX_DEPLOYMENT_TARGET=''
+              LIBS="${LIBS} -lstdc++"
+              AC_MSG_NOTICE([set MACOSX_DEPLOYMENT_TARGET to ${python_target}])
+            fi
+            ;;
+        esac
+      fi
+
     # ... otherwise check for includes relative to exectuable (obsolete?)
     else                             
                              
@@ -900,32 +926,6 @@ else
       # Check if we have Python.h
       AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
   
-    fi
-
-    # If we have Mavericks then get the MACOSX_DEPLOYMENT_TARGET from Python
-    # If the target is older then Mavericks then set the MACOSX_DEPLOYMENT_TARGET
-    # to this value as otherwise we get trouble with name mangling (that changed)
-    if [test "x$osx_mavericks" = "xyes"]; then
-      AC_MSG_CHECKING([Python MACOSX_DEPLOYMENT_TARGET])
-      python_target=`$PYTHON -c "from distutils import sysconfig; \
-                                 print(sysconfig.get_config_vars()[['MACOSX_DEPLOYMENT_TARGET']]);" 2> /dev/null`
-      python_compact_target=`echo $python_target | sed 's/\(10\.[[0-9]]*\).*/\1/' | sed -e 's/\.//g'`
-      case $python_compact_target in
-        (*[!0-9]*|'')
-          AC_MSG_RESULT(unknown)
-          ;;
-        (*)
-          AC_MSG_RESULT(${python_target})
-          if [ test $python_compact_target -le 108 ]; then
-            CONFIGURE_MACOSX_DEPLOYMENT_TARGET="$python_target"
-            MACOSX_DEPLOYMENT_TARGET="$python_target"
-            export MACOSX_DEPLOYMENT_TARGET
-            EXPORT_MACOSX_DEPLOYMENT_TARGET=''
-            LIBS="${LIBS} -lstdc++"
-            AC_MSG_NOTICE([set MACOSX_DEPLOYMENT_TARGET to ${python_target}])
-          fi
-          ;;
-      esac
     fi
   
   fi
