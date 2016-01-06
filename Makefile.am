@@ -25,7 +25,7 @@ doc_DATA = \
 	   AUTHORS \
 	   ChangeLog \
 	   COPYING \
-	   INSTALL \
+       INSTALL \
 	   NEWS \
 	   README
 docdir = ${datadir}/doc/${PACKAGE}
