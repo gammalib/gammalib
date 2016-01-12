@@ -369,6 +369,9 @@ void GCTAEventList::read(const GFits& fits)
     // ... otherwise build GTI from TSTART and TSTOP
     else {
 
+        // Set flag that GTIs are not available
+        m_has_gti_ext = false;
+
         // Read start and stop time
         double tstart = events.real("TSTART");
         double tstop  = events.real("TSTOP");
