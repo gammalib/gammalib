@@ -67,14 +67,17 @@ public:
     bool                has_response(void) const;
     bool                has_events(void) const;
     void                read(const GFits& fits);
-    void                write(GFits& fits) const;
+    void                write(GFits& fits, const std::string& extname = "EVENTS") const;
     void                load(const std::string& filename);
+    void                load_gti(const std::string& filename);
     void                load(const std::string& cntcube,
                              const std::string& expcube,
                              const std::string& psfcube,
                              const std::string& bkgcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
+    void                save_gti(const std::string& filename,
+                                 const bool& clobber = false) const;
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
     void                response(const GCTACubeExposure& expcube,
@@ -98,6 +101,8 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    void                gtifile(const std::string& filename);
+    const std::string&  gtifile(void) const;
     const std::string&  eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;

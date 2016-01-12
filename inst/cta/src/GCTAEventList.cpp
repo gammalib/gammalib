@@ -33,6 +33,7 @@
 #include "GCTASupport.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GFilename.hpp"
 #include "GFits.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableFloatCol.hpp"
@@ -281,6 +282,24 @@ void GCTAEventList::load(const std::string& filename)
 
 
 /***********************************************************************//**
+ * @brief Load GTIs FITS file.
+ *
+ * @param[in] filename Name of FITS file from which GTIs are loaded.
+ *
+ * Loads CTA GTIs from a separate file.
+ ***************************************************************************/
+void GCTAEventList::load_gti(const std::string& filename)
+{
+
+    // Load gti from file
+    m_gti.load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Save CTA events into FITS file.
  *
  * @param[in] filename FITS filename.
@@ -330,13 +349,20 @@ void GCTAEventList::read(const GFits& fits)
     // Clear object
     clear();
 
+    // Initialise filename from fits file
+    GFilename fname = GFilename(fits.filename());
+
+    // Initialise extension name
+    std::string extname = fname.extname("EVENTS");
+
     // Get event list HDU
-    const GFitsTable& events = *fits.table("EVENTS");
+    const GFitsTable& events = *fits.table(extname);
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
     if (fits.contains("GTI")) {
         const GFitsTable& gti = *fits.table("GTI");
+        m_has_gti_ext = true;
         m_gti.read(gti);
     }
 
@@ -403,8 +429,10 @@ void GCTAEventList::write(GFits& file) const
     // Free binary table
     delete events;
 
-    // Append GTI to FITS file
-    gti().write(file);
+    // Write GTI extension if present on loading
+    if (m_has_gti_ext) {
+        gti().write(file);
+    }
 
     // Return
     return;
@@ -575,6 +603,7 @@ void GCTAEventList::init_members(void)
     m_columns.clear();
     m_has_phase = false;
     m_has_detxy = true;
+    m_has_gti_ext = true;
 
     // Initialise cache
     m_irf_names.clear();
@@ -597,6 +626,7 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
     m_events    = list.m_events;
     m_has_phase = list.m_has_phase;
     m_has_detxy = list.m_has_detxy;
+    m_has_gti_ext = list.m_has_gti_ext;
 
     // Copy cache
     m_irf_names  = list.m_irf_names;

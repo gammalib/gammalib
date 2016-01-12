@@ -54,6 +54,7 @@ const std::string cta_cntmap       = datadir+"/crab_cntmap.fits.gz";
 const std::string cta_cube_xml     = datadir+"/obs_cube.xml";
 const std::string cta_bin_xml      = datadir+"/obs_binned.xml";
 const std::string cta_unbin_xml    = datadir+"/obs_unbinned.xml";
+const std::string cta_unbin_xml_gti = datadir+"/obs_unbinned_gti.xml";
 const std::string cta_model_xml    = datadir+"/crab.xml";
 const std::string cta_rsp_xml      = datadir+"/rsp_models.xml";
 const std::string cta_cube_bgd_xml = datadir+"/cta_model_cube_bgd.xml";
@@ -1297,7 +1298,10 @@ void TestGCTAModel::test_model_aeff_bgd(void)
 void TestGCTAObservation::test_unbinned_obs(void)
 {
     // Set filenames
+    const std::string evfile = "test_cta_obs_unbinned.fits[TESTEVENTS]";
+    const std::string gtifile = "test_cta_obs_unbinned.fits[TESTGTI]";
     const std::string file1 = "test_cta_obs_unbinned.xml";
+    const std::string file2 = "test_cta_obs_unbinned_gti.xml";
 
     // Declare observations
     GObservations   obs;
@@ -1307,7 +1311,21 @@ void TestGCTAObservation::test_unbinned_obs(void)
     test_try("Load unbinned CTA observation");
     try {
         run.load(cta_events);
+        run.load_gti(cta_events+"[GTI]");
         run.response(cta_irf, GCaldb(cta_caldb));
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    test_try("Save and load unbinned CTA observation");
+    try {
+        run.save(evfile, true);
+        run.save_gti(gtifile, true);
+        GCTAObservation testrun;
+        testrun.load(evfile);
+        testrun.load_gti(gtifile);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1340,6 +1358,17 @@ void TestGCTAObservation::test_unbinned_obs(void)
     try {
         obs = GObservations(cta_unbin_xml);
         obs.save(file1);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML loading and saving
+    test_try("Test GTI loading and saving via XML");
+    try {
+        obs = GObservations(cta_unbin_xml_gti);
+        obs.save(file2);
         test_try_success();
     }
     catch (std::exception &e) {

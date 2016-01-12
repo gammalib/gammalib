@@ -65,6 +65,7 @@ public:
     virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual void           load(const std::string& filename);
+    virtual void           load_gti(const std::string& filename);
     virtual void           save(const std::string& filename,
                                 const bool& clobber = false) const;
     virtual void           read(const GFits& file);
@@ -100,6 +101,7 @@ protected:
     std::vector<GFitsTableCol*> m_columns;   //!< Pointers to optional columns
     bool                        m_has_phase; //!< Signal presence of phase
     bool                        m_has_detxy; //!< Signal presence of detector coordinates
+    bool                        m_has_gti_ext; //!< Signals if a GTI extension was present on loading
 
     // IRF cache for diffuse models
     mutable std::vector<std::string>          m_irf_names;  //!< Model names

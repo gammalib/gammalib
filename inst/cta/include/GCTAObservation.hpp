@@ -95,13 +95,16 @@ public:
     bool                has_response(void) const;
     bool                has_events(void) const;
     void                read(const GFits& fits);
-    void                write(GFits& fits) const;
+    void                write(GFits& fits, const std::string& extname = "EVENTS") const;
     void                load(const std::string& filename);
+    void                load_gti(const std::string& filename);
     void                load(const std::string& cntcube,
                              const std::string& expcube,
                              const std::string& psfcube,
                              const std::string& bkgcube);
     void                save(const std::string& filename,
+                             const bool& clobber = false) const;
+    void                save_gti(const std::string& filename,
                              const bool& clobber = false) const;
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
@@ -126,6 +129,8 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    void                gtifile(const std::string& filename);
+    const std::string&  gtifile(void) const;
     const std::string&  eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
@@ -144,7 +149,8 @@ protected:
 
     // Protected members
     std::string   m_instrument;    //!< Instrument name
-    std::string   m_eventfile;     //!< Event filename
+    std::string  m_eventfile;      //!< Event filename
+    std::string  m_gtifile;      //!< Event filename
     std::string   m_eventtype;     //!< Event type (for XML file)
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;      //!< Pointing direction
@@ -439,6 +445,31 @@ inline
 const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
+}
+
+
+/***********************************************************************//**
+ * @brief Set GTI file name
+ *
+ * @param[in] filename GTI file name.
+ ***************************************************************************/
+inline
+void GCTAObservation::gtifile(const std::string& filename)
+{
+    m_gtifile = filename;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return GTI file name
+ *
+ * @return GTI file name.
+ ***************************************************************************/
+inline
+const std::string& GCTAObservation::gtifile(void) const
+{
+    return m_gtifile;
 }
 
 
