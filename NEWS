@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.1
 
 Author(s) : Juergen Knoedlseder
 
-5 January 2016
+13 January 2016
 
 
 1. Introduction
@@ -108,7 +108,7 @@ None
 
 20. CTA interface
 -----------------
-None
+Add table column units to the CTA event list columns (fixes #1616).
 
 
 21. COMPTEL interface

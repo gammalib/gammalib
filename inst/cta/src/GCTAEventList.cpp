@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.cpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -797,6 +797,13 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
         GFitsTableFloatCol  col_dec    = GFitsTableFloatCol("DEC", size());
         GFitsTableFloatCol  col_energy = GFitsTableFloatCol("ENERGY", size());
 
+        // Set units of columns
+        // (see http://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf)
+        col_time.unit("s");
+        col_ra.unit("deg");
+        col_dec.unit("deg");
+        col_energy.unit("TeV");
+
         // Fill mandatory columns
         for (int i = 0; i < size(); ++i) {
             col_eid(i)    = m_events[i].m_event_id;
@@ -815,23 +822,42 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
 
         // If available, add detector coordinates in degrees
         if (m_has_detxy) {
+
+            // Allocate columns
             GFitsTableFloatCol col_detx = GFitsTableFloatCol("DETX", size());
             GFitsTableFloatCol col_dety = GFitsTableFloatCol("DETY", size());
+
+            // Set units of columns
+            // (see http://fits.gsfc.nasa.gov/standard30/fits_standard30aa.pdf)
+            col_detx.unit("deg");
+            col_dety.unit("deg");
+
+            // Fill columns
             for (int i = 0; i < size(); ++i) {
                 col_detx(i) = m_events[i].dir().detx() * gammalib::rad2deg;
                 col_dety(i) = m_events[i].dir().dety() * gammalib::rad2deg;
             }
+
+            // Append columns to table
             hdu.append(col_detx);
             hdu.append(col_dety);
+
         }
 
         // If available, add event phase
         if (m_has_phase) {
+
+            // Allocate columns
             GFitsTableFloatCol col_phase = GFitsTableFloatCol("PHASE", size());
+
+            // Fill columns
             for (int i = 0; i < size(); ++i) {
                 col_phase(i) = m_events[i].m_phase;
             }
+
+            // Append columns to table
             hdu.append(col_phase);
+
         }
 
         // Append other columns to table
