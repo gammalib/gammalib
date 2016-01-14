@@ -769,7 +769,7 @@ void GFitsImageDouble::copy_members(const GFitsImageDouble& image)
     // Copy NULL value
     alloc_nulval(image.m_nulval);
 
-    // Small memory option: release column if it was fetch above
+    // Small memory option: release image if it was fetched above
     #if defined(G_SMALL_MEMORY)
     if (not_loaded) {
         const_cast<GFitsImageDouble*>(&image)->release_data();

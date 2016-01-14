@@ -216,8 +216,8 @@ void GFitsHDU::connect(void* vptr)
  * @exception GException::fits_file_not_open
  *            No FITS file has been opened.
  *
- * Moves to FITS file pointer to the actual HDU. This operation should
- * preceed any FITS file manipulation.
+ * Moves FITS file pointer to the actual HDU. This operation should preceed
+ * any FITS file manipulation.
  ***************************************************************************/
 void GFitsHDU::move_to_hdu(void)
 {
