@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1112,7 +1112,7 @@ void GFits::open(const std::string& filename, const bool& create)
 /***********************************************************************//**
  * @brief Saves FITS file
  *
- * @param[in] clobber Overwrite existing FITS file (true/false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false).
  *
  * @exception GException::fits_file_exist
  *            Attemting to overwrite an existing file without having specified
@@ -1149,7 +1149,32 @@ void GFits::save(const bool& clobber)
               "Either open FITS file before saving or use saveto() method.");
     }
 
-    // If no HDUs exist then save an empty primary image.
+    // We have to make sure that all data are online before we can save them.
+    // This needs to be done before the data are deleted from disk. We do
+    // this by cloning all HDUs, as cloning will force all data to get online.
+    for (int i = 0; i < size(); ++i) {
+        GFitsHDU* hdu = m_hdu[i]->clone();
+        delete m_hdu[i];
+        m_hdu[i] = hdu;
+    }
+
+    // Determine number of HDUs in current FITS file on disk
+    int num_hdu = 0;
+    status = __ffthdu(FPTR(m_fitsfile), &num_hdu, &status);
+    if (status != 0) {
+        throw GException::fits_error(G_SAVE, status);
+    }
+
+    // Delete all HDUs (except of the primary HDU) since we will write them
+    // all freshly
+    for (int i = num_hdu-1; i >= 0; --i) {
+        status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
+        if (status != 0) {
+            throw GException::fits_error(G_SAVE, status);
+        }
+    }
+
+    // If no HDUs exist in the FITS object then write an empty primary image
     if (size() == 0) {
         status     = __ffmahd(FPTR(m_fitsfile), 1, NULL, &status);
         status     = __ffcrim(FPTR(m_fitsfile), 8, 0, NULL, &status);
@@ -1163,22 +1188,6 @@ void GFits::save(const bool& clobber)
         for (int i = 0; i < size(); ++i) {
             m_hdu[i]->extno(i);
             m_hdu[i]->save();
-        }
-    }
-
-    // Determine number of HDUs in FITS file
-    int num_hdu = 0;
-    status = __ffthdu(FPTR(m_fitsfile), &num_hdu, &status);
-    if (status != 0) {
-        throw GException::fits_error(G_SAVE, status);
-    }
-
-    // Delete all excedent HDUs (these may be their following removal
-    // of HDUs from the GFits object)
-    for (int i = num_hdu-1; i >= size(); --i) {
-        status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
-        if (status != 0) {
-            throw GException::fits_error(G_SAVE, status);
         }
     }
 
