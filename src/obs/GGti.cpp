@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GGti.cpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -575,8 +575,8 @@ void GGti::extend(const GGti& gti)
  *
  * Loads the Good Time Intervals from FITS file.
  *
- * If no extension name is provided, the energy boundaries are loaded from
- * the "GTI" extension.
+ * If no extension name is provided in the @p filename, the Good Time
+ * Intervals are loaded from the "GTI" extension.
  ***************************************************************************/
 void GGti::load(const std::string& filename)
 {
@@ -607,26 +607,31 @@ void GGti::load(const std::string& filename)
  * @brief Save Good Time Intervals intervals to FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing GTI extension?
+ * @param[in] clobber Modify any existing FITS file? (default: false)
  *
- * Saves Good Time Intervals into a FITS file.
+ * Saves Good Time Intervals into a FITS file. If a file with the given
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The method will create (or replace an existing)
+ * Good Time Interval extension. The extension name can be specified as part
+ * of the @p filename, or if no extension name is given, is assumed to be
+ * "GTI".
  *
- * If no extension name is provided, the Good Time Intervals are saved into
- * an "GTI" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
 void GGti::save(const std::string& filename, const bool& clobber) const
 {
     // Create file name
     GFilename fname(filename);
 
-    // Allocate FITS file
-    GFits file;
+    // Open or create FITS file
+    GFits fits(fname.filename(), true);
 
-    // Write GTI to FITS file
-    write(file, fname.extname("GTI"));
+    // Write GTI to FITS object
+    write(fits, fname.extname("GTI"));
 
     // Save to file
-    file.saveto(fname.filename(), clobber);
+    fits.save(clobber);
 
     // Return
     return;
@@ -638,15 +643,14 @@ void GGti::save(const std::string& filename, const bool& clobber) const
  *
  * @param[in] table FITS table.
  *
- * Reads the Good Time Intervals and time reference from a FITS table.
+ * Reads the Good Time Intervals and time reference from a FITS table. The
+ * start and stop tims of the Good Time Intervals are expected to be contain
+ * in columns names "START" and "STOP".
  ***************************************************************************/
 void GGti::read(const GFitsTable& table)
 {
-    // Free members
-    free_members();
-
-    // Initialise attributes
-    init_members();
+    // Clear object
+    clear();
 
     // Read time reference
     m_reference.read(table);
@@ -676,17 +680,17 @@ void GGti::read(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write Good Time Intervals and time reference into FITS object
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS object.
  * @param[in] extname GTI extension name (defaults to "GTI")
  *
- * Saves Good Time Intervals and time reference into a FITS object. If the
- * file does not exist it is created. If the file exists the GTI is appended
- * as extension. If another GTI exists already it is overwritten if
- * @p clobber=true.
+ * Writes Good Time Intervals and time reference into a FITS object. If an
+ * extension with the same name does already exist in the FITS object, the
+ * values in that extension will be replaced.
  *
- * @todo Implement clobber method for overwriting of existing GTIs.
+ * The start and stop tims of the Good Time Intervals will be written into
+ * double precision columns named "START" and "STOP".
  ***************************************************************************/
-void GGti::write(GFits& file, const std::string& extname) const
+void GGti::write(GFits& fits, const std::string& extname) const
 {
     // Create GTI columns
     GFitsTableDoubleCol cstart = GFitsTableDoubleCol("START", m_num);
@@ -699,19 +703,22 @@ void GGti::write(GFits& file, const std::string& extname) const
     }
 
     // Create GTI table
-    GFitsBinTable* table = new GFitsBinTable(m_num);
-    table->append(cstart);
-    table->append(cstop);
-    table->extname(extname);
+    GFitsBinTable table(m_num);
+    table.append(cstart);
+    table.append(cstop);
+    table.extname(extname);
 
-    // Write time reference
-    m_reference.write(*table);
+    // Write time reference into table
+    m_reference.write(table);
 
-    // Write to FITS file
-    file.append(*table);
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
-    // Free table
-    delete table;
+    // Append GTI table to FITS object
+    fits.append(table);
 
     // Return
     return;
@@ -727,13 +734,17 @@ void GGti::write(GFits& file, const std::string& extname) const
  *            Invalid XML format encountered.
  *
  * Read Good Time Intervals from an XML element. The format of the Good Time
- * Intervals is
+ * Intervals is either
+ *
+ *     <parameter name="GoodTimeIntervals" file="..."/>
+ *
+ * in case that the information is stored in a FITS file, or
  *
  *     <parameter name="GoodTimeIntervals" tmin="..." tmax="..."/>
  *
- * The units of the @a tmin and @a tmax parameters are seconds.
- *
- * Note that the method also expects that the time reference is provided
+ * if the Good Time Intervals should be constructed from a start and stop
+ * time (the units of the @a tmin and @a tmax parameters are seconds). In the
+ * latter case, the method also expects that the time reference is provided
  * as parameter in the @p xml element.
  ***************************************************************************/
 void GGti::read(const GXmlElement& xml)
@@ -741,22 +752,45 @@ void GGti::read(const GXmlElement& xml)
     // Clear energy boundaries
     clear();
 
-    // Read time reference
-    m_reference.read(xml);
-
-    // Get energy boundaries parameter
+    // Get GTI parameter
     const GXmlElement* par = gammalib::xml_get_par(G_READ_XML, xml, "GoodTimeIntervals");
 
-    // Extract tmin and tmax attributes
-    if (par->has_attribute("tmin") && par->has_attribute("tmax")) {
+    // If we have a "file" attribute then load GTIs from file ...
+    if (par->has_attribute("file")) {
+
+        // Get filename
+        std::string filename = par->attribute("file");
+
+        // Load GTIs from file
+        load(filename);
+
+        // Store filename (we need to do this after loading as the
+        // load method calls the read method that clears the object
+        m_xml_filename = filename;
+
+    }
+
+    // ... otherwise if "tmin" and "tmax" attributes are found then set
+    // the GTIs from these attributes and also read the time reference
+    // from the XML file
+    else if (par->has_attribute("tmin") && par->has_attribute("tmax")) {
+
+        // Read time reference first (needed before reading times!)
+        m_reference.read(xml);
+
+        // Create GTI from "tmin" and "tmax" attributes
         double tmin = gammalib::todouble(par->attribute("tmin"));
         double tmax = gammalib::todouble(par->attribute("tmax"));
         append(GTime(tmin, m_reference), GTime(tmax, m_reference));
+
     }
+
+    // ... otherwise throw an exception
     else {
-        std::string msg = "Attributes \"tmin\" and/or \"tmax\" not found"
-                          " in XML parameter \"GoodTimeIntervals\"."
-                          " Please verify the XML format.";
+        std::string msg = "Attributes \"file\" or \"tmin\" and \"tmax\" not "
+                          "found in XML parameter \"GoodTimeIntervals\". "
+                          "Please verify the observation definition XML "
+                          "file.";
         throw GException::invalid_value(G_READ_XML, msg);
     }
 
@@ -773,12 +807,18 @@ void GGti::read(const GXmlElement& xml)
  * Writes Good Time Intervals into an XML element. The format of the Good
  * Time Intervals is
  *
+ *     <parameter name="GoodTimeIntervals" file="..."/>
+ *
+ * if a file name has been specified previously upon reading from an XML
+ * file. In that case, the method will also write the Good Time Intervals to
+ * the specified file. If no file name is available, the method will write
+ * the first start and the last stop time of the Good Time Intervals in the
+ * format
+ *
  *     <parameter name="GoodTimeIntervals" tmin="..." tmax="..."/>
  *
- * The units of the @a tmin and @a tmax parameters are seconds.
- *
- * The method also writes the time reference as parameter in the @p xml
- * element.
+ * The units of the @a tmin and @a tmax parameters are seconds. In that case,
+ * the time reference is also written into the XML element.
  *
  * This method does nothing if the Good Time Intervals are empty.
  ***************************************************************************/
@@ -788,14 +828,32 @@ void GGti::write(GXmlElement& xml) const
     if (!is_empty()) {
 
         // Get parameter
-        GXmlElement* par = gammalib::xml_need_par(G_WRITE_XML, xml, "GoodTimeIntervals");
+        GXmlElement* par =
+            gammalib::xml_need_par(G_WRITE_XML, xml, "GoodTimeIntervals");
 
-        // Write time interval
-        par->attribute("tmin", gammalib::str(tstart().convert(m_reference)));
-        par->attribute("tmax", gammalib::str(tstop().convert(m_reference)));
+        // If we have a file name then write the "file" attribute ...
+        if (!m_xml_filename.empty()) {
 
-        // Write time reference
-        m_reference.write(xml);
+            // Write "file" attribute
+            par->attribute("file", m_xml_filename);
+
+            // Write GTI file
+            save(m_xml_filename, true);
+
+        }
+
+        // ... otherwise write "tmin" and "tmax" attributes and write the
+        // time reference
+        else {
+
+            // Write time interval
+            par->attribute("tmin", gammalib::str(tstart().convert(m_reference)));
+            par->attribute("tmax", gammalib::str(tstop().convert(m_reference)));
+
+            // Write time reference
+            m_reference.write(xml);
+
+        }
 
     } // endif: GTIs were not empty
 
@@ -993,12 +1051,20 @@ std::string GGti::print(const GChatter& chatter) const
         result.append(gammalib::str(tstop().convert(m_reference)));
         result.append(" "+reference().timeunit());
         result.append(" ("+reference().timesys()+")");
+
+        // Append reference MJD
         result.append("\n"+gammalib::parformat("Reference MDJ"));
         result.append(gammalib::str(reference().mjdref()));
 
         // EXPLICIT: Append time reference information
         if (chatter >= EXPLICIT) {
             result.append("\n"+reference().print(chatter));
+        }
+
+        // Optionally append XML filename
+        if (!m_xml_filename.empty()) {
+            result.append("\n"+gammalib::parformat("File name"));
+            result.append(m_xml_filename);
         }
 
     } // endif: chatter was not silent
@@ -1023,6 +1089,7 @@ void GGti::init_members(void)
     m_num     = 0;
     m_tstart.clear();
     m_tstop.clear();
+    m_xml_filename.clear();
     m_ontime  = 0.0;
     m_telapse = 0.0;
     m_start   = NULL;
@@ -1045,12 +1112,13 @@ void GGti::init_members(void)
 void GGti::copy_members(const GGti& gti)
 {
     // Copy attributes
-    m_num       = gti.m_num;
-    m_tstart    = gti.m_tstart;
-    m_tstop     = gti.m_tstop;
-    m_ontime    = gti.m_ontime;
-    m_telapse   = gti.m_telapse;
-    m_reference = gti.m_reference;
+    m_num          = gti.m_num;
+    m_tstart       = gti.m_tstart;
+    m_tstop        = gti.m_tstop;
+    m_ontime       = gti.m_ontime;
+    m_telapse      = gti.m_telapse;
+    m_reference    = gti.m_reference;
+    m_xml_filename = gti.m_xml_filename;
 
     // Copy start/stop times
     if (m_num > 0) {
