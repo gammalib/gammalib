@@ -644,8 +644,8 @@ void GGti::save(const std::string& filename, const bool& clobber) const
  * @param[in] table FITS table.
  *
  * Reads the Good Time Intervals and time reference from a FITS table. The
- * start and stop tims of the Good Time Intervals are expected to be contain
- * in columns names "START" and "STOP".
+ * start and stop times of the Good Time Intervals are read from the "START"
+ * and "STOP" columns.
  ***************************************************************************/
 void GGti::read(const GFitsTable& table)
 {
