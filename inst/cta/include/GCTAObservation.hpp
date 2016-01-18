@@ -104,11 +104,6 @@ public:
                              const std::string& bkgcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
-    /*
-    void                load_gti(const std::string& filename);
-    void                save_gti(const std::string& filename,
-                                 const bool& clobber = false) const;
-    */
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
     void                response(const GCTACubeExposure&   expcube,
@@ -132,10 +127,6 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
-    /*
-    void                gtifile(const std::string& filename);
-    const std::string&  gtifile(void) const;
-    */
     const std::string&  eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
@@ -455,35 +446,6 @@ const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
 }
-
-
-/***********************************************************************//**
- * @brief Set GTI file name
- *
- * @param[in] filename GTI file name.
- ***************************************************************************/
-/*
-inline
-void GCTAObservation::gtifile(const std::string& filename)
-{
-    m_gtifile = filename;
-    return;
-}
-*/
-
-
-/***********************************************************************//**
- * @brief Return GTI file name
- *
- * @return GTI file name.
- ***************************************************************************/
-/*
-inline
-const std::string& GCTAObservation::gtifile(void) const
-{
-    return m_gtifile;
-}
-*/
 
 
 /***********************************************************************//**
