@@ -1357,21 +1357,6 @@ void TestGCTAObservation::test_unbinned_obs(void)
         test_try_failure(e);
     }
 
-    /*
-    test_try("Save and load unbinned CTA observation");
-    try {
-        run.save(evfile, true);
-        run.save_gti(gtifile, true);
-        GCTAObservation testrun;
-        testrun.load(evfile);
-        testrun.load_gti(gtifile);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    */
-
     // Add observation (twice) to data
     test_try("Append observation twice");
     try {
@@ -1399,21 +1384,21 @@ void TestGCTAObservation::test_unbinned_obs(void)
         obs = GObservations(cta_unbin_xml);
         obs.save(file1);
         GCTAObservation* run = dynamic_cast<GCTAObservation*>(obs[0]);
-        test_value(run->roi().centre().dir().ra_deg(), 83.63, 1.0e-10);
-        test_value(run->roi().centre().dir().dec_deg(), 22.01, 1.0e-10);
-        test_value(run->roi().radius(), 5.0, 1.0e-10);
-        test_value(run->ebounds().emin().TeV(), 0.1, 1.0e-10);
-        test_value(run->ebounds().emax().TeV(), 100.0, 1.0e-10);
-        test_value(run->gti().tstart().convert(run->gti().reference()), 0.0, 1.0e-10);
-        test_value(run->gti().tstop().convert(run->gti().reference()), 1800.0, 1.0e-10);
-        test_value(run->ontime(), 1800.0, 1.0e-10);
-        test_value(run->livetime(), 1710.0, 1.0e-10);
-        test_value(run->deadc(), 0.95, 1.0e-10);
-        test_value(run->ra_obj(), 0.0, 1.0e-10);
-        test_value(run->dec_obj(), 0.0, 1.0e-10);
+        test_value(run->roi().centre().dir().ra_deg(), 83.63);
+        test_value(run->roi().centre().dir().dec_deg(), 22.01);
+        test_value(run->roi().radius(), 5.0);
+        test_value(run->ebounds().emin().TeV(), 0.1);
+        test_value(run->ebounds().emax().TeV(), 100.0);
+        test_value(run->gti().tstart().convert(run->gti().reference()), 0.0);
+        test_value(run->gti().tstop().convert(run->gti().reference()), 1800.0);
+        test_value(run->ontime(), 1800.0);
+        test_value(run->livetime(), 1710.0);
+        test_value(run->deadc(), 0.95);
+        test_value(run->ra_obj(), 0.0);
+        test_value(run->dec_obj(), 0.0);
         test_value(run->obs_id(), 0);
-        test_value(run->pointing().dir().ra_deg(), 83.63, 1.0e-10);
-        test_value(run->pointing().dir().dec_deg(), 22.01, 1.0e-10);
+        test_value(run->pointing().dir().ra_deg(), 83.63);
+        test_value(run->pointing().dir().dec_deg(), 22.01);
         test_try_success();
     }
     catch (std::exception &e) {
