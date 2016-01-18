@@ -3,7 +3,8 @@
         * Version 1.1.0 released
         =========================
 
-        Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598).
+        Use GFilename in GFits to store filename (#1649)
+        Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598)
 
 
 2016-01-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

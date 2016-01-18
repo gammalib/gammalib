@@ -13,7 +13,8 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-None
+The following methods return now GFilename instead of std::string:
+- GFits::filename()
 
 
 3. Configuration
@@ -33,7 +34,7 @@ None
 
 6. FITS I/O Interface
 ---------------------
-None
+GFits now uses the GFilename class to store the FITS filename (fixes #1649).
 
 
 7. Linear algebra module

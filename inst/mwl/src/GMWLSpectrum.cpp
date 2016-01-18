@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GMWLSpectrum.cpp - Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -380,7 +380,7 @@ void GMWLSpectrum::read(const GFits& fits, const int& extno)
 
     // If we found no table then throw an exception
     if (extension == 0) {
-        throw GMWLException::file_open_error(G_READ, fits.filename(),
+        throw GMWLException::file_open_error(G_READ, fits.filename().filename(),
                                              "No table found in file.");
     }
 
