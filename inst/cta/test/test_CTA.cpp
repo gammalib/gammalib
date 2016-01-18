@@ -1300,10 +1300,6 @@ void TestGCTAObservation::test_unbinned_obs(void)
     // Set filenames
     const std::string file1 = "test_cta_obs_unbinned.xml";
     const std::string file2 = "test_cta_obs_unbinned_gti.xml";
-    /*
-    const std::string evfile = "test_cta_obs_unbinned.fits[TESTEVENTS]";
-    const std::string gtifile = "test_cta_obs_unbinned.fits[TESTGTI]";
-    */
 
     // Declare observations
     GObservations   obs;
@@ -1314,21 +1310,21 @@ void TestGCTAObservation::test_unbinned_obs(void)
     try {
         run.load(cta_events);
         run.response(cta_irf, GCaldb(cta_caldb));
-        test_value(run.roi().centre().dir().ra_deg(), 83.63, 1.0e-10);
-        test_value(run.roi().centre().dir().dec_deg(), 22.01, 1.0e-10);
-        test_value(run.roi().radius(), 5.0, 1.0e-10);
-        test_value(run.ebounds().emin().TeV(), 0.1, 1.0e-10);
-        test_value(run.ebounds().emax().TeV(), 100.0, 1.0e-10);
-        test_value(run.gti().tstart().convert(run.gti().reference()), 0.0, 1.0e-10);
-        test_value(run.gti().tstop().convert(run.gti().reference()), 1800.0, 1.0e-10);
-        test_value(run.ontime(), 1800.0, 1.0e-10);
-        test_value(run.livetime(), 1710.0, 1.0e-10);
-        test_value(run.deadc(), 0.95, 1.0e-10);
-        test_value(run.ra_obj(), 0.0, 1.0e-10);
-        test_value(run.dec_obj(), 0.0, 1.0e-10);
+        test_value(run.roi().centre().dir().ra_deg(), 83.63);
+        test_value(run.roi().centre().dir().dec_deg(), 22.01);
+        test_value(run.roi().radius(), 5.0);
+        test_value(run.ebounds().emin().TeV(), 0.1);
+        test_value(run.ebounds().emax().TeV(), 100.0);
+        test_value(run.gti().tstart().convert(run.gti().reference()), 0.0);
+        test_value(run.gti().tstop().convert(run.gti().reference()), 1800.0);
+        test_value(run.ontime(), 1800.0);
+        test_value(run.livetime(), 1710.0);
+        test_value(run.deadc(), 0.95);
+        test_value(run.ra_obj(), 0.0);
+        test_value(run.dec_obj(), 0.0);
         test_value(run.obs_id(), 0);
-        test_value(run.pointing().dir().ra_deg(), 83.63, 1.0e-10);
-        test_value(run.pointing().dir().dec_deg(), 22.01, 1.0e-10);
+        test_value(run.pointing().dir().ra_deg(), 83.63);
+        test_value(run.pointing().dir().dec_deg(), 22.01);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1340,21 +1336,21 @@ void TestGCTAObservation::test_unbinned_obs(void)
     try {
         run.load(cta_events_gti);
         run.response(cta_irf, GCaldb(cta_caldb));
-        test_value(run.roi().centre().dir().ra_deg(), 83.65, 1.0e-10);
-        test_value(run.roi().centre().dir().dec_deg(), 23.01, 1.0e-10);
-        test_value(run.roi().radius(), 4.0, 1.0e-10);
-        test_value(run.ebounds().emin().TeV(), 0.2, 1.0e-10);
-        test_value(run.ebounds().emax().TeV(), 120.0, 1.0e-10);
-        test_value(run.gti().tstart().convert(run.gti().reference()), 1.0, 1.0e-10);
-        test_value(run.gti().tstop().convert(run.gti().reference()), 2000.0, 1.0e-10);
-        test_value(run.ontime(), 1800.0, 1.0e-10);
-        test_value(run.livetime(), 1710.0, 1.0e-10);
-        test_value(run.deadc(), 0.95, 1.0e-10);
-        test_value(run.ra_obj(), 0.0, 1.0e-10);
-        test_value(run.dec_obj(), 0.0, 1.0e-10);
+        test_value(run.roi().centre().dir().ra_deg(), 83.65);
+        test_value(run.roi().centre().dir().dec_deg(), 23.01);
+        test_value(run.roi().radius(), 4.0);
+        test_value(run.ebounds().emin().TeV(), 0.2);
+        test_value(run.ebounds().emax().TeV(), 120.0);
+        test_value(run.gti().tstart().convert(run.gti().reference()), 1.0);
+        test_value(run.gti().tstop().convert(run.gti().reference()), 2000.0);
+        test_value(run.ontime(), 1800.0);
+        test_value(run.livetime(), 1710.0);
+        test_value(run.deadc(), 0.95);
+        test_value(run.ra_obj(), 0.0);
+        test_value(run.dec_obj(), 0.0);
         test_value(run.obs_id(), 0);
-        test_value(run.pointing().dir().ra_deg(), 83.63, 1.0e-10);
-        test_value(run.pointing().dir().dec_deg(), 22.01, 1.0e-10);
+        test_value(run.pointing().dir().ra_deg(), 83.63);
+        test_value(run.pointing().dir().dec_deg(), 22.01);
         test_try_success();
     }
     catch (std::exception &e) {
