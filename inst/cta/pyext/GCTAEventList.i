@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEventList.i - CTA event atom container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,7 +49,6 @@ public:
     virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual void           load(const std::string& filename);
-    virtual void           load_gti(const std::string& filename);
     virtual void           save(const std::string& filename,
                                 const bool& clobber = false) const;
     virtual void           read(const GFits& file);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.cpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 #include "GMath.hpp"
 #include "GFilename.hpp"
 #include "GFits.hpp"
+#include "GFitsBinTable.hpp"
 #include "GFitsTableBitCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
@@ -80,7 +81,7 @@ GCTAEventList::GCTAEventList(void) : GEventList()
  *
  * @param[in] filename Counts cube filename.
  *
- * Construct event list object by loading the events from a FITS file.
+ * Construct event list by loading the events from a FITS file.
  ***************************************************************************/
 GCTAEventList::GCTAEventList(const std::string& filename) : GEventList()
 {
@@ -166,6 +167,7 @@ GCTAEventList& GCTAEventList::operator=(const GCTAEventList& list)
  * @brief Event atom access operator
  *
  * @param[in] index Event index [0,...,size()-1].
+ * @return Pointer to event atom.
  *
  * @exception GException::out_of_range
  *            Event index outside valid range.
@@ -190,6 +192,7 @@ GCTAEventAtom* GCTAEventList::operator[](const int& index)
  * @brief Event atom access operator
  *
  * @param[in] index Event index [0,...,size()-1].
+ * @return Pointer to event atom.
  *
  * @exception GException::out_of_range
  *            Event index outside valid range.
@@ -251,13 +254,11 @@ GCTAEventList* GCTAEventList::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load events from event FITS file.
+ * @brief Load events from FITS file.
  *
- * @param[in] filename Name of FITS file from which events are loaded.
+ * @param[in] filename FITS file name.
  *
- * Load CTA events from the EVENTS extension EVENTS, read the region of
- * interest and the energy boundaries from the data selection keywords,
- * and read the Good Time Intervals from the GTI extension.
+ * Load events from FITS file. See the read() method for details.
  *
  * The method clears the object before loading, thus any events residing in
  * the object before loading will be lost.
@@ -282,30 +283,12 @@ void GCTAEventList::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Load GTIs FITS file.
+ * @brief Save events into FITS file.
  *
- * @param[in] filename Name of FITS file from which GTIs are loaded.
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing FITS file (default: false).
  *
- * Loads CTA GTIs from a separate file.
- ***************************************************************************/
-void GCTAEventList::load_gti(const std::string& filename)
-{
-
-    // Load gti from file
-    m_gti.load(filename);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Save CTA events into FITS file.
- *
- * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
- *
- * Write the CTA event list into FITS file.
+ * Save event list into FITS file. See the write() method for details.
  ***************************************************************************/
 void GCTAEventList::save(const std::string& filename,
                          const bool& clobber) const
@@ -325,24 +308,27 @@ void GCTAEventList::save(const std::string& filename,
 
 
 /***********************************************************************//**
- * @brief Read CTA events from FITS file.
+ * @brief Read events from FITS file.
  *
  * @param[in] fits FITS file.
  *
- * This method reads the CTA event list from a FITS file. The extension name
- * for the events is expected to be "EVENTS". The header of the HDU is
- * scanned for data selection keywords that define the energy boundaries and
- * the region of interest. So far, no scan is performed for time intervals.
+ * Reads the event list from a FITS file.
  *
- * If present, Good Time Intervals will be read from an extension names 
- * "GTI". If no "GTI" extension is present, a single Good Time Interval will
- * be assumed based on the TSTART and TSTOP keywords.
+ * The events will be loaded by default from the extension "EVENTS" unless
+ * an extension name is explicitly specified in the FITS file name. The
+ * FITS header of the extension will be scanned for data sub-space keywords
+ * to extract the energy boundaries, the region of interest, as well as the
+ * extension name for the Good Time Intervals. If no extension name for
+ * Good Time Intervals is found it is expected that the Good Time Intervals
+ * reside in the "GTI" extension.
+ *
+ * If a Good Time Intervals is found in the same FITS file, the Good Time
+ * Intervals will be loaded. Otherwise, a single Good Time Interval will
+ * be assumed based on the "TSTART" and "TSTOP" keywords found in the header
+ * of the event list.
  *
  * The method clears the object before reading, thus any information residing
  * in the event list prior to reading will be lost.
- *
- * @todo Ultimately, any events file should have a GTI extension, hence the
- *       extraction of GTIs from TSTART and TSTOP should not be necessary.
  ***************************************************************************/
 void GCTAEventList::read(const GFits& fits)
 {
@@ -358,19 +344,27 @@ void GCTAEventList::read(const GFits& fits)
     // Get event list HDU
     const GFitsTable& events = *fits.table(extname);
 
-    // If we have a GTI extension, then read Good Time Intervals from that
-    // extension
-    if (fits.contains("GTI")) {
-        const GFitsTable& gti = *fits.table("GTI");
-        m_has_gti_ext = true;
+    // Load event data
+    read_events(events);
+
+    // Read GTI extension name from data sub-space keyword
+    std::string gti_extname = gammalib::read_ds_gti_extname(events);
+
+    // If no GTI extension name was found then
+    if (gti_extname.empty()) {
+        gti_extname = "GTI";
+    }
+
+    // If GTI extension is present in FITS file then read Good Time Intervals
+    // from that extension
+    if (fits.contains(gti_extname)) {
+        const GFitsTable& gti = *fits.table(gti_extname);
+        m_gti_extname         = gti_extname;
         m_gti.read(gti);
     }
 
     // ... otherwise build GTI from TSTART and TSTOP
     else {
-
-        // Set flag that GTIs are not available
-        m_has_gti_ext = false;
 
         // Read start and stop time
         double tstart = events.real("TSTART");
@@ -379,25 +373,23 @@ void GCTAEventList::read(const GFits& fits)
         // Create time reference from header information
         GTimeReference timeref(events);
 
+        // Set GTI time reference
+        m_gti.reference(timeref);
+
         // Set start and stop time
-        GTime start(tstart);
-        GTime stop(tstop);
+        GTime start(tstart, m_gti.reference());
+        GTime stop(tstop, m_gti.reference());
 
         // Append start and stop time as single time interval to GTI
         m_gti.append(start, stop);
 
-        // Set GTI time reference
-        m_gti.reference(timeref);
 
     } // endelse: GTI built from TSTART and TSTOP
 
-    // Load event data
-    read_events(events);
-
-    // Read region of interest from data selection keyword
+    // Read region of interest from data sub-space keyword
     m_roi = gammalib::read_ds_roi(events);
 
-    // Read energy boundaries from data selection keyword
+    // Read energy boundaries from data sub-space keyword
     m_ebounds = gammalib::read_ds_ebounds(events);
 
     // Return
@@ -411,9 +403,6 @@ void GCTAEventList::read(const GFits& fits)
  * @param[in] file FITS file.
  *
  * Write the CTA event list into FITS file.
- *
- * @todo The TELMASK column is allocated with a dummy length of 100.
- * @todo Implement agreed column format
  ***************************************************************************/
 void GCTAEventList::write(GFits& file) const
 {
@@ -432,9 +421,9 @@ void GCTAEventList::write(GFits& file) const
     // Free binary table
     delete events;
 
-    // Write GTI extension if present on loading
-    if (m_has_gti_ext) {
-        gti().write(file);
+    // Write GTI extension if we have an extension name
+    if (!m_gti_extname.empty()) {
+        gti().write(file, m_gti_extname);
     }
 
     // Return
@@ -604,9 +593,9 @@ void GCTAEventList::init_members(void)
     m_roi.clear();
     m_events.clear();
     m_columns.clear();
-    m_has_phase = false;
-    m_has_detxy = true;
-    m_has_gti_ext = true;
+    m_gti_extname = "GTI"; //!< Default GTI extension name
+    m_has_phase   = false;
+    m_has_detxy   = true;
 
     // Initialise cache
     m_irf_names.clear();
@@ -625,11 +614,11 @@ void GCTAEventList::init_members(void)
 void GCTAEventList::copy_members(const GCTAEventList& list)
 {
     // Copy members
-    m_roi       = list.m_roi;
-    m_events    = list.m_events;
-    m_has_phase = list.m_has_phase;
-    m_has_detxy = list.m_has_detxy;
-    m_has_gti_ext = list.m_has_gti_ext;
+    m_roi         = list.m_roi;
+    m_events      = list.m_events;
+    m_gti_extname = list.m_gti_extname;
+    m_has_phase   = list.m_has_phase;
+    m_has_detxy   = list.m_has_detxy;
 
     // Copy cache
     m_irf_names  = list.m_irf_names;

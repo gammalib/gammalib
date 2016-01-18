@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.hpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,9 +33,11 @@
 #include "GEventList.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTARoi.hpp"
-#include "GFitsHDU.hpp"
-#include "GFitsTable.hpp"
-#include "GFitsBinTable.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFitsHDU;
+class GFitsTable;
+class GFitsBinTable;
 
 
 /***********************************************************************//**
@@ -65,7 +67,6 @@ public:
     virtual std::string    classname(void) const;
     virtual int            size(void) const;
     virtual void           load(const std::string& filename);
-    virtual void           load_gti(const std::string& filename);
     virtual void           save(const std::string& filename,
                                 const bool& clobber = false) const;
     virtual void           read(const GFits& file);
@@ -96,12 +97,12 @@ protected:
     int          irf_cache_index(const std::string& name) const;
 
     // Protected members
-    GCTARoi                     m_roi;       //!< Region of interest
-    std::vector<GCTAEventAtom>  m_events;    //!< Events
-    std::vector<GFitsTableCol*> m_columns;   //!< Pointers to optional columns
-    bool                        m_has_phase; //!< Signal presence of phase
-    bool                        m_has_detxy; //!< Signal presence of detector coordinates
-    bool                        m_has_gti_ext; //!< Signals if a GTI extension was present on loading
+    GCTARoi                     m_roi;         //!< Region of interest
+    std::vector<GCTAEventAtom>  m_events;      //!< Events
+    std::vector<GFitsTableCol*> m_columns;     //!< Pointers to optional columns
+    std::string                 m_gti_extname; //!< GTI extension name
+    bool                        m_has_phase;   //!< Signal presence of phase
+    bool                        m_has_detxy;   //!< Signal presence of detector coordinates
 
     // IRF cache for diffuse models
     mutable std::vector<std::string>          m_irf_names;  //!< Model names
