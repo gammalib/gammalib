@@ -322,6 +322,15 @@ std::string GFilename::print(const GChatter& chatter) const
             result.append("Not provided");
         }
 
+        // Append expression
+        result.append("\n"+gammalib::parformat("Selection expression"));
+        if (has_expression()) {
+            result.append(m_expression);
+        }
+        else {
+            result.append("Not provided");
+        }
+
     } // endif: chatter was not silent
 
     // Return result
@@ -345,6 +354,7 @@ void GFilename::init_members(void)
     m_extname.clear();
     m_extno  = -1;
     m_extver = 0;
+    m_expression.clear();
 
     // Return
     return;
@@ -363,6 +373,7 @@ void GFilename::copy_members(const GFilename& filename)
     m_extname  = filename.m_extname;
     m_extno    = filename.m_extno;
     m_extver   = filename.m_extver;
+    m_expression = filename.m_expression;
 
     // Return
     return;
@@ -424,12 +435,18 @@ void GFilename::set_filename(const std::string& filename)
                 throw GException::invalid_argument(G_SET_FILENAME, msg);
             }
 
-            // If ] is not the last character then throw an exception
+            // If ] is not the last character then check if an opening bracket is next
             if (stop < fname.length()-1) {
-                std::string msg = "Characters beyond ] symbol in filename \""+
-                                  fname+"\". Please correct the filename.";
-                throw GException::invalid_argument(G_SET_FILENAME, msg);
-            }
+
+                std::string character = gammalib::strip_whitespace(fname.substr(stop+1,1));
+
+                // If no bracket is coming, throw an exception
+                if (character != "[") {
+                    std::string msg = "Non-bracket character \""+character+"\" beyond ] symbol in filename \""+
+                            fname+"\" expression. Please correct the filename.";
+                    throw GException::invalid_argument(G_SET_FILENAME, msg);
+                }
+             }
 
             // Extract extension name
             std::string extname = gammalib::strip_whitespace(fname.substr(start+1, stop-start-1));
@@ -513,6 +530,33 @@ void GFilename::set_filename(const std::string& filename)
 
             // Store the file name
             m_filename = gammalib::strip_whitespace(fname.substr(0,start));
+
+            // Check if there is an expression behind the extension name
+            size_t expr_start = fname.find_first_of("[", stop+1);
+
+            if (expr_start != std::string::npos) {
+
+               // Check for ] symbol in expression
+               size_t expr_stop = fname.find_first_of("]", expr_start);
+
+               // If there is no ] symbol then throw an exception
+               if (expr_stop == std::string::npos) {
+                   std::string msg = "Missing ] symbol in filename \""+
+                                     fname+"\" expression. Please correct the "
+                                     "filename.";
+                   throw GException::invalid_argument(G_SET_FILENAME, msg);
+               }
+
+               // If ] is not the last character then throw an exception
+               if (expr_stop < fname.length()-1) {
+                   std::string msg = "Characters beyond ] symbol in filename \""+
+                           fname+"\" expression. Please correct the filename.";
+                   throw GException::invalid_argument(G_SET_FILENAME, msg);
+                }
+
+               // Store expression
+               m_expression = gammalib::strip_whitespace(fname.substr(expr_start+1, expr_stop - expr_start-1));
+            }
 
         } // endif: had extension
 

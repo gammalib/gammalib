@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAObservation.hpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,7 +82,7 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
@@ -95,7 +95,8 @@ public:
     bool                has_response(void) const;
     bool                has_events(void) const;
     void                read(const GFits& fits);
-    void                write(GFits& fits) const;
+    void                write(GFits& fits,
+                              const std::string& extname = "EVENTS") const;
     void                load(const std::string& filename);
     void                load(const std::string& cntcube,
                              const std::string& expcube,
@@ -103,6 +104,11 @@ public:
                              const std::string& bkgcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
+    /*
+    void                load_gti(const std::string& filename);
+    void                save_gti(const std::string& filename,
+                                 const bool& clobber = false) const;
+    */
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
     void                response(const GCTACubeExposure&   expcube,
@@ -126,6 +132,10 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    /*
+    void                gtifile(const std::string& filename);
+    const std::string&  gtifile(void) const;
+    */
     const std::string&  eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
@@ -145,6 +155,7 @@ protected:
     // Protected members
     std::string   m_instrument;    //!< Instrument name
     std::string   m_eventfile;     //!< Event filename
+    //std::string   m_gtifile;       //!< GTI filename
     std::string   m_eventtype;     //!< Event type (for XML file)
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;      //!< Pointing direction
@@ -197,7 +208,7 @@ std::string GCTAObservation::instrument(void) const
 inline
 double GCTAObservation::ontime(void) const
 {
-    return m_ontime;
+    return (m_ontime);
 }
 
 
@@ -209,23 +220,27 @@ double GCTAObservation::ontime(void) const
 inline
 double GCTAObservation::livetime(void) const
 {
-    return m_livetime;
+    return (m_livetime);
 }
 
 
 /***********************************************************************//**
  * @brief Return deadtime correction factor
  *
- * @param[in] time Time.
+ * @param[in] time Time (default: GTime()).
  * @return Deadtime correction factor.
  *
- * Returns the deadtime correction factor as function of time. The deadtime
- * correction factor is defined by the livetime divided by the ontime.
+ * Returns the deadtime correction factor. Optionally, this method takes a
+ * @p time argument that takes provision for returning the deadtime
+ * correction factor as function of time.
+ *
+ * The deadtime correction factor is defined as the livetime divided by the
+ * ontime.
  ***************************************************************************/
 inline
 double GCTAObservation::deadc(const GTime& time) const
 {
-    return m_deadc;
+    return (m_deadc);
 }
 
 
@@ -440,6 +455,35 @@ const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
 }
+
+
+/***********************************************************************//**
+ * @brief Set GTI file name
+ *
+ * @param[in] filename GTI file name.
+ ***************************************************************************/
+/*
+inline
+void GCTAObservation::gtifile(const std::string& filename)
+{
+    m_gtifile = filename;
+    return;
+}
+*/
+
+
+/***********************************************************************//**
+ * @brief Return GTI file name
+ *
+ * @return GTI file name.
+ ***************************************************************************/
+/*
+inline
+const std::string& GCTAObservation::gtifile(void) const
+{
+    return m_gtifile;
+}
+*/
 
 
 /***********************************************************************//**

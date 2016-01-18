@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAObservation.i - CTA Observation class interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,7 +55,7 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 
@@ -67,7 +67,7 @@ public:
     bool                has_response(void) const;
     bool                has_events(void) const;
     void                read(const GFits& fits);
-    void                write(GFits& fits) const;
+    void                write(GFits& fits, const std::string& extname = "EVENTS") const;
     void                load(const std::string& filename);
     void                load(const std::string& cntcube,
                              const std::string& expcube,
@@ -75,6 +75,11 @@ public:
                              const std::string& bkgcube);
     void                save(const std::string& filename,
                              const bool& clobber = false) const;
+    /*
+    void                load_gti(const std::string& filename);
+    void                save_gti(const std::string& filename,
+                                 const bool& clobber = false) const;
+    */
     void                response(const std::string& rspname,
                                  const GCaldb& caldb);
     void                response(const GCTACubeExposure& expcube,
@@ -98,6 +103,10 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
+    /*
+    void                gtifile(const std::string& filename);
+    const std::string&  gtifile(void) const;
+    */
     const std::string&  eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.cpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,6 +42,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_DS_ROI                      "gammalib::read_ds_roi(GFitsHDU&)"
 #define G_READ_DS_EBOUNDS              "gammalib::read_ds_ebounds(GFitsHDU&)"
+#define G_READ_DS_GTI         "GGti gammalib::read_ds_gti_extname(GFitsHDU&)"
 
 /* __ Coding definitions _________________________________________________ */
 
@@ -128,18 +129,18 @@ double gammalib::cta_roi_arclength(const double& rad,     const double& dist,
 
 
 /***********************************************************************//**
- * @brief Extract ROI from data selection keywords
+ * @brief Extract ROI from data sub-space keywords
  *
  * @param[in] hdu FITS HDU
  *
  * @exception GException::invalid_value
- *            Invalid ROI data selection encountered
+ *            Invalid ROI data sub-space encountered
  *
- * Reads the ROI data selection keywords by searching for a DSTYPx keyword
- * named "POS(RA,DEC)". The data selection information is expected to be
- * in the format "CIRCLE(267.0208,-24.78,4.5)", where the 3 arguments are
- * Right Ascension, Declination and radius in units of degrees. No detailed
- * syntax checking is performed.
+ * Reads the ROI data sub-space keywords by searching for a DSTYPx keyword
+ * named "POS(RA,DEC)". The data sub-space information is expected to be in
+ * the format "CIRCLE(267.0208,-24.78,4.5)", where the 3 arguments are Right
+ * Ascension, Declination and radius in units of degrees. No detailed syntax
+ * checking is performed.
  *
  * If no ROI information has been found, an GCTARoi object with initial
  * values will be returned. 
@@ -149,14 +150,14 @@ GCTARoi gammalib::read_ds_roi(const GFitsHDU& hdu)
     // Initialise ROI
     GCTARoi roi;
 
-    // Get number of data selection keywords (default to 0 if keyword is
+    // Get number of data sub-space keywords (default to 0 if keyword is
     // not found)
     int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
 
     // Loop over all data selection keys
     for (int i = 1; i <= ndskeys; ++i) {
 
-        // Set data selection key strings
+        // Set data sub-space key strings
         std::string type_key  = "DSTYP"+gammalib::str(i);
         //std::string unit_key  = "DSUNI"+gammalib::str(i);
         std::string value_key = "DSVAL"+gammalib::str(i);
@@ -181,14 +182,14 @@ GCTARoi gammalib::read_ds_roi(const GFitsHDU& hdu)
             }
             else {
                 std::string msg = "Invalid acceptance cone value \""+value+
-                                  "\" encountered in data selection key \""+
-                                  value_key+"\"";
+                                  "\" encountered in data sub-space "
+                                  "key \""+value_key+"\".";
                 throw GException::invalid_value(G_READ_DS_ROI, msg);
             }
 
         } // endif: POS(RA,DEC) type found
 
-    } // endfor: looped over data selection keys
+    } // endfor: looped over data sub-space keys
 
     // Return roi
     return roi;
@@ -196,15 +197,15 @@ GCTARoi gammalib::read_ds_roi(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
- * @brief Read energy boundary data selection keywords
+ * @brief Read energy boundary data sub-space keywords
  *
  * @param[in] hdu FITS HDU
  *
  * @exception GException::invalid_value
- *            Invalid energy data selection encountered
+ *            Invalid energy data sub-space encountered
  *
- * Reads the energy boundary data selection keywords by searching for a 
- * DSTYPx keyword named "ENERGY". The data selection information is expected
+ * Reads the energy boundary data sub-space keywords by searching for a 
+ * DSTYPx keyword named "ENERGY". The data sub-space information is expected
  * to be in the format "200:50000", where the 2 arguments are the minimum
  * and maximum energy. The energy unit is given by the keyword DSUNIx, which
  * supports keV, MeV, GeV and TeV (case independent). No detailed syntax
@@ -215,14 +216,14 @@ GEbounds gammalib::read_ds_ebounds(const GFitsHDU& hdu)
     // Initialise energy boundaries
     GEbounds ebounds;
 
-    // Get number of data selection keywords (default to 0 if keyword is
+    // Get number of data sub-space keywords (default to 0 if keyword is
     // not found)
     int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
 
-    // Loop over all data selection keys
+    // Loop over all data sub-space keys
     for (int i = 1; i <= ndskeys; ++i) {
 
-        // Set data selection key strings
+        // Set data sub-space key strings
         std::string type_key  = "DSTYP"+gammalib::str(i);
         std::string unit_key  = "DSUNI"+gammalib::str(i);
         std::string value_key = "DSVAL"+gammalib::str(i);
@@ -254,4 +255,77 @@ GEbounds gammalib::read_ds_ebounds(const GFitsHDU& hdu)
 
     // Return
     return ebounds;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Good Time Intervals extension name from data sub-space keywords
+ *
+ * @param[in] hdu FITS HDU
+ * @return Good Time Interval extension name
+ *
+ * @exception GException::invalid_value
+ *            Invalid Good Time Intervals data sub-space encountered
+ *
+ * Returns the name of the FITS extension that contains the Good Time
+ * Intervals by screening the data sub-space keywords that are present in
+ * the FITS header. The method searches for a DSTYPx keyword named "TIME"
+ * and a corresponding DSVALx keyword named "TABLE", and the extension name
+ * is extracted from the corresponding DSREFx keyword. Note that by
+ * convention the extension name is preceeded by a colon, which is stripped
+ * by this method.
+ ***************************************************************************/
+std::string gammalib::read_ds_gti_extname(const GFitsHDU& hdu)
+{
+    // Initialise extension name
+    std::string extname;
+
+    // Get number of data sub-space keys (default to 0 if "NDSKEYS" keyword
+    // is not found)
+    int ndskeys = (hdu.has_card("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
+
+    // Loop over all data sub-space keys
+    for (int i = 1; i <= ndskeys; ++i) {
+
+        // Set data sub-space key strings
+        std::string type_key  = "DSTYP"+gammalib::str(i);
+        std::string unit_key  = "DSUNI"+gammalib::str(i);
+        std::string value_key = "DSVAL"+gammalib::str(i);
+        std::string ref_key   = "DSREF"+gammalib::str(i);
+
+        // Skip if DSTYPi keyword does not exist, or if it is not "TIME"
+        if (!hdu.has_card(type_key) || hdu.string(type_key) != "TIME") {
+            continue;
+        }
+
+        // If DSVALi keyword does not exist or if it's value is not
+        // "TABLE" then throw an exception
+        if (!hdu.has_card(value_key)) {
+            std::string msg = "Keyword \""+value_key+"\" missing for data "
+                              "sub-space selection of type "+type_key+
+                              "=\"TIME\". Please correct FITS header.";
+            throw GException::invalid_value(G_READ_DS_GTI, msg);
+        }
+        if (hdu.string(value_key) != "TABLE") {
+            std::string msg = "Cannot interpret keyword \""+value_key+"\" "
+                              "value \""+hdu.string(value_key)+"\". Only "
+                              "the value \"TABLE\" is supported.";
+            throw GException::invalid_value(G_READ_DS_GTI, msg);
+        }
+
+        // If DSREFi keyword does not exist then throw an exception
+        if (!hdu.has_card(ref_key)) {
+            std::string msg = "Keyword \""+ref_key+"\" missing for data "
+                              "sub-space selection of type "+type_key+
+                              "=\"TIME\". Please correct FITS header.";
+            throw GException::invalid_value(G_READ_DS_GTI, msg);
+        }
+
+        // Get extension name (strip any leading and trailing colons)
+        extname = gammalib::strip_whitespace(gammalib::strip_chars(hdu.string(ref_key), ":"));
+
+    } // endfor: looped over data sub-space keywords
+
+    // Return
+    return extname;
 }

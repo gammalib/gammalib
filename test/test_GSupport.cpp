@@ -698,6 +698,18 @@ void TestGSupport::test_filename(void)
     test_assert(filename.has_extver(),
                 "Expected that extension version is set.");
 
+    // Set filename with extension name and expression
+    filename = "myfile.fits[EVENTS][ENERGY>0.1]";
+    test_assert(filename.filename() == "myfile.fits",
+                "Expected \"myfile.fits\" filename, "
+                "found \""+filename.filename()+"\"");
+    test_assert(filename.extname() == "EVENTS",
+                 "Expected \"EVENTS\" extension name, "
+                 "found \""+filename.extname()+"\"");
+    test_assert(filename.expression() == "ENERGY>0.1",
+                 "Expected \"EVENTS>0.1\" expression, "
+                  "found \""+filename.expression()+"\"");
+
     // Test missing closing symbol
     test_try("Missing ] symbol");
     try {
@@ -712,6 +724,16 @@ void TestGSupport::test_filename(void)
     test_try("Character after ] symbol");
     try {
         GFilename filename("myfile.fits[EVENTS]a");
+        test_try_failure();
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+
+    // Test character after closing symbol
+    test_try("Character after ] symbol after expression");
+    try {
+        GFilename filename("myfile.fits[EVENTS][ENERGY>0.1]a");
         test_try_failure();
     }
     catch (GException::invalid_argument &e) {

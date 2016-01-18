@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTASupport.hpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,6 +28,7 @@
 #define GCTASUPPORT_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -40,11 +41,12 @@ class GEbounds;
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
-    double   cta_roi_arclength(const double& rad,     const double& dist,
-                               const double& cosdist, const double& sindist,
-                               const double& roi,     const double& cosroi);
-    GCTARoi  read_ds_roi(const GFitsHDU& hdu);
-    GEbounds read_ds_ebounds(const GFitsHDU& hdu);
+    double      cta_roi_arclength(const double& rad,     const double& dist,
+                                  const double& cosdist, const double& sindist,
+                                  const double& roi,     const double& cosroi);
+    GCTARoi     read_ds_roi(const GFitsHDU& hdu);
+    GEbounds    read_ds_ebounds(const GFitsHDU& hdu);
+    std::string read_ds_gti_extname(const GFitsHDU& hdu);
 }
 
 #endif /* GCTASUPPORT_HPP */
