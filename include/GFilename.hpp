@@ -61,11 +61,13 @@ public:
     int                length(void) const;
     const std::string& filename(void) const;
     std::string        extname(const std::string& defaultname = "") const;
+    const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;
     int                extver(const int& defaultver = 0) const;
     bool               has_extname(void) const;
     bool               has_extno(void) const;
     bool               has_extver(void) const;
+    bool               has_expression(void) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -80,6 +82,7 @@ protected:
     std::string m_extname;   //!< Extension name ("": not set)
     int         m_extno;     //!< Extension number  (-1: not set)
     int         m_extver;    //!< Extension version (0: not set)
+    std::string m_expression; //!< Selection expression ("": not set)
 };
 
 
@@ -146,6 +149,18 @@ const std::string& GFilename::filename(void) const
 
 
 /***********************************************************************//**
+ * @brief Return expression name
+ *
+ * @return String containing file expression.
+ ***************************************************************************/
+inline
+const std::string& GFilename::expression(void) const
+{
+    return (m_expression);
+}
+
+
+/***********************************************************************//**
  * @brief Signal if filename has an extension name
  *
  * @return True if filename has an extension name, false otherwise.
@@ -178,6 +193,18 @@ inline
 bool GFilename::has_extver(void) const
 {
     return (m_extver > 0);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if filename has an expression
+ *
+ * @return True if filename has an expression, false otherwise.
+ ***************************************************************************/
+inline
+bool GFilename::has_expression(void) const
+{
+    return (!m_expression.empty());
 }
 
 #endif /* GFILENAME_HPP */

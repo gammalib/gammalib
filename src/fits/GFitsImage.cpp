@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsImage.cpp - Abstract FITS image base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -773,6 +773,12 @@ void GFitsImage::save_image(int datatype, const void* pixels)
         if (status != 0) {
             throw GException::fits_error(G_SAVE_IMAGE, status);
         }
+    }
+
+    // Make sure that the image on disk has the right size by resizing it
+    status = __ffrsim(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
+    if (status != 0) {
+        throw GException::fits_error(G_SAVE_IMAGE, status);
     }
 
     // Save the image pixels (if there are some ...)

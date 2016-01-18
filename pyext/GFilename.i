@@ -53,11 +53,13 @@ public:
     int                length(void) const;
     const std::string& filename(void) const;
     std::string        extname(const std::string& defaultname = "") const;
+    const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;
     int                extver(const int& defaultver = 0) const;
     bool               has_extname(void) const;
     bool               has_extno(void) const;
     bool               has_extver(void) const;
+    bool               has_expression(void) const;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GGti.i - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,7 +65,7 @@ public:
     void                  save(const std::string& filename,
                                const bool& clobber = false) const;
     void                  read(const GFitsTable& table);
-    void                  write(GFits& file,
+    void                  write(GFits& fits,
                                 const std::string& extname = "GTI") const;
     void                  read(const GXmlElement& xml);
     void                  write(GXmlElement& xml) const;

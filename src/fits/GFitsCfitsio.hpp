@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsCfitsio.hpp  - CFITSIO interface header              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -91,6 +91,7 @@
 #define __ffphis(A, B, C) ffphis(A, B, C)
 #define __ffpss(A, B, C, D, E, F) ffpss(A, B, C, D, E, F)
 #define __ffprec(A, B, C) ffprec(A, B, C)
+#define __ffrsim(A, B, C, D, E) ffrsim(A, B, C, D, E)
 #define __ffsrow(A, B, C, D) ffsrow(A, B, C, D)
 #define __ffthdu(A, B, C) ffthdu(A, B, C)
 #define __ffuky(A, B, C, D, E, F) ffuky(A, B, C, D, E, F)
@@ -168,6 +169,7 @@ typedef fitsfile __fitsfile;
 #define __ffphis(A, B, C) __dummy()
 #define __ffpss(A, B, C, D, E, F) __dummy()
 #define __ffprec(A, B, C) __dummy()
+#define __ffrsim(A, B, C, D, E) __dummy()
 #define __ffsrow(A, B, C, D) __dummy()
 #define __ffthdu(A, B, C) __dummy()
 #define __ffuky(A, B, C, D, E, F) __dummy()

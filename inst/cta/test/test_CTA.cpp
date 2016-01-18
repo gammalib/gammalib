@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,8 +49,9 @@
 const std::string datadir          = PACKAGE_SOURCE"/inst/cta/test/data";
 const std::string cta_caldb        = PACKAGE_SOURCE"/inst/cta/caldb";
 const std::string cta_irf          = "cta_dummy_irf";
-const std::string cta_events       = datadir+"/crab_events.fits.gz";
-const std::string cta_cntmap       = datadir+"/crab_cntmap.fits.gz";
+const std::string cta_events       = datadir+"/crab_events.fits";
+const std::string cta_events_gti   = datadir+"/crab_events_gti.fits[EVENTS2]";
+const std::string cta_cntmap       = datadir+"/crab_cntmap.fits";
 const std::string cta_cube_xml     = datadir+"/obs_cube.xml";
 const std::string cta_bin_xml      = datadir+"/obs_binned.xml";
 const std::string cta_unbin_xml    = datadir+"/obs_unbinned.xml";
@@ -66,7 +67,7 @@ const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf
 const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
 const std::string cta_bkgcube      = datadir+"/bkgcube.fits";
 const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
-const std::string cta_point_table  = datadir+"/crab_pointing.fits.gz";
+const std::string cta_point_table  = datadir+"/crab_pointing.fits";
 
 
 /***********************************************************************//**
@@ -1298,6 +1299,7 @@ void TestGCTAObservation::test_unbinned_obs(void)
 {
     // Set filenames
     const std::string file1 = "test_cta_obs_unbinned.xml";
+    const std::string file2 = "test_cta_obs_unbinned_gti.xml";
 
     // Declare observations
     GObservations   obs;
@@ -1308,6 +1310,47 @@ void TestGCTAObservation::test_unbinned_obs(void)
     try {
         run.load(cta_events);
         run.response(cta_irf, GCaldb(cta_caldb));
+        test_value(run.roi().centre().dir().ra_deg(), 83.63);
+        test_value(run.roi().centre().dir().dec_deg(), 22.01);
+        test_value(run.roi().radius(), 5.0);
+        test_value(run.ebounds().emin().TeV(), 0.1);
+        test_value(run.ebounds().emax().TeV(), 100.0);
+        test_value(run.gti().tstart().convert(run.gti().reference()), 0.0);
+        test_value(run.gti().tstop().convert(run.gti().reference()), 1800.0);
+        test_value(run.ontime(), 1800.0);
+        test_value(run.livetime(), 1710.0);
+        test_value(run.deadc(), 0.95);
+        test_value(run.ra_obj(), 0.0);
+        test_value(run.dec_obj(), 0.0);
+        test_value(run.obs_id(), 0);
+        test_value(run.pointing().dir().ra_deg(), 83.63);
+        test_value(run.pointing().dir().dec_deg(), 22.01);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Load unbinned CTA observation with non-default extension names
+    test_try("Load unbinned CTA observation with non-default extension names");
+    try {
+        run.load(cta_events_gti);
+        run.response(cta_irf, GCaldb(cta_caldb));
+        test_value(run.roi().centre().dir().ra_deg(), 83.65);
+        test_value(run.roi().centre().dir().dec_deg(), 23.01);
+        test_value(run.roi().radius(), 4.0);
+        test_value(run.ebounds().emin().TeV(), 0.2);
+        test_value(run.ebounds().emax().TeV(), 120.0);
+        test_value(run.gti().tstart().convert(run.gti().reference()), 1.0);
+        test_value(run.gti().tstop().convert(run.gti().reference()), 2000.0);
+        test_value(run.ontime(), 1800.0);
+        test_value(run.livetime(), 1710.0);
+        test_value(run.deadc(), 0.95);
+        test_value(run.ra_obj(), 0.0);
+        test_value(run.dec_obj(), 0.0);
+        test_value(run.obs_id(), 0);
+        test_value(run.pointing().dir().ra_deg(), 83.63);
+        test_value(run.pointing().dir().dec_deg(), 22.01);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1340,6 +1383,22 @@ void TestGCTAObservation::test_unbinned_obs(void)
     try {
         obs = GObservations(cta_unbin_xml);
         obs.save(file1);
+        GCTAObservation* run = dynamic_cast<GCTAObservation*>(obs[0]);
+        test_value(run->roi().centre().dir().ra_deg(), 83.63);
+        test_value(run->roi().centre().dir().dec_deg(), 22.01);
+        test_value(run->roi().radius(), 5.0);
+        test_value(run->ebounds().emin().TeV(), 0.1);
+        test_value(run->ebounds().emax().TeV(), 100.0);
+        test_value(run->gti().tstart().convert(run->gti().reference()), 0.0);
+        test_value(run->gti().tstop().convert(run->gti().reference()), 1800.0);
+        test_value(run->ontime(), 1800.0);
+        test_value(run->livetime(), 1710.0);
+        test_value(run->deadc(), 0.95);
+        test_value(run->ra_obj(), 0.0);
+        test_value(run->dec_obj(), 0.0);
+        test_value(run->obs_id(), 0);
+        test_value(run->pointing().dir().ra_deg(), 83.63);
+        test_value(run->pointing().dir().dec_deg(), 22.01);
         test_try_success();
     }
     catch (std::exception &e) {
