@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -276,45 +276,45 @@ void TestGObservation::test_gti(void)
     GGti gti;
     test_value(gti.size(), 0, "GGti should have zero size.");
     test_assert(gti.is_empty(), "GGti should be empty.");
-    test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
-    test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
+    test_value(gti.tstart().secs(), 0.0, 1.0e-7, "Start time should be 0.");
+    test_value(gti.tstop().secs(), 0.0, 1.0e-7, "Stop time should be 0.");
 
     // Add empty interval
     gti.append(GTime(1.0), GTime(1.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 1.0, 1.0e-10, "Stop time should be 1.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1.0, 1.0e-7, "Stop time should be 1.");
 
     // Add one interval
     gti.append(GTime(1.0), GTime(10.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 10.0, 1.0e-10, "Stop time should be 10.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 10.0, 1.0e-7, "Stop time should be 10.");
 
     // Remove interval
     gti.remove(0);
     gti.remove(0);
     test_value(gti.size(), 0, "GGti should have zero size.");
     test_assert(gti.is_empty(), "GGti should be empty.");
-    test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
-    test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
+    test_value(gti.tstart().secs(), 0.0, 1.0e-7, "Start time should be 0.");
+    test_value(gti.tstop().secs(), 0.0, 1.0e-7, "Stop time should be 0.");
 
     // Append two overlapping intervals
     gti.append(GTime(1.0), GTime(100.0));
     gti.append(GTime(10.0), GTime(1000.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Clear object
     gti.clear();
     test_value(gti.size(), 0, "GGti should have zero size.");
     test_assert(gti.is_empty(), "GGti should be empty.");
-    test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");
-    test_value(gti.tstop().secs(), 0.0, 1.0e-10, "Stop time should be 0.");
+    test_value(gti.tstart().secs(), 0.0, 1.0e-7, "Start time should be 0.");
+    test_value(gti.tstop().secs(), 0.0, 1.0e-7, "Stop time should be 0.");
 
     // Append two overlapping intervals in inverse order
     gti.clear();
@@ -322,8 +322,8 @@ void TestGObservation::test_gti(void)
     gti.append(GTime(1.0), GTime(100.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Insert two overlapping intervals
     gti.clear();
@@ -340,8 +340,8 @@ void TestGObservation::test_gti(void)
     gti.insert(GTime(1.0), GTime(100.0));
     test_value(gti.size(), 2, "GGti should have 2 intervals.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Merge two overlapping intervals
     gti.clear();
@@ -349,8 +349,8 @@ void TestGObservation::test_gti(void)
     gti.merge(GTime(10.0), GTime(1000.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Merge two overlapping intervals in inverse order
     gti.clear();
@@ -358,8 +358,8 @@ void TestGObservation::test_gti(void)
     gti.merge(GTime(1.0), GTime(100.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Check extension
     gti.clear();
@@ -370,40 +370,40 @@ void TestGObservation::test_gti(void)
     gti.extend(ext);
     test_value(gti.size(), 3, "GGti should have 3 intervals.");
     test_assert(!gti.is_empty(), "GGti should not be empty.");
-    test_value(gti.tstart(0).secs(), 1.0, 1.0e-10, "Bin 0 start time should be 1.");
-    test_value(gti.tstart(1).secs(), 10.0, 1.0e-10, "Bin 1 start time should be 10.");
-    test_value(gti.tstart(2).secs(), 100.0, 1.0e-10, "Bin 2 start time should be 100.");
-    test_value(gti.tstop(0).secs(), 10.0, 1.0e-10, "Bin 0 stop time should be 10.");
-    test_value(gti.tstop(1).secs(), 100.0, 1.0e-10, "Bin 1 stop time should be 100.");
-    test_value(gti.tstop(2).secs(), 1000.0, 1.0e-10, "Bin 2 stop time should be 1000.");
-    test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(gti.tstart(0).secs(), 1.0, 1.0e-7, "Bin 0 start time should be 1.");
+    test_value(gti.tstart(1).secs(), 10.0, 1.0e-7, "Bin 1 start time should be 10.");
+    test_value(gti.tstart(2).secs(), 100.0, 1.0e-7, "Bin 2 start time should be 100.");
+    test_value(gti.tstop(0).secs(), 10.0, 1.0e-7, "Bin 0 stop time should be 10.");
+    test_value(gti.tstop(1).secs(), 100.0, 1.0e-7, "Bin 1 stop time should be 100.");
+    test_value(gti.tstop(2).secs(), 1000.0, 1.0e-7, "Bin 2 stop time should be 1000.");
+    test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Check saving in and loading from FITS file
     gti.save("test_gti1.fits", true);
     GGti test1("test_gti1.fits");
     test_value(test1.size(), 3, "GGti should have 3 intervals.");
-    test_value(test1.tstart(0).secs(), 1.0, 1.0e-10, "Bin 0 start time should be 1.");
-    test_value(test1.tstart(1).secs(), 10.0, 1.0e-10, "Bin 1 start time should be 10.");
-    test_value(test1.tstart(2).secs(), 100.0, 1.0e-10, "Bin 2 start time should be 100.");
-    test_value(test1.tstop(0).secs(), 10.0, 1.0e-10, "Bin 0 stop time should be 10.");
-    test_value(test1.tstop(1).secs(), 100.0, 1.0e-10, "Bin 1 stop time should be 100.");
-    test_value(test1.tstop(2).secs(), 1000.0, 1.0e-10, "Bin 2 stop time should be 1000.");
-    test_value(test1.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(test1.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(test1.tstart(0).secs(), 1.0, 1.0e-7, "Bin 0 start time should be 1.");
+    test_value(test1.tstart(1).secs(), 10.0, 1.0e-7, "Bin 1 start time should be 10.");
+    test_value(test1.tstart(2).secs(), 100.0, 1.0e-7, "Bin 2 start time should be 100.");
+    test_value(test1.tstop(0).secs(), 10.0, 1.0e-7, "Bin 0 stop time should be 10.");
+    test_value(test1.tstop(1).secs(), 100.0, 1.0e-7, "Bin 1 stop time should be 100.");
+    test_value(test1.tstop(2).secs(), 1000.0, 1.0e-7, "Bin 2 stop time should be 1000.");
+    test_value(test1.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(test1.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Check saving in and loading from FITS file with specific extension
     gti.save("test_gti2.fits[GTI_2]", true);
     GGti test2("test_gti2.fits[GTI_2]");
     test_value(test2.size(), 3, "GGti should have 3 intervals.");
-    test_value(test2.tstart(0).secs(), 1.0, 1.0e-10, "Bin 0 start time should be 1.");
-    test_value(test2.tstart(1).secs(), 10.0, 1.0e-10, "Bin 1 start time should be 10.");
-    test_value(test2.tstart(2).secs(), 100.0, 1.0e-10, "Bin 2 start time should be 100.");
-    test_value(test2.tstop(0).secs(), 10.0, 1.0e-10, "Bin 0 stop time should be 10.");
-    test_value(test2.tstop(1).secs(), 100.0, 1.0e-10, "Bin 1 stop time should be 100.");
-    test_value(test2.tstop(2).secs(), 1000.0, 1.0e-10, "Bin 2 stop time should be 1000.");
-    test_value(test2.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(test2.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(test2.tstart(0).secs(), 1.0, 1.0e-7, "Bin 0 start time should be 1.");
+    test_value(test2.tstart(1).secs(), 10.0, 1.0e-7, "Bin 1 start time should be 10.");
+    test_value(test2.tstart(2).secs(), 100.0, 1.0e-7, "Bin 2 start time should be 100.");
+    test_value(test2.tstop(0).secs(), 10.0, 1.0e-7, "Bin 0 stop time should be 10.");
+    test_value(test2.tstop(1).secs(), 100.0, 1.0e-7, "Bin 1 stop time should be 100.");
+    test_value(test2.tstop(2).secs(), 1000.0, 1.0e-7, "Bin 2 stop time should be 1000.");
+    test_value(test2.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(test2.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Check reading from XML element using "tmin" and "tmax" format
     GXmlElement element("observation");
@@ -411,26 +411,26 @@ void TestGObservation::test_gti(void)
     element.append(GXmlElement("parameter name=\"TimeReference\" mjdrefi=\"51544\" mjdreff=\"0.5\" timeunit=\"s\" timesys=\"TT\" timeref=\"LOCAL\""));
     GGti test3(element);
     test_value(test3.size(), 1, "GGti should have 1 interval.");
-    test_value(test3.tstart(0).convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-10, "Bin 0 start time should be 0.");
-    test_value(test3.tstop(0).convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-10, "Bin 0 stop time should be 100.");
-    test_value(test3.tstart().convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-10, "Start time should be 0.");
-    test_value(test3.tstop().convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-10, "Stop time should be 100.");
+    test_value(test3.tstart(0).convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-7, "Bin 0 start time should be 0.");
+    test_value(test3.tstop(0).convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-7, "Bin 0 stop time should be 100.");
+    test_value(test3.tstart().convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-7, "Start time should be 0.");
+    test_value(test3.tstop().convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-7, "Stop time should be 100.");
 
     // Check writing of GTI into XML element
     element.clear();
     test3.write(element);
     const GXmlElement* par = gammalib::xml_get_par("test_GObservation", element, "GoodTimeIntervals");
-    test_value(gammalib::tofloat(par->attribute("tmin")), 0.0, 1.0e-10,
+    test_value(gammalib::tofloat(par->attribute("tmin")), 0.0, 1.0e-7,
                "Attribute tmin should be 0, found "+
                par->attribute("tmin")+".");
-    test_value(gammalib::tofloat(par->attribute("tmax")), 100.0, 1.0e-10,
+    test_value(gammalib::tofloat(par->attribute("tmax")), 100.0, 1.0e-7,
                "Attribute tmax should be 100, found "+
                par->attribute("tmax")+".");
     par = gammalib::xml_get_par("test_GObservation", element, "TimeReference");
-    test_value(gammalib::tofloat(par->attribute("mjdrefi")), 51544.0, 1.0e-10,
+    test_value(gammalib::tofloat(par->attribute("mjdrefi")), 51544.0, 1.0e-7,
                "Attribute mjdrefi should be 51544, found "+
                par->attribute("mjdrefi")+".");
-    test_value(gammalib::tofloat(par->attribute("mjdreff")), 0.5, 1.0e-10,
+    test_value(gammalib::tofloat(par->attribute("mjdreff")), 0.5, 1.0e-7,
                "Attribute mjdreff should be 0.5, found "+
                par->attribute("mjdreff")+".");
     test_assert(par->attribute("timeunit") == "s",
@@ -448,14 +448,14 @@ void TestGObservation::test_gti(void)
     element.append(GXmlElement("parameter name=\"GoodTimeIntervals\" file=\"test_gti2.fits[GTI_2]\""));
     GGti test4(element);
     test_value(test4.size(), 3, "GGti should have 3 intervals.");
-    test_value(test4.tstart(0).secs(), 1.0, 1.0e-10, "Bin 0 start time should be 1.");
-    test_value(test4.tstart(1).secs(), 10.0, 1.0e-10, "Bin 1 start time should be 10.");
-    test_value(test4.tstart(2).secs(), 100.0, 1.0e-10, "Bin 2 start time should be 100.");
-    test_value(test4.tstop(0).secs(), 10.0, 1.0e-10, "Bin 0 stop time should be 10.");
-    test_value(test4.tstop(1).secs(), 100.0, 1.0e-10, "Bin 1 stop time should be 100.");
-    test_value(test4.tstop(2).secs(), 1000.0, 1.0e-10, "Bin 2 stop time should be 1000.");
-    test_value(test4.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(test4.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
+    test_value(test4.tstart(0).secs(), 1.0, 1.0e-7, "Bin 0 start time should be 1.");
+    test_value(test4.tstart(1).secs(), 10.0, 1.0e-7, "Bin 1 start time should be 10.");
+    test_value(test4.tstart(2).secs(), 100.0, 1.0e-7, "Bin 2 start time should be 100.");
+    test_value(test4.tstop(0).secs(), 10.0, 1.0e-7, "Bin 0 stop time should be 10.");
+    test_value(test4.tstop(1).secs(), 100.0, 1.0e-7, "Bin 1 stop time should be 100.");
+    test_value(test4.tstop(2).secs(), 1000.0, 1.0e-7, "Bin 2 stop time should be 1000.");
+    test_value(test4.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(test4.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
     // Append one time interval to test change of GTI file
     test4.append(GTime(1000.0), GTime(10000.0));
@@ -469,16 +469,16 @@ void TestGObservation::test_gti(void)
                par->attribute("file")+".");
     GGti test5(par->attribute("file"));
     test_value(test5.size(), 4, "GGti should have 4 intervals.");
-    test_value(test5.tstart(0).secs(), 1.0, 1.0e-10, "Bin 0 start time should be 1.");
-    test_value(test5.tstart(1).secs(), 10.0, 1.0e-10, "Bin 1 start time should be 10.");
-    test_value(test5.tstart(2).secs(), 100.0, 1.0e-10, "Bin 2 start time should be 100.");
-    test_value(test5.tstart(3).secs(), 1000.0, 1.0e-10, "Bin 3 start time should be 1000.");
-    test_value(test5.tstop(0).secs(), 10.0, 1.0e-10, "Bin 0 stop time should be 10.");
-    test_value(test5.tstop(1).secs(), 100.0, 1.0e-10, "Bin 1 stop time should be 100.");
-    test_value(test5.tstop(2).secs(), 1000.0, 1.0e-10, "Bin 2 stop time should be 1000.");
-    test_value(test5.tstop(3).secs(), 10000.0, 1.0e-10, "Bin 3 stop time should be 10000.");
-    test_value(test5.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
-    test_value(test5.tstop().secs(), 10000.0, 1.0e-10, "Stop time should be 10000.");
+    test_value(test5.tstart(0).secs(), 1.0, 1.0e-7, "Bin 0 start time should be 1.");
+    test_value(test5.tstart(1).secs(), 10.0, 1.0e-7, "Bin 1 start time should be 10.");
+    test_value(test5.tstart(2).secs(), 100.0, 1.0e-7, "Bin 2 start time should be 100.");
+    test_value(test5.tstart(3).secs(), 1000.0, 1.0e-7, "Bin 3 start time should be 1000.");
+    test_value(test5.tstop(0).secs(), 10.0, 1.0e-7, "Bin 0 stop time should be 10.");
+    test_value(test5.tstop(1).secs(), 100.0, 1.0e-7, "Bin 1 stop time should be 100.");
+    test_value(test5.tstop(2).secs(), 1000.0, 1.0e-7, "Bin 2 stop time should be 1000.");
+    test_value(test5.tstop(3).secs(), 10000.0, 1.0e-7, "Bin 3 stop time should be 10000.");
+    test_value(test5.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(test5.tstop().secs(), 10000.0, 1.0e-7, "Stop time should be 10000.");
 
     // Return
     return;
