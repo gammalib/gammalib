@@ -293,14 +293,14 @@ void GCTAEventList::load(const std::string& filename)
 void GCTAEventList::save(const std::string& filename,
                          const bool& clobber) const
 {
-    // Create empty FITS file
-    GFits fits;
+    // Open or create FITS file
+    GFits fits(filename, true);
 
     // Write event list
     write(fits);
 
     // Save FITS file
-    fits.saveto(filename, clobber);
+    fits.save(clobber);
 
     // Return
     return;
@@ -335,11 +335,8 @@ void GCTAEventList::read(const GFits& fits)
     // Clear object
     clear();
 
-    // Initialise filename from fits file
-    GFilename fname = GFilename(fits.filename());
-
-    // Initialise extension name
-    std::string extname = fname.extname("EVENTS");
+    // Initialise events extension name
+    std::string extname = fits.filename().extname("EVENTS");
 
     // Get event list HDU
     const GFitsTable& events = *fits.table(extname);
@@ -400,31 +397,37 @@ void GCTAEventList::read(const GFits& fits)
 /***********************************************************************//**
  * @brief Write CTA events into FITS file.
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
- * Write the CTA event list into FITS file.
+ * Writes the CTA event list into a FITS file. The events will be written by
+ * default into the extension "EVENTS" unless an extension name is explicitly
+ * specified in the FITS file name. The method also writes the data sub-space
+ * keywords in the FITS header of the events table.
+ *
+ * In addition, the method will also append a table containing the Good Time
+ * Intervals of the events to the FITS file. The extension name for the Good
+ * Time Intervals is either taken from the m_gti_extname member, or if empty,
+ * is set to "GTI".
  ***************************************************************************/
-void GCTAEventList::write(GFits& file) const
+void GCTAEventList::write(GFits& fits) const
 {
-    // Allocate FITS binary table HDU
-    GFitsBinTable* events = new GFitsBinTable;
+    // Allocate empty FITS binary table
+    GFitsBinTable table;
 
-    // Write events
-    write_events(*events);
+    // Write events into binary table
+    write_events(table);
+
+    // Set FITS extension name (default: "EVENTS")
+    table.extname(fits.filename().extname("EVENTS"));
 
     // Write data selection keywords
-    write_ds_keys(*events);
+    write_ds_keys(table);
 
     // Append event table to FITS file
-    file.append(*events);
+    fits.append(table);
 
-    // Free binary table
-    delete events;
-
-    // Write GTI extension if we have an extension name
-    if (!m_gti_extname.empty()) {
-        gti().write(file, m_gti_extname);
-    }
+    // Write GTI extension
+    gti().write(fits, gti_extname());
 
     // Return
     return;
@@ -895,16 +898,32 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
 
 
 /***********************************************************************//**
- * @brief Write data selection keywords into FITS HDU
+ * @brief Write data sub-space keywords into FITS HDU
  *
  * @param[in] hdu FITS HDU.
  *
- * This method does nothing if the HDU pointer is NULL.
+ * Writes the data sub-space keywords for an event list into the FITS HDU.
+ * The following keywords will be written:
  *
- * @todo This is a very dumb data selection keyword writing routine that does
- *       not take into account any existing keywords. We definitely want a
- *       more secure logic that checks for existing keywords and possible
- *       conflicts. But for the moment, this code does the job.
+ *      DSTYP1 = "TIME"                     / Data sub-space type
+ *      DSUNI1 = "s"                        / Data sub-space unit
+ *      DSVAL1 = "TABLE"                    / Data sub-space value
+ *      DSREF1 = ":[extname]"               / Data sub-space reference
+ *      DSTYP2 = "ENERGY"                   / Data sub-space type
+ *      DSUNI2 = "TeV"                      / Data sub-space unit
+ *      DSVAL2 = "[emin]:[emax]"            / Data sub-space value
+ *      DSTYP3 = "POS(RA,DEC)"              / Data sub-space type
+ *      DSUNI3 = "deg"                      / Data sub-space unit
+ *      DSVAL3 = "CIRCLE([ra],[dec],[rad])" / Data sub-space value
+ *
+ * where
+ *
+ *      [extname] is the GTI extension (default: GTI)
+ *      [emin] is the minimum event energy in TeV
+ *      [emax] is the maximum event energy in TeV
+ *      [ra] is the Right Ascension of the Region of Interest centre in degrees
+ *      [dec] is the Declination of the Region of Interest centre in degrees
+ *      [rad] is the radius of the Region of Interest in degrees
  ***************************************************************************/
 void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
 {
@@ -921,16 +940,19 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
     std::string dsval2 = gammalib::str(e_min) + ":" +
                          gammalib::str(e_max);
 
+    // Set Good Time Intervals extension name
+    std::string dsref1 = ":"+gti_extname();
+
     // Add time selection keywords
-    hdu.card("DSTYP1", "TIME",  "Data selection type");
-    hdu.card("DSUNI1", "s",     "Data selection unit");
-    hdu.card("DSVAL1", "TABLE", "Data selection value");
-    hdu.card("DSREF1", ":GTI",  "Data selection reference");
+    hdu.card("DSTYP1", "TIME",  "Data sub-space type");
+    hdu.card("DSUNI1", "s",     "Data sub-space unit");
+    hdu.card("DSVAL1", "TABLE", "Data sub-space value");
+    hdu.card("DSREF1", dsref1,  "Data sub-space reference");
 
     // Add energy range selection
-    hdu.card("DSTYP2", "ENERGY", "Data selection type");
-    hdu.card("DSUNI2", "TeV",    "Data selection unit");
-    hdu.card("DSVAL2", dsval2,   "Data selection value");
+    hdu.card("DSTYP2", "ENERGY", "Data sub-space type");
+    hdu.card("DSUNI2", "TeV",    "Data sub-space unit");
+    hdu.card("DSVAL2", dsval2,   "Data sub-space value");
 
     // Initialise number of NDSKEYS
     int ndskeys = 2;
@@ -945,15 +967,15 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
                              gammalib::str(rad) + ")";
 
         // Write DS keywords
-        hdu.card("DSTYP3", "POS(RA,DEC)", "Data selection type");
-        hdu.card("DSUNI3", "deg",         "Data selection unit");
-        hdu.card("DSVAL3", dsval3,        "Data selection value");
+        hdu.card("DSTYP3", "POS(RA,DEC)", "Data sub-space type");
+        hdu.card("DSUNI3", "deg",         "Data sub-space unit");
+        hdu.card("DSVAL3", dsval3,        "Data sub-space value");
         ndskeys++;
         
     } // endif: RoI was valid
 
     // Set number of data selection keys
-    hdu.card("NDSKEYS", ndskeys,  "Number of data selections");
+    hdu.card("NDSKEYS", ndskeys,  "Number of data sub-space keys");
 
     // Return
     return;

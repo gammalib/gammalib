@@ -110,6 +110,11 @@ GTIs (and also event lists) in a single FITS file. We do however require that
 the event and GTI extension reside in the same FITS file. This satisfies the
 feature request #1598.
 
+A gti_extname() method has been added to GCTAObservation and GCTAEventList to
+set the name of the Good Time Intervals FITS extension. The data sub-space
+keyword is now also adjusted to the specified GTI extension name when the
+data are written to disk. This satisfies the feature request #1598.
+
 
 21. COMPTEL interface
 ---------------------

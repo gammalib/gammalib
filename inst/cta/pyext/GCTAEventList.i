@@ -51,18 +51,20 @@ public:
     virtual void           load(const std::string& filename);
     virtual void           save(const std::string& filename,
                                 const bool& clobber = false) const;
-    virtual void           read(const GFits& file);
-    virtual void           write(GFits& file) const;
+    virtual void           read(const GFits& fits);
+    virtual void           write(GFits& fits) const;
     virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
     virtual const GCTARoi& roi(void) const;
 
     // Implement other methods
-    void   append(const GCTAEventAtom& event);
-    void   reserve(const int& number);
-    double irf_cache(const std::string& name, const int& index) const;
-    void   irf_cache(const std::string& name, const int& index,
-                     const double& irf) const;
+    void        append(const GCTAEventAtom& event);
+    void        reserve(const int& number);
+    double      irf_cache(const std::string& name, const int& index) const;
+    void        irf_cache(const std::string& name, const int& index,
+                          const double& irf) const;
+    void        gti_extname(const std::string& extname);
+    std::string gti_extname(void) const;
 };
 
 

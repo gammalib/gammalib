@@ -69,19 +69,21 @@ public:
     virtual void           load(const std::string& filename);
     virtual void           save(const std::string& filename,
                                 const bool& clobber = false) const;
-    virtual void           read(const GFits& file);
-    virtual void           write(GFits& file) const;
+    virtual void           read(const GFits& fits);
+    virtual void           write(GFits& fits) const;
     virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
     virtual const GCTARoi& roi(void) const;
     std::string            print(const GChatter& chatter = NORMAL) const;
 
     // Implement other methods
-    void   append(const GCTAEventAtom& event);
-    void   reserve(const int& number);
-    double irf_cache(const std::string& name, const int& index) const;
-    void   irf_cache(const std::string& name, const int& index,
-                     const double& irf) const;
+    void        append(const GCTAEventAtom& event);
+    void        reserve(const int& number);
+    double      irf_cache(const std::string& name, const int& index) const;
+    void        irf_cache(const std::string& name, const int& index,
+                          const double& irf) const;
+    void        gti_extname(const std::string& extname);
+    std::string gti_extname(void) const;
 
 protected:
     // Protected methods
@@ -169,6 +171,35 @@ inline
 void GCTAEventList::reserve(const int& number)
 {
     m_events.reserve(number);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Good Time Intervals FITS extension name
+ *
+ * @return Good Time Intervals FITS extension name.
+ *
+ * Returns the FITS extension name of the Good Time Intervals.
+ ***************************************************************************/
+inline
+std::string GCTAEventList::gti_extname(void) const
+{
+    return ((m_gti_extname.empty()) ? "GTI" : m_gti_extname);
+}
+
+
+/***********************************************************************//**
+ * @brief Set Good Time Intervals FITS extension name
+ *
+ * @param[in] extname Good Time Intervals FITS extension name.
+ *
+ * Sets the FITS extension name for the Good Time Intervals.
+ ***************************************************************************/
+inline
+void GCTAEventList::gti_extname(const std::string& extname)
+{
+    m_gti_extname = extname;
     return;
 }
 

@@ -128,6 +128,7 @@ public:
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
     const std::string&  eventtype(void) const;
+    void                gti_extname(const std::string& extname);
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;
@@ -146,7 +147,6 @@ protected:
     // Protected members
     std::string   m_instrument;    //!< Instrument name
     std::string   m_eventfile;     //!< Event filename
-    //std::string   m_gtifile;       //!< GTI filename
     std::string   m_eventtype;     //!< Event type (for XML file)
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;      //!< Pointing direction

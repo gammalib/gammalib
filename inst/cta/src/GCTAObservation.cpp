@@ -480,37 +480,9 @@ GGti GCTAObservation::gti(void) const
     // ... otherwise try reading the GTIs from file
     else {
 
-        // If we know in which file the GTIs reside then extract the GTIs
-        // from that file ...
-        /*
-        if (!m_gtifile.empty()) {
-
-            // Initialise filename
-            GFilename fname(m_gtifile);
-
-            // Open FITS file
-            GFits fits(fname.filename());
-
-            // Get extension name
-            std::string extname = fname.extname("GTI");
-
-            // If the FITS file contains the specified extension, then read
-            // Good Time Intervals from that extension
-            if (fits.contains(extname)) {
-                const GFitsTable& table = *fits.table(extname);
-                gti.read(table);
-            }
-
-            // Close FITS file
-            fits.close();
-
-        } // endif: gti file name was not not empty
-
-        // ... otherwise we extract the GTIs on basis on the DSS keywords,
-        // and if these keywords are not present, we build the GTIs from
-        // the start and stop time that is provided in the event header
-        else if (!m_eventfile.empty()) {
-        */
+        // Extract the GTIs on basis on the DSS keywords, and if these
+        // keywords are not present, we build the GTIs from the start and
+        // stop time that is provided in the event header
         if (!m_eventfile.empty()) {
         
             // Initialise filename
@@ -596,13 +568,6 @@ GGti GCTAObservation::gti(void) const
 
     // Check for GTI validity
     if (gti.size() == 0) {
-        /*
-        std::string msg = "Could not find Good Time Interval information "
-                          "in the event file \""+m_eventfile+"\" or in "
-                          "the GTI file "+m_gtifile+"\". Please "
-                          "check that Good Time Interval information is "
-                          "properly set in the event file.";
-        */
         std::string msg = "Could not find Good Time Interval information "
                           "in the event file \""+m_eventfile+"\". Please "
                           "check that Good Time Interval information is "
@@ -858,16 +823,6 @@ void GCTAObservation::read(const GXmlElement& xml)
 
         }
 
-        // Read optional Good Time Intervals file name
-        /*
-        else if (par->attribute("name") == "GoodTimeIntervals") {
-
-            // Read GTI filename
-            m_gtifile = par->attribute("file");
-
-        }
-        */
-
     } // endfor: looped over observation parameters
 
     // Analyse parameters
@@ -1113,15 +1068,6 @@ void GCTAObservation::write(GXmlElement& xml) const
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_eventtype);
         par->attribute("file", m_eventfile);
 
-        // If we had a GTI file name upon reading from a XML file then write
-        // back the GTI file name information into the XML file
-        /*
-        if (!m_gtifile.empty()) {
-            GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "GoodTimeIntervals");
-            par->attribute("file", m_gtifile);
-        }
-        */
-
     }
 
     // ... otherwise write the observation definition information
@@ -1155,9 +1101,9 @@ void GCTAObservation::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Read data from FITS object
+ * @brief Read data from FITS file
  *
- * @param[in] fits FITS object.
+ * @param[in] fits FITS file.
  ***************************************************************************/
 void GCTAObservation::read(const GFits& fits)
 {
@@ -1218,11 +1164,23 @@ void GCTAObservation::read(const GFits& fits)
 
 
 /***********************************************************************//**
- * @brief Write CTA observation into FITS object.
+ * @brief Write observation into FITS file.
  *
- * @param[in] fits FITS object.
+ * @param[in] fits FITS file.
+ * @param[in] extname FITS extension name for event list (default: "EVENTS").
  *
- * This method does nothing if no events are within the CTA observation.
+ * Writes the observation into a FITS file.
+ *
+ * If the observation contains an event list, the event list and Good Time
+ * Interval will be written to the FITS file. The FITS extension name for the
+ * event list can be optionally specified by the @p extname argument. If the
+ * extension name of the GTI should be changed to a non-default value, the
+ * gti_extname() method should be called prior to calling the write() method.
+ *
+ * If the observation contains an event cube, the event cube will be written
+ * into the primary extension of the FITS file.
+ *
+ * This method does nothing if no events are in the CTA observation.
  ***************************************************************************/
 void GCTAObservation::write(GFits& fits, const std::string& extname) const
 {
@@ -1237,8 +1195,9 @@ void GCTAObservation::write(GFits& fits, const std::string& extname) const
         // the GTI if provided on loading.
         list->write(fits);
 
-        // Get reference to EVENTS HDU
-        GFitsHDU& hdu = *fits.at("EVENTS");
+        // Get reference to EVENTS HDU (see GCTAEventList::write() for
+        // consistency)
+        GFitsHDU& hdu = *fits.at(fits.filename().extname("EVENTS"));
 
         // Change extension name
         hdu.extname(extname);
@@ -1294,34 +1253,6 @@ void GCTAObservation::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Load GTIs FITS file.
- *
- * @param[in] filename Name of FITS file from which GTIs are loaded.
- *
- * Loads CTA GTIs from a separate file.
- ***************************************************************************/
-/*
-void GCTAObservation::load_gti(const std::string& filename)
-{
-
-    // Check if we have an event list
-    GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
-
-    // Load GTI
-    if (list != NULL) {
-        list->load_gti(filename);
-    }
-
-    // Store GTI file name
-    m_gtifile = filename;
-
-    // Return
-    return;
-}
-*/
-
-
-/***********************************************************************//**
  * @brief Load stacked cube from FITS files
  *
  * @param[in] cntcube Counts cube file name.
@@ -1368,7 +1299,7 @@ void GCTAObservation::load(const std::string& cntcube,
  * @brief Save CTA observation into FITS file.
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false)
  ***************************************************************************/
 void GCTAObservation::save(const std::string& filename, const bool& clobber) const
 {
@@ -1391,35 +1322,6 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
     return;
 }
 
-
-/***********************************************************************//**
- * @brief Save CTA GTIs into FITS file.
- *
- * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
- ***************************************************************************/
-/*
-void GCTAObservation::save_gti(const std::string& filename, const bool& clobber) const
-{
-    // Initialise filename
-    GFilename fname(filename);
-
-    // Initialise extension name
-    std::string extname = fname.extname("GTI");
-
-    // Initialise FITS file
-    GFits fits(fname.filename(), true);
-
-    // Write GTIs to fits files
-    gti().write(fits, extname);
-
-    // Save FITS file
-    fits.save(clobber);
-
-    // Return
-    return;
-}
-*/
 
 /***********************************************************************//**
  * @brief Set event container
@@ -1468,11 +1370,6 @@ const GEvents* GCTAObservation::events(void) const
         {
         try {
             const_cast<GCTAObservation*>(this)->load(m_eventfile);
-            /*
-            if (!m_gtifile.empty()) {
-                const_cast<GCTAObservation*>(this)->load_gti(m_gtifile);
-            }
-            */
         }
         catch (...) {
             ;
@@ -1499,6 +1396,31 @@ const GEvents* GCTAObservation::events(void) const
 
     // Return pointer to event container
     return m_events;
+}
+
+
+/***********************************************************************//**
+ * @brief Set Good Time Intervals extension name
+ *
+ * @param[in] extname Good Time Intervals extension name.
+ *
+ * Sets the FITS extension name of the Good Time Intervals. This method
+ * should be used prior to saving or writing of the FITS file if the Good
+ * Time Intervals should be used in an extension that differs from the
+ * default extension ("GTI")
+ ***************************************************************************/
+void GCTAObservation::gti_extname(const std::string& extname)
+{
+    // Get non-const pointer to event list
+    GCTAEventList* list = dynamic_cast<GCTAEventList*>(const_cast<GEvents*>(events()));
+
+    // If we have a CTA event list then set the extension name
+    if (list != NULL) {
+        list->gti_extname(extname);
+    }
+
+    // Return
+    return;
 }
 
 
@@ -1619,7 +1541,6 @@ void GCTAObservation::init_members(void)
     m_instrument = "CTA";
     m_object.clear();
     m_eventfile.clear();
-    //m_gtifile.clear();
     m_eventtype.clear();
     m_bgdfile.clear();
     m_response = NULL;
@@ -1650,7 +1571,6 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
     m_instrument    = obs.m_instrument;
     m_object        = obs.m_object;
     m_eventfile     = obs.m_eventfile;
-    //m_gtifile       = obs.m_gtifile;
     m_eventtype     = obs.m_eventtype;
     m_bgdfile       = obs.m_bgdfile;
     m_pointing      = obs.m_pointing;
