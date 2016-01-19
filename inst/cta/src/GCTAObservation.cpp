@@ -1167,22 +1167,23 @@ void GCTAObservation::read(const GFits& fits)
  * @brief Write observation into FITS file.
  *
  * @param[in] fits FITS file.
- * @param[in] extname FITS extension name for event list (default: "EVENTS").
+ * @param[in] evtname Events FITS extension name (default: "EVENTS").
+ * @param[in] gtiname Good Time Intervals FITS extension name (default: "GTI").
  *
  * Writes the observation into a FITS file.
  *
  * If the observation contains an event list, the event list and Good Time
- * Interval will be written to the FITS file. The FITS extension name for the
- * event list can be optionally specified by the @p extname argument. If the
- * extension name of the GTI should be changed to a non-default value, the
- * gti_extname() method should be called prior to calling the write() method.
+ * Intervals will be written to the FITS file. The FITS extension name for
+ * the event list and the Good Time Intervals can be optionally specified
+ * thru the @p evtname and @p gtiname arguments.
  *
  * If the observation contains an event cube, the event cube will be written
  * into the primary extension of the FITS file.
  *
  * This method does nothing if no events are in the CTA observation.
  ***************************************************************************/
-void GCTAObservation::write(GFits& fits, const std::string& extname) const
+void GCTAObservation::write(GFits& fits, const std::string& evtname,
+                                         const std::string& gtiname) const
 {
     // Get pointers on event list
     const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(events());
@@ -1191,18 +1192,13 @@ void GCTAObservation::write(GFits& fits, const std::string& extname) const
     // Case A: Observation contains an event list
     if (list != NULL) {
 
-        // Write event list into FITS file. This method also writes
-        // the GTI if provided on loading.
-        list->write(fits);
+        // Write event list and Good Time Intervals into FITS file
+        list->write(fits, evtname, gtiname);
 
-        // Get reference to EVENTS HDU (see GCTAEventList::write() for
-        // consistency)
-        GFitsHDU& hdu = *fits.at(fits.filename().extname("EVENTS"));
+        // Get reference to events extension
+        GFitsHDU& hdu = *fits.at(evtname);
 
-        // Change extension name
-        hdu.extname(extname);
-
-        // Write observation attributes
+        // Write observation attributes to events extension
         write_attributes(hdu);
 
     } // endif: observation contained an event list
@@ -1300,20 +1296,52 @@ void GCTAObservation::load(const std::string& cntcube,
  *
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite existing FITS file? (default: false)
+ *
+ * Saves the CTA observation into a FITS file.
+ *
+ * If the CTA observation contains an event list, the method will write an
+ * events and a Good Time Intervals extension to the FITS file. The names
+ * for both extension can be optionally specified in the filename using
+ * the format
+ *
+ *      filename[EVENTS;GTI]
+ *
+ * where the string in the squared bracket defines the extension names. The
+ * part before the semi-colon is the events extension name and the part after
+ * the semi-colon is the Good Time Intervals extension name.
+ *
+ * If the CTA observation contains an event cube, the method will write the
+ * cube into the primary image, followed by binary tables containing the
+ * energy boundaries and the Good Time Intervals. The extension names of
+ * these binary tables are "EBOUNDS" and "GTI", and cannot be modified.
  ***************************************************************************/
 void GCTAObservation::save(const std::string& filename, const bool& clobber) const
 {
     // Initialise filename
     GFilename fname(filename);
 
-    // Initialise extension name
-    std::string extname = fname.extname("EVENTS");
+    // Set default events and Good Time Intervals extension name and extract
+    // a possible overwrite from the extension name argument of the filename.
+    // The specific format that is implemented is [events;gti], where the
+    // part before the semi-colon is the events extension name and the part
+    // after the semi-colon is the Good Time Intervals extension name.
+    std::string evtname = "EVENTS";
+    std::string gtiname = "GTI";
+    if (fname.has_extname()) {
+        std::vector<std::string> extnames = gammalib::split(fname.extname(), ";");
+        if (extnames.size() > 0) {
+            evtname = gammalib::strip_whitespace(extnames[0]);
+        }
+        if (extnames.size() > 1) {
+            gtiname = gammalib::strip_whitespace(extnames[1]);
+        }
+    }
 
     // Create FITS file
     GFits fits;
 
     // Write data into FITS file
-    write(fits, extname);
+    write(fits, evtname, gtiname);
 
     // Save FITS file
     fits.saveto(fname.filename(), clobber);
@@ -1396,31 +1424,6 @@ const GEvents* GCTAObservation::events(void) const
 
     // Return pointer to event container
     return m_events;
-}
-
-
-/***********************************************************************//**
- * @brief Set Good Time Intervals extension name
- *
- * @param[in] extname Good Time Intervals extension name.
- *
- * Sets the FITS extension name of the Good Time Intervals. This method
- * should be used prior to saving or writing of the FITS file if the Good
- * Time Intervals should be used in an extension that differs from the
- * default extension ("GTI")
- ***************************************************************************/
-void GCTAObservation::gti_extname(const std::string& extname)
-{
-    // Get non-const pointer to event list
-    GCTAEventList* list = dynamic_cast<GCTAEventList*>(const_cast<GEvents*>(events()));
-
-    // If we have a CTA event list then set the extension name
-    if (list != NULL) {
-        list->gti_extname(extname);
-    }
-
-    // Return
-    return;
 }
 
 

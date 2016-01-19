@@ -1403,15 +1403,13 @@ void TestGCTAObservation::test_unbinned_obs(void)
 
     // Test loading of the event file and saving into a different extension
     run.load(cta_events);
-    run.gti_extname("GTI2");
-    run.save("test_cta_events1.fits[EVENTS2]", true);
+    run.save("test_cta_events1.fits[EVENTS2;GTI2]", true);
     GFits fits("test_cta_events1.fits");
     test_value(fits.size(), 3, "FITS file should contain 3 HDUs");
     test_assert(fits.contains("EVENTS2"), "FITS should contain \"EVENTS2\" HDU");
     test_assert(fits.contains("GTI2"), "FITS should contain \"GTI2\" HDU");
     fits.close();
-    run.gti_extname("GTI3");
-    run.save("test_cta_events1.fits[EVENTS3]", true);
+    run.save("test_cta_events1.fits[EVENTS3;GTI3]", true);
     fits.open("test_cta_events1.fits");
     test_value(fits.size(), 3, "FITS file should contain 3 HDUs");
     test_assert(fits.contains("EVENTS3"), "FITS should contain \"EVENTS3\" HDU");
@@ -1421,12 +1419,9 @@ void TestGCTAObservation::test_unbinned_obs(void)
     // Test writing of multiple event files into FITS file
     run.load(cta_events);
     GFits fits2;
-    run.gti_extname("GTI1");
-    run.write(fits2, "EVENTS1");
-    run.gti_extname("GTI2");
-    run.write(fits2, "EVENTS2");
-    run.gti_extname("GTI3");
-    run.write(fits2, "EVENTS3");
+    run.write(fits2, "EVENTS1", "GTI1");
+    run.write(fits2, "EVENTS2", "GTI2");
+    run.write(fits2, "EVENTS3", "GTI3");
     fits2.saveto("test_cta_events2.fits", true);
     fits2.close();
     fits.open("test_cta_events2.fits");

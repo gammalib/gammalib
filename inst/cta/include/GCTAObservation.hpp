@@ -96,7 +96,8 @@ public:
     bool                has_events(void) const;
     void                read(const GFits& fits);
     void                write(GFits& fits,
-                              const std::string& extname = "EVENTS") const;
+                              const std::string& evtname = "EVENTS",
+                              const std::string& gtiname = "GTI") const;
     void                load(const std::string& filename);
     void                load(const std::string& cntcube,
                              const std::string& expcube,
@@ -128,7 +129,6 @@ public:
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
     const std::string&  eventtype(void) const;
-    void                gti_extname(const std::string& extname);
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;

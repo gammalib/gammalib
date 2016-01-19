@@ -395,14 +395,16 @@ void GCTAEventList::read(const GFits& fits)
 
 
 /***********************************************************************//**
- * @brief Write CTA events into FITS file.
+ * @brief Write CTA events and Good Time Intervals into FITS file
  *
  * @param[in] fits FITS file.
  *
- * Writes the CTA event list into a FITS file. The events will be written by
- * default into the extension "EVENTS" unless an extension name is explicitly
- * specified in the FITS file name. The method also writes the data sub-space
- * keywords in the FITS header of the events table.
+ * Writes the CTA event list and the Good Time intervals into a FITS file.
+ *
+ * The events will be written by default into the extension "EVENTS" unless
+ * an extension name is explicitly specified in the FITS file name. The
+ * method also writes the data sub-space keywords in the FITS header of the
+ * events table.
  *
  * In addition, the method will also append a table containing the Good Time
  * Intervals of the events to the FITS file. The extension name for the Good
@@ -411,23 +413,52 @@ void GCTAEventList::read(const GFits& fits)
  ***************************************************************************/
 void GCTAEventList::write(GFits& fits) const
 {
+    // Set event extension name
+    std::string evtname = fits.filename().extname("EVENTS");
+
+    // Set GTI extension name
+    std::string gtiname = (m_gti_extname.empty()) ? "GTI" : m_gti_extname;
+
+    // Write events and GTIs
+    write(fits, evtname, gtiname);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write CTA events and Good Time Intervals into FITS file
+ *
+ * @param[in] fits FITS file.
+ * @param[in] evtname Event FITS extension name.
+ * @param[in] gtiname Good Time Intervals FITS extension name.
+ *
+ * Writes the CTA event list and the Good Time intervals into a FITS file.
+ *
+ * The events will be written into the extension @p evtname while the Good
+ * Time Intervals will be written into the extension @p gtiname.
+ ***************************************************************************/
+void GCTAEventList::write(GFits& fits, const std::string& evtname,
+                                       const std::string& gtiname) const
+{
     // Allocate empty FITS binary table
     GFitsBinTable table;
 
     // Write events into binary table
     write_events(table);
 
-    // Set FITS extension name (default: "EVENTS")
-    table.extname(fits.filename().extname("EVENTS"));
+    // Set FITS extension name
+    table.extname(evtname);
 
     // Write data selection keywords
-    write_ds_keys(table);
+    write_ds_keys(table, gtiname);
 
     // Append event table to FITS file
     fits.append(table);
 
     // Write GTI extension
-    gti().write(fits, gti_extname());
+    gti().write(fits, gtiname);
 
     // Return
     return;
@@ -901,6 +932,7 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
  * @brief Write data sub-space keywords into FITS HDU
  *
  * @param[in] hdu FITS HDU.
+ * @param[in] gtiname Good Time Interval FITS extension.
  *
  * Writes the data sub-space keywords for an event list into the FITS HDU.
  * The following keywords will be written:
@@ -918,14 +950,14 @@ void GCTAEventList::write_events(GFitsBinTable& hdu) const
  *
  * where
  *
- *      [extname] is the GTI extension (default: GTI)
+ *      [extname] is the GTI extension name @p gtiname
  *      [emin] is the minimum event energy in TeV
  *      [emax] is the maximum event energy in TeV
  *      [ra] is the Right Ascension of the Region of Interest centre in degrees
  *      [dec] is the Declination of the Region of Interest centre in degrees
  *      [rad] is the radius of the Region of Interest in degrees
  ***************************************************************************/
-void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
+void GCTAEventList::write_ds_keys(GFitsHDU& hdu, const std::string& gtiname) const
 {
     // Set ROI parameters
     double ra  = roi().centre().dir().ra_deg();
@@ -941,7 +973,7 @@ void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
                          gammalib::str(e_max);
 
     // Set Good Time Intervals extension name
-    std::string dsref1 = ":"+gti_extname();
+    std::string dsref1 = ":"+gtiname;
 
     // Add time selection keywords
     hdu.card("DSTYP1", "TIME",  "Data sub-space type");

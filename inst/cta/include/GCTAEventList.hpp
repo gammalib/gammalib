@@ -79,11 +79,11 @@ public:
     // Implement other methods
     void        append(const GCTAEventAtom& event);
     void        reserve(const int& number);
+    void        write(GFits& fits, const std::string& evtname,
+                                   const std::string& gtiname) const;
     double      irf_cache(const std::string& name, const int& index) const;
     void        irf_cache(const std::string& name, const int& index,
                           const double& irf) const;
-    void        gti_extname(const std::string& extname);
-    std::string gti_extname(void) const;
 
 protected:
     // Protected methods
@@ -94,7 +94,7 @@ protected:
     virtual void set_times(void) { return; }
     void         read_events(const GFitsTable& table);
     void         write_events(GFitsBinTable& table) const;
-    void         write_ds_keys(GFitsHDU& hdu) const;
+    void         write_ds_keys(GFitsHDU& hdu, const std::string& gtiname = "GTI") const;
     int          irf_cache_init(const std::string& name) const;
     int          irf_cache_index(const std::string& name) const;
 
@@ -171,35 +171,6 @@ inline
 void GCTAEventList::reserve(const int& number)
 {
     m_events.reserve(number);
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return Good Time Intervals FITS extension name
- *
- * @return Good Time Intervals FITS extension name.
- *
- * Returns the FITS extension name of the Good Time Intervals.
- ***************************************************************************/
-inline
-std::string GCTAEventList::gti_extname(void) const
-{
-    return ((m_gti_extname.empty()) ? "GTI" : m_gti_extname);
-}
-
-
-/***********************************************************************//**
- * @brief Set Good Time Intervals FITS extension name
- *
- * @param[in] extname Good Time Intervals FITS extension name.
- *
- * Sets the FITS extension name for the Good Time Intervals.
- ***************************************************************************/
-inline
-void GCTAEventList::gti_extname(const std::string& extname)
-{
-    m_gti_extname = extname;
     return;
 }
 
