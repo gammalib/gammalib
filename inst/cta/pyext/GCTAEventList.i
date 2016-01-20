@@ -58,13 +58,14 @@ public:
     virtual const GCTARoi& roi(void) const;
 
     // Implement other methods
-    void        append(const GCTAEventAtom& event);
-    void        reserve(const int& number);
-    void        write(GFits& fits, const std::string& evtname,
-                                   const std::string& gtiname) const;
-    double      irf_cache(const std::string& name, const int& index) const;
-    void        irf_cache(const std::string& name, const int& index,
-                          const double& irf) const;
+    void               append(const GCTAEventAtom& event);
+    void               reserve(const int& number);
+    void               write(GFits& fits, const std::string& evtname,
+                                          const std::string& gtiname) const;
+    double             irf_cache(const std::string& name, const int& index) const;
+    void               irf_cache(const std::string& name, const int& index,
+                                 const double& irf) const;
+    const std::string& gtiname(void) const;
 };
 
 

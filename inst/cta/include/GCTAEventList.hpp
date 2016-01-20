@@ -77,13 +77,14 @@ public:
     std::string            print(const GChatter& chatter = NORMAL) const;
 
     // Implement other methods
-    void        append(const GCTAEventAtom& event);
-    void        reserve(const int& number);
-    void        write(GFits& fits, const std::string& evtname,
-                                   const std::string& gtiname) const;
-    double      irf_cache(const std::string& name, const int& index) const;
-    void        irf_cache(const std::string& name, const int& index,
-                          const double& irf) const;
+    void               append(const GCTAEventAtom& event);
+    void               reserve(const int& number);
+    void               write(GFits& fits, const std::string& evtname,
+                                          const std::string& gtiname) const;
+    double             irf_cache(const std::string& name, const int& index) const;
+    void               irf_cache(const std::string& name, const int& index,
+                                 const double& irf) const;
+    const std::string& gtiname(void) const;
 
 protected:
     // Protected methods
@@ -172,6 +173,18 @@ void GCTAEventList::reserve(const int& number)
 {
     m_events.reserve(number);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Good Time Interval extension name
+ *
+ * @return Good Time Interval extension name.
+ ***************************************************************************/
+inline
+const std::string& GCTAEventList::gtiname(void) const
+{
+    return (m_gti_extname);
 }
 
 #endif /* GCTAEVENTLIST_HPP */
