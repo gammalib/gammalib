@@ -1014,21 +1014,20 @@ void GFits::open(const std::string& filename, const bool& create)
     // Remove any HDUs
     m_hdu.clear();
 
-    // Create file name
-    GFilename fname(gammalib::expand_env(filename));
+    // Expand environment variables
+    std::string fname(gammalib::expand_env(filename));
 
     // Don't allow opening if a file is already open
     if (m_fitsfile != NULL) {
         std::string msg;
-        if (m_filename.filename() == fname.filename()) {
+        if (m_filename.filename() == GFilename(fname).filename()) {
             msg = "FITS file \""+m_filename.filename()+"\" has already been "
                   "opened, cannot open it again.";
         }
         else {
             msg = "A FITS file \""+m_filename.filename()+"\" has already "
                   "been opened, cannot open another FITS file \""+
-                  fname.filename()+"\" before closing the existing "
-                  "one.";
+                  fname+"\" before closing the existing one.";
         }
         throw GException::invalid_argument(G_OPEN, msg);
     }
@@ -1039,12 +1038,12 @@ void GFits::open(const std::string& filename, const bool& create)
 
     // Try opening FITS file with readwrite access
     int status = 0;
-    status     = __ffopen(FHANDLE(m_fitsfile), fname.filename().c_str(), 1, &status);
+    status     = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 1, &status);
 
     // If failed then try opening as readonly
     if (status == 104 || status == 112) {
         status      = 0;
-        status      = __ffopen(FHANDLE(m_fitsfile), fname.filename().c_str(), 0, &status);
+        status      = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 0, &status);
         m_readwrite = false;
     }
 
@@ -1052,7 +1051,7 @@ void GFits::open(const std::string& filename, const bool& create)
     // FITS file now
     if (create && status == 104) {
         status      = 0;
-        status      = __ffinit(FHANDLE(m_fitsfile), fname.filename().c_str(), &status);
+        status      = __ffinit(FHANDLE(m_fitsfile), fname.c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }
@@ -1060,17 +1059,17 @@ void GFits::open(const std::string& filename, const bool& create)
     // Throw special exception if status=202 (keyword not found). This error
     // may occur if the file is opened with an expression
     if (status == 202) {
-        throw GException::fits_open_error(G_OPEN, fname.filename(), status,
+        throw GException::fits_open_error(G_OPEN, fname, status,
                           "Keyword not found when opening file.");
     }
 
     // Throw any other error
     else if (status != 0) {
-        throw GException::fits_open_error(G_OPEN, fname.filename(), status);
+        throw GException::fits_open_error(G_OPEN, fname, status);
     }
 
-    // Store FITS file name
-    m_filename = fname;
+    // Store FITS file name as GFilename object
+    m_filename = GFilename(fname);
 
     // Determine number of HDUs
     int num_hdu = 0;
