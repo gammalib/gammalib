@@ -260,16 +260,16 @@ GModelSpatialEllipticalGauss* GModelSpatialEllipticalGauss::clone(void) const
  *
  * \f[
  * S_{\rm p}(\theta, \phi | E, t) = {\tt m\_norm} \times
- * \exp \left( -\frac{\theta^2}{2 r_{rm eff}} \right)
+ * \exp \left( -\frac{\theta^2}{2 r_{\rm eff}^2} \right)
  * \f]
  *
- * where the effective ellipse radius \f$r_{rm eff}\f$ towards a given
+ * where the effective ellipse radius \f$r_{\rm eff}\f$ towards a given
  * position angle is given by
  *
  * \f[
- * r_{rm eff} = \frac{ab}
- *                   {\sqrt{\left( a \sin (\phi - \phi_0) \right)^2 +
- *                    \sqrt{\left( b \cos (\phi - \phi_0) \right)^2}
+ * r_{\rm eff} = \frac{ab}
+ *                   {\sqrt{\left( a \sin (\phi - \phi_0) \right)^2} +
+ *                    \sqrt{\left( b \cos (\phi - \phi_0) \right)^2}}
  * \f]
  * and  
  * \f$a\f$ is the semi-major axis of the ellipse,

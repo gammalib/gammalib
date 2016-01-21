@@ -239,7 +239,7 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * \f]
  *
  * where
- * - \f$\theta\f$ is the angular separation from the source direction, and
+ * - \f$\theta\f$ is the angular separation from the centre of the model, and
  * - \f$\sigma\f$ is the Gaussian width.
  *
  * @todo The Gaussian function is only correct in the small angle
