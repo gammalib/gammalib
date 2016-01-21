@@ -949,7 +949,7 @@ void GApplicationPar::check_value_bool(const std::string& value) const
         lvalue != "n" && lvalue != "no"  && lvalue != "false" && lvalue != "f") {
         std::string msg = "Invalid boolean value \""+value+"\" encountered"
                           " for parameter \""+m_name+"\". Use"
-                          " y/n/yes/no/true/false";
+                          " y/n/yes/no/t/f/true/false";
         throw GException::invalid_value(G_CHECK_VALUE_BOOL, msg);
     }
 
