@@ -982,7 +982,7 @@ void GApplicationPar::check_value_int(const std::string& value) const
 
         // If no options check has been done and if there is a m_min and
         // m_max value then perform an integer check
-        if (!has_options && m_min.length() > 0 && m_max.length()) {
+        if (!has_options && m_min.length() > 0 && m_max.length() > 0) {
 
             // Throw an exception if we have a NAN parameter
             if (m_status == ST_NAN) {
@@ -1038,7 +1038,7 @@ void GApplicationPar::check_value_real(const std::string& value) const
 
         // If no options check has been done and if there is a m_min and
         // m_max value then perform an integer check
-        if (!has_options && m_min.length() > 0 && m_max.length()) {
+        if (!has_options && m_min.length() > 0 && m_max.length() > 0) {
 
             // Throw an exception if we have a NAN parameter
             if (m_status == ST_NAN) {
@@ -1084,7 +1084,6 @@ void GApplicationPar::check_value_real(const std::string& value) const
 void GApplicationPar::check_value_string(const std::string& value) const
 {
     // Check for options
-    //bool has_options = check_options(value);
     check_options(value);
 
     // Return
@@ -1108,7 +1107,6 @@ void GApplicationPar::check_value_string(const std::string& value) const
 void GApplicationPar::check_value_filename(const std::string& value) const
 {
     // Check for options
-    //bool has_options = check_options(value);
     check_options(value);
 
     // Return
