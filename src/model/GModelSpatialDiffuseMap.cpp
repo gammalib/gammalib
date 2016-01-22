@@ -719,11 +719,18 @@ void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
         // Make sure that last pixel in the cache is >1
         m_mc_cache[npix] = 1.0001;
 
-        // Set the normalization factor for the MC simulations as the
-        // fraction of the flux that is comprised within the simulation
-        // cone
+        // Set the normalization factor for the MC simulations. In case
+        // that the map is normalized, this is the fraction of the flux
+        // that is comprised within the simulation cone. For non-normalized
+        // maps, this is simply the flux comprised within the simulation
+        // cone.
         if (sum_map > 0.0) {
-            m_mc_norm = sum / sum_map;
+            if (m_normalize) {
+                m_mc_norm = sum / sum_map;
+            }
+            else {
+                m_mc_norm = sum;
+            }
         }
 
         // Do we have a HealPix map?
