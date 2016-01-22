@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.0.1
 
 Author(s) : Juergen Knoedlseder
 
-13 January 2016
+22 January 2016
 
 
 1. Introduction
@@ -47,7 +47,9 @@ None
 
 8. Model module
 ---------------
-None
+The diffuse map normalization for Monte Carlo simulations has been corrected in
+GModelSpatialDiffuseMap::set_mc_cone() to properly account for the case that the
+diffuse map has not been normalized. This fixes #1584.
 
 
 9. Numerics module

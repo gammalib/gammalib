@@ -1,4 +1,4 @@
-2016-01-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-01-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix version 1.0.1 released
         ================================
@@ -6,6 +6,7 @@
         Add units to CTA event list columns (#1616)
         Allow usage of numbers in FITS extension names (#1611)
         Solve compatibility issues with Anaconda on Mac OS X (#1607)
+        Correct diffuse map MC normalisation (#1584)
 
 
 2015-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
