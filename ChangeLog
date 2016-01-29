@@ -7,7 +7,7 @@
         Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598)
 
 
-2016-01-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-01-27  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix version 1.0.1 released
         ================================

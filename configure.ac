@@ -55,7 +55,7 @@ AC_CONFIG_HEADER([config.h])
 # 5. If any interfaces have been removed or changed since the last public   #
 #    release, then set age to 0.                                            #
 #############################################################################
-GAMMALIB_LT_VERSION="1:0:0"
+GAMMALIB_LT_VERSION="2:0:0"
 AC_SUBST(GAMMALIB_LT_VERSION)
 
 
