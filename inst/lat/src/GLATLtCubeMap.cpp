@@ -494,10 +494,10 @@ std::string GLATLtCubeMap::costhetabin(void) const
 
 
 /***********************************************************************//**
- * @brief Print lifetime cube map information
+ * @brief Print livetime cube map information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing lifetime cube map information.
+ * @return String containing livetime cube map information.
  ***************************************************************************/
 std::string GLATLtCubeMap::print(const GChatter& chatter) const
 {

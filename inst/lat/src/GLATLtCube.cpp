@@ -350,7 +350,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear lifetime cube
+ * @brief Clear livetime cube
  ***************************************************************************/
 void GLATLtCube::clear(void)
 {
@@ -366,9 +366,9 @@ void GLATLtCube::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone lifetime cube
+ * @brief Clone livetime cube
  *
- * @return Pointer to deep copy of lifetime cube.
+ * @return Pointer to deep copy of livetime cube.
  ***************************************************************************/
 GLATLtCube* GLATLtCube::clone(void) const
 {
@@ -390,7 +390,7 @@ void GLATLtCube::load(const std::string& filename)
     // Clear object
     clear();
 
-    // Open lifetime cube FITS file
+    // Open livetime cube FITS file
     GFits file(filename);
 
     // Get HDUs

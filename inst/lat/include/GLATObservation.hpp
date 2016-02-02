@@ -93,7 +93,7 @@ protected:
     std::string  m_cntfile;      //!< Counts map filename
     std::string  m_expfile;      //!< Exposure map filename
     GLATResponse m_response;     //!< Instrument response functions
-    GLATLtCube*  m_ltcube;       //!< Pointer to lifetime cube
+    GLATLtCube*  m_ltcube;       //!< Pointer to livetime cube
 };
 
 
