@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATLtCube.i - Fermi/LAT lifetime cube class              *
+ *               GLATLtCube.i - Fermi/LAT livetime cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATLtCube.i
- * @brief Fermi/LAT lifetime cube interface definition
+ * @brief Fermi/LAT livetime cube interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GLATLtCube
  *
- * @brief Interface for the Fermi LAT lifetime cube.
+ * @brief Interface for the Fermi LAT livetime cube.
  ***************************************************************************/
 class GLATLtCube : public GBase {
 

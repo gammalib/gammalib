@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -520,7 +520,7 @@ double GLATMeanPsf::exposure(const double& logE)
 
 
 /***********************************************************************//**
- * @brief Print lifetime cube information
+ * @brief Print livetime cube information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing ROI information.

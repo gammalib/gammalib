@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTACubeExposure.cpp - CTA cube analysis exposure class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -348,7 +348,7 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
                         // Get logE/TeV
                         double logE = m_ebounds.elogmean(iebin).log10TeV();
 
-                        // Set exposure cube (effective area * lifetime)
+                        // Set exposure cube (effective area * livetime)
                         m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
                                                obs.livetime();
 
