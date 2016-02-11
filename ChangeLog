@@ -3,6 +3,8 @@
         * Version 1.1.0 released
         =========================
 
+        Add GCTAEventList::remove method
+        Handle also additional columns in GCTAEventList::append method
         Correct GFitsTableCol::insert method for empty columns
         Correct GCTAEdisp2D::compute_ebounds methods (#1662)
         Use GFilename in GFits to store filename (#1649)

@@ -109,6 +109,16 @@ None
 
 20. CTA interface
 -----------------
+Add GCTAEventList::remove() method to remove events from an event list.
+
+The GCTAEventList::append() method now also appends empty elements to the
+additional columns so that all event list columns have finally the same length.
+
+The GCTAEdisp2D::compute_ebounds_obs() and GCTAEdisp2::compute_ebounds_src()
+methods have been corrected so that they return the energy intervals covered by
+valid matrix elements. With the code before there were problems with not setting
+correctly the maximum energies of the intervals (#1662).
+
 The extension name for the GTI HDU is now determined from the data sub-space
 keyword provided in the events FITS file header. This allows to have multiple
 GTIs (and also event lists) in a single FITS file. We do however require that
@@ -127,11 +137,6 @@ The GCTAObservation::save() method has now a special logic that decodes any
 optionally specified extension in the format [EVENTS;GTI] into an events and a
 Good Time Intervals extension name. These changes satisfy the feature request
 #1598.
-
-The GCTAEdisp2D::compute_ebounds_obs() and GCTAEdisp2::compute_ebounds_src()
-methods have been corrected so that they return the energy intervals covered by
-valid matrix elements. With the code before there were problems with not setting
-correctly the maximum energies of the intervals (#1662).
 
 
 21. COMPTEL interface

@@ -603,9 +603,49 @@ void GCTAEventList::append(const GCTAEventAtom& event)
     // Append event
     m_events.push_back(event);
 
+    // Append an element to all additional columns
+    for (int i = 0; i < m_columns.size(); ++i) {
+        m_columns[i]->insert(m_columns[i]->length(),1);
+    }
+
     // Set event index
     int index = m_events.size()-1;
     m_events[index].m_index = index;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove event atoms from event list
+ *
+ * @param[in] index Index from which on events should be removed.
+ * @param[in] number Number of event to remove.
+ *
+ * Removes events from the event list. This method does nothing if @p index
+ * points beyond the event list. The method does also gently accepts
+ * @p number arguments where @p index + @p number reach beyond the event
+ * list.
+ ***************************************************************************/
+void GCTAEventList::remove(const int& index, const int& number)
+{
+    // Continue only if index is valid
+    if (index < size()) {
+
+        // Determine number of elements to remove
+        int n_remove = (index + number > size()) ? size() - index : number;
+
+        // Remove events
+        m_events.erase(m_events.begin() + index,
+                       m_events.begin() + index + n_remove);
+
+        // Remove elements from additional columns
+        for (int i = 0; i < m_columns.size(); ++i) {
+            m_columns[i]->remove(index, n_remove);
+        }
+
+    } // endif: index was valid
 
     // Return
     return;

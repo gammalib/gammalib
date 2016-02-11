@@ -60,6 +60,7 @@ public:
     // Implement other methods
     void               append(const GCTAEventAtom& event);
     void               reserve(const int& number);
+    void               remove(const int& index, const int& number = 1);
     void               write(GFits& fits, const std::string& evtname,
                                           const std::string& gtiname) const;
     double             irf_cache(const std::string& name, const int& index) const;
