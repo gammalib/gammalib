@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCOMModelDRBFitting.cpp - COMPTEL DRB model fitting class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,6 @@
 #include "GTools.hpp"
 #include "GModelRegistry.hpp"
 #include "GCOMModelDRBFitting.hpp"
-#include "GCOMException.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventBin.hpp"
 
@@ -231,9 +230,8 @@ GCOMModelDRBFitting* GCOMModelDRBFitting::clone(void) const
  * @param[in] obs Observation.
  * @return Background model value.
  *
- * @exception GCOMException::bad_observation_type
+ * @exception GException::invalid_argument
  *            Observation is not a COMPTEL observation.
- * @exception GCOMException::bad_event_type
  *            Event is not a COMPTEL event bin.
  *
  * Evaluates the COMPTEL DRB fitting model.
@@ -244,13 +242,20 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
     // Extract COMPTEL observation
     const GCOMObservation* observation = dynamic_cast<const GCOMObservation*>(&obs);
     if (observation == NULL) {
-        throw GCOMException::bad_observation_type(G_EVAL);
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
+                          "observations. Please specify a COMPTEL observation "
+                          "as argument.";
+        throw GException::invalid_argument(G_EVAL, msg);
     }
 
     // Extract COMPTEL event bin
     const GCOMEventBin* bin = dynamic_cast<const GCOMEventBin*>(&event);
     if (bin == NULL) {
-        throw GCOMException::bad_event_type(G_EVAL);
+        std::string cls = std::string(typeid(&event).name());
+        std::string msg = "Event of type \""+cls+"\" is  not a COMPTEL event. "
+                          "Please specify a COMPTEL event as argument.";
+        throw GException::invalid_argument(G_EVAL, msg);
     }
 
     // Initialise value
@@ -337,13 +342,20 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
     // Extract COMPTEL observation
     const GCOMObservation* observation = dynamic_cast<const GCOMObservation*>(&obs);
     if (observation == NULL) {
-        throw GCOMException::bad_observation_type(G_EVAL_GRADIENTS);
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
+                          "observations. Please specify a COMPTEL observation "
+                          "as argument.";
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
     // Extract COMPTEL event bin
     const GCOMEventBin* bin = dynamic_cast<const GCOMEventBin*>(&event);
     if (bin == NULL) {
-        throw GCOMException::bad_event_type(G_EVAL_GRADIENTS);
+        std::string cls = std::string(typeid(&event).name());
+        std::string msg = "Event of type \""+cls+"\" is  not a COMPTEL event. "
+                          "Please specify a COMPTEL event as argument.";
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
     // Initialise value and gradients
@@ -491,10 +503,8 @@ GCOMEventCube* GCOMModelDRBFitting::mc(const GObservation& obs,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter name found in XML element.
+ * @exception GException::invalid_value
+ *            Model definition requires at least one node.
  *
  * Read the COMPTEL DRB fitting model from an XML element.
  *
@@ -524,9 +534,9 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
 
     // Throw an error if there are no nodes
     if (nodes < 1) {
-        std::string message = "DRB fitting model requires at least one"
-                              " Phibar node.";
-        throw GException::model_invalid_parnum(G_READ, xml, message);
+        std::string msg = "DRB fitting model requires at least one Phibar "
+                          "node. Please correct XML format.";
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Loop over all nodes
@@ -539,38 +549,13 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
         // Get node
         const GXmlElement* node = xml.element("node", i);
 
-        // Verify that node XML element has exactly 2 parameters
-        if (node->elements() != 2 || node->elements("parameter") != 2) {
-            throw GException::model_invalid_parnum(G_READ, xml,
-                  "Node requires exactly 2 parameters.");
-        }
+        // Read Phibar parameter
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, *node, "Phibar");
+        phibar.read(*par);
 
-        // Extract node parameters
-        int npar[] = {0, 0};
-        for (int k = 0; k < 2; ++k) {
-
-            // Get parameter element
-            const GXmlElement* par = node->element("parameter", k);
-
-            // Handle energy
-            if (par->attribute("name") == "Phibar") {
-                phibar.read(*par);
-                npar[0]++;
-            }
-
-            // Handle intensity
-            else if (par->attribute("name") == "Normalization") {
-                normalization.read(*par);
-                npar[1]++;
-            }
-
-        } // endfor: looped over parameters
-
-        // Verify that all parameters were found
-        if (npar[0] != 1 || npar[1] != 1) {
-            throw GException::model_invalid_parnames(G_READ, xml,
-                  "Require \"Phibar\" and \"Normalization\" parameters.");
-        }
+        // Read Normalization parameter
+        par = gammalib::xml_get_par(G_READ, *node, "Normalization");
+        normalization.read(*par);
 
         // Set parameter names
         std::string phibar_name        = "Phibar layer "+gammalib::str(i);
@@ -675,8 +660,10 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
 
     // Verify model type
     if (src->attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, src->attribute("type"),
-              "DRB fitting model is not of type \""+type()+"\".");
+        std::string msg = "Invalid model type \""+src->attribute("type")+"\" "
+                          "found in XML file. Model type \""+type()+"\" "
+                          "expected.";
+        throw GException::invalid_value(G_WRITE, msg);
     }
 
     // Determine number of nodes
@@ -691,9 +678,11 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
 
     // Verify that XML element has the required number of nodes
     if (src->elements() != nodes || src->elements("node") != nodes) {
-        std::string message = "DRB fitting model requires exactly " +
-                              gammalib::str(nodes) + " nodes.";
-        throw GException::model_invalid_parnum(G_WRITE, *src, message);
+        std::string msg = "Invalid number of nodes "+
+                          gammalib::str(src->elements("node"))+
+                          " found in XML file, but model requires exactly "+
+                          gammalib::str(nodes)+" nodes.";
+        throw GException::invalid_value(G_WRITE, msg);
     }
 
     // Loop over all nodes
@@ -702,45 +691,13 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
         // Get node
         GXmlElement* node = src->element("node", i);
 
-        // If XML element has 0 leafs then append energy and intensity
-        // element
-        if (node->elements() == 0) {
-            node->append(GXmlElement("parameter name=\"Phibar\""));
-            node->append(GXmlElement("parameter name=\"Normalization\""));
-        }
+        // Write Phibar parameter
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, *node, "Phibar");
+        m_phibars[i].write(*par);
 
-        // Verify that node XML element has exactly 2 parameters
-        if (node->elements() != 2 || node->elements("parameter") != 2) {
-            throw GException::model_invalid_parnum(G_WRITE, *src,
-                  "Node requires exactly 2 parameters.");
-        }
-
-        // Set or update model parameter attributes
-        int npar[] = {0, 0};
-        for (int k = 0; k < 2; ++k) {
-
-            // Get parameter element
-            GXmlElement* par = node->element("parameter", k);
-
-            // Handle prefactor
-            if (par->attribute("name") == "Phibar") {
-                npar[0]++;
-                m_phibars[i].write(*par);
-            }
-
-            // Handle index
-            else if (par->attribute("name") == "Normalization") {
-                npar[1]++;
-                m_values[i].write(*par);
-            }
-
-        } // endfor: looped over parameters
-
-        // Check of all required parameters are present
-        if (npar[0] != 1 || npar[1] != 1) {
-            throw GException::model_invalid_parnames(G_WRITE, *src,
-                  "Require \"Phibar\" and \"Normalization\" parameters.");
-        }
+        // Write Normalization parameter
+        par = gammalib::xml_need_par(G_WRITE, *node, "Normalization");
+        m_values[i].write(*par);
 
     } // endfor: looped over nodes
 

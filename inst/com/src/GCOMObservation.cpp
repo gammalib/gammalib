@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,7 +33,6 @@
 #include "GException.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
-#include "GCOMException.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMSupport.hpp"
@@ -65,7 +64,7 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Creates empty class instance.
+ * Creates an empty COMPTEL observation.
  ***************************************************************************/
 GCOMObservation::GCOMObservation(void) : GObservation()
 {
@@ -115,7 +114,7 @@ GCOMObservation::GCOMObservation(const std::string& drename,
  *
  * @param[in] obs COMPTEL observation.
  *
- * Creates class instance by copying an existing COMPTEL observation.
+ * Creates COMPTEL observation by copying an existing COMPTEL observation.
  ***************************************************************************/
 GCOMObservation::GCOMObservation(const GCOMObservation& obs) : GObservation(obs)
 {
@@ -188,7 +187,7 @@ GCOMObservation& GCOMObservation::operator=(const GCOMObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear COMPTEL observation
  ***************************************************************************/
 void GCOMObservation::clear(void)
 {
@@ -206,7 +205,7 @@ void GCOMObservation::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone COMPTEL observation
  *
  * @return Pointer to deep copy of COMPTEL observation.
  ***************************************************************************/
@@ -221,19 +220,21 @@ GCOMObservation* GCOMObservation::clone(void) const
  *
  * @param[in] rsp Response function.
  *
- * @exception GException::rsp_invalid_type
- *            Specified response is not of type GCOMResponse.
+ * @exception GException::invalid_argument
+ *            Specified response is not a COMPTEL response.
  *
- * Sets the response function for the observation. The argument has to be of
- * type GCOMResponse, otherwise an exception is thrown.
+ * Sets the response function for the observation.
  ***************************************************************************/
 void GCOMObservation::response(const GResponse& rsp)
 {
     // Get pointer on COM response
     const GCOMResponse* comrsp = dynamic_cast<const GCOMResponse*>(&rsp);
     if (comrsp == NULL) {
-        throw GException::rsp_invalid_type(G_RESPONSE,
-              typeid(&rsp).name(), "Expected type \"GCOMResponse\".");
+        std::string cls = std::string(typeid(&rsp).name());
+        std::string msg = "Response of type \""+cls+"\" is "
+                          "not a COMPTEL response. Please specify a COMPTEL "
+                          "response as argument.";
+        throw GException::invalid_argument(G_RESPONSE, msg);
     }
 
     // Clone response function
@@ -250,8 +251,8 @@ void GCOMObservation::response(const GResponse& rsp)
  * @param[in] rspname Name of COMPTEL response.
  * @param[in] caldb Calibration database.
  *
- * Sets the response function by loading the response information from an
- * IAQ file.
+ * Sets the response function by loading the response information from the
+ * calibration database.
  ***************************************************************************/
 void GCOMObservation::response(const std::string& rspname, const GCaldb& caldb)
 {
@@ -274,11 +275,6 @@ void GCOMObservation::response(const std::string& rspname, const GCaldb& caldb)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
- *
  * Reads information for a COMPTEL observation from an XML element.
  * The expected format of the XML element is
  *
@@ -287,7 +283,7 @@ void GCOMObservation::response(const std::string& rspname, const GCaldb& caldb)
  *       <parameter name="DRB" file="..."/>
  *       <parameter name="DRG" file="..."/>
  *       <parameter name="DRX" file="..."/>
- *       <parameter name="IAQ" file="..."/>
+ *       <parameter name="IAQ" value="..."/>
  *     </observation>
  *
  * for a binned observation.
@@ -297,70 +293,15 @@ void GCOMObservation::read(const GXmlElement& xml)
     // Clear observation
     clear();
 
-    // Initialise FITS file names
-    std::string drename;
-    std::string drbname;
-    std::string drgname;
-    std::string drxname;
-    std::string iaqname;
-
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
-
-    // Verify that XML element has exactly 5 parameters
-    if (xml.elements() != 5 || npars != 5) {
-        throw GException::xml_invalid_parnum(G_READ, xml,
-              "COMPTEL observation requires exactly 5 parameters.");
-    }
-
-    // Extract parameters
-    int npar[] = {0, 0, 0, 0, 0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle EventList
-        if (par->attribute("name") == "DRE") {
-            drename = par->attribute("file");
-            npar[0]++;
-        }
-
-        // Handle DRB
-        else if (par->attribute("name") == "DRB") {
-            drbname = par->attribute("file");
-            npar[1]++;
-        }
-
-        // Handle DRG
-        else if (par->attribute("name") == "DRG") {
-            drgname = par->attribute("file");
-            npar[2]++;
-        }
-
-        // Handle DRX
-        else if (par->attribute("name") == "DRX") {
-            drxname = par->attribute("file");
-            npar[3]++;
-        }
-
-        // Handle IAQ
-        else if (par->attribute("name") == "IAQ") {
-            iaqname = par->attribute("file");
-            npar[4]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
-        throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"DRE\", \"DRB\", \"DRG\", \"DRX\"  and \"IAQ\""
-              " parameters.");
-    }
+    // Get parameters
+    std::string drename = gammalib::xml_get_attr(G_READ, xml, "DRE", "file");
+    std::string drbname = gammalib::xml_get_attr(G_READ, xml, "DRB", "file");
+    std::string drgname = gammalib::xml_get_attr(G_READ, xml, "DRG", "file");
+    std::string drxname = gammalib::xml_get_attr(G_READ, xml, "DRX", "file");
+    std::string iaqname = gammalib::xml_get_attr(G_READ, xml, "IAQ", "value");
 
     // Load observation
     load(drename, drbname, drgname, drxname);
@@ -378,11 +319,6 @@ void GCOMObservation::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
- *
  * Writes information for a COMPTEL observation into an XML element. The
  * expected format of the XML element is
  *
@@ -391,75 +327,35 @@ void GCOMObservation::read(const GXmlElement& xml)
  *       <parameter name="DRB" file="..."/>
  *       <parameter name="DRG" file="..."/>
  *       <parameter name="DRX" file="..."/>
- *       <parameter name="IAQ" file="..."/>
+ *       <parameter name="IAQ" value="..."/>
  *     </observation>
  *
  * for a binned observation.
  ***************************************************************************/
 void GCOMObservation::write(GXmlElement& xml) const
 {
-    // If XML element has 0 nodes then append 5 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"DRE\""));
-        xml.append(GXmlElement("parameter name=\"DRB\""));
-        xml.append(GXmlElement("parameter name=\"DRG\""));
-        xml.append(GXmlElement("parameter name=\"DRX\""));
-        xml.append(GXmlElement("parameter name=\"IAQ\""));
-    }
+    // Allocate XML element pointer
+    GXmlElement* par;
 
-    // Verify that XML element has exactly 5 parameters
-    if (xml.elements() != 5 || xml.elements("parameter") != 5) {
-        throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "COMPTEL observation requires exactly 5 parameters.");
-    }
+    // Set DRE parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "DRE");
+    par->attribute("file", m_drename);
 
-    // Set or update parameter attributes
-    int npar[] = {0, 0, 0, 0, 0};
-    for (int i = 0; i < 5; ++i) {
+    // Set DRB parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "DRB");
+    par->attribute("file", m_drbname);
 
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
+    // Set DRG parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "DRG");
+    par->attribute("file", m_drgname);
 
-        // Handle DRE
-        if (par->attribute("name") == "DRE") {
-            par->attribute("file", m_drename);
-            npar[0]++;
-        }
+    // Set DRX parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "DRX");
+    par->attribute("file", m_drxname);
 
-        // Handle DRB
-        else if (par->attribute("name") == "DRB") {
-            par->attribute("file", m_drbname);
-            npar[1]++;
-        }
-
-        // Handle DRG
-        else if (par->attribute("name") == "DRG") {
-            par->attribute("file", m_drgname);
-            npar[2]++;
-        }
-
-        // Handle DRX
-        else if (par->attribute("name") == "DRX") {
-            par->attribute("file", m_drxname);
-            npar[3]++;
-        }
-
-        // Handle IAQ
-        else if (par->attribute("name") == "IAQ") {
-            std::string iaqname = "";
-            iaqname = m_response.rspname();
-            par->attribute("file", iaqname);
-            npar[4]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
-        throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"DRE\", \"DRB\", \"DRG\", \"DRX\"  and \"IAQ\""
-              " parameters.");
-    }
+    // Set IAQ parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "DRX");
+    par->attribute("value", m_response.rspname());
 
     // Return
     return;
@@ -579,11 +475,11 @@ void GCOMObservation::init_members(void)
     m_drx.clear();
     m_pointing.clear();
     m_response.clear();
-    m_obs_id     = 0;
-    m_ontime     = 0.0;
-    m_livetime   = 0.0;
-    m_deadc      = 0.0;
-    m_ewidth     = 0.0;
+    m_obs_id   = 0;
+    m_ontime   = 0.0;
+    m_livetime = 0.0;
+    m_deadc    = 0.0;
+    m_ewidth   = 0.0;
 
     // Return
     return;
@@ -670,7 +566,7 @@ void GCOMObservation::load_dre(const std::string& drename)
  *
  * @param[in] drbname DRB filename.
  *
- * @exception GCOMException::incompatible_dataspace
+ * @exception GException::invalid_value
  *            DRB data space incompatible with DRE data space.
  *
  * Load the background model from the primary image of the specified FITS
@@ -695,8 +591,9 @@ void GCOMObservation::load_drb(const std::string& drbname)
 
     // Check map dimensions
     if (!check_map(m_drb)) {
-        throw GCOMException::incompatible_dataspace(G_LOAD_DRB,
-              "DRB data cube incompatible with DRE data cube.");
+        std::string msg = "DRB data cube \""+drbname+"\" incompatible with "
+                          "DRE data cube \""+m_drename+"\".";
+        throw GException::invalid_value(G_LOAD_DRB, msg);
     }
 
     // Store DRB filename
@@ -712,7 +609,7 @@ void GCOMObservation::load_drb(const std::string& drbname)
  *
  * @param[in] drgname DRG filename.
  *
- * @exception GCOMException::incompatible_dataspace
+ * @exception GException::invalid_value
  *            DRG data space incompatible with DRE data space.
  *
  * Load the geometry factors from the primary image of the specified FITS
@@ -737,8 +634,9 @@ void GCOMObservation::load_drg(const std::string& drgname)
 
     // Check map dimensions
     if (!check_map(m_drg)) {
-        throw GCOMException::incompatible_dataspace(G_LOAD_DRG,
-              "DRG data cube incompatible with DRE data cube.");
+        std::string msg = "DRG data cube \""+drgname+"\" incompatible with "
+                          "DRE data cube \""+m_drename+"\".";
+        throw GException::invalid_value(G_LOAD_DRB, msg);
     }
 
     // Store DRG filename

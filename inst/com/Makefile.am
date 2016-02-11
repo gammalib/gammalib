@@ -13,7 +13,6 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = src/GCOMSupport.cpp \
-          src/GCOMException.cpp \
           src/GCOMEventCube.cpp \
           src/GCOMEventBin.cpp \
           src/GCOMInstDir.cpp \
@@ -22,8 +21,7 @@ sources = src/GCOMSupport.cpp \
           src/GCOMModelDRBFitting.cpp
 
 # Define headers to be installed
-pkginclude_HEADERS = include/GCOMException.hpp \
-                     include/GCOMEventCube.hpp \
+pkginclude_HEADERS = include/GCOMEventCube.hpp \
                      include/GCOMEventBin.hpp \
                      include/GCOMInstDir.hpp \
                      include/GCOMResponse.hpp \
