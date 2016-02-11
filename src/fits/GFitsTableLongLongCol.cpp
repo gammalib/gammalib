@@ -292,8 +292,8 @@ int GFitsTableLongLongCol::integer(const int& row, const int& inx) const
  * @exception GException::fits_invalid_row
  *            Specified row is invalid.
  *
- * This method inserts rows into a FITS table. This implies that all columns
- * will be loaded into memory.
+ * Inserts rows into a FITS table. This implies that all columns will be
+ * loaded into memory.
  ***************************************************************************/
 void GFitsTableLongLongCol::insert(const int& row, const int& nrows)
 {
@@ -309,6 +309,9 @@ void GFitsTableLongLongCol::insert(const int& row, const int& nrows)
         // number of rows to be inserted
         if (m_length == 0) {
             m_length = nrows;
+            m_size   = m_number * m_length;
+            alloc_data();
+            init_data();
         }
         
         // ... otherwise fetch data, allocate new data and copy over

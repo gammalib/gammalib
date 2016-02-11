@@ -34,6 +34,11 @@ None
 
 6. FITS I/O Interface
 ---------------------
+The GFitsTableCol::insert() method did not work corretly for an empty column
+since it de-allocated memory without having necessarily memory on disk. This
+was corrected by allocating now memory after inserting elements into an empty
+FITS column.
+
 GFits now uses the GFilename class to store the FITS filename (fixes #1649).
 
 
