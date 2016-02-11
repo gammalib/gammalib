@@ -725,6 +725,12 @@ void GCTAEdisp2D::free_members(void)
  * @param[in] phi Azimuth angle (rad).
  * @param[in] zenith Zenith angle (rad).
  * @param[in] azimuth Azimuth angle (rad).
+ *
+ * Computes for all true energies the energy boundaries of the observed
+ * energies covered by valid migration matrix elements. Only matrix elements
+ * with values >= 1.0e-12 are considered as valid elements. In case that no
+ * matrix elements are found of a given true energy, the interval of observed
+ * energies will be set to [1 TeV, 1 TeV] (i.e. an empty interval).
  ***************************************************************************/
 void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
                                       const double& phi,
@@ -741,49 +747,62 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
     for (int isrc = 0; isrc < m_edisp.axis(0); ++isrc) {
 
         // Set Esrc
-        double Esrc    = std::sqrt(m_edisp.axis_hi(0, isrc) *
-                                   m_edisp.axis_lo(0, isrc));
+        double Esrc    = std::sqrt(m_edisp.axis_hi(0,isrc) *
+                                   m_edisp.axis_lo(0,isrc));
         double logEsrc = std::log10(Esrc);
 
         // Initialise results
-        double logEobsMin = -30.0;
-        double logEobsMax =  10.0;
+        double logEobsMin = 0.0;
+        double logEobsMax = 0.0;
         bool   minFound   = false;
         bool   maxFound   = false;
 
-        // Find boundaries, loop over EobsOverEsrc
-        for (int i = 0; i < m_edisp.axis(1); ++i) {
+        // Determine number of MIGRA bins
+        int n_migra = m_edisp.axis(1);
 
-            // Compute value EobsOverEsrc
-            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1, i) +
-                                         m_edisp.axis_lo(1, i));
+        // Find minimum boundary
+        for (int i = 0; i < n_migra; ++i) {
+
+            // Compute EobsOverEsrc value
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1,i) +
+                                         m_edisp.axis_lo(1,i));
+
+            // Get matrix term
+            double edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta);
 
             // Find first non-negligible matrix term
-            if (!minFound && m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
+            if (edisp >= eps) {
                 minFound   = true;
                 logEobsMin = std::log10(EobsOverEsrc * Esrc);
+                break;
             }
 
-            // Find last non-negligible matrix term
-            else if (minFound && !maxFound &&
-                     m_edisp(0, logEsrc, EobsOverEsrc, theta) < eps) {
+        } // endfor: find minimum boundary
+
+        // Find maximum boundary
+        for (int i = n_migra-1; i >= 0; i--) {
+
+            // Compute EobsOverEsrc value
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1,i) +
+                                         m_edisp.axis_lo(1,i));
+
+            // Get matrix term
+            double edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta);
+
+            // Find first non-negligible matrix term
+            if (edisp >= eps) {
                 maxFound   = true;
                 logEobsMax = std::log10(EobsOverEsrc * Esrc);
+                break;
             }
 
-            // Continue searching
-            else if (minFound && maxFound &&
-                     m_edisp(0, logEsrc, EobsOverEsrc, theta) >= eps) {
-                maxFound = false;
-            }
+        } // endfor: find maximum boundary
 
-        } // endfor: looped over EobsOverEsrc
-
-
-        // If energy dispersion has never become negligible until end of loop,
-        // reset logEobsMax
-        if (!maxFound) {
-            logEobsMax = 10.0;
+        // If we did not find boundaries then set the interval to
+        // a zero interval for safety
+        if (!minFound || !maxFound) {
+            logEobsMin = 0.0;
+            logEobsMax = 0.0;
         }
 
         // Set energy boundaries
@@ -809,6 +828,12 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
  * @param[in] phi Azimuth angle (rad).
  * @param[in] zenith Zenith angle (rad).
  * @param[in] azimuth Azimuth angle (rad).
+ *
+ * Computes for all observed energies the energy boundaries of the true
+ * energies covered by valid migration matrix elements. Only matrix elements
+ * with values >= 1.0e-12 are considered as valid elements. In case that no
+ * matrix elements are found of a given observed energy, the interval of true
+ * energies will be set to [1 TeV, 1 TeV] (i.e. an empty interval).
  ***************************************************************************/
 void GCTAEdisp2D::compute_ebounds_src(const double& theta,
                                       const double& phi,
@@ -825,49 +850,64 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
     for (int iobs = 0; iobs < m_edisp.axis(0); ++iobs) {
 
         // Set Eobs
-        double Eobs    = std::sqrt(m_edisp.axis_hi(0, iobs) *
-                                   m_edisp.axis_lo(0, iobs));
+        double Eobs    = std::sqrt(m_edisp.axis_hi(0,iobs) *
+                                   m_edisp.axis_lo(0,iobs));
         double logEobs = std::log10(Eobs);
 
         // Initialise results
-        double logEsrcMin = -10.0;
-        double logEsrcMax =  30.0;
+        double logEsrcMin = 0.0;
+        double logEsrcMax = 0.0;
         bool   minFound   = false;
         bool   maxFound   = false;
 
-        // Find boundaries, loop over Esrc
-        for (int isrc = 0; isrc < m_edisp.axis(0); ++isrc) {
+        // Determine number of true energy bins
+        int n_bins = m_edisp.axis(0);
+
+        // Find minimum boundary
+        for (int isrc = 0; isrc < n_bins; ++isrc) {
 
             // Set Esrc
-            double Esrc    = std::sqrt(m_edisp.axis_hi(0, isrc) *
-                                       m_edisp.axis_lo(0, isrc));
+            double Esrc    = std::sqrt(m_edisp.axis_hi(0,isrc) *
+                                       m_edisp.axis_lo(0,isrc));
             double logEsrc = std::log10(Esrc);
 
+            // Get matrix term
+            double edisp = operator()(logEobs, logEsrc, theta);
+
             // Find first non-negligible matrix term
-            if (!minFound && operator()(logEobs, logEsrc, theta) >= eps) {
+            if (edisp >= eps) {
                 minFound   = true;
                 logEsrcMin = logEsrc;
+                break;
             }
 
-            // Find last non-negligible matrix term
-            else if (minFound && !maxFound &&
-                     operator()(logEobs, logEsrc, theta) < eps) {
+        } // endfor: find minimum boundary
+
+        // Find maximum boundary
+        for (int isrc = n_bins-1; isrc >= 0; isrc--) {
+
+            // Set Esrc
+            double Esrc    = std::sqrt(m_edisp.axis_hi(0,isrc) *
+                                       m_edisp.axis_lo(0,isrc));
+            double logEsrc = std::log10(Esrc);
+
+            // Get matrix term
+            double edisp = operator()(logEobs, logEsrc, theta);
+
+            // Find first non-negligible matrix term
+            if (edisp >= eps) {
                 maxFound   = true;
                 logEsrcMax = logEsrc;
+                break;
             }
 
-            // Continue
-            else if (minFound && maxFound &&
-                     operator()(logEobs, logEsrc, theta) >= eps) {
-                maxFound = false;
-            }
+        } // endfor: find maximum boundary
 
-        } // endfor: looped over true energy
-
-        // If energy dispersion has never become negligible until end of loop,
-        // reset logEobsMax
-        if (!maxFound) {
-            logEsrcMax = 30.0;
+        // If we did not find boundaries then set the interval to
+        // a zero interval for safety
+        if (!minFound || !maxFound) {
+            logEsrcMin = 0.0;
+            logEsrcMax = 0.0;
         }
 
         // Set energy boundaries
