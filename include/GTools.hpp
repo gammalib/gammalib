@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.hpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -115,6 +115,10 @@ namespace gammalib {
     const GXmlElement*       xml_get_par(const std::string& origin,
                                          const GXmlElement& xml,
                                          const std::string& name);
+    std::string              xml_get_attr(const std::string& origin,
+                                          const GXmlElement& xml,
+                                          const std::string& name,
+                                          const std::string& attribute);
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);
