@@ -16,9 +16,6 @@ made since the last release of GammaLib.
 The following methods have been added to the public interface:
 - GObservation::events() (non-const variant)
 
-The following methods have been removed from the public interface:
-- GCTAObservation::dispose_events()
-
 The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string
 - GCTAObservation::eventtype() returns now std::string instead of const std::string&

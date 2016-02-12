@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
 #include "GObservationRegistry.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
@@ -1208,6 +1209,28 @@ std::string GCTAObservation::eventtype(void) const
 
     // Return event type
     return eventtype;
+}
+
+
+/***********************************************************************//**
+ * @brief Dispose events
+ *
+ * Disposes the events to save memory. The method only applies to event
+ * lists. If does nothing in case that the observation does not contain an
+ * event list.
+ ***************************************************************************/
+void GCTAObservation::dispose_events(void)
+{
+    // Get pointer to event list
+    GCTAEventList* list = dynamic_cast<GCTAEventList*>(m_events);
+
+    // Dispose event list if pointer is valid
+    if (list != NULL) {
+        list->dispose();
+    }
+
+    // Return
+    return;
 }
 
 
