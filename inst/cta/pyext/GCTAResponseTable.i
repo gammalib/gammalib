@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTAResponseTable.i - CTA response table class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -134,30 +134,31 @@ public:
     void               clear(void);
     GCTAResponseTable* clone(void) const;
     std::string        classname(void) const;
-    int                size(void) const;
+    int                tables(void) const;
     const int&         elements(void) const;
+    const std::string& unit(const int& table) const;
+    void               scale(const int& table, const double& scale);
     const int&         axes(void) const;
-    int                axis(const int& index) const;
-    const double&      axis_lo(const int& index, const int& bin) const;
-    const double&      axis_hi(const int& index, const int& bin) const;
-    const std::string& axis_lo_name(const int& index) const;
-    const std::string& axis_hi_name(const int& index) const;
-    const std::string& axis_lo_unit(const int& index) const;
-    const std::string& axis_hi_unit(const int& index) const;
-    void               axis_linear(const int& index);
-    void               axis_log10(const int& index);
-    void               axis_radians(const int& index);
-    const std::string& unit(const int& index) const;
+    int                axis(const std::string& name) const;
+    int                axis_bins(const int& axis) const;
+    const double&      axis_lo(const int& axis, const int& bin) const;
+    const double&      axis_hi(const int& axis, const int& bin) const;
+    const GNodeArray&  axis_nodes(const int& axis) const;
+    const std::string& axis_lo_name(const int& axis) const;
+    const std::string& axis_hi_name(const int& axis) const;
+    const std::string& axis_lo_unit(const int& axis) const;
+    const std::string& axis_hi_unit(const int& axis) const;
+    void               axis_linear(const int& axis);
+    void               axis_log10(const int& axis);
+    void               axis_radians(const int& axis);
     void               append_axis(const std::vector<double>& axis_lo, 
                                    const std::vector<double>& axis_hi,
                                    const std::string&         name,
                                    const std::string&         unit);    
-    void               append_parameter(const std::string& name,
-                                        const std::string& unit);
-    const GNodeArray&  nodes(const int& index) const;
-    void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable& hdu);
-    void               write(GFitsTable& hdu) const;
+    void               append_table(const std::string& name,
+                                    const std::string& unit);
+    void               read(const GFitsTable& table);
+    void               write(GFitsTable& table) const;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseTable.hpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,10 +38,17 @@
 /***********************************************************************//**
  * @class GCTAResponseTable
  *
- * @brief Interface for the CTA response table class
+ * @brief CTA response table class
  *
- * A response table contains response parameters in multi-dimensional vector
- * column format. Each dimension is described by axes columns. 
+ * A CTA response table holds n-dimensional data cubes that describe a
+ * component of the instrumental response function.
+ *
+ * Each dimension of the n-dimensional cube is describe by two axes vectors,
+ * providing the lower and upper bin boundaries of each axis.
+ *
+ * Each n-dimensional data cube is called a table. Table elements can be
+ * accessed by element index, or through linear, bilinear or trilinear
+ * interpolation operators.
  ***************************************************************************/
 class GCTAResponseTable : public GBase {
 
@@ -60,10 +67,10 @@ public:
                                    const double& arg3) const;
     const double&       operator()(const int& element) const;
     double&             operator()(const int& element);
-    const double&       operator()(const int& index, const int& element) const;
-    double&             operator()(const int& index, const int& element);
-    double              operator()(const int& index, const double& arg) const;
-    double              operator()(const int& index, const double& arg1,
+    const double&       operator()(const int& table, const int& element) const;
+    double&             operator()(const int& table, const int& element);
+    double              operator()(const int& table, const double& arg) const;
+    double              operator()(const int& table, const double& arg1,
                                    const double& arg2) const;
     double              operator()(const int& index, const double& arg1,
                                    const double& arg2, const double& arg3) const;
@@ -72,28 +79,29 @@ public:
     void               clear(void);
     GCTAResponseTable* clone(void) const;
     std::string        classname(void) const;
-    int                size(void) const;
+    int                tables(void) const;
     const int&         elements(void) const;
+    const std::string& unit(const int& table) const;
+    void               scale(const int& table, const double& scale);
+    void               append_table(const std::string& name,
+                                    const std::string& unit);
     const int&         axes(void) const;
-    int                axis(const int& index) const;
-    const double&      axis_lo(const int& index, const int& bin) const;
-    const double&      axis_hi(const int& index, const int& bin) const;
-    const std::string& axis_lo_name(const int& index) const;
-    const std::string& axis_hi_name(const int& index) const;
-    const std::string& axis_lo_unit(const int& index) const;
-    const std::string& axis_hi_unit(const int& index) const;
-    void               axis_linear(const int& index);
-    void               axis_log10(const int& index);
-    void               axis_radians(const int& index);
-    const std::string& unit(const int& index) const;
+    int                axis(const std::string& name) const;
+    int                axis_bins(const int& axis) const;
+    const double&      axis_lo(const int& axis, const int& bin) const;
+    const double&      axis_hi(const int& axis, const int& bin) const;
+    const GNodeArray&  axis_nodes(const int& axis) const;
+    const std::string& axis_lo_name(const int& axis) const;
+    const std::string& axis_hi_name(const int& axis) const;
+    const std::string& axis_lo_unit(const int& axis) const;
+    const std::string& axis_hi_unit(const int& axis) const;
+    void               axis_linear(const int& axis);
+    void               axis_log10(const int& axis);
+    void               axis_radians(const int& axis);
     void               append_axis(const std::vector<double>& axis_lo, 
                                    const std::vector<double>& axis_hi,
                                    const std::string&         name,
                                    const std::string&         unit);    
-    void               append_parameter(const std::string& name,
-                                        const std::string& unit);
-    const GNodeArray&  nodes(const int& index) const;
-    void               scale(const int& index, const double& scale);
     void               read(const GFitsTable& table);
     void               write(GFitsTable& table) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
@@ -105,26 +113,26 @@ private:
     void free_members(void);
     void read_colnames(const GFitsTable& hdu);
     void read_axes(const GFitsTable& hdu);
-    void read_pars(const GFitsTable& hdu);
+    void read_tables(const GFitsTable& hdu);
     void update(const double& arg) const;
     void update(const double& arg1, const double& arg2) const;
     void update(const double& arg1, const double& arg2,
                 const double& arg3) const;
 
     // Table information
-    int                               m_naxes;       //!< Number of axes
-    int                               m_npars;       //!< Number of parameters
-    int                               m_nelements;   //!< Number of elements per parameter
-    std::vector<std::string>          m_colname_lo;  //!< Column names for lower boundaries
-    std::vector<std::string>          m_colname_hi;  //!< Column names for upper boundaries
-    std::vector<std::string>          m_colname_par; //!< Column names for parameters
-    std::vector<std::vector<double> > m_axis_lo;     //!< Axes lower boundaries
-    std::vector<std::vector<double> > m_axis_hi;     //!< Axes upper boundaries
-    std::vector<std::string>          m_units_lo;    //!< Lower boundaries units
-    std::vector<std::string>          m_units_hi;    //!< Upper boundaries units
-    std::vector<std::string>          m_units_par;   //!< Parameter units
-    std::vector<GNodeArray>           m_axis_nodes;  //!< Axes node arrays
-    std::vector<std::vector<double> > m_pars;        //!< Parameters
+    int                               m_naxes;         //!< Number of axes
+    int                               m_ntables;       //!< Number of tables
+    int                               m_nelements;     //!< Number of elements per table
+    std::vector<std::string>          m_colname_lo;    //!< Column names for lower boundaries
+    std::vector<std::string>          m_colname_hi;    //!< Column names for upper boundaries
+    std::vector<std::string>          m_colname_table; //!< Column names for table
+    std::vector<std::vector<double> > m_axis_lo;       //!< Axes lower boundaries
+    std::vector<std::vector<double> > m_axis_hi;       //!< Axes upper boundaries
+    std::vector<std::string>          m_units_lo;      //!< Lower boundaries units
+    std::vector<std::string>          m_units_hi;      //!< Upper boundaries units
+    std::vector<std::string>          m_units_table;   //!< Parameter units
+    std::vector<GNodeArray>           m_axis_nodes;    //!< Axes node arrays
+    std::vector<std::vector<double> > m_tables;        //!< Tables
 
     // Response table computation cache for 1D access
     mutable int    m_inx_left;        //!< Index of left node
@@ -167,45 +175,45 @@ std::string GCTAResponseTable::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of parameters in response table
+ * @brief Return number of tables
  *
- * @return Number of parameters in response table.
+ * @return Number of tables.
  *
- * Returns the number of parameters in response table.
+ * Returns the number of tables.
  ***************************************************************************/
 inline
-int GCTAResponseTable::size(void) const
+int GCTAResponseTable::tables(void) const
 {
-    return m_npars;
+    return (m_ntables);
 }
 
 
 /***********************************************************************//**
- * @brief Return number of elements per parameter
+ * @brief Return number of elements per table
  *
- * @return Number of elements per parameter.
+ * @return Number of elements per table.
  *
- * Returns the number of elements per parameter.
+ * Returns the number of elements per table.
  ***************************************************************************/
 inline
 const int& GCTAResponseTable::elements(void) const
 {
-    return m_nelements;
+    return (m_nelements);
 }
 
 
 /***********************************************************************//**
- * @brief Return number of axes in response table
+ * @brief Return number of axes of the tables
  *
- * @return Number of axes in response table.
+ * @return Number of axes of tables.
  *
- * Returns the number of axes in response table.
+ * Returns the number of axes of tables.
  ***************************************************************************/
 inline
 const int& GCTAResponseTable::axes(void) const
 {
     // Return number of axes
-    return m_naxes;
+    return (m_naxes);
 }
 
 #endif /* GCTARESPONSETABLE_HPP */
