@@ -87,8 +87,12 @@ private:
     void free_members(void);
 
     // Members
-    std::string       m_filename;  //!< Name of Aeff response file
-    GCTAResponseTable m_aeff;      //!< Aeff response table
+    std::string       m_filename;      //!< Name of Aeff response file
+    GCTAResponseTable m_aeff;          //!< Aeff response table
+    int               m_inx_energy;    //!< Energy index
+    int               m_inx_theta;     //!< Theta index
+    int               m_inx_aeff;      //!< Effective area (true energy)
+    int               m_inx_aeff_reco; //!< Effective area (reconstructed energy)
 };
 
 
