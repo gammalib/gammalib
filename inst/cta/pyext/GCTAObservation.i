@@ -59,10 +59,6 @@ public:
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 
-    // Overwrite virtual base class methods
-    virtual const GEvents* events(void) const;
-    virtual void           events(const GEvents& events);
-
     // Other methods
     bool                has_response(void) const;
     bool                has_events(void) const;
@@ -100,8 +96,7 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
-    const std::string&  eventtype(void) const;
-    void                dispose_events(void);
+    std::string         eventtype(void) const;
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;
     void                n_tels(const int& tels);

@@ -13,9 +13,12 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
-The following methods return now GFilename instead of std::string:
-- GFits::filename()
+The following methods have been removed from the public interface:
+- GCTAObservation::dispose_events()
 
+The return value has been changed for the following methods:
+- GFits::filename() returns now GFilename instead of std::string
+- GCTAObservation::eventtype() returns now std::string instead of const std::string&
 
 3. Configuration
 -----------------
@@ -112,7 +115,8 @@ None
 -----------------
 Event fetching and disposal has been implemented in the GCTAEventList class by
 additing the fetch() and dispose() methods. Now, events are only loaded upon
-request and can be dispatched after user to save memory (#1648).
+request and can be dispatched after user to save memory. The event fetching and
+disposal logic has been removed from GCTAObservation (#1648).
 
 Add GCTAEventList::remove() method to remove events from an event list.
 

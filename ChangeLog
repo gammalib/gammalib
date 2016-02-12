@@ -3,10 +3,11 @@
         * Version 1.1.0 released
         =========================
 
-        Implement event fetching and disposal in GCTAEventList (#1648)
+        Remove event fetching from GCTAObservation class (#1648)
+        Implement event fetching and disposal in GCTAEventList class (#1648)
         Add GFilename::fullname() method
         Add GCTAEventList::remove() method
-        Handle also additional columns in GCTAEventList::append method
+        Handle also additional columns in GCTAEventList::append() method
         Correct GFitsTableCol::insert() method for empty columns
         Correct GCTAEdisp2D::compute_ebounds_xxx() methods (#1662)
         Use GFilename in GFits to store filename (#1649)

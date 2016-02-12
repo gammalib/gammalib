@@ -87,10 +87,6 @@ public:
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
-    // Overwrite virtual base class methods
-    virtual const GEvents* events(void) const;
-    virtual void           events(const GEvents& events);
-
     // Other methods
     bool                has_response(void) const;
     bool                has_events(void) const;
@@ -128,8 +124,7 @@ public:
     void                deadc(const double& deadc);
     void                eventfile(const std::string& filename);
     const std::string&  eventfile(void) const;
-    const std::string&  eventtype(void) const;
-    void                dispose_events(void);
+    std::string         eventtype(void) const;
     const double&       lo_user_thres(void) const;
     const double&       hi_user_thres(void) const;
     void                n_tels(const int& tels);
@@ -142,12 +137,10 @@ protected:
     void free_members(void);
     void read_attributes(const GFitsHDU& hdu);
     void write_attributes(GFitsHDU& hdu) const;
-    void set_event_type(void);
 
     // Protected members
     std::string   m_instrument;    //!< Instrument name
     std::string   m_eventfile;     //!< Event filename
-    std::string   m_eventtype;     //!< Event type (for XML file)
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;      //!< Pointing direction
     int           m_obs_id;        //!< Observation ID
@@ -445,18 +438,6 @@ inline
 const std::string& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
-}
-
-
-/***********************************************************************//**
- * @brief Return type of events
- *
- * @return Type of events.
- ***************************************************************************/
-inline
-const std::string& GCTAObservation::eventtype(void) const
-{
-    return m_eventtype;
 }
 
 
