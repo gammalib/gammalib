@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.cpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -627,11 +627,11 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
 
         // Compute energy boundaries in TeV
         double emin = m_psf.axis_lo(0,0);
-        double emax = m_psf.axis_hi(0,m_psf.axis(0)-1);
+        double emax = m_psf.axis_hi(0,m_psf.axis_bins(0)-1);
 
         // Compute offset angle boundaries in deg
         double omin = m_psf.axis_lo(1,0);
-        double omax = m_psf.axis_hi(1,m_psf.axis(1)-1);
+        double omax = m_psf.axis_hi(1,m_psf.axis_bins(1)-1);
 
         // Append header
         result.append("=== GCTAPsf2D ===");
@@ -639,9 +639,9 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_psf.axis(0)));
+                      gammalib::str(m_psf.axis_bins(0)));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_psf.axis(1)));
+                      gammalib::str(m_psf.axis_bins(1)));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));

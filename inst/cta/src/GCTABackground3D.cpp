@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.cpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -190,9 +190,9 @@ double GCTABackground3D::operator()(const double& logE,
         // Get background rate
         #if defined(G_LOG_INTERPOLATION)
         // Retrieve node arrays
-        const GNodeArray& detx_nodes   = m_background.nodes(0);
-        const GNodeArray& dety_nodes   = m_background.nodes(1);
-        const GNodeArray& energy_nodes = m_background.nodes(2);
+        const GNodeArray& detx_nodes   = m_background.axis_nodes(0);
+        const GNodeArray& dety_nodes   = m_background.axis_nodes(1);
+        const GNodeArray& energy_nodes = m_background.axis_nodes(2);
 
         // Set values for node arrays
         detx_nodes.set_value(detx);
@@ -225,7 +225,8 @@ double GCTABackground3D::operator()(const double& logE,
         double wgt_emax = energy_nodes.wgt_right();
 
         // Compute offsets in energy dimension
-        int npixels     = m_background.axis(0) * m_background.axis(1);
+        int npixels     = m_background.axis_bins(0) *
+                          m_background.axis_bins(1);
         int offset_emin = inx_emin * npixels;
         int offset_emax = inx_emax * npixels;
 
@@ -496,7 +497,7 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
                               " in the range ["+
                               gammalib::str(m_background.axis_lo(2,0))+
                               " "+m_background.axis_lo_unit(2)+" - "+
-                              gammalib::str(m_background.axis_hi(2,m_background.axis(2)-1))+
+                              gammalib::str(m_background.axis_hi(2,m_background.axis_bins(2)-1))+
                               " "+m_background.axis_hi_unit(2)+"].";
             throw GException::invalid_value(G_MC, msg);
         }
@@ -564,23 +565,23 @@ std::string GCTABackground3D::print(const GChatter& chatter) const
 
             // Compute DETX boundaries in deg
             double detx_min = m_background.axis_lo(0,0);
-            double detx_max = m_background.axis_hi(0,m_background.axis(0)-1);
+            double detx_max = m_background.axis_hi(0,m_background.axis_bins(0)-1);
 
             // Compute DETY boundaries in deg
             double dety_min = m_background.axis_lo(1,0);
-            double dety_max = m_background.axis_hi(1,m_background.axis(1)-1);
+            double dety_max = m_background.axis_hi(1,m_background.axis_bins(1)-1);
 
             // Compute energy boundaries in TeV
             double emin = m_background.axis_lo(2,0);
-            double emax = m_background.axis_hi(2,m_background.axis(2)-1);
+            double emax = m_background.axis_hi(2,m_background.axis_bins(2)-1);
 
             // Append information
             result.append("\n"+gammalib::parformat("Number of DETX bins") +
-                          gammalib::str(m_background.axis(0)));
+                          gammalib::str(m_background.axis_bins(0)));
             result.append("\n"+gammalib::parformat("Number of DETY bins") +
-                          gammalib::str(m_background.axis(1)));
+                          gammalib::str(m_background.axis_bins(1)));
             result.append("\n"+gammalib::parformat("Number of energy bins") +
-                          gammalib::str(m_background.axis(2)));
+                          gammalib::str(m_background.axis_bins(2)));
             result.append("\n"+gammalib::parformat("DETX range"));
             result.append(gammalib::str(detx_min)+" - "+gammalib::str(detx_max)+" deg");
             result.append("\n"+gammalib::parformat("DETX range"));
@@ -723,9 +724,9 @@ void GCTABackground3D::init_mc_cache(void) const
     }
 
     // Determine number of response cube pixels and maps
-    m_mc_nx    = m_background.axis(0);
-    m_mc_ny    = m_background.axis(1);
-    m_mc_nmaps = m_background.axis(2);
+    m_mc_nx    = m_background.axis_bins(0);
+    m_mc_ny    = m_background.axis_bins(1);
+    m_mc_nmaps = m_background.axis_bins(2);
 
     // Compute DETX boundaries and binsize in deg. If DETX binsize is too
     // coarse then request a finer sampling

@@ -294,9 +294,9 @@ void GCTAEdisp2D::read(const GFitsTable& table)
     m_edisp.axis_radians(2);
 
     // Get axes dimensions
-    int etrue_size = m_edisp.axis(0);
-    int migra_size = m_edisp.axis(1);
-    int theta_size = m_edisp.axis(2);
+    int etrue_size = m_edisp.axis_bins(0);
+    int migra_size = m_edisp.axis_bins(1);
+    int theta_size = m_edisp.axis_bins(2);
 
     // Now normalize the migration matrix vectors. We do this by integrating
     // for each true energy and offset angle the measured energy. We perform
@@ -619,11 +619,11 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
 
         // Compute energy boundaries in TeV
         double emin = m_edisp.axis_lo(0,0);
-        double emax = m_edisp.axis_hi(0,m_edisp.axis(0)-1);
+        double emax = m_edisp.axis_hi(0,m_edisp.axis_bins(0)-1);
 
         // Compute offset angle boundaries in deg
         double omin = m_edisp.axis_lo(1,0);
-        double omax = m_edisp.axis_hi(1,m_edisp.axis(1)-1);
+        double omax = m_edisp.axis_hi(1,m_edisp.axis_bins(1)-1);
 
         // Append header
         result.append("=== GCTAEdisp2D ===");
@@ -631,9 +631,9 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_edisp.axis(0)));
+                      gammalib::str(m_edisp.axis_bins(0)));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_edisp.axis(1)));
+                      gammalib::str(m_edisp.axis_bins(1)));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));
@@ -744,7 +744,7 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
     const double eps = 1.0e-12;
 
     // Loop over Esrc
-    for (int isrc = 0; isrc < m_edisp.axis(0); ++isrc) {
+    for (int isrc = 0; isrc < m_edisp.axis_bins(0); ++isrc) {
 
         // Set Esrc
         double Esrc    = std::sqrt(m_edisp.axis_hi(0,isrc) *
@@ -758,7 +758,7 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
         bool   maxFound   = false;
 
         // Determine number of MIGRA bins
-        int n_migra = m_edisp.axis(1);
+        int n_migra = m_edisp.axis_bins(1);
 
         // Find minimum boundary
         for (int i = 0; i < n_migra; ++i) {
