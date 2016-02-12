@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -88,6 +88,7 @@ public:
     virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
+    virtual GEvents*         events(void);
     virtual const GEvents*   events(void) const;
     virtual void             events(const GEvents& events);
     virtual double           likelihood(const GModels& models,

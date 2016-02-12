@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -760,6 +760,27 @@ void GObservation::events(const GEvents& events)
  *            No events allocated for observation.
  *
  * Returns pointer to events.
+ ***************************************************************************/
+GEvents* GObservation::events(void)
+{
+    // Throw an exception if the event container is not valid
+    if (m_events == NULL) {
+        std::string msg = "No events allocated for observation.";
+        throw GException::invalid_value(G_EVENTS, msg);
+    }
+
+    // Return pointer to events
+    return (m_events);
+}
+
+
+/***********************************************************************//**
+ * @brief Return events (const version)
+ *
+ * @exception GException::no_events
+ *            No events allocated for observation.
+ *
+ * Returns const pointer to events.
  ***************************************************************************/
 const GEvents* GObservation::events(void) const
 {

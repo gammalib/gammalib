@@ -59,7 +59,7 @@ public:
     virtual void             write(GXmlElement& xml) const = 0;
 
     // Virtual methods
-    virtual const GEvents*   events(void) const;
+    virtual GEvents*         events(void);
     virtual void             events(const GEvents& events);
     virtual double           likelihood(const GModels& models,
                                         GVector*       gradient,

@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Add non-const GObservation::events() method (#1664)
         Remove event fetching from GCTAObservation class (#1648)
         Implement event fetching and disposal in GCTAEventList class (#1648)
         Add GFilename::fullname() method
