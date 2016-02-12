@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCOMLib.hpp - COMPTEL Support Header files              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,6 @@
 #include "GammaLib.hpp"
 
 /* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMException.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
