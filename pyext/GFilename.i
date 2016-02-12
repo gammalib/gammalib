@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GFilename.i - Filename class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Juergen Knoedlseder                              *
+ *  copyright (C) 2015-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,7 @@ public:
     bool               empty(void) const;
     int                size(void) const;
     int                length(void) const;
+    const std::string& fullname(void) const;
     const std::string& filename(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;

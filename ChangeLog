@@ -1,12 +1,13 @@
-2016-02-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-02-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
-        Add GCTAEventList::remove method
+        Add GFilename::fullname() method
+        Add GCTAEventList::remove() method
         Handle also additional columns in GCTAEventList::append method
-        Correct GFitsTableCol::insert method for empty columns
-        Correct GCTAEdisp2D::compute_ebounds methods (#1662)
+        Correct GFitsTableCol::insert() method for empty columns
+        Correct GCTAEdisp2D::compute_ebounds_xxx() methods (#1662)
         Use GFilename in GFits to store filename (#1649)
         Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598)
 

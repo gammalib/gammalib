@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-11 February 2016
+12 February 2016
 
 
 1. Introduction
@@ -74,7 +74,8 @@ None
 
 13. Support module
 ------------------
-None
+Add GFilename::fullname() method that returns the full filename including
+any FITS extension.
 
 
 14. XML module

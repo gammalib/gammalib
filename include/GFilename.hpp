@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GFilename.hpp - Filename class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Juergen Knoedlseder                              *
+ *  copyright (C) 2015-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,6 +59,7 @@ public:
     bool               empty(void) const;
     int                size(void) const;
     int                length(void) const;
+    const std::string& fullname(void) const;
     const std::string& filename(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
@@ -78,10 +79,11 @@ protected:
     void set_filename(const std::string& filename);
 
     // Protected members
-    std::string m_filename;  //!< Filename (with stripped extension info)
-    std::string m_extname;   //!< Extension name ("": not set)
-    int         m_extno;     //!< Extension number  (-1: not set)
-    int         m_extver;    //!< Extension version (0: not set)
+    std::string m_fullname;   //!< Full file name
+    std::string m_filename;   //!< File name (with stripped extension info)
+    std::string m_extname;    //!< Extension name ("": not set)
+    int         m_extno;      //!< Extension number  (-1: not set)
+    int         m_extver;     //!< Extension version (0: not set)
     std::string m_expression; //!< Selection expression ("": not set)
 };
 
@@ -137,9 +139,25 @@ int GFilename::length(void) const
 
 
 /***********************************************************************//**
- * @brief Return file name
+ * @brief Return full filename
  *
- * @return String containing file name.
+ * @return String containing filename with extension.
+ *
+ * Returns the full filename, including any extension.
+ ***************************************************************************/
+inline
+const std::string& GFilename::fullname(void) const
+{
+    return (m_fullname);
+}
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return String containing filename without extension.
+ *
+ * Returns the file name without any extension.
  ***************************************************************************/
 inline
 const std::string& GFilename::filename(void) const

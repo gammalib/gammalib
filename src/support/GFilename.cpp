@@ -350,6 +350,7 @@ std::string GFilename::print(const GChatter& chatter) const
 void GFilename::init_members(void)
 {
     // Initialise members
+    m_fullname.clear();
     m_filename.clear();
     m_extname.clear();
     m_extno  = -1;
@@ -369,10 +370,11 @@ void GFilename::init_members(void)
 void GFilename::copy_members(const GFilename& filename)
 {
     // Copy members
-    m_filename = filename.m_filename;
-    m_extname  = filename.m_extname;
-    m_extno    = filename.m_extno;
-    m_extver   = filename.m_extver;
+    m_fullname   = filename.m_fullname;
+    m_filename   = filename.m_filename;
+    m_extname    = filename.m_extname;
+    m_extno      = filename.m_extno;
+    m_extver     = filename.m_extver;
     m_expression = filename.m_expression;
 
     // Return
@@ -411,45 +413,48 @@ void GFilename::set_filename(const std::string& filename)
     // Clear file name
     clear();
 
-    // Strip any whitespace
-    std::string fname = gammalib::strip_whitespace(filename);
+    // Strip any whitespace and store the full name
+    m_fullname = gammalib::strip_whitespace(filename);
 
     // Continue only if filename is not empty
-    if (!fname.empty()) {
+    if (!m_fullname.empty()) {
 
         // Check for [ symbol in filename
-        size_t start = fname.find_first_of("[");
+        size_t start = m_fullname.find_first_of("[");
 
         // If we have an extension then separate filename into filename
         // part and extension part and fill the information of th object
         if (start != std::string::npos) {
 
             // Check for ] symbol in filename
-            size_t stop = fname.find_first_of("]", start);
+            size_t stop = m_fullname.find_first_of("]", start);
             
             // If there is no ] symbol then throw an exception
             if (stop == std::string::npos) {
-                std::string msg = "Missing ] symbol in filename \""+
-                                  fname+"\" extension. Please correct the "
-                                  "filename.";
+                std::string msg = "Missing ] symbol in file name \""+
+                                  m_fullname+"\" extension. Please correct "
+                                  "the file name.";
                 throw GException::invalid_argument(G_SET_FILENAME, msg);
             }
 
             // If ] is not the last character then check if an opening bracket is next
-            if (stop < fname.length()-1) {
+            if (stop < m_fullname.length()-1) {
 
-                std::string character = gammalib::strip_whitespace(fname.substr(stop+1,1));
+                // Get character
+                std::string character = gammalib::strip_whitespace(m_fullname.substr(stop+1,1));
 
                 // If no bracket is coming, throw an exception
                 if (character != "[") {
-                    std::string msg = "Non-bracket character \""+character+"\" beyond ] symbol in filename \""+
-                            fname+"\" expression. Please correct the filename.";
+                    std::string msg = "Non-bracket character \""+character+
+                                      "\" beyond ] symbol in file name \""+
+                                      m_fullname+"\" expression. Please "
+                                      "correct the file name.";
                     throw GException::invalid_argument(G_SET_FILENAME, msg);
                 }
              }
 
             // Extract extension name
-            std::string extname = gammalib::strip_whitespace(fname.substr(start+1, stop-start-1));
+            std::string extname = gammalib::strip_whitespace(m_fullname.substr(start+1, stop-start-1));
 
             // Check if there is a , symbol that separates extension name
             // and extension version
@@ -464,8 +469,8 @@ void GFilename::set_filename(const std::string& filename)
                 // If string is empty then throw an exception
                 if (extver.empty()) {
                     std::string msg = "No extension version found after , "
-                                      "symbol in filename \""+fname+
-                                      "\". Please correct the filename.";
+                                      "symbol in file name \""+m_fullname+
+                                      "\". Please correct the file name.";
                     throw GException::invalid_argument(G_SET_FILENAME, msg);
                 }
 
@@ -476,8 +481,9 @@ void GFilename::set_filename(const std::string& filename)
                 // positive
                 if (m_extver <= 0) {
                     std::string msg = "Non-positive extension version "
-                                      "encountered in filename \""+fname+
-                                      "\". Please correct the filename.";
+                                      "encountered in file name \""+
+                                      m_fullname+ "\". Please correct the "
+                                      "file name.";
                     throw GException::invalid_argument(G_SET_FILENAME, msg);
                 }
 
@@ -489,8 +495,8 @@ void GFilename::set_filename(const std::string& filename)
             // If we have an empty extension name then throw an exception
             if (extname.empty()) {
                 std::string msg = "An empty extension has been specified in "
-                                  "filename \""+fname+"\". Please correct the"
-                                  " filename.";
+                                  "file name \""+m_fullname+"\". Please "
+                                  "correct the file name.";
                 throw GException::invalid_argument(G_SET_FILENAME, msg);
             }
 
@@ -505,8 +511,8 @@ void GFilename::set_filename(const std::string& filename)
                 // positive
                 if (m_extno < 0) {
                     std::string msg = "Negative extension number encountered "
-                                      "in filename \""+fname+"\". Please "
-                                      "correct the filename.";
+                                      "in file name \""+m_fullname+"\". "
+                                      "Please correct the file name.";
                     throw GException::invalid_argument(G_SET_FILENAME, msg);
                 }
 
@@ -521,48 +527,49 @@ void GFilename::set_filename(const std::string& filename)
                 // Throw an exception if extension name is empty
                 if (m_extname.empty()) {
                     std::string msg = "Empty extension name encountered "
-                                      "in filename \""+fname+"\". Please "
-                                      "correct the filename.";
+                                      "in file name \""+m_fullname+"\". "
+                                      "Please correct the file name.";
                     throw GException::invalid_argument(G_SET_FILENAME, msg);
                 }
 
             } // endelse: extension name provided
 
             // Store the file name
-            m_filename = gammalib::strip_whitespace(fname.substr(0,start));
+            m_filename = gammalib::strip_whitespace(m_fullname.substr(0,start));
 
             // Check if there is an expression behind the extension name
-            size_t expr_start = fname.find_first_of("[", stop+1);
+            size_t expr_start = m_fullname.find_first_of("[", stop+1);
 
             if (expr_start != std::string::npos) {
 
                // Check for ] symbol in expression
-               size_t expr_stop = fname.find_first_of("]", expr_start);
+               size_t expr_stop = m_fullname.find_first_of("]", expr_start);
 
                // If there is no ] symbol then throw an exception
                if (expr_stop == std::string::npos) {
-                   std::string msg = "Missing ] symbol in filename \""+
-                                     fname+"\" expression. Please correct the "
-                                     "filename.";
+                   std::string msg = "Missing ] symbol in file name \""+
+                                     m_fullname+"\" expression. Please "
+                                     "correct the file name.";
                    throw GException::invalid_argument(G_SET_FILENAME, msg);
                }
 
                // If ] is not the last character then throw an exception
-               if (expr_stop < fname.length()-1) {
-                   std::string msg = "Characters beyond ] symbol in filename \""+
-                           fname+"\" expression. Please correct the filename.";
+               if (expr_stop < m_fullname.length()-1) {
+                   std::string msg = "Characters beyond ] symbol in file "
+                                     "name \""+m_fullname+"\" expression. "
+                                     "Please correct the file name.";
                    throw GException::invalid_argument(G_SET_FILENAME, msg);
                 }
 
                // Store expression
-               m_expression = gammalib::strip_whitespace(fname.substr(expr_start+1, expr_stop - expr_start-1));
+               m_expression = gammalib::strip_whitespace(m_fullname.substr(expr_start+1, expr_stop - expr_start-1));
             }
 
         } // endif: had extension
 
         // ... otherwise simply set the filename
         else {
-            m_filename = fname;
+            m_filename = m_fullname;
         }
 
     } // endif: filename was not empty
