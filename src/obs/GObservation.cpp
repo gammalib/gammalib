@@ -754,22 +754,23 @@ void GObservation::events(const GEvents& events)
 
 
 /***********************************************************************//**
- * @brief Return event container
+ * @brief Return events
  *
  * @exception GException::no_events
- *            No event container defined for observation.
+ *            No events allocated for observation.
  *
- * Returns pointer to event container.
+ * Returns pointer to events.
  ***************************************************************************/
 const GEvents* GObservation::events(void) const
 {
     // Throw an exception if the event container is not valid
     if (m_events == NULL) {
-        throw GException::no_events(G_EVENTS);
+        std::string msg = "No events allocated for observation.";
+        throw GException::invalid_value(G_EVENTS, msg);
     }
 
-    // Return pointer to event container
-    return m_events;
+    // Return pointer to events
+    return (m_events);
 }
 
 
