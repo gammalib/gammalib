@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAEventList.hpp - CTA event atom container class           *
+ *                GCTAEventList.hpp - CTA event list class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventList.hpp
- * @brief CTA event atom container class interface definition
+ * @brief CTA event list class interface definition
  * @author Juergen Knoedlseder
  */
 
@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include "GEventList.hpp"
+#include "GFilename.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTARoi.hpp"
 
@@ -43,9 +44,9 @@ class GFitsBinTable;
 /***********************************************************************//**
  * @class GCTAEventList
  *
- * @brief CTA event atom container class
+ * @brief CTA event list class
  *
- * This class is a container class for CTA event atoms.
+ * This class implements an event list for CTA.
  ***************************************************************************/
 class GCTAEventList : public GEventList {
 
@@ -82,6 +83,8 @@ public:
     void               remove(const int& index, const int& number = 1);
     void               write(GFits& fits, const std::string& evtname,
                                           const std::string& gtiname) const;
+    void               fetch(void) const;
+    void               dispose(void) const;
     double             irf_cache(const std::string& name, const int& index) const;
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
@@ -94,19 +97,23 @@ protected:
     void         free_members(void);
     virtual void set_energies(void) { return; }
     virtual void set_times(void) { return; }
-    void         read_events(const GFitsTable& table);
+    void         read_events(const GFitsTable& table) const;
     void         write_events(GFitsBinTable& table) const;
     void         write_ds_keys(GFitsHDU& hdu, const std::string& gtiname = "GTI") const;
     int          irf_cache_init(const std::string& name) const;
     int          irf_cache_index(const std::string& name) const;
 
-    // Protected members
-    GCTARoi                     m_roi;         //!< Region of interest
-    std::vector<GCTAEventAtom>  m_events;      //!< Events
-    std::vector<GFitsTableCol*> m_columns;     //!< Pointers to optional columns
-    std::string                 m_gti_extname; //!< GTI extension name
-    bool                        m_has_phase;   //!< Signal presence of phase
-    bool                        m_has_detxy;   //!< Signal presence of detector coordinates
+    // Event list meta data
+    GCTARoi     m_roi;         //!< Region of interest
+    int         m_num_events;  //!< Number of events
+    std::string m_gti_extname; //!< GTI extension name
+    bool        m_has_phase;   //!< Signal presence of phase
+    bool        m_has_detxy;   //!< Signal presence of detector coordinates
+
+    // Event list data
+    mutable std::vector<GCTAEventAtom>  m_events;   //!< Events
+    mutable std::vector<GFitsTableCol*> m_columns;  //!< Pointers to optional columns
+    mutable GFilename                   m_filename; //!< Event list file name
 
     // IRF cache for diffuse models
     mutable std::vector<std::string>          m_irf_names;  //!< Model names
@@ -134,7 +141,7 @@ std::string GCTAEventList::classname(void) const
 inline
 int GCTAEventList::size(void) const
 {
-    return (int)m_events.size();
+    return (m_num_events);
 }
 
 
@@ -146,7 +153,7 @@ int GCTAEventList::size(void) const
 inline
 int GCTAEventList::number(void) const
 {
-    return (int)m_events.size();
+    return (m_num_events);
 }
 
 

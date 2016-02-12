@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAEventList.cpp - CTA event atom container class           *
+ *                GCTAEventList.cpp - CTA event list class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventList.cpp
- * @brief CTA event atom container class implementation
+ * @brief CTA event list class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,27 +28,24 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GCTAEventList.hpp"
-#include "GCTAException.hpp"
-#include "GCTASupport.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GFilename.hpp"
 #include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
-#include "GFitsTableBitCol.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GFitsTableDoubleCol.hpp"
 #include "GFitsTableULongCol.hpp"
-#include "GFitsTableShortCol.hpp"
-#include "GFitsTableStringCol.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
+#include "GCTAEventList.hpp"
+#include "GCTASupport.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR                          "GCTAEventList::operator[](int&)"
 #define G_ROI                                     "GCTAEventList::roi(GRoi&)"
-#define G_READ_DS_EBOUNDS         "GCTAEventList::read_ds_ebounds(GFitsHDU*)"
+#define G_FETCH                                      "GCTAEventList::fetch()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,6 +62,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty event list.
  ***************************************************************************/
 GCTAEventList::GCTAEventList(void) : GEventList()
 {
@@ -81,7 +80,7 @@ GCTAEventList::GCTAEventList(void) : GEventList()
  *
  * @param[in] filename Counts cube filename.
  *
- * Construct event list by loading the events from a FITS file.
+ * Constructs event list by loading the events from a FITS file.
  ***************************************************************************/
 GCTAEventList::GCTAEventList(const std::string& filename) : GEventList()
 {
@@ -100,6 +99,8 @@ GCTAEventList::GCTAEventList(const std::string& filename) : GEventList()
  * @brief Copy constructor
  *
  * @param[in] list Event list.
+ *
+ * Constructs event list by coping from another event list.
  ***************************************************************************/
 GCTAEventList::GCTAEventList(const GCTAEventList& list) : GEventList(list)
 {
@@ -116,6 +117,8 @@ GCTAEventList::GCTAEventList(const GCTAEventList& list) : GEventList(list)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs event list.
  ***************************************************************************/
 GCTAEventList::~GCTAEventList(void)
 {
@@ -138,6 +141,8 @@ GCTAEventList::~GCTAEventList(void)
  *
  * @param[in] list Event list.
  * @return Event list.
+ *
+ * Assigns events from another event list.
  ***************************************************************************/
 GCTAEventList& GCTAEventList::operator=(const GCTAEventList& list)
 {
@@ -176,10 +181,14 @@ GCTAEventList& GCTAEventList::operator=(const GCTAEventList& list)
  ***************************************************************************/
 GCTAEventAtom* GCTAEventList::operator[](const int& index)
 {
+    // Make sure that the events are online
+    fetch();
+
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+        throw GException::out_of_range(G_OPERATOR, "Event index",
+                                       index, size());
     }
     #endif
 
@@ -201,10 +210,14 @@ GCTAEventAtom* GCTAEventList::operator[](const int& index)
  ***************************************************************************/
 const GCTAEventAtom* GCTAEventList::operator[](const int& index) const
 {
+    // Make sure that the events are online
+    fetch();
+
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+        throw GException::out_of_range(G_OPERATOR, "Event index",
+                                       index, size());
     }
     #endif
 
@@ -222,7 +235,7 @@ const GCTAEventAtom* GCTAEventList::operator[](const int& index) const
 /***********************************************************************//**
  * @brief Clear event list
  *
- * This method properly resets the object to an initial state.
+ * Clear event list.
  ***************************************************************************/
 void GCTAEventList::clear(void)
 {
@@ -245,6 +258,8 @@ void GCTAEventList::clear(void)
  * @brief Clone event list
  *
  * @return Pointer to deep copy of event list.
+ *
+ * Returns a pointer to a deep copy of the event list.
  ***************************************************************************/
 GCTAEventList* GCTAEventList::clone(void) const
 {
@@ -258,24 +273,18 @@ GCTAEventList* GCTAEventList::clone(void) const
  *
  * @param[in] filename FITS file name.
  *
- * Load events from FITS file. See the read() method for details.
- *
- * The method clears the object before loading, thus any events residing in
- * the object before loading will be lost.
+ * Loads the event list from a FITS file. See the read() method for details.
  ***************************************************************************/
 void GCTAEventList::load(const std::string& filename)
 {
-    // Clear object
-    clear();
-
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read event list
-    read(file);
+    read(fits);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -288,7 +297,7 @@ void GCTAEventList::load(const std::string& filename)
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing FITS file (default: false).
  *
- * Save event list into FITS file. See the write() method for details.
+ * Saves the event list into a FITS file. See the write() method for details.
  ***************************************************************************/
 void GCTAEventList::save(const std::string& filename,
                          const bool& clobber) const
@@ -314,7 +323,7 @@ void GCTAEventList::save(const std::string& filename,
  *
  * Reads the event list from a FITS file.
  *
- * The events will be loaded by default from the extension "EVENTS" unless
+ * The events will be read by default from the extension "EVENTS" unless
  * an extension name is explicitly specified in the FITS file name. The
  * FITS header of the extension will be scanned for data sub-space keywords
  * to extract the energy boundaries, the region of interest, as well as the
@@ -327,13 +336,22 @@ void GCTAEventList::save(const std::string& filename,
  * be assumed based on the "TSTART" and "TSTOP" keywords found in the header
  * of the event list.
  *
- * The method clears the object before reading, thus any information residing
- * in the event list prior to reading will be lost.
+ * The method clears the event list before reading, thus any events that
+ * existed before in the event list will be lost. Note that the method will
+ * actually not read the events but only the event metadata. The events are
+ * only read from the FITS file when they are actually need. This reduces
+ * the memory requirements. Events can be manually loaded into memory using
+ * the fetch() method. Events can be unloaded using the dispose() method, but
+ * the user has to take care of saving the events to disk in case he wants
+ * to keep them for further use.
  ***************************************************************************/
 void GCTAEventList::read(const GFits& fits)
 {
     // Clear object
     clear();
+
+    // Store the FITS file name
+    m_filename = fits.filename();
 
     // Initialise events extension name
     std::string extname = fits.filename().extname("EVENTS");
@@ -341,8 +359,31 @@ void GCTAEventList::read(const GFits& fits)
     // Get event list HDU
     const GFitsTable& events = *fits.table(extname);
 
-    // Load event data
-    read_events(events);
+    // Determine number of events from event list HDU
+    m_num_events = events.nrows();
+
+    // Signal presence of "DETX" and "DETY" columns
+    if (events.contains("DETX") && events.contains("DETY")) {
+        m_has_detxy = true;
+    }
+    else {
+        m_has_detxy = false;
+    }
+
+    // Signal presence of "PHASE" column
+    if (events.contains("PHASE")) {
+        m_has_phase = true;
+    }
+    else {
+        m_has_phase = false;
+    }
+
+    // If the file name contains an expression then load the events now
+    // (we apparently can't do this later properly, not fully sure why this
+    // is the case)
+    if (m_filename.has_expression()) {
+        read_events(events);
+    }
 
     // Read GTI extension name from data sub-space keyword
     std::string gti_extname = gammalib::read_ds_gti_extname(events);
@@ -460,6 +501,9 @@ void GCTAEventList::write(GFits& fits, const std::string& evtname,
     // Write GTI extension
     gti().write(fits, gtiname);
 
+    // Store FITS file name
+    m_filename = fits.filename();
+
     // Return
     return;
 }
@@ -470,8 +514,10 @@ void GCTAEventList::write(GFits& fits, const std::string& evtname,
  *
  * @param[in] roi ROI.
  *
- * @exception GCTAException::bad_roi_type
- *            ROI is not of type GCTARoi.
+ * @exception GException::invalid_argument
+ *            Invalid region of interest class specified.
+ *
+ * Sets the region of interest of the event list.
  ***************************************************************************/
 void GCTAEventList::roi(const GRoi& roi)
 {
@@ -480,11 +526,214 @@ void GCTAEventList::roi(const GRoi& roi)
 
     // Throw exception if ROI is not of correct type
     if (ptr == NULL) {
-        throw GCTAException::bad_roi_type(G_ROI);
+        std::string cls = std::string(typeid(&roi).name());
+        std::string msg = "Invalid region of interest type \""+cls+"\" "
+                          "provided on input. Please specify a \"GCTARoi\" "
+                          "object as argument.";
+        throw GException::invalid_argument(G_ROI, msg);
     }
 
     // Set ROI
     m_roi = *ptr;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append event to event list
+ *
+ * @param[in] event Event.
+ *
+ * Appends an event to the end of the event list.
+ ***************************************************************************/
+void GCTAEventList::append(const GCTAEventAtom& event)
+{
+    // Make sure that the events are online
+    fetch();
+
+    // Append event
+    m_events.push_back(event);
+
+    // Append an element to all additional columns
+    for (int i = 0; i < m_columns.size(); ++i) {
+        m_columns[i]->insert(m_columns[i]->length(),1);
+    }
+
+    // Set number of events
+    m_num_events = m_events.size();
+
+    // Set event index
+    int index               = m_num_events - 1;
+    m_events[index].m_index = index;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove events from event list
+ *
+ * @param[in] index Index from which on events should be removed.
+ * @param[in] number Number of event to remove (default: 1).
+ *
+ * Removes events from the event list. This method does nothing if @p index
+ * points beyond the event list. The method does also gently accept
+ * @p number arguments where @p index + @p number reach beyond the event
+ * list. In that case, all events from event @p index on will be removed.
+ ***************************************************************************/
+void GCTAEventList::remove(const int& index, const int& number)
+{
+    // Make sure that the events are online
+    fetch();
+
+    // Continue only if index is valid
+    if (index < size()) {
+
+        // Determine number of elements to remove
+        int n_remove = (index + number > size()) ? size() - index : number;
+
+        // Remove events
+        m_events.erase(m_events.begin() + index,
+                       m_events.begin() + index + n_remove);
+
+        // Remove elements from additional columns
+        for (int i = 0; i < m_columns.size(); ++i) {
+            m_columns[i]->remove(index, n_remove);
+        }
+
+        // Set number of events
+        m_num_events = m_events.size();
+
+    } // endif: index was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch events
+ *
+ * @exception GException::file_error
+ *            File not found.
+ *            Unable to load events.
+ * @exception GException::invalid_value
+ *            No file name has been specified.
+ *            Fetched number of events mismatches the expectation.
+ *
+ * Fetches the events by reading them from a FITS file. This method does
+ * nothing if the events are already loaded, if there is nothing to fetch,
+ * or if the m_filename member is empty.
+ *
+ * The method is thread save. The method furthermore checks whether the
+ * loaded number of events corresponds to the expectation. If also checks
+ * whether the file from which events should be loaded actually exists.
+ ***************************************************************************/
+void GCTAEventList::fetch(void) const
+{
+    // Continue only if events are not loaded but there are events to fetch
+    if (m_events.empty() && size() > 0) {
+
+        // Continue only if the file name is not empty
+        if (!m_filename.empty()) {
+
+            // Throw an exception if the file does not exist
+            if (!gammalib::file_exists_gzip(m_filename.filename())) {
+                std::string msg = "File \""+m_filename.filename()+"\" not "
+                                  "found. Cannot fetch events. Maybe the "
+                                  "file has been deleted in the meantime.";
+                GException::file_error(G_FETCH, msg);
+            }
+
+            // Initialise exception flag
+            bool has_exception = false;
+
+            // Load events. Catch any exception. Put the code into a critical
+            // zone as it might be called from within a parallelized thread.
+            #pragma omp critical
+            {
+            try {
+
+                // Open FITS file
+                GFits fits(m_filename.fullname());
+
+                // Initialise events extension name
+                std::string extname = fits.filename().extname("EVENTS");
+
+                // Get event list HDU
+                const GFitsTable& events = *fits.table(extname);
+
+                // Load event data
+                read_events(events);
+
+                // Close FITS file
+                fits.close();
+
+
+            }
+            catch (...) {
+                has_exception = true;
+            }
+            }
+
+            // Throw an exception if an exception has occured
+            if (has_exception) {
+                std::string msg = "Unable to load events from file \""+
+                                  m_filename.filename()+"\"."; 
+                throw GException::file_error(G_FETCH, msg);
+            }
+
+            // Throw an exception if the number of events does not correspond
+            // to the expectation
+            if (m_events.size() != size()) {
+                std::string msg = "Loaded "+gammalib::str(m_events.size())+
+                                  " events from FITS file while "+
+                                  gammalib::str(size())+" events were "
+                                  "expected. This should never happen!"; 
+                throw GException::invalid_value(G_FETCH, msg);
+            }
+
+        
+        } // endif: filename was not empty
+
+        // Throw an exception if the FITS file name is not known
+        else {
+            std::string msg = "Unable to fetch "+gammalib::str(size())+
+                              " events since the name of the FITS file from "
+                              "which to fetch the events is not known.";
+            throw GException::invalid_value(G_FETCH, msg);
+        }
+
+    } // endif: there were no events
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Dispose events
+ *
+ * Disposes the events to save memory. The method free's all memory
+ * associated to the events. The method should be used with care as it does
+ * not check whether the events can actually be recovered using the fetch()
+ * method. Eventually, the events should be saved before so that fetch()
+ * can recover them.
+ ***************************************************************************/
+void GCTAEventList::dispose(void) const
+{
+    // Free additional columns
+    for (int i = 0; i < m_columns.size(); ++i) {
+        delete m_columns[i];
+        m_columns[i] = NULL;
+    }
+
+    // Clear events and additional columns
+    m_events.clear();
+    m_columns.clear();
 
     // Return
     return;
@@ -508,9 +757,22 @@ std::string GCTAEventList::print(const GChatter& chatter) const
         // Append header
         result.append("=== GCTAEventList ===");
 
-        // Append information
+        // Append number of events and disposal information
         result.append("\n"+gammalib::parformat("Number of events") +
                       gammalib::str(size()));
+        if (m_events.empty()) {
+            if (!m_filename.empty()) {
+                result.append(" (disposed in \"");
+                result.append(m_filename.filename());
+                result.append("\")");
+            }
+            else {
+                result.append(" (disposed without possibility to recover)");
+            }
+        }
+        else {
+            result.append(" (loaded)");
+        }
 
         // Append GTI interval
         result.append("\n"+gammalib::parformat("Time interval"));
@@ -591,67 +853,6 @@ std::string GCTAEventList::print(const GChatter& chatter) const
 }
 
 
-/***********************************************************************//**
- * @brief Append event atom to event list
- *
- * @param[in] event Event.
- *
- * Appends an event atom to the event list.
- ***************************************************************************/
-void GCTAEventList::append(const GCTAEventAtom& event)
-{
-    // Append event
-    m_events.push_back(event);
-
-    // Append an element to all additional columns
-    for (int i = 0; i < m_columns.size(); ++i) {
-        m_columns[i]->insert(m_columns[i]->length(),1);
-    }
-
-    // Set event index
-    int index = m_events.size()-1;
-    m_events[index].m_index = index;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Remove event atoms from event list
- *
- * @param[in] index Index from which on events should be removed.
- * @param[in] number Number of event to remove.
- *
- * Removes events from the event list. This method does nothing if @p index
- * points beyond the event list. The method does also gently accepts
- * @p number arguments where @p index + @p number reach beyond the event
- * list.
- ***************************************************************************/
-void GCTAEventList::remove(const int& index, const int& number)
-{
-    // Continue only if index is valid
-    if (index < size()) {
-
-        // Determine number of elements to remove
-        int n_remove = (index + number > size()) ? size() - index : number;
-
-        // Remove events
-        m_events.erase(m_events.begin() + index,
-                       m_events.begin() + index + n_remove);
-
-        // Remove elements from additional columns
-        for (int i = 0; i < m_columns.size(); ++i) {
-            m_columns[i]->remove(index, n_remove);
-        }
-
-    } // endif: index was valid
-
-    // Return
-    return;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -667,6 +868,8 @@ void GCTAEventList::init_members(void)
     m_roi.clear();
     m_events.clear();
     m_columns.clear();
+    m_filename.clear();
+    m_num_events  = 0;
     m_gti_extname = "GTI"; //!< Default GTI extension name
     m_has_phase   = false;
     m_has_detxy   = true;
@@ -690,6 +893,8 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
     // Copy members
     m_roi         = list.m_roi;
     m_events      = list.m_events;
+    m_filename    = list.m_filename;
+    m_num_events  = list.m_num_events;
     m_gti_extname = list.m_gti_extname;
     m_has_phase   = list.m_has_phase;
     m_has_detxy   = list.m_has_detxy;
@@ -749,10 +954,10 @@ void GCTAEventList::free_members(void)
  * read, and written into the FITS table when the write_events() method is
  * called.
  ***************************************************************************/
-void GCTAEventList::read_events(const GFitsTable& table)
+void GCTAEventList::read_events(const GFitsTable& table) const
 {
-    // Clear existing events
-    m_events.clear();
+    // Dispose any existing events
+    dispose();
 
     // Extract number of events in FITS file
     int num = table.nrows();
@@ -770,31 +975,18 @@ void GCTAEventList::read_events(const GFitsTable& table)
         const GFitsTableCol* ptr_dec    = table["DEC"];
         const GFitsTableCol* ptr_energy = table["ENERGY"];
 
-        // Check for DETX and DETY columns
-        const GFitsTableCol* ptr_detx;
-        const GFitsTableCol* ptr_dety;
-        if (table.contains("DETX") && table.contains("DETY")) {
-            m_has_detxy = true;
-            ptr_detx    = table["DETX"];
-            ptr_dety    = table["DETY"];
-        }
-        else {
-            m_has_detxy = false;
-        }
+        // Optionally get pointers to DETX and DETY columns
+        const GFitsTableCol* ptr_detx = (m_has_detxy) ? table["DETX"] : NULL;
+        const GFitsTableCol* ptr_dety = (m_has_detxy) ? table["DETY"] : NULL;
 
-        // Check for PHASE column
-        const GFitsTableCol* ptr_phase;
-        if (table.contains("PHASE")) {
-            m_has_phase = true;
-            ptr_phase   = table["PHASE"];
-        }
-        else {
-            m_has_phase = false;
-        }
+        // Optionally get pointer to PHASE column
+        const GFitsTableCol* ptr_phase = (m_has_phase) ? table["PHASE"] : NULL;
 
         // Copy data from columns into GCTAEventAtom objects
-        GCTAEventAtom event;
         for (int i = 0; i < num; ++i) {
+
+            // Allocate event
+            GCTAEventAtom event;
 
             // Set mandatory information
             event.m_time.set(ptr_time->real(i), m_gti.reference());
@@ -880,6 +1072,9 @@ void GCTAEventList::read_events(const GFitsTable& table)
  ***************************************************************************/
 void GCTAEventList::write_events(GFitsBinTable& hdu) const
 {
+    // Make sure that the events are online
+    fetch();
+
     // Set extension name
     hdu.extname("EVENTS");
 

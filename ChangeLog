@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Implement event fetching and disposal in GCTAEventList (#1648)
         Add GFilename::fullname() method
         Add GCTAEventList::remove() method
         Handle also additional columns in GCTAEventList::append method

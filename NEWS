@@ -110,6 +110,10 @@ None
 
 20. CTA interface
 -----------------
+Event fetching and disposal has been implemented in the GCTAEventList class by
+additing the fetch() and dispose() methods. Now, events are only loaded upon
+request and can be dispatched after user to save memory (#1648).
+
 Add GCTAEventList::remove() method to remove events from an event list.
 
 The GCTAEventList::append() method now also appends empty elements to the

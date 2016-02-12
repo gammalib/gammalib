@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GCTAEventList.i - CTA event atom container class            *
+ *                GCTAEventList.i - CTA event list class                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventList.i
- * @brief CTA event atom container class Python interface definition
+ * @brief CTA event list class Python interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GCTAEventList
  *
- * @brief CTA event atom container class Python interface
+ * @brief CTA event list class Python interface
  ***************************************************************************/
 class GCTAEventList : public GEventList {
 
@@ -63,6 +63,8 @@ public:
     void               remove(const int& index, const int& number = 1);
     void               write(GFits& fits, const std::string& evtname,
                                           const std::string& gtiname) const;
+    void               fetch(void);
+    void               dispose(void);
     double             irf_cache(const std::string& name, const int& index) const;
     void               irf_cache(const std::string& name, const int& index,
                                  const double& irf) const;
