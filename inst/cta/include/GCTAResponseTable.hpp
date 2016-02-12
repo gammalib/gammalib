@@ -79,14 +79,15 @@ public:
     void               clear(void);
     GCTAResponseTable* clone(void) const;
     std::string        classname(void) const;
-    int                tables(void) const;
+    bool               has_table(const std::string& name) const;
+    bool               has_axis(const std::string& name) const;
+    const int&         axes(void) const;
+    const int&         tables(void) const;
     const int&         elements(void) const;
+    int                axis(const std::string& name) const;
+    int                table(const std::string& name) const;
     const std::string& unit(const int& table) const;
     void               scale(const int& table, const double& scale);
-    void               append_table(const std::string& name,
-                                    const std::string& unit);
-    const int&         axes(void) const;
-    int                axis(const std::string& name) const;
     int                axis_bins(const int& axis) const;
     const double&      axis_lo(const int& axis, const int& bin) const;
     const double&      axis_hi(const int& axis, const int& bin) const;
@@ -102,6 +103,8 @@ public:
                                    const std::vector<double>& axis_hi,
                                    const std::string&         name,
                                    const std::string&         unit);    
+    void               append_table(const std::string& name,
+                                    const std::string& unit);
     void               read(const GFitsTable& table);
     void               write(GFitsTable& table) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
@@ -175,6 +178,21 @@ std::string GCTAResponseTable::classname(void) const
 
 
 /***********************************************************************//**
+ * @brief Return number of axes of the tables
+ *
+ * @return Number of axes of tables.
+ *
+ * Returns the number of axes of tables.
+ ***************************************************************************/
+inline
+const int& GCTAResponseTable::axes(void) const
+{
+    // Return number of axes
+    return (m_naxes);
+}
+
+
+/***********************************************************************//**
  * @brief Return number of tables
  *
  * @return Number of tables.
@@ -182,7 +200,7 @@ std::string GCTAResponseTable::classname(void) const
  * Returns the number of tables.
  ***************************************************************************/
 inline
-int GCTAResponseTable::tables(void) const
+const int& GCTAResponseTable::tables(void) const
 {
     return (m_ntables);
 }
@@ -199,21 +217,6 @@ inline
 const int& GCTAResponseTable::elements(void) const
 {
     return (m_nelements);
-}
-
-
-/***********************************************************************//**
- * @brief Return number of axes of the tables
- *
- * @return Number of axes of tables.
- *
- * Returns the number of axes of tables.
- ***************************************************************************/
-inline
-const int& GCTAResponseTable::axes(void) const
-{
-    // Return number of axes
-    return (m_naxes);
 }
 
 #endif /* GCTARESPONSETABLE_HPP */

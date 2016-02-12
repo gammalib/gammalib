@@ -48,6 +48,7 @@
                                                                   " double&)"
 #define G_INX_OPERATOR3        "GCTAResponseTable::operator()(int&, double&,"\
                                                          " double&, double&)"
+#define G_TABLE                      "GCTAResponseTable::table(std::string&)"
 #define G_SCALE                     "GCTAResponseTable::scale(int&, double&)"
 #define G_AXIS                        "GCTAResponseTable::axis(std::string&)"
 #define G_AXIS_BINS                      "GCTAResponseTable::axis_bins(int&)"
@@ -680,6 +681,99 @@ GCTAResponseTable* GCTAResponseTable::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Check whether a table exists
+ *
+ * @param[in] name Column name
+ * @return True if table exists.
+ *
+ * Checks whether a table exists.
+ ***************************************************************************/
+bool GCTAResponseTable::has_table(const std::string& name) const
+{
+    // Initialise existence flag
+    bool exists = false;
+
+    // Loop over all tables to find index
+    int table = 0;
+    for (; table < tables(); ++table) {
+        if (m_colname_table[table] == name) {
+            exists = true;
+            break;
+        }
+    }
+
+    // Return existence flag
+    return exists;
+}
+
+
+/***********************************************************************//**
+ * @brief Check whether an axis exists
+ *
+ * @param[in] name Column name
+ * @return True if axis exists.
+ *
+ * Check whether an axis exists.
+ ***************************************************************************/
+bool GCTAResponseTable::has_axis(const std::string& name) const
+{
+    // Initialise existence flag
+    bool exists = false;
+
+    // Build column names
+    std::string col_lo = name + "_LO";
+    std::string col_hi = name + "_HI";
+
+    // Loop over all axes to find index
+    int axis = 0;
+    for (; axis < axes(); ++axis) {
+        if ((axis_lo_name(axis) == col_lo) &&
+            (axis_hi_name(axis) == col_hi)) {
+            exists = true;
+            break;
+        }
+    }
+
+    // Return existence flag
+    return exists;
+}
+
+
+/***********************************************************************//**
+ * @brief Determine index of table
+ *
+ * @param[in] name Column name
+ * @return Table index.
+ *
+ * @exception GException::invalid_value
+ *            Table not found.
+ *
+ * Determines the index of a table @p name. An exception is thrown if the
+ * table is not found.
+ ***************************************************************************/
+int GCTAResponseTable::table(const std::string& name) const
+{
+    // Loop over all tables to find index
+    int table = 0;
+    for (; table < tables(); ++table) {
+        if (m_colname_table[table] == name) {
+            break;
+        }
+    }
+
+    // Throw an exception if table has not been found
+    if (table >= tables()) {
+        std::string msg = "Table \""+name+"\" not found. Please verify the "
+                          "response table.";
+        throw GException::invalid_value(G_TABLE, msg);
+    }
+
+    // Return table index
+    return table;
+}
+
+
+/***********************************************************************//**
  * @brief Return table unit
  *
  * @param[in] table Table index [0,...,tables()-1].
@@ -754,7 +848,7 @@ int GCTAResponseTable::axis(const std::string& name) const
     std::string col_lo = name + "_LO";
     std::string col_hi = name + "_HI";
 
-    // Loop over all axis to find index
+    // Loop over all axes to find index
     int axis = 0;
     for (; axis < axes(); ++axis) {
         if ((axis_lo_name(axis) == col_lo) &&

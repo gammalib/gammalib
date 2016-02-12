@@ -134,12 +134,15 @@ public:
     void               clear(void);
     GCTAResponseTable* clone(void) const;
     std::string        classname(void) const;
-    int                tables(void) const;
+    bool               has_table(const std::string& name) const;
+    bool               has_axis(const std::string& name) const;
+    const int&         axes(void) const;
+    const int&         tables(void) const;
     const int&         elements(void) const;
+    int                axis(const std::string& name) const;
+    int                table(const std::string& name) const;
     const std::string& unit(const int& table) const;
     void               scale(const int& table, const double& scale);
-    const int&         axes(void) const;
-    int                axis(const std::string& name) const;
     int                axis_bins(const int& axis) const;
     const double&      axis_lo(const int& axis, const int& bin) const;
     const double&      axis_hi(const int& axis, const int& bin) const;
