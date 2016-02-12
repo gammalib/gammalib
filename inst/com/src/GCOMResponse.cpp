@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <string>
+#include <typeinfo>
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
@@ -46,7 +47,6 @@
 #include "GCOMObservation.hpp"
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
-#include "GCOMException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF           "GCOMResponse::irf(GEvent&, GSource&, GObservation&)"
@@ -230,10 +230,9 @@ GCOMResponse* GCOMResponse::clone(void) const
  * @param[in] obs Observation.
  * @return Instrument response function (cm2 sr-1)
  *
- * @exception GCOMException::bad_observation_type
+ * @exception GException::invalid_argument
  *            Observation is not a COMPTEL observation.
- * @exception GCOMException::bad_instdir_type
- *            Instrument direction is not a COMPTEL instrument direction.
+ *            Event is not a COMPTEL event bin.
  *
  * Returns the instrument response function for a given observed photon
  * direction as function of the assumed true photon direction. The result
@@ -258,13 +257,20 @@ double GCOMResponse::irf(const GEvent&       event,
     // Extract COMPTEL observation
     const GCOMObservation* observation = dynamic_cast<const GCOMObservation*>(&obs);
     if (observation == NULL) {
-        throw GCOMException::bad_observation_type(G_IRF);
+        std::string cls = std::string(typeid(&obs).name());
+        std::string msg = "Observation of type \""+cls+"\" is not a COMPTEL "
+                          "observations. Please specify a COMPTEL observation "
+                          "as argument.";
+        throw GException::invalid_argument(G_IRF, msg);
     }
 
     // Extract COMPTEL event bin
     const GCOMEventBin* bin = dynamic_cast<const GCOMEventBin*>(&event);
     if (bin == NULL) {
-        throw GCOMException::bad_event_type(G_IRF);
+        std::string cls = std::string(typeid(&event).name());
+        std::string msg = "Event of type \""+cls+"\" is  not a COMPTEL event. "
+                          "Please specify a COMPTEL event as argument.";
+        throw GException::invalid_argument(G_IRF, msg);
     }
 
     // Extract event parameters

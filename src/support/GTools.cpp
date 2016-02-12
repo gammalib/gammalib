@@ -1392,10 +1392,10 @@ bool gammalib::xml_has_par(const GXmlElement& xml, const std::string& name)
  *
  * Returns pointer to parameter with given @p name in XML element. If the
  * @p name is not found, a parameter with the given @p name is added. In
- * that respect the method differs from xml_getpar which does not add a
+ * that respect the function differs from xml_get_par which does not add a
  * parameter element.
  *
- * The method checks for multiple occurences of a parameter and throws an
+ * The function checks for multiple occurences of a parameter and throws an
  * exception in case that more than one parameter with a given name is found.
  ***************************************************************************/
 GXmlElement* gammalib::xml_need_par(const std::string& origin,
@@ -1442,10 +1442,10 @@ GXmlElement* gammalib::xml_need_par(const std::string& origin,
  * @exception GException::invalid_value
  *            Invalid XML format encountered.
  *
- * Returns pointer to parameter with given @p name in XML element. The method
- * checks whether the parameter has been found and throws an exception if
- * no parameter or multiple occurences of a parameter with given @p name
- * are found.
+ * Returns pointer to parameter with given @p name in XML element. The
+ * function checks whether the parameter has been found and throws an
+ * exception if no parameter or multiple occurences of a parameter with given
+ * @p name are found.
  ***************************************************************************/
 const GXmlElement* gammalib::xml_get_par(const std::string& origin,
                                          const GXmlElement& xml,
@@ -1472,6 +1472,51 @@ const GXmlElement* gammalib::xml_get_par(const std::string& origin,
 
     // Return
     return par;
+}
+
+
+/***********************************************************************//**
+ * @brief Return attribute value for a given parameter in XML element
+ *
+ * @param[in] origin Method requesting parameter.
+ * @param[in] xml XML element.
+ * @param[in] name Parameter name.
+ * @param[in] attribute Attribute name.
+ * @return Value of attribute.
+ *
+ * @exception GException::invalid_value
+ *            Attribute not found.
+ *
+ * Returns the value of @p attribute of parameter @p name in XML element.
+ * The function checks whether the parameter has been found and throws an
+ * exception if no parameter or multiple occurences of a parameter with given
+ * @p name are found. The function furthermore checks whether the attribute
+ * exists. 
+ ***************************************************************************/
+std::string gammalib::xml_get_attr(const std::string& origin,
+                                   const GXmlElement& xml,
+                                   const std::string& name,
+                                   const std::string& attribute)
+{
+    // Initialise attribute value
+    std::string value = "";
+
+    // Get parameter
+    const GXmlElement* par = gammalib::xml_get_par(origin, xml, name);
+
+    // Throw an exception if a parameter has not the requested attribute
+    if (!par->has_attribute(attribute)) {
+        std::string msg = "Attribute \""+attribute+"\" not found in XML "
+                          "parameter \""+name+"\". Please verify the XML "
+                          "format.";
+        throw GException::invalid_value(origin, msg);
+    }
+
+    // Extract attribute
+    value = par->attribute(attribute);
+
+    // Return attribute value
+    return value;
 }
 
 
