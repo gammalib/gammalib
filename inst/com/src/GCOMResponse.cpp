@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <string>
+#include <typeinfo>
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GFits.hpp"
