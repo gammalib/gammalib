@@ -1,7 +1,7 @@
 /***************************************************************************
- *                         test.i - Test module                            *
+ *                  typemap_GFilename.i - Filename typemap                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2016 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -17,39 +17,28 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall test.i                                          *
  ***************************************************************************/
-/**
- * @file test.i
- * @brief Test module
- * @author Juergen Knoedlseder
- */
-%module test
-%feature("autodoc", "1");
 
-/* __ Headers needed for compilation _____________________________________ */
-%{
-#include <stddef.h>
-#include "GException.hpp"
-#include "GTools.hpp"
-%}
-
-/* __ Include standard typemaps for vectors and strings __________________ */
-%include stl.i
-
-/* __ Include GammaLib typemaps __________________________________________ */
-%include typemap_GFilename.i
-
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-%import(module="gammalib.base") "GContainer.i";
-
-/* __ Make sure that exceptions are catched ______________________________ */
-%import(module="gammalib.support") "GException.i";
-
-/* __ XML module _________________________________________________________ */
-%include "GTestSuites.i"
-%include "GTestSuite.i"
-%include "GTestCase.i"
+/***********************************************************************//**
+ * @brief Input typemap for GFilename
+ *
+ * This typemap allows to pass a string for a GFilename& argument. In that
+ * way the user can simply pass a string to any function or method that has
+ * a GFilename argument, and the typemap transparently converts a string
+ * into a GFilename object.
+ ***************************************************************************/
+%typemap(in) GFilename& (GFilename temp) {
+    if (PyString_Check($input)) {
+         temp = GFilename(std::string(PyString_AsString($input)));
+         $1 = &temp;
+    }
+    else {
+        void *filename_argp1 = 0;
+        if (SWIG_IsOK(SWIG_ConvertPtr($input, &filename_argp1, SWIGTYPE_p_GFilename, 0))) {
+            $1 = reinterpret_cast<GFilename*>(filename_argp1);
+        }
+        else {
+            SWIG_exception(SWIG_TypeError, "GFilename expected");
+        }
+    }
+}
