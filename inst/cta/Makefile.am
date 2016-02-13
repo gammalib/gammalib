@@ -117,18 +117,6 @@ libcta_la_SOURCES = $(sources)
 libcta_la_LDFLAGS =
 
 # Distribute calibration database files
-#EXTRA_DIST     = $(caldb_pinx) $(caldb_perf) $(caldb_indx) $(caldb_irf1) $(caldb_irf2)
-#caldbpinxdir   = $(datadir)/caldb/data/cta/dummy
-#caldbpinx_DATA = caldb/caldb.indx
-#caldbperfdir   = $(datadir)/caldb/data/cta/dummy/bcf
-#caldbperf_DATA = caldb/cta_dummy_irf.dat
-#caldbindxdir   = $(datadir)/caldb/data/cta/e
-#caldbindx_DATA = caldb/data/cta/e/caldb.indx
-#caldbirf1dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h
-#caldbirf1_DATA = caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits
-#caldbirf2dir   = $(datadir)/caldb/data/cta/e/bcf/IFAE20120510_50h_King
-#caldbirf2_DATA = caldb/data/cta/e/bcf/IFAE20120510_50h_King/irf_file.fits
-#
 caldb_prod2_indxdir      = $(datadir)/caldb/data/cta/prod2
 caldb_prod2_indx_DATA    = caldb/data/cta/prod2/caldb.indx
 caldb_prod2_north1dir    = $(datadir)/caldb/data/cta/prod2/bcf/North_0.5h

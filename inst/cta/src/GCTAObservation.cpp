@@ -580,47 +580,11 @@ void GCTAObservation::read(const GXmlElement& xml)
         if ((par->attribute("name") == "EventList") ||
             (par->attribute("name") == "CountsCube")) {
 
-            // Store event type
-            //m_eventtype = par->attribute("name");
-
             // Read eventlist file name
             std::string filename = par->attribute("file");
 
             // Load events
             load(filename);
-
-            // Initialise filename
-            //GFilename fname(filename);
-
-            // Open FITS file
-            //GFits fits(fname.filename());
-
-            // Get extension name
-            //std::string extname = fname.extname("EVENTS");
-
-            // Read observation attributes. Note that we do not load the
-            // events and GTI here as this will be done on-the-fly when
-            // the events need to be access. This poses however the problem
-            // that we need to implement a specific gti() method in
-            // GCTAObservation to access th GTIs without accessing the
-            // events. It would be better if the GCTAEventList class handles
-            // the loading of the events on request.
-            /*
-            if (fits.contains(extname)) {
-                const GFitsHDU& hdu = *fits.at(extname);
-                read_attributes(hdu);
-            }
-            else {
-                const GFitsHDU& hdu = *fits.at(0);
-                read_attributes(hdu);
-            }
-            */
-
-            // Close FITS file
-            //fits.close();
-
-            // Store event filename
-            //m_eventfile = filename;
 
             // Increment parameter counter
             n_evfile++;
