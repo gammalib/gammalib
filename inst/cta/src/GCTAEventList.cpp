@@ -83,7 +83,7 @@ GCTAEventList::GCTAEventList(void) : GEventList()
  *
  * Constructs event list by loading the events from a FITS file.
  ***************************************************************************/
-GCTAEventList::GCTAEventList(const std::string& filename) : GEventList()
+GCTAEventList::GCTAEventList(const GFilename& filename) : GEventList()
 {
     // Initialise members
     init_members();
@@ -276,10 +276,10 @@ GCTAEventList* GCTAEventList::clone(void) const
  *
  * Loads the event list from a FITS file. See the read() method for details.
  ***************************************************************************/
-void GCTAEventList::load(const std::string& filename)
+void GCTAEventList::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits fits(filename);
+    GFits fits(filename.filename());
 
     // Read event list
     read(fits);
@@ -300,11 +300,11 @@ void GCTAEventList::load(const std::string& filename)
  *
  * Saves the event list into a FITS file. See the write() method for details.
  ***************************************************************************/
-void GCTAEventList::save(const std::string& filename,
-                         const bool& clobber) const
+void GCTAEventList::save(const GFilename& filename,
+                         const bool&      clobber) const
 {
     // Open or create FITS file
-    GFits fits(filename, true);
+    GFits fits(filename.filename(), true);
 
     // Write event list
     write(fits);

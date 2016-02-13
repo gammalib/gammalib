@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GMWLSpectrum.i - Multi-wavelength spectrum class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,7 +38,7 @@ class GMWLSpectrum : public GEventCube {
 public:
     // Constructors and destructors
     GMWLSpectrum(void);
-    explicit GMWLSpectrum(const std::string& filename);
+    explicit GMWLSpectrum(const GFilename& filename);
     GMWLSpectrum(const GMWLSpectrum& spec);
     virtual ~GMWLSpectrum(void);
 
@@ -49,9 +49,9 @@ public:
     virtual int           size(void) const;
     virtual int           dim(void) const;
     virtual int           naxis(const int& axis) const;
-    virtual void          load(const std::string& filename);
-    virtual void          save(const std::string& filename,
-                               const bool& clobber = false) const;
+    virtual void          load(const GFilename& filename);
+    virtual void          save(const GFilename& filename,
+                               const bool&      clobber = false) const;
     virtual void          read(const GFits& file);
     virtual void          write(GFits& file) const;
     virtual int           number(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GTestEventCube.hpp - Test event bin container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2013-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,9 @@
 #include "GTestInstDir.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsImage.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
 
 
 /***********************************************************************//**
@@ -97,16 +100,16 @@ public:
     }
     virtual GTestEventCube* clone(void) const { return new GTestEventCube(*this);}
     virtual std::string     classname(void) const { return "GTestEventCube"; }
-    virtual int            size(void) const { return m_bins.size(); }
-    virtual int            dim(void) const { return 1; }
-    virtual int            naxis(const int& axis) const { return 1;}
-    virtual void           load(const std::string& filename) { }
-    virtual void           save(const std::string& filename,
-                                const bool& clobber = false) const { }
-    virtual void           read(const GFits& file) { }
-    virtual void           write(GFits& file) const { }
-    virtual int            number(void) const { return m_counts; }
-    virtual std::string    print(const GChatter& chatter = NORMAL) const {
+    virtual int             size(void) const { return m_bins.size(); }
+    virtual int             dim(void) const { return 1; }
+    virtual int             naxis(const int& axis) const { return 1;}
+    virtual void            load(const GFilename& filename) { }
+    virtual void            save(const GFilename& filename,
+                                 const bool& clobber = false) const { }
+    virtual void            read(const GFits& file) { }
+    virtual void            write(GFits& file) const { }
+    virtual int             number(void) const { return m_counts; }
+    virtual std::string     print(const GChatter& chatter = NORMAL) const {
         std::string result;
         result.append("=== GTestEventCube ===");
         result.append("\n"+gammalib::parformat("Number of events")+gammalib::str(number()));

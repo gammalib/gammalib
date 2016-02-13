@@ -31,6 +31,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFits.hpp"
+#include "GFilename.hpp"
 #include "GCOMSupport.hpp"
 #include "GCOMEventCube.hpp"
 
@@ -77,7 +78,7 @@ GCOMEventCube::GCOMEventCube(void) : GEventCube()
  *
  * Construct an event cube by loading information from a FITS file.
  ***************************************************************************/
-GCOMEventCube::GCOMEventCube(const std::string& filename) : GEventCube()
+GCOMEventCube::GCOMEventCube(const GFilename& filename) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -362,13 +363,13 @@ int GCOMEventCube::naxis(const int& axis) const
  * The method clears the object before loading, thus any events residing in
  * the object before loading will be lost.
  ***************************************************************************/
-void GCOMEventCube::load(const std::string& filename)
+void GCOMEventCube::load(const GFilename& filename)
 {
     // Clear object
     clear();
 
     // Open DRE FITS file
-    GFits file(filename);
+    GFits file(filename.filename());
 
     // Load DRE cube
     read(file);
@@ -389,7 +390,7 @@ void GCOMEventCube::load(const std::string& filename)
  *
  * Save the COMPTEL event cube into FITS file.
  ***************************************************************************/
-void GCOMEventCube::save(const std::string& filename, const bool& clobber) const
+void GCOMEventCube::save(const GFilename& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
@@ -398,7 +399,7 @@ void GCOMEventCube::save(const std::string& filename, const bool& clobber) const
     write(fits);
     
     // Save FITS file
-    fits.saveto(filename, clobber);
+    fits.saveto(filename.filename(), clobber);
 
     // Return
     return;

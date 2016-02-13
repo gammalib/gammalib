@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEventList.hpp - Fermi/LAT event list class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,9 @@
 #include "GFitsHDU.hpp"
 #include "GFitsTable.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+
 
 /***********************************************************************//**
  * @class GLATEventList
@@ -48,7 +51,7 @@ class GLATEventList : public GEventList {
 public:
     // Constructors and destructors
     GLATEventList(void);
-    explicit GLATEventList(const std::string& filename);
+    explicit GLATEventList(const GFilename& filename);
     GLATEventList(const GLATEventList& list);
     virtual ~GLATEventList(void);
 
@@ -62,9 +65,9 @@ public:
     virtual GLATEventList* clone(void) const;
     virtual std::string    classname(void) const;
     virtual int            size(void) const;
-    virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename,
-                                const bool& clobber = false) const;
+    virtual void           load(const GFilename& filename);
+    virtual void           save(const GFilename& filename,
+                                const bool&      clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;

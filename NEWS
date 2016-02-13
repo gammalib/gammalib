@@ -24,13 +24,15 @@ The following methods have been renamed:
 - GCTAResponseTable::tables(), was formerly GCTAResponseTable::size()
 - GCTAResponseTable::axis_bins(), was formerly GCTAResponseTable::axis()
 
-The following methods now take a GFilename argument instead of std::string:
-- GEbounds(const GFilename&)
-- GEbounds::load()
-- GEbounds::save()
-- GGti(const GFilename&)                            
-- GGti::load()
-- GGti::save()
+The following classes now use for filenames a GFilename argument instead
+of std::string:
+- GEbounds
+- GGti
+- GEnergies
+- GEvents
+- GEventCube, GCOMEventCube, GCTAEventCube, GLATEventCube, GMWLSpectrum
+- GEventList, GCTAEventList, GLATEventList
+
 
 The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string

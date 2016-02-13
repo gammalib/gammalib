@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEnergies.cpp - Energy container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty energy container.
  ***************************************************************************/
 GEnergies::GEnergies(void)
 {
@@ -78,7 +80,7 @@ GEnergies::GEnergies(void)
  *
  * Constructs energy container from a FITS file.
  ***************************************************************************/
-GEnergies::GEnergies(const std::string& filename)
+GEnergies::GEnergies(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -95,6 +97,8 @@ GEnergies::GEnergies(const std::string& filename)
  * @brief Copy constructor
  *
  * @param energies Energy container.
+ *
+ * Construct energy container by copying from another energy container.
  ***************************************************************************/
 GEnergies::GEnergies(const GEnergies& energies)
 {
@@ -193,7 +197,7 @@ GEnergies& GEnergies::operator=(const GEnergies& energies)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear container
+ * @brief Clear energy container
  *
  * Removes all energies from the container.
  ***************************************************************************/
@@ -211,7 +215,7 @@ void GEnergies::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone energy container
  *
  * @return Pointer to deep copy of energy container
  *
@@ -541,19 +545,16 @@ void GEnergies::set_log(const int&     num,
  * If no extension name is provided, the energies are loaded from the
  * "ENERGIES" extension.
  ***************************************************************************/
-void GEnergies::load(const std::string& filename)
+void GEnergies::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
     // Allocate FITS file
     GFits file;
 
     // Open FITS file
-    file.open(fname.filename());
+    file.open(filename.filename());
 
     // Get energies table
-    const GFitsTable& table = *file.table(fname.extname("ENERGIES"));
+    const GFitsTable& table = *file.table(filename.extname("ENERGIES"));
 
     // Read energies from table
     read(table);
@@ -577,19 +578,16 @@ void GEnergies::load(const std::string& filename)
  * If no extension name is provided, the energies are saved into an
  * "ENERGIES" extension.
  ***************************************************************************/
-void GEnergies::save(const std::string& filename, const bool& clobber) const
+void GEnergies::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
-
     // Allocate FITS file
     GFits file;
 
     // Write energies to FITS file
-    write(file, fname.extname("ENERGIES"));
+    write(file, filename.extname("ENERGIES"));
 
     // Save to file
-    file.saveto(fname.filename(), clobber);
+    file.saveto(filename.filename(), clobber);
 
     // Return
     return;

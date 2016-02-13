@@ -39,7 +39,7 @@ class GCTAEventList : public GEventList {
 public:
     // Constructors and destructors
     GCTAEventList(void);
-    explicit GCTAEventList(const std::string& filename);
+    explicit GCTAEventList(const GFilename& filename);
     GCTAEventList(const GCTAEventList& list);
     virtual ~GCTAEventList(void);
 
@@ -48,9 +48,9 @@ public:
     virtual GCTAEventList* clone(void) const;
     virtual std::string    classname(void) const;
     virtual int            size(void) const;
-    virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename,
-                                const bool& clobber = false) const;
+    virtual void           load(const GFilename& filename);
+    virtual void           save(const GFilename& filename,
+                                const bool&      clobber = false) const;
     virtual void           read(const GFits& fits);
     virtual void           write(GFits& fits) const;
     virtual int            number(void) const;

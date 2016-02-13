@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GEventList.hpp - Abstract event atom container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include "GEvents.hpp"
 #include "GEventAtom.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
 
 
 /***********************************************************************//**
@@ -61,9 +64,9 @@ public:
     virtual GEventList* clone(void) const = 0;
     virtual std::string classname(void) const = 0;
     virtual int         size(void) const = 0;
-    virtual void        load(const std::string& filename) = 0;
-    virtual void        save(const std::string& filename,
-                             const bool& clobber = false) const = 0;
+    virtual void        load(const GFilename& filename) = 0;
+    virtual void        save(const GFilename& filename,
+                             const bool&      clobber = false) const = 0;
     virtual void        read(const GFits& file) = 0;
     virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;

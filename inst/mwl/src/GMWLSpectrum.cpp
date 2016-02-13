@@ -81,7 +81,7 @@ GMWLSpectrum::GMWLSpectrum(void) : GEventCube()
  *
  * Creates instance from file.
  ***************************************************************************/
-GMWLSpectrum::GMWLSpectrum(const std::string& filename) : GEventCube()
+GMWLSpectrum::GMWLSpectrum(const GFilename& filename) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -258,23 +258,20 @@ GMWLSpectrum* GMWLSpectrum::clone(void) const
  *
  * @todo So far only FITS file support is implemented.
  ***************************************************************************/
-void GMWLSpectrum::load(const std::string& filename)
+void GMWLSpectrum::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
     // Clear object
     clear();
 
     // Open FITS file
-    GFits file(fname.filename());
+    GFits file(filename.filename());
 
     // Read spectrum
-    if (fname.has_extno()) {
-        read(file, fname.extno());
+    if (filename.has_extno()) {
+        read(file, filename.extno());
     }
-    else if (fname.has_extname()) {
-        read(file, fname.extname());
+    else if (filename.has_extname()) {
+        read(file, filename.extname());
     }
     else {
         read(file);
@@ -296,8 +293,8 @@ void GMWLSpectrum::load(const std::string& filename)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GMWLSpectrum::save(const std::string& filename,
-                        const bool& clobber) const
+void GMWLSpectrum::save(const GFilename& filename,
+                        const bool&      clobber) const
 {
     // Return
     return;

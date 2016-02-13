@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GTestEventList.hpp - Test event atom container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,9 @@
 #include "GEventList.hpp"
 #include "GTestEventAtom.hpp"
 #include "GTestRoi.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
 
 
 /***********************************************************************//**
@@ -93,15 +96,15 @@ public:
     virtual GTestEventList* clone(void) const{
         return new GTestEventList(*this);
     }
-    virtual std::string     classname(void) const { return "GTestEventList"; }
-    virtual int  size(void) const { return m_events.size(); }
-    virtual void load(const std::string& filename) {}
-    virtual void save(const std::string& filename,
-                      const bool& clobber = false) const {}
-    virtual void read(const GFits& file) {}
-    virtual void write(GFits& file) const {}
-    virtual int  number(void) const { return m_events.size(); }
-    virtual void roi(const GRoi& roi) {
+    virtual std::string classname(void) const { return "GTestEventList"; }
+    virtual int         size(void) const { return m_events.size(); }
+    virtual void        load(const GFilename& filename) {}
+    virtual void        save(const GFilename& filename,
+                             const bool&      clobber = false) const {}
+    virtual void        read(const GFits& file) {}
+    virtual void        write(GFits& file) const {}
+    virtual int         number(void) const { return m_events.size(); }
+    virtual void        roi(const GRoi& roi) {
         const GTestRoi* ptr = dynamic_cast<const GTestRoi*>(&roi);
         if (ptr == NULL) {
             throw;

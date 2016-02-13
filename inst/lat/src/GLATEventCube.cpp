@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,11 +28,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATEventCube.hpp"
-#include "GLATException.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
+#include "GLATEventCube.hpp"
+#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAXIS                                   "GLATEventCube::naxis(int)"
@@ -77,7 +78,7 @@ GLATEventCube::GLATEventCube(void) : GEventCube()
  *
  * Construct event cube object by loading the events from a FITS file.
  ***************************************************************************/
-GLATEventCube::GLATEventCube(const std::string& filename) : GEventCube()
+GLATEventCube::GLATEventCube(const GFilename& filename) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -306,13 +307,13 @@ int GLATEventCube::naxis(const int& axis) const
  *
  * @param[in] filename FITS file name.
  ***************************************************************************/
-void GLATEventCube::load(const std::string& filename)
+void GLATEventCube::load(const GFilename& filename)
 {
     // Clear object
     clear();
 
     // Open FITS file
-    GFits file(filename);
+    GFits file(filename.filename());
 
     // Read counts map
     read(file);
@@ -329,12 +330,12 @@ void GLATEventCube::load(const std::string& filename)
  * @brief Save LAT event cube into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing FITS file? (default=false)
+ * @param[in] clobber Overwrite existing FITS file? (default: false)
  *
  * Save the LAT event cube into FITS file.
  ***************************************************************************/
-void GLATEventCube::save(const std::string& filename,
-                         const bool& clobber) const
+void GLATEventCube::save(const GFilename& filename,
+                         const bool&      clobber) const
 {
     // Create empty FITS file
     GFits fits;
@@ -343,7 +344,7 @@ void GLATEventCube::save(const std::string& filename,
     write(fits);
     
     // Save FITS file
-    fits.saveto(filename, clobber);
+    fits.saveto(filename.filename(), clobber);
 
     // Return
     return;

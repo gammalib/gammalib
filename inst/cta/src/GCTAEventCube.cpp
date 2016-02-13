@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,7 +75,7 @@ GCTAEventCube::GCTAEventCube(void) : GEventCube()
  *
  * Construct instance of events cube a counts cube file.
  ***************************************************************************/
-GCTAEventCube::GCTAEventCube(const std::string& filename) : GEventCube()
+GCTAEventCube::GCTAEventCube(const GFilename& filename) : GEventCube()
 {
     // Initialise members
     init_members();
@@ -321,13 +321,13 @@ int GCTAEventCube::naxis(const int& axis) const
  * The method clears the object before loading, thus any events residing in
  * the object before loading will be lost.
  ***************************************************************************/
-void GCTAEventCube::load(const std::string& filename)
+void GCTAEventCube::load(const GFilename& filename)
 {
     // Clear object
     clear();
 
     // Open counts map FITS file
-    GFits fits(filename);
+    GFits fits(filename.filename());
 
     // Load counts map
     read(fits);
@@ -348,8 +348,8 @@ void GCTAEventCube::load(const std::string& filename)
  *
  * Save the CTA event cube into FITS file.
  ***************************************************************************/
-void GCTAEventCube::save(const std::string& filename,
-                         const bool& clobber) const
+void GCTAEventCube::save(const GFilename& filename,
+                         const bool&      clobber) const
 {
     // Create empty FITS file
     GFits fits;
@@ -358,7 +358,7 @@ void GCTAEventCube::save(const std::string& filename,
     write(fits);
     
     // Save FITS file
-    fits.saveto(filename, clobber);
+    fits.saveto(filename.filename(), clobber);
 
     // Return
     return;
