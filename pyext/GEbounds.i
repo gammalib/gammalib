@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEbounds.i - Energy boundaries class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GEbounds : public GContainer {
 public:
     // Constructors and destructors
     GEbounds(void);
-    explicit GEbounds(const std::string& filename);
+    explicit GEbounds(const GFilename& filename);
     explicit GEbounds(const GXmlElement& xml);
     GEbounds(const GEbounds& ebds);
     GEbounds(const GEnergy& emin, const GEnergy& emax);
@@ -62,8 +62,8 @@ public:
     void           extend(const GEbounds& ebds);
     void           set_lin(const int& num, const GEnergy& emin, const GEnergy& emax);
     void           set_log(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void           load(const std::string& filename);
-    void           save(const std::string& filename,
+    void           load(const GFilename& filename);
+    void           save(const GFilename& filename,
                         const bool& clobber = false,
                         const std::string& unit = "keV") const;
     void           read(const GFitsTable& table);

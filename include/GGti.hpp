@@ -32,6 +32,7 @@
 #include "GContainer.hpp"
 #include "GTime.hpp"
 #include "GTimeReference.hpp"
+#include "GFilename.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GXmlElement;
@@ -58,7 +59,7 @@ class GGti : public GContainer {
 public:
     // Constructors and destructors
     GGti(void);
-    explicit GGti(const std::string& filename);
+    explicit GGti(const GFilename& filename);
     GGti(const GGti& gti);
     GGti(const GTime& tstart, const GTime& tstop);
     explicit GGti(const GXmlElement& xml);
@@ -82,8 +83,8 @@ public:
     void                  remove(const int& index);
     void                  reserve(const int& num);
     void                  extend(const GGti& gti);
-    void                  load(const std::string& filename);
-    void                  save(const std::string& filename,
+    void                  load(const GFilename& filename);
+    void                  save(const GFilename& filename,
                                const bool& clobber = false) const;
     void                  read(const GFitsTable& table);
     void                  write(GFits& fits,
@@ -118,7 +119,7 @@ protected:
     GTime          *m_start;        //!< Array of start times
     GTime          *m_stop;         //!< Array of stop times
     GTimeReference  m_reference;    //!< Time reference
-    std::string     m_xml_filename; //!< XML filename
+    GFilename       m_xml_filename; //!< XML filename
 };
 
 

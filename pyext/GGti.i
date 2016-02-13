@@ -40,7 +40,7 @@ class GGti : public GBase {
 public:
     // Constructors and destructors
     GGti(void);
-    explicit GGti(const std::string& filename);
+    explicit GGti(const GFilename& filename);
     GGti(const GGti& gti);
     GGti(const GTime& tstart, const GTime& tstop);
     explicit GGti(const GXmlElement& xml);
@@ -61,8 +61,8 @@ public:
     void                  remove(const int& index);
     void                  reserve(const int& num);
     void                  extend(const GGti& gti);
-    void                  load(const std::string& filename);
-    void                  save(const std::string& filename,
+    void                  load(const GFilename& filename);
+    void                  save(const GFilename& filename,
                                const bool& clobber = false) const;
     void                  read(const GFitsTable& table);
     void                  write(GFits& fits,

@@ -62,6 +62,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty Good Time Intervals.
  ***************************************************************************/
 GGti::GGti(void)
 {
@@ -80,7 +82,7 @@ GGti::GGti(void)
  *
  * Constructs Good Time Intervals from a FITS file.
  ***************************************************************************/
-GGti::GGti(const std::string& filename)
+GGti::GGti(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -97,6 +99,8 @@ GGti::GGti(const std::string& filename)
  * @brief Copy constructor
  *
  * @param[in] gti Good Time Intervals.
+ *
+ * Constructs Good Time Intervals by coping other Good Time Intervals.
  ***************************************************************************/
 GGti::GGti(const GGti& gti)
 {
@@ -578,19 +582,16 @@ void GGti::extend(const GGti& gti)
  * If no extension name is provided in the @p filename, the Good Time
  * Intervals are loaded from the "GTI" extension.
  ***************************************************************************/
-void GGti::load(const std::string& filename)
+void GGti::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
     // Allocate FITS file
     GFits file;
 
     // Open FITS file
-    file.open(fname.filename());
+    file.open(filename.filename());
 
     // Get GTI table
-    const GFitsTable& table = *file.table(fname.extname("GTI"));
+    const GFitsTable& table = *file.table(filename.extname("GTI"));
 
     // Read GTI from table
     read(table);
@@ -619,16 +620,13 @@ void GGti::load(const std::string& filename)
  * An existing file will only be modified if the @p clobber flag is set to
  * true.
  ***************************************************************************/
-void GGti::save(const std::string& filename, const bool& clobber) const
+void GGti::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
-
     // Open or create FITS file
-    GFits fits(fname.filename(), true);
+    GFits fits(filename.filename(), true);
 
     // Write GTI to FITS object
-    write(fits, fname.extname("GTI"));
+    write(fits, filename.extname("GTI"));
 
     // Save to file
     fits.save(clobber);
@@ -835,7 +833,7 @@ void GGti::write(GXmlElement& xml) const
         if (!m_xml_filename.empty()) {
 
             // Write "file" attribute
-            par->attribute("file", m_xml_filename);
+            par->attribute("file", m_xml_filename.fullname());
 
             // Write GTI file
             save(m_xml_filename, true);
@@ -1064,7 +1062,7 @@ std::string GGti::print(const GChatter& chatter) const
         // Optionally append XML filename
         if (!m_xml_filename.empty()) {
             result.append("\n"+gammalib::parformat("File name"));
-            result.append(m_xml_filename);
+            result.append(m_xml_filename.fullname());
         }
 
     } // endif: chatter was not silent
