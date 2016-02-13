@@ -36,7 +36,6 @@
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAPsf2D.hpp"
-#include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                 "GCTAPsf2D::read(GFitsTable&)"
@@ -61,6 +60,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty point spread function.
  ***************************************************************************/
 GCTAPsf2D::GCTAPsf2D(void) : GCTAPsf()
 {
@@ -96,6 +97,9 @@ GCTAPsf2D::GCTAPsf2D(const std::string& filename) : GCTAPsf()
  * @brief Copy constructor
  *
  * @param[in] psf Point spread function.
+ *
+ * Constructs point spread function by copying from another point spread
+ * function.
  ***************************************************************************/
 GCTAPsf2D::GCTAPsf2D(const GCTAPsf2D& psf) : GCTAPsf(psf)
 {
@@ -112,6 +116,8 @@ GCTAPsf2D::GCTAPsf2D(const GCTAPsf2D& psf) : GCTAPsf(psf)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs point spread function.
  ***************************************************************************/
 GCTAPsf2D::~GCTAPsf2D(void)
 {
@@ -134,6 +140,8 @@ GCTAPsf2D::~GCTAPsf2D(void)
  *
  * @param[in] psf Point spread function.
  * @return Point spread function.
+ *
+ * Assigns point spread function.
  ***************************************************************************/
 GCTAPsf2D& GCTAPsf2D::operator=(const GCTAPsf2D& psf)
 {
@@ -242,13 +250,13 @@ double GCTAPsf2D::operator()(const double& delta,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear point spread function
  *
- * This method properly resets the object to an initial state.
+ * Clears point spread function.
  ***************************************************************************/
 void GCTAPsf2D::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
     this->GCTAPsf::free_members();
 
@@ -262,9 +270,11 @@ void GCTAPsf2D::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone point spread functions
  *
- * @return Deep copy of point spread function instance.
+ * @return Deep copy of point spread function.
+ *
+ * Returns a pointer to a deep copy of the point spread function.
  ***************************************************************************/
 GCTAPsf2D* GCTAPsf2D::clone(void) const
 {
@@ -278,13 +288,23 @@ GCTAPsf2D* GCTAPsf2D::clone(void) const
  * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
- *            FITS file format differs from expectation.
+ *            Response table is not two-dimensional.
  *
- * Reads point spread function from the FITS @p table.
+ * Reads the point spread function form the FITS @p table. The following
+ * column names are mandatory:
  *
- * The data are stored in m_psf which is of type GCTAResponseTable. The
- * energy axis will be set to log10. The offset angle axis and sigma
- * parameter columns will be set to radians.
+ *     ENERG_LO - Energy lower bin boundaries
+ *     ENERG_HI - Energy upper bin boundaries
+ *     THETA_LO - Offset angle lower bin boundaries
+ *     THETA_HI - Offset angle upper bin boundaries
+ *     SIGMA_1  - 1st Gaussian sigma
+ *     AMPL_2   - 2nd Gaussian relative amplitude
+ *     SIGMA_2  - 2nd Gaussian sigma
+ *     AMPL_3   - 3rd Gaussian relative amplitude
+ *     SIGMA_3  - 3rd Gaussian sigma
+ *
+ * The data are stored in the m_psf member. The energy axis will be set to
+ * log10, the offset angle axis to radians.
  ***************************************************************************/
 void GCTAPsf2D::read(const GFitsTable& table)
 {
@@ -294,32 +314,35 @@ void GCTAPsf2D::read(const GFitsTable& table)
     // Read PSF table
     m_psf.read(table);
 
-    // Check that axis names comply to format
-    if (m_psf.axis_lo_name(0) != "ENERG_LO" ||
-        m_psf.axis_hi_name(0) != "ENERG_HI") {
-        std::string msg = "Point spread function response table does not"
-                          " contain \"ENERG_LO\" and \"ENERG_HI\" columns"
-                          " as the first axis.";
-        throw GException::invalid_value(G_READ, msg);
-    }
-    if (m_psf.axis_lo_name(1) != "THETA_LO" ||
-        m_psf.axis_hi_name(1) != "THETA_HI") {
-        std::string msg = "Point spread function response table does not"
-                          " contain \"THETA_LO\" and \"THETA_HI\" columns"
-                          " as the second axis.";
+    // Get mandatory indices (throw exception if not found)
+    m_inx_energy = m_psf.axis("ENERG");
+    m_inx_theta  = m_psf.axis("THETA");
+    m_inx_sigma1 = m_psf.table("SIGMA_1");
+    m_inx_ampl2  = m_psf.table("AMPL_2");
+    m_inx_sigma2 = m_psf.table("SIGMA_2");
+    m_inx_ampl3  = m_psf.table("AMPL_3");
+    m_inx_sigma3 = m_psf.table("SIGMA_3");
+
+    // Throw an exception if the table is not two-dimensional
+    if (m_psf.axes() != 2) {
+        std::string msg = "Expected two-dimensional point spread function "
+                          "response table but found "+
+                          gammalib::str(m_psf.axes())+
+                          " dimensions. Please specify a two-dimensional "
+                          "point spread function.";
         throw GException::invalid_value(G_READ, msg);
     }
 
     // Set energy axis to logarithmic scale
-    m_psf.axis_log10(0);
+    m_psf.axis_log10(m_inx_energy);
 
     // Set offset angle axis to radians
-    m_psf.axis_radians(1);
+    m_psf.axis_radians(m_inx_theta);
 
     // Convert sigma parameters to radians
-    m_psf.scale(1, gammalib::deg2rad);
-    m_psf.scale(3, gammalib::deg2rad);
-    m_psf.scale(5, gammalib::deg2rad);
+    m_psf.scale(m_inx_sigma1, gammalib::deg2rad);
+    m_psf.scale(m_inx_sigma2, gammalib::deg2rad);
+    m_psf.scale(m_inx_sigma3, gammalib::deg2rad);
 
     // Return
     return;
@@ -341,11 +364,11 @@ void GCTAPsf2D::write(GFitsBinTable& table) const
     GCTAResponseTable psf(m_psf);
 
     // Convert sigma parameters back to degrees
-    psf.scale(1, gammalib::rad2deg);
-    psf.scale(3, gammalib::rad2deg);
-    psf.scale(5, gammalib::rad2deg);
+    psf.scale(m_inx_sigma1, gammalib::rad2deg);
+    psf.scale(m_inx_sigma2, gammalib::rad2deg);
+    psf.scale(m_inx_sigma3, gammalib::rad2deg);
 
-    // Write background table
+    // Write response table
     psf.write(table);
 
     // Return
@@ -626,12 +649,14 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Compute energy boundaries in TeV
-        double emin = m_psf.axis_lo(0,0);
-        double emax = m_psf.axis_hi(0,m_psf.axis_bins(0)-1);
+        double emin = m_psf.axis_lo(m_inx_energy,0);
+        double emax = m_psf.axis_hi(m_inx_energy,
+                                    m_psf.axis_bins(m_inx_energy)-1);
 
         // Compute offset angle boundaries in deg
-        double omin = m_psf.axis_lo(1,0);
-        double omax = m_psf.axis_hi(1,m_psf.axis_bins(1)-1);
+        double omin = m_psf.axis_lo(m_inx_theta,0);
+        double omax = m_psf.axis_hi(m_inx_theta,
+                                    m_psf.axis_bins(m_inx_theta)-1);
 
         // Append header
         result.append("=== GCTAPsf2D ===");
@@ -639,9 +664,9 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_psf.axis_bins(0)));
+                      gammalib::str(m_psf.axis_bins(m_inx_energy)));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_psf.axis_bins(1)));
+                      gammalib::str(m_psf.axis_bins(m_inx_theta)));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
         result.append("\n"+gammalib::parformat("Offset angle range"));
@@ -668,17 +693,24 @@ void GCTAPsf2D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_psf.clear();
-    m_par_logE  = -1.0e30;
-    m_par_theta = -1.0;
-    m_norm      = 1.0;
-    m_norm2     = 0.0;
-    m_norm3     = 0.0;
-    m_sigma1    = 0.0;
-    m_sigma2    = 0.0;
-    m_sigma3    = 0.0;
-    m_width1    = 0.0;
-    m_width2    = 0.0;
-    m_width3    = 0.0;
+    m_inx_energy = 0;
+    m_inx_theta  = 1;
+    m_inx_sigma1 = 0;
+    m_inx_ampl2  = 1;
+    m_inx_sigma2 = 2;
+    m_inx_ampl3  = 3;
+    m_inx_sigma3 = 4;
+    m_par_logE   = -1.0e30;
+    m_par_theta  = -1.0;
+    m_norm       = 1.0;
+    m_norm2      = 0.0;
+    m_norm3      = 0.0;
+    m_sigma1     = 0.0;
+    m_sigma2     = 0.0;
+    m_sigma3     = 0.0;
+    m_width1     = 0.0;
+    m_width2     = 0.0;
+    m_width3     = 0.0;
 
     // Return
     return;
@@ -693,19 +725,26 @@ void GCTAPsf2D::init_members(void)
 void GCTAPsf2D::copy_members(const GCTAPsf2D& psf)
 {
     // Copy members
-    m_filename  = psf.m_filename;
-    m_psf       = psf.m_psf;
-    m_par_logE  = psf.m_par_logE;
-    m_par_theta = psf.m_par_theta;
-    m_norm      = psf.m_norm;
-    m_norm2     = psf.m_norm2;
-    m_norm3     = psf.m_norm3;
-    m_sigma1    = psf.m_sigma1;
-    m_sigma2    = psf.m_sigma2;
-    m_sigma3    = psf.m_sigma3;
-    m_width1    = psf.m_width1;
-    m_width2    = psf.m_width2;
-    m_width3    = psf.m_width3;
+    m_filename   = psf.m_filename;
+    m_psf        = psf.m_psf;
+    m_inx_energy = psf.m_inx_energy;
+    m_inx_theta  = psf.m_inx_theta;
+    m_inx_sigma1 = psf.m_inx_sigma1;
+    m_inx_ampl2  = psf.m_inx_ampl2;
+    m_inx_sigma2 = psf.m_inx_sigma2;
+    m_inx_ampl3  = psf.m_inx_ampl3;
+    m_inx_sigma3 = psf.m_inx_sigma3;
+    m_par_logE   = psf.m_par_logE;
+    m_par_theta  = psf.m_par_theta;
+    m_norm       = psf.m_norm;
+    m_norm2      = psf.m_norm2;
+    m_norm3      = psf.m_norm3;
+    m_sigma1     = psf.m_sigma1;
+    m_sigma2     = psf.m_sigma2;
+    m_sigma3     = psf.m_sigma3;
+    m_width1     = psf.m_width1;
+    m_width2     = psf.m_width2;
+    m_width3     = psf.m_width3;
 
     // Return
     return;
@@ -740,12 +779,13 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
         m_par_theta = theta;
 
         // Interpolate response parameters
-        std::vector<double> pars = m_psf(logE, theta);
+        std::vector<double> pars = (m_inx_energy == 0) ? m_psf(logE, theta) :
+                                                         m_psf(theta, logE);
 
         // Set Gaussian sigmas
-        m_sigma1 = pars[1];
-        m_sigma2 = pars[3];
-        m_sigma3 = pars[5];
+        m_sigma1 = pars[m_inx_sigma1];
+        m_sigma2 = pars[m_inx_sigma2];
+        m_sigma3 = pars[m_inx_sigma3];
 
         // Set width parameters
         double sigma1 = m_sigma1 * m_sigma1;
@@ -763,7 +803,7 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
         // Compute Gaussian 2
         if (sigma2 > 0.0) {
             m_width2 = -0.5 / sigma2;
-            m_norm2  = pars[2];
+            m_norm2  = pars[m_inx_ampl2];
         }
         else {
             m_width2 = 0.0;
@@ -773,7 +813,7 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
         // Compute Gaussian 3
         if (sigma3 > 0.0) {
             m_width3 = -0.5 / sigma3;
-            m_norm3  = pars[4];
+            m_norm3  = pars[m_inx_ampl3];
         }
         else {
             m_width3 = 0.0;
@@ -781,7 +821,8 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
         }
 
         // Compute global normalization parameter
-        double integral = gammalib::twopi * (sigma1 + sigma2*m_norm2 + sigma3*m_norm3);
+        double integral = gammalib::twopi *
+                          (sigma1 + sigma2*m_norm2 + sigma3*m_norm3);
         m_norm = (integral > 0.0) ? 1.0 / integral : 0.0;
 
     }

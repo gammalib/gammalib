@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-12 February 2016
+13 February 2016
 
 
 1. Introduction
@@ -15,6 +15,14 @@ made since the last release of GammaLib.
 ---------------------------------
 The following methods have been added to the public interface:
 - GObservation::events() (non-const variant)
+- GCTAResponseTable::axis(std::string)
+- GCTAResponseTable::table(std::string)
+- GCTAResponseTable::has_axis(std::string)
+- GCTAResponseTable::has_table(std::string)
+
+The following methods have been renamed:
+- GCTAResponseTable::tables(), was formerly GCTAResponseTable::size()
+- GCTAResponseTable::axis_bins(), was formerly GCTAResponseTable::axis()
 
 The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string
@@ -116,6 +124,10 @@ None
 
 20. CTA interface
 -----------------
+The response table instrument response functions now rely on the FITS table
+column names to determine the information instead of hard-wired column indices
+(#1656).
+
 Event fetching and disposal has been implemented in the GCTAEventList class by
 additing the fetch() and dispose() methods. Now, events are only loaded upon
 request and can be dispatched after user to save memory. The event fetching and

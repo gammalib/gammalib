@@ -112,6 +112,13 @@ private:
     // Members
     std::string       m_filename;   //!< Name of Aeff response file
     GCTAResponseTable m_psf;        //!< PSF response table
+    int               m_inx_energy; //!< Energy index
+    int               m_inx_theta;  //!< Theta index
+    int               m_inx_sigma1; //!< 1st Gaussian sigma
+    int               m_inx_ampl2;  //!< 2nd Gaussian relative amplitude
+    int               m_inx_sigma2; //!< 2nd Gaussian sigma
+    int               m_inx_ampl3;  //!< 3nd Gaussian relative amplitude
+    int               m_inx_sigma3; //!< 3nd Gaussian sigma
 
     // Precomputation cache
     mutable double    m_par_logE;   //!< Cache energy

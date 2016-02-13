@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEdisp2D.cpp - CTA 2D energy dispersion class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Florent Forest                                   *
+ *  copyright (C) 2015-2016 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,7 @@
 #include "GCTAEdisp2D.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_READ                               "GCTAEdisp2D::read(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -58,6 +59,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty energy dispersion.
  ***************************************************************************/
 GCTAEdisp2D::GCTAEdisp2D(void) : GCTAEdisp()
 {
@@ -94,6 +97,8 @@ GCTAEdisp2D::GCTAEdisp2D(const std::string& filename) : GCTAEdisp()
  * @brief Copy constructor
  *
  * @param[in] edisp Energy dispersion.
+ *
+ * Constructs energy dispersion by copying from another energy dispersion.
  ***************************************************************************/
 GCTAEdisp2D::GCTAEdisp2D(const GCTAEdisp2D& edisp) : GCTAEdisp(edisp)
 {
@@ -110,6 +115,8 @@ GCTAEdisp2D::GCTAEdisp2D(const GCTAEdisp2D& edisp) : GCTAEdisp(edisp)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs energy dispersion.
  ***************************************************************************/
 GCTAEdisp2D::~GCTAEdisp2D(void)
 {
@@ -132,6 +139,8 @@ GCTAEdisp2D::~GCTAEdisp2D(void)
  *
  * @param[in] edisp Energy dispersion.
  * @return Energy dispersion.
+ *
+ * Assigns energy dispersion.
  ***************************************************************************/
 GCTAEdisp2D& GCTAEdisp2D::operator=(const GCTAEdisp2D& edisp)
 {
@@ -184,8 +193,14 @@ double GCTAEdisp2D::operator()(const double& logEobs,
     // Compute Eobs/Esrc
     double EobsOverEsrc = std::exp((logEobs-logEsrc) * gammalib::ln10);
 
+    // Setup argument vector
+    double arg[3];
+    arg[m_inx_etrue] = logEsrc;
+    arg[m_inx_migra] = EobsOverEsrc;
+    arg[m_inx_theta] = theta;
+
     // Compute edisp
-    edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta);
+    edisp = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
 
     // Return
     return edisp;
@@ -199,13 +214,13 @@ double GCTAEdisp2D::operator()(const double& logEobs,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear energy dispersion
  *
- * This method properly resets the object to an initial state.
+ * Clears energy dispersion.
  ***************************************************************************/
 void GCTAEdisp2D::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
     this->GCTAEdisp::free_members();
 
@@ -219,9 +234,11 @@ void GCTAEdisp2D::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone energy dispersion
  *
- * @return Deep copy of energy dispersion instance.
+ * @return Deep copy of energy dispersion.
+ *
+ * Returns a pointer to a deep copy of the point spread function.
  ***************************************************************************/
 GCTAEdisp2D* GCTAEdisp2D::clone(void) const
 {
@@ -230,52 +247,26 @@ GCTAEdisp2D* GCTAEdisp2D::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Load energy dispersion from FITS file
- *
- * @param[in] filename FITS file name.
- *
- * Loads the energy dispersion from a FITS file.
- *
- * If no extension name is provided, the energy dispersion will be loaded
- * from the "ENERGY DISPERSION" extension.
- ***************************************************************************/
-void GCTAEdisp2D::load(const std::string& filename)
-{
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
-    // Open FITS file
-    file.open(fname.filename());
-
-    // Get energy dispersion table
-    const GFitsTable& table = *file.table(fname.extname("ENERGY DISPERSION"));
-
-    // Read energy dispersion from table
-    read(table);
-
-    // Close FITS file
-    file.close();
-
-    // Store filename
-    m_filename = filename;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Read energy dispersion from FITS table
  *
  * @param[in] table FITS table.
  *
- * Reads the energy dispersion form the FITS @p table.
+ * @exception GException::invalid_value
+ *            Response table is not three-dimensional.
  *
- * The data are stored in m_edisp which is of type GCTAResponseTable. The
- * energy axis will be set to log10, the offset angle axis to radians.
+ * Reads the energy dispersion form the FITS @p table. The following column
+ * names are mandatory:
+ *
+ *     ETRUE_LO - True energy lower bin boundaries
+ *     ETRUE_HI - True energy upper bin boundaries
+ *     MIGRA_LO - Migration lower bin boundaries
+ *     MIGRA_HI - Migration upper bin boundaries
+ *     THETA_LO - Offset angle lower bin boundaries
+ *     THETA_HI - Offset angle upper bin boundaries
+ *     MATRIX   - Migration matrix
+ *
+ * The data are stored in the m_edisp member. The energy axis will be set to
+ * log10, the offset angle axis to radians.
  *
  * The method assures that the energy dispersion is properly normalised.
  ***************************************************************************/
@@ -287,16 +278,32 @@ void GCTAEdisp2D::read(const GFitsTable& table)
     // Read energy dispersion table
     m_edisp.read(table);
 
+    // Get mandatory indices (throw exception if not found)
+    m_inx_etrue  = m_edisp.axis("ETRUE");
+    m_inx_migra  = m_edisp.axis("MIGRA");
+    m_inx_theta  = m_edisp.axis("THETA");
+    m_inx_matrix = m_edisp.table("MATRIX");
+
+    // Throw an exception if the table is not two-dimensional
+    if (m_edisp.axes() != 3) {
+        std::string msg = "Expected three-dimensional energy dispersion "
+                          "response table but found "+
+                          gammalib::str(m_edisp.axes())+
+                          " dimensions. Please specify a three-dimensional "
+                          "energy dispersion.";
+        throw GException::invalid_value(G_READ, msg);
+    }
+
     // Set true energy axis to logarithmic scale
-    m_edisp.axis_log10(0);
+    m_edisp.axis_log10(m_inx_etrue);
 
     // Set offset angle axis to radians
-    m_edisp.axis_radians(2);
+    m_edisp.axis_radians(m_inx_theta);
 
     // Get axes dimensions
-    int etrue_size = m_edisp.axis_bins(0);
-    int migra_size = m_edisp.axis_bins(1);
-    int theta_size = m_edisp.axis_bins(2);
+    int etrue_size = m_edisp.axis_bins(m_inx_etrue);
+    int migra_size = m_edisp.axis_bins(m_inx_migra);
+    int theta_size = m_edisp.axis_bins(m_inx_theta);
 
     // Now normalize the migration matrix vectors. We do this by integrating
     // for each true energy and offset angle the measured energy. We perform
@@ -313,16 +320,16 @@ void GCTAEdisp2D::read(const GFitsTable& table)
         for (int i_theta = 0; i_theta < theta_size; ++i_theta) {
 
             // Get offset angle (in radians)
-            double theta = 0.5 * (m_edisp.axis_lo(2,i_theta) +
-                                  m_edisp.axis_hi(2,i_theta)) *
+            double theta = 0.5 * (m_edisp.axis_lo(m_inx_theta,i_theta) +
+                                  m_edisp.axis_hi(m_inx_theta,i_theta)) *
                            gammalib::deg2rad;
 
             // Loop over true photon energy
             for (int i_etrue = 0; i_etrue < etrue_size; ++i_etrue) {
 
                 // Get energy
-                double emin    = std::log10(m_edisp.axis_lo(0,i_etrue));
-                double emax    = std::log10(m_edisp.axis_hi(0,i_etrue));
+                double emin    = std::log10(m_edisp.axis_lo(m_inx_etrue,i_etrue));
+                double emax    = std::log10(m_edisp.axis_hi(m_inx_etrue,i_etrue));
                 double logEsrc = 0.5*(emin+emax);
 
                 // Initialise integration
@@ -364,7 +371,7 @@ void GCTAEdisp2D::read(const GFitsTable& table)
                 if (sum > 0.0) {
                     int offset = i_etrue + (i_theta*migra_size) * etrue_size;
                     for (int k = 0, i = offset; k < migra_size; ++k, i += etrue_size) {
-                        m_edisp(0,i) /= sum;
+                        m_edisp(m_inx_matrix,i) /= sum;
                     }
                 }
             }
@@ -393,6 +400,44 @@ void GCTAEdisp2D::write(GFitsBinTable& table) const
 {
     // Write background table
     m_edisp.write(table);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load energy dispersion from FITS file
+ *
+ * @param[in] filename FITS file name.
+ *
+ * Loads the energy dispersion from a FITS file.
+ *
+ * If no extension name is provided, the energy dispersion will be loaded
+ * from the "ENERGY DISPERSION" extension.
+ ***************************************************************************/
+void GCTAEdisp2D::load(const std::string& filename)
+{
+    // Create file name
+    GFilename fname(filename);
+
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(fname.filename());
+
+    // Get energy dispersion table
+    const GFitsTable& table = *file.table(fname.extname("ENERGY DISPERSION"));
+
+    // Read energy dispersion from table
+    read(table);
+
+    // Close FITS file
+    file.close();
+
+    // Store filename
+    m_filename = filename;
 
     // Return
     return;
@@ -522,7 +567,7 @@ GEbounds GCTAEdisp2D::ebounds_obs(const double& logEsrc,
         int high = m_ebounds_obs.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
-            double e = m_edisp.axis_lo(0, mid);
+            double e = m_edisp.axis_lo(m_inx_etrue, mid);
             if (logEsrc < std::log10(e)) {
                 high = mid;
             }
@@ -584,7 +629,7 @@ GEbounds GCTAEdisp2D::ebounds_src(const double& logEobs,
         int high = m_ebounds_src.size() - 1;
         while ((high-low) > 1) {
             int  mid = (low+high) / 2;
-            double e = m_edisp.axis_lo(0, mid);
+            double e = m_edisp.axis_lo(m_inx_etrue, mid);
             if (logEobs < std::log10(e)) {
                 high = mid;
             }
@@ -618,12 +663,19 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Compute energy boundaries in TeV
-        double emin = m_edisp.axis_lo(0,0);
-        double emax = m_edisp.axis_hi(0,m_edisp.axis_bins(0)-1);
+        double emin = m_edisp.axis_lo(m_inx_etrue,0);
+        double emax = m_edisp.axis_hi(m_inx_etrue,
+                                      m_edisp.axis_bins(m_inx_etrue)-1);
+
+        // Compute mingration
+        double mmin = m_edisp.axis_lo(m_inx_migra,0);
+        double mmax = m_edisp.axis_hi(m_inx_migra,
+                                      m_edisp.axis_bins(m_inx_migra)-1);
 
         // Compute offset angle boundaries in deg
-        double omin = m_edisp.axis_lo(1,0);
-        double omax = m_edisp.axis_hi(1,m_edisp.axis_bins(1)-1);
+        double omin = m_edisp.axis_lo(m_inx_theta,0);
+        double omax = m_edisp.axis_hi(m_inx_theta,
+                                      m_edisp.axis_bins(m_inx_theta)-1);
 
         // Append header
         result.append("=== GCTAEdisp2D ===");
@@ -631,11 +683,15 @@ std::string GCTAEdisp2D::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+gammalib::parformat("Number of energy bins") +
-                      gammalib::str(m_edisp.axis_bins(0)));
+                      gammalib::str(m_edisp.axis_bins(m_inx_etrue)));
+        result.append("\n"+gammalib::parformat("Number of migration bins") +
+                      gammalib::str(m_edisp.axis_bins(m_inx_migra)));
         result.append("\n"+gammalib::parformat("Number of offset bins") +
-                      gammalib::str(m_edisp.axis_bins(1)));
+                      gammalib::str(m_edisp.axis_bins(m_inx_theta)));
         result.append("\n"+gammalib::parformat("Log10(Energy) range"));
         result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Migration range"));
+        result.append(gammalib::str(mmin)+" - "+gammalib::str(mmax));
         result.append("\n"+gammalib::parformat("Offset angle range"));
         result.append(gammalib::str(omin)+" - "+gammalib::str(omax)+" deg");
 
@@ -660,6 +716,10 @@ void GCTAEdisp2D::init_members(void)
     // Initialise members
     m_filename.clear();
     m_edisp.clear();
+    m_inx_etrue  = 0;
+    m_inx_migra  = 1;
+    m_inx_theta  = 2;
+    m_inx_matrix = 0;
 
     // Initialise computation cache
     m_ebounds_obs_computed = false;
@@ -687,8 +747,12 @@ void GCTAEdisp2D::init_members(void)
 void GCTAEdisp2D::copy_members(const GCTAEdisp2D& edisp)
 {
     // Copy members
-    m_filename  = edisp.m_filename;
-    m_edisp     = edisp.m_edisp;
+    m_filename   = edisp.m_filename;
+    m_edisp      = edisp.m_edisp;
+    m_inx_etrue  = edisp.m_inx_etrue;
+    m_inx_migra  = edisp.m_inx_migra;
+    m_inx_theta  = edisp.m_inx_theta;
+    m_inx_matrix = edisp.m_inx_matrix;
 
     // Copy computation cache
     m_ebounds_obs_computed = edisp.m_ebounds_obs_computed;
@@ -743,12 +807,16 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
     // Set epsilon
     const double eps = 1.0e-12;
 
+    // Determine number of true energy and migration bins
+    int n_bins  = m_edisp.axis_bins(m_inx_etrue);
+    int n_migra = m_edisp.axis_bins(m_inx_migra);
+
     // Loop over Esrc
-    for (int isrc = 0; isrc < m_edisp.axis_bins(0); ++isrc) {
+    for (int isrc = 0; isrc < n_bins; ++isrc) {
 
         // Set Esrc
-        double Esrc    = std::sqrt(m_edisp.axis_hi(0,isrc) *
-                                   m_edisp.axis_lo(0,isrc));
+        double Esrc    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,isrc) *
+                                   m_edisp.axis_lo(m_inx_etrue,isrc));
         double logEsrc = std::log10(Esrc);
 
         // Initialise results
@@ -757,18 +825,19 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
         bool   minFound   = false;
         bool   maxFound   = false;
 
-        // Determine number of MIGRA bins
-        int n_migra = m_edisp.axis_bins(1);
-
         // Find minimum boundary
         for (int i = 0; i < n_migra; ++i) {
 
             // Compute EobsOverEsrc value
-            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1,i) +
-                                         m_edisp.axis_lo(1,i));
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(m_inx_migra,i) +
+                                         m_edisp.axis_lo(m_inx_migra,i));
 
             // Get matrix term
-            double edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta);
+            double arg[3];
+            arg[m_inx_etrue] = logEsrc;
+            arg[m_inx_migra] = EobsOverEsrc;
+            arg[m_inx_theta] = theta;
+            double edisp     = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
 
             // Find first non-negligible matrix term
             if (edisp >= eps) {
@@ -783,11 +852,15 @@ void GCTAEdisp2D::compute_ebounds_obs(const double& theta,
         for (int i = n_migra-1; i >= 0; i--) {
 
             // Compute EobsOverEsrc value
-            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(1,i) +
-                                         m_edisp.axis_lo(1,i));
+            double EobsOverEsrc = 0.5 * (m_edisp.axis_hi(m_inx_migra,i) +
+                                         m_edisp.axis_lo(m_inx_migra,i));
 
             // Get matrix term
-            double edisp = m_edisp(0, logEsrc, EobsOverEsrc, theta);
+            double arg[3];
+            arg[m_inx_etrue] = logEsrc;
+            arg[m_inx_migra] = EobsOverEsrc;
+            arg[m_inx_theta] = theta;
+            double edisp     = m_edisp(m_inx_matrix, arg[0], arg[1], arg[2]);
 
             // Find first non-negligible matrix term
             if (edisp >= eps) {
@@ -846,12 +919,15 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
     // Set epsilon
     const double eps = 1.0e-12;
 
+    // Determine number of true energy bins
+    int n_bins = m_edisp.axis_bins(m_inx_etrue);
+
     // Loop over Eobs
-    for (int iobs = 0; iobs < m_edisp.axis(0); ++iobs) {
+    for (int iobs = 0; iobs < n_bins; ++iobs) {
 
         // Set Eobs
-        double Eobs    = std::sqrt(m_edisp.axis_hi(0,iobs) *
-                                   m_edisp.axis_lo(0,iobs));
+        double Eobs    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,iobs) *
+                                   m_edisp.axis_lo(m_inx_etrue,iobs));
         double logEobs = std::log10(Eobs);
 
         // Initialise results
@@ -860,15 +936,12 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
         bool   minFound   = false;
         bool   maxFound   = false;
 
-        // Determine number of true energy bins
-        int n_bins = m_edisp.axis(0);
-
         // Find minimum boundary
         for (int isrc = 0; isrc < n_bins; ++isrc) {
 
             // Set Esrc
-            double Esrc    = std::sqrt(m_edisp.axis_hi(0,isrc) *
-                                       m_edisp.axis_lo(0,isrc));
+            double Esrc    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,isrc) *
+                                       m_edisp.axis_lo(m_inx_etrue,isrc));
             double logEsrc = std::log10(Esrc);
 
             // Get matrix term
@@ -887,8 +960,8 @@ void GCTAEdisp2D::compute_ebounds_src(const double& theta,
         for (int isrc = n_bins-1; isrc >= 0; isrc--) {
 
             // Set Esrc
-            double Esrc    = std::sqrt(m_edisp.axis_hi(0,isrc) *
-                                       m_edisp.axis_lo(0,isrc));
+            double Esrc    = std::sqrt(m_edisp.axis_hi(m_inx_etrue,isrc) *
+                                       m_edisp.axis_lo(m_inx_etrue,isrc));
             double logEsrc = std::log10(Esrc);
 
             // Get matrix term
@@ -936,7 +1009,7 @@ void GCTAEdisp2D::set_max_edisp(void) const
 
     // Loop over all response table elements
     for (int i = 0; i < m_edisp.elements(); ++i) {
-        double value = m_edisp(0,i);
+        double value = m_edisp(m_inx_matrix,i);
         if (value > m_max_edisp) {
             m_max_edisp = value;
         }

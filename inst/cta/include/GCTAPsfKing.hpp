@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAPsfKing.hpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -111,6 +111,10 @@ private:
     // Members
     std::string       m_filename;   //!< Name of Aeff response file
     GCTAResponseTable m_psf;        //!< PSF response table
+    int               m_inx_energy; //!< Energy index
+    int               m_inx_theta;  //!< Theta index
+    int               m_inx_gamma;  //!< Gamma
+    int               m_inx_sigma;  //!< Sigma
 
     // Evaluation cache
     mutable double m_par_logE;   //!< Cache energy

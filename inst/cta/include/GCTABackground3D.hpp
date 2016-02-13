@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCTABackground3D.hpp - CTA 3D background class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -92,6 +92,10 @@ private:
     GCTAResponseTable m_background;  //!< Background response table
     double            m_mc_max_bin;  //!< Maximum spatial binsize for MC
     double            m_mc_max_logE; //!< Maximum log energy binsize for MC
+    int               m_inx_detx;    //!< DETX index
+    int               m_inx_dety;    //!< DETY index
+    int               m_inx_energy;  //!< Energy index
+    int               m_inx_bgd;     //!< Background index
 
     // Monte Carlo cache
     mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
