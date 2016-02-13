@@ -87,14 +87,14 @@ if WITH_INST_CTA
   testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
   testdatacta_DATA  = $(testdatacta)
   testcaldbcta      = ../inst/cta/test/caldb/cta_dummy_irf.dat \
-                      ../inst/cta/test/caldb/prod1_gauss.fits \
-                      ../inst/cta/test/caldb/prod1_king.fits
+                      ../inst/cta/test/caldb/prod1_gauss.fits.gz \
+                      ../inst/cta/test/caldb/prod1_king.fits.gz
   testcaldbctadir   = $(pyexecdir)/gammalib/tests/cta/caldb
   testcaldbcta_DATA = $(testcaldbcta)
-  testdc1cta        = ../inst/cta/test/caldb/dc1/arf.fits \
-                      ../inst/cta/test/caldb/dc1/psf.fits \
-                      ../inst/cta/test/caldb/dc1/psf_magic.fits \
-                      ../inst/cta/test/caldb/dc1/rmf.fits
+  testdc1cta        = ../inst/cta/test/caldb/dc1/arf.fits.gz \
+                      ../inst/cta/test/caldb/dc1/psf.fits.gz \
+                      ../inst/cta/test/caldb/dc1/psf_magic.fits.gz \
+                      ../inst/cta/test/caldb/dc1/rmf.fits.gz
   testdc1ctadir     = $(pyexecdir)/gammalib/tests/cta/caldb/dc1
   testdc1cta_DATA   = $(testdc1cta)
 endif
