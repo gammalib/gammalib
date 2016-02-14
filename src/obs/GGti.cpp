@@ -584,11 +584,8 @@ void GGti::extend(const GGti& gti)
  ***************************************************************************/
 void GGti::load(const GFilename& filename)
 {
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(filename);
+    GFits file(filename);
 
     // Get GTI table
     const GFitsTable& table = *file.table(filename.extname("GTI"));
@@ -678,7 +675,7 @@ void GGti::read(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write Good Time Intervals and time reference into FITS object
  *
- * @param[in] fits FITS object.
+ * @param[in] fits FITS file.
  * @param[in] extname GTI extension name (defaults to "GTI")
  *
  * Writes Good Time Intervals and time reference into a FITS object. If an
@@ -691,8 +688,8 @@ void GGti::read(const GFitsTable& table)
 void GGti::write(GFits& fits, const std::string& extname) const
 {
     // Create GTI columns
-    GFitsTableDoubleCol cstart = GFitsTableDoubleCol("START", m_num);
-    GFitsTableDoubleCol cstop  = GFitsTableDoubleCol("STOP", m_num);
+    GFitsTableDoubleCol cstart("START", m_num);
+    GFitsTableDoubleCol cstop("STOP", m_num);
 
     // Fill GTI columns in specified time reference
     for (int i = 0; i < m_num; ++i) {
@@ -715,7 +712,7 @@ void GGti::write(GFits& fits, const std::string& extname) const
         fits.remove(extname);
     }
 
-    // Append GTI table to FITS object
+    // Append GTI table to FITS file
     fits.append(table);
 
     // Return

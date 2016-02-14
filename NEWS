@@ -43,7 +43,17 @@ of std::string:
 - GGti
 - GLog
 - GModelSpatialDiffuseCube
+- GModelSpatialDiffuseMap
+- GModelSpectralFunc
+- GModels
+- GNodeArray
+- GObservations
+- GPha
+- GRmf
 - GSkyMap
+- GSkyRegions
+- GTestSuites
+- GXml
 
 The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string

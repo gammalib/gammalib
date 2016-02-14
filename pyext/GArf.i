@@ -50,7 +50,6 @@ public:
     std::string      classname(void) const;
     int              size(void) const;
     double&          at(const int& index);
-    const double&    at(const int& index) const;
     const GEbounds&  ebounds(void) const;
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,

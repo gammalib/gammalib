@@ -388,25 +388,25 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 
 		// Handle on counts
 		if (par->attribute("name") == "Pha_on") {
-			par->attribute("file", m_on_spec.filename());
+			par->attribute("file", m_on_spec.filename().url());
 			npar[0]++;
 		}
 
 		// Handle off counts
 		else if (par->attribute("name") == "Pha_off") {
-			par->attribute("file", m_off_spec.filename());
+			par->attribute("file", m_off_spec.filename().url());
 			npar[1]++;
 		}
 
 		// Handle on regions
 		else if (par->attribute("name") == "Regions_on") {
-			par->attribute("file", m_on_regions.filename());
+			par->attribute("file", m_on_regions.filename().url());
 			npar[2]++;
 		}
 
 		// Handle off regions
 		else if (par->attribute("name") == "Regions_off") {
-			par->attribute("file", m_off_regions.filename());
+			par->attribute("file", m_off_regions.filename().url());
 			npar[3]++;
 		}
 
@@ -418,7 +418,7 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 
 		// Handle energy resolution
 		else if (par->attribute("name") == "Rmf") {
-			par->attribute("file", m_rmf.filename());
+			par->attribute("file", m_rmf.filename().url());
 			npar[5]++;
 		}
 	}

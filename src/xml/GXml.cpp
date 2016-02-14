@@ -28,6 +28,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
+#include "GException.hpp"
+#include "GFilename.hpp"
 #include "GUrlFile.hpp"
 #include "GUrlString.hpp"
 #include "GXml.hpp"
@@ -37,8 +40,6 @@
 #include "GXmlElement.hpp"
 #include "GXmlComment.hpp"
 #include "GXmlPI.hpp"
-#include "GException.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                                     "GXml::load(std::string&)"
@@ -515,18 +516,15 @@ const GXmlElement* GXml::element(const std::string& name, const int& index) cons
  * @todo Ideally, we would like to extract the URL type from the filename
  * so that any kind of URL can be used for loading.
  ***************************************************************************/
-void GXml::load(const std::string& filename)
+void GXml::load(const GFilename& filename)
 {
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
     // Check if file exists
-    if (!gammalib::file_exists(fname)) {
-        throw GException::file_open_error(G_LOAD, fname);
+    if (!gammalib::file_exists(filename.url())) {
+        throw GException::file_open_error(G_LOAD, filename.url());
     }
 
     // Open XML URL as file for reading
-    GUrlFile url(fname.c_str(), "r");
+    GUrlFile url(filename.url().c_str(), "r");
 
     // Read XML document from URL
     read(url);
@@ -554,10 +552,10 @@ void GXml::load(const std::string& filename)
  * @todo Ideally, we would like to extract the URL type from the filename
  * so that any kind of URL can be used for loading.
  ***************************************************************************/
-void GXml::save(const std::string& filename)
+void GXml::save(const GFilename& filename)
 {
     // Open XML file for writing
-    GUrlFile url(filename.c_str(), "w");
+    GUrlFile url(filename.url().c_str(), "w");
 
     // Write XML document
     write(url, 0);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.cpp - Spatial map model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -107,9 +107,9 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GXmlElement& xml) :
  * Constructs spatial map model by loading a skymap from the file specified
  * by @p filename and by setting the normalization @p value.
  ***************************************************************************/
-GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename,
-                                                 const double&      value,
-                                                 const bool&        normalize) :
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GFilename& filename,
+                                                 const double&    value,
+                                                 const bool&      normalize) :
                          GModelSpatialDiffuse()
 {
     // Initialise members
@@ -585,7 +585,7 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
     }
 
     // Set model filename
-    xml.attribute("file", m_filename);
+    xml.attribute("file", m_filename.url());
 
     // Verify model type
     if (xml.attribute("type") != "SpatialMap") {
@@ -830,7 +830,8 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
         result.append("=== GModelSpatialDiffuseMap ===");
 
         // Append parameters
-        result.append("\n"+gammalib::parformat("Sky map file")+m_filename);
+        result.append("\n"+gammalib::parformat("Sky map file"));
+        result.append(m_filename.url());
         result.append("\n"+gammalib::parformat("Map normalization"));
         result.append(gammalib::str(m_mc_norm)+" ph/cm2/s");
         if (normalize()) {
@@ -861,7 +862,7 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
  * Loads skymap into the model class. The method calls the protected method
  * prepare_map() that prepares the map for usage by the class.
  ***************************************************************************/
-void GModelSpatialDiffuseMap::load(const std::string& filename)
+void GModelSpatialDiffuseMap::load(const GFilename& filename)
 {
     // Initialise skymap
     m_map.clear();
@@ -873,7 +874,7 @@ void GModelSpatialDiffuseMap::load(const std::string& filename)
     m_filename = filename;
 
     // Load skymap
-    m_map.load(gammalib::expand_env(m_filename));
+    m_map.load(m_filename.url());
 
     // Prepare sky map
     prepare_map();

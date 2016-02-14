@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GXml.hpp - XML class                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,6 +37,7 @@
 #include "GXmlText.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFilename;
 
 
 /***********************************************************************//**
@@ -208,8 +209,8 @@ public:
     const GXmlElement* element(const std::string& name) const;
     GXmlElement*       element(const std::string& name, const int& index);
     const GXmlElement* element(const std::string& name, const int& index) const;
-    void               load(const std::string& filename);
-    void               save(const std::string& filename);
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename);
     void               read(const GUrl& url);
     void               write(GUrl& url, const int& indent = 0) const;
     std::string        print(const GChatter& chatter = NORMAL) const;

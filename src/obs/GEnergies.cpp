@@ -547,11 +547,8 @@ void GEnergies::set_log(const int&     num,
  ***************************************************************************/
 void GEnergies::load(const GFilename& filename)
 {
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(filename);
+    GFits file(filename);
 
     // Get energies table
     const GFitsTable& table = *file.table(filename.extname("ENERGIES"));
@@ -644,18 +641,18 @@ void GEnergies::read(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write energies into FITS object
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  * @param[in] extname Energy extension name (default: "ENERGIES")
  *
  * Writes energies into FITS object.
  ***************************************************************************/
-void GEnergies::write(GFits& file, const std::string& extname) const
+void GEnergies::write(GFits& fits, const std::string& extname) const
 {
     // Set number of energies
     int num = m_energies.size();
 
     // Create Energy column
-    GFitsTableDoubleCol col_energy = GFitsTableDoubleCol("Energy", num);
+    GFitsTableDoubleCol col_energy("Energy", num);
 
     // Fill energy column in units of MeV
     for (int i = 0; i < num; ++i) {
@@ -664,15 +661,18 @@ void GEnergies::write(GFits& file, const std::string& extname) const
     col_energy.unit("MeV");
 
     // Create energies table
-    GFitsBinTable* table = new GFitsBinTable(num);
-    table->append(col_energy);
-    table->extname(extname);
+    GFitsBinTable table(num);
+    table.append(col_energy);
+    table.extname(extname);
 
-    // Write to FITS file
-    file.append(*table);
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
-    // Free table
-    delete table;
+    // Append ENERGIES table to FITS file
+    fits.append(table);
 
     // Return
     return;

@@ -24,8 +24,8 @@
  * @author Juergen Knoedlseder
  */
 
-#ifndef GPARS_HPP
-#define GPARS_HPP
+#ifndef GAPPLICATIONPARS_HPP
+#define GAPPLICATIONPARS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
@@ -53,7 +53,7 @@ public:
     // Constructors and destructors
     GApplicationPars(void);
     explicit GApplicationPars(const GFilename& filename);
-    GApplicationPars(const GFilename& filename,
+    GApplicationPars(const GFilename&                filename,
                      const std::vector<std::string>& args);
     GApplicationPars(const GApplicationPars& pars);
     virtual ~GApplicationPars(void);
@@ -76,7 +76,7 @@ public:
     GApplicationPar&       append(const GApplicationPar& par);
     void                   append_standard(void);
     GApplicationPar&       insert(const int& index, const GApplicationPar& par);
-    GApplicationPar&       insert(const std::string& name,
+    GApplicationPar&       insert(const std::string&     name,
                                   const GApplicationPar& par);
     void                   remove(const int& index);
     void                   remove(const std::string& name);
@@ -84,7 +84,7 @@ public:
     void                   extend(const GApplicationPars& pars);
     bool                   contains(const std::string& name) const;
     void                   load(const GFilename& filename);
-    void                   load(const GFilename& filename,
+    void                   load(const GFilename&                filename,
                                 const std::vector<std::string>& args);
     void                   save(const GFilename& filename);
     std::string            print(const GChatter& chatter = NORMAL) const;
@@ -195,4 +195,4 @@ void GApplicationPars::reserve(const int& num)
     return;
 }
 
-#endif /* GPARS_HPP */
+#endif /* GAPPLICATIONPARS_HPP */

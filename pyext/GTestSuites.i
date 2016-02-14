@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.i - Test suite container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2016 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,12 +35,12 @@
  * @brief Test suites container class
  ***************************************************************************/
 class GTestSuites : public GContainer {
-    public:
 
+public:
     // Constructors and destructors
     GTestSuites(void);
     GTestSuites(const GTestSuites& suites);
-    GTestSuites(const std::string& name);
+    explicit GTestSuites(const std::string& name);
     virtual ~GTestSuites(void);
 
     // Methods
@@ -64,7 +64,7 @@ class GTestSuites : public GContainer {
     int                tests(void) const;
     const time_t&      timestamp(void) const;
     bool               run(void);
-    void               save(const std::string& filename) const;
+    void               save(const GFilename& filename) const;
 };
 
 

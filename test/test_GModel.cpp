@@ -681,8 +681,9 @@ void TestGModel::test_diffuse_map(void)
     try {
         GModelSpatialDiffuseMap model;
         test_assert(model.type() == "SpatialMap",
-                                    "Model type \"SpatialMap\" expected.");
-        test_assert(model.filename() == "", "Model filename \"\" expected.");
+                    "Model type \"SpatialMap\" expected.");
+        test_assert(model.filename().url() == "",
+                    "Model filename \"\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -694,7 +695,8 @@ void TestGModel::test_diffuse_map(void)
     try {
         GModelSpatialDiffuseMap model(m_map_file, 3.0);
         test_value(model.value(), 3.0);
-        test_assert(model.filename() == m_map_file, "Expected \""+m_map_file+"\"");
+        test_assert(model.filename().url() == m_map_file,
+                    "Expected \""+m_map_file+"\"");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -707,7 +709,7 @@ void TestGModel::test_diffuse_map(void)
         GSkyMap map("GAL", 16, "RING", 10);
         GModelSpatialDiffuseMap model(map, 3.0);
         test_value(model.value(), 3.0);
-        test_assert(model.filename() == "", "Expected \"\"");
+        test_assert(model.filename().url() == "", "Expected \"\"");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -724,8 +726,8 @@ void TestGModel::test_diffuse_map(void)
         test_value(model.size(), 1);
         test_assert(model.type() == "SpatialMap", "Expected \"SpatialMap\"");
         test_value(model.value(), 1.0);
-        test_assert(model.filename() == m_map_file,
-                                        "Model filename \""+m_map_file+"\" expected.");
+        test_assert(model.filename().url() == m_map_file,
+                    "Model filename \""+m_map_file+"\" expected.");
 
         // Test value method
         model.value(3.9);
@@ -733,8 +735,8 @@ void TestGModel::test_diffuse_map(void)
 
         // Test load method
         model.load(m_map_file);
-        test_assert(model.filename() == m_map_file,
-                                        "Model filename \""+m_map_file+"\" expected.");
+        test_assert(model.filename().url() == m_map_file,
+                    "Model filename \""+m_map_file+"\" expected.");
 
         // Test map method
         model.map(GSkyMap("GAL", 16, "RING", 10));
@@ -2055,7 +2057,8 @@ void TestGModel::test_filefct(void)
     test_try("Test value constructor");
     try {
         GModelSpectralFunc model("data/filefunction.txt", 2.0);
-        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+        test_assert(model.filename().url() == "data/filefunction.txt",
+                    "Expected \"data/filefunction.txt\"");
         test_value(model.norm(), 2.0);
         test_try_success();
     }
@@ -2072,12 +2075,14 @@ void TestGModel::test_filefct(void)
         GModelSpectralFunc model(*element);
         test_value(model.size(), 1);
         test_assert(model.type() == "FileFunction", "Expected \"FileFunction\"");
-        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+        test_assert(model.filename().url() == "data/filefunction.txt",
+                    "Expected \"data/filefunction.txt\"");
         test_value(model.norm(), 1.0);
 
         // Test filename method
         model.filename("data/filefunction.txt");
-        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+        test_assert(model.filename().url() == "data/filefunction.txt",
+                    "Expected \"data/filefunction.txt\"");
 
         // Test norm method
         model.norm(3.0);

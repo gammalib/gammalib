@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuites.cpp - Test suite container class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,9 +29,10 @@
 #include <config.h>
 #endif
 #include <ctime>
+#include "GTools.hpp"
+#include "GXml.hpp"
 #include "GTestSuites.hpp"
 #include "GTestCase.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                          "GTestSuites::at(int&)"
@@ -474,7 +475,7 @@ bool GTestSuites::run(void)
  *
  * Saves the test results in a JUnit compliant format into an XML file.
  ***************************************************************************/
-void GTestSuites::save(const std::string& filename) const
+void GTestSuites::save(const GFilename& filename) const
 {
     // Declare empty XML document
     GXml xml;

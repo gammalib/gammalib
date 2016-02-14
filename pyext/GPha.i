@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.i - XSPEC Pulse Height Analyzer class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,30 +38,30 @@ class GPha : public GBase {
 public:
     // Constructors and destructors
     GPha(void);
-    explicit GPha(const std::string& filename);
+    explicit GPha(const GFilename& filename);
     explicit GPha(const GEbounds& ebds);
     explicit GPha(const int& bins);
     GPha(const GPha& pha);
     virtual ~GPha(void);
 
     // Methods
-    void               clear(void);
-    GPha*              clone(void) const;
-    std::string        classname(void) const;
-    int                size(void) const;
-    double&            at(const int& index);
-    const GEbounds&    ebounds(void) const;
-    double             counts(void) const;
-    const double&      underflow(void) const;
-    const double&      overflow(void) const;
-    const double&      outflow(void) const;
-    void               fill(const GEnergy& energy, const double& value = 1.0);
-    void               load(const std::string& filename);
-    void               save(const std::string& filename,
-                            const bool& clobber = false) const;
-    void               read(const GFitsTable& table);
-    void               write(GFits& fits) const;
-    const std::string& filename(void) const;
+    void             clear(void);
+    GPha*            clone(void) const;
+    std::string      classname(void) const;
+    int              size(void) const;
+    double&          at(const int& index);
+    const GEbounds&  ebounds(void) const;
+    double           counts(void) const;
+    const double&    underflow(void) const;
+    const double&    overflow(void) const;
+    const double&    outflow(void) const;
+    void             fill(const GEnergy& energy, const double& value = 1.0);
+    void             load(const GFilename& filename);
+    void             save(const GFilename& filename,
+                          const bool&      clobber = false) const;
+    void             read(const GFitsTable& table);
+    void             write(GFits& fits) const;
+    const GFilename& filename(void) const;
 };
 
 

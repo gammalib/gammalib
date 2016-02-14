@@ -53,10 +53,10 @@ public:
     std::string        classname(void) const;
     bool               is_empty(void) const;
     int                length(void) const;
-    const std::string& url(void) const;
-    //const std::string& protocol(void) const;
-    //const std::string& path(void) const;
-    //const std::string& file(void) const;
+    std::string        url(void) const;
+    //std::string        protocol(void) const;
+    //std::string        path(void) const;
+    //std::string        file(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;

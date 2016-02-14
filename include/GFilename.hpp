@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GTools.hpp"
 
 
 /***********************************************************************//**
@@ -78,12 +79,10 @@ public:
     std::string        classname(void) const;
     bool               is_empty(void) const;
     int                length(void) const;
-    //const std::string& fullname(void) const;
-    //const std::string& filename(void) const;
-    const std::string& url(void) const;
-    //const std::string& protocol(void) const;
-    //const std::string& path(void) const;
-    //const std::string& file(void) const;
+    std::string        url(void) const;
+    //std::string        protocol(void) const;
+    //std::string&       path(void) const;
+    //std::string&       file(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;
@@ -169,12 +168,13 @@ int GFilename::length(void) const
  *
  * @return Uniform Resource Locator without FITS extension.
  *
- * Returns the Uniform Resource Locator without FITS extension.
+ * Returns the Uniform Resource Locator without FITS extension. Any
+ * environment variable in the URL string will be expanded.
  ***************************************************************************/
 inline
-const std::string& GFilename::url(void) const
+std::string GFilename::url(void) const
 {
-    return (m_filename);
+    return (gammalib::expand_env(m_filename));
 }
 
 

@@ -578,11 +578,8 @@ void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
  ***************************************************************************/
 void GEbounds::load(const GFilename& filename)
 {
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(filename);
+    GFits file(filename);
 
     // Get energy boundary table
     const GFitsTable& table = *file.table(filename.extname("EBOUNDS"));
@@ -687,7 +684,7 @@ void GEbounds::read(const GFitsTable& table)
 /***********************************************************************//**
  * @brief Write energy boundaries into FITS object
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS")
  * @param[in] unit Energy units (defaults to "keV")
  *
@@ -697,13 +694,13 @@ void GEbounds::read(const GFitsTable& table)
  *
  * @todo Write header keywords.
  ***************************************************************************/
-void GEbounds::write(GFits&             file,
+void GEbounds::write(GFits&             fits,
                      const std::string& extname,
                      const std::string& unit) const
 {
     // Create energy boundary columns
-    GFitsTableDoubleCol cemin = GFitsTableDoubleCol("E_MIN", m_num);
-    GFitsTableDoubleCol cemax = GFitsTableDoubleCol("E_MAX", m_num);
+    GFitsTableDoubleCol cemin("E_MIN", m_num);
+    GFitsTableDoubleCol cemax("E_MAX", m_num);
 
     // Fill energy boundary columns
     for (int i = 0; i < m_num; ++i) {
@@ -716,16 +713,19 @@ void GEbounds::write(GFits&             file,
     cemax.unit(unit);
 
     // Create binary table
-    GFitsBinTable* table = new GFitsBinTable(m_num);
-    table->append(cemin);
-    table->append(cemax);
-    table->extname(extname);
+    GFitsBinTable table(m_num);
+    table.append(cemin);
+    table.append(cemax);
+    table.extname(extname);
 
-    // Write to FITS file
-    file.append(*table);
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
-    // Free table
-    delete table;
+    // Append EBOUNDS table to FITS file
+    fits.append(table);
 
     // Return
     return;

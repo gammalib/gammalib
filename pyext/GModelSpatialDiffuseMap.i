@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelSpatialDiffuseMap.i - Spatial map model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,9 +39,9 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseMap(void);
     explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
-    GModelSpatialDiffuseMap(const std::string& filename,
-                            const double&      value = 1.0,
-                            const bool&        normalize = true);
+    GModelSpatialDiffuseMap(const GFilename& filename,
+                            const double&    value = 1.0,
+                            const bool&      normalize = true);
     GModelSpatialDiffuseMap(const GSkyMap& map,
                             const double&  value = 1.0,
                             const bool&    normalize = true);
@@ -66,15 +66,15 @@ public:
     virtual void                     write(GXmlElement& xml) const;
 
     // Other methods
-    double             value(void) const;
-    void               value(const double& value);
-    const std::string& filename(void) const;
-    void               load(const std::string& filename);
-    const GSkyMap&     map(void) const;
-    void               map(const GSkyMap& map);
-    bool               normalize(void) const;
-    void               set_mc_cone(const GSkyDir& centre,
-                                   const double&  radius) const;
+    double           value(void) const;
+    void             value(const double& value);
+    const GFilename& filename(void) const;
+    void             load(const GFilename& filename);
+    const GSkyMap&   map(void) const;
+    void             map(const GSkyMap& map);
+    bool             normalize(void) const;
+    void             set_mc_cone(const GSkyDir& centre,
+                            const double&  radius) const;
 };
 
 

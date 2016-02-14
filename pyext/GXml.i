@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GXml.i - XML class                            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -27,6 +27,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXml.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 %}
 
 
@@ -61,8 +62,8 @@ public:
     GXmlElement* element(const int& index);
     GXmlElement* element(const std::string& name);
     GXmlElement* element(const std::string& name, const int& index);
-    void         load(const std::string& filename);
-    void         save(const std::string& filename);
+    void         load(const GFilename& filename);
+    void         save(const GFilename& filename);
     void         read(const GUrl& url);
     void         write(GUrl& url, const int& indent = 0) const;
 };

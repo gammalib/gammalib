@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.hpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,10 +30,13 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GFilename.hpp"
 #include "GEbounds.hpp"
 #include "GMatrixSparse.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFits;
+class GFitsTable;
 
 
 /***********************************************************************//**
@@ -48,7 +51,7 @@ class GRmf : public GBase {
 public:
     // Constructors and destructors
     GRmf(void);
-    explicit GRmf(const std::string& filename);
+    explicit GRmf(const GFilename& filename);
     GRmf(const GEbounds& etrue, const GEbounds& emeasured);
     GRmf(const GRmf& rmf);
     virtual ~GRmf(void);
@@ -74,14 +77,14 @@ public:
     GEbounds             etrue(const GEnergy& emeasured) const;
     GEbounds             emeasured(const GEnergy& etrue) const;
     const GMatrixSparse& matrix(void) const;
-    void                 load(const std::string& filename);
-    void                 save(const std::string& filename,
-                              const bool& clobber = false,
+    void                 load(const GFilename& filename);
+    void                 save(const GFilename&   filename,
+                              const bool&        clobber = false,
                               const std::string& unit = "keV") const;
     void                 read(const GFitsTable& table);
     void                 write(GFits& fits,
                                const std::string& unit = "keV") const;
-    const std::string&   filename(void) const;
+    const GFilename&     filename(void) const;
     std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -91,12 +94,12 @@ protected:
     void   free_members(void);
     
     // Protected members
-    mutable std::string m_filename;      //!< Filename of origin
-    GEbounds            m_ebds_true;     //!< True energy boundaries
-    GEbounds            m_ebds_measured; //!< Measured energy boundaries
-    GMatrixSparse       m_matrix;        //!< Sparse redistribution matrix
-    int                 m_imeasmax;      //!< Index of measured maximum
-    int                 m_itruemax;      //!< Index of true maximum
+    mutable GFilename m_filename;      //!< Filename of origin
+    GEbounds          m_ebds_true;     //!< True energy boundaries
+    GEbounds          m_ebds_measured; //!< Measured energy boundaries
+    GMatrixSparse     m_matrix;        //!< Sparse redistribution matrix
+    int               m_imeasmax;      //!< Index of measured maximum
+    int               m_itruemax;      //!< Index of true maximum
     
 };
 
@@ -268,7 +271,7 @@ const GMatrixSparse& GRmf::matrix(void) const
  * no load() or save() method has been called before.
  ***************************************************************************/
 inline
-const std::string& GRmf::filename(void) const
+const GFilename& GRmf::filename(void) const
 {
     return (m_filename);
 }

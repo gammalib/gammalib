@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRmf.cpp - XSPEC Redistribution Matrix File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,8 @@
 #include "GMath.hpp"
 #include "GRmf.hpp"
 #include "GException.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
@@ -70,7 +72,7 @@ GRmf::GRmf(void)
  *
  * @param[in] filename File name.
  ***************************************************************************/
-GRmf::GRmf(const std::string& filename)
+GRmf::GRmf(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -368,7 +370,7 @@ GEbounds GRmf::emeasured(const GEnergy& etrue) const
  *
  * @param[in] filename File name.
  ***************************************************************************/
-void GRmf::load(const std::string& filename)
+void GRmf::load(const GFilename& filename)
 {
     // Clear any existing models
     clear();
@@ -380,7 +382,7 @@ void GRmf::load(const std::string& filename)
     m_ebds_measured.load(filename);
 
     // Get RMF table
-    const GFitsTable& table = *file.table("MATRIX");
+    const GFitsTable& table = *file.table(filename.extname("MATRIX"));
 
     // Read RMF data
     read(table);
@@ -400,21 +402,21 @@ void GRmf::load(const std::string& filename)
  * @brief Save Redistribution Matrix File
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file? (defaults to true)
- * @param[in] unit Energy unit (defaults to "keV")
+ * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] unit Energy unit (default: "keV")
  ***************************************************************************/
-void GRmf::save(const std::string& filename,
+void GRmf::save(const GFilename&   filename,
                 const bool&        clobber,
                 const std::string& unit) const
 {
-    // Open FITS file
-    GFits fits;
+    // Open or create FITS file
+    GFits fits(filename, true);
 
     // Write RMF into file
     write(fits, unit);
 
-    // Close FITS file
-    fits.saveto(filename, clobber);
+    // Save to file
+    fits.save(clobber);
 
     // Store filename
     m_filename = filename;
@@ -449,8 +451,8 @@ void GRmf::read(const GFitsTable& table)
     // Initialize matrix
     m_matrix = GMatrixSparse(rows, columns);
 
-   // Initialize matrix maximum
-   double max = 0.0;
+    // Initialize matrix maximum
+    double max = 0.0;
 
     // Set true energy bins
     for (int itrue = 0; itrue < rows; ++itrue) {
@@ -536,7 +538,7 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         } // endfor: looped over true energies
 
         // Create new binary table
-        GFitsBinTable* hdu = new GFitsBinTable;
+        GFitsBinTable hdu;
 
         // Allocate columns
         GFitsTableFloatCol energy_lo("ENERG_LO", length);
@@ -593,21 +595,18 @@ void GRmf::write(GFits& fits, const std::string& unit) const
         energy_hi.unit(unit);
 
         // Set table attributes
-        hdu->extname("MATRIX");
+        hdu.extname("MATRIX");
 
         // Append columns to table
-        hdu->append(energy_lo);
-        hdu->append(energy_hi);
-        hdu->append(n_grp);
-        hdu->append(f_chan);
-        hdu->append(n_chan);
-        hdu->append(matrix);
+        hdu.append(energy_lo);
+        hdu.append(energy_hi);
+        hdu.append(n_grp);
+        hdu.append(f_chan);
+        hdu.append(n_chan);
+        hdu.append(matrix);
 
         // Append HDU to FITS file
-        fits.append(*hdu);
-
-        // Free binary table
-        delete hdu;
+        fits.append(hdu);
 
         // Append measured energy boundaries
         m_ebds_measured.write(fits);

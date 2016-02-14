@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPha.cpp - XSPEC Pulse Height Analyzer class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,9 @@
 #include "GPha.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GEnergy.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
@@ -70,7 +73,7 @@ GPha::GPha(void)
  *
  * @param[in] filename File name.
  ***************************************************************************/
-GPha::GPha(const std::string& filename)
+GPha::GPha(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -330,7 +333,7 @@ void GPha::fill(const GEnergy& energy, const double& value)
  * Loads the Pulse Height Analyzer spectrum from a FITS file. If an EBOUNDS
  * extension is given, the energy boundaries information is also loaded
  ***************************************************************************/
-void GPha::load(const std::string& filename)
+void GPha::load(const GFilename& filename)
 {
     // Clear any existing models
     clear();
@@ -372,7 +375,7 @@ void GPha::load(const std::string& filename)
  * @param[in] filename File name.
  * @param[in] clobber Overwrite existing file? (defaults to true)
  ***************************************************************************/
-void GPha::save(const std::string& filename, const bool& clobber) const
+void GPha::save(const GFilename& filename, const bool& clobber) const
 {
     // Open FITS file
     GFits fits;
@@ -447,7 +450,7 @@ void GPha::write(GFits& fits) const
     if (length > 0) {
 
         // Create new binary table
-        GFitsBinTable* hdu = new GFitsBinTable;
+        GFitsBinTable hdu;
 
         // Allocate floating point vector columns
         GFitsTableShortCol col_chan("CHANNEL",  length);
@@ -466,23 +469,20 @@ void GPha::write(GFits& fits) const
         }
 
         // Set table attributes
-        hdu->extname("SPECTRUM");
+        hdu.extname("SPECTRUM");
 
         // Append columns to table
-        hdu->append(col_chan);
-        hdu->append(col_data);
-        hdu->append(col_stat);
-        hdu->append(col_syst);
-        hdu->append(col_qual);
-        hdu->append(col_grpg);
-        hdu->append(col_area);
-        hdu->append(col_back);
+        hdu.append(col_chan);
+        hdu.append(col_data);
+        hdu.append(col_stat);
+        hdu.append(col_syst);
+        hdu.append(col_qual);
+        hdu.append(col_grpg);
+        hdu.append(col_area);
+        hdu.append(col_back);
 
         // Append HDU to FITS file
-        fits.append(*hdu);
-
-        // Free binary table
-        delete hdu;
+        fits.append(hdu);
 
         // Optionally append energy boundaries
         if (m_ebounds.size() > 0) {
