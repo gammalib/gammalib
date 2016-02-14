@@ -30,14 +30,20 @@ The following methods have been renamed:
 - GFilename::is_empty(), was GFilename::empty()
 - GFilename::url(), was GFilename::filename()
 
-The following classes now use for filenames a GFilename argument instead
+The following classes now use GFilename for filenames arguments instead
 of std::string:
+- GApplicationPars
+- GArf
+- GCsv
 - GEbounds
-- GGti
 - GEnergies
-- GEvents
 - GEventCube, GCOMEventCube, GCTAEventCube, GLATEventCube, GMWLSpectrum
 - GEventList, GCTAEventList, GLATEventList
+- GEvents
+- GGti
+- GLog
+- GModelSpatialDiffuseCube
+- GSkyMap
 
 The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string

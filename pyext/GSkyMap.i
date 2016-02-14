@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GSkyMap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -110,20 +110,20 @@ class GSkyMap : public GBase {
 public:
     // Constructors and destructors
     GSkyMap(void);
-    explicit GSkyMap(const std::string& filename);
-    explicit GSkyMap(const std::string& coords,
-                     const int&         nside,
-                     const std::string& order,
-                     const int&         nmaps = 1);
-    explicit GSkyMap(const std::string& wcs,
-                     const std::string& coords,
-                     const double&      x,
-                     const double&      y,
-                     const double&      dx,
-                     const double&      dy,
-                     const int&         nx,
-                     const int&         ny,
-                     const int&         nmaps = 1);
+    explicit GSkyMap(const GFilename& filename);
+    GSkyMap(const std::string& coords,
+            const int&         nside,
+            const std::string& order,
+            const int&         nmaps = 1);
+    GSkyMap(const std::string& wcs,
+            const std::string& coords,
+            const double&      x,
+            const double&      y,
+            const double&      dx,
+            const double&      dy,
+            const int&         nx,
+            const int&         ny,
+            const int&         nmaps = 1);
     GSkyMap(const GSkyMap& map);
     virtual ~GSkyMap(void);
 
@@ -168,8 +168,8 @@ public:
     const double*         pixels(void) const;
     GSkyMap               extract(const int& map, const int& nmaps = 1) const;
     void                  stack_maps(void);
-    void                  load(const std::string& filename);
-    void                  save(const std::string& filename, bool clobber = false) const;
+    void                  load(const GFilename& filename);
+    void                  save(const GFilename& filename, bool clobber = false) const;
     void                  read(const GFitsHDU& hdu);
     void                  write(GFits& file) const;
 };

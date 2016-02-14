@@ -33,14 +33,26 @@
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GSkyProjection.hpp"
+/*
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsImageDouble.hpp"
-#include "GMatrix.hpp"
-#include "GVector.hpp"
+*/
+//#include "GMatrix.hpp"
+//#include "GVector.hpp"
 #include "GBilinear.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GFits;
+class GFitsTable;
+class GFitsBinTable;
+class GFitsImage;
+class GFitsImageDouble;
+class GMatrix;
+class GVector;
 
 
 /***********************************************************************//**
@@ -84,20 +96,20 @@ class GSkyMap : public GBase {
 public:
     // Constructors and destructors
     GSkyMap(void);
-    explicit GSkyMap(const std::string& filename);
-    explicit GSkyMap(const std::string& coords,
-                     const int&         nside,
-                     const std::string& order,
-                     const int&         nmaps = 1);
-    explicit GSkyMap(const std::string& wcs,
-                     const std::string& coords,
-                     const double&      x,
-                     const double&      y,
-                     const double&      dx,
-                     const double&      dy,
-                     const int&         nx,
-                     const int&         ny,
-                     const int&         nmaps = 1);
+    explicit GSkyMap(const GFilename& filename);
+    GSkyMap(const std::string& coords,
+            const int&         nside,
+            const std::string& order,
+            const int&         nmaps = 1);
+    GSkyMap(const std::string& wcs,
+            const std::string& coords,
+            const double&      x,
+            const double&      y,
+            const double&      dx,
+            const double&      dy,
+            const int&         nx,
+            const int&         ny,
+            const int&         nmaps = 1);
     GSkyMap(const GSkyMap& map);
     virtual ~GSkyMap(void);
 
@@ -148,8 +160,8 @@ public:
     const double*         pixels(void) const;
     GSkyMap               extract(const int& map, const int& nmaps = 1) const;
     void                  stack_maps(void);
-    void                  load(const std::string& filename);
-    void                  save(const std::string& filename, bool clobber = false) const;
+    void                  load(const GFilename& filename);
+    void                  save(const GFilename& filename, bool clobber = false) const;
     void                  read(const GFitsHDU& hdu);
     void                  write(GFits& file) const;
     std::string           print(const GChatter& chatter = NORMAL) const;

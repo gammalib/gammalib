@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.cpp - CTA on-off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Chia-Chun Lu & Christoph Deil                    *
+ *  copyright (C) 2014-2016 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -412,7 +412,7 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 
 		// Handle effective area
 		else if (par->attribute("name") == "Arf") {
-			par->attribute("file", m_arf.filename());
+			par->attribute("file", m_arf.filename().url());
 			npar[4]++;
 		}
 

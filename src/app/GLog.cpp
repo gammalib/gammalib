@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.cpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,7 +75,7 @@ GLog::GLog(void)
  *
  * Construct a logger with an open log file.
  ***************************************************************************/
-GLog::GLog(const std::string& filename, const bool& clobber)
+GLog::GLog(const GFilename& filename, const bool& clobber)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -212,13 +212,13 @@ GLog& GLog::operator<<(GLog& log)
         log.flush(true);
 
         // Get the filename
-        std::string filename = log.filename();
+        GFilename filename = log.filename();
 
         // Close log's file
         log.close();
 
         // Open log's file in read mode
-        std::ifstream file(filename.c_str(), std::ios::in);
+        std::ifstream file(filename.url().c_str(), std::ios::in);
         if (file) {
 
             // Append all lines from file to this buffer
@@ -232,7 +232,7 @@ GLog& GLog::operator<<(GLog& log)
         }
 
         // Open log's file in append mode
-        log.open(filename,false);
+        log.open(filename, false);
     }
 
     // Flush
@@ -477,7 +477,7 @@ int GLog::size(void) const
  * Opens a file for logging. If a log file was already open it is closed
  * before opening a new file.
  ***************************************************************************/
-void GLog::open(const std::string& filename, const bool& clobber)
+void GLog::open(const GFilename& filename, const bool& clobber)
 {
     // Store the filename
     m_filename = filename;
@@ -487,10 +487,10 @@ void GLog::open(const std::string& filename, const bool& clobber)
 
     // Open file
     if (clobber) {
-        m_file = std::fopen(filename.c_str(), "w");
+        m_file = std::fopen(filename.url().c_str(), "w");
     }
     else {
-        m_file = std::fopen(filename.c_str(), "a");
+        m_file = std::fopen(filename.url().c_str(), "a");
     }
 
     // Return

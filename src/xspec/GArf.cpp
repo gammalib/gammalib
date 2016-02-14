@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.cpp - XSPEC Auxiliary Response File class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,7 +30,10 @@
 #endif
 #include "GArf.hpp"
 #include "GException.hpp"
+#include "GFilename.hpp"
 #include "GTools.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableFloatCol.hpp"
@@ -69,7 +72,7 @@ GArf::GArf(void)
  *
  * @param[in] filename File name.
  ***************************************************************************/
-GArf::GArf(const std::string& filename)
+GArf::GArf(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -250,7 +253,7 @@ const double& GArf::at(const int& index) const
  *
  * @param[in] filename File name.
  ***************************************************************************/
-void GArf::load(const std::string& filename)
+void GArf::load(const GFilename& filename)
 {
     // Clear any existing models
     clear();
@@ -279,9 +282,9 @@ void GArf::load(const std::string& filename)
  * @brief Save Auxiliary Response File
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file? (defaults to true)
+ * @param[in] clobber Overwrite existing file? (defaults: false)
  ***************************************************************************/
-void GArf::save(const std::string& filename, const bool& clobber) const
+void GArf::save(const GFilename& filename, const bool& clobber) const
 {
     // Open FITS file
     GFits fits;

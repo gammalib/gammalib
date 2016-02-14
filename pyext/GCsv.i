@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCsv.i - Comma-separated values table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -87,7 +87,7 @@ public:
     // Constructors and destructors
     GCsv(void);
     GCsv(const int& nrows, const int& ncols);
-    GCsv(const std::string& filename, const std::string& sep = " ");
+    GCsv(const GFilename& filename, const std::string& sep = " ");
     GCsv(const GCsv& csv);
     virtual ~GCsv(void);
  
@@ -106,8 +106,8 @@ public:
     void        string(const int& row, const int& col, const std::string& value);
     void        real(const int& row, const int& col, const double& value);
     void        integer(const int& row, const int& col, const int& value);
-    void        load(const std::string& filename, const std::string& sep = " ");
-    void        save(const std::string& filename, const std::string& sep = " ",
+    void        load(const GFilename& filename, const std::string& sep = " ");
+    void        save(const GFilename& filename, const std::string& sep = " ",
                      const bool& clobber = false) const;
 };
 

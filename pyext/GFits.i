@@ -53,7 +53,7 @@ class GFits : public GContainer {
 public:
     // Constructors and destructors
     GFits(void);
-    GFits(const std::string& filename, const bool& create = false);
+    GFits(const GFilename& filename, const bool& create = false);
     GFits(const GFits& fits);
     virtual ~GFits(void);
 
@@ -82,11 +82,11 @@ public:
     bool             contains(const std::string& extname) const;
     const GFilename& filename(void) const;
     int              extno(const std::string& extname) const;
-    void             open(const std::string& filename,
-                          const bool&        create = false);
+    void             open(const GFilename& filename,
+                          const bool&      create = false);
     void             save(const bool& clobber = false);
-    void             saveto(const std::string& filename,
-                            const bool&        clobber = false);
+    void             saveto(const GFilename& filename,
+                            const bool&      clobber = false);
     void             close(void);
 };
 

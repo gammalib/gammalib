@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,7 +51,7 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 #define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
 #define G_ENERGIES           "GModelSpatialDiffuseCube::energies(GEnergies&)"
-#define G_LOAD_CUBE                   "GModelSpatialDiffuseCube::load_cube()"
+#define G_LOAD_CUBE         "GModelSpatialDiffuseCube::load_cube(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -113,8 +113,8 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GXmlElement& xml) :
  * Constructs map cube model by loading a map cube from @p filename and by
  * assigning the normalization @p value.
  ***************************************************************************/
-GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
-                                                   const double&      value) :
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GFilename& filename,
+                                                   const double&    value) :
                           GModelSpatialDiffuse()
 {
     // Initialise members
@@ -649,7 +649,7 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
     }
 
     // Set filename
-    xml.attribute("file", m_filename);
+    xml.attribute("file", m_filename.url());
 
     // Return
     return;
@@ -975,7 +975,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
  *
  * Loads cube into the model class.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::load(const std::string& filename)
+void GModelSpatialDiffuseCube::load(const GFilename& filename)
 {
     // Load cube
     load_cube(filename);
@@ -992,12 +992,12 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
  * @brief Save cube into FITS file
  *
  * @param[in] filename Cube FITS file name.
- * @param[in] clobber Overwrite existing FITS file (default=false).
+ * @param[in] clobber Overwrite existing FITS file (default: false).
  *
  * Saves spatial cube model into a FITS file.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::save(const std::string& filename,
-                                    const bool&        clobber) const
+void GModelSpatialDiffuseCube::save(const GFilename& filename,
+                                    const bool&      clobber) const
 {
     // Create empty FITS file
     GFits fits;
@@ -1056,7 +1056,8 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
         result.append("=== GModelSpatialDiffuseCube ===");
 
         // Append parameters
-        result.append("\n"+gammalib::parformat("Map cube file")+m_filename);
+        result.append("\n"+gammalib::parformat("Map cube file"));
+        result.append(m_filename.url());
         if (m_loaded) {
             result.append(" [loaded]");
         }
@@ -1210,7 +1211,7 @@ void GModelSpatialDiffuseCube::free_members(void)
 void GModelSpatialDiffuseCube::fetch_cube(void) const
 {
     // Load cube if it is not yet loaded
-    if (!m_loaded && !m_filename.empty()) {
+    if (!m_loaded && !m_filename.is_empty()) {
 
         // Put in a OMP critical zone
         #pragma omp critical
@@ -1235,7 +1236,7 @@ void GModelSpatialDiffuseCube::fetch_cube(void) const
  *
  * Load diffuse cube.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::load_cube(const std::string& filename)
+void GModelSpatialDiffuseCube::load_cube(const GFilename& filename)
 {
     // Initialise skymap
     m_cube.clear();
@@ -1248,13 +1249,14 @@ void GModelSpatialDiffuseCube::load_cube(const std::string& filename)
     m_filename = filename;
 
     // Get expanded filename
-    std::string fname = gammalib::expand_env(filename);
+    //std::string fname = gammalib::expand_env(filename);
 
     // Load cube
-    m_cube.load(fname);
+    //m_cube.load(fname);
+    m_cube.load(filename);
 
     // Load energies
-    GEnergies energies(fname);
+    GEnergies energies(filename);
 
     // Extract number of energy bins
     int num = energies.size();

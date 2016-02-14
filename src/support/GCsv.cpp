@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCsv.cpp - Comma-separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,12 +31,13 @@
 #include <cstdio>            // std::fopen, std::fgets, std::fclose, etc...
 #include "GCsv.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                               "GCsv::operator()(int&, int&)"
-#define G_LOAD                       "GCsv::load(std::string&, std::string&)"
-#define G_SAVE                "GCsv::save(std::string&, std::string&, bool&)"
+#define G_LOAD                         "GCsv::load(GFilename&, std::string&)"
+#define G_SAVE                  "GCsv::save(GFilename&, std::string&, bool&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -96,7 +97,7 @@ GCsv::GCsv(const int& nrows, const int& ncols)
  * @param[in] filename Filename.
  * @param[in] sep Column separator (default is whitespace).
  ***************************************************************************/
-GCsv::GCsv(const std::string& filename, const std::string& sep)
+GCsv::GCsv(const GFilename& filename, const std::string& sep)
 { 
     // Initialise private
     init_members();
@@ -370,7 +371,7 @@ void GCsv::integer(const int& row, const int& col, const int& value)
  * Load CSV table from ASCII file. Any environment variable present in the
  * filename will be expanded.
  **************************************************************************/
-void GCsv::load(const std::string& filename, const std::string& sep)
+void GCsv::load(const GFilename& filename, const std::string& sep)
 {
     // Clear instance
     clear();
@@ -380,7 +381,7 @@ void GCsv::load(const std::string& filename, const std::string& sep)
     char  line[n];
 
     // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
+    std::string fname = gammalib::expand_env(filename.url());
 
     // Open CSV table (read-only)
     FILE* fptr = std::fopen(fname.c_str(), "r");
@@ -456,25 +457,26 @@ void GCsv::load(const std::string& filename, const std::string& sep)
  * Save CSV table into ASCII file. Any environment variable present in the
  * filename will be expanded.
  **************************************************************************/
-void GCsv::save(const std::string& filename, const std::string& sep,
-                const bool& clobber) const
+void GCsv::save(const GFilename&   filename,
+                const std::string& sep,
+                const bool&        clobber) const
 {
     // Throw exception if file exists but clobber flag is false
-    if (!clobber && gammalib::file_exists(filename)) {
-        std::string msg = "File \""+filename+"\" exists already but the "
-                          "clobber flag is set to \"false\". Set the "
+    if (!clobber && gammalib::file_exists(filename.url())) {
+        std::string msg = "File \""+filename.url()+"\" exists already but "
+                          "the clobber flag is set to \"false\". Set the "
                           "clobber flag to true to overwrite the existing "
                           "file or specify another file name.";
         throw GException::invalid_value(G_SAVE, msg);
     }
 
     // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
+    std::string fname = gammalib::expand_env(filename.url());
 
     // Open CSV table (write-only)
     FILE* fptr = std::fopen(fname.c_str(), "w");
     if (fptr == NULL) {
-        std::string msg = "Unable to create file \""+filename+"\".";
+        std::string msg = "Unable to create file \""+filename.url()+"\".";
         throw GException::file_error(G_SAVE, msg);
     }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GArf.i - XSPEC Auxiliary Response File class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,23 +39,25 @@ class GArf : public GBase {
 public:
     // Constructors and destructors
     GArf(void);
-    explicit GArf(const std::string& filename);
+    explicit GArf(const GFilename& filename);
     explicit GArf(const GEbounds& ebds);
     GArf(const GArf& arf);
     virtual ~GArf(void);
 
     // Methods
-    void            clear(void);
-    GArf*           clone(void) const;
-    std::string     classname(void) const;
-    int             size(void) const;
-    double&         at(const int& index);
-    const GEbounds& ebounds(void) const;
-    void            load(const std::string& filename);
-    void            save(const std::string& filename,
-                         const bool& clobber = false) const;
-    void            read(const GFitsTable& table);
-    void            write(GFits& fits) const;
+    void             clear(void);
+    GArf*            clone(void) const;
+    std::string      classname(void) const;
+    int              size(void) const;
+    double&          at(const int& index);
+    const double&    at(const int& index) const;
+    const GEbounds&  ebounds(void) const;
+    void             load(const GFilename& filename);
+    void             save(const GFilename& filename,
+                          const bool&      clobber = false) const;
+    void             read(const GFitsTable& table);
+    void             write(GFits& fits) const;
+    const GFilename& filename(void) const;
 };
 
 

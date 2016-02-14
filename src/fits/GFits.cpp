@@ -80,6 +80,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty FITS file.
  ***************************************************************************/
 GFits::GFits(void)
 {
@@ -100,7 +102,7 @@ GFits::GFits(void)
  * Construct an object by opening a FITS file. If the file does not exist it
  * will be created if @p create is set to true.
  ***************************************************************************/
-GFits::GFits(const std::string& filename, const bool& create)
+GFits::GFits(const GFilename& filename, const bool& create)
 {
     // Initialise class members
     init_members();
@@ -1009,23 +1011,23 @@ int GFits::extno(const std::string& extname) const
  * hdu(int extno) method.
  * Any environment variable present in the filename will be expanded.
  ***************************************************************************/
-void GFits::open(const std::string& filename, const bool& create)
+void GFits::open(const GFilename& filename, const bool& create)
 {
     // Remove any HDUs
     m_hdu.clear();
 
     // Expand environment variables
-    std::string fname(gammalib::expand_env(filename));
+    std::string fname(gammalib::expand_env(filename()));
 
     // Don't allow opening if a file is already open
     if (m_fitsfile != NULL) {
         std::string msg;
-        if (m_filename.filename() == GFilename(fname).filename()) {
-            msg = "FITS file \""+m_filename.filename()+"\" has already been "
+        if (m_filename.url() == GFilename(fname).url()) {
+            msg = "FITS file \""+m_filename.url()+"\" has already been "
                   "opened, cannot open it again.";
         }
         else {
-            msg = "A FITS file \""+m_filename.filename()+"\" has already "
+            msg = "A FITS file \""+m_filename.url()+"\" has already "
                   "been opened, cannot open another FITS file \""+
                   fname+"\" before closing the existing one.";
         }
@@ -1146,7 +1148,7 @@ void GFits::save(const bool& clobber)
     // If we attempt to save an existing file without overwriting permission
     // then throw an error
     if (!m_created && !clobber) {
-        throw GException::fits_file_exist(G_SAVE, m_filename.filename());
+        throw GException::fits_file_exist(G_SAVE, m_filename.url());
     }
 
     // If no FITS file has been opened then throw an error
@@ -1223,10 +1225,10 @@ void GFits::save(const bool& clobber)
  * Saves object into a specific FITS file.
  * Any environment variable present in the filename will be expanded.
  ***************************************************************************/
-void GFits::saveto(const std::string& filename, const bool& clobber)
+void GFits::saveto(const GFilename& filename, const bool& clobber)
 {
     // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
+    std::string fname = gammalib::expand_env(filename());
 
     // Create gzipped file name version
     std::string gzfname = fname + ".gz";
@@ -1320,7 +1322,7 @@ std::string GFits::print(const GChatter& chatter) const
 
         // Append file information
         result.append("\n"+gammalib::parformat("Filename"));
-        result.append(m_filename.filename());
+        result.append(m_filename.url());
         result.append("\n"+gammalib::parformat("History"));
         if (m_created) {
             result.append("new file");

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GArf.hpp - XSPEC Auxiliary Response File class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,10 +29,14 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GBase.hpp"
 #include "GEbounds.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
+#include "GFilename.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFits;
+class GFitsTable;
 
 
 /***********************************************************************//**
@@ -45,7 +49,7 @@ class GArf : public GBase {
 public:
     // Constructors and destructors
     GArf(void);
-    explicit GArf(const std::string& filename);
+    explicit GArf(const GFilename& filename);
     explicit GArf(const GEbounds& ebds);
     GArf(const GArf& arf);
     virtual ~GArf(void);
@@ -56,20 +60,20 @@ public:
     const double& operator[](const int& index) const;
 
     // Methods
-    void               clear(void);
-    GArf*              clone(void) const;
-    std::string        classname(void) const;
-    int                size(void) const;
-    double&            at(const int& index);
-    const double&      at(const int& index) const;
-    const GEbounds&    ebounds(void) const;
-    void               load(const std::string& filename);
-    void               save(const std::string& filename,
-                            const bool& clobber = false) const;
-    void               read(const GFitsTable& table);
-    void               write(GFits& fits) const;
-    const std::string& filename(void) const;
-    std::string        print(const GChatter& chatter = NORMAL) const;
+    void             clear(void);
+    GArf*            clone(void) const;
+    std::string      classname(void) const;
+    int              size(void) const;
+    double&          at(const int& index);
+    const double&    at(const int& index) const;
+    const GEbounds&  ebounds(void) const;
+    void             load(const GFilename& filename);
+    void             save(const GFilename& filename,
+                          const bool&      clobber = false) const;
+    void             read(const GFitsTable& table);
+    void             write(GFits& fits) const;
+    const GFilename& filename(void) const;
+    std::string      print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -78,7 +82,7 @@ protected:
     void free_members(void);
     
     // Protected members
-    mutable std::string m_filename;   //!< Filename of origin
+    mutable GFilename   m_filename;   //!< Filename of origin
     GEbounds            m_ebounds;    //!< Energy boundaries
     std::vector<double> m_specresp;   //!< Spectral response
 };
@@ -163,7 +167,7 @@ const GEbounds& GArf::ebounds(void) const
  * no load() or save() method has been called before.
  ***************************************************************************/
 inline
-const std::string& GArf::filename(void) const
+const GFilename& GArf::filename(void) const
 {
     return (m_filename);
 }

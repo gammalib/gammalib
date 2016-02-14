@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,13 +31,18 @@
 #include "GException.hpp"
 #include "GMath.hpp"
 #include "GTools.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsImageDouble.hpp"
+#include "GFitsTableDoubleCol.hpp"
 #include "GSkyMap.hpp"
 #include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcs.hpp"
-#include "GFits.hpp"
-#include "GFitsTableDoubleCol.hpp"
-#include "GFitsImageDouble.hpp"
+#include "GMatrix.hpp"
+#include "GVector.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT_HPX                "GSkyMap::GSkyMap(std::string&, int&,"\
@@ -105,7 +110,7 @@ GSkyMap::GSkyMap(void)
  *
  * @param[in] filename FITS file name.
  ***************************************************************************/
-GSkyMap::GSkyMap(const std::string& filename)
+GSkyMap::GSkyMap(const GFilename& filename)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -1739,7 +1744,7 @@ void GSkyMap::stack_maps(void)
  * @todo Do we have to restrict a HEALPix map to a BinTable and a WCS map
  * to a Double precision image???
  ***************************************************************************/
-void GSkyMap::load(const std::string& filename)
+void GSkyMap::load(const GFilename& filename)
 {
     // Free memory and initialise members
     free_members();
@@ -1808,7 +1813,7 @@ void GSkyMap::load(const std::string& filename)
  *
  * The method does nothing if the skymap holds no valid WCS.
  ***************************************************************************/
-void GSkyMap::save(const std::string& filename, bool clobber) const
+void GSkyMap::save(const GFilename& filename, bool clobber) const
 {
     // Continue only if we have data to save
     if (m_proj != NULL) {

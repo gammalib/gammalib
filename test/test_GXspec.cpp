@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GXspec.hpp - Test Xspec module                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -210,11 +210,11 @@ void TestGXspec::test_GArf(void)
 
     // Test saving and loading
     arf.save("arf.fits", true);
-    test_assert(arf.filename() == "arf.fits",
-                "Unexpected filename \""+arf.filename()+"\".");
+    test_assert(arf.filename().url() == "arf.fits",
+                "Unexpected filename \""+arf.filename().url()+"\".");
     arf.load("arf.fits");
-    test_assert(arf.filename() == "arf.fits",
-                "Unexpected filename \""+arf.filename()+"\".");
+    test_assert(arf.filename().url() == "arf.fits",
+                "Unexpected filename \""+arf.filename().url()+"\".");
     test_value(arf[0], 5.0, 1.0e-6);
     test_value(arf[1], 3.7, 1.0e-6);
     for (int i = 2; i < 9; i += 2) {
@@ -228,8 +228,8 @@ void TestGXspec::test_GArf(void)
 
     // Test constructing
     GArf arf2("arf.fits");
-    test_assert(arf2.filename() == "arf.fits",
-                "Unexpected filename \""+arf2.filename()+"\".");
+    test_assert(arf2.filename().url() == "arf.fits",
+                "Unexpected filename \""+arf2.filename().url()+"\".");
     test_value(arf2[0], 5.0, 1.0e-6);
     test_value(arf2[1], 3.7, 1.0e-6);
     for (int i = 2; i < 9; i += 2) {

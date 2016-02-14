@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPars.hpp - Application parameters             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,6 +33,9 @@
 #include "GContainer.hpp"
 #include "GApplicationPar.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+
 
 /***********************************************************************//**
  * @class GApplicationPars
@@ -49,8 +52,8 @@ class GApplicationPars : public GContainer {
 public:
     // Constructors and destructors
     GApplicationPars(void);
-    explicit GApplicationPars(const std::string& filename);
-    GApplicationPars(const std::string& filename,
+    explicit GApplicationPars(const GFilename& filename);
+    GApplicationPars(const GFilename& filename,
                      const std::vector<std::string>& args);
     GApplicationPars(const GApplicationPars& pars);
     virtual ~GApplicationPars(void);
@@ -80,10 +83,10 @@ public:
     void                   reserve(const int& num);
     void                   extend(const GApplicationPars& pars);
     bool                   contains(const std::string& name) const;
-    void                   load(const std::string& filename);
-    void                   load(const std::string& filename,
+    void                   load(const GFilename& filename);
+    void                   load(const GFilename& filename,
                                 const std::vector<std::string>& args);
-    void                   save(const std::string& filename);
+    void                   save(const GFilename& filename);
     std::string            print(const GChatter& chatter = NORMAL) const;
   
 protected:

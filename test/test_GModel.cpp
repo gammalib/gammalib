@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -584,7 +584,7 @@ void TestGModel::test_diffuse_cube(void)
         GModelSpatialDiffuseCube model;
         test_assert(model.type() == "MapCubeFunction",
                                     "Model type \"MapCubeFunction\" expected.");
-        test_assert(model.filename() == "", "Model filename \"\" expected.");
+        test_assert(model.filename().url() == "", "Model filename \"\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -596,7 +596,8 @@ void TestGModel::test_diffuse_cube(void)
     try {
         GModelSpatialDiffuseCube model(m_cube_file, 3.0);
         test_value(model.value(), 3.0);
-        test_assert(model.filename() == m_cube_file, "Expected \""+m_cube_file+"\"");
+        test_assert(model.filename().url() == m_cube_file,
+                    "Expected \""+m_cube_file+"\"");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -613,7 +614,7 @@ void TestGModel::test_diffuse_cube(void)
         }
         GModelSpatialDiffuseCube model(map, energies, 3.0);
         test_value(model.value(), 3.0);
-        test_assert(model.filename() == "", "Expected \"\"");
+        test_assert(model.filename().url() == "", "Expected \"\"");
         //test_assert(model.cube() == map, "Map cube is not the expected one");
         test_try_success();
     }
@@ -631,8 +632,8 @@ void TestGModel::test_diffuse_cube(void)
         test_value(model.size(), 1);
         test_assert(model.type() == "MapCubeFunction", "Expected \"MapCubeFunction\"");
         test_value(model.value(), 1.0);
-        test_assert(model.filename() == m_cube_file,
-                                        "Model filename \""+m_cube_file+"\" expected.");
+        test_assert(model.filename().url() == m_cube_file,
+                    "Model filename \""+m_cube_file+"\" expected.");
 
         // Test value method
         model.value(3.9);
@@ -640,8 +641,8 @@ void TestGModel::test_diffuse_cube(void)
 
         // Test filename method
         model.filename("Help me!");
-        test_assert(model.filename() == "Help me!",
-                                        "Model filename \"Help me!\" expected.");
+        test_assert(model.filename().url() == "Help me!",
+                    "Model filename \"Help me!\" expected.");
 
         // Test cube method
         model.cube(GSkyMap("GAL", 16, "RING", 10));

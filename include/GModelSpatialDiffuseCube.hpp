@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialDiffuseCube.hpp - Spatial map cube model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,7 @@
 #include "GXmlElement.hpp"
 #include "GEbounds.hpp"
 #include "GEnergies.hpp"
+#include "GFilename.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -60,8 +61,8 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
-    GModelSpatialDiffuseCube(const std::string& filename,
-                             const double&      value = 1.0);
+    GModelSpatialDiffuseCube(const GFilename& filename,
+                             const double&    value = 1.0);
     GModelSpatialDiffuseCube(const GSkyMap&   cube,
                              const GEnergies& energies,
                              const double&    value = 1.0);
@@ -94,8 +95,8 @@ public:
     int                        pixels(void) const;
     double                     value(void) const;
     void                       value(const double& value);
-    const std::string&         filename(void) const;
-    void                       filename(const std::string& filename);
+    const GFilename&           filename(void) const;
+    void                       filename(const GFilename& filename);
     const GSkyMap&             cube(void) const;
     void                       cube(const GSkyMap& cube);
     GEnergies                  energies(void);
@@ -103,9 +104,9 @@ public:
     const GModelSpectralNodes& spectrum(void) const;
     void                       set_mc_cone(const GSkyDir& centre,
                                            const double&  radius) const;
-    void                       load(const std::string& filename);
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
+    void                       load(const GFilename& filename);
+    void                       save(const GFilename& filename,
+                                    const bool&      clobber = false) const;
     //void                       read(const GFits& file);
     void                       write(GFits& file) const;
 
@@ -115,18 +116,18 @@ protected:
     void   copy_members(const GModelSpatialDiffuseCube& model);
     void   free_members(void);
     void   fetch_cube(void) const;
-    void   load_cube(const std::string& filename);
+    void   load_cube(const GFilename& filename);
     void   set_energy_boundaries(void);
     void   update_mc_cache(void);
     double cube_intensity(const GPhoton& photon) const;
 
     // Protected members
-    GModelPar    m_value;       //!< Value
-    std::string  m_filename;    //!< Name of map cube
-    bool         m_loaded;      //!< Signals if map cube has been loaded
-    GSkyMap      m_cube;        //!< Map cube
-    GNodeArray   m_logE;        //!< Log10(energy) values of the maps
-    GEbounds     m_ebounds;     //!< Energy bounds of the maps
+    GModelPar  m_value;       //!< Value
+    GFilename  m_filename;    //!< Name of map cube
+    bool       m_loaded;      //!< Signals if map cube has been loaded
+    GSkyMap    m_cube;        //!< Map cube
+    GNodeArray m_logE;        //!< Log10(energy) values of the maps
+    GEbounds   m_ebounds;     //!< Energy bounds of the maps
 
     // Monte Carlo cache
     mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
@@ -226,7 +227,7 @@ void GModelSpatialDiffuseCube::value(const double& value)
  * Returns the file name of the spatial map cube model.
  ***************************************************************************/
 inline
-const std::string& GModelSpatialDiffuseCube::filename(void) const
+const GFilename& GModelSpatialDiffuseCube::filename(void) const
 {
     return (m_filename);
 }
@@ -240,7 +241,7 @@ const std::string& GModelSpatialDiffuseCube::filename(void) const
  * Set the file name of the spatial map cube model.
  ***************************************************************************/
 inline
-void GModelSpatialDiffuseCube::filename(const std::string& filename)
+void GModelSpatialDiffuseCube::filename(const GFilename& filename)
 {
     m_filename = filename;
     return;
