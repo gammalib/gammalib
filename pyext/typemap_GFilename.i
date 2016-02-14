@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file typemap_GFilename.i
+ * @brief GFilename SWIG typemap
+ * @author Juergen Knoedlseder
+ */
 
 /***********************************************************************//**
  * @brief Input typemap for GFilename
@@ -26,6 +31,9 @@
  * way the user can simply pass a string to any function or method that has
  * a GFilename argument, and the typemap transparently converts a string
  * into a GFilename object.
+ *
+ * Note that the $1_descriptor special variable will check for the GFilename
+ * pointer.
  ***************************************************************************/
 %typemap(in) GFilename& (GFilename temp) {
     if (PyString_Check($input)) {
@@ -34,11 +42,30 @@
     }
     else {
         void *filename_argp1 = 0;
-        if (SWIG_IsOK(SWIG_ConvertPtr($input, &filename_argp1, SWIGTYPE_p_GFilename, 0))) {
+        if (SWIG_IsOK(SWIG_ConvertPtr($input, &filename_argp1, $1_descriptor, 0))) {
             $1 = reinterpret_cast<GFilename*>(filename_argp1);
         }
         else {
             SWIG_exception(SWIG_TypeError, "GFilename expected");
         }
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief Typecheck typemap for GFilename
+ *
+ * This typemap allows to overload methods or constructors and to pass a
+ * string for a GFilename& argument. We take here as precedence a typecheck
+ * for a double precision value. A precedence is needed as otherwise a
+ * warning will be issued.
+ ***************************************************************************/
+%typecheck(SWIG_TYPECHECK_DOUBLE) GFilename& {
+    if (PyString_Check($input) ||
+        SWIG_CheckState(SWIG_ConvertPtr($input, 0, $1_descriptor, 0))) {
+        $1 = 1;
+    }
+    else {
+        $1 = 0;
     }
 }
