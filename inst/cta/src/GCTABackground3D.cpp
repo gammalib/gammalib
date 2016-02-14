@@ -413,7 +413,7 @@ void GCTABackground3D::load(const std::string& filename)
     GFits file;
 
     // Open FITS file
-    file.open(fname.filename());
+    file.open(fname);
 
     // Get background table
     const GFitsTable& table = *file.table(fname.extname("BACKGROUND"));
@@ -458,7 +458,7 @@ void GCTABackground3D::save(const std::string& filename, const bool& clobber) co
     // Create FITS file, append table, and write into the file
     GFits fits;
     fits.append(table);
-    fits.saveto(fname.filename(), clobber);
+    fits.saveto(fname, clobber);
 
     // Return
     return;

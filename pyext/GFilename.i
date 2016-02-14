@@ -44,15 +44,19 @@ public:
     GFilename(const char* filename);
     virtual ~GFilename(void);
 
+    // Operators
+    const std::string& operator()(void) const;
+
     // Methods
     void               clear(void);
     GFilename*         clone(void) const;
     std::string        classname(void) const;
-    bool               empty(void) const;
-    int                size(void) const;
+    bool               is_empty(void) const;
     int                length(void) const;
-    const std::string& fullname(void) const;
-    const std::string& filename(void) const;
+    const std::string& url(void) const;
+    //const std::string& protocol(void) const;
+    //const std::string& path(void) const;
+    //const std::string& file(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;

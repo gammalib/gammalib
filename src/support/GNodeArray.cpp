@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNodeArray.cpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -709,7 +709,7 @@ void GNodeArray::load(const std::string& filename)
     GFits file;
 
     // Open FITS file
-    file.open(fname.filename());
+    file.open(fname.url());
 
     // Get nodes table
     const GFitsTable& table = *file.table(fname.extname("NODES"));
@@ -748,7 +748,7 @@ void GNodeArray::save(const std::string& filename, const bool& clobber) const
     write(file, fname.extname("NODES"));
 
     // Save to file
-    file.saveto(fname.filename(), clobber);
+    file.saveto(fname.url(), clobber);
 
     // Return
     return;

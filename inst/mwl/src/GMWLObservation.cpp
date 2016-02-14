@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GMWLObservation.cpp - Multi-wavelength observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -424,7 +424,7 @@ void GMWLObservation::load(const std::string& filename)
 
     // Set attributes
     name("Multi-wavelength observation");
-    m_filename   = fname.filename();
+    m_filename   = fname.url();
     m_instrument = spec->instrument();
 
     // Return

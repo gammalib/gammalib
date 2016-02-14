@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAResponseIrf.cpp - CTA instrument response function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1098,7 +1098,7 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
     GFilename fname(filename);
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!gammalib::file_exists_gzip(fname.url())) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid effective area response file.";
         throw GException::file_error(G_LOAD_AEFF, msg);
@@ -1108,7 +1108,7 @@ void GCTAResponseIrf::load_aeff(const std::string& filename)
     if (gammalib::is_fits(filename)) {
 
         // Open FITS file
-        GFits file(fname.filename());
+        GFits file(fname);
 
         // Get the extension name. If an extension name has been specified
         // then use this name, otherwise use either the "EFFECTIVE AREA"
@@ -1219,7 +1219,7 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
     GFilename fname(filename);
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!gammalib::file_exists_gzip(fname.url())) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid point spread function response file.";
         throw GException::file_error(G_LOAD_PSF, msg);
@@ -1229,7 +1229,7 @@ void GCTAResponseIrf::load_psf(const std::string& filename)
     if (gammalib::is_fits(filename)) {
 
         // Open FITS file
-        GFits file(fname.filename());
+        GFits file(fname);
 
         // Get the extension name. If an extension name has been specified
         // then use this name, otherwise use either the
@@ -1345,7 +1345,7 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
     GFilename fname(filename);
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!gammalib::file_exists_gzip(fname.url())) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid energy dispersion response file.";
         throw GException::file_error(G_LOAD_EDISP, msg);
@@ -1355,7 +1355,7 @@ void GCTAResponseIrf::load_edisp(const std::string& filename)
     if (gammalib::is_fits(filename)) {
 
         // Open FITS file
-        GFits file(fname.filename());
+        GFits file(fname);
 
         // Get the extension name. If an extension name has been specified
         // then use this name, otherwise use either the "EFFECTIVE AREA"
@@ -1453,7 +1453,7 @@ void GCTAResponseIrf::load_background(const std::string& filename)
     GFilename fname(filename);
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(fname.filename())) {
+    if (!gammalib::file_exists_gzip(fname.url())) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid background response file.";
         throw GException::file_error(G_LOAD_BACKGROUND, msg);

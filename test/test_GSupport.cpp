@@ -643,17 +643,17 @@ void TestGSupport::test_filename(void)
 
     // Set filename without extension
     GFilename filename = "myfile.fits";
-    test_assert(filename.filename() == "myfile.fits",
+    test_assert(filename.url() == "myfile.fits",
                 "Expected \"myfile.fits\" filename, "
-                "found \""+filename.filename()+"\"");
+                "found \""+filename.url()+"\"");
     test_assert(!filename.has_extname(),
                 "Expected that extension name is not set.");
 
     // Set filename with extension name
     filename = "myfile.fits[EVENTS]";
-    test_assert(filename.filename() == "myfile.fits",
+    test_assert(filename.url() == "myfile.fits",
                 "Expected \"myfile.fits\" filename, "
-                "found \""+filename.filename()+"\"");
+                "found \""+filename.url()+"\"");
     test_assert(filename.extname() == "EVENTS",
                 "Expected \"EVENTS\" extension name, "
                 "found \""+filename.extname()+"\"");
@@ -662,9 +662,9 @@ void TestGSupport::test_filename(void)
 
     // Set filename with extension name and version
     filename = "myfile.fits[EVENTS,2]";
-    test_assert(filename.filename() == "myfile.fits",
+    test_assert(filename.url() == "myfile.fits",
                 "Expected \"myfile.fits\" filename, "
-                "found \""+filename.filename()+"\"");
+                "found \""+filename.url()+"\"");
     test_assert(filename.extname() == "EVENTS",
                 "Expected \"EVENTS\" extension name, "
                 "found \""+filename.extname()+"\"");
@@ -688,9 +688,9 @@ void TestGSupport::test_filename(void)
 
     // Set filename with extension number and version
     filename = "myfile.fits[1,2]";
-    test_assert(filename.filename() == "myfile.fits",
+    test_assert(filename.url() == "myfile.fits",
                 "Expected \"myfile.fits\" filename, "
-                "found \""+filename.filename()+"\"");
+                "found \""+filename.url()+"\"");
     test_value(filename.extno(), 1);
     test_assert(filename.has_extno(),
                 "Expected that extension number is set.");
@@ -700,9 +700,9 @@ void TestGSupport::test_filename(void)
 
     // Set filename with extension name and expression
     filename = "myfile.fits[EVENTS][ENERGY>0.1]";
-    test_assert(filename.filename() == "myfile.fits",
+    test_assert(filename.url() == "myfile.fits",
                 "Expected \"myfile.fits\" filename, "
-                "found \""+filename.filename()+"\"");
+                "found \""+filename.url()+"\"");
     test_assert(filename.extname() == "EVENTS",
                  "Expected \"EVENTS\" extension name, "
                  "found \""+filename.extname()+"\"");
@@ -782,8 +782,7 @@ void TestGSupport::test_filename(void)
 
     // Test size operators
     filename = "myfile.fits";
-    test_assert(!filename.empty(), "Non empty file name expected.");
-    test_value(filename.size(), 11);
+    test_assert(!filename.is_empty(), "Non empty file name expected.");
     test_value(filename.length(), 11);
 
     // Test default extension name

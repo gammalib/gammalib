@@ -361,7 +361,7 @@ void GCTAAeff2D::load(const std::string& filename)
     GFits file;
 
     // Open FITS file
-    file.open(fname.filename());
+    file.open(fname);
 
     // Get effective area table
     const GFitsTable& table = *file.table(fname.extname("EFFECTIVE AREA"));
@@ -406,7 +406,7 @@ void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
     // Create FITS file, append table, and write into the file
     GFits fits;
     fits.append(table);
-    fits.saveto(fname.filename(), clobber);
+    fits.saveto(fname, clobber);
 
     // Return
     return;

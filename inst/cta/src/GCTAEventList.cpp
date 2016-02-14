@@ -279,7 +279,7 @@ GCTAEventList* GCTAEventList::clone(void) const
 void GCTAEventList::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits fits(filename.filename());
+    GFits fits(filename);
 
     // Read event list
     read(fits);
@@ -304,7 +304,7 @@ void GCTAEventList::save(const GFilename& filename,
                          const bool&      clobber) const
 {
     // Open or create FITS file
-    GFits fits(filename.filename(), true);
+    GFits fits(filename, true);
 
     // Write event list
     write(fits);
@@ -639,11 +639,11 @@ void GCTAEventList::fetch(void) const
     if (m_events.empty() && size() > 0) {
 
         // Continue only if the file name is not empty
-        if (!m_filename.empty()) {
+        if (!m_filename.is_empty()) {
 
             // Throw an exception if the file does not exist
-            if (!gammalib::file_exists_gzip(m_filename.filename())) {
-                std::string msg = "File \""+m_filename.filename()+"\" not "
+            if (!gammalib::file_exists_gzip(m_filename.url())) {
+                std::string msg = "File \""+m_filename.url()+"\" not "
                                   "found. Cannot fetch events. Maybe the "
                                   "file has been deleted in the meantime.";
                 GException::file_error(G_FETCH, msg);
@@ -659,7 +659,7 @@ void GCTAEventList::fetch(void) const
             try {
 
                 // Open FITS file
-                GFits fits(m_filename.fullname());
+                GFits fits(m_filename);
 
                 // Initialise events extension name
                 std::string extname = fits.filename().extname("EVENTS");
@@ -683,7 +683,7 @@ void GCTAEventList::fetch(void) const
             // Throw an exception if an exception has occured
             if (has_exception) {
                 std::string msg = "Unable to load events from file \""+
-                                  m_filename.filename()+"\"."; 
+                                  m_filename.url()+"\"."; 
                 throw GException::file_error(G_FETCH, msg);
             }
 
@@ -762,9 +762,9 @@ std::string GCTAEventList::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Number of events") +
                       gammalib::str(size()));
         if (m_events.empty()) {
-            if (!m_filename.empty()) {
+            if (!m_filename.is_empty()) {
                 result.append(" (disposed in \"");
-                result.append(m_filename.filename());
+                result.append(m_filename.url());
                 result.append("\")");
             }
             else {

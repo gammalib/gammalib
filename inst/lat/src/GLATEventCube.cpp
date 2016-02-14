@@ -309,13 +309,10 @@ int GLATEventCube::naxis(const int& axis) const
  ***************************************************************************/
 void GLATEventCube::load(const GFilename& filename)
 {
-    // Clear object
-    clear();
-
     // Open FITS file
-    GFits file(filename.filename());
+    GFits file(filename);
 
-    // Read counts map
+    // Read event cube from FITS file
     read(file);
 
     // Close FITS file
@@ -340,11 +337,11 @@ void GLATEventCube::save(const GFilename& filename,
     // Create empty FITS file
     GFits fits;
 
-    // Write event cube
+    // Write event cube into FITS file
     write(fits);
     
     // Save FITS file
-    fits.saveto(filename.filename(), clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

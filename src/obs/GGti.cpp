@@ -588,7 +588,7 @@ void GGti::load(const GFilename& filename)
     GFits file;
 
     // Open FITS file
-    file.open(filename.filename());
+    file.open(filename);
 
     // Get GTI table
     const GFitsTable& table = *file.table(filename.extname("GTI"));
@@ -623,7 +623,7 @@ void GGti::load(const GFilename& filename)
 void GGti::save(const GFilename& filename, const bool& clobber) const
 {
     // Open or create FITS file
-    GFits fits(filename.filename(), true);
+    GFits fits(filename, true);
 
     // Write GTI to FITS object
     write(fits, filename.extname("GTI"));
@@ -830,10 +830,10 @@ void GGti::write(GXmlElement& xml) const
             gammalib::xml_need_par(G_WRITE_XML, xml, "GoodTimeIntervals");
 
         // If we have a file name then write the "file" attribute ...
-        if (!m_xml_filename.empty()) {
+        if (!m_xml_filename.is_empty()) {
 
             // Write "file" attribute
-            par->attribute("file", m_xml_filename.fullname());
+            par->attribute("file", m_xml_filename());
 
             // Write GTI file
             save(m_xml_filename, true);
@@ -1060,9 +1060,9 @@ std::string GGti::print(const GChatter& chatter) const
         }
 
         // Optionally append XML filename
-        if (!m_xml_filename.empty()) {
+        if (!m_xml_filename.is_empty()) {
             result.append("\n"+gammalib::parformat("File name"));
-            result.append(m_xml_filename.fullname());
+            result.append(m_xml_filename());
         }
 
     } // endif: chatter was not silent

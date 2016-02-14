@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -582,7 +582,7 @@ void GEbounds::load(const GFilename& filename)
     GFits file;
 
     // Open FITS file
-    file.open(filename.filename());
+    file.open(filename);
 
     // Get energy boundary table
     const GFitsTable& table = *file.table(filename.extname("EBOUNDS"));
@@ -605,23 +605,28 @@ void GEbounds::load(const GFilename& filename)
  * @param[in] clobber Overwrite any existing file  (default: false)?
  * @param[in] unit Energy units (default: "keV")
  *
- * Saves energy boundaries into a FITS file.
+ * Saves energy boundaries into a FITS file. If a file with the given
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The method will create (or replace an existing)
+ * energy boundaries extension. The extension name can be specified as part
+ * of the @p filename, or if no extension name is given, is assumed to be
+ * "EBOUNDS".
  *
- * If no extension name is provided, the energy boundaries are saved into
- * an "EBOUNDS" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
 void GEbounds::save(const GFilename&   filename,
                     const bool&        clobber,
                     const std::string& unit) const
 {
-    // Allocate FITS file
-    GFits file;
+    // Open or create FITS file
+    GFits fits(filename, true);
 
     // Write energy boundaries to FITS file
-    write(file, filename.extname("EBOUNDS"), unit);
+    write(fits, filename.extname("EBOUNDS"), unit);
 
     // Save to file
-    file.saveto(filename.filename(), clobber);
+    fits.save(clobber);
 
     // Return
     return;

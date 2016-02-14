@@ -1125,7 +1125,7 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
     write(fits, evtname, gtiname);
 
     // Save FITS file
-    fits.saveto(fname.filename(), clobber);
+    fits.saveto(fname.url(), clobber);
 
     // Return
     return;

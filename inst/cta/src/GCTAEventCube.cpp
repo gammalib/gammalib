@@ -327,7 +327,7 @@ void GCTAEventCube::load(const GFilename& filename)
     clear();
 
     // Open counts map FITS file
-    GFits fits(filename.filename());
+    GFits fits(filename);
 
     // Load counts map
     read(fits);
@@ -358,7 +358,7 @@ void GCTAEventCube::save(const GFilename& filename,
     write(fits);
     
     // Save FITS file
-    fits.saveto(filename.filename(), clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

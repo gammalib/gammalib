@@ -365,13 +365,10 @@ int GCOMEventCube::naxis(const int& axis) const
  ***************************************************************************/
 void GCOMEventCube::load(const GFilename& filename)
 {
-    // Clear object
-    clear();
-
     // Open DRE FITS file
-    GFits file(filename.filename());
+    GFits file(filename);
 
-    // Load DRE cube
+    // Load DRE cube from FITS file
     read(file);
 
     // Close FITS file
@@ -395,11 +392,11 @@ void GCOMEventCube::save(const GFilename& filename, const bool& clobber) const
     // Create empty FITS file
     GFits fits;
 
-    // Write event cube
+    // Write event cube into FITS file
     write(fits);
     
     // Save FITS file
-    fits.saveto(filename.filename(), clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

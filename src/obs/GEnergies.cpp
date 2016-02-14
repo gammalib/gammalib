@@ -551,7 +551,7 @@ void GEnergies::load(const GFilename& filename)
     GFits file;
 
     // Open FITS file
-    file.open(filename.filename());
+    file.open(filename);
 
     // Get energies table
     const GFitsTable& table = *file.table(filename.extname("ENERGIES"));
@@ -573,21 +573,25 @@ void GEnergies::load(const GFilename& filename)
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite any existing energies extension?
  *
- * Saves energies into a FITS file.
+ * Saves energiesinto a FITS file. If a file with the given @p filename does
+ * not yet exist it will be created, otherwise the method opens the existing
+ * file. The method will create (or replace an existing) energies extension.
+ * The extension name can be specified as part of the @p filename, or if no
+ * extension name is given, is assumed to be "ENERGIES".
  *
- * If no extension name is provided, the energies are saved into an
- * "ENERGIES" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
 void GEnergies::save(const GFilename& filename, const bool& clobber) const
 {
-    // Allocate FITS file
-    GFits file;
+    // Open or create FITS file
+    GFits fits(filename, true);
 
     // Write energies to FITS file
-    write(file, filename.extname("ENERGIES"));
+    write(fits, filename.extname("ENERGIES"));
 
     // Save to file
-    file.saveto(filename.filename(), clobber);
+    fits.save(clobber);
 
     // Return
     return;

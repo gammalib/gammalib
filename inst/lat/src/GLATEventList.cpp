@@ -251,13 +251,10 @@ GLATEventList* GLATEventList::clone(void) const
  ***************************************************************************/
 void GLATEventList::load(const GFilename& filename)
 {
-    // Clear object
-    clear();
-
     // Open FITS file
-    GFits file(filename.filename());
+    GFits file(filename);
 
-    // Read event list
+    // Read event list from FITS file
     read(file);
 
     // Close FITS file

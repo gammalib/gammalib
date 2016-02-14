@@ -142,25 +142,25 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Test assigning file names
         filename = gammalib.GFilename("myfile.fits")
-        self.test_assert(filename.filename() == "myfile.fits",
+        self.test_assert(filename.url() == "myfile.fits",
                          "Expected \"myfile.fits\", found \""+
-                         filename.filename()+"\"")
+                         filename.url()+"\"")
         filename = gammalib.GFilename("myfile.fits[EVENTS]")
-        self.test_assert(filename.filename() == "myfile.fits",
+        self.test_assert(filename.url() == "myfile.fits",
                          "Expected \"myfile.fits\", found \""+
-                         filename.filename()+"\"")
+                         filename.url()+"\"")
         self.test_assert(filename.extname() == "EVENTS",
                          "Expected extension \"EVENTS\", found \""+
                          filename.extname()+"\"")
         filename = gammalib.GFilename("myfile.fits[0]")
-        self.test_assert(filename.filename() == "myfile.fits",
+        self.test_assert(filename.url() == "myfile.fits",
                          "Expected \"myfile.fits\", found \""+
-                         filename.filename()+"\"")
+                         filename.url()+"\"")
         self.test_value(filename.extno(), 0)
         filename = gammalib.GFilename("myfile.fits[0,2]")
-        self.test_assert(filename.filename() == "myfile.fits",
+        self.test_assert(filename.url() == "myfile.fits",
                          "Expected \"myfile.fits\", found \""+
-                         filename.filename()+"\"")
+                         filename.url()+"\"")
         self.test_value(filename.extno(), 0)
         self.test_value(filename.extver(), 2)
         

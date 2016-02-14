@@ -37,7 +37,26 @@
  *
  * @brief Filename class
  *
- * This class handles filenames.
+ * This class handles filenames. A filename is a string composed of an
+ * optional protocol (http:, ftp:, file:), an absolute or relative access
+ * path, a file, and optionally a FITS extension. Examples of valid file
+ * names are
+ *
+ *     myfits.fits
+ *     myfile.fits[EVENTS]
+ *     ./data/myfile.fits
+ *     ~/data/myfile.fits
+ *     /home/myuser/data/myfile.fits
+ *     http://www.irap.omp.eu/data/myfile.fits
+ *     ftp://www.irap.omp.eu/data/myfile.fits
+ *     file:///home/myuser/data/myfile.fits
+ *
+ * A filename without the optional FITS extension is called a Uniform
+ * Resource Locator (URL) an is accessed using the url() method. The URL
+ * can be decomposed into the protocol, access path and the filename using
+ * the protocol(), path(), and file().
+ *
+ * The FITS extension is implemente using the GFitsExtension class.
  ***************************************************************************/
 class GFilename : public GBase {
 
@@ -50,17 +69,21 @@ public:
     virtual ~GFilename(void);
 
     // Operators
-    GFilename& operator=(const GFilename& filename);
+    GFilename&         operator=(const GFilename& filename);
+    const std::string& operator()(void) const;
 
     // Methods
     void               clear(void);
     GFilename*         clone(void) const;
     std::string        classname(void) const;
-    bool               empty(void) const;
-    int                size(void) const;
+    bool               is_empty(void) const;
     int                length(void) const;
-    const std::string& fullname(void) const;
-    const std::string& filename(void) const;
+    //const std::string& fullname(void) const;
+    //const std::string& filename(void) const;
+    const std::string& url(void) const;
+    //const std::string& protocol(void) const;
+    //const std::string& path(void) const;
+    //const std::string& file(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;
@@ -81,11 +104,28 @@ protected:
     // Protected members
     std::string m_fullname;   //!< Full file name
     std::string m_filename;   //!< File name (with stripped extension info)
+    //std::string m_protocol;   //!< Access protocol
+    //std::string m_url;        //!< File name (with stripped extension info)
+    //std::string m_path;       //!< Path
     std::string m_extname;    //!< Extension name ("": not set)
     int         m_extno;      //!< Extension number  (-1: not set)
     int         m_extver;     //!< Extension version (0: not set)
     std::string m_expression; //!< Selection expression ("": not set)
 };
+
+
+/***********************************************************************//**
+ * @brief Filename operator
+ *
+ * @return Full filename.
+ *
+ * Returns the full filename including any FITS extension.
+ ***************************************************************************/
+inline
+const std::string& GFilename::operator()(void) const
+{
+    return (m_fullname);
+}
 
 
 /***********************************************************************//**
@@ -106,23 +146,9 @@ std::string GFilename::classname(void) const
  * @return True if filename is empty, false otherwise.
  ***************************************************************************/
 inline
-bool GFilename::empty(void) const
+bool GFilename::is_empty(void) const
 {
-    return (m_filename.empty());
-}
-
-
-/***********************************************************************//**
- * @brief Return size of filename
- *
- * @return Size of filename.
- *
- * The size of the file name is equal to its length.
- ***************************************************************************/
-inline
-int GFilename::size(void) const
-{
-    return (m_filename.size());
+    return (m_fullname.empty());
 }
 
 
@@ -139,28 +165,14 @@ int GFilename::length(void) const
 
 
 /***********************************************************************//**
- * @brief Return full filename
+ * @brief Return Uniform Resource Locator (URL)
  *
- * @return String containing filename with extension.
+ * @return Uniform Resource Locator without FITS extension.
  *
- * Returns the full filename, including any extension.
+ * Returns the Uniform Resource Locator without FITS extension.
  ***************************************************************************/
 inline
-const std::string& GFilename::fullname(void) const
-{
-    return (m_fullname);
-}
-
-
-/***********************************************************************//**
- * @brief Return filename
- *
- * @return String containing filename without extension.
- *
- * Returns the file name without any extension.
- ***************************************************************************/
-inline
-const std::string& GFilename::filename(void) const
+const std::string& GFilename::url(void) const
 {
     return (m_filename);
 }

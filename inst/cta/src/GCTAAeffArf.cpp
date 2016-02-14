@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAAeffArf.cpp - CTA ARF effective area class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -256,7 +256,7 @@ void GCTAAeffArf::load(const std::string& filename)
     GFits file;
 
     // Open FITS file
-    file.open(fname.filename());
+    file.open(fname);
 
     // Get ARF table
     const GFitsTable& table = *file.table(fname.extname("SPECRESP"));

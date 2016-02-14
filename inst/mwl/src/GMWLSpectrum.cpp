@@ -264,7 +264,7 @@ void GMWLSpectrum::load(const GFilename& filename)
     clear();
 
     // Open FITS file
-    GFits file(filename.filename());
+    GFits file(filename);
 
     // Read spectrum
     if (filename.has_extno()) {
@@ -377,7 +377,7 @@ void GMWLSpectrum::read(const GFits& fits, const int& extno)
 
     // If we found no table then throw an exception
     if (extension == 0) {
-        throw GMWLException::file_open_error(G_READ, fits.filename().filename(),
+        throw GMWLException::file_open_error(G_READ, fits.filename().url(),
                                              "No table found in file.");
     }
 
