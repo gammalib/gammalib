@@ -61,6 +61,12 @@
  ***************************************************************************/
 class GFilename : public GBase {
 
+    // Friend functions
+    friend std::string operator+(const GFilename& filename, const std::string& string);
+    friend std::string operator+(const std::string& string, const GFilename& filename);
+    friend bool        operator==(const GFilename &a, const GFilename &b);
+    friend bool        operator!=(const GFilename &a, const GFilename &b);
+    
 public:
     // Constructors and destructors
     GFilename(void);
@@ -71,7 +77,7 @@ public:
 
     // Operators
     GFilename&         operator=(const GFilename& filename);
-    const std::string& operator()(void) const;
+                       operator std::string(void) const;
 
     // Methods
     void               clear(void);
@@ -83,6 +89,9 @@ public:
     //std::string        protocol(void) const;
     //std::string&       path(void) const;
     //std::string&       file(void) const;
+    //bool               exists(void) const;
+    //bool               is_fits(void) const;
+    //void               remove(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;
@@ -114,16 +123,16 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Filename operator
+ * @brief Implicit filename std::string convertor
  *
- * @return Full filename.
+ * @return Full filename as std::string.
  *
- * Returns the full filename including any FITS extension.
+ * Returns the full filename including any FITS extension as std::string.
  ***************************************************************************/
 inline
-const std::string& GFilename::operator()(void) const
+GFilename::operator std::string(void) const
 {
-    return (m_fullname);
+    return (gammalib::expand_env(m_fullname));
 }
 
 
@@ -235,6 +244,62 @@ inline
 bool GFilename::has_expression(void) const
 {
     return (!m_expression.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief String addition operator
+ *
+ * @param[in] filename Filename.
+ * @param[in] string String.
+ * @return String with filename + string.
+ ***************************************************************************/
+inline
+std::string operator+(const GFilename& filename, const std::string& string)
+{
+    return (std::string(filename)+string);
+}
+
+
+/***********************************************************************//**
+ * @brief String addition operator
+ *
+ * @param[in] string String.
+ * @param[in] filename Filename.
+ * @return String with string + filename.
+ ***************************************************************************/
+inline
+std::string operator+(const std::string& string, const GFilename& filename)
+{
+    return (string+std::string(filename));
+}
+
+
+/***********************************************************************//**
+ * @brief Filename equality operator
+ *
+ * @param[in] a First filename.
+ * @param[in] b Second filename.
+ * @return True if filenames are equal.
+ ***************************************************************************/
+inline
+bool operator==(const GFilename &a, const GFilename &b)
+{
+    return (std::string(a) == std::string(b));
+}
+
+
+/***********************************************************************//**
+ * @brief Filename inequality operator
+ *
+ * @param[in] a First filename.
+ * @param[in] b Second filename.
+ * @return True if filenames are not equal.
+ ***************************************************************************/
+inline
+bool operator!=(const GFilename &a, const GFilename &b)
+{
+    return (std::string(a) != std::string(b));
 }
 
 #endif /* GFILENAME_HPP */

@@ -830,7 +830,7 @@ void GGti::write(GXmlElement& xml) const
         if (!m_xml_filename.is_empty()) {
 
             // Write "file" attribute
-            par->attribute("file", m_xml_filename());
+            par->attribute("file", m_xml_filename);
 
             // Write GTI file
             save(m_xml_filename, true);
@@ -1059,7 +1059,7 @@ std::string GGti::print(const GChatter& chatter) const
         // Optionally append XML filename
         if (!m_xml_filename.is_empty()) {
             result.append("\n"+gammalib::parformat("File name"));
-            result.append(m_xml_filename());
+            result.append(m_xml_filename);
         }
 
     } // endif: chatter was not silent

@@ -44,9 +44,6 @@ public:
     GFilename(const char* filename);
     virtual ~GFilename(void);
 
-    // Operators
-    const std::string& operator()(void) const;
-
     // Methods
     void               clear(void);
     GFilename*         clone(void) const;

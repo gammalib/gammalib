@@ -1017,19 +1017,19 @@ void GFits::open(const GFilename& filename, const bool& create)
     m_hdu.clear();
 
     // Expand environment variables
-    std::string fname(gammalib::expand_env(filename()));
+    //std::string fname(gammalib::expand_env(filename()));
 
     // Don't allow opening if a file is already open
     if (m_fitsfile != NULL) {
         std::string msg;
-        if (m_filename.url() == GFilename(fname).url()) {
-            msg = "FITS file \""+m_filename.url()+"\" has already been "
+        if (m_filename == filename) {
+            msg = "FITS file \""+m_filename+"\" has already been "
                   "opened, cannot open it again.";
         }
         else {
-            msg = "A FITS file \""+m_filename.url()+"\" has already "
+            msg = "A FITS file \""+m_filename+"\" has already "
                   "been opened, cannot open another FITS file \""+
-                  fname+"\" before closing the existing one.";
+                  filename+"\" before closing the existing one.";
         }
         throw GException::invalid_argument(G_OPEN, msg);
     }
@@ -1040,12 +1040,12 @@ void GFits::open(const GFilename& filename, const bool& create)
 
     // Try opening FITS file with readwrite access
     int status = 0;
-    status     = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 1, &status);
+    status     = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 1, &status);
 
     // If failed then try opening as readonly
     if (status == 104 || status == 112) {
         status      = 0;
-        status      = __ffopen(FHANDLE(m_fitsfile), fname.c_str(), 0, &status);
+        status      = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 0, &status);
         m_readwrite = false;
     }
 
@@ -1053,7 +1053,7 @@ void GFits::open(const GFilename& filename, const bool& create)
     // FITS file now
     if (create && status == 104) {
         status      = 0;
-        status      = __ffinit(FHANDLE(m_fitsfile), fname.c_str(), &status);
+        status      = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }
@@ -1061,17 +1061,17 @@ void GFits::open(const GFilename& filename, const bool& create)
     // Throw special exception if status=202 (keyword not found). This error
     // may occur if the file is opened with an expression
     if (status == 202) {
-        throw GException::fits_open_error(G_OPEN, fname, status,
+        throw GException::fits_open_error(G_OPEN, filename, status,
                           "Keyword not found when opening file.");
     }
 
     // Throw any other error
     else if (status != 0) {
-        throw GException::fits_open_error(G_OPEN, fname, status);
+        throw GException::fits_open_error(G_OPEN, filename, status);
     }
 
     // Store FITS file name as GFilename object
-    m_filename = GFilename(fname);
+    m_filename = filename;
 
     // Determine number of HDUs
     int num_hdu = 0;
@@ -1227,11 +1227,8 @@ void GFits::save(const bool& clobber)
  ***************************************************************************/
 void GFits::saveto(const GFilename& filename, const bool& clobber)
 {
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename());
-
     // Create gzipped file name version
-    std::string gzfname = fname + ".gz";
+    std::string gzfname = filename + ".gz";
 
     // Debug header
     #if defined(G_DEBUG)
@@ -1243,8 +1240,8 @@ void GFits::saveto(const GFilename& filename, const bool& clobber)
     // consider here also the possibility that the file is gzipped, but
     // the file name does not contain the .gz extension.
     if (clobber) {
-        if (gammalib::file_exists(fname)) {
-            std::remove(fname.c_str());
+        if (gammalib::file_exists(filename)) {
+            std::remove(filename.c_str());
         }
         else {
             if (gammalib::file_exists(gzfname)) {
@@ -1254,25 +1251,24 @@ void GFits::saveto(const GFilename& filename, const bool& clobber)
     }
 
     // Otherwise, if file exists then throw an exception
-    else if (gammalib::file_exists(fname) ||
+    else if (gammalib::file_exists(filename) ||
              gammalib::file_exists(gzfname)) {
-        throw GException::fits_file_exist(G_SAVETO, fname);
+        throw GException::fits_file_exist(G_SAVETO, filename);
     }
 
     // Create or open FITS file
-    GFits new_fits;
-    new_fits.open(fname, true);
+    GFits fits(filename, true);;
 
     // Append all headers
     for (int i = 0; i < size(); ++i) {
-        new_fits.append(*m_hdu[i]);
+        fits.append(*m_hdu[i]);
     }
 
-    // Save new FITS file
-    new_fits.save();
+    // Save FITS file
+    fits.save();
 
-    // Close new FITS file
-    new_fits.close();
+    // Close FITS file
+    fits.close();
 
     // Debug trailer
     #if defined(G_DEBUG)
