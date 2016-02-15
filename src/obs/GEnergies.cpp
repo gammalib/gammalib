@@ -581,11 +581,19 @@ void GEnergies::load(const GFilename& filename)
  ***************************************************************************/
 void GEnergies::save(const GFilename& filename, const bool& clobber) const
 {
+    // Get extension name
+    std::string extname = filename.extname("ENERGIES");
+
     // Open or create FITS file
     GFits fits(filename, true);
 
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
+
     // Write energies to FITS file
-    write(fits, filename.extname("ENERGIES"));
+    write(fits, extname);
 
     // Save to file
     fits.save(clobber);

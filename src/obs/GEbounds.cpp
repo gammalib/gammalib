@@ -616,11 +616,19 @@ void GEbounds::save(const GFilename&   filename,
                     const bool&        clobber,
                     const std::string& unit) const
 {
+    // Get extension name
+    std::string extname = filename.extname("EBOUNDS");
+
     // Open or create FITS file
     GFits fits(filename, true);
 
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
+
     // Write energy boundaries to FITS file
-    write(fits, filename.extname("EBOUNDS"), unit);
+    write(fits, extname, unit);
 
     // Save to file
     fits.save(clobber);

@@ -619,11 +619,19 @@ void GGti::load(const GFilename& filename)
  ***************************************************************************/
 void GGti::save(const GFilename& filename, const bool& clobber) const
 {
+    // Get extension name
+    std::string extname = filename.extname("GTI");
+
     // Open or create FITS file
     GFits fits(filename, true);
 
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
+
     // Write GTI to FITS object
-    write(fits, filename.extname("GTI"));
+    write(fits, extname);
 
     // Save to file
     fits.save(clobber);
