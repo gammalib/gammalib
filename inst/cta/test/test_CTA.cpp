@@ -1401,6 +1401,10 @@ void TestGCTAObservation::test_unbinned_obs(void)
         test_try_failure(e);
     }
 
+    // Remove test files
+    std::remove("test_cta_events1.fits");
+    std::remove("test_cta_events2.fits");
+
     // Test loading of the event file and saving into a different extension
     run.load(cta_events);
     run.save("test_cta_events1.fits[EVENTS2;GTI2]", true);
@@ -1411,7 +1415,9 @@ void TestGCTAObservation::test_unbinned_obs(void)
     fits.close();
     run.save("test_cta_events1.fits[EVENTS3;GTI3]", true);
     fits.open("test_cta_events1.fits");
-    test_value(fits.size(), 3, "FITS file should contain 3 HDUs");
+    test_value(fits.size(), 5, "FITS file should contain 5 HDUs");
+    test_assert(fits.contains("EVENTS2"), "FITS should contain \"EVENTS2\" HDU");
+    test_assert(fits.contains("GTI2"), "FITS should contain \"GTI2\" HDU");
     test_assert(fits.contains("EVENTS3"), "FITS should contain \"EVENTS3\" HDU");
     test_assert(fits.contains("GTI3"), "FITS should contain \"GTI3\" HDU");
     fits.close();
