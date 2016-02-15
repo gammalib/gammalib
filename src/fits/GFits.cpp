@@ -1013,12 +1013,6 @@ int GFits::extno(const std::string& extname) const
  ***************************************************************************/
 void GFits::open(const GFilename& filename, const bool& create)
 {
-    // Remove any HDUs
-    m_hdu.clear();
-
-    // Expand environment variables
-    //std::string fname(gammalib::expand_env(filename()));
-
     // Don't allow opening if a file is already open
     if (m_fitsfile != NULL) {
         std::string msg;
@@ -1034,18 +1028,21 @@ void GFits::open(const GFilename& filename, const bool& create)
         throw GException::invalid_argument(G_OPEN, msg);
     }
 
+    // Remove any HDUs
+    m_hdu.clear();
+
     // Initialise FITS file as readwrite and non created
     m_readwrite = true;
     m_created   = false;
 
     // Try opening FITS file with readwrite access
     int status = 0;
-    status     = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 1, &status);
+    status     = __ffopen(FHANDLE(m_fitsfile), filename.url().c_str(), 1, &status);
 
     // If failed then try opening as readonly
     if (status == 104 || status == 112) {
         status      = 0;
-        status      = __ffopen(FHANDLE(m_fitsfile), filename.c_str(), 0, &status);
+        status      = __ffopen(FHANDLE(m_fitsfile), filename.url().c_str(), 0, &status);
         m_readwrite = false;
     }
 
@@ -1053,7 +1050,7 @@ void GFits::open(const GFilename& filename, const bool& create)
     // FITS file now
     if (create && status == 104) {
         status      = 0;
-        status      = __ffinit(FHANDLE(m_fitsfile), filename.c_str(), &status);
+        status      = __ffinit(FHANDLE(m_fitsfile), filename.url().c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }
@@ -1241,7 +1238,7 @@ void GFits::saveto(const GFilename& filename, const bool& clobber)
     // the file name does not contain the .gz extension.
     if (clobber) {
         if (gammalib::file_exists(filename)) {
-            std::remove(filename.c_str());
+            std::remove(filename.url().c_str());
         }
         else {
             if (gammalib::file_exists(gzfname)) {
