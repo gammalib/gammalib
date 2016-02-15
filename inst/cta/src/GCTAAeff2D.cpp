@@ -76,7 +76,7 @@ GCTAAeff2D::GCTAAeff2D(void) : GCTAAeff()
  *
  * Constructs effective area from a FITS file.
  ***************************************************************************/
-GCTAAeff2D::GCTAAeff2D(const std::string& filename) : GCTAAeff()
+GCTAAeff2D::GCTAAeff2D(const GFilename& filename) : GCTAAeff()
 {
     // Initialise class members
     init_members();
@@ -352,19 +352,13 @@ void GCTAAeff2D::write(GFitsBinTable& table) const
  * If no extension name is provided, the effective area will be loaded from
  * the "EFFECTIVE AREA" extension.
  ***************************************************************************/
-void GCTAAeff2D::load(const std::string& filename)
+void GCTAAeff2D::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname);
+    GFits file(filename);
 
     // Get effective area table
-    const GFitsTable& table = *file.table(fname.extname("EFFECTIVE AREA"));
+    const GFitsTable& table = *file.table(filename.extname("EFFECTIVE AREA"));
 
     // Read effective area from table
     read(table);
@@ -386,27 +380,43 @@ void GCTAAeff2D::load(const std::string& filename)
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the effectiva area into a FITS file.
+ * Saves effectiva area into a FITS file. If a file with the given 
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The method will create a (or replace an existing)
+ * effectiva area extension. The extension name can be specified as part
+ * of the @p filename, or if no extension name is given, is assumed to be
+ * "EFFECTIVE AREA".
  *
- * If no extension name is provided, the effective area will be saved into
- * the "EFFECTIVE AREA" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
-void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
+void GCTAAeff2D::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
+    // Get extension name
+    std::string extname = filename.extname("EFFECTIVE AREA");
+
+    // Open or create FITS file
+    GFits fits(filename, true);
+
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
     // Create binary table
     GFitsBinTable table;
-    table.extname(fname.extname("EFFECTIVE AREA"));
 
-    // Write the Effective area table
+    // Write the background table
     write(table);
 
-    // Create FITS file, append table, and write into the file
-    GFits fits;
+    // Set binary table extension name
+    table.extname(extname);
+
+    // Append table to FITS file
     fits.append(table);
-    fits.saveto(fname, clobber);
+
+    // Save to file
+    fits.save(clobber);
 
     // Return
     return;

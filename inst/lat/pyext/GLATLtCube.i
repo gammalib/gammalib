@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATLtCube.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -40,7 +39,7 @@ class GLATLtCube : public GBase {
 public:
     // Constructors and destructors
     GLATLtCube(void);
-    explicit GLATLtCube(const std::string& filename);
+    explicit GLATLtCube(const GFilename& filename);
     GLATLtCube(const GLATLtCube& cube);
     virtual ~GLATLtCube(void);
 
@@ -59,8 +58,9 @@ public:
     void        clear(void);
     GLATLtCube* clone(void) const;
     std::string classname(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename, bool clobber=false) const;
+    void        load(const GFilename& filename);
+    void        save(const GFilename& filename,
+                     const bool&      clobber = false) const;
 };
 
 

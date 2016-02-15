@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEdisp2D.i - CTA 2D energy dispersion class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Florent Forest                                   *
+ *  copyright (C) 2015-2016 by Florent Forest                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GCTAEdisp2D : public GCTAEdisp {
 public:
     // Constructors and destructors
     GCTAEdisp2D(void);
-    explicit GCTAEdisp2D(const std::string& filename);
+    explicit GCTAEdisp2D(const GFilename& filename);
     GCTAEdisp2D(const GCTAEdisp2D& edisp);
     virtual ~GCTAEdisp2D(void);
 
@@ -55,8 +55,8 @@ public:
     void         clear(void);
     GCTAEdisp2D* clone(void) const;
     std::string  classname(void) const;
-    void         load(const std::string& filename);
-    std::string  filename(void) const;
+    void         load(const GFilename& filename);
+    GFilename    filename(void) const;
     GEnergy      mc(GRan&         ran,
                     const double& logE,
                     const double& theta = 0.0,
@@ -79,8 +79,8 @@ public:
     void                     table(const GCTAResponseTable& table);
     void                     read(const GFitsTable& table);
     void                     write(GFitsBinTable& table) const;
-    void                     save(const std::string& filename,
-                                  const bool& clobber = false) const;
+    void                     save(const GFilename& filename,
+                                  const bool&      clobber = false) const;
 };
 
 

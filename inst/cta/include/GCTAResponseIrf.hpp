@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GCTAResponseIrf.hpp - CTA instrument response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,9 +39,8 @@
 #include "GCTAEdisp.hpp"
 #include "GCTABackground.hpp"
 
-/* __ Type definitions ___________________________________________________ */
-
 /* __ Forward declarations _______________________________________________ */
+class GFilename;
 class GSkyDir;
 class GPhoton;
 class GEbounds;
@@ -103,10 +102,10 @@ public:
     void                  caldb(const GCaldb& caldb);
     const GCaldb&         caldb(void) const;
     void                  load(const std::string& rspname);
-    void                  load_aeff(const std::string& filename);
-    void                  load_psf(const std::string& filename);
-    void                  load_edisp(const std::string& filename);
-    void                  load_background(const std::string& filename);
+    void                  load_aeff(const GFilename& filename);
+    void                  load_psf(const GFilename& filename);
+    void                  load_edisp(const GFilename& filename);
+    void                  load_background(const GFilename& filename);
     void                  offset_sigma(const double& sigma);
     double                offset_sigma(void) const;
     const GCTAAeff*       aeff(void) const;

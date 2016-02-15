@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTACubePsf.cpp - CTA cube analysis point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,13 +28,15 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
+#include "GMath.hpp"
+#include "GLog.hpp"
+#include "GObservations.hpp"
 #include "GCTACubePsf.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
 #include "GCTAEventList.hpp"
-#include "GMath.hpp"
-#include "GTools.hpp"
-#include "GLog.hpp"
+#include "GCTAEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                            "GCTACubePsf::set(GCTAObservation&)"
@@ -96,7 +98,7 @@ GCTACubePsf::GCTACubePsf(const GCTACubePsf& cube)
  *
  * Construct PSF cube by loading the information from a PSF cube file.
  ***************************************************************************/
-GCTACubePsf::GCTACubePsf(const std::string& filename)
+GCTACubePsf::GCTACubePsf(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -685,7 +687,7 @@ void GCTACubePsf::write(GFits& fits) const
  *
  * Loads the PSF cube from a FITS file into the object.
  ***************************************************************************/
-void GCTACubePsf::load(const std::string& filename)
+void GCTACubePsf::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -708,13 +710,13 @@ void GCTACubePsf::load(const std::string& filename)
  * @brief Save PSF cube into FITS file
  *
  * @param[in] filename PSF cube FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
  * Save the PSF cube into a FITS file.
  ***************************************************************************/
-void GCTACubePsf::save(const std::string& filename, const bool& clobber) const
+void GCTACubePsf::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create empty FITS file
+    // Create FITS file
     GFits fits;
 
     // Write PSF cube

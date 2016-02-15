@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTACubeBackground.hpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GFilename.hpp"
 #include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
 #include "GEbounds.hpp"
@@ -51,7 +52,7 @@ class GCTACubeBackground : public GBase {
 public:
     // Constructors and destructors
     GCTACubeBackground(void);
-    explicit GCTACubeBackground(const std::string& filename);
+    explicit GCTACubeBackground(const GFilename& filename);
     explicit GCTACubeBackground(const GCTAEventCube& cube);
     GCTACubeBackground(const GCTACubeBackground& bgd);
     virtual ~GCTACubeBackground(void);
@@ -69,13 +70,13 @@ public:
     double              integral(const double& logE) const;
     void                read(const GFits& fits);
     void                write(GFits& file) const;
-    void                load(const std::string& filename);
-    void                save(const std::string& filename,
-                             const bool& clobber = false) const;
+    void                load(const GFilename& filename);
+    void                save(const GFilename& filename,
+                             const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
     const GEbounds&     ebounds(void) const;
     const GNodeArray&   elogmeans(void) const;
-    const std::string&  filename(void) const;
+    const GFilename&    filename(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -87,10 +88,10 @@ private:
     void update(const double& logE) const;
 
     // Members
-    mutable std::string m_filename;  //!< Name of background response file
-    GSkyMap             m_cube;      //!< Background cube
-    GEbounds            m_ebounds;   //!< Energy bounds for the background cube
-    GNodeArray          m_elogmeans; //!< Mean energy for the background cube
+    mutable GFilename m_filename;  //!< Name of background response file
+    GSkyMap           m_cube;      //!< Background cube
+    GEbounds          m_ebounds;   //!< Energy bounds for the background cube
+    GNodeArray        m_elogmeans; //!< Mean energy for the background cube
 
     // Response table computation cache for 1D access
     mutable int    m_inx_left;       //!< Index of left node
@@ -161,7 +162,7 @@ const GNodeArray& GCTACubeBackground::elogmeans(void) const
  * which the background cube has been saved.
  ***************************************************************************/
 inline
-const std::string& GCTACubeBackground::filename(void) const
+const GFilename& GCTACubeBackground::filename(void) const
 {
     return (m_filename);
 }

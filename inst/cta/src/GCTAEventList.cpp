@@ -642,8 +642,8 @@ void GCTAEventList::fetch(void) const
         if (!m_filename.is_empty()) {
 
             // Throw an exception if the file does not exist
-            if (!gammalib::file_exists_gzip(m_filename.url())) {
-                std::string msg = "File \""+m_filename.url()+"\" not "
+            if (!gammalib::file_exists_gzip(m_filename)) {
+                std::string msg = "File \""+m_filename+"\" not "
                                   "found. Cannot fetch events. Maybe the "
                                   "file has been deleted in the meantime.";
                 GException::file_error(G_FETCH, msg);
@@ -683,7 +683,7 @@ void GCTAEventList::fetch(void) const
             // Throw an exception if an exception has occured
             if (has_exception) {
                 std::string msg = "Unable to load events from file \""+
-                                  m_filename.url()+"\"."; 
+                                  m_filename+"\"."; 
                 throw GException::file_error(G_FETCH, msg);
             }
 
@@ -763,9 +763,7 @@ std::string GCTAEventList::print(const GChatter& chatter) const
                       gammalib::str(size()));
         if (m_events.empty()) {
             if (!m_filename.is_empty()) {
-                result.append(" (disposed in \"");
-                result.append(m_filename.url());
-                result.append("\")");
+                result.append(" (disposed in \""+m_filename+"\")");
             }
             else {
                 result.append(" (disposed without possibility to recover)");

@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GFilename.hpp"
 #include "GObservation.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAPointing.hpp"
@@ -63,10 +64,10 @@ public:
     // Constructors and destructors
     GCTAObservation(void);
     explicit GCTAObservation(const std::string& instrument);
-    GCTAObservation(const std::string& cntcube,
-                    const std::string& expcube,
-                    const std::string& psfcube,
-                    const std::string& bkgcube);
+    GCTAObservation(const GFilename& cntcube,
+                    const GFilename& expcube,
+                    const GFilename& psfcube,
+                    const GFilename& bkgcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -94,15 +95,15 @@ public:
     void                write(GFits& fits,
                               const std::string& evtname = "EVENTS",
                               const std::string& gtiname = "GTI") const;
-    void                load(const std::string& filename);
-    void                load(const std::string& cntcube,
-                             const std::string& expcube,
-                             const std::string& psfcube,
-                             const std::string& bkgcube);
-    void                save(const std::string& filename,
-                             const bool& clobber = false) const;
+    void                load(const GFilename& filename);
+    void                load(const GFilename& cntcube,
+                             const GFilename& expcube,
+                             const GFilename& psfcube,
+                             const GFilename& bkgcube);
+    void                save(const GFilename& filename,
+                             const bool&      clobber = false) const;
     void                response(const std::string& rspname,
-                                 const GCaldb& caldb);
+                                 const GCaldb&      caldb);
     void                response(const GCTACubeExposure&   expcube,
                                  const GCTACubePsf&        psfcube,
                                  const GCTACubeBackground& bkgcube);
@@ -122,8 +123,8 @@ public:
     void                ontime(const double& ontime);
     void                livetime(const double& livetime);
     void                deadc(const double& deadc);
-    void                eventfile(const std::string& filename);
-    const std::string&  eventfile(void) const;
+    void                eventfile(const GFilename& filename);
+    const GFilename&    eventfile(void) const;
     std::string         eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;
@@ -141,7 +142,7 @@ protected:
 
     // Protected members
     std::string   m_instrument;    //!< Instrument name
-    std::string   m_eventfile;     //!< Event filename
+    GFilename     m_eventfile;     //!< Event filename
     GCTAResponse* m_response;      //!< Pointer to instrument response functions
     GCTAPointing  m_pointing;      //!< Pointing direction
     int           m_obs_id;        //!< Observation ID
@@ -423,7 +424,7 @@ void GCTAObservation::deadc(const double& deadc)
  * @param[in] filename Event file name.
  ***************************************************************************/
 inline
-void GCTAObservation::eventfile(const std::string& filename)
+void GCTAObservation::eventfile(const GFilename& filename)
 {
     m_eventfile = filename;
     return;
@@ -436,7 +437,7 @@ void GCTAObservation::eventfile(const std::string& filename)
  * @return Event file name.
  ***************************************************************************/
 inline
-const std::string& GCTAObservation::eventfile(void) const
+const GFilename& GCTAObservation::eventfile(void) const
 {
     return m_eventfile;
 }

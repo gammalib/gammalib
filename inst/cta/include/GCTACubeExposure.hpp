@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTACubeExposure.hpp - CTA cube analysis exposure class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,11 +30,18 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GFits.hpp"
+#include "GFilename.hpp"
 #include "GSkyMap.hpp"
-#include "GObservations.hpp"
-#include "GCTAObservation.hpp"
-#include "GCTAEventCube.hpp"
+#include "GEbounds.hpp"
+#include "GNodeArray.hpp"
+#include "GGti.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFits;
+class GFitsHDU;
+class GObservations;
+class GCTAObservation;
+class GCTAEventCube;
 
 
 /***********************************************************************//**
@@ -52,7 +59,7 @@ public:
     // Constructors and destructors
     GCTACubeExposure(void);
     GCTACubeExposure(const GCTACubeExposure& cube);
-    explicit GCTACubeExposure(const std::string& filename);
+    explicit GCTACubeExposure(const GFilename& filename);
     explicit GCTACubeExposure(const GCTAEventCube& cube);
     GCTACubeExposure(const std::string&   wcs,
                      const std::string&   coords,
@@ -84,10 +91,10 @@ public:
     double             deadc(void) const;
     void               read(const GFits& fits);
     void               write(GFits& file) const;
-    void               load(const std::string& filename);
-    void               save(const std::string& filename,
-                            const bool& clobber = false) const;
-    const std::string& filename(void) const;
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    const GFilename&   filename(void) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -101,14 +108,14 @@ protected:
     void write_attributes(GFitsHDU& hdu) const;
 
     // Members
-    mutable std::string m_filename;  //!< Filename
-    GSkyMap             m_cube;      //!< Average Exposure cube
-    GEbounds            m_ebounds;   //!< Energy bounds for the Exposure cube
-    GNodeArray          m_elogmeans; //!< Mean energy for the Exposure cube
-    GGti                m_gti;       //!< Good time interval for the Exposure cube
+    mutable GFilename m_filename;  //!< Filename
+    GSkyMap           m_cube;      //!< Average Exposure cube
+    GEbounds          m_ebounds;   //!< Energy bounds for the Exposure cube
+    GNodeArray        m_elogmeans; //!< Mean energy for the Exposure cube
+    GGti              m_gti;       //!< Good time interval for the Exposure cube
 
     // Exposure attributes
-    double              m_livetime;  //!< Livetime (sec)
+    double            m_livetime;  //!< Livetime (sec)
 
 private:
     // Response table computation cache for 1D access
@@ -227,7 +234,7 @@ double GCTACubeExposure::deadc(void) const
  * the exposure cube has been saved.
  ***************************************************************************/
 inline
-const std::string& GCTACubeExposure::filename(void) const
+const GFilename& GCTACubeExposure::filename(void) const
 {
     return (m_filename);
 }

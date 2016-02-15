@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAAeffPerfTable.i - CTA performance table effective area class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAAeffPerfTable.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -40,7 +39,7 @@ class GCTAAeffPerfTable : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeffPerfTable(void);
-    explicit GCTAAeffPerfTable(const std::string& filename);
+    explicit GCTAAeffPerfTable(const GFilename& filename);
     GCTAAeffPerfTable(const GCTAAeffPerfTable& cta);
     virtual ~GCTAAeffPerfTable(void);
 
@@ -56,8 +55,8 @@ public:
     void               clear(void);
     GCTAAeffPerfTable* clone(void) const;
     std::string        classname(void) const;
-    void               load(const std::string& filename);
-    std::string        filename(void) const;
+    void               load(const GFilename& filename);
+    GFilename          filename(void) const;
     double             max(const double& logE,
                            const double& zenith,
                            const double& azimuth,

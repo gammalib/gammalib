@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GFilename.hpp"
 #include "GException.hpp"
 #include "GCTAOnOffObservations.hpp"
 
@@ -94,7 +95,7 @@ GCTAOnOffObservations::GCTAOnOffObservations(const GCTAOnOffObservations& obs)
  * from a XML file. Please refer to the read() method for more information
  * about the structure of the XML file.
  ***************************************************************************/
-GCTAOnOffObservations::GCTAOnOffObservations(const std::string& filename)
+GCTAOnOffObservations::GCTAOnOffObservations(const GFilename& filename)
 {
     // Initialise members
     init_members();
@@ -492,13 +493,13 @@ bool GCTAOnOffObservations::contains(const std::string& instrument,
  * Loads observation from a XML file into the container. Please refer to the
  * read() method for more information about the structure of the XML file.
  ***************************************************************************/
-void GCTAOnOffObservations::load(const std::string& filename)
+void GCTAOnOffObservations::load(const GFilename& filename)
 {
     // Clear any existing observations
     clear();
 
     // Load XML document
-    GXml xml(filename);
+    GXml xml(filename.url());
 
     // Read observations from XML document
     read(xml);
@@ -516,7 +517,7 @@ void GCTAOnOffObservations::load(const std::string& filename)
  * Saves observations into a XML file. Please refer to the read() method for
  * more information about the structure of the XML file.
  ***************************************************************************/
-void GCTAOnOffObservations::save(const std::string& filename) const
+void GCTAOnOffObservations::save(const GFilename& filename) const
 {
     // Declare empty XML document
     GXml xml;
@@ -683,7 +684,7 @@ void GCTAOnOffObservations::write(GXml& xml) const
  * method for more information about the expected structure of the XML
  * file. 
  ***************************************************************************/
-void GCTAOnOffObservations::models(const std::string& filename)
+void GCTAOnOffObservations::models(const GFilename& filename)
 {
     // Load models
     m_models.load(filename);

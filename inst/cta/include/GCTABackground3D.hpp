@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GFilename.hpp"
 #include "GCTABackground.hpp"
 #include "GCTAResponseTable.hpp"
 
@@ -47,7 +48,7 @@ class GCTABackground3D : public GCTABackground {
 public:
     // Constructors and destructors
     GCTABackground3D(void);
-    explicit GCTABackground3D(const std::string& filename);
+    explicit GCTABackground3D(const GFilename& filename);
     GCTABackground3D(const GCTABackground3D& bgd);
     virtual ~GCTABackground3D(void);
 
@@ -63,8 +64,8 @@ public:
     void                       clear(void);
     GCTABackground3D*          clone(void) const;
     std::string                classname(void) const;
-    void                       load(const std::string& filename);
-    std::string                filename(void) const;
+    void                       load(const GFilename& filename);
+    GFilename                  filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;
@@ -77,8 +78,8 @@ public:
     void                       table(const GCTAResponseTable& table);
     void                       read(const GFitsTable& table);
     void                       write(GFitsBinTable& table) const;
-    void                       save(const std::string& filename,
-                                    const bool& clobber = false) const;
+    void                       save(const GFilename& filename,
+                                    const bool&      clobber = false) const;
 
 private:
     // Methods
@@ -88,7 +89,7 @@ private:
     void init_mc_cache(void) const;
 
     // Members
-    std::string       m_filename;    //!< Name of background response file
+    GFilename         m_filename;    //!< Name of background response file
     GCTAResponseTable m_background;  //!< Background response table
     double            m_mc_max_bin;  //!< Maximum spatial binsize for MC
     double            m_mc_max_logE; //!< Maximum log energy binsize for MC
@@ -134,7 +135,7 @@ std::string GCTABackground3D::classname(void) const
  * @return Returns filename from which the background was loaded.
  ***************************************************************************/
 inline
-std::string GCTABackground3D::filename(void) const
+GFilename GCTABackground3D::filename(void) const
 {
     // Return filename
     return m_filename;

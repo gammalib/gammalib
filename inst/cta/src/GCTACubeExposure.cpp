@@ -28,13 +28,15 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
+#include "GMath.hpp"
+#include "GLog.hpp"
+#include "GObservations.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponseIrf.hpp"
+#include "GCTAEventCube.hpp"
 #include "GCTAEventList.hpp"
-#include "GMath.hpp"
-#include "GTools.hpp"
-#include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                       "GCTACubeExposure::set(GCTAObservation&)"
@@ -95,7 +97,7 @@ GCTACubeExposure::GCTACubeExposure(const GCTACubeExposure& cube)
  * Construct exposure cube by loading the information from an exposure cube
  * file.
  ***************************************************************************/
-GCTACubeExposure::GCTACubeExposure(const std::string& filename)
+GCTACubeExposure::GCTACubeExposure(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -580,7 +582,7 @@ void GCTACubeExposure::write(GFits& fits) const
  *
  * Loads the exposure cube from a FITS file into the object.
  ***************************************************************************/
-void GCTACubeExposure::load(const std::string& filename)
+void GCTACubeExposure::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -603,15 +605,13 @@ void GCTACubeExposure::load(const std::string& filename)
  * @brief Save exposure cube into FITS file
  *
  * @param[in] filename Exposure cube FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
  * Save the exposure cube into a FITS file.
- *
- * @todo Implement method
  ***************************************************************************/
-void GCTACubeExposure::save(const std::string& filename, const bool& clobber) const
+void GCTACubeExposure::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create empty FITS file
+    // Create FITS file
     GFits fits;
 
     // Write exposure cube

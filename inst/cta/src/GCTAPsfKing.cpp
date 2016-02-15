@@ -30,10 +30,12 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
-#include "GException.hpp"
 #include "GMath.hpp"
+#include "GException.hpp"
+#include "GRan.hpp"
 #include "GFilename.hpp"
 #include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTAPsfKing.hpp"
 #include "GCTAException.hpp"
@@ -85,7 +87,7 @@ GCTAPsfKing::GCTAPsfKing(void) : GCTAPsf()
  *
  * Constructs point spread function from a FITS file.
  ***************************************************************************/
-GCTAPsfKing::GCTAPsfKing(const std::string& filename) : GCTAPsf()
+GCTAPsfKing::GCTAPsfKing(const GFilename& filename) : GCTAPsf()
 {
     // Initialise class members
     init_members();
@@ -379,25 +381,19 @@ void GCTAPsfKing::write(GFitsBinTable& table) const
  * If no extension name is provided, the point spread function will be loaded
  * from the "POINT SPREAD FUNCTION" extension.
  ***************************************************************************/
-void GCTAPsfKing::load(const std::string& filename)
+void GCTAPsfKing::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname);
+    GFits fits(filename);
 
     // Get PSFa table
-    const GFitsTable& table = *file.table(fname.extname("POINT SPREAD FUNCTION"));
+    const GFitsTable& table = *fits.table(filename.extname("POINT SPREAD FUNCTION"));
 
     // Read PSF from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -412,27 +408,43 @@ void GCTAPsfKing::load(const std::string& filename)
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the point spread function into a FITS file.
+ * Saves point spread function into a FITS file. If a file with the given
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The method will create a (or replace an existing)
+ * point spread function extension. The extension name can be specified as
+ * part of the @p filename, or if no extension name is given, is assumed to
+ * be "POINT SPREAD FUNCTION".
  *
- * If no extension name is provided, the point spread function will be saved
- * into the "POINT SPREAD FUNCTION" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
-void GCTAPsfKing::save(const std::string& filename, const bool& clobber) const
+void GCTAPsfKing::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
+    // Get extension name
+    std::string extname = filename.extname("POINT SPREAD FUNCTION");
+
+    // Open or create FITS file
+    GFits fits(filename, true);
+
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
     // Create binary table
     GFitsBinTable table;
-    table.extname(fname.extname("POINT SPREAD FUNCTION"));
 
-    // Write the PSF table
+    // Write the background table
     write(table);
 
-    // Create FITS file, append table, and write into the file
-    GFits fits;
+    // Set binary table extension name
+    table.extname(extname);
+
+    // Append table to FITS file
     fits.append(table);
-    fits.saveto(fname, clobber);
+
+    // Save to file
+    fits.save(clobber);
 
     // Return
     return;

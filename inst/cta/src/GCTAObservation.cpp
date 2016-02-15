@@ -62,8 +62,8 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_EBOUNDS                                "GCTAObservation::ebounds()"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
-#define G_LOAD           "GCTAObservation::load(std::string&, std::string&, "\
-                                                "std::string&, std::string&)"
+#define G_LOAD               "GCTAObservation::load(GFilename&, GFilename&, "\
+                                                    "GFilename&, GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -128,10 +128,10 @@ GCTAObservation::GCTAObservation(const std::string& instrument) : GObservation()
  * Constructs a CTA observation from a counts cube, an exposure cube, a Psf
  * cube and a background cube.
  ***************************************************************************/
-GCTAObservation::GCTAObservation(const std::string& cntcube,
-                                 const std::string& expcube,
-                                 const std::string& psfcube,
-                                 const std::string& bkgcube) : GObservation()
+GCTAObservation::GCTAObservation(const GFilename& cntcube,
+                                 const GFilename& expcube,
+                                 const GFilename& psfcube,
+                                 const GFilename& bkgcube) : GObservation()
 {
     // Initialise members
     init_members();
@@ -837,11 +837,11 @@ void GCTAObservation::write(GXmlElement& xml) const
 
     // If there is an event filename then write the event information to the
     // XML file ...
-    if (!m_eventfile.empty()) {
+    if (!m_eventfile.is_empty()) {
 
         // Write event file name
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, evttype);
-        par->attribute("file", m_eventfile);
+        par->attribute("file", m_eventfile.url());
 
     }
 
@@ -1010,7 +1010,7 @@ void GCTAObservation::write(GFits& fits, const std::string& evtname,
  *
  * Loads either an event list or a counts cube from a FITS file.
  ***************************************************************************/
-void GCTAObservation::load(const std::string& filename)
+void GCTAObservation::load(const GFilename& filename)
 {
     // Store event filename
     m_eventfile = filename;
@@ -1040,17 +1040,17 @@ void GCTAObservation::load(const std::string& filename)
  * Loads a counts map, an exposure cube, a Psf cube and a background cube
  * for stacked cube analysis.
  ***************************************************************************/
-void GCTAObservation::load(const std::string& cntcube,
-                           const std::string& expcube,
-                           const std::string& psfcube,
-                           const std::string& bkgcube) {
+void GCTAObservation::load(const GFilename& cntcube,
+                           const GFilename& expcube,
+                           const GFilename& psfcube,
+                           const GFilename& bkgcube) {
 
     // Load counts cube FITS file
     load(cntcube);
 
     // Check whether we have an event cube
     if (dynamic_cast<const GCTAEventCube*>(events()) == NULL) {
-        std::string msg = "Specified file \""+cntcube+"\" is not a CTA "
+        std::string msg = "Specified file \""+cntcube.url()+"\" is not a CTA "
                           "counts cube. Please provide a counts cube.";
         throw GException::invalid_argument(G_LOAD, msg);
     }
@@ -1096,11 +1096,8 @@ void GCTAObservation::load(const std::string& cntcube,
  * energy boundaries and the Good Time Intervals. The extension names of
  * these binary tables are "EBOUNDS" and "GTI", and cannot be modified.
  ***************************************************************************/
-void GCTAObservation::save(const std::string& filename, const bool& clobber) const
+void GCTAObservation::save(const GFilename& filename, const bool& clobber) const
 {
-    // Initialise filename
-    GFilename fname(filename);
-
     // Set default events and Good Time Intervals extension name and extract
     // a possible overwrite from the extension name argument of the filename.
     // The specific format that is implemented is [events;gti], where the
@@ -1108,8 +1105,8 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
     // after the semi-colon is the Good Time Intervals extension name.
     std::string evtname = "EVENTS";
     std::string gtiname = "GTI";
-    if (fname.has_extname()) {
-        std::vector<std::string> extnames = gammalib::split(fname.extname(), ";");
+    if (filename.has_extname()) {
+        std::vector<std::string> extnames = gammalib::split(filename.extname(), ";");
         if (extnames.size() > 0) {
             evtname = gammalib::strip_whitespace(extnames[0]);
         }
@@ -1118,14 +1115,22 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
         }
     }
 
-    // Create FITS file
-    GFits fits;
+    // Open or create FITS file
+    GFits fits(filename, true);
+
+    // Remove HDUs if they exist already
+    if (fits.contains(evtname)) {
+        fits.remove(evtname);
+    }
+    if (fits.contains(gtiname)) {
+        fits.remove(gtiname);
+    }
 
     // Write data into FITS file
     write(fits, evtname, gtiname);
 
     // Save FITS file
-    fits.saveto(fname.url(), clobber);
+    fits.save(clobber);
 
     // Return
     return;
@@ -1219,7 +1224,7 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Name")+name());
         result.append("\n"+gammalib::parformat("Identifier")+id());
         result.append("\n"+gammalib::parformat("Instrument")+instrument());
-        result.append("\n"+gammalib::parformat("Event file")+eventfile());
+        result.append("\n"+gammalib::parformat("Event file")+eventfile().url());
         result.append("\n"+gammalib::parformat("Event type")+eventtype());
         result.append("\n"+gammalib::parformat("Statistics")+statistics());
         result.append("\n"+gammalib::parformat("Ontime"));

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATAeff.cpp - Fermi-LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,13 +28,17 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATAeff.hpp"
-#include "GLATException.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
+#include "GFilename.hpp"
+#include "GEnergy.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GFitsTableFloatCol.hpp"
-#include "GException.hpp"
+#include "GLATAeff.hpp"
+#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ_AEFF                        "GLATAeff::read_aeff(GFitsTable&)"
@@ -76,7 +80,7 @@ GLATAeff::GLATAeff(void)
  * effective area information and the efficiency factor parameters are loaded
  * when available.
  ***************************************************************************/
-GLATAeff::GLATAeff(const std::string& filename)
+GLATAeff::GLATAeff(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -255,7 +259,7 @@ GLATAeff* GLATAeff::clone(void) const
  * efficiency factors, from the FITS response file. See the GLATAeff::read
  * method for details.
  ***************************************************************************/
-void GLATAeff::load(const std::string& filename)
+void GLATAeff::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -272,22 +276,22 @@ void GLATAeff::load(const std::string& filename)
  * @brief Save effective area into FITS file
  *
  * @param[in] filename FITS file.
- * @param[in] clobber Overwrite existing file?.
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
  * This method saves the effective area information, and if available, the
  * efficiency factors, into the FITS response file. See the GLATAeff::write
  * method for details.
  ***************************************************************************/
-void GLATAeff::save(const std::string& filename, const bool& clobber)
+void GLATAeff::save(const GFilename& filename, const bool& clobber)
 {
-    // Open FITS file
-    GFits fits(filename, true);
+    // Create FITS file
+    GFits fits;
 
     // Write effective area into file
     write(fits);
 
     // Close FITS file
-    fits.save(clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

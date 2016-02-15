@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATPsf.i - Fermi/LAT point spread function class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GLATPsf : public GBase {
 public:
     // Constructors and destructors
     GLATPsf(void);
-    explicit GLATPsf(const std::string& filename);
+    explicit GLATPsf(const GFilename& filename);
     GLATPsf(const GLATPsf& psf);
     virtual ~GLATPsf(void);
 
@@ -51,9 +51,9 @@ public:
     void        clear(void);
     GLATPsf*    clone(void) const;
     std::string classname(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename,
-                     const bool& clobber = false);
+    void        load(const GFilename& filename);
+    void        save(const GFilename& filename,
+                     const bool&      clobber = false);
     void        read(const GFits& file);
     void        write(GFits& file) const;
     int         size(void) const;

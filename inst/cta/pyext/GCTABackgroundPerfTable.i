@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTABackgroundPerfTable.i - CTA performance table background class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GCTABackgroundPerfTable : public GCTABackground {
 public:
     // Constructors and destructors
     GCTABackgroundPerfTable(void);
-    explicit GCTABackgroundPerfTable(const std::string& filename);
+    explicit GCTABackgroundPerfTable(const GFilename& filename);
     GCTABackgroundPerfTable(const GCTABackgroundPerfTable& bgd);
     virtual ~GCTABackgroundPerfTable(void);
 
@@ -52,8 +52,8 @@ public:
     void                       clear(void);
     GCTABackgroundPerfTable*   clone(void) const;
     std::string                classname(void) const;
-    void                       load(const std::string& filename);
-    std::string                filename(void) const;
+    void                       load(const GFilename& filename);
+    GFilename                  filename(void) const;
     GCTAInstDir                mc(const GEnergy& energy,
                                   const GTime& time,
                                   GRan& ran) const;

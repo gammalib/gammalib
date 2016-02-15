@@ -39,7 +39,7 @@ public:
     // Constructors and destructors
     GCTAOnOffObservations(void);
     GCTAOnOffObservations(const GCTAOnOffObservations& obs);
-    explicit GCTAOnOffObservations(const std::string& filename);
+    explicit GCTAOnOffObservations(const GFilename& filename);
     virtual ~GCTAOnOffObservations(void);
 
     // Methods
@@ -57,12 +57,12 @@ public:
     void                   extend(const GCTAOnOffObservations& obs);
     bool                   contains(const std::string& instrument,
                                     const std::string& id) const;
-	void                   load(const std::string& filename);
-    void                   save(const std::string& filename) const;
+	void                   load(const GFilename& filename);
+    void                   save(const GFilename& filename) const;
     void                   read(const GXml& xml);
     void                   write(GXml& xml) const;
 	void                   models(const GModels& models);
-    void                   models(const std::string& filename);
+    void                   models(const GFilename& filename);
     const GModels&         models(void) const;	
 };
 

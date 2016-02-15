@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATLtCube.cpp - Fermi/LAT livetime cube class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,8 +28,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATLtCube.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
+#include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GLATAeff.hpp"
+#include "GLATPsf.hpp"
+#include "GLATLtCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -66,7 +71,7 @@ GLATLtCube::GLATLtCube(void)
  *
  * @param[in] filename Livetime cube filename.
  ***************************************************************************/
-GLATLtCube::GLATLtCube(const std::string& filename)
+GLATLtCube::GLATLtCube(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -385,7 +390,7 @@ GLATLtCube* GLATLtCube::clone(void) const
  *       critical since they are not really needed. We just need them once
  *       we want to implement also saving.
  ***************************************************************************/
-void GLATLtCube::load(const std::string& filename)
+void GLATLtCube::load(const GFilename& filename)
 {
     // Clear object
     clear();
@@ -422,11 +427,11 @@ void GLATLtCube::load(const std::string& filename)
  * @brief Save livetime cube into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file?
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-void GLATLtCube::save(const std::string& filename, const bool& clobber) const
+void GLATLtCube::save(const GFilename& filename, const bool& clobber) const
 {
     // Return
     return;

@@ -80,7 +80,7 @@ GMWLObservation::GMWLObservation(void) : GObservation()
  *
  * Creates instance from file.
  ***************************************************************************/
-GMWLObservation::GMWLObservation(const std::string& filename) : GObservation()
+GMWLObservation::GMWLObservation(const GFilename& filename) : GObservation()
 {
     // Initialise members
     init_members();
@@ -242,7 +242,7 @@ void GMWLObservation::response(const GResponse& rsp)
  *
  *     <observation name="..." id="..." instrument="MWL">
  *       <parameter name="Instrument" value="..."/>
- *       <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *       <parameter name="Data" file="..."/>
  *     </observation>
  *
  * The extno and extname attributes of the data parameter are optional, and
@@ -285,23 +285,10 @@ void GMWLObservation::read(const GXmlElement& xml)
         else if (par->attribute("name") == "Data") {
 
             // Read filename
-            std::string filename = par->attribute("file");
-            
-            // Read (optional) extension number and name
-            std::string extno   = par->attribute("extno");
-            std::string extname = par->attribute("extname");
-            
-            // Load file (this also stores the filename, extno and
-            // extname)
-            if (!gammalib::strip_whitespace(extno).empty()) {
-                load(filename+"["+extno+"]");
-            }
-            else if (!gammalib::strip_whitespace(extname).empty()) {
-                load(filename+"["+extname+"]");
-            }
-            else {
-                load(filename);
-            }
+            GFilename filename = par->attribute("file");
+
+            // Load file
+            load(filename);
             
             // Increment parameter counter
             npar[1]++;
@@ -335,7 +322,7 @@ void GMWLObservation::read(const GXmlElement& xml)
  *
  *     <observation name="..." id="..." instrument="MWL">
  *       <parameter name="Instrument" value="..."/>
- *       <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *       <parameter name="Data" file="..."/>
  *     </observation>
  ***************************************************************************/
 void GMWLObservation::write(GXmlElement& xml) const
@@ -369,12 +356,6 @@ void GMWLObservation::write(GXmlElement& xml) const
         else if (par->attribute("name") == "Data") {
             npar[1]++;
             par->attribute("file", m_filename);
-            if (gammalib::strip_whitespace(m_extno).length() > 0) {
-                par->attribute("extno", m_extno);
-            }
-            if (gammalib::strip_whitespace(m_extname).length() > 0) {
-                par->attribute("extname", m_extname);
-            }
         }
 
     } // endfor: looped over all parameters
@@ -394,37 +375,22 @@ void GMWLObservation::write(GXmlElement& xml) const
  *
  * @param[in] filename File name.
  ***************************************************************************/
-void GMWLObservation::load(const std::string& filename)
+void GMWLObservation::load(const GFilename& filename)
 {
     // Clear observation
     clear();
-
-    // Create file name
-    GFilename fname(filename);
 
     // Allocate spectrum
     GMWLSpectrum* spec = new GMWLSpectrum;
     m_events = spec;
 
     // Load spectrum
-    if (fname.has_extno()) {
-        spec->load(filename);
-        m_extno = gammalib::str(fname.extno());
-        id(filename+"["+m_extno+"]");
-    }
-    else if (fname.has_extname()) {
-        spec->load(filename);
-        m_extname = fname.extname();
-        id(filename+"["+m_extname+"]");
-    }
-    else {
-        spec->load(filename);
-        id(filename);
-    }
+    spec->load(filename);
 
     // Set attributes
     name("Multi-wavelength observation");
-    m_filename   = fname.url();
+    id(filename);
+    m_filename   = filename;
     m_instrument = spec->instrument();
 
     // Return
@@ -487,8 +453,6 @@ void GMWLObservation::init_members(void)
     // Initialise members
     m_instrument = "MWL";
     m_filename.clear();
-    m_extno.clear();
-    m_extname.clear();
     m_response.clear();
 
     // Overwrite base class statistics
@@ -509,8 +473,6 @@ void GMWLObservation::copy_members(const GMWLObservation& obs)
     // Copy members
     m_instrument = obs.m_instrument;
     m_filename   = obs.m_filename;
-    m_extno      = obs.m_extno;
-    m_extname    = obs.m_extname;
     m_response   = obs.m_response;
 
     // Return

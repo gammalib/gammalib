@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTACubePsf.i - CTA cube analysis point spread function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -27,7 +27,6 @@
 %{
 /* __ Includes ___________________________________________________________ */
 #include "GCTACubePsf.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -48,7 +47,7 @@ public:
     // Constructors and destructors
     GCTACubePsf(void);
     GCTACubePsf(const GCTACubePsf& cube);
-    explicit GCTACubePsf(const std::string& filename);
+    explicit GCTACubePsf(const GFilename& filename);
     GCTACubePsf(const GCTAEventCube& cube,
                 const double& dmax, const int& ndbins);
     GCTACubePsf(const std::string&   wcs,
@@ -83,9 +82,10 @@ public:
     int                offset(const int& idelta, const int& iebin) const;
     void               read(const GFits& fits);
     void               write(GFits& file) const;
-    void               load(const std::string& filename);
-    void               save(const std::string& filename, const bool& clobber = false) const;
-    const std::string& filename(void) const;
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    const GFilename&   filename(void) const;
 };
 
 

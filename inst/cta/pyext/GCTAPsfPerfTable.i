@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsfPerfTable.i - CTA performance table PSF class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAPsfPerfTable.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -40,7 +39,7 @@ class GCTAPsfPerfTable : public GCTAPsf {
 public:
     // Constructors and destructors
     GCTAPsfPerfTable(void);
-    GCTAPsfPerfTable(const std::string& filename);
+    GCTAPsfPerfTable(const GFilename& filename);
     GCTAPsfPerfTable(const GCTAPsfPerfTable& psf);
     virtual ~GCTAPsfPerfTable(void);
 
@@ -57,8 +56,8 @@ public:
     void              clear(void);
     GCTAPsfPerfTable* clone(void) const;
     std::string       classname(void) const;
-    void              load(const std::string& filename);
-    std::string       filename(void) const;
+    void              load(const GFilename& filename);
+    GFilename         filename(void) const;
     double            mc(GRan&         ran,
                          const double& logE, 
                          const double& theta = 0.0, 

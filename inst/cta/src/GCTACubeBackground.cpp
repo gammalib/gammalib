@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTACubeBackground.cpp - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -86,7 +86,7 @@ GCTACubeBackground::GCTACubeBackground(void)
  *
  * Construct instance by loading the background information from a FITS file.
  ***************************************************************************/
-GCTACubeBackground::GCTACubeBackground(const std::string& filename)
+GCTACubeBackground::GCTACubeBackground(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -500,7 +500,7 @@ void GCTACubeBackground::write(GFits& fits) const
  *
  * Loads the background cube from a FITS file.
  ***************************************************************************/
-void GCTACubeBackground::load(const std::string& filename)
+void GCTACubeBackground::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -528,10 +528,10 @@ void GCTACubeBackground::load(const std::string& filename)
  *
  * Save the background cube into a FITS file.
  ***************************************************************************/
-void GCTACubeBackground::save(const std::string& filename,
-                              const bool&        clobber) const
+void GCTACubeBackground::save(const GFilename& filename,
+                              const bool&      clobber) const
 {
-    // Create empty FITS file
+    // Open or create FITS file
     GFits fits;
 
     // Write background cube

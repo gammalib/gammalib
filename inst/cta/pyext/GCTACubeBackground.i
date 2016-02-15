@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTACubeBackground.i - CTA cube background class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@ class GCTACubeBackground : public GBase {
 public:
     // Constructors and destructors
     GCTACubeBackground(void);
-    explicit GCTACubeBackground(const std::string& filename);
+    explicit GCTACubeBackground(const GFilename& filename);
     explicit GCTACubeBackground(const GCTAEventCube& cube);
     GCTACubeBackground(const GCTACubeBackground& bgd);
     virtual ~GCTACubeBackground(void);
@@ -56,13 +56,13 @@ public:
     double              integral(const double& logE) const;
     void                read(const GFits& fits);
     void                write(GFits& file) const;
-    void                load(const std::string& filename);
-    void                save(const std::string& filename,
-                             const bool& clobber = false) const;
+    void                load(const GFilename& filename);
+    void                save(const GFilename& filename,
+                             const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
     const GEbounds&     ebounds(void) const;
     const GNodeArray&   elogmeans(void) const;
-    const std::string&  filename(void) const;
+    const GFilename&    filename(void) const;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAAeffPerfTable.hpp - CTA performance table effective area class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,7 +49,7 @@ class GCTAAeffPerfTable : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeffPerfTable(void);
-    explicit GCTAAeffPerfTable(const std::string& filename);
+    explicit GCTAAeffPerfTable(const GFilename& filename);
     GCTAAeffPerfTable(const GCTAAeffPerfTable& cta);
     virtual ~GCTAAeffPerfTable(void);
 
@@ -66,8 +66,8 @@ public:
     void               clear(void);
     GCTAAeffPerfTable* clone(void) const;
     std::string        classname(void) const;
-    void               load(const std::string& filename);
-    std::string        filename(void) const;
+    void               load(const GFilename& filename);
+    GFilename          filename(void) const;
     double             max(const double& logE,
                            const double& zenith,
                            const double& azimuth,
@@ -86,7 +86,7 @@ private:
     void free_members(void);
 
     // Members
-    std::string         m_filename;  //!< Name of Aeff response file
+    GFilename           m_filename;  //!< Name of Aeff response file
     GNodeArray          m_logE;      //!< log(E) nodes for Aeff interpolation
     std::vector<double> m_aeff;      //!< Effective area in cm2
     double              m_sigma;     //!< Sigma for offset angle computation (0=none)
@@ -111,7 +111,7 @@ std::string GCTAAeffPerfTable::classname(void) const
  * @return Returns filename from which effective area was loaded.
  ***************************************************************************/
 inline
-std::string GCTAAeffPerfTable::filename(void) const
+GFilename GCTAAeffPerfTable::filename(void) const
 {
     return m_filename;
 }

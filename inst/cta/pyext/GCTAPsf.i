@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAPsf.i - CTA point spread function base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCTAPsf.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -56,8 +55,8 @@ public:
     virtual void        clear(void) = 0;
     virtual GCTAPsf*    clone(void) const = 0;
     virtual std::string classname(void) const = 0;
-    virtual void        load(const std::string& filename) = 0;
-    virtual std::string filename(void) const = 0;
+    virtual void        load(const GFilename& filename) = 0;
+    virtual GFilename   filename(void) const = 0;
     virtual double      mc(GRan&         ran,
                            const double& logE, 
                            const double& theta = 0.0, 

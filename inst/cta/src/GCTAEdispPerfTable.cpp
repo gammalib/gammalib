@@ -32,11 +32,12 @@
 #include <cmath>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                       "GCTAEdispPerfTable::load(std::string&)"
+#define G_LOAD                         "GCTAEdispPerfTable::load(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -74,7 +75,7 @@ GCTAEdispPerfTable::GCTAEdispPerfTable(void) : GCTAEdisp()
  * Construct instance by loading the energy dispersion information from
  * an ASCII performance table.
  ***************************************************************************/
-GCTAEdispPerfTable::GCTAEdispPerfTable(const std::string& filename) :
+GCTAEdispPerfTable::GCTAEdispPerfTable(const GFilename& filename) :
                     GCTAEdisp()
 {
     // Initialise class members
@@ -247,7 +248,7 @@ GCTAEdispPerfTable* GCTAEdispPerfTable::clone(void) const
  * this internally to a sigma value by multiplying the stored values by
  * 1/ln(10).
  ***************************************************************************/
-void GCTAEdispPerfTable::load(const std::string& filename)
+void GCTAEdispPerfTable::load(const GFilename& filename)
 {
 
     // Clear arrays
@@ -258,13 +259,10 @@ void GCTAEdispPerfTable::load(const std::string& filename)
     const int n = 1000;
     char  line[n];
 
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename);
-
     // Open performance table readonly
-    FILE* fptr = std::fopen(fname.c_str(), "r");
+    FILE* fptr = std::fopen(filename.url().c_str(), "r");
     if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_LOAD, fname);
+        throw GCTAException::file_open_error(G_LOAD, filename.url());
     }
 
     // Read lines
@@ -290,14 +288,9 @@ void GCTAEdispPerfTable::load(const std::string& filename)
 
         // Push elements in node array and vector
         m_logE.append(gammalib::todouble(elements[0]));
+
         // The energy resolution is stored as RMS(ln(Eest/Etrue))
         m_sigma.push_back(gammalib::todouble(elements[4]) * gammalib::inv_ln10);
-
-        // The energy resolution is stored as RMS(Eest/Etrue)
-        //m_sigma.push_back(std::log10(gammalib::todouble(elements[4])));
-
-        // The energy resolution is stored as RMS(log10(Eest/Etrue))
-        //m_sigma.push_back(gammalib::todouble(elements[4]));
 
     } // endwhile: looped over lines
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GLATEdisp.i - Fermi/LAT energy dispersion class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEdisp.i
  * @brief Fermi/LAT energy dispersion class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,7 +39,7 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    explicit GLATEdisp(const std::string filename);
+    explicit GLATEdisp(const GFilename& filename);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
@@ -50,9 +50,9 @@ public:
     void         clear(void);
     GLATEdisp*   clone(void) const;
     std::string  classname(void) const;
-    void         load(const std::string filename);
-    void         save(const std::string filename,
-                      const bool& clobber = false);
+    void         load(const GFilename& filename);
+    void         save(const GFilename& filename,
+                      const bool&      clobber = false);
     void         read(const GFits& file);
     void         write(GFits& file) const;
     int          size(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATPsf.hpp - Fermi LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,12 +31,10 @@
 #include <string>
 #include "GBase.hpp"
 #include "GLATPsfBase.hpp"
-#include "GLATInstDir.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GFits;
 
 
 /***********************************************************************//**
@@ -58,7 +56,7 @@ class GLATPsf : public GBase {
 public:
     // Constructors and destructors
     GLATPsf(void);
-    explicit GLATPsf(const std::string& filename);
+    explicit GLATPsf(const GFilename& filename);
     GLATPsf(const GLATPsf& psf);
     virtual ~GLATPsf(void);
 
@@ -71,9 +69,9 @@ public:
     void        clear(void);
     GLATPsf*    clone(void) const;
     std::string classname(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename,
-                     const bool& clobber = false);
+    void        load(const GFilename& filename);
+    void        save(const GFilename& filename,
+                     const bool&      clobber = false);
     void        read(const GFits& file);
     void        write(GFits& file) const;
     int         size(void) const;

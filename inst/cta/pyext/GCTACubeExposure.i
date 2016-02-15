@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTACubeExposure.i - CTA cube analysis exposure class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Chia-Chun Lu                                *
+ *  copyright (C) 2014-2016 by Chia-Chun Lu                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@ public:
     // Constructors and destructors
     GCTACubeExposure(void);
     GCTACubeExposure(const GCTACubeExposure& cube);
-    explicit GCTACubeExposure(const std::string& filename);
+    explicit GCTACubeExposure(const GFilename& filename);
     explicit GCTACubeExposure(const GCTAEventCube& cube);
     GCTACubeExposure(const std::string&   wcs,
                      const std::string&   coords,
@@ -61,23 +61,24 @@ public:
     double operator()(const GSkyDir& dir, const GEnergy& energy) const;
 
     // Methods
-    void              clear(void);
-    GCTACubeExposure* clone(void) const;
-    std::string       classname(void) const;
-    void              set(const GCTAObservation& obs);
-    void              fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&    cube(void) const;
-    const GEbounds&   ebounds(void) const;
-    const GGti&       gti(void) const;
-    const GNodeArray& elogmeans(void) const;
-    const double&     livetime(void) const;
-    const double&     ontime(void) const;
-    double            deadc(void) const;
-    void              read(const GFits& fits);
-    void              write(GFits& file) const;
-    void              load(const std::string& filename);
-    void              save(const std::string& filename,
-                           const bool& clobber = false) const;
+    void               clear(void);
+    GCTACubeExposure*  clone(void) const;
+    std::string        classname(void) const;
+    void               set(const GCTAObservation& obs);
+    void               fill(const GObservations& obs, GLog* log = NULL);
+    const GSkyMap&     cube(void) const;
+    const GEbounds&    ebounds(void) const;
+    const GGti&        gti(void) const;
+    const GNodeArray&  elogmeans(void) const;
+    const double&      livetime(void) const;
+    const double&      ontime(void) const;
+    double             deadc(void) const;
+    void               read(const GFits& fits);
+    void               write(GFits& file) const;
+    void               load(const GFilename& filename);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false) const;
+    const GFilename&   filename(void) const;
 };
 
 /***********************************************************************//**

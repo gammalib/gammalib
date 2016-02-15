@@ -54,6 +54,14 @@ of std::string:
 - GSkyRegions
 - GTestSuites
 - GXml
+- GCTAAeff, GCTAAeff2D, GCTAAeffArf, GCTAAeffPerfTable
+- GCTABackground, GCTABackground3D, GCTABackgroundPerfTable
+- GCTACubeBackground, GCTACubeExposure, GCTACubePsf
+- GCTAEdisp, GCTAEdisp2D, GCTAEdispPerfTable, GCTAEdispRmf
+- GCTAObservation
+- GCTAOnOffObservations
+- GCTAPointing
+- GCTAPsf, GCTAPsf2D, GCTAPsfKing, GCTAPsfPerfTable, GCTAPsfVector
 
 The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string

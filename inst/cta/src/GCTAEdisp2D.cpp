@@ -32,8 +32,10 @@
 #include <vector>
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GException.hpp"
 #include "GIntegral.hpp"
 #include "GFilename.hpp"
+#include "GRan.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -79,7 +81,7 @@ GCTAEdisp2D::GCTAEdisp2D(void) : GCTAEdisp()
  *
  * Constructs energy dispersion from a FITS file.
  ***************************************************************************/
-GCTAEdisp2D::GCTAEdisp2D(const std::string& filename) : GCTAEdisp()
+GCTAEdisp2D::GCTAEdisp2D(const GFilename& filename) : GCTAEdisp()
 {
 
     // Initialise class members
@@ -416,19 +418,13 @@ void GCTAEdisp2D::write(GFitsBinTable& table) const
  * If no extension name is provided, the energy dispersion will be loaded
  * from the "ENERGY DISPERSION" extension.
  ***************************************************************************/
-void GCTAEdisp2D::load(const std::string& filename)
+void GCTAEdisp2D::load(const GFilename& filename)
 {
-    // Create file name
-    GFilename fname(filename);
-
-    // Allocate FITS file
-    GFits file;
-
     // Open FITS file
-    file.open(fname);
+    GFits file(filename);
 
     // Get energy dispersion table
-    const GFitsTable& table = *file.table(fname.extname("ENERGY DISPERSION"));
+    const GFitsTable& table = *file.table(filename.extname("ENERGY DISPERSION"));
 
     // Read energy dispersion from table
     read(table);
@@ -450,27 +446,43 @@ void GCTAEdisp2D::load(const std::string& filename)
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing file? (default: false)
  *
- * Save the energy dispersion table into FITS file.
+ * Saves energy dispersion into a FITS file. If a file with the given
+ * @p filename does not yet exist it will be created, otherwise the method
+ * opens the existing file. The method will create a (or replace an existing)
+ * energy dispersion extension. The extension name can be specified as part
+ * of the @p filename, or if no extension name is given, is assumed to be
+ * "ENERGY DISPERSION".
  *
- * If no extension name is provided, the energy dispersion will be saved into
- * the "ENERGY DISPERSION" extension.
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
-void GCTAEdisp2D::save(const std::string& filename, const bool& clobber) const
+void GCTAEdisp2D::save(const GFilename& filename, const bool& clobber) const
 {
-    // Create file name
-    GFilename fname(filename);
+    // Get extension name
+    std::string extname = filename.extname("ENERGY DISPERSION");
+
+    // Open or create FITS file
+    GFits fits(filename, true);
+
+    // Remove extension if it exists already
+    if (fits.contains(extname)) {
+        fits.remove(extname);
+    }
 
     // Create binary table
     GFitsBinTable table;
-    table.extname(fname.extname("ENERGY DISPERSION"));
 
-    // Write the energy dispersion table
+    // Write the background table
     write(table);
 
-    // Create FITS file, append table, and write into the file
-    GFits fits;
+    // Set binary table extension name
+    table.extname(extname);
+
+    // Append table to FITS file
     fits.append(table);
-    fits.saveto(fname, clobber);
+
+    // Save to file
+    fits.save(clobber);
 
     // Return
     return;

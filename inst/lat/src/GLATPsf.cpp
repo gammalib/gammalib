@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATPsf.cpp - Fermi-LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,13 +28,15 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
+#include "GFilename.hpp"
+#include "GFits.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableFloatCol.hpp"
 #include "GLATPsf.hpp"
 #include "GLATPsfV1.hpp"
 #include "GLATPsfV3.hpp"
 #include "GLATException.hpp"
-#include "GTools.hpp"
-#include "GFitsBinTable.hpp"
-#include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                        "GLATPsf::read(GFits&)"
@@ -75,7 +77,7 @@ GLATPsf::GLATPsf(void)
  *
  * Construct instance by loading the point spread function from FITS file.
  ***************************************************************************/
-GLATPsf::GLATPsf(const std::string& filename)
+GLATPsf::GLATPsf(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -220,7 +222,7 @@ GLATPsf* GLATPsf::clone(void) const
  *
  * Loads Fermi/LAT point spread function from FITS file.
  ***************************************************************************/
-void GLATPsf::load(const std::string& filename)
+void GLATPsf::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -237,20 +239,20 @@ void GLATPsf::load(const std::string& filename)
  * @brief Save point spread function into FITS file
  *
  * @param[in] filename FITS file.
- * @param[in] clobber Overwrite existing file?
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
  * Saves Fermi/LAT point spread function into FITS file.
  ***************************************************************************/
-void GLATPsf::save(const std::string& filename, const bool& clobber)
+void GLATPsf::save(const GFilename& filename, const bool& clobber)
 {
-    // Open FITS file
-    GFits fits(filename, true);
+    // Create FITS file
+    GFits fits;
 
     // Write point spread function into file
     write(fits);
 
     // Close FITS file
-    fits.save(clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAOnOffObservations.hpp - CTA on-off observation container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Pierrick Martin                             *
+ *  copyright (C) 2013-2016 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,9 @@
 #include "GCTAOnOffObservation.hpp"
 #include "GModels.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+
 
 /***********************************************************************//**
  * @class GCTAOnOffObservations
@@ -49,7 +52,7 @@ public:
     // Constructors and destructors
     GCTAOnOffObservations(void);
     GCTAOnOffObservations(const GCTAOnOffObservations& obs);
-    explicit GCTAOnOffObservations(const std::string& filename);
+    explicit GCTAOnOffObservations(const GFilename& filename);
     virtual ~GCTAOnOffObservations(void);
 
     // Operators
@@ -73,12 +76,12 @@ public:
     void                        extend(const GCTAOnOffObservations& obs);
     bool                        contains(const std::string& instrument,
                                          const std::string& id) const;
-	void                        load(const std::string& filename);
-    void                        save(const std::string& filename) const;
+	void                        load(const GFilename& filename);
+    void                        save(const GFilename& filename) const;
     void                        read(const GXml& xml);
     void                        write(GXml& xml) const;
 	void                        models(const GModels& models);
-    void                        models(const std::string& filename);
+    void                        models(const GFilename& filename);
     const GModels&              models(void) const;	
     std::string                 print(const GChatter& chatter = NORMAL) const;	
     

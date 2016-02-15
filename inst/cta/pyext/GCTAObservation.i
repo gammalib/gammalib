@@ -39,10 +39,10 @@ public:
     // Constructors and destructors
     GCTAObservation(void);
     explicit GCTAObservation(const std::string& instrument);
-    GCTAObservation(const std::string& cntcube,
-                    const std::string& expcube,
-                    const std::string& psfcube,
-                    const std::string& bkgcube);
+    GCTAObservation(const GFilename& cntcube,
+                    const GFilename& expcube,
+                    const GFilename& psfcube,
+                    const GFilename& bkgcube);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -66,15 +66,15 @@ public:
     void                write(GFits& fits,
                               const std::string& evtname = "EVENTS",
                               const std::string& gtiname = "GTI") const;
-    void                load(const std::string& filename);
-    void                load(const std::string& cntcube,
-                             const std::string& expcube,
-                             const std::string& psfcube,
-                             const std::string& bkgcube);
-    void                save(const std::string& filename,
-                             const bool& clobber = false) const;
+    void                load(const GFilename& filename);
+    void                load(const GFilename& cntcube,
+                             const GFilename& expcube,
+                             const GFilename& psfcube,
+                             const GFilename& bkgcube);
+    void                save(const GFilename& filename,
+                             const bool&      clobber = false) const;
     void                response(const std::string& rspname,
-                                 const GCaldb& caldb);
+                                 const GCaldb&      caldb);
     void                response(const GCTACubeExposure& expcube,
                                  const GCTACubePsf&      psfcube,
                                  const GCTACubeBackground& bkgcube);
@@ -94,8 +94,8 @@ public:
     void                ontime(const double& ontime);
     void                livetime(const double& livetime);
     void                deadc(const double& deadc);
-    void                eventfile(const std::string& filename);
-    const std::string&  eventfile(void) const;
+    void                eventfile(const GFilename& filename);
+    const GFilename&    eventfile(void) const;
     std::string         eventtype(void) const;
     void                dispose_events(void);
     const double&       lo_user_thres(void) const;

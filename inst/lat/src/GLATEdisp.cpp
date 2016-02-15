@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEdisp.cpp - Fermi-LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,14 +28,17 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GLATEdisp.hpp"
-#include "GLATException.hpp"
 #include "GTools.hpp"
+#include "GFilename.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableFloatCol.hpp"
+#include "GLATEdisp.hpp"
+#include "GLATException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                           "GLATEdisp::read(const GFits& file)"
+#define G_READ                                      "GLATEdisp::read(GFits&)"
 #define G_READ_EDISP                     "GLATEdisp::read_edisp(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -74,7 +77,7 @@ GLATEdisp::GLATEdisp(void)
  * Construct instance by loading the energy dispersion information from FITS
  * file.
  ***************************************************************************/
-GLATEdisp::GLATEdisp(const std::string& filename)
+GLATEdisp::GLATEdisp(const GFilename& filename)
 {
     // Initialise class members
     init_members();
@@ -191,7 +194,7 @@ GLATEdisp* GLATEdisp::clone(void) const
  *
  * @param[in] filename FITS file.
  ***************************************************************************/
-void GLATEdisp::load(const std::string& filename)
+void GLATEdisp::load(const GFilename& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -208,18 +211,18 @@ void GLATEdisp::load(const std::string& filename)
  * @brief Save energy dispersion into FITS file
  *
  * @param[in] filename FITS file.
- * @param[in] clobber Overwrite existing file?.
+ * @param[in] clobber Overwrite existing file? (default: false)
  ***************************************************************************/
-void GLATEdisp::save(const std::string& filename, const bool& clobber)
+void GLATEdisp::save(const GFilename& filename, const bool& clobber)
 {
-    // Open FITS file
-    GFits fits(filename, true);
+    // Create FITS file
+    GFits fits;
 
     // Write energy dispersion into file
     write(fits);
 
     // Close FITS file
-    fits.save(clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

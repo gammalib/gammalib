@@ -39,7 +39,7 @@ class GLATAeff : public GBase {
 public:
     // Constructors and destructors
     GLATAeff(void);
-    explicit GLATAeff(const std::string& filename);
+    explicit GLATAeff(const GFilename& filename);
     GLATAeff(const GLATAeff& aeff);
     virtual ~GLATAeff(void);
 
@@ -52,9 +52,9 @@ public:
     void         clear(void);
     GLATAeff*    clone(void) const;
     std::string  classname(void) const;
-    void         load(const std::string filename);
-    void         save(const std::string filename,
-                      const bool& clobber = false);
+    void         load(const GFilename& filename);
+    void         save(const GFilename& filename,
+                      const bool&      clobber = false);
     void         read(const GFits& file);
     void         write(GFits& file) const;
     int          size(void) const;

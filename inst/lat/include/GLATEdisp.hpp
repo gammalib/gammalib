@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,8 +32,11 @@
 #include <vector>
 #include "GBase.hpp"
 #include "GLATResponseTable.hpp"
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GFits;
+class GFitsTable;
 
 
 /***********************************************************************//**
@@ -48,7 +51,7 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    explicit GLATEdisp(const std::string& filename);
+    explicit GLATEdisp(const GFilename& filename);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
@@ -62,9 +65,9 @@ public:
     void         clear(void);
     GLATEdisp*   clone(void) const;
     std::string  classname(void) const;
-    void         load(const std::string& filename);
-    void         save(const std::string& filename,
-                      const bool& clobber = false);
+    void         load(const GFilename& filename);
+    void         save(const GFilename& filename,
+                      const bool&      clobber = false);
     void         read(const GFits& file);
     void         write(GFits& file) const;
     int          size(void) const;

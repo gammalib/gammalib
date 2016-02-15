@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAPointing.hpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,17 +29,18 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GSkyDir.hpp"
-#include "GTime.hpp"
-#include "GTimeReference.hpp"
 #include "GMatrix.hpp"
-#include "GHorizDir.hpp"
 #include "GNodeArray.hpp"
-#include "GFitsTable.hpp"
-#include "GCTAInstDir.hpp"
+#include "GSkyDir.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFilename;
+class GTime;
+class GTimeReference;
+class GHorizDir;
+class GFitsTable;
 class GXmlElement;
+class GCTAInstDir;
 
 
 /***********************************************************************//**
@@ -61,7 +62,7 @@ public:
     GCTAPointing(void);
     explicit GCTAPointing(const GSkyDir& dir);
     explicit GCTAPointing(const GXmlElement& xml);
-    explicit GCTAPointing(const std::string& filename);
+    explicit GCTAPointing(const GFilename& filename);
     GCTAPointing(const GCTAPointing& pnt);
     virtual ~GCTAPointing(void);
 
@@ -82,7 +83,7 @@ public:
     void           zenith(const double& zenith);  
     void           azimuth(const double& azimuth); 
     GHorizDir      dir_horiz(const GTime& time) const;
-    void           load(const std::string& filename);
+    void           load(const GFilename& filename);
     void           read(const GFitsTable& table);
     void           read(const GXmlElement& xml);
     void           write(GXmlElement& xml) const;
