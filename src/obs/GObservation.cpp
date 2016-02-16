@@ -28,16 +28,22 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GTools.hpp"
 #include "GException.hpp"
-#include "GObservation.hpp"
-#include "GModelSky.hpp"
-#include "GModelData.hpp"
 #include "GIntegral.hpp"
 #include "GDerivative.hpp"
-#include "GTools.hpp"
+#include "GVector.hpp"
+#include "GMatrixSparse.hpp"
+#include "GObservation.hpp"
+#include "GResponse.hpp"
 #include "GEventCube.hpp"
 #include "GEventList.hpp"
 #include "GEventBin.hpp"
+#include "GModel.hpp"
+#include "GModels.hpp"
+#include "GModelPar.hpp"
+#include "GModelSky.hpp"
+#include "GModelData.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LIKELIHOOD           "GObservation::likelihood(GModels&, GVector*,"\

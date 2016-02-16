@@ -125,6 +125,11 @@ A non-const GObservation::events() method has been added to allow for
 the manipulation of events within an observation without the need to
 create a local copy.
 
+The argument of GObservation::deadc(GTime) now defaults to GTime() so
+that no argument is needed when calling the method. This reflects the
+fact that the deadtime correction is often computed as an average value
+over the observation, and does in fact not depend on time (#1670).
+
 
 11. Optimization module
 -----------------------

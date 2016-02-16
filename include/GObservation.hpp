@@ -31,13 +31,17 @@
 #include <string>
 #include "GBase.hpp"
 #include "GEvents.hpp"
-#include "GResponse.hpp"
-#include "GModels.hpp"
 #include "GTime.hpp"
-#include "GEnergy.hpp"
 #include "GFunction.hpp"
-#include "GVector.hpp"
-#include "GMatrixSparse.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GVector;
+class GMatrixSparse;
+class GModel;
+class GModels;
+class GModelPar;
+class GResponse;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -82,7 +86,7 @@ public:
     virtual std::string      instrument(void) const = 0;
     virtual double           ontime(void) const = 0;
     virtual double           livetime(void) const = 0;
-    virtual double           deadc(const GTime& time) const = 0;
+    virtual double           deadc(const GTime& time = GTime()) const = 0;
     virtual void             read(const GXmlElement& xml) = 0;
     virtual void             write(GXmlElement& xml) const = 0;
     virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;

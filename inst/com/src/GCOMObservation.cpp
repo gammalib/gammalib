@@ -30,9 +30,10 @@
 #endif
 #include <typeinfo> 
 #include "GObservationRegistry.hpp"
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
-#include "GTools.hpp"
+#include "GCaldb.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMSupport.hpp"
@@ -45,8 +46,8 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 #define G_RESPONSE                    "GCOMObservation::response(GResponse&)"
 #define G_READ                          "GCOMObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCOMObservation::write(GXmlElement&)"
-#define G_LOAD_DRB                  "GCOMObservation::load_drb(std::string&)"
-#define G_LOAD_DRG                  "GCOMObservation::load_drg(std::string&)"
+#define G_LOAD_DRB                    "GCOMObservation::load_drb(GFilename&)"
+#define G_LOAD_DRG                    "GCOMObservation::load_drg(GFilename&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -93,10 +94,10 @@ GCOMObservation::GCOMObservation(void) : GObservation()
  *
  * Each of the four files is mandatory.
  ***************************************************************************/
-GCOMObservation::GCOMObservation(const std::string& drename,
-                                 const std::string& drbname,
-                                 const std::string& drgname,
-                                 const std::string& drxname) : GObservation()
+GCOMObservation::GCOMObservation(const GFilename& drename,
+                                 const GFilename& drbname,
+                                 const GFilename& drgname,
+                                 const GFilename& drxname) : GObservation()
 {
     // Initialise members
     init_members();
@@ -374,10 +375,10 @@ void GCOMObservation::write(GXmlElement& xml) const
  * factors from DRG file and the exposure map from the DRX file. All files
  * are mandatory.
  ***************************************************************************/
-void GCOMObservation::load(const std::string& drename,
-                           const std::string& drbname,
-                           const std::string& drgname,
-                           const std::string& drxname)
+void GCOMObservation::load(const GFilename& drename,
+                           const GFilename& drbname,
+                           const GFilename& drgname,
+                           const GFilename& drxname)
 {
     // Load DRE
     load_dre(drename);
@@ -529,8 +530,10 @@ void GCOMObservation::free_members(void)
  * @brief Load event cube data from DRE file
  *
  * @param[in] drename DRE filename.
+ *
+ * Loads the event cube from a DRE file.
  ***************************************************************************/
-void GCOMObservation::load_dre(const std::string& drename)
+void GCOMObservation::load_dre(const GFilename& drename)
 {
     // Delete any existing event container (do not call clear() as we do not
     // want to delete the response function)
@@ -541,17 +544,17 @@ void GCOMObservation::load_dre(const std::string& drename)
     m_events = new GCOMEventCube;
 
     // Open FITS file
-    GFits file(drename);
+    GFits fits(drename);
 
     // Read event cube
-    m_events->read(file);
+    m_events->read(fits);
 
     // Read observation attributes from primary extension
-    GFitsHDU* hdu = file[0];
+    GFitsHDU* hdu = fits[0];
     read_attributes(hdu);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store event filename
     m_drename = drename;
@@ -572,13 +575,13 @@ void GCOMObservation::load_dre(const std::string& drename)
  * Load the background model from the primary image of the specified FITS
  * file.
  ***************************************************************************/
-void GCOMObservation::load_drb(const std::string& drbname)
+void GCOMObservation::load_drb(const GFilename& drbname)
 {
     // Open FITS file
-    GFits file(drbname);
+    GFits fits(drbname);
 
     // Get image
-    const GFitsImage& image = *file.image("Primary");
+    const GFitsImage& image = *fits.image("Primary");
 
     // Load background model as sky map
     m_drb.read(image);
@@ -587,7 +590,7 @@ void GCOMObservation::load_drb(const std::string& drbname)
     com_wcs_mer2car(m_drb);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Check map dimensions
     if (!check_map(m_drb)) {
@@ -615,13 +618,13 @@ void GCOMObservation::load_drb(const std::string& drbname)
  * Load the geometry factors from the primary image of the specified FITS
  * file.
  ***************************************************************************/
-void GCOMObservation::load_drg(const std::string& drgname)
+void GCOMObservation::load_drg(const GFilename& drgname)
 {
     // Open FITS file
-    GFits file(drgname);
+    GFits fits(drgname);
 
     // Get image
-    const GFitsImage& image = *file.image("Primary");
+    const GFitsImage& image = *fits.image("Primary");
 
     // Load geometry factors as sky map
     m_drg.read(image);
@@ -630,7 +633,7 @@ void GCOMObservation::load_drg(const std::string& drgname)
     com_wcs_mer2car(m_drg);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Check map dimensions
     if (!check_map(m_drg)) {
@@ -654,13 +657,13 @@ void GCOMObservation::load_drg(const std::string& drgname)
  *
  * Load the exposure map from the primary image of the specified FITS file.
  ***************************************************************************/
-void GCOMObservation::load_drx(const std::string& drxname)
+void GCOMObservation::load_drx(const GFilename& drxname)
 {
     // Open FITS file
-    GFits file(drxname);
+    GFits fits(drxname);
 
     // Get HDU
-    const GFitsImage& image = *file.image("Primary");
+    const GFitsImage& image = *fits.image("Primary");
 
     // Load exposure map as sky map
     m_drx.read(image);
@@ -669,7 +672,7 @@ void GCOMObservation::load_drx(const std::string& drxname)
     com_wcs_mer2car(m_drx);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store DRX filename
     m_drxname = drxname;

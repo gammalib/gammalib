@@ -28,12 +28,15 @@
 #define GMWLOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include "GTime.hpp"
 #include "GFilename.hpp"
 #include "GObservation.hpp"
 #include "GMWLResponse.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GTime;
+class GResponse;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -66,7 +69,7 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;

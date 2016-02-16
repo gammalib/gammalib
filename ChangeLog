@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Use default GTime in GObservation::deadc() method (#1670)
         The GApplicationPar::filename() methods now take and return GFilename (#1671)
         Add GFilename methods and remove equivalents from GTools (#1666)
         Use column names for CTA response table access (#1656)

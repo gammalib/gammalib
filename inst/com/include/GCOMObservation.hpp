@@ -28,12 +28,20 @@
 #define GCOMOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GObservation.hpp"
 #include "GTime.hpp"
-#include "GModel.hpp"
+#include "GFilename.hpp"
+#include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
 #include "GCOMResponse.hpp"
-#include "GCaldb.hpp"
+//#include "GCaldb.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GCaldb;
+class GResponse;
+class GXmlElement;
+class GFitsHDU;
 
 
 /***********************************************************************//**
@@ -52,10 +60,10 @@ class GCOMObservation : public GObservation {
 public:
     // Constructors and destructors
     GCOMObservation(void);
-    GCOMObservation(const std::string& drename,
-                    const std::string& drbname,
-                    const std::string& drgname,
-                    const std::string& drxname);
+    GCOMObservation(const GFilename& drename,
+                    const GFilename& drbname,
+                    const GFilename& drgname,
+                    const GFilename& drxname);
     GCOMObservation(const GCOMObservation& obs);
     virtual ~GCOMObservation(void);
 
@@ -71,16 +79,16 @@ public:
     virtual std::string         instrument(void) const;
     virtual double              ontime(void) const;
     virtual double              livetime(void) const;
-    virtual double              deadc(const GTime& time) const;
+    virtual double              deadc(const GTime& time = GTime()) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void           load(const std::string& drename,
-                        const std::string& drbname,
-                        const std::string& drgname,
-                        const std::string& drxname);
+    void           load(const GFilename& drename,
+                        const GFilename& drbname,
+                        const GFilename& drgname,
+                        const GFilename& drxname);
     void           response(const std::string& rspname, const GCaldb& caldb);
     void           obs_id(const double& id);
     void           ontime(const double& ontime);
@@ -98,20 +106,20 @@ protected:
     void init_members(void);
     void copy_members(const GCOMObservation& obs);
     void free_members(void);
-    void load_dre(const std::string& drename);
-    void load_drb(const std::string& drbname);
-    void load_drg(const std::string& drgname);
-    void load_drx(const std::string& drxname);
+    void load_dre(const GFilename& drename);
+    void load_drb(const GFilename& drbname);
+    void load_drg(const GFilename& drgname);
+    void load_drx(const GFilename& drxname);
     bool check_map(const GSkyMap& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
 
     // Protected members
     std::string  m_instrument;  //!< Instrument name
-    std::string  m_drename;     //!< DRE filename
-    std::string  m_drbname;     //!< DRB filename
-    std::string  m_drgname;     //!< DRG filename
-    std::string  m_drxname;     //!< DRX filename
+    GFilename    m_drename;     //!< DRE filename
+    GFilename    m_drbname;     //!< DRB filename
+    GFilename    m_drgname;     //!< DRG filename
+    GFilename    m_drxname;     //!< DRX filename
     GSkyMap      m_drb;         //!< Background model
     GSkyMap      m_drg;         //!< Geometry factors
     GSkyMap      m_drx;         //!< Exposure map
