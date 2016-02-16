@@ -38,6 +38,7 @@
 #endif
 #endif
 #include <sys/stat.h>             // for stat structure and S_ISREG
+#include <cstdio>                 // for std::remove()
 #include "GFilename.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
