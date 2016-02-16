@@ -111,7 +111,10 @@ None
 
 8. Model module
 ---------------
-None
+The GModelSpatialDiffuseCube::set_mc_cone() method now recomputes only
+the Monte Carlo acceptance cone in case that the cone centre or radius
+have changed since the last computation. This speeds up the computations
+(#1673).
 
 
 9. Numerics module

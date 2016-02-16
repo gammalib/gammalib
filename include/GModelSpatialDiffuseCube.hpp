@@ -130,6 +130,8 @@ protected:
     GEbounds   m_ebounds;     //!< Energy bounds of the maps
 
     // Monte Carlo cache
+    mutable GSkyDir             m_mc_centre;   //!< Centre of MC cone
+    mutable double              m_mc_radius;   //!< Radius of MC cone
     mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
     mutable std::vector<double> m_mc_max;      //!< Maximum values for MC
     mutable GModelSpectralNodes m_mc_spectrum; //!< Map cube spectrum

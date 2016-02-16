@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Optimise GModelSpatialDiffuseCube::set_mc_cone() method (#1673)
         Use default GTime in GObservation::deadc() method (#1670)
         The GApplicationPar::filename() methods now take and return GFilename (#1671)
         Add GFilename methods and remove equivalents from GTools (#1666)

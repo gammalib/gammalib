@@ -782,186 +782,198 @@ GEnergies GModelSpatialDiffuseCube::energies(void)
 void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                                            const double&  radius) const
 {
-    // Initialise cache
-    m_mc_cache.clear();
-    m_mc_max.clear();
-    m_mc_spectrum.clear();
+    // Continue only if the simulation cone has changed
+    if ((centre != m_mc_centre) || (radius != m_mc_radius)) {
 
-    // Fetch cube
-    fetch_cube();
+        // Save simulation cone definition
+        m_mc_centre = centre;
+        m_mc_radius = radius;
 
-    // Determine number of cube pixels and maps
-    int npix  = pixels();
-    int nmaps = maps();
+        // Initialise cache
+        m_mc_cache.clear();
+        m_mc_max.clear();
+        m_mc_spectrum.clear();
 
-    // Continue only if there are pixels and maps
-    if (npix > 0 && nmaps > 0) {
+        // Fetch cube
+        fetch_cube();
 
-        // Reserve space for all pixels in cache
-        m_mc_cache.reserve((npix+1)*nmaps);
-        m_mc_max.reserve((npix+1)*nmaps);
-        m_mc_spectrum.reserve(nmaps);
+        // Determine number of cube pixels and maps
+        int npix  = pixels();
+        int nmaps = maps();
 
-        // Loop over all maps
-        for (int i = 0; i < nmaps; ++i) {
+        // Continue only if there are pixels and maps
+        if (npix > 0 && nmaps > 0) {
 
-            // Compute pixel offset
-            int offset = i * (npix+1);
+            // Reserve space for all pixels in cache
+            m_mc_cache.reserve((npix+1)*nmaps);
+            m_mc_max.reserve((npix+1)*nmaps);
+            m_mc_spectrum.reserve(nmaps);
 
-            // Set first cache value to 0
-            m_mc_cache.push_back(0.0);
+            // Loop over all maps
+            for (int i = 0; i < nmaps; ++i) {
 
-            // Initialise cache with cumulative pixel fluxes and compute
-            // total flux in skymap for normalization. Negative pixels are
-            // excluded from the cumulative map.
-            double sum     = 0.0;
-            double sum_map = 0.0;
-            for (int k = 0; k < npix; ++k) {
+                // Compute pixel offset
+                int offset = i * (npix+1);
 
-                // Derive effective pixel radius from half opening angle
-                // that corresponds to the pixel's solid angle. For security,
-                // the radius is enhanced by 50%.
-                /*
-                double pixel_radius =
-                       std::acos(1.0 - m_cube.solidangle(k)/gammalib::twopi) *
-                       gammalib::rad2deg * 1.5;
-                */
+                // Set first cache value to 0
+                m_mc_cache.push_back(0.0);
 
-                // Add up flux with simulation cone radius + effective pixel
-                // radius. The effective pixel radius is added to make sure
-                // that all pixels that overlap with the simulation cone are
-                // taken into account. There is no problem of having even
-                // pixels outside the simulation cone taken into account as
-                // long as the mc() method has an explicit test of whether a
-                // simulated event is contained in the simulation cone.
-                double flux = m_cube.flux(k,i);
-                if (flux > 0.0) {
-                    //double distance = centre.dist_deg(m_cube.pix2dir(k));
-                    //if (distance <= radius+pixel_radius) {
-                        sum += flux;
-                    //}
-                    sum_map += flux; // sum up total flux in map
-                }
-
-                // Push back flux
-                m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
-            }
-
-            // Normalize cumulative pixel fluxes so that the values in the
-            // cache run from 0 to 1
-            if (sum > 0.0) {
-                for (int k = 0; k < npix; ++k) {
-                    m_mc_cache[k+offset] /= sum;
-                }
-            }
-
-            // Make sure that last pixel in the cache is >1
-            m_mc_cache[npix+offset] = 1.0001;
-
-            // Store flux as spectral node
-            if (m_logE.size() == nmaps) {
-
-                // Compute mean energy
-                GEnergy energy;
-                energy.log10MeV(m_logE[i]);
-
-                // Only append node if flux > 0
-                if (sum > 0.0) {
-                    m_mc_spectrum.append(energy, sum);
-                }
-
-            }
-
-            // Do we have a HealPix map?
-            if (m_cube.projection()->code() == "HPX") {
-
-                // Get pointer on HealPix projection
-                const GHealpix* healpix =
-                    static_cast<const GHealpix*>(m_cube.projection());
-
-                // Compute maximum value that may occur from bilinear
-                // interpolation within this pixel and push this value on the
-                // stack. We do this by checking values of all neighbours.
+                // Initialise cache with cumulative pixel fluxes and compute
+                // total flux in skymap for normalization. Negative pixels
+                // are excluded from the cumulative map.
+                double sum     = 0.0;
+                double sum_map = 0.0;
                 for (int k = 0; k < npix; ++k) {
 
-                    // Get neighbours
-                    std::vector<int> neighbours = healpix->neighbours(k);
+                    // Derive effective pixel radius from half opening angle
+                    // that corresponds to the pixel's solid angle. For
+                    // security, the radius is enhanced by 50%.
+                    /*
+                    double pixel_radius =
+                        std::acos(1.0 - m_cube.solidangle(k)/gammalib::twopi) *
+                        gammalib::rad2deg * 1.5;
+                    */
 
-                    // Loop over neighbours
-                    double max = m_cube(k,i);
-                    for (int j = 0; j < neighbours.size(); ++j) {
-                        if (neighbours[j] != -1) {
-                            double value = m_cube(neighbours[j],i);
-                            if (value > max) {
-                                max = value;
-                            }
-                        }
+                    // Add up flux with simulation cone radius + effective
+                    // pixel radius. The effective pixel radius is added to
+                    // make sure that all pixels that overlap with the
+                    // simulation cone are taken into account. There is no
+                    // problem of having even pixels outside the simulation
+                    // cone taken into account as long as the mc() method has
+                    // an explicit test of whether a simulated event is
+                    // contained in the simulation cone.
+                    double flux = m_cube.flux(k,i);
+                    if (flux > 0.0) {
+                        //double distance = centre.dist_deg(m_cube.pix2dir(k));
+                        //if (distance <= radius+pixel_radius) {
+                            sum += flux;
+                        //}
+                        sum_map += flux; // sum up total flux in map
                     }
 
-                    // Store maximum
-                    m_mc_max[k+offset] = max;
+                    // Push back flux
+                    m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
+                }
 
-                } // endfor: looped over pixels
+                // Normalize cumulative pixel fluxes so that the values in
+                // the cache run from 0 to 1
+                if (sum > 0.0) {
+                    for (int k = 0; k < npix; ++k) {
+                        m_mc_cache[k+offset] /= sum;
+                    }
+                }
 
-            } // endif: Healpix projection
+                // Make sure that last pixel in the cache is >1
+                m_mc_cache[npix+offset] = 1.0001;
 
-            // ... no, then we have a WCS map
-            else {
+                // Store flux as spectral node
+                if (m_logE.size() == nmaps) {
 
-                // Compute maximum value that may occur from bilinear
-                // interpolation within this pixel and push this value on the
-                // stack. We do this by checking the map values at the corners
-                // and the centre of each edge.
-                for (int k = 0; k < npix; ++k) {
-                    GSkyPixel pixel = m_cube.inx2pix(k);
-                    double    max   = m_cube(pixel,i);
-                    for (int ix = -1; ix < 2; ++ix) {
-                        for (int iy = -1; iy < 2; ++iy) {
-                            if (ix != 0 && iy != 0) {
-                                GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
-                                if (m_cube.contains(edge)) {
-                                    GSkyDir dir  = m_cube.pix2dir(edge);
-                                    double value = m_cube(dir,i);
-                                    if (value > max) {
-                                        max = value;
+                    // Compute mean energy
+                    GEnergy energy;
+                    energy.log10MeV(m_logE[i]);
+
+                    // Only append node if flux > 0
+                    if (sum > 0.0) {
+                        m_mc_spectrum.append(energy, sum);
+                    }
+
+                }
+
+                // Do we have a HealPix map?
+                if (m_cube.projection()->code() == "HPX") {
+
+                    // Get pointer on HealPix projection
+                    const GHealpix* healpix =
+                        static_cast<const GHealpix*>(m_cube.projection());
+
+                    // Compute maximum value that may occur from bilinear
+                    // interpolation within this pixel and push this value
+                    // on the stack. We do this by checking values of all
+                    // neighbours.
+                    for (int k = 0; k < npix; ++k) {
+
+                        // Get neighbours
+                        std::vector<int> neighbours = healpix->neighbours(k);
+
+                        // Loop over neighbours
+                        double max = m_cube(k,i);
+                        for (int j = 0; j < neighbours.size(); ++j) {
+                            if (neighbours[j] != -1) {
+                                double value = m_cube(neighbours[j],i);
+                                if (value > max) {
+                                    max = value;
+                                }
+                            }
+                        }
+
+                        // Store maximum
+                        m_mc_max[k+offset] = max;
+
+                    } // endfor: looped over pixels
+
+                } // endif: Healpix projection
+
+                // ... no, then we have a WCS map
+                else {
+
+                    // Compute maximum value that may occur from bilinear
+                    // interpolation within this pixel and push this value
+                    // on the stack. We do this by checking the map values
+                    // at the corners and the centre of each edge.
+                    for (int k = 0; k < npix; ++k) {
+                        GSkyPixel pixel = m_cube.inx2pix(k);
+                        double    max   = m_cube(pixel,i);
+                        for (int ix = -1; ix < 2; ++ix) {
+                            for (int iy = -1; iy < 2; ++iy) {
+                                if (ix != 0 && iy != 0) {
+                                    GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
+                                    if (m_cube.contains(edge)) {
+                                        GSkyDir dir  = m_cube.pix2dir(edge);
+                                        double value = m_cube(dir,i);
+                                        if (value > max) {
+                                            max = value;
+                                        }
                                     }
                                 }
                             }
                         }
+                        m_mc_max[k+offset] = max;
                     }
-                    m_mc_max[k+offset] = max;
-                }
 
-            } // endelse: computed maximum pixel value
+                } // endelse: computed maximum pixel value
 
-            // Make sure that last pixel in the maximum cache has a well defined value
-            m_mc_max[npix+offset] = 0.0;
+                // Make sure that last pixel in the maximum cache has a
+                // well defined value
+                m_mc_max[npix+offset] = 0.0;
 
-        } // endfor: looped over all maps
+            } // endfor: looped over all maps
 
-        // Dump cache values for debugging
-        #if defined(G_DEBUG_CACHE)
-        std::cout << "GModelSpatialDiffuseCube::set_mc_cone: cache";
-        std::cout << std::endl;
-        for (int i = 0; i < m_mc_cache.size(); ++i) {
-            std::cout << "i=" << i;
-            std::cout << " cache=" << m_mc_cache[i];
-            std::cout << " max=" << m_mc_max[i] << std::endl;
-        }
-        #endif
+            // Dump cache values for debugging
+            #if defined(G_DEBUG_CACHE)
+            std::cout << "GModelSpatialDiffuseCube::set_mc_cone: cache";
+            std::cout << std::endl;
+            for (int i = 0; i < m_mc_cache.size(); ++i) {
+                std::cout << "i=" << i;
+                std::cout << " cache=" << m_mc_cache[i];
+                std::cout << " max=" << m_mc_max[i] << std::endl;
+            }
+            #endif
 
-        // Dump spectrum for debugging
-        #if defined(G_DEBUG_CACHE)
-        std::cout << "GModelSpatialDiffuseCube::set_mc_cone: spectrum";
-        std::cout << std::endl;
-        for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
-            std::cout << i;
-            std::cout << " " << m_mc_spectrum.energy(i);
-            std::cout << " " << m_mc_spectrum.intensity(i) << std::endl;
-        }
-        #endif
+            // Dump spectrum for debugging
+            #if defined(G_DEBUG_CACHE)
+            std::cout << "GModelSpatialDiffuseCube::set_mc_cone: spectrum";
+            std::cout << std::endl;
+            for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
+                std::cout << i;
+                std::cout << " " << m_mc_spectrum.energy(i);
+                std::cout << " " << m_mc_spectrum.intensity(i) << std::endl;
+            }
+            #endif
 
-    } // endif: there were cube pixels and maps
+        } // endif: there were cube pixels and maps
+
+    } // endif: simulation cone has changed
 
     // Return
     return;
@@ -1155,6 +1167,8 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_loaded = false;
 
     // Initialise MC cache
+    m_mc_centre.clear();
+    m_mc_radius = -1.0;    //!< Signal that initialisation is needed
     m_mc_cache.clear();
     m_mc_max.clear();
     m_mc_spectrum.clear();
@@ -1180,6 +1194,8 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     m_loaded   = model.m_loaded;
 
     // Copy MC cache
+    m_mc_centre   = model.m_mc_centre;
+    m_mc_radius   = model.m_mc_radius;
     m_mc_cache    = model.m_mc_cache;
     m_mc_max      = model.m_mc_max;
     m_mc_spectrum = model.m_mc_spectrum;
