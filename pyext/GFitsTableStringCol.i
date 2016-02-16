@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableStringCol.i - FITS table string column class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,6 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsTableStringCol.hpp"
+#include "GFilename.hpp"
 %}
 
 
@@ -102,6 +103,26 @@ public:
             if (GFitsTableColInx[2] >= 0 && GFitsTableColInx[2] <
                 self->elements(GFitsTableColInx[1])) {
                 (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = value;
+            }
+            else {
+                throw GException::out_of_range("__setitem__()", "Column index",
+                                               GFitsTableColInx[2],
+                                               self->elements(GFitsTableColInx[1]));
+            }
+        }
+    }
+    void __setitem__(int GFitsTableColInx[], GFilename value) {
+        if (GFitsTableColInx[1] < 0 || GFitsTableColInx[1] >= self->length()) {
+            throw GException::out_of_range("__setitem__()", "Row index",
+                                           GFitsTableColInx[1], self->length());
+        }
+        if (GFitsTableColInx[0] == 1) {
+            (*self)(GFitsTableColInx[1]) = std::string(value);
+        }
+        else {
+            if (GFitsTableColInx[2] >= 0 && GFitsTableColInx[2] <
+                self->elements(GFitsTableColInx[1])) {
+                (*self)(GFitsTableColInx[1], GFitsTableColInx[2]) = std::string(value);
             }
             else {
                 throw GException::out_of_range("__setitem__()", "Column index",
