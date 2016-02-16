@@ -72,11 +72,14 @@ public:
  * @brief GFilename class extension
  ***************************************************************************/
 %extend GFilename {
-    GFilename __add__(const std::string& string) const {
-        return ((*self) + string);
+    std::string __repr__(void) const {
+        return (std::string(*self));
     }
-    GFilename __radd__(const std::string& string) const {
-        return (string + (*self));
+    std::string __add__(const std::string& string) const {
+        return (std::string(*self) + string);
+    }
+    std::string __radd__(const std::string& string) const {
+        return (string + std::string(*self));
     }
     bool __eq__(const GFilename& filename) const {
         return ((*self) == filename);
