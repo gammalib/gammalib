@@ -465,22 +465,16 @@ void GCOMResponse::load(const std::string& rspname)
     m_rspname = rspname;
 
     // First attempt reading the response using the GCaldb interface
-    std::string filename = m_caldb.filename("","","IAQ","","",rspname);
+    GFilename filename = m_caldb.filename("","","IAQ","","",rspname);
 
     // If filename is empty then build filename from CALDB root path and
     // response name
-    if (filename.empty()) {
+    if (filename.is_empty()) {
         filename = gammalib::filepath(m_caldb.rootdir(), rspname);
-        if (!gammalib::file_exists(filename)) {
-            std::string testname = filename + ".fits";
-            if (gammalib::file_exists(testname)) {
+        if (!filename.exists()) {
+            GFilename testname = filename + ".fits";
+            if (testname.exists()) {
                 filename = testname;
-            }
-            else {
-                std::string testname = filename + ".fits.gz";
-                if (gammalib::file_exists(testname)) {
-                    filename = testname;
-                }
             }
         }
     }

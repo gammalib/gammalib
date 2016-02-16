@@ -454,29 +454,25 @@ void GCsv::load(const GFilename& filename, const std::string& sep)
  * @exception GException::file_error
  *            Unable to create file.
  *
- * Save CSV table into ASCII file. Any environment variable present in the
- * filename will be expanded.
+ * Save CSV table into ASCII file.
  **************************************************************************/
 void GCsv::save(const GFilename&   filename,
                 const std::string& sep,
                 const bool&        clobber) const
 {
     // Throw exception if file exists but clobber flag is false
-    if (!clobber && gammalib::file_exists(filename.url())) {
-        std::string msg = "File \""+filename.url()+"\" exists already but "
+    if (!clobber && filename.exists()) {
+        std::string msg = "File \""+filename+"\" exists already but "
                           "the clobber flag is set to \"false\". Set the "
                           "clobber flag to true to overwrite the existing "
                           "file or specify another file name.";
         throw GException::invalid_value(G_SAVE, msg);
     }
 
-    // Expand environment variables
-    std::string fname = gammalib::expand_env(filename.url());
-
     // Open CSV table (write-only)
-    FILE* fptr = std::fopen(fname.c_str(), "w");
+    FILE* fptr = std::fopen(filename.url().c_str(), "w");
     if (fptr == NULL) {
-        std::string msg = "Unable to create file \""+filename.url()+"\".";
+        std::string msg = "Unable to create file \""+filename+"\".";
         throw GException::file_error(G_SAVE, msg);
     }
 

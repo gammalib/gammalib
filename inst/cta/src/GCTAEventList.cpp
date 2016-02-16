@@ -642,10 +642,10 @@ void GCTAEventList::fetch(void) const
         if (!m_filename.is_empty()) {
 
             // Throw an exception if the file does not exist
-            if (!gammalib::file_exists_gzip(m_filename)) {
-                std::string msg = "File \""+m_filename+"\" not "
-                                  "found. Cannot fetch events. Maybe the "
-                                  "file has been deleted in the meantime.";
+            if (!m_filename.exists()) {
+                std::string msg = "File \""+m_filename+"\" not found. "
+                                  "Cannot fetch events. Maybe the file has "
+                                  "been deleted in the meantime.";
                 GException::file_error(G_FETCH, msg);
             }
 

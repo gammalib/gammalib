@@ -54,6 +54,9 @@ public:
     //std::string        protocol(void) const;
     //std::string        path(void) const;
     //std::string        file(void) const;
+    bool               exists(void) const;
+    bool               is_fits(void) const;
+    void               remove(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;

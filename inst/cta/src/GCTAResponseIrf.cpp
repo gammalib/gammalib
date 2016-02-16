@@ -1095,14 +1095,14 @@ void GCTAResponseIrf::load_aeff(const GFilename& filename)
     m_aeff = NULL;
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(filename)) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid effective area response file.";
         throw GException::file_error(G_LOAD_AEFF, msg);
     }
 
     // If file is a FITS file ...
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
 
         // Open FITS file
         GFits fits(filename);
@@ -1213,14 +1213,14 @@ void GCTAResponseIrf::load_psf(const GFilename& filename)
     m_psf = NULL;
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(filename)) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid point spread function response file.";
         throw GException::file_error(G_LOAD_PSF, msg);
     }
 
     // If file is a FITS file ...
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
 
         // Open FITS file
         GFits fits(filename);
@@ -1336,14 +1336,14 @@ void GCTAResponseIrf::load_edisp(const GFilename& filename)
     m_edisp = NULL;
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(filename)) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid energy dispersion response file.";
         throw GException::file_error(G_LOAD_EDISP, msg);
     }
 
     // If file is a FITS file ...
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
 
         // Open FITS file
         GFits fits(filename);
@@ -1441,14 +1441,14 @@ void GCTAResponseIrf::load_background(const GFilename& filename)
     m_background = NULL;
 
     // Check for existence of file
-    if (!gammalib::file_exists_gzip(filename)) {
+    if (!filename.exists()) {
         std::string msg = "File \""+filename+"\" not found. Please specify "
                           "a valid background response file.";
         throw GException::file_error(G_LOAD_BACKGROUND, msg);
     }
 
     // If file is a FITS file than load background as 3D background
-    if (gammalib::is_fits(filename)) {
+    if (filename.is_fits()) {
         m_background = new GCTABackground3D(filename);
     }
 
@@ -2159,18 +2159,18 @@ void GCTAResponseIrf::free_members(void)
 std::string GCTAResponseIrf::irf_filename(const std::string& filename) const
 {
     // Set input filename as result filename
-    std::string result = filename;
+    GFilename result = filename;
 
     // If file does not exist then try a variant with extension .dat
-    if (!gammalib::file_exists(result)) {
-        std::string testname = result + ".dat";
-        if (gammalib::file_exists(testname)) {
+    if (!result.exists()) {
+        GFilename testname = filename + ".dat";
+        if (testname.exists()) {
             result = testname;
         }
     }
 
     // Return result
-    return result;
+    return (result.url());
 }
 
 

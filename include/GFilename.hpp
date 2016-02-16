@@ -89,9 +89,9 @@ public:
     //std::string        protocol(void) const;
     //std::string&       path(void) const;
     //std::string&       file(void) const;
-    //bool               exists(void) const;
-    //bool               is_fits(void) const;
-    //void               remove(void) const;
+    bool               exists(void) const;
+    bool               is_fits(void) const;
+    void               remove(void) const;
     std::string        extname(const std::string& defaultname = "") const;
     const std::string& expression(void) const;
     int                extno(const int& defaultno = -1) const;
@@ -110,10 +110,9 @@ protected:
     void set_filename(const std::string& filename);
 
     // Protected members
-    std::string m_fullname;   //!< Full file name
-    std::string m_filename;   //!< File name (with stripped extension info)
+    std::string m_filename;   //!< Full file name
     //std::string m_protocol;   //!< Access protocol
-    //std::string m_url;        //!< File name (with stripped extension info)
+    std::string m_url;        //!< File name (with stripped extension info)
     //std::string m_path;       //!< Path
     std::string m_extname;    //!< Extension name ("": not set)
     int         m_extno;      //!< Extension number  (-1: not set)
@@ -132,7 +131,7 @@ protected:
 inline
 GFilename::operator std::string(void) const
 {
-    return (gammalib::expand_env(m_fullname));
+    return (gammalib::expand_env(m_filename));
 }
 
 
@@ -156,7 +155,7 @@ std::string GFilename::classname(void) const
 inline
 bool GFilename::is_empty(void) const
 {
-    return (m_fullname.empty());
+    return (m_filename.empty());
 }
 
 
@@ -164,11 +163,13 @@ bool GFilename::is_empty(void) const
  * @brief Return length of filename
  *
  * @return Length of filename.
+ *
+ * Returns the length of the filename, excluding any FITS extension.
  ***************************************************************************/
 inline
 int GFilename::length(void) const
 {
-    return (m_filename.length());
+    return (m_url.length());
 }
 
 
@@ -183,7 +184,7 @@ int GFilename::length(void) const
 inline
 std::string GFilename::url(void) const
 {
-    return (gammalib::expand_env(m_filename));
+    return (gammalib::expand_env(m_url));
 }
 
 

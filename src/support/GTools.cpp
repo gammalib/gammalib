@@ -1002,58 +1002,6 @@ GEnergy gammalib::elogmean(const GEnergy& a, const GEnergy& b)
 
 
 /***********************************************************************//**
- * @brief Checks if file exists
- *
- * @param[in] filename File name.
- * @return True if file exists, false otherwise.
- *
- * Checks if a file exists. If a directory with the same name is found, false
- * is returned. The function expands any environment variable prior to
- * checking.
- ***************************************************************************/
-bool gammalib::file_exists(const std::string& filename)
-{
-    // Initialise result
-    bool result = false;
-
-    // Allocate file information structure
-    struct stat info;
-
-    // Get file information structure
-    int ret = stat(gammalib::expand_env(filename).c_str(), &info);
-
-    // Check if file is a regular file
-    if (ret == 0 && S_ISREG(info.st_mode)) {
-        result = true;
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Checks if either uncompressed or compressed file exists
- *
- * @param[in] filename Uncompressed file name (withput ".gz" extension)
- * @return True if file exists, false otherwise.
- *
- * Checks if a file exists, either as an uncompressed file or with a ".gz"
- * extension. If a directory with the same name is found, false is returned.
- * The function expands any environment variable prior to checking.
- ***************************************************************************/
-bool gammalib::file_exists_gzip(const std::string& filename)
-{
-    // Get result
-    bool result = gammalib::file_exists(filename) ||
-                  gammalib::file_exists(filename+".gz");
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Checks if directory exists
  *
  * @param[in] dirname Directory name.
@@ -1076,41 +1024,6 @@ bool gammalib::dir_exists(const std::string& dirname)
     // Check if we have a directory
     if (ret == 0 && S_ISDIR(info.st_mode)) {
         result = true;
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Checks if file is a FITS file
- *
- * @param[in] filename File name.
- * @return True if file is a FITS file.
- *
- * Checks if the specified file is a FITS file.
- ***************************************************************************/
-bool gammalib::is_fits(const std::string& filename)
-{
-    // Initialise result
-    bool result = false;
-
-    // Try opening file
-    try {
-
-        // Open file
-        GFits fits(filename);
-
-        // If we're still alive then close file and set result to true
-        fits.close();
-        result = true;
-
-    }
-
-    // Catch any exceptions
-    catch (...) {
-        ;
     }
 
     // Return result

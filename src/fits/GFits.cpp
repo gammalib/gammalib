@@ -1213,7 +1213,7 @@ void GFits::save(const bool& clobber)
  * @brief Saves to specified FITS file
  *
  * @param[in] filename Filename.
- * @param[in] clobber Overwrite existing FITS file (true/false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false)
  *
  * @exception GException::fits_file_exist
  *            Specified file exists already. Overwriting requires
@@ -1233,23 +1233,12 @@ void GFits::saveto(const GFilename& filename, const bool& clobber)
               << " (size=" << size() << ") -->" << std::endl;
     #endif
 
-    // If overwriting has been specified then remove any existing file. We
-    // consider here also the possibility that the file is gzipped, but
-    // the file name does not contain the .gz extension.
+    // If overwriting has been specified then remove the file. Otherwise,
+    // throw an exception if the file exists.
     if (clobber) {
-        if (gammalib::file_exists(filename)) {
-            std::remove(filename.url().c_str());
-        }
-        else {
-            if (gammalib::file_exists(gzfname)) {
-                std::remove(gzfname.c_str());
-            }
-        }
+        filename.remove();
     }
-
-    // Otherwise, if file exists then throw an exception
-    else if (gammalib::file_exists(filename) ||
-             gammalib::file_exists(gzfname)) {
+    else if (filename.exists()) {
         throw GException::fits_file_exist(G_SAVETO, filename);
     }
 

@@ -95,12 +95,9 @@ namespace gammalib {
                                               const double& epivot,
                                               const double& gamma);
     GEnergy                  elogmean(const GEnergy& a, const GEnergy& b);
-    bool                     file_exists(const std::string& filename);
-    bool                     file_exists_gzip(const std::string& filename);
     bool                     dir_exists(const std::string& dirname);
     bool                     is_infinite(const double& x);
     bool                     is_notanumber(const double& x);
-    bool                     is_fits(const std::string& filename);
     bool                     contains(const std::string& str,
                                       const std::string& substring);
     void                     warning(const std::string& origin,

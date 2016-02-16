@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GXml.cpp - XML class                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -518,9 +518,9 @@ const GXmlElement* GXml::element(const std::string& name, const int& index) cons
  ***************************************************************************/
 void GXml::load(const GFilename& filename)
 {
-    // Check if file exists
-    if (!gammalib::file_exists(filename.url())) {
-        throw GException::file_open_error(G_LOAD, filename.url());
+    // Throw an exception if file does not exist
+    if (!filename.exists()) {
+        throw GException::file_open_error(G_LOAD, filename);
     }
 
     // Open XML URL as file for reading

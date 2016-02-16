@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-13 February 2016
+16 February 2016
 
 
 1. Introduction
@@ -15,7 +15,10 @@ made since the last release of GammaLib.
 ---------------------------------
 The following methods have been added to the public interface:
 - GObservation::events() (non-const variant)
-- GFilename::operator()
+- GFilename::operator std::string()
+- GFilename::exists()
+- GFilename::is_fits()
+- GFilename::remove()
 - GCTAResponseTable::axis(std::string)
 - GCTAResponseTable::table(std::string)
 - GCTAResponseTable::has_axis(std::string)
@@ -23,6 +26,9 @@ The following methods have been added to the public interface:
 
 The following methods have been removed:
 - GFilename::size()
+- gammalib::file_exists()
+- gammalib::file_exists_gzip()
+- gammalib::is_fits()
 
 The following methods have been renamed:
 - GCTAResponseTable::tables(), was GCTAResponseTable::size()
@@ -127,8 +133,12 @@ None
 
 13. Support module
 ------------------
-Add GFilename::fullname() method that returns the full filename including
-any FITS extension.
+The GFilename class has been extended and some methods have been renamed.
+The full filename including and FITS extension is now returned by an
+implicit type conversion operator std::string(). The filename() method has
+been renamed to url(), and the methods exists(), is_fits() and remove()
+have been added to replace functions of the GTools module that were used
+for this purpose in the past.
 
 
 14. XML module
