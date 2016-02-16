@@ -86,9 +86,9 @@ public:
     bool               is_empty(void) const;
     int                length(void) const;
     std::string        url(void) const;
-    //std::string        protocol(void) const;
-    //std::string&       path(void) const;
-    //std::string&       file(void) const;
+    std::string        protocol(void) const;
+    std::string        path(void) const;
+    std::string        file(void) const;
     bool               exists(void) const;
     bool               is_fits(void) const;
     void               remove(void) const;
@@ -111,9 +111,10 @@ protected:
 
     // Protected members
     std::string m_filename;   //!< Full file name
-    //std::string m_protocol;   //!< Access protocol
     std::string m_url;        //!< File name (with stripped extension info)
-    //std::string m_path;       //!< Path
+    std::string m_protocol;   //!< Access protocol
+    std::string m_path;       //!< Access path
+    std::string m_file;       //!< Name of file
     std::string m_extname;    //!< Extension name ("": not set)
     int         m_extno;      //!< Extension number  (-1: not set)
     int         m_extver;     //!< Extension version (0: not set)
@@ -185,6 +186,48 @@ inline
 std::string GFilename::url(void) const
 {
     return (gammalib::expand_env(m_url));
+}
+
+
+/***********************************************************************//**
+ * @brief Return access protocol
+ *
+ * @return Access protocol.
+ *
+ * Returns the access protocol of the file.
+ ***************************************************************************/
+inline
+std::string GFilename::protocol(void) const
+{
+    return (gammalib::expand_env(m_protocol));
+}
+
+
+/***********************************************************************//**
+ * @brief Return access path
+ *
+ * @return Access path.
+ *
+ * Returns the access path of the file.
+ ***************************************************************************/
+inline
+std::string GFilename::path(void) const
+{
+    return (gammalib::expand_env(m_path));
+}
+
+
+/***********************************************************************//**
+ * @brief Return name of file
+ *
+ * @return File name.
+ *
+ * Returns the name of the file.
+ ***************************************************************************/
+inline
+std::string GFilename::file(void) const
+{
+    return (gammalib::expand_env(m_file));
 }
 
 

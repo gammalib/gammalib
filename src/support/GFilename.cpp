@@ -412,6 +412,18 @@ std::string GFilename::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("URL"));
         result.append(m_url);
 
+        // Append protocol
+        result.append("\n"+gammalib::parformat("Protocol"));
+        result.append(m_protocol);
+
+        // Append access path
+        result.append("\n"+gammalib::parformat("Access path"));
+        result.append(m_path);
+
+        // Append file name
+        result.append("\n"+gammalib::parformat("File"));
+        result.append(m_file);
+
         // Append extension name
         result.append("\n"+gammalib::parformat("Extension name"));
         if (has_extname()) {
@@ -469,6 +481,9 @@ void GFilename::init_members(void)
     // Initialise members
     m_filename.clear();
     m_url.clear();
+    m_protocol.clear();
+    m_path.clear();
+    m_file.clear();
     m_extname.clear();
     m_extno  = -1;
     m_extver = 0;
@@ -489,6 +504,9 @@ void GFilename::copy_members(const GFilename& filename)
     // Copy members
     m_filename   = filename.m_filename;
     m_url        = filename.m_url;
+    m_protocol   = filename.m_protocol;
+    m_path       = filename.m_path;
+    m_file       = filename.m_file;
     m_extname    = filename.m_extname;
     m_extno      = filename.m_extno;
     m_extver     = filename.m_extver;
@@ -687,6 +705,50 @@ void GFilename::set_filename(const std::string& filename)
         // ... otherwise simply set the filename
         else {
             m_url = m_filename;
+        }
+
+        // Extract access protocol
+        size_t proto_end = m_filename.find_first_of(":");
+        if (proto_end != std::string::npos) {
+            m_protocol = m_filename.substr(0, proto_end);
+            proto_end++;
+        }
+        else {
+            proto_end = 0;
+        }
+
+        // Set start and end of file name
+        size_t file_start = m_filename.find_last_of("/");
+        size_t file_end   = (start == std::string::npos) ? m_filename.length() : start;
+
+        // If a "/" symbol was found then extract the path and file
+        if (file_start != std::string::npos) {
+        
+            // Extract path
+            size_t path_start = m_filename.find_first_not_of("/", proto_end);
+            if (path_start != std::string::npos) {
+                if (path_start > 0) {
+                    path_start--;
+                }
+                int length = file_start - path_start + 1;
+                if (length > 0) {
+                    m_path = m_filename.substr(path_start, length);
+                }
+            }
+
+            // Extract file name
+            int length = file_end - file_start - 1;
+            if (length > 0) {
+                m_file = m_filename.substr(file_start+1, length);
+            }
+        }
+
+        // ... otherwise there is no path and we only extract the file
+        else {
+            int length = file_end - proto_end;
+            if (length > 0) {
+                m_file = m_filename.substr(proto_end, length);
+            }
         }
 
     } // endif: filename was not empty

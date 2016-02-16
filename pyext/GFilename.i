@@ -51,9 +51,9 @@ public:
     bool               is_empty(void) const;
     int                length(void) const;
     std::string        url(void) const;
-    //std::string        protocol(void) const;
-    //std::string        path(void) const;
-    //std::string        file(void) const;
+    std::string        protocol(void) const;
+    std::string        path(void) const;
+    std::string        file(void) const;
     bool               exists(void) const;
     bool               is_fits(void) const;
     void               remove(void) const;
@@ -72,6 +72,18 @@ public:
  * @brief GFilename class extension
  ***************************************************************************/
 %extend GFilename {
+    GFilename __add__(const std::string& string) const {
+        return ((*self) + string);
+    }
+    GFilename __radd__(const std::string& string) const {
+        return (string + (*self));
+    }
+    bool __eq__(const GFilename& filename) const {
+        return ((*self) == filename);
+    }
+    bool __ne__(const GFilename& filename) const {
+        return ((*self) != filename);
+    }
     GFilename copy() {
         return (*self);
     }

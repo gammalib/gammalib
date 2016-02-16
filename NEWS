@@ -19,6 +19,9 @@ The following methods have been added to the public interface:
 - GFilename::exists()
 - GFilename::is_fits()
 - GFilename::remove()
+- GFilaname::protocol()
+- GFilename::path()
+- GFilename::file()
 - GCTAResponseTable::axis(std::string)
 - GCTAResponseTable::table(std::string)
 - GCTAResponseTable::has_axis(std::string)
@@ -138,7 +141,10 @@ The full filename including and FITS extension is now returned by an
 implicit type conversion operator std::string(). The filename() method has
 been renamed to url(), and the methods exists(), is_fits() and remove()
 have been added to replace functions of the GTools module that were used
-for this purpose in the past.
+for this purpose in the past. Furthermore, the method protocol() returns
+the access protocol (e.g. http, ftp, file) of the file name, the method
+path() returns the path of th file name, and the method file() returns the
+file name without the path.
 
 
 14. XML module
