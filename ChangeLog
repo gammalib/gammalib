@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        The GApplicationPar::filename() methods now take and return GFilename (#1671)
         Add GFilename methods and remove equivalents from GTools (#1666)
         Use column names for CTA response table access (#1656)
         Add non-const GObservation::events() method (#1664)

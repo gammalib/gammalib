@@ -41,6 +41,7 @@ The following methods have been renamed:
 
 The following classes now use GFilename for filenames arguments instead
 of std::string:
+- GApplicationPar
 - GApplicationPars
 - GArf
 - GCsv
@@ -84,7 +85,8 @@ None
 
 4. Application module
 ---------------------
-None
+The GApplicationPar::filename() methods now take and return GFilename objects
+instead of std::string objects (#1671).
 
 
 5. Base module

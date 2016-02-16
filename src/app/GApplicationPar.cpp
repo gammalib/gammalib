@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GApplicationPar.cpp - Application parameter               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,7 +39,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_STRING_SET                  "GApplicationPar::string(std::string&)"
-#define G_FILENAME_SET              "GApplicationPar::filename(std::string&)"
+#define G_FILENAME_SET                "GApplicationPar::filename(GFilename&)"
 #define G_BOOLEAN_SET                       "GApplicationPar::boolean(bool&)"
 #define G_INTEGER_SET                        "GApplicationPar::integer(int&)"
 #define G_REAL_SET                           "GApplicationPar::real(double&)"
@@ -315,7 +315,7 @@ void GApplicationPar::string(const std::string& value)
  * This method sets a filename parameter. The method only applies to filename
  * parameters. Other parameter types will produce an exception.
  ***************************************************************************/
-void GApplicationPar::filename(const std::string& value)
+void GApplicationPar::filename(const GFilename& value)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
@@ -497,7 +497,7 @@ std::string GApplicationPar::string(void)
  * exception. Any environment variables that are encountered within the
  * filename are expanded automatically.
  ***************************************************************************/
-std::string GApplicationPar::filename(void)
+GFilename GApplicationPar::filename(void)
 {
     // Check if parameter is a filename parameter
     if (!is_filename()) {
@@ -518,7 +518,7 @@ std::string GApplicationPar::filename(void)
     }
 
     // Return value
-    return (gammalib::expand_env(m_value));
+    return (GFilename(m_value));
 }
 
 

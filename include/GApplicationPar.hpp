@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplicationPar.hpp - Application parameter class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GFilename.hpp"
 
 
 /***********************************************************************//**
@@ -64,7 +65,7 @@ public:
     void               mode(const std::string& mode);
     void               value(const std::string& value);
     void               string(const std::string& value);
-    void               filename(const std::string& value);
+    void               filename(const GFilename& value);
     void               boolean(const bool& value);
     void               integer(const int& value);
     void               real(const double& value);
@@ -73,7 +74,7 @@ public:
     const std::string& mode(void) const;
     std::string        value(void);
     std::string        string(void);
-    std::string        filename(void);
+    GFilename          filename(void);
     bool               boolean(void);
     int                integer(void);
     double             real(void);
