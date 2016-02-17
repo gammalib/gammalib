@@ -1039,18 +1039,30 @@ void GFits::open(const GFilename& filename, const bool& create)
     int status = 0;
     status     = __ffopen(FHANDLE(m_fitsfile), std::string(filename).c_str(), 1, &status);
 
-    // If failed then try opening as readonly
-    if (status == 104 || status == 112) {
+    // If failed then try opening as readonly.
+    // 
+    // Possible error codes are:
+    //  104: FILE_NOT_OPENED (could not open the named file)
+    //  107: END_OF_FILE (tried to move past end of file, occurs if extname is invalid)
+    //  112: READONLY_FILE (cannot write to readonly file)
+    if (status == 104 || status == 107 || status == 112) {
         status      = 0;
         status      = __ffopen(FHANDLE(m_fitsfile), std::string(filename).c_str(), 0, &status);
         m_readwrite = false;
     }
 
     // If failed and if we are allowed to create a new FITS file then create
-    // FITS file now
-    if (create && status == 104) {
+    // FITS file now. We pass the URL as filename since we want to create a
+    // fresh file without any extension. We also remove any file before in
+    // case that file exists but is not a FITS file.
+    //
+    // Possible error codes are:
+    //  104: FILE_NOT_OPENED (could not open the named file)
+    //  107: END_OF_FILE (tried to move past end of file, occurs if extname is invalid)
+    if (create && (status == 104 || status == 107)) {
+        filename.remove();
         status      = 0;
-        status      = __ffinit(FHANDLE(m_fitsfile), std::string(filename).c_str(), &status);
+        status      = __ffinit(FHANDLE(m_fitsfile), filename.url().c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }

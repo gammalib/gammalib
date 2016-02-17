@@ -262,12 +262,6 @@ void TestGObservation::test_ebounds(void)
  ***************************************************************************/
 void TestGObservation::test_gti(void)
 {
-    // Remove test files
-    GFilename file1("test_gti1.fits");
-    GFilename file2("test_gti2.fits");
-    file1.remove();
-    file2.remove();
-
     // Test void constructor
     test_try("Void constructor");
     try {
