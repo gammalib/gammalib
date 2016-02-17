@@ -69,7 +69,8 @@ testscripts = gammalib/tests/__init__.py \
               ../test/test_GXspec.py \
               $(MWL_TESTS) $(CTA_TESTS) $(LAT_TESTS) $(COM_TESTS)
 testdata    = ../test/data/initial_coords.txt \
-              ../test/data/fk5_to_galactic.txt
+              ../test/data/fk5_to_galactic.txt \
+              ../test/data/file.fits.gz
 
 # Distribute scripts
 EXTRA_DIST       = $(testscripts) $(testdata)
