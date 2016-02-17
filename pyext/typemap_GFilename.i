@@ -37,8 +37,12 @@
  ***************************************************************************/
 %typemap(in) GFilename& (GFilename temp) {
     if (PyString_Check($input)) {
-         temp = GFilename(std::string(PyString_AsString($input)));
-         $1 = &temp;
+        temp = GFilename(std::string(PyString_AsString($input)));
+        $1 = &temp;
+    }
+    else if (PyUnicode_Check($input)) {
+        temp = GFilename(std::string(PyBytes_AS_STRING(PyUnicode_AsEncodedString($input, "utf-8", "Error ~"))));
+        $1 = &temp;
     }
     else {
         void *filename_argp1 = 0;
@@ -62,6 +66,10 @@
  ***************************************************************************/
 %typecheck(SWIG_TYPECHECK_DOUBLE) GFilename& {
     if (PyString_Check($input) ||
+        SWIG_CheckState(SWIG_ConvertPtr($input, 0, $1_descriptor, 0))) {
+        $1 = 1;
+    }
+    else if (PyUnicode_Check($input) ||
         SWIG_CheckState(SWIG_ConvertPtr($input, 0, $1_descriptor, 0))) {
         $1 = 1;
     }
