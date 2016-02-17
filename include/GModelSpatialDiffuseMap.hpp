@@ -110,9 +110,11 @@ protected:
     bool      m_has_normalize; //!< XML has normalize attribute
 
     // MC simulation cache
-    mutable double              m_mc_norm;  //!< Map normalization
-    mutable std::vector<double> m_mc_cache; //!< Monte Carlo cache
-    mutable std::vector<double> m_mc_max;   //!< Monte Carlo maximum
+    mutable GSkyDir             m_mc_centre; //!< Centre of MC cone
+    mutable double              m_mc_radius; //!< Radius of MC cone
+    mutable double              m_mc_norm;   //!< Map normalization
+    mutable std::vector<double> m_mc_cache;  //!< Monte Carlo cache
+    mutable std::vector<double> m_mc_max;    //!< Monte Carlo maximum
 };
 
 

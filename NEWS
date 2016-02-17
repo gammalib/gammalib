@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-16 February 2016
+17 February 2016
 
 
 1. Introduction
@@ -111,10 +111,10 @@ None
 
 8. Model module
 ---------------
-The GModelSpatialDiffuseCube::set_mc_cone() method now recomputes only
-the Monte Carlo acceptance cone in case that the cone centre or radius
-have changed since the last computation. This speeds up the computations
-(#1673).
+The set_mc_cone() methods of the GModelSpatialDiffuseCube class and the
+GModelSpatialDiffuseMap class now recompute only the Monte Carlo acceptance
+cone in case that the cone centre or radius have changed since the last
+computation. This speeds up the computations (#1673).
 
 
 9. Numerics module

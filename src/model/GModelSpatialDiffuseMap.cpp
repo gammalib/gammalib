@@ -654,158 +654,167 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 void GModelSpatialDiffuseMap::set_mc_cone(const GSkyDir& centre,
                                           const double&  radius) const
 {
-    // Initialise cache
-    m_mc_cache.clear();
-    m_mc_max.clear();
-    m_mc_norm = 0.0;
+    // Continue only if the simulation cone has changed
+    if ((centre != m_mc_centre) || (radius != m_mc_radius)) {
 
-    // Determine number of skymap pixels
-    int npix = m_map.npix();
+        // Save simulation cone definition
+        m_mc_centre = centre;
+        m_mc_radius = radius;
 
-    // Continue only if there are pixels
-    if (npix > 0) {
+        // Initialise cache
+        m_mc_cache.clear();
+        m_mc_max.clear();
+        m_mc_norm = 0.0;
 
-        // Reserve space for all pixels in cache
-        m_mc_cache.reserve(npix+1);
-        m_mc_max.reserve(npix);
+        // Determine number of skymap pixels
+        int npix = m_map.npix();
 
-        // Set first cache value to 0
-        m_mc_cache.push_back(0.0);
+        // Continue only if there are pixels
+        if (npix > 0) {
 
-        // Initialise cache with cumulative pixel fluxes and compute
-        // total flux in skymap for normalization. Negative pixels are
-        // excluded from the cumulative map. Invalid pixels are also
-        // filtered.
-        double sum     = 0.0;
-        double sum_map = 0.0;
-        for (int i = 0; i < npix; ++i) {
+            // Reserve space for all pixels in cache
+            m_mc_cache.reserve(npix+1);
+            m_mc_max.reserve(npix);
 
-            // Derive effective pixel radius from half opening angle
-            // that corresponds to the pixel's solid angle. For security,
-            // the radius is enhanced by 50%.
-            double pixel_radius =
-                   std::acos(1.0 - m_map.solidangle(i)/gammalib::twopi) *
-                   gammalib::rad2deg * 1.5;
+            // Set first cache value to 0
+            m_mc_cache.push_back(0.0);
 
-            // Add up flux with simulation cone radius + effective pixel
-            // radius. The effective pixel radius is added to make sure
-            // that all pixels that overlap with the simulation cone are
-            // taken into account. There is no problem of having even
-            // pixels outside the simulation cone taken into account as
-            // long as the mc() method has an explicit test of whether a
-            // simulated event is contained in the simulation cone.
-            double flux = m_map.flux(i);
-            if (flux > 0.0) {
-                double distance = centre.dist_deg(m_map.pix2dir(i));
-                if (distance <= radius+pixel_radius) {
-                    sum += flux;
-                }
-                sum_map += flux; // sum up total flux in map
-            }
-
-            // Push back flux
-            m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
-
-        } // endfor: looped over pixels
-
-        // Normalize fluxes in the cache so that the values in the cache
-        // run from 0 to 1.
-        if (sum > 0.0) {
-            for (int i = 0; i < npix; ++i) {
-                m_mc_cache[i] /= sum;
-            }
-        }
-
-        // Make sure that last pixel in the cache is >1
-        m_mc_cache[npix] = 1.0001;
-
-        // Set the normalization factor for the MC simulations. In case
-        // that the map is normalized, this is the fraction of the flux
-        // that is comprised within the simulation cone. For non-normalized
-        // maps, this is simply the flux comprised within the simulation
-        // cone.
-        if (sum_map > 0.0) {
-            if (m_normalize) {
-                m_mc_norm = sum / sum_map;
-            }
-            else {
-                m_mc_norm = sum;
-            }
-        }
-
-        // Do we have a HealPix map?
-        if (m_map.projection()->code() == "HPX") {
-
-            // Get pointer on HealPix projection
-            const GHealpix* healpix =
-                  static_cast<const GHealpix*>(m_map.projection());
-
-            // Compute maximum value that may occur from bilinear
-            // interpolation within this pixel and push this value on the
-            // stack. We do this by checking values of all neighbours.
+            // Initialise cache with cumulative pixel fluxes and compute
+            // total flux in skymap for normalization. Negative pixels are
+            // excluded from the cumulative map. Invalid pixels are also
+            // filtered.
+            double sum     = 0.0;
+            double sum_map = 0.0;
             for (int i = 0; i < npix; ++i) {
 
-                // Get neighbours
-                std::vector<int> neighbours = healpix->neighbours(i);
+                // Derive effective pixel radius from half opening angle
+                // that corresponds to the pixel's solid angle. For security,
+                // the radius is enhanced by 50%.
+                double pixel_radius =
+                    std::acos(1.0 - m_map.solidangle(i)/gammalib::twopi) *
+                    gammalib::rad2deg * 1.5;
 
-                // Loop over neighbours
-                double max = m_map(i);
-                for (int j = 0; j < neighbours.size(); ++j) {
-                    if (neighbours[j] != -1) {
-                        double value = m_map(neighbours[j]);
-                        if (value > max) {
-                            max = value;
-                        }
+                // Add up flux with simulation cone radius + effective pixel
+                // radius. The effective pixel radius is added to make sure
+                // that all pixels that overlap with the simulation cone are
+                // taken into account. There is no problem of having even
+                // pixels outside the simulation cone taken into account as
+                // long as the mc() method has an explicit test of whether a
+                // simulated event is contained in the simulation cone.
+                double flux = m_map.flux(i);
+                if (flux > 0.0) {
+                    double distance = centre.dist_deg(m_map.pix2dir(i));
+                    if (distance <= radius+pixel_radius) {
+                        sum += flux;
                     }
+                    sum_map += flux; // sum up total flux in map
                 }
 
-                // Store maximum
-                m_mc_max.push_back(max);
+                // Push back flux
+                m_mc_cache.push_back(sum); // units: ph/cm2/s/MeV
 
             } // endfor: looped over pixels
 
-        } // endif: Healpix projection
+            // Normalize fluxes in the cache so that the values in the cache
+            // run from 0 to 1.
+            if (sum > 0.0) {
+                for (int i = 0; i < npix; ++i) {
+                    m_mc_cache[i] /= sum;
+                }
+            }
 
-        // ... no, then we have a WCS map
-        else {
+            // Make sure that last pixel in the cache is >1
+            m_mc_cache[npix] = 1.0001;
 
-            // Compute maximum value that may occur from bilinear
-            // interpolation within this pixel and push this value on the
-            // stack. We do this by checking the map values at the corners
-            // and the centre of each edge.
-            for (int i = 0; i < npix; ++i) {
-                GSkyPixel pixel = m_map.inx2pix(i);
-                double    max   = m_map(pixel);
-                for (int ix = -1; ix < 2; ++ix) {
-                    for (int iy = -1; iy < 2; ++iy) {
-                        if (ix != 0 && iy != 0) {
-                            GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
-                            if (m_map.contains(edge)) {
-                                GSkyDir dir  = m_map.pix2dir(edge);
-                                double value = m_map(dir);
-                                if (value > max) {
-                                    max = value;
+            // Set the normalization factor for the MC simulations. In case
+            // that the map is normalized, this is the fraction of the flux
+            // that is comprised within the simulation cone. For non-normalized
+            // maps, this is simply the flux comprised within the simulation
+            // cone.
+            if (sum_map > 0.0) {
+                if (m_normalize) {
+                    m_mc_norm = sum / sum_map;
+                }
+                else {
+                    m_mc_norm = sum;
+                }
+            }
+
+            // Do we have a HealPix map?
+            if (m_map.projection()->code() == "HPX") {
+
+                // Get pointer on HealPix projection
+                const GHealpix* healpix =
+                    static_cast<const GHealpix*>(m_map.projection());
+
+                // Compute maximum value that may occur from bilinear
+                // interpolation within this pixel and push this value on the
+                // stack. We do this by checking values of all neighbours.
+                for (int i = 0; i < npix; ++i) {
+
+                    // Get neighbours
+                    std::vector<int> neighbours = healpix->neighbours(i);
+
+                    // Loop over neighbours
+                    double max = m_map(i);
+                    for (int j = 0; j < neighbours.size(); ++j) {
+                        if (neighbours[j] != -1) {
+                            double value = m_map(neighbours[j]);
+                            if (value > max) {
+                                max = value;
+                            }
+                        }
+                    }
+
+                    // Store maximum
+                    m_mc_max.push_back(max);
+
+                } // endfor: looped over pixels
+
+            } // endif: Healpix projection
+
+            // ... no, then we have a WCS map
+            else {
+
+                // Compute maximum value that may occur from bilinear
+                // interpolation within this pixel and push this value on the
+                // stack. We do this by checking the map values at the corners
+                // and the centre of each edge.
+                for (int i = 0; i < npix; ++i) {
+                    GSkyPixel pixel = m_map.inx2pix(i);
+                    double    max   = m_map(pixel);
+                    for (int ix = -1; ix < 2; ++ix) {
+                        for (int iy = -1; iy < 2; ++iy) {
+                            if (ix != 0 && iy != 0) {
+                                GSkyPixel edge(pixel.x()+ix*0.5, pixel.y()+iy*0.5);
+                                if (m_map.contains(edge)) {
+                                    GSkyDir dir  = m_map.pix2dir(edge);
+                                    double value = m_map(dir);
+                                    if (value > max) {
+                                        max = value;
+                                    }
                                 }
                             }
                         }
                     }
+                    m_mc_max.push_back(max);
                 }
-                m_mc_max.push_back(max);
+
+            } // endelse: computed maximum pixel value
+
+            // Dump cache values for debugging
+            #if defined(G_DEBUG_CACHE)
+            std::cout << "GModelSpatialDiffuseMap::set_mc_cone: cache";
+            std::cout << std::endl;
+            for (int i = 0; i < m_mc_cache.size(); ++i) {
+                std::cout << "i=" << i;
+                std::cout << " c=" << m_mc_cache[i] << std::endl;
             }
+            #endif
 
-        } // endelse: computed maximum pixel value
+        } // endif: there were cube pixels
 
-        // Dump cache values for debugging
-        #if defined(G_DEBUG_CACHE)
-        std::cout << "GModelSpatialDiffuseMap::set_mc_cone: cache";
-        std::cout << std::endl;
-        for (int i = 0; i < m_mc_cache.size(); ++i) {
-            std::cout << "i=" << i;
-            std::cout << " c=" << m_mc_cache[i] << std::endl;
-        }
-        #endif
-
-    } // endif: there were cube pixels
+    } // endif: simulation cone has changed
 
     // Return
     return;
@@ -918,6 +927,8 @@ void GModelSpatialDiffuseMap::init_members(void)
     m_radius        = 0.0;
 
     // Initialise MC cache
+    m_mc_centre.clear();
+    m_mc_radius = -1.0;   //!< Signal initialisation
     m_mc_norm = 0.0;
     m_mc_cache.clear();
     m_mc_max.clear();
@@ -944,6 +955,8 @@ void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
     m_radius        = model.m_radius;
 
     // Copy MC cache
+    m_mc_centre     = model.m_mc_centre;
+    m_mc_radius     = model.m_mc_radius;
     m_mc_norm       = model.m_mc_norm;
     m_mc_cache      = model.m_mc_cache;
     m_mc_max        = model.m_mc_max;
