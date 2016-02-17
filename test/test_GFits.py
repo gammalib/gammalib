@@ -18,7 +18,6 @@
 #
 # ==========================================================================
 import math
-import sys
 import gammalib
 
 
@@ -47,10 +46,10 @@ class Test(gammalib.GPythonTestSuite):
         self.name("fits")
 
         # Append tests
-        self.append(self.test_fits, "Test GFits")
-        self.append(self.test_fits_image, "Test GFitsImage")
-        self.append(self.test_fits_table, "Test GFitsTable")
-        self.append(self.test_fits_table_columns, "Test FITS table columns")
+        self.append(self.test_fits, "Test GFits class")
+        self.append(self.test_fits_image, "Test GFitsImage class")
+        self.append(self.test_fits_table, "Test GFitsTable class")
+        self.append(self.test_fits_table_columns, "Test GFitsTableCol classes")
 
         # Return
         return
@@ -62,13 +61,21 @@ class Test(gammalib.GPythonTestSuite):
         # Set test file names
         file = gammalib.GFilename("data/file.fits")
 
-        # Test creation of FITS file
-        self.test_try("Test GFits file constructor")
+        # Test loading of FITS file
+        self.test_try("Test GFits file load constructor")
         try:
-            fits = gammalib.GFits(file, True)
+            fits = gammalib.GFits(file)
             self.test_try_success()
         except:
-            self.test_try_failure("Unable to create file.")
+            self.test_try_failure("Unable to load FITS file.")
+
+        # Test creation of FITS file
+        self.test_try("Test GFits file creation constructor")
+        try:
+            fits = gammalib.GFits("test_file.fits", True)
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to create FITS file.")
 
         # Open FITS file
         fits = gammalib.GFits(file)
@@ -281,6 +288,19 @@ class Test(gammalib.GPythonTestSuite):
         col10 = gammalib.GFitsTableULongCol("ULONG", nrows)
         col11 = gammalib.GFitsTableUShortCol("USHORT", nrows)
 
+        # Test number of rows
+        self.test_value(col1.length(),  nrows, "Check number of rows in Bit column")
+        self.test_value(col2.length(),  nrows, "Check number of rows in Boolean column")
+        self.test_value(col3.length(),  nrows, "Check number of rows in Byte column")
+        self.test_value(col4.length(),  nrows, "Check number of rows in Double column")
+        self.test_value(col5.length(),  nrows, "Check number of rows in Float column")
+        self.test_value(col6.length(),  nrows, "Check number of rows in Long column")
+        self.test_value(col7.length(),  nrows, "Check number of rows in LongLong column")
+        self.test_value(col8.length(),  nrows, "Check number of rows in Short column")
+        self.test_value(col9.length(),  nrows, "Check number of rows in String column")
+        self.test_value(col10.length(), nrows, "Check number of rows in ULong column")
+        self.test_value(col11.length(), nrows, "Check number of rows in UShort column")
+
         # Test iterators
         for row in col1:
             pass
@@ -304,6 +324,30 @@ class Test(gammalib.GPythonTestSuite):
             pass
         for row in col11:
             pass
+
+        # Test setting and retrieving of values
+        col1[5] = True
+        self.test_assert(col1[5], "Check Bit column setting and retrieving")
+        col2[5] = True
+        self.test_assert(col2[5], "Check Boolean column setting and retrieving")
+        col3[5] = 5
+        self.test_value(col3[5], 5, "Check Byte column setting and retrieving")
+        col4[5] = 3.14
+        self.test_value(col4[5], 3.14, 1.0e-6, "Check Double column setting and retrieving")
+        col5[5] = 3.14
+        self.test_value(col5[5], 3.14, 1.0e-6, "Check Float column setting and retrieving")
+        col6[5] = 314
+        self.test_value(col6[5], 314, "Check Long column setting and retrieving")
+        col7[5] = 314
+        self.test_value(col7[5], 314, "Check LongLong column setting and retrieving")
+        col8[5] = 314
+        self.test_value(col8[5], 314, "Check Short column setting and retrieving")
+        col9[5] = "Hallo"
+        self.test_assert(col9[5] == "Hallo", "Check String column setting and retrieving")
+        col10[5] = 314
+        self.test_value(col10[5], 314, "Check ULong column setting and retrieving")
+        col11[5] = 314
+        self.test_value(col11[5], 314, "Check UShort column setting and retrieving")
 
         # Return
         return
