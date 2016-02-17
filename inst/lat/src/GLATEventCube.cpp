@@ -310,13 +310,13 @@ int GLATEventCube::naxis(const int& axis) const
 void GLATEventCube::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read event cube from FITS file
-    read(file);
+    read(fits);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;

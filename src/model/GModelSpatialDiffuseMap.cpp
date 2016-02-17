@@ -585,7 +585,7 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
     }
 
     // Set model filename
-    xml.attribute("file", m_filename.url());
+    xml.attribute("file", m_filename);
 
     // Verify model type
     if (xml.attribute("type") != "SpatialMap") {
@@ -840,7 +840,7 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
 
         // Append parameters
         result.append("\n"+gammalib::parformat("Sky map file"));
-        result.append(m_filename.url());
+        result.append(m_filename);
         result.append("\n"+gammalib::parformat("Map normalization"));
         result.append(gammalib::str(m_mc_norm)+" ph/cm2/s");
         if (normalize()) {
@@ -883,7 +883,7 @@ void GModelSpatialDiffuseMap::load(const GFilename& filename)
     m_filename = filename;
 
     // Load skymap
-    m_map.load(m_filename.url());
+    m_map.load(m_filename);
 
     // Prepare sky map
     prepare_map();

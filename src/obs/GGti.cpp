@@ -585,16 +585,16 @@ void GGti::extend(const GGti& gti)
 void GGti::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get GTI table
-    const GFitsTable& table = *file.table(filename.extname("GTI"));
+    const GFitsTable& table = *fits.table(filename.extname("GTI"));
 
     // Read GTI from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -624,11 +624,6 @@ void GGti::save(const GFilename& filename, const bool& clobber) const
 
     // Open or create FITS file
     GFits fits(filename, true);
-
-    // Remove extension if it exists already
-    if (fits.contains(extname)) {
-        fits.remove(extname);
-    }
 
     // Write GTI to FITS object
     write(fits, extname);

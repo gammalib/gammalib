@@ -1145,7 +1145,7 @@ void GFits::save(const bool& clobber)
     // If we attempt to save an existing file without overwriting permission
     // then throw an error
     if (!m_created && !clobber) {
-        throw GException::fits_file_exist(G_SAVE, m_filename.url());
+        throw GException::fits_file_exist(G_SAVE, m_filename);
     }
 
     // If no FITS file has been opened then throw an error
@@ -1219,14 +1219,10 @@ void GFits::save(const bool& clobber)
  *            Specified file exists already. Overwriting requires
  *            clobber=true.
  *
- * Saves object into a specific FITS file.
- * Any environment variable present in the filename will be expanded.
+ * Saves the FITS object into a specific file.
  ***************************************************************************/
 void GFits::saveto(const GFilename& filename, const bool& clobber)
 {
-    // Create gzipped file name version
-    std::string gzfname = filename + ".gz";
-
     // Debug header
     #if defined(G_DEBUG)
     std::cout << "GFits::saveto(\"" << fname << "\", " << clobber << ")"
@@ -1243,7 +1239,7 @@ void GFits::saveto(const GFilename& filename, const bool& clobber)
     }
 
     // Create or open FITS file
-    GFits fits(filename, true);;
+    GFits fits(filename, true);
 
     // Append all headers
     for (int i = 0; i < size(); ++i) {
@@ -1304,7 +1300,7 @@ std::string GFits::print(const GChatter& chatter) const
 
         // Append file information
         result.append("\n"+gammalib::parformat("Filename"));
-        result.append(m_filename.url());
+        result.append(m_filename);
         result.append("\n"+gammalib::parformat("History"));
         if (m_created) {
             result.append("new file");

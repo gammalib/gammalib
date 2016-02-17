@@ -649,7 +649,7 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
     }
 
     // Set filename
-    xml.attribute("file", m_filename.url());
+    xml.attribute("file", m_filename);
 
     // Return
     return;
@@ -1069,7 +1069,7 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
 
         // Append parameters
         result.append("\n"+gammalib::parformat("Map cube file"));
-        result.append(m_filename.url());
+        result.append(m_filename);
         if (m_loaded) {
             result.append(" [loaded]");
         }

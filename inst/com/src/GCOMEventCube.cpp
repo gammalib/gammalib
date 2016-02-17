@@ -366,13 +366,13 @@ int GCOMEventCube::naxis(const int& axis) const
 void GCOMEventCube::load(const GFilename& filename)
 {
     // Open DRE FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Load DRE cube from FITS file
-    read(file);
+    read(fits);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -383,7 +383,7 @@ void GCOMEventCube::load(const GFilename& filename)
  * @brief Save COMPTEL event cube into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite existing FITS file (default=false).
+ * @param[in] clobber Overwrite existing FITS file? (default: false).
  *
  * Save the COMPTEL event cube into FITS file.
  ***************************************************************************/

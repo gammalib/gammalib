@@ -480,16 +480,16 @@ void GCOMResponse::load(const std::string& rspname)
     }
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get IAQ image
-    const GFitsImage& iaq = *file.image(0);
+    const GFitsImage& iaq = *fits.image(0);
 
     // Read IAQ
     read(iaq);
 
     // Close ARF FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;

@@ -355,16 +355,16 @@ void GCTAAeff2D::write(GFitsBinTable& table) const
 void GCTAAeff2D::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get effective area table
-    const GFitsTable& table = *file.table(filename.extname("EFFECTIVE AREA"));
+    const GFitsTable& table = *fits.table(filename.extname("EFFECTIVE AREA"));
 
     // Read effective area from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -395,7 +395,7 @@ void GCTAAeff2D::save(const GFilename& filename, const bool& clobber) const
     // Get extension name
     std::string extname = filename.extname("EFFECTIVE AREA");
 
-    // Open or create FITS file
+    // Open or create FITS file (without extension)
     GFits fits(filename, true);
 
     // Remove extension if it exists already

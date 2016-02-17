@@ -418,16 +418,16 @@ GHorizDir GCTAPointing::dir_horiz(const GTime& time) const
 void GCTAPointing::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get pointing table
-    const GFitsTable& table = *file.table(filename.extname("POINTING"));
+    const GFitsTable& table = *fits.table(filename.extname("POINTING"));
 
     // Read pointing from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;

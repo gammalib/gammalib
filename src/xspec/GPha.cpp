@@ -373,18 +373,27 @@ void GPha::load(const GFilename& filename)
  * @brief Save Pulse Height Analyzer spectrum
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file? (defaults to true)
+ * @param[in] clobber Overwrite existing file? (default: false)
+ *
+ * Saves Pulse Height Analyzer spectrum and energy boundaries into a FITS
+ * file. If a file with the given @p filename does not yet exist it will be
+ * created, otherwise the method opens the existing file. The method will
+ * create (or replace an existing) Pulse Height Analyzer spectrum and energy
+ * boundary extensions.
+ *
+ * An existing file will only be modified if the @p clobber flag is set to
+ * true.
  ***************************************************************************/
 void GPha::save(const GFilename& filename, const bool& clobber) const
 {
-    // Open FITS file
-    GFits fits;
+    // Open or create FITS file
+    GFits fits(filename, true);
 
     // Write PHA into file
     write(fits);
 
     // Close FITS file
-    fits.saveto(filename, clobber);
+    fits.save(clobber);
 
     // Store filename
     m_filename = filename;
@@ -443,6 +452,14 @@ void GPha::read(const GFitsTable& table)
  ***************************************************************************/
 void GPha::write(GFits& fits) const
 {
+    // Remove extensions if they exist already
+    if (fits.contains("EBOUNDS")) {
+        fits.remove("EBOUNDS");
+    }
+    if (fits.contains("SPECTRUM")) {
+        fits.remove("SPECTRUM");
+    }
+
     // Set column length
     int length = size();
 

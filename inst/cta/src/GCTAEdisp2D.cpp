@@ -421,16 +421,16 @@ void GCTAEdisp2D::write(GFitsBinTable& table) const
 void GCTAEdisp2D::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get energy dispersion table
-    const GFitsTable& table = *file.table(filename.extname("ENERGY DISPERSION"));
+    const GFitsTable& table = *fits.table(filename.extname("ENERGY DISPERSION"));
 
     // Read energy dispersion from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;

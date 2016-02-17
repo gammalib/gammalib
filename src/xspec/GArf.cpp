@@ -255,20 +255,17 @@ const double& GArf::at(const int& index) const
  ***************************************************************************/
 void GArf::load(const GFilename& filename)
 {
-    // Clear any existing models
-    clear();
-
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get ARF table
-    const GFitsTable& table = *file.table("SPECRESP");
+    const GFitsTable& table = *fits.table("SPECRESP");
 
     // Read ARF data
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -310,6 +307,9 @@ void GArf::save(const GFilename& filename, const bool& clobber) const
  ***************************************************************************/
 void GArf::read(const GFitsTable& table)
 {
+    // Clear members
+    clear();
+
     // Get pointer to data columns
     const GFitsTableCol* energy_lo = table["ENERG_LO"];
     const GFitsTableCol* energy_hi = table["ENERG_HI"];
@@ -352,6 +352,12 @@ void GArf::read(const GFitsTable& table)
  ***************************************************************************/
 void GArf::write(GFits& fits) const
 {
+    // If the FITS object contains already an extension with the same
+    // name then remove now this extension
+    if (fits.contains("SPECRESP")) {
+        fits.remove("SPECRESP");
+    }
+
     // Set column length
     int length = size();
 
@@ -359,7 +365,7 @@ void GArf::write(GFits& fits) const
     if (length > 0) {
 
         // Create new binary table
-        GFitsBinTable* hdu = new GFitsBinTable;
+        GFitsBinTable hdu;
 
         // Allocate floating point vector columns
         GFitsTableFloatCol energy_lo("ENERG_LO", length);
@@ -379,18 +385,15 @@ void GArf::write(GFits& fits) const
         specresp.unit("cm^2");
 
         // Set table attributes
-        hdu->extname("SPECRESP");
+        hdu.extname("SPECRESP");
 
         // Append columns to table
-        hdu->append(energy_lo);
-        hdu->append(energy_hi);
-        hdu->append(specresp);
+        hdu.append(energy_lo);
+        hdu.append(energy_hi);
+        hdu.append(specresp);
 
         // Append HDU to FITS file
-        fits.append(*hdu);
-
-        // Free binary table
-        delete hdu;
+        fits.append(hdu);
 
     } // endif: there were data to write
 

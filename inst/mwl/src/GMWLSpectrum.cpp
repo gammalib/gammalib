@@ -264,21 +264,21 @@ void GMWLSpectrum::load(const GFilename& filename)
     clear();
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read spectrum
     if (filename.has_extno()) {
-        read(file, filename.extno());
+        read(fits, filename.extno());
     }
     else if (filename.has_extname()) {
-        read(file, filename.extname());
+        read(fits, filename.extname());
     }
     else {
-        read(file);
+        read(fits);
     }
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;

@@ -896,11 +896,11 @@ void GCTAObservation::read(const GFits& fits)
     if (m_events != NULL) delete m_events;
     m_events = NULL;
 
-    // Initialise file name from FITS file
-    GFilename fname(fits.filename());
+    // Retrieve file name from FITS file
+    GFilename filename(fits.filename());
 
     // Get extension name
-    std::string extname = fname.extname("EVENTS");
+    std::string extname = filename.extname("EVENTS");
 
     // If FITS file contains an EVENTS extension we have an unbinned
     // observation ...
@@ -972,6 +972,14 @@ void GCTAObservation::write(GFits& fits, const std::string& evtname,
 
     // Case A: Observation contains an event list
     if (list != NULL) {
+
+        // Remove HDUs if they exist already
+        if (fits.contains(evtname)) {
+            fits.remove(evtname);
+        }
+        if (fits.contains(gtiname)) {
+            fits.remove(gtiname);
+        }
 
         // Write event list and Good Time Intervals into FITS file
         list->write(fits, evtname, gtiname);
@@ -1096,7 +1104,8 @@ void GCTAObservation::load(const GFilename& cntcube,
  * energy boundaries and the Good Time Intervals. The extension names of
  * these binary tables are "EBOUNDS" and "GTI", and cannot be modified.
  ***************************************************************************/
-void GCTAObservation::save(const GFilename& filename, const bool& clobber) const
+void GCTAObservation::save(const GFilename& filename,
+                           const bool&      clobber) const
 {
     // Set default events and Good Time Intervals extension name and extract
     // a possible overwrite from the extension name argument of the filename.
@@ -1115,16 +1124,10 @@ void GCTAObservation::save(const GFilename& filename, const bool& clobber) const
         }
     }
 
-    // Open or create FITS file
-    GFits fits(filename, true);
-
-    // Remove HDUs if they exist already
-    if (fits.contains(evtname)) {
-        fits.remove(evtname);
-    }
-    if (fits.contains(gtiname)) {
-        fits.remove(gtiname);
-    }
+    // Open or create FITS file. Since we accept here a special structure
+    // for the extension that cfitsio does not understand we only pass
+    // the URL without extension name to the GFits constructor.
+    GFits fits(filename.url(), true);
 
     // Write data into FITS file
     write(fits, evtname, gtiname);

@@ -250,16 +250,16 @@ GCTAAeffArf* GCTAAeffArf::clone(void) const
 void GCTAAeffArf::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get ARF table
-    const GFitsTable& table = *file.table(filename.extname("SPECRESP"));
+    const GFitsTable& table = *fits.table(filename.extname("SPECRESP"));
 
     // Read ARF from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;

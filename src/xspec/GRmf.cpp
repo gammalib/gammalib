@@ -376,19 +376,19 @@ void GRmf::load(const GFilename& filename)
     clear();
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read measured energy boundaries
     m_ebds_measured.load(filename);
 
     // Get RMF table
-    const GFitsTable& table = *file.table(filename.extname("MATRIX"));
+    const GFitsTable& table = *fits.table(filename.extname("MATRIX"));
 
     // Read RMF data
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -501,6 +501,14 @@ void GRmf::read(const GFitsTable& table)
  ***************************************************************************/
 void GRmf::write(GFits& fits, const std::string& unit) const
 {
+    // Remove extensions if they exist already
+    if (fits.contains("MATRIX")) {
+        fits.remove("MATRIX");
+    }
+    if (fits.contains("EBOUNDS")) {
+        fits.remove("EBOUNDS");
+    }
+
     // Set table length
     int length = ntrue();
 

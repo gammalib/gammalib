@@ -396,13 +396,13 @@ void GLATLtCube::load(const GFilename& filename)
     clear();
 
     // Open livetime cube FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get HDUs
-    const GFitsTable& hdu_exposure          = *file.table("EXPOSURE");
-    const GFitsTable& hdu_weighted_exposure = *file.table("WEIGHTED_EXPOSURE");
-    //const GFitsTable& hdu_cthetabounds      = *file.table("CTHETABOUNDS");
-    const  GFitsTable& hdu_gti               = *file.table("GTI");
+    const GFitsTable& hdu_exposure          = *fits.table("EXPOSURE");
+    const GFitsTable& hdu_weighted_exposure = *fits.table("WEIGHTED_EXPOSURE");
+    //const GFitsTable& hdu_cthetabounds      = *fits.table("CTHETABOUNDS");
+    const  GFitsTable& hdu_gti               = *fits.table("GTI");
 
     // Load exposure
     m_exposure.read(hdu_exposure);
@@ -416,7 +416,7 @@ void GLATLtCube::load(const GFilename& filename)
     m_gti.read(hdu_gti);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;

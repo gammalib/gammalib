@@ -548,16 +548,16 @@ void GEnergies::set_log(const int&     num,
 void GEnergies::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get energies table
-    const GFitsTable& table = *file.table(filename.extname("ENERGIES"));
+    const GFitsTable& table = *fits.table(filename.extname("ENERGIES"));
 
     // Read energies from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -586,11 +586,6 @@ void GEnergies::save(const GFilename& filename, const bool& clobber) const
 
     // Open or create FITS file
     GFits fits(filename, true);
-
-    // Remove extension if it exists already
-    if (fits.contains(extname)) {
-        fits.remove(extname);
-    }
 
     // Write energies to FITS file
     write(fits, extname);

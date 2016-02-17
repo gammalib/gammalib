@@ -579,16 +579,16 @@ void GEbounds::set_log(const int& num, const GEnergy& emin, const GEnergy& emax)
 void GEbounds::load(const GFilename& filename)
 {
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get energy boundary table
-    const GFitsTable& table = *file.table(filename.extname("EBOUNDS"));
+    const GFitsTable& table = *fits.table(filename.extname("EBOUNDS"));
 
     // Read energy boundaries from table
     read(table);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -621,11 +621,6 @@ void GEbounds::save(const GFilename&   filename,
 
     // Open or create FITS file
     GFits fits(filename, true);
-
-    // Remove extension if it exists already
-    if (fits.contains(extname)) {
-        fits.remove(extname);
-    }
 
     // Write energy boundaries to FITS file
     write(fits, extname, unit);
