@@ -992,7 +992,7 @@ int GFits::extno(const std::string& extname) const
  * @brief Open or (optionally) create FITS file
  *
  * @param[in] filename Name of FITS file to be opened.
- * @param[in] create Create FITS file if it does not exist (default=false)
+ * @param[in] create Create FITS file if it does not exist (default: false)
  *
  * @exception GException::invalid_argument
  *            Class instance contains already an opened FITS file.
@@ -1037,12 +1037,12 @@ void GFits::open(const GFilename& filename, const bool& create)
 
     // Try opening FITS file with readwrite access
     int status = 0;
-    status     = __ffopen(FHANDLE(m_fitsfile), filename.url().c_str(), 1, &status);
+    status     = __ffopen(FHANDLE(m_fitsfile), std::string(filename).c_str(), 1, &status);
 
     // If failed then try opening as readonly
     if (status == 104 || status == 112) {
         status      = 0;
-        status      = __ffopen(FHANDLE(m_fitsfile), filename.url().c_str(), 0, &status);
+        status      = __ffopen(FHANDLE(m_fitsfile), std::string(filename).c_str(), 0, &status);
         m_readwrite = false;
     }
 
@@ -1050,7 +1050,7 @@ void GFits::open(const GFilename& filename, const bool& create)
     // FITS file now
     if (create && status == 104) {
         status      = 0;
-        status      = __ffinit(FHANDLE(m_fitsfile), filename.url().c_str(), &status);
+        status      = __ffinit(FHANDLE(m_fitsfile), std::string(filename).c_str(), &status);
         m_readwrite = true;
         m_created   = true;
     }
