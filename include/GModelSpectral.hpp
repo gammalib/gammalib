@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectral.hpp - Abstract spectral model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,11 +31,13 @@
 #include <string>
 #include <vector>
 #include "GBase.hpp"
-#include "GModelPar.hpp"
-#include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GRan.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declaration ________________________________________________ */
+class GEnergy;
+class GRan;
+class GModelPar;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -51,8 +53,8 @@
  * \f]
  *
  * where
- * - \f$E\f$ is the true photon energy, and
- * - \f$t\f$ is the true photon arrival time.
+ * \f$E\f$ is the true photon energy, and
+ * \f$t\f$ is the true photon arrival time.
  *
  * The spectral component describes the spatially integrated time dependent
  * spectral distribution of the source. It satisfies
@@ -84,9 +86,9 @@ public:
     virtual std::string     classname(void) const = 0;
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GEnergy& srcEng,
-                                 const GTime& srcTime) const = 0;
+                                 const GTime&   srcTime = GTime()) const = 0;
     virtual double          eval_gradients(const GEnergy& srcEng,
-                                           const GTime& srcTime) = 0;
+                                           const GTime&   srcTime = GTime()) = 0;
     virtual double          flux(const GEnergy& emin,
                                  const GEnergy& emax) const = 0;
     virtual double          eflux(const GEnergy& emin,

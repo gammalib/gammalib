@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectral.cpp - Abstract spectral model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GModelSpectral.hpp"
+#include "GModelPar.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                   "GModelSpectral::operator[](std::string&)"

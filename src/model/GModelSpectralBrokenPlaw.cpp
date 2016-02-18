@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralBrokenPlaw.cpp - Broken power law spectrum class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Anneli Schulz                                    *
+ *  copyright (C) 2013-2016 by Anneli Schulz                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GRan.hpp"
 #include "GModelSpectralBrokenPlaw.hpp"
 #include "GModelSpectralRegistry.hpp"
 

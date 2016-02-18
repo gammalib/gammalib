@@ -32,6 +32,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GIntegral.hpp"
+#include "GRan.hpp"
 #include "GCTABackgroundPerfTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */

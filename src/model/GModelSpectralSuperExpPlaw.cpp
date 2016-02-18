@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpectralSuperExpPlaw.cpp - Super exp. cut off power law model   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014 by Michael Mayer                                    *
+ *  copyright (C) 2014-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GRan.hpp"
 #include "GIntegral.hpp"
 #include "GModelSpectralSuperExpPlaw.hpp"
 #include "GModelSpectralRegistry.hpp"

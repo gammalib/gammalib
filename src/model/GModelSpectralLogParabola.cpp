@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.cpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2014 by Michael Mayer                               *
+ *  copyright (C) 2012-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GRan.hpp"
 #include "GIntegral.hpp"
 #include "GModelSpectralLogParabola.hpp"
 #include "GModelSpectralRegistry.hpp"

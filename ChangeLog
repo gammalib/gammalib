@@ -1,8 +1,9 @@
-2016-02-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-02-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Use default GTime in GModelSpectral eval() and eval_gradients() methods (#1672)
         Optimise GModelSpatialDiffuseMap::set_mc_cone() method (#1673)
         Optimise GModelSpatialDiffuseCube::set_mc_cone() method (#1673)
         Use default GTime in GObservation::deadc() method (#1670)

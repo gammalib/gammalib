@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GFilename.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 #include "GCTABackground3D.hpp"

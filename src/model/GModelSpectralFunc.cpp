@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GCsv.hpp"
+#include "GRan.hpp"
 #include "GModelSpectralFunc.hpp"
 #include "GModelSpectralRegistry.hpp"
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralConst.cpp - Spectral constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GRan.hpp"
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralRegistry.hpp"
 

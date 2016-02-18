@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-17 February 2016
+18 February 2016
 
 
 1. Introduction
@@ -111,6 +111,11 @@ None
 
 8. Model module
 ---------------
+The GModelSpectral eval() and eval_gradients() methods use an empty GTim()
+object as default time argument since all spectral models are so far time-
+independent. This avoids that a user needs to specify a dummy time argument
+(#1672).
+
 The set_mc_cone() methods of the GModelSpatialDiffuseCube class and the
 GModelSpatialDiffuseMap class now recompute only the Monte Carlo acceptance
 cone in case that the cone centre or radius have changed since the last

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw2.cpp - Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GRan.hpp"
 #include "GModelSpectralPlaw2.hpp"
 #include "GModelSpectralRegistry.hpp"
 

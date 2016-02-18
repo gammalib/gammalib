@@ -30,12 +30,16 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
+#include "GModelPar.hpp"
 #include "GEnergy.hpp"
-#include "GXmlElement.hpp"
 #include "GNodeArray.hpp"
 #include "GFilename.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GRan;
+class GTime;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -73,9 +77,9 @@ public:
     virtual std::string         classname(void) const;
     virtual std::string         type(void) const;
     virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime) const;
+                                     const GTime&   srcTime = GTime()) const;
     virtual double              eval_gradients(const GEnergy& srcEng,
-                                               const GTime&   srcTime);
+                                               const GTime&   srcTime = GTime());
     virtual double              flux(const GEnergy& emin,
                                      const GEnergy& emax) const;
     virtual double              eflux(const GEnergy& emin,

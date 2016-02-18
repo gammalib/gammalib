@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralExpPlaw.cpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GRan.hpp"
 #include "GIntegral.hpp"
 #include "GModelSpectralExpPlaw.hpp"
 #include "GModelSpectralRegistry.hpp"
