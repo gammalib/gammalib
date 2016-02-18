@@ -20,10 +20,13 @@ Each class should be defined in a pair of individual files:
 In addition, a SWIG interface file should be provided for the Python
 bindings (with filename suffix ``.i``).
 
-Each file should contain the ``#include`` directives that are necessary for
-compilation of the specific file. ``#include`` directives that are specified
-in the header file can be omitted in the source code file, provided that
-the header file is included in the source code file.
+In the header file, prefer forward declarations instead of ``#include``
+directives to minimise the dependencies between the files. Specify only
+the ``#include`` directives that are absolutely needed to compile the
+code.
+
+In the source file, put all ``#include`` directives that are necessary for
+compilation of the specific file.
 
 The C++ style header files should be used instead of the C style header
 files to ensure maximum portability. The following table provides the
@@ -42,11 +45,11 @@ C++           C              Function examples
 ============= ============== =================
 
 Note that functions and types should be prefixed by ``std::``. For example,
-``cos`` becomes ``std::cos``, ``time_t`` becomes ``std::time_t``, etc. One significant
-change between C and C++ is that ``fabs`` becomes ``std::abs`` since the C style
-``abs`` function only applies to integers. Here, the ``std::`` prefix is crucial
-to distinguish the C++ function (which is also defined for doubles) from
-the C function.
+``cos`` becomes ``std::cos``, ``time_t`` becomes ``std::time_t``, etc.
+One significant change between C and C++ is that ``fabs`` becomes ``std::abs``
+since the C style ``abs`` function only applies to integers. Here, the
+``std::`` prefix is crucial to distinguish the C++ function (which is also
+defined for doubles) from the C function.
 
 .. _sec_header:
 
