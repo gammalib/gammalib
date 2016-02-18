@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSpatialDiffuseConst.cpp - Spatial isotropic model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,7 +41,7 @@ const GModelSpatialDiffuseConst g_spatial_const_seed;
 const GModelSpatialRegistry     g_spatial_const_registry(&g_spatial_const_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC                           "GModelSpatialDiffuseConst::mc(GRan&)"
+#define G_MC_NORM     "GModelSpatialDiffuseConst::mc_norm(GSkyDir&, double&)"
 #define G_READ                "GModelSpatialDiffuseConst::read(GXmlElement&)"
 #define G_WRITE              "GModelSpatialDiffuseConst::write(GXmlElement&)"
 
@@ -60,6 +60,8 @@ const GModelSpatialRegistry     g_spatial_const_registry(&g_spatial_const_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Construct empty isotropic spatial model.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(void) :
                            GModelSpatialDiffuse()
@@ -98,11 +100,11 @@ GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Value constructor
  *
- * @param[in] value Isotropic intensity value (units sr^-1).
+ * @param[in] value Isotropic intensity value (\f$sr^{-1}\f$).
  *
- * Constructs isotropic spatial model by assigning the intensity @p value of
- * the diffuse emission. This constructor explicitly sets the m_value
- * parameter of the model.
+ * Constructs isotropic spatial model by assigning an intensity of @p value
+ * in units of \f$sr^{-1}\f$ to the diffuse emission. This constructor
+ * explicitly sets the @a m_value member of the model.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const double& value) :
                            GModelSpatialDiffuse()
@@ -125,6 +127,9 @@ GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const double& value) :
  * @brief Copy constructor
  *
  * @param[in] model Isotropic spatial model.
+ *
+ * Constructs isotropic spatial model by copying another isotropic spatial
+ * model.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GModelSpatialDiffuseConst& model) :
                            GModelSpatialDiffuse(model)
@@ -142,6 +147,8 @@ GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GModelSpatialDiffuseC
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs isotropic spatial model.
  ***************************************************************************/
 GModelSpatialDiffuseConst::~GModelSpatialDiffuseConst(void)
 {
@@ -164,6 +171,8 @@ GModelSpatialDiffuseConst::~GModelSpatialDiffuseConst(void)
  *
  * @param[in] model Isotropic spatial model.
  * @return Isotropic spatial model.
+ *
+ * Assigns an isotropic spatial model.
  ***************************************************************************/
 GModelSpatialDiffuseConst& GModelSpatialDiffuseConst::operator=(const GModelSpatialDiffuseConst& model)
 {
@@ -197,10 +206,13 @@ GModelSpatialDiffuseConst& GModelSpatialDiffuseConst::operator=(const GModelSpat
 
 /***********************************************************************//**
  * @brief Clear isotropic spatial model
+ *
+ * Clears the isotropic spatial model. This method is equivalent to creating
+ * an isotropic spatial model using the void constructor.
  ***************************************************************************/
 void GModelSpatialDiffuseConst::clear(void)
 {
-    // Free class members (base and derived classes, derived class first)
+    // Free class members
     free_members();
     this->GModelSpatialDiffuse::free_members();
     this->GModelSpatial::free_members();
@@ -219,6 +231,8 @@ void GModelSpatialDiffuseConst::clear(void)
  * @brief Clone isotropic spatial model
  *
  * @return Pointer to deep copy of isotropic spatial model.
+ *
+ * Returns a pointer to a deep copy of the isotropic spatial model.
  ***************************************************************************/
 GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
 {
@@ -228,15 +242,22 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function (in units of sr^-1)
+ * @brief Evaluate isotropic spatial model value
  *
- * @param[in] photon Incident photon (ignored).
- * @return Model value (units of sr^-1).
+ * @param[in] photon Incident photon.
+ * @return Model value (\f$sr^{-1}\f$).
  *
- * Evaluates the spatial part for an isotropic source model. By definition
- * the model value is independent from the sky direction. The model value is
- * given by the value parameter divided by the solid angle of the sphere
- * \f$4 \pi\f$.
+ * Evaluates the isotropic spatial model for a given @p photon, characterised
+ * by a sky direction, energy and arrival time \f$(\vec{p},E,t)\f$. By
+ * definition, the isotropic spatial model and gradient are independent of
+ * sky direction, energy and time. The model value is given by
+ *
+ * \f[
+ *    M_\mathrm{S}(\vec{p}|E,t) = \frac{v}{4\pi}
+ * \f]
+ *
+ * where \f$v\f$ is the value() parameter, which is divided by the solid
+ * angle \f$4\pi\f$ of the celestial sphere. 
  ***************************************************************************/
 double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
 {
@@ -252,14 +273,32 @@ double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function and gradients (in units of sr^-1)
+ * @brief Evaluate isotropic spatial model value and parameter gradient
  *
- * @param[in] photon Incident photon (ignored).
- * @return Model value (units of sr^-1).
+ * @param[in] photon Incident photon.
+ * @return Model value (\f$sr^{-1}\f$).
  *
- * Evaluates the spatial part for an isotropic source model and sets the
- * parameter gradient. By definition, the model value and gradient are
- * independent from the sky direction.
+ * Evaluates the isotropic spatial model for a given @p photon, characterised
+ * by a sky direction, energy and arrival time \f$(\vec{p},E,t)\f$, and
+ * computes the gradient of the value() parameter. By definition, the
+ * isotropic spatial model and gradient are independent of sky direction,
+ * energy and time. The model value is given by
+ *
+ * \f[
+ *    M_\mathrm{S}(\vec{p}|E,t) = \frac{v}{4\pi}
+ * \f]
+ *
+ * where \f$v\f$ is the value() parameter, which is divided by the solid
+ * angle \f$4\pi\f$ of the celestial sphere. The value() gradient is given
+ * by
+ *
+ * \f[
+ *    \frac{\partial M_\mathrm{S}(\vec{p}|E,t)}{\partial v_v} =
+ *    \frac{v_s}{4\pi}
+ * \f]
+ *
+ * where \f$v=v_v v_s\f$ is the factorisation of the value() parameter into
+ * a value \f$v_v\f$ and scale \f$v_s\f$ term.
  ***************************************************************************/
 double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
 {
@@ -283,28 +322,83 @@ double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
 /***********************************************************************//**
  * @brief Return MC sky direction
  *
- * @param[in] energy Photon energy (ignored).
- * @param[in] time Photon arrival time (ignored).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Returns an arbitrary position on the celestial sphere. This position is
- * independent of event @p energy and arrival @p time.
+ * Returns an arbitrary direction on the celestial sphere within a simulation
+ * cone region that has been defined by a previous call to the mc_norm()
+ * method (if no such call was made the entire sky will be assumed as the
+ * simulation cone). The sky direction is independent of event @p energy and
+ * arrival @p time.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseConst::mc(const GEnergy& energy,
                                       const GTime&   time,
                                       GRan&          ran) const
 {
-    // Simulate Right Ascension and Declination
-    double ra  = gammalib::twopi * ran.uniform();
-    double dec = std::asin(2.0 * ran.uniform() - 1.0);
+    // Simulate offset from simulation cone centre
+    double theta = std::acos(1.0 - ran.uniform() * (1.0 - m_mc_cos_radius)) *
+                   gammalib::rad2deg;
+    double phi   = 360.0 * ran.uniform();
 
-    // Set sky direction
-    GSkyDir dir;
-    dir.radec(ra, dec);
+    // Initialise sky direction with simulation cone centre
+    GSkyDir dir(m_mc_centre);
 
+    // Rotate sky direction by offset angles (phi, theta)
+    dir.rotate_deg(phi, theta);
+    
     // Return sky direction
     return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization of constant diffuse source for Monte Carlo
+ *        simulations
+ *
+ * @param[in] dir Centre of simulation cone.
+ * @param[in] radius Radius of simulation cone (deg).
+ * @return Model normalization.
+ *
+ * @exception GException::invalid_argument
+ *            Radius of simulation cone not coprised in [0,180] degrees.
+ *
+ * Returns the normalization of a constant diffuse source. The normalization
+ * is given by the product between the fraction \f$f\f$ of the sky covered
+ * by the simulation cone 
+ *
+ * \f[
+ *    f = \frac{2\pi \left( 1-\cos(r) \right)}{4\pi}
+ * \f]
+ *
+ * (where \f$r\f$ is the radius of the simulation cone) and the model
+ * parameter value(). The normalization only depends of the radius of the
+ * simulation cone and is invariant to its centre.
+ ***************************************************************************/
+double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
+                                          const double&  radius) const
+{
+    // Throw exception if the radius is invalid
+    if (radius < 0.0 || radius > 180.0) {
+        std::string msg = "Invalid simulation cone radius "+
+                          gammalib::str(radius)+" specified. Please provide "
+                          "a value comprised within 0 and 180 degrees.";
+        throw GException::invalid_argument(G_MC_NORM, msg);
+    }
+
+    // Store cosine of simulation cone radius and cone centre
+    m_mc_centre     = dir;
+    m_mc_cos_radius = std::cos(radius * gammalib::deg2rad);
+
+    // Compute fraction of sky covered by the simulation cone
+    double fraction = 0.5 * (1.0 - m_mc_cos_radius);
+
+    // Multiply by normalization value of model
+    double norm = fraction * value();
+
+    // Return normalization
+    return (norm);
 }
 
 
@@ -312,11 +406,6 @@ GSkyDir GModelSpatialDiffuseConst::mc(const GEnergy& energy,
  * @brief Read model from XML element
  *
  * @param[in] xml XML element.
- *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Read the isotropic source model information from an XML element. The XML
  * element is expected to have the following format:
@@ -331,23 +420,11 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
     // Clear model
     clear();
 
-    // Verify that XML element has exactly 1 parameters
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Isotropic source model requires exactly 1 parameter.");
-    }
+    // Get value parameter
+    const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
 
-    // Get pointer on model parameter
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Value") {
-        m_value.read(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Isotropic source model requires \"Value\" parameter.");
-    }
+    // Read value parameter
+    m_value.read(*par);
 
     // Return
     return;
@@ -361,10 +438,6 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
  *
  * @exception GException::model_invalid_spatial
  *            Existing XML element is not of type "ConstantValue"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Write the isotropic source model information into an XML element. The XML
  * element will have the following format:
@@ -387,28 +460,11 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
               "Spatial model is not of type \"ConstantValue\".");
     }
 
-    // If XML element has 0 nodes then append 1 parameter node
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Value\""));
-    }
+    // Get or create Value parameter
+    GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "Value");
 
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Isotropic source model requires exactly 1 parameter.");
-    }
-
-    // Get pointers on both model parameters
-    GXmlElement* par = xml.element("parameter", 0);
-
-    // Set or update parameter
-    if (par->attribute("name") == "Value") {
-        m_value.write(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Isotropic source model requires \"Value\" parameter.");
-    }
+    // Write parameter
+    m_value.write(*par);
 
     // Return
     return;
@@ -467,6 +523,10 @@ void GModelSpatialDiffuseConst::init_members(void)
     m_value.gradient(0.0);
     m_value.has_grad(true);
 
+    // Initialise other members
+    m_mc_centre.clear();
+    m_mc_cos_radius = -1.0; // Set simulation cone to allsky
+
     // Set parameter pointer(s)
     m_pars.clear();
     m_pars.push_back(&m_value);
@@ -484,7 +544,9 @@ void GModelSpatialDiffuseConst::init_members(void)
 void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& model)
 {
     // Copy members
-    m_value = model.m_value;
+    m_value         = model.m_value;
+    m_mc_centre     = model.m_mc_centre;
+    m_mc_cos_radius = model.m_mc_cos_radius;
 
     // Set parameter pointer(s)
     m_pars.clear();

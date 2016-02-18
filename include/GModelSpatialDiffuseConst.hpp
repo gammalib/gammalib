@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialDiffuseConst.hpp - Spatial isotropic model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -86,7 +86,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_value;    //!< Value
+    GModelPar       m_value;         //!< Value
+    mutable GSkyDir m_mc_centre;     //!< Simulation cone centre
+    mutable double  m_mc_cos_radius; //!< Cosine of simulation cone radius
 };
 
 
@@ -146,29 +148,10 @@ void GModelSpatialDiffuseConst::value(const double& value)
 
 
 /***********************************************************************//**
- * @brief Return normalization of constant diffuse source for Monte Carlo
- *        simulations
- *
- * @param[in] dir Centre of simulation cone.
- * @param[in] radius Radius of simulation cone (degrees).
- * @return Normalization.
- *
- * Returns the normalization of a constant diffuse source. The normalization
- * is given by the model value and does not depend on @p dir and @p radius.
- ***************************************************************************/
-inline
-double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
-                                          const double&  radius) const
-{
-    return (value());
-}
-
-
-/***********************************************************************//**
  * @brief Signals whether model contains sky direction
  *
  * @param[in] dir Sky direction.
- * @param[in] margin Margin to be added to sky direction (degrees)
+ * @param[in] margin Margin to be added to sky direction (deg, default: 0.0).
  * @return True.
  *
  * Signals whether a sky direction falls within the bounding circle of

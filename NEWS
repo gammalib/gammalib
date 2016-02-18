@@ -111,6 +111,11 @@ None
 
 8. Model module
 ---------------
+Sky directions drawn by GModelSpatialDiffuseConst::mc() are now restricted
+to the simulation cone that has previously been defined using the mc_norm()
+method. This speeds up considerbly the Monte Carlo simulations for an
+isotropic diffuse model (#1674). 
+
 The GModelSpectral eval() and eval_gradients() methods use an empty GTim()
 object as default time argument since all spectral models are so far time-
 independent. This avoids that a user needs to specify a dummy time argument
