@@ -381,6 +381,30 @@ void TestGSupport::test_node_array(void)
     test_value(nodes.wgt_left(), 0.25, 1.0e-6, "Expected weight 0.25");
     test_value(nodes.wgt_right(), 0.75, 1.0e-6, "Expected weight 0.75");
 
+    // Remove test file
+    GFilename filename("test_nodes.fits");
+    filename.remove();
+
+    // Check saving
+    nodes.save("test_nodes.fits");
+    GNodeArray load1("test_nodes.fits");
+    test_value(load1.size(), 3, "GNodeArray should have 3 nodes.");
+    test_value(load1[0], 1.0, 1.0e-7, "First node should be 1.");
+    test_value(load1[1], 3.0, 1.0e-7, "First node should be 3.");
+    test_value(load1[2], 4.0, 1.0e-7, "First node should be 4.");
+
+    // Check saving in a different extnsion
+    nodes.append(10.0);
+    nodes.append(11.0);
+    nodes.save("test_nodes.fits[NODE ARRAY]", true);
+    GNodeArray load2("test_nodes.fits[NODE ARRAY]");
+    test_value(load2.size(), 5, "GNodeArray should have 5 nodes.");
+    test_value(load2[0], 1.0, 1.0e-7, "First node should be 1.");
+    test_value(load2[1], 3.0, 1.0e-7, "First node should be 3.");
+    test_value(load2[2], 4.0, 1.0e-7, "First node should be 4.");
+    test_value(load2[3], 10.0, 1.0e-7, "First node should be 10.");
+    test_value(load2[4], 11.0, 1.0e-7, "First node should be 11.");
+
     // Return
     return;
 }

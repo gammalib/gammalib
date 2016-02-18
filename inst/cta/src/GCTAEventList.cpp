@@ -303,8 +303,9 @@ void GCTAEventList::load(const GFilename& filename)
 void GCTAEventList::save(const GFilename& filename,
                          const bool&      clobber) const
 {
-    // Open or create FITS file
-    GFits fits(filename, true);
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
 
     // Write event list
     write(fits);

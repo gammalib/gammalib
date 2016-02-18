@@ -252,11 +252,18 @@ const double& GArf::at(const int& index) const
  * @brief Load Auxiliary Response File
  *
  * @param[in] filename File name.
+ *
+ * Loads the Auxiliary Response File from the `SPECRESP` extension of the
+ * FITS file.
  ***************************************************************************/
 void GArf::load(const GFilename& filename)
 {
-    // Open FITS file
-    GFits fits(filename);
+    // Clear response
+    clear();
+
+    // Open FITS file (without extension name as the user is not allowed
+    // to modify the extension names)
+    GFits fits(filename.url());
 
     // Get ARF table
     const GFitsTable& table = *fits.table("SPECRESP");
@@ -268,7 +275,7 @@ void GArf::load(const GFilename& filename)
     fits.close();
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -279,21 +286,30 @@ void GArf::load(const GFilename& filename)
  * @brief Save Auxiliary Response File
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file? (defaults: false)
+ * @param[in] clobber Overwrite existing file?
+ *
+ * Saves the Auxiliary Response File into a FITS file. If a file with the
+ * given @p filename does not yet exist it will be created. If the file
+ * exists it can be overwritten if the @p clobber flag is set to `true`.
+ * Otherwise an exception is thrown.
+ *
+ * The method will save the `SPECRESP` binary FITS table into the FITS file
+ * that contains the values of the Auxiliary Response File.
  ***************************************************************************/
 void GArf::save(const GFilename& filename, const bool& clobber) const
 {
-    // Open FITS file
+    // Create FITS file
     GFits fits;
 
     // Write ARF into file
     write(fits);
 
-    // Close FITS file
-    fits.saveto(filename, clobber);
+    // Save to file (without extension name since the requested extension
+    // may not yet exist in the file)
+    fits.saveto(filename.url(), clobber);
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -304,6 +320,19 @@ void GArf::save(const GFilename& filename, const bool& clobber) const
  * @brief Read Auxiliary Response File
  *
  * @param[in] table ARF FITS table.
+ *
+ * Reads the Auxiliary Response File from a FITS table. The true energy
+ * boundaries are expected in the `ENERG_LO` and `ENERG_HI` columns, the
+ * response information is expected in the `SPECRESP` column.
+ *
+ * The method will analyze the unit of the `SPECRESP` column, and if either
+ * `m^2` or `m2` are encountered, multiply the values of the column by 
+ * \f$10^4\f$ to convert the response into units of \f$cm^2\f$. Units of the
+ * `ENERG_LO` and `ENERG_HI` columns are also interpreted for conversion.
+ *
+ * See
+ * http://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc4
+ * for details about the Auxiliary Response File format.
  ***************************************************************************/
 void GArf::read(const GFitsTable& table)
 {
@@ -349,6 +378,18 @@ void GArf::read(const GFitsTable& table)
  * @brief Write Auxiliary Response File
  *
  * @param[in] fits FITS file.
+ *
+ * Writes the Auxiliary Response File into the `SPECRESP` extension of the
+ * FITS file. An existing extension with the same name will be removed from
+ * the FITS file before writing.
+ *
+ * The method writes the boundaries of the true energy bins into the
+ * `ENERG_LO` and `ENERG_HI` columns, response information will be written
+ * into the `SPECRESP` column.
+ *
+ * See
+ * http://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc4
+ * for details about the Auxiliary Response File format.
  ***************************************************************************/
 void GArf::write(GFits& fits) const
 {
@@ -405,7 +446,7 @@ void GArf::write(GFits& fits) const
 /***********************************************************************//**
  * @brief Print Auxiliary Response File
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing Auxiliary Response File information.
  ***************************************************************************/
 std::string GArf::print(const GChatter& chatter) const

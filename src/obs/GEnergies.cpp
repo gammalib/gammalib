@@ -565,30 +565,36 @@ void GEnergies::load(const GFilename& filename)
 
 
 /***********************************************************************//**
- * @brief Save energies to FITS file
+ * @brief Save energies into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing energies extension?
+ * @param[in] clobber Overwrite an existing energies extension?
  *
- * Saves energiesinto a FITS file. If a file with the given @p filename does
- * not yet exist it will be created, otherwise the method opens the existing
- * file. The method will create (or replace an existing) energies extension.
- * The extension name can be specified as part of the @p filename, or if no
- * extension name is given, is assumed to be "ENERGIES".
+ * Saves energies into a FITS file. If a file with the given @p filename
+ * does not yet exist it will be created, otherwise the method opens the
+ * existing file. Energies can only be appended to an existing file if the
+ * @p clobber flag is set to `true` (otherwise an exception is thrown).
  *
- * An existing file will only be modified if the @p clobber flag is set to
- * true.
+ * The method will append a binary FITS table containing the energies to the
+ * FITS file. The extension name can be specified as part of the
+ * @p filename. For example the @p filename
+ *
+ *      myfile.fits[ENERGY VALUES]
+ *
+ * will save the energies in the `ENERGY VALUES` extension of the
+ * `myfile.fits` file. If the extension exists already in the file it will be
+ * replaced, otherwise a new extension will be created. If no extension name
+ * is provided, the method will use `ENERGIES` as the default extension name
+ * for energies.
  ***************************************************************************/
 void GEnergies::save(const GFilename& filename, const bool& clobber) const
 {
-    // Get extension name
-    std::string extname = filename.extname("ENERGIES");
-
-    // Open or create FITS file
-    GFits fits(filename, true);
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
 
     // Write energies to FITS file
-    write(fits, extname);
+    write(fits, filename.extname("ENERGIES"));
 
     // Save to file
     fits.save(clobber);

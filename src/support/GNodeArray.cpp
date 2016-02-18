@@ -721,26 +721,35 @@ void GNodeArray::load(const GFilename& filename)
 
 
 /***********************************************************************//**
- * @brief Save nodes to FITS file
+ * @brief Save node array into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing nodes extension? (default: false)
+ * @param[in] clobber Overwrite an existing node array extension?
  *
  * Saves node array into a FITS file. If a file with the given @p filename
  * does not yet exist it will be created, otherwise the method opens the
- * existing file. The method will create (or replace an existing) node array
- * extension. The extension name can be specified as part of the @p filename,
- * or if no extension name is given, is assumed to be "NODES".
+ * existing file. Node arrays can only be appended to an existing file if the
+ * @p clobber flag is set to `true` (otherwise an exception is thrown).
  *
- * An existing file will only be modified if the @p clobber flag is set to
- * true.
+ * The method will append a binary FITS table containing the node array to
+ * the FITS file. The extension name can be specified as part of the
+ * @p filename. For example the @p filename
+ *
+ *      myfile.fits[NODE ARRAY]
+ *
+ * will save the node array in the `NODE ARRAY` extension of the
+ * `myfile.fits` file. If the extension exists already in the file it will be
+ * replaced, otherwise a new extension will be created. If no extension name
+ * is provided, the method will use `NODES` as the default extension name
+ * for the node array.
  ***************************************************************************/
 void GNodeArray::save(const GFilename& filename, const bool& clobber) const
 {
-    // Open or create FITS file
-    GFits fits(filename, true);
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
 
-    // Write GTI to FITS object
+    // Write node array to FITS object
     write(fits, filename.extname("NODES"));
 
     // Save to file

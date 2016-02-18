@@ -330,16 +330,18 @@ void GPha::fill(const GEnergy& energy, const double& value)
  *
  * @param[in] filename File name.
  *
- * Loads the Pulse Height Analyzer spectrum from a FITS file. If an EBOUNDS
- * extension is given, the energy boundaries information is also loaded
+ * Loads the Pulse Height Analyzer spectrum from the `SPECTRUM` extension
+ * of the FITS file. If the file contains also an `EBOUNDS` extension the
+ * energy boundaries of all Pulse Height Analyzer channels are also loaded.
  ***************************************************************************/
 void GPha::load(const GFilename& filename)
 {
-    // Clear any existing models
+    // Clear spectrum
     clear();
 
-    // Open FITS file
-    GFits fits(filename);
+    // Open FITS file (without extension name as the user is not allowed
+    // to modify the extension names)
+    GFits fits(filename.url());
 
     // Get PHA table
     const GFitsTable& pha = *fits.table("SPECTRUM");
@@ -362,7 +364,7 @@ void GPha::load(const GFilename& filename)
     fits.close();
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -373,30 +375,32 @@ void GPha::load(const GFilename& filename)
  * @brief Save Pulse Height Analyzer spectrum
  *
  * @param[in] filename File name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
- * Saves Pulse Height Analyzer spectrum and energy boundaries into a FITS
- * file. If a file with the given @p filename does not yet exist it will be
- * created, otherwise the method opens the existing file. The method will
- * create (or replace an existing) Pulse Height Analyzer spectrum and energy
- * boundary extensions.
+ * Saves the Pulse Height Analyzer spectrum and energy boundaries into a
+ * FITS file. If a file with the given @p filename does not yet exist it
+ * will be created. If the file exists it can be overwritten if the
+ * @p clobber flag is set to `true`. Otherwise an exception is thrown.
  *
- * An existing file will only be modified if the @p clobber flag is set to
- * true.
+ * The method will save two binary FITS tables into the FITS file: a
+ * `SPECTRUM` extension that contains the channel values of the Pulse
+ * Height Analyzer spectrum and an `EBOUNDS` extension that contains the
+ * energy boundaries for all channels.
  ***************************************************************************/
 void GPha::save(const GFilename& filename, const bool& clobber) const
 {
-    // Open or create FITS file
-    GFits fits(filename, true);
+    // Create FITS file
+    GFits fits;
 
     // Write PHA into file
     write(fits);
 
-    // Close FITS file
-    fits.save(clobber);
+    // Save to file (without extension name since the requested extension
+    // may not yet exist in the file)
+    fits.saveto(filename.url(), clobber);
 
     // Store filename
-    m_filename = filename;
+    m_filename = filename.url();
 
     // Return
     return;
@@ -406,10 +410,18 @@ void GPha::save(const GFilename& filename, const bool& clobber) const
 /***********************************************************************//**
  * @brief Read Pulse Height Analyzer spectrum
  *
- * @param[in] table PHA FITS table.
+ * @param[in] table FITS table.
  *
  * @exception GException::invalid_value
  *            Mismatch between PHA file and energy boundaries.
+ *
+ * Reads the Pulse Height Analyzer spectrum from a FITS table. The channel
+ * values are expected in the `COUNTS` column of the table. All other
+ * columns are ignored.
+ *
+ * See
+ * https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007/node5.html
+ * for details about the Pulse Height Analyzer spectrum format.
  ***************************************************************************/
 void GPha::read(const GFitsTable& table)
 {
@@ -417,17 +429,16 @@ void GPha::read(const GFitsTable& table)
     const GFitsTableCol* col_data = table["COUNTS"];
 
     // Extract number of channels in FITS file
-    int length = table.integer("NAXIS2");
+    int length = col_data->length();
 
-    // Check whether column length is okay
+    // Check whether column length is consistent with energy boundaries
     if (m_ebounds.size() > 0) {
         if (m_ebounds.size() != length) {
-            std::string msg = "Number of channels in PHA file ("
-                              ""+gammalib::str(length)+") mismatches the"
-                              " number of energy boundaries ("
-                              ""+gammalib::str(m_ebounds.size())+") that"
-                              " are defined in the GPha instance.\n"
-                              "Please define the correct energy boundaries.";
+            std::string msg = "Mismatch between the "+gammalib::str(length)+
+                              " channels in the PHA file and the "+
+                              gammalib::str(m_ebounds.size())+" energy "
+                              "boundaries. Please correct either the energy "
+                              "boundaris or the PHA file.";
             throw GException::invalid_value(G_READ, msg);
         }
     }
@@ -449,6 +460,20 @@ void GPha::read(const GFitsTable& table)
  * @brief Write Pulse Height Analyzer spectrum
  *
  * @param[in] fits FITS file.
+ *
+ * Writes the Pulse Height Analyzer spectrum into `SPECTRUM` and `EBOUNDS`
+ * extensions of the FITS file. Extensions with these names will be removed
+ * from the FITS file before writing.
+ *
+ * The columns `CHANNEL`, `COUNTS`, `STAT_ERR`, `SYS_ERR`, `QUALITY`,
+ * `GROUPING`, `AREASCAL`, and `BACKSCAL` will be written into the `SPECTRUM`
+ * extension, but only the `CHANNEL` and `COUNTS` columns will be filled with
+ * values. Note that the channels start from 1 in the Pulse Height Analyzer
+ * spectrum.
+ *
+ * See
+ * https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007/node5.html
+ * for details about the PHA file format.
  ***************************************************************************/
 void GPha::write(GFits& fits) const
 {
@@ -516,7 +541,7 @@ void GPha::write(GFits& fits) const
 /***********************************************************************//**
  * @brief Print Pulse Height Analyzer spectrum
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing Pulse Height Analyzer spectrum information.
  ***************************************************************************/
 std::string GPha::print(const GChatter& chatter) const

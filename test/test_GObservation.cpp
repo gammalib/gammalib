@@ -252,6 +252,24 @@ void TestGObservation::test_ebounds(void)
     test_assert(!containment.contains(GEnergy(200.0, "MeV"), GEnergy(2000.0, "MeV")), "Energy bin [200,2000] MeV should not be contained.");
     test_assert(!containment.contains(GEnergy(80.0, "MeV"), GEnergy(2000.0, "MeV")), "Energy bin [80,2000] MeV should not be contained.");
 
+    // Remove test file
+    GFilename filename("test_ebounds.fits");
+    filename.remove();
+
+    // Check saving
+    containment.save("test_ebounds.fits");
+    GEbounds load1("test_ebounds.fits");
+    test_value(load1.size(), 1, "GEbounds should have 1 element.");
+    test_value(load1.emin().MeV(), 100.0, 1.0e-10, "Minimum energy should be 100.");
+    test_value(load1.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
+
+    // Check saving in a different extnsion
+    ebds.save("test_ebounds.fits[ENERGY BOUNDARIES 2]", true);
+    GEbounds load2("test_ebounds.fits[ENERGY BOUNDARIES 2]");
+    test_value(load2.size(), 1, "GEbounds should have 1 element.");
+    test_value(load2.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(load2.emax().MeV(), 10.0, 1.0e-10, "Maximum energy should be 10.");
+
     // Return
     return;
 }
@@ -379,6 +397,12 @@ void TestGObservation::test_gti(void)
     test_value(gti.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-7, "Stop time should be 1000.");
 
+    // Remove test file
+    GFilename file1("test_gti1.fits");
+    GFilename file2("test_gti2.fits");
+    file1.remove();
+    file2.remove();
+
     // Check saving in and loading from FITS file
     gti.save("test_gti1.fits", true);
     GGti test1("test_gti1.fits");
@@ -479,6 +503,24 @@ void TestGObservation::test_gti(void)
     test_value(test5.tstop(3).secs(), 10000.0, 1.0e-7, "Bin 3 stop time should be 10000.");
     test_value(test5.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
     test_value(test5.tstop().secs(), 10000.0, 1.0e-7, "Stop time should be 10000.");
+
+    // Remove test file
+    GFilename filename("test_gti.fits");
+    filename.remove();
+
+    // Check saving
+    test4.save("test_gti.fits");
+    GGti load1("test_gti.fits");
+    test_value(load1.size(), 4, "GGti should have 4 intervals.");
+    test_value(load1.tstart().secs(), 1.0, 1.0e-7, "Start time should be 1.");
+    test_value(load1.tstop().secs(), 10000.0, 1.0e-7, "Stop time should be 10000.");
+
+    // Check saving in a different extnsion
+    test3.save("test_gti.fits[GOOD TIME INTERVALS]", true);
+    GGti load2("test_gti.fits[GOOD TIME INTERVALS]");
+    test_value(load2.size(), 1, "GGti should have 1 interval.");
+    test_value(load2.tstart().convert(GTimeReference(51544.5, "s")), 0.0, 1.0e-7, "Start time should be 0.");
+    test_value(load2.tstop().convert(GTimeReference(51544.5, "s")), 100.0, 1.0e-7, "Stop time should be 100.");
 
     // Return
     return;
@@ -984,6 +1026,10 @@ void TestGObservation::test_energies(void)
         test_value(energies[i].MeV(), double(i));
     }
 
+    // Remove test file
+    GFilename filename("test_energies.fits");
+    filename.remove();
+
     // Save and reload energies
     test_try("Saving and loading");
     try {
@@ -1010,6 +1056,21 @@ void TestGObservation::test_energies(void)
     }
     catch (std::exception &e) {
         test_try_failure(e);
+    }
+
+    // Save and reload energies in another extension
+    test_try("Saving and loading in another extension");
+    try {
+        energies.save("test_energies.fits[NEW ENERGIES]", true);
+        energies.clear();
+        energies.load("test_energies.fits[NEW ENERGIES]");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    for (int i = 0; i < 4; ++i) {
+        test_value(energies[i].MeV(), double(i));
     }
 
     // Check linear energies

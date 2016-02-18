@@ -423,8 +423,9 @@ void GCTAPsfKing::save(const GFilename& filename, const bool& clobber) const
     // Get extension name
     std::string extname = filename.extname("POINT SPREAD FUNCTION");
 
-    // Open or create FITS file
-    GFits fits(filename, true);
+    // Open or create FITS file (without extension name since the requested
+    // extension may not yet exist in the file)
+    GFits fits(filename.url(), true);
 
     // Remove extension if it exists already
     if (fits.contains(extname)) {
