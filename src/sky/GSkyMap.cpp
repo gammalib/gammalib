@@ -1874,6 +1874,12 @@ void GSkyMap::save(const GFilename& filename, bool clobber) const
             // requested extension may not yet exist in the file)
             GFits fits(filename.url(), true);
 
+            // If the FITS file contains already an extension with the same
+            // name then remove now this extension
+            if (fits.contains(filename.extname())) {
+                fits.remove(filename.extname());
+            }
+
             // Append sky map to FITS file
             fits.append(*hdu);
 
