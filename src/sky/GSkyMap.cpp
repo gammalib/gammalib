@@ -1746,56 +1746,85 @@ void GSkyMap::stack_maps(void)
  ***************************************************************************/
 void GSkyMap::load(const GFilename& filename)
 {
-    // Free memory and initialise members
-    free_members();
-    init_members();
+    // Clear sky map
+    clear();
+
+    // Initialize load flag
+    bool loaded(false);
 
     // Open FITS file
     GFits fits(filename);
 
-    // Get number of HDUs
-    int num = fits.size();
-
-    // Initialize load flag
-    bool loaded = false;
-
-    // First search for HEALPix extension. We can skip the first extension
-    // since this is always an image and a HEALPix map is stored in a
-    // binary table
-    for (int extno = 1; extno < num; ++extno) {
-
-        // Get reference to HDU
-        const GFitsHDU& hdu = *fits.at(extno);
-
-        // If PIXTYPE keyword equals "HEALPIX" then load map
-        if (hdu.has_card("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+    // If an extension name is specified then first try loading that
+    // extension
+    if (filename.has_extname()) {
+        const GFitsHDU& hdu = *fits.at(filename.extname());
+        if (is_healpix(hdu)) {
             read_healpix(static_cast<const GFitsTable&>(hdu));
             loaded = true;
-            break;
         }
+        else if (is_wcs(hdu)) {
+            read_wcs(static_cast<const GFitsImage&>(hdu));
+            loaded = true;
+        }
+    }
 
-    } // endfor: looped over HDUs
+    // ... otherwise is an extension number is specified then try loading
+    // the corresponding HDU
+    else if (filename.has_extno()) {
+        const GFitsHDU& hdu = *fits.at(filename.extno());
+        if (is_healpix(hdu)) {
+            read_healpix(static_cast<const GFitsTable&>(hdu));
+            loaded = true;
+        }
+        else if (is_wcs(hdu)) {
+            read_wcs(static_cast<const GFitsImage&>(hdu));
+            loaded = true;
+        }
+    }
 
-    // If we have not found a HEALPIX map then search now for image.
-    // Skip empty images
+    // If no map has yet been loaded then scan the file for an appropriate
+    // HDU and read sky map from the first suitable HDU
     if (!loaded) {
-        for (int extno = 0; extno < num; ++extno) {
 
-            // Get referene to HDU
+        // Get number of HDUs
+        int num = fits.size();
+
+        // First search for HEALPix extension. We can skip the first
+        // extension since this is always an image and a HEALPix map
+        // is stored in a binary table
+        for (int extno = 1; extno < num; ++extno) {
+
+            // Get reference to HDU
             const GFitsHDU& hdu = *fits.at(extno);
 
-            // Skip if extension is not an image
-            if (extno > 0) {
-                if (hdu.string("XTENSION") != "IMAGE")
-                    continue;
+            // If HDU is HEALPix then read data
+            if (is_healpix(hdu)) {
+                read_healpix(static_cast<const GFitsTable&>(hdu));
+                loaded = true;
+                break;
             }
 
-            // Load WCS map
-            read_wcs(static_cast<const GFitsImage&>(hdu));
-            break;
-
         } // endfor: looped over HDUs
-    } // endif: no HEALPix map found
+
+        // If we have not found a HEALPIX map then search now for an
+        // image.
+        if (!loaded) {
+            for (int extno = 0; extno < num; ++extno) {
+
+                // Get referene to HDU
+                const GFitsHDU& hdu = *fits.at(extno);
+
+                // If HDU is WCS then read data
+                if (is_wcs(hdu)) {
+                    read_wcs(static_cast<const GFitsImage&>(hdu));
+                    loaded = true;
+                    break;
+                }
+
+            } // endfor: looped over HDUs
+        } // endif: no sky map yet loaded
+    } // endif: no sky map yet loaded
 
     // Close FITS file
     fits.close();
@@ -1806,12 +1835,14 @@ void GSkyMap::load(const GFilename& filename)
 
 
 /***********************************************************************//**
- * @brief Save skymap into FITS file.
+ * @brief Save sky map into FITS file
  *
  * @param[in] filename FITS file name.
- * @param[in] clobber Overwrite existing file? (true=yes)
+ * @param[in] clobber Overwrite existing file? (default: false)
  *
- * The method does nothing if the skymap holds no valid WCS.
+ * Saves the sky map into a FITS file. If the file exists already the method
+ * will append the sky map to the FITS file in case that the @p clobber
+ * parameter is set to true.
  ***************************************************************************/
 void GSkyMap::save(const GFilename& filename, bool clobber) const
 {
@@ -1831,15 +1862,28 @@ void GSkyMap::save(const GFilename& filename, bool clobber) const
             hdu = create_wcs_hdu();
         }
 
-        // Create FITS file and save it to disk
+        // If we have a valid HDU then save it now to the FITS file
         if (hdu != NULL) {
-            GFits fits;
-            fits.append(*hdu);
-            fits.saveto(filename, clobber);
-        }
 
-        // Delete HDU
-        if (hdu != NULL) delete hdu;
+            // Set extension name
+            if (filename.has_extname()) {
+                hdu->extname(filename.extname());
+            }
+
+            // Open or create FITS file (without extension name since the
+            // requested extension may not yet exist in the file)
+            GFits fits(filename.url(), true);
+
+            // Append sky map to FITS file
+            fits.append(*hdu);
+
+            // Save FITS file
+            fits.save(clobber);
+
+            // Delete HDU
+            delete hdu;
+
+        } // endif: HDU was valid
 
     } // endif: we had data to save
 
@@ -2671,6 +2715,51 @@ double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
 
     // Return solid angle
     return solidangle;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if HDU contains HEALPix data
+ *
+ * @param[in] hdu FITS Header Data Unit.
+ * @return True is HDU contains HEALPix data.
+ ***************************************************************************/
+bool GSkyMap::is_healpix(const GFitsHDU& hdu) const
+{
+    // Initialise flag
+    bool flag(false);
+
+    // If PIXTYPE keyword equals "HEALPIX" then signal that we have
+    // HEALPix data
+    if ((hdu.exttype() != GFitsHDU::HT_IMAGE) &&
+        (hdu.has_card("PIXTYPE"))   &&
+        (hdu.string("PIXTYPE") == "HEALPIX")) {
+        flag = true;
+    }
+
+    // Return flag
+    return (flag);
+}
+
+
+/***********************************************************************//**
+ * @brief Check if HDU contains WCS data
+ *
+ * @param[in] hdu FITS Header Data Unit.
+ * @return True is HDU contains WCS data.
+ ***************************************************************************/
+bool GSkyMap::is_wcs(const GFitsHDU& hdu) const
+{
+    // Initialise flag
+    bool flag(false);
+
+    // If extension is an image thn signal that we have WCS data
+    if (hdu.exttype() == GFitsHDU::HT_IMAGE)  {
+        flag = true;
+    }
+
+    // Return flag
+    return (flag);
 }
 
 

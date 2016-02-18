@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,6 +60,7 @@ void TestGSky::set(void){
     append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_construct),"Test WCS GSkyMap constructors");
     append(static_cast<pfunction>(&TestGSky::test_GSkyMap_wcs_io),"Test WCS GSkyMap I/O");
     append(static_cast<pfunction>(&TestGSky::test_GSkyMap),"Test GSkyMap");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyMap_io),"Test GSkyMap I/O");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
     append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
@@ -1025,6 +1026,68 @@ void TestGSky::test_GSkyMap(void)
     }
 	test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
 	test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");    
+
+    // Exit test
+    return;
+}
+
+
+/***************************************************************************
+ * @brief GSkyMap
+ *
+ * This method tests the GSkyMap class input and output. Specifically, the
+ * test verifies that saving of a HEALPix and WCS map in the same FITS file
+ * is possible, and that upon opening the correct extension is selected.
+ ***************************************************************************/
+void TestGSky::test_GSkyMap_io(void)
+{
+    // Set filename
+    GFilename filename("test_skymap.fits");
+    filename.remove();
+
+    // Create HEALPix and WCS maps and save them to FITS file
+    GSkyMap healpix1("GAL", 4, "RING", 1);
+    GSkyMap healpix2("GAL", 2, "RING", 1);
+    GSkyMap wcs1("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10);
+    GSkyMap wcs2("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 5, 5);
+    for (int i = 0; i < healpix1.npix(); ++i) {
+        healpix1(i) = double(i+1);
+    }
+    for (int i = 0; i < healpix2.npix(); ++i) {
+        healpix2(i) = 3.0*double(i+1);
+    }
+    for (int i = 0; i < wcs1.npix(); ++i) {
+        wcs1(i) = double(i+1);
+    }
+    for (int i = 0; i < wcs2.npix(); ++i) {
+        wcs2(i) = 3.0*double(i+1);
+    }
+    healpix1.save(filename+"[HEALPIX1]", true);
+    wcs1.save(filename+"[WCS1]", true);
+    healpix2.save(filename+"[HEALPIX2]", true);
+    wcs2.save(filename+"[WCS2]", true);
+
+    // Load HEALPix map and check content
+    GSkyMap map1(filename+"[HEALPIX1]");
+	test_value(map1.npix(), healpix1.npix(), "Check number of HEALPix pixels");    
+    int failures1(0);
+    for (int i = 0; i < map1.npix(); ++i) {
+        if (std::abs(map1(i)-double(i+1)) > 1.0e-6) {
+            failures1++;
+        }
+    }
+	test_value(failures1, 0, "Check number of invalid HEALPix pixel values");    
+
+    // Load WCS map and check content
+    GSkyMap map2(filename+"[WCS1]");
+	test_value(map2.npix(), wcs1.npix(), "Check number of WCS pixels");    
+    int failures2(0);
+    for (int i = 0; i < map2.npix(); ++i) {
+        if (std::abs(map2(i)-double(i+1)) > 1.0e-6) {
+            failures2++;
+        }
+    }
+	test_value(failures2, 0, "Check number of invalid WCS pixel values");    
 
     // Exit test
     return;

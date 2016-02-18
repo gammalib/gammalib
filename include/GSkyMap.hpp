@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GSkyMap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,20 +33,12 @@
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GSkyProjection.hpp"
-/*
-#include "GFits.hpp"
-#include "GFitsTable.hpp"
-#include "GFitsBinTable.hpp"
-#include "GFitsImage.hpp"
-#include "GFitsImageDouble.hpp"
-*/
-//#include "GMatrix.hpp"
-//#include "GVector.hpp"
 #include "GBilinear.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFilename;
 class GFits;
+class GFitsHDU;
 class GFitsTable;
 class GFitsBinTable;
 class GFitsImage;
@@ -186,6 +178,8 @@ private:
                                  const GSkyDir& dir3) const;
     double            solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
                                  const GSkyDir& dir3, const GSkyDir& dir4) const;
+    bool              is_healpix(const GFitsHDU& hdu) const;
+    bool              is_wcs(const GFitsHDU& hdu) const;
 
     // Private data area
     int               m_num_pixels; //!< Number of pixels (used for pixel allocation)

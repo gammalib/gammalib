@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Handle FITS extensions in GSkyMap load() and save() methods (#1695)
         Restrict Monte Carlo simulations in GModelSpatialDiffuseConst to simulation cone (#1674)
         Use default GTime in GModelSpectral eval() and eval_gradients() methods (#1672)
         Optimise GModelSpatialDiffuseMap::set_mc_cone() method (#1673)
