@@ -32,7 +32,7 @@
 #include "GBase.hpp"
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
-
+#include "GFits.hpp"
 
 /***********************************************************************//**
  * @class GVOClient
@@ -74,8 +74,9 @@ public:
     bool        ping_hub(void) const;
     void        shutdown_hub(void) const;
     GXml        execute(const std::string& request) const;
+    void        publish(const GFitsHDU& hdu);
     std::string print(const GChatter& chatter = NORMAL) const;
-
+    
 protected:
     // Protected methods
     void        init_members(void);
@@ -97,7 +98,7 @@ protected:
     bool        response_is_valid(const GXml& xml) const;
     int         response_error_code(const GXml& xml) const;
     std::string response_error_message(const GXml& xml) const;
-
+    
     // Protected data area
     std::string m_name;        //!< Client name
     std::string m_secret;      //!< Secret Hub key

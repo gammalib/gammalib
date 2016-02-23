@@ -34,6 +34,7 @@
 #include <unistd.h>        // close() function
 #include <netdb.h>         // getaddrinfo() function
 #include <sys/socket.h>    // socket(), connect() functions
+#include <fstream>
 #include "GVOClient.hpp"
 #include "GVOHub.hpp"
 #include "GException.hpp"
@@ -359,6 +360,47 @@ GXml GVOClient::execute(const std::string& request) const
 
 
 /***********************************************************************//**
+ * @brief Publish FITS HDU
+ *
+ * @param[in] hdu FITS HDU
+ *
+ * Publishes a FITS HDU.           
+ ***************************************************************************/
+void GVOClient::publish(const GFitsHDU& hdu)
+{
+    // Save FITS HDU into a temporary file
+    std::string samp_share = std::tmpnam(NULL);
+    GFits fits;
+    fits.append(hdu);
+    fits.saveto(samp_share, true);
+
+    // Compose notification to be passed to the Hub
+    std::string hub_command = "";
+    hub_command.append("<?xml version=\"1.0\"?>\n");
+    hub_command.append("<methodCall>");
+    hub_command.append("  <methodName>samp.hub.notifyAll</methodName>\n");
+    hub_command.append("  <params>\n");
+    hub_command.append("    <param><value>image.load.fits</value></param>\n");
+    hub_command.append("    <param><value>"+m_secret+"</value></param>\n");
+    hub_command.append("    <param><value><struct>\n");
+    hub_command.append("      <member><name>samp.params</name><value><struct>\n");
+    hub_command.append("        <member><name>name</name><value>Gammalib_FITS_FILE</value></member>\n");
+    hub_command.append("        <member><name>url</name><value>file://localhost"+samp_share+"</value></member>\n");
+    hub_command.append("        <member><name>image-id</name><value>Gammalib Data</value></member>\n");
+    hub_command.append("      </struct></value></member>\n");
+    hub_command.append("      <member><name>samp.mtype</name><value>image.load.fits</value></member>\n");
+    hub_command.append("    </struct></value></param>\n");
+    hub_command.append("  </params>\n</methodCall>\n");
+
+    // Send notification
+    execute(hub_command);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print VO client information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -517,7 +559,7 @@ bool GVOClient::find_hub(void)
     if (!lockurl.empty()) {
 
         // If we have a file:// prefix then strip it now. This is a kluge
-        // and should be replaced by a method that allows opening any kind
+        // and should be remplaced by a method that allows opening any kind
         // of URL
         if (lockurl.compare(0, 7, "file://") == 0) {
             lockurl = lockurl.substr(7, std::string::npos);
@@ -955,6 +997,7 @@ std::string GVOClient::receive_string(void) const
         int n       = 0;
         do {
             n = gammalib::recv(m_socket, buffer, 1000, 0, timeout);
+            //n = recv(m_socket, buffer, 1000, 0);
             if (n > 0) {
                 buffer[n] = '\0';
                 result.append(std::string(buffer));
@@ -1073,7 +1116,7 @@ std::string GVOClient::get_hub_lockfile(void) const
     char* hub_ptr = std::getenv("SAMP_HUB");
     if (hub_ptr != NULL) {
 
-        // Check for mandatory std-lockurl: prefix (no other prefix is
+        // Check for mandatory std-lockurl: prefix (no other prefixe is
         // supported so far)
         std::string lockurl = std::string(hub_ptr);
         if (lockurl.compare(0, 12, "std-lockurl:") == 0) {
@@ -1083,7 +1126,7 @@ std::string GVOClient::get_hub_lockfile(void) const
 
         } // endif: std-lockurl: prefix found
   
-    } // endif: SAMP_HUB environment variable found
+    }
 
     // ... otherwise the lockfile should be $HOME/.samp
     else {

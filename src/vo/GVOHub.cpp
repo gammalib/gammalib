@@ -47,15 +47,14 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_START_HUB                                     "GVOHub::start_hub()"
-#define G_START_SOCKET                               "GVOHub::start_socket()"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_CONSOLE_DUMP
-//#define G_SHOW_MESSAGE
+#define G_CONSOLE_DUMP
+#define G_SHOW_MESSAGE
 
 
 /*==========================================================================
@@ -86,7 +85,7 @@ GVOHub::GVOHub(const GVOHub& hub)
 {
     // Initialise members
     init_members();
-
+    
     // Copy members
     copy_members(hub);
 
@@ -180,6 +179,9 @@ GVOHub* GVOHub::clone(void) const
  ***************************************************************************/
 void GVOHub::start(void)
 {
+    // Create SAMP file
+    create_samp_file();
+
     // Start Hub
     start_hub();
 
@@ -208,7 +210,7 @@ std::string GVOHub::print(const GChatter& chatter) const
         // Append Hub information
         result.append("\n"+gammalib::parformat("Hub identifier")+m_hub_id);
         result.append("\n"+gammalib::parformat("Hub key")+m_secret);
-        result.append("\n"+gammalib::parformat("Hub URL")+hub_url());
+        result.append("\n"+gammalib::parformat("Hub URL")+m_hub_url);
         result.append("\n"+gammalib::parformat("Hub host")+m_hub_host);
         result.append("\n"+gammalib::parformat("Hub port")+m_hub_port);
         result.append("\n"+gammalib::parformat("Hub path")+m_hub_path);
@@ -238,6 +240,7 @@ void GVOHub::init_members(void)
     m_hub_host      = "127.0.0.1";
     m_hub_port      = "2526";
     m_hub_path      = "xmlrpc";
+    m_hub_url       = "http://"+m_hub_host+":"+m_hub_port+"/"+m_hub_path;
     m_version       = "1.3";
     m_hub_id        = "gammalib_hub";
     m_socket        = -1;        // Signals no socket
@@ -258,6 +261,7 @@ void GVOHub::copy_members(const GVOHub& hub)
 {
     // Copy members
     m_secret   = hub.m_secret;
+    m_hub_url  = hub.m_hub_url;
     m_hub_host = hub.m_hub_host;
     m_hub_port = hub.m_hub_port;
     m_hub_path = hub.m_hub_path;
@@ -284,7 +288,8 @@ void GVOHub::free_members(void)
     }
     
     // Remove lockfile
-    delete_samp_file();
+    std::string lockurl = get_hub_lockfile();
+    std::remove(lockurl.c_str());
 
     // Return
     return;
@@ -301,13 +306,46 @@ void GVOHub::free_members(void)
  ***************************************************************************/
 void GVOHub::start_hub(void)
 {
-    // Get socket
-    m_socket = get_socket();
+    // Prepare TCP/IP structure
+    struct sockaddr_in serv_addr;
+    std::memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family      = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr(m_hub_host.c_str());
+    serv_addr.sin_port        = htons(gammalib::toint(m_hub_port));
+    
+    // Create Hub socket
+    m_socket = socket(AF_INET, SOCK_STREAM, 0);
+    
+    // Creation of hub main socket
+    if (m_socket < 0) {
+        std::string msg = "Unable to create Hub socket. Errno="+
+                          gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
+    }
+    
+    // Set hub main socket to allow multiple connections
+    int opt = 1;
+    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0) {
+        std::string msg = "Unable to set Hub socket to multiple connections."
+                          " Errno="+gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
+    }
+    #ifdef SO_REUSEPORT
+    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0) {
+        std::string msg = "Unable to set Hub socket to multiple connections."
+                          " Errno="+gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
+    }
+    #endif
+    
+    // Server socket is opened. Now, bind it to the port, with family etc.
+    if (bind(m_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+        std::string msg = "Unable to bind Hub socket to server socket. Errno="+
+                          gammalib::str(errno);
+        throw GException::runtime_error(G_START_HUB, msg);
+    }
 
-    // Create SAMP file
-    create_samp_file();
-
-    // Start listening for the clients: 5 requests simultaneously pending
+    // Now start listening for the clients: 5 requests simultaneously pending
     // at maximum
     if (listen(m_socket, 5) < 0) {
         std::string msg = "Unable to start listening on Hub socket. Errno="+
@@ -323,7 +361,7 @@ void GVOHub::start_hub(void)
     while (1) {
 
         // Accept connection from the client 
-    	int socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
+    	socklen_t socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
     	if (socket < 0) {
             std::string msg = "Client connection to socket not accepted.";
             throw GException::runtime_error(G_START_HUB, msg);
@@ -346,9 +384,6 @@ void GVOHub::start_hub(void)
     // Close socket
     close(m_socket);
     m_socket = -1;
-
-    // Delete SAMP file
-    delete_samp_file();
 
     // Return
     return;
@@ -395,11 +430,12 @@ void GVOHub::handle_request(const socklen_t& sock)
     
     // Extract response into an XML object
     GXml   xml;
+    
     size_t start = message.find("<?xml");
     if (start != std::string::npos) {
         xml = GXml(message.substr(start, std::string::npos));
     }
-
+    
     // Get methodName value
     std::string method_called;
     const GXmlNode* node = xml.element("methodCall > methodName");
@@ -446,11 +482,18 @@ void GVOHub::handle_request(const socklen_t& sock)
     else if (method_called.compare("samp.hub.getMetadata") == 0) {
         request_get_metadata(xml, sock);
     }
+    else if (method_called.compare("table.load.votable") == 0) {
+        request_ping(sock);
+    }
     else if (method_called.compare("samp.hub.notify") == 0) {
         request_ping(sock);
     }
     else if (method_called.compare("samp.hub.notifyAll") == 0) {
-        request_ping(sock);
+         #if defined(G_CONSOLE_DUMP)
+	 std::cout << "==========================================" << std::endl;
+	 std::cout << "samp.hub.notifyAll" << std::endl;
+         #endif
+        broadcast(xml, sock);
     }
     else if (method_called.compare("samp.hub.call") == 0) {
         request_ping(sock);
@@ -561,7 +604,7 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
     response.append("    </member>\n");
     response.append("    <member>\n");
     response.append("      <name>samp.url-translator</name>\n");
-    response.append("      <value>"+hub_url()+"</value>\n");
+    response.append("      <value>"+m_hub_url+"</value>\n");
     response.append("    </member>\n");
     response.append("  </struct></value></param>\n");
     response.append("</params>\n");
@@ -743,7 +786,7 @@ void GVOHub::request_set_xml_rpc_callback(const GXml&      xml,
     if (i != -1) {
 
         // Get callback URL
-        //std::string client_url = get_callback_url(xml);
+        std::string client_url = get_callback_url(xml);
 
         // Set callback URL
         m_clients[i].url = get_callback_url(xml);
@@ -869,9 +912,8 @@ void GVOHub::request_get_registered_clients(const GXml& xml, const socklen_t& so
 
     // Declare message
     std::string msg = "";
-
     // Set response
-    msg.append("<?xml version=\'1.0\' encoding=\"UTF-8\"?>\n");
+    msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     msg.append("<methodResponse>\n");
     msg.append("<params>\n");
     msg.append("  <param><value><array><data>\n");
@@ -890,7 +932,6 @@ void GVOHub::request_get_registered_clients(const GXml& xml, const socklen_t& so
     msg.append("  </data></array></value></param>\n");
     msg.append("</params>\n");
     msg.append("</methodResponse>\n");
-
     // Post response
     post_string(msg, sock);
     
@@ -915,29 +956,16 @@ void GVOHub::request_get_subscribed_clients(const GXml& xml, const socklen_t& so
     std::cout << "GVOHub::request_get_subscribed_clients" << std::endl;
     #endif
 
-/*
-    std::string buffer;
-    const int n = 1000; 
-    char      line[n];
-    FILE* fptr = fopen("SAMP-registered.txt", "r");
-    if (fptr != NULL) {
-        while (fgets(line, n, fptr) != NULL) {
+    // Declare message
+    std::string msg = "";    
 
-                // Convert line to C++ string
-                std::string cline = std::string(line);
+    msg.append("<?xml version=\'1.0\' encoding=\"UTF-8\"?>\n");
+    msg.append("<methodResponse>\n");
+    msg.append("<params>\n");
+    msg.append("  <param><value><struct><member><name>c0</name><value><struct></struct></value></member><member><name>gammalib_hub</name><value><struct></struct></value></member></struct></value></param></params></methodResponse>");
 
-                // Check for secret key
-                if (cline.compare(0, 10, "Registered") == 0) {
-                    buffer = gammalib::strip_chars(cline.substr(10, std::string::npos), "\r\n");
-                }
-    }
-    
-    // Closes file
-    fclose(fptr);
-*/
-
-    // Post void message
-    post_samp_void(sock);
+    // Post response
+    post_string(msg, sock);
     
     // Return
     return;
@@ -1079,6 +1107,51 @@ void GVOHub::request_get_metadata(const GXml& xml, const socklen_t& sock)
     return;
 }
 
+/***********************************************************************//**
+ * @brief Broadcasts a message
+ *
+ * @param[in] xml XML message sent by client.
+ * @param[in] sock Socket.
+ *
+ * Broadcasts an image to every registered client.
+ ***************************************************************************/
+void GVOHub::broadcast(const GXml& xml, const socklen_t& sock)
+{
+    // Header
+   
+    // Get client index
+    int i = get_client_index(xml);
+
+    // Get message mtype
+    std::string mtype = get_mtype(xml);
+    #if defined(G_CONSOLE_DUMP)
+    std::cout<<"mtype is: " +mtype + " i value: " + gammalib::str(i)<<std::endl;
+    #endif
+    post_samp_void(sock);
+
+	if (mtype == "image.load.fits") {
+	    #if defined(G_CONSOLE_DUMP)
+	    std::cout<<"notifying image.load.fits"<<std::endl;
+        #endif
+
+	    // Send notifications
+	    send_notifications("image.load.fits",m_clients[i].reference,xml);
+	}
+
+	if (mtype == "table.load.votable") {
+
+	    // Send notifications
+	    send_notifications("table.load.votable",m_clients[i].reference,xml);
+	}
+
+    #if defined(G_CONSOLE_DUMP)
+    std::cout<<"Returning from broadcast function"<<std::endl;
+    #endif
+
+    // Return
+    return;
+  
+}
 
 /***********************************************************************//**
  * @brief Handles Hub shutdown requests
@@ -1408,11 +1481,14 @@ std::string GVOHub::get_hub_lockfile(void) const
  * @param[in] method Name of the method
  * @param[in] client Reference of the client
  *
- * The method send notifications to all registered clients that request so.
+ * Send notifications to all registered clients that request so.
  ***************************************************************************/
 void GVOHub::send_notifications(const std::string& method,
                                 const std::string& client)
 {
+     #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::send_notifications 1st form" << std::endl;
+    #endif
     // Loop over all clients
     for (int i = 0; i < m_clients.size(); ++i) {
     
@@ -1459,7 +1535,7 @@ void GVOHub::send_notifications(const std::string& method,
                     notify(m_clients[i].url, msg);
                     
                 }
-                    
+               
                 // Unregister
                 else if (method == "samp.hub.event.unregister") {
 
@@ -1579,7 +1655,7 @@ void GVOHub::send_notifications(const std::string& method,
                     // Post notification
                     notify(m_clients[i].url, msg);
 					
-                } // endelse: metadata
+	      } // endelse: metadata
 
             } // endif: method was requested one
 
@@ -1590,13 +1666,135 @@ void GVOHub::send_notifications(const std::string& method,
     // Return
     return;
 }
+/***********************************************************************//**
+ * @brief Send notifications
+ *
+ * @param[in] method Name of the method
+ * @param[in] client Reference of the client
+ * @param[in] xml message sent by the client
+ *
+ * Send notifications to all registered clients that request so.
+ ***************************************************************************/
+void GVOHub::send_notifications(const std::string& method,
+                                const std::string& client,
+                                const GXml&        xml)
+{
+    // Debug: dump information to console
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::send_notifications 2nd form" << std::endl;
+    std::cout << "GVOHub::send_notifications "+method << std::endl;
+    #endif
 
+    // Loop over all clients
+    for (int i = 0; i < m_clients.size(); ++i) {
+    
+        // Loop over all methods
+        for (int j = 0; j < m_clients[i].subscriptions.size(); ++j) {
+
+            // Continue only if method matches
+            if (method == m_clients[i].subscriptions[j]) {
+    
+                // Declare notification
+                std::string msg = "";
+
+                // Image loading
+                if (method == "image.load.fits") {
+
+                    // Debug: dump information to console
+		            #if defined(G_CONSOLE_DUMP)
+		            std::cout << "GVOHub:: Preparing broadcast message" << std::endl;
+                    #endif
+
+		            // Declare value
+		            std::string value = "";
+
+		            // Search for value of specified member
+		            const GXmlNode* node = xml.element("methodCall > params > param[2] > value > struct > member > value > struct");
+                    #if defined(G_CONSOLE_DUMP)
+		            std::cout << "Searching url value" << std::endl;
+		            #endif
+		            if (node != NULL) {
+		                #if defined(G_CONSOLE_DUMP)
+		                std::cout << "Node found" << std::endl;
+                        #endif
+			            int num = node->elements("member");
+			            for (int i = 0; i < num; ++i) {
+			                const GXmlNode* member = node->element("member", i);
+			                std::string one_name;
+			                std::string one_value;
+			                get_name_value_pair(member, one_name, one_value);
+                            #if defined(G_CONSOLE_DUMP)
+			                std::cout << "name: "+one_name << std::endl;
+			                #endif
+			                if (one_name == "url") {
+			                    value = one_value;
+			                    break;
+			                }
+			            }
+		            } else {
+		                #if defined(G_CONSOLE_DUMP)
+		                std::cout << "Node not found" << std::endl;
+                        #endif
+		            }
+		    
+		            // Set response for image.load.fits
+                    msg.append("<?xml version=\"1.0\"?>\n");
+                    msg.append("<methodCall>\n");
+                    msg.append("<methodName>samp.client.receiveNotification</methodName>\n");
+                    msg.append("<params>\n");
+                    msg.append("  <param><value>");
+                    msg.append(m_clients[i].private_key);
+                    msg.append("</value></param>\n");
+                    msg.append("  <param><value>");
+                    msg.append(m_hub_id);
+                    msg.append("</value></param>\n");
+                    msg.append("  <param><value><struct>\n");
+                    msg.append("    <member>\n");
+                    msg.append("      <name>samp.mtype</name>\n");
+                    msg.append("      <value>image.load.fits</value>\n");
+                    msg.append("    </member>\n");
+                    msg.append("    <member>\n");
+                    msg.append("      <name>samp.params</name>\n");
+                    msg.append("      <value><struct>\n");
+                    msg.append("        <member>\n");
+                    msg.append("          <name>name</name>\n");
+                    msg.append("          <value>Gammalib_shared_fits</value>\n");
+                    msg.append("        </member>\n");
+		            msg.append("        <member>\n");
+                    msg.append("          <name>image-id</name>\n");
+                    msg.append("          <value>Gammalib_shared_fits_id</value>\n");
+                    msg.append("        </member>\n");
+		            msg.append("        <member>\n");
+                    msg.append("          <name>url</name>\n");
+                    msg.append("          <value>"+value+"</value>\n");
+		            msg.append("        </member>\n");
+                    msg.append("      </struct></value>\n");
+                    msg.append("    </member>\n");
+                    msg.append("  </struct></value></param>\n");
+                    msg.append("</params>\n");
+                    msg.append("</methodCall>\n");
+                    #if defined(G_CONSOLE_DUMP)
+		            std::cout << msg << std::endl;
+                    #endif
+
+                    // Post notification
+                    notify(m_clients[i].url, msg);
+		  
+		        }
+            } // endif: method was requested one
+
+        } // endfor: looped over all methods
+
+    } // endfor: looped over all clients
+    
+    // Return
+    return;
+}
 
 /***********************************************************************//**
- * @brief Create the lockfile
+ * @brief Creates the lockfile, fill it
  *
- * Creates the SAMP lockfile and fill it with information. Implements IVOA
- * standard REC-SAMP-1.3-20120411.
+ * Implements IVOA standard REC-SAMP-1.3-20120411.
  ***************************************************************************/
 void GVOHub::create_samp_file(void) const
 {
@@ -1613,7 +1811,7 @@ void GVOHub::create_samp_file(void) const
         fprintf(fptr, "# SAMP lockfile\n");
         fprintf(fptr, "# Required keys:\n");
         fprintf(fptr, "samp.secret=%s\n", m_secret.c_str());
-        fprintf(fptr, "samp.hub.xmlrpc.url=%s\n", hub_url().c_str());
+        fprintf(fptr, "samp.hub.xmlrpc.url=%s\n", m_hub_url.c_str());
         fprintf(fptr, "samp.profile.version=%s\n", m_version.c_str());
         fprintf(fptr, "# Info stored by hub for some private reason:\n");
         fprintf(fptr, "gammalib.hubid=%s\n", m_hub_id.c_str());
@@ -1625,87 +1823,6 @@ void GVOHub::create_samp_file(void) const
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete the lockfile
- *
- * Deletes the SAMP lockfile on disk.
- ***************************************************************************/
-void GVOHub::delete_samp_file(void) const
-{
-    // Get lockfile URL
-    std::string lockurl = get_hub_lockfile();
-
-    // Delete lockfile
-    std::remove(lockurl.c_str());
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Get Hub socket
- *
- * @return Hub socket (-1 if no socket was found).
- *
- * Returns Hub socket. Starting from an initial port of 2526 the method
- * searches for the next free port and binds it to a socket.
- ***************************************************************************/
-int GVOHub::get_socket(void)
-{
-    // Initialise socket, port and socket address structure
-    int    sock = -1;
-    int    port = 2526;
-    struct sockaddr_in serv_addr;
-
-    // Loop over 100 ports at most
-    for (int i = 0; i < 100; ++i) {
-    
-        // Clean TCP/IP structure
-        std::memset(&serv_addr, 0, sizeof(serv_addr));
-
-        // Set TCP/IP structure
-        serv_addr.sin_family      = AF_INET;
-        serv_addr.sin_addr.s_addr = inet_addr(m_hub_host.c_str());
-        serv_addr.sin_port        = htons(port);
-    
-        // Create Hub socket
-        sock = socket(AF_INET, SOCK_STREAM, 0);
-    
-        // Creation of hub main socket
-        if (sock < 0) {
-            std::string msg = "Unable to create Hub socket. Errno="+
-                              gammalib::str(errno);
-            throw GException::runtime_error(G_START_SOCKET, msg);
-        }
-
-        // Now bind socket to the address and port
-        if (bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-            if (errno == EADDRINUSE) {
-                port++;
-                close(sock);
-            }
-            else {
-                std::string msg = "Unable to bind Hub socket to address "+
-                                  m_hub_host+":"+gammalib::str(port)+
-                                  ". Errno="+gammalib::str(errno);
-                throw GException::runtime_error(G_START_HUB, msg);
-            }
-        }
-        else {
-            break;
-        }
-
-    } // endfor: looped over ports
-
-    // Store port as string
-    m_hub_port = gammalib::str(port);
-
-    // Return socket
-    return sock;
 }
 
 
@@ -1948,24 +2065,6 @@ void GVOHub::notify(const std::string& url,
             }
         } while (!done);
 
-        /*
-        // Declare response
-        std::string response = "";
-
-        // Read buffer until it is empty
-        char buffer[1001];
-        int timeout = 1000; // Initial timeout is 1 sec
-        int n       = 0;
-        do {
-            n = gammalib::recv(socket, buffer, 1000, 0, timeout);
-            if (n > 0) {
-                buffer[n+1] = '\0';
-                response.append(std::string(buffer));
-            }
-            timeout = 10; // The timeout now is 0.01 sec 
-        } while (n > 0);
-        */
-
         // Close socket
         close(socket);
 
@@ -1994,21 +2093,61 @@ std::string GVOHub::random_string(const size_t& length) const
     // Return string
     return str;
 }
-
-
 /***********************************************************************//**
- * @brief Return Hub URL
+ * @brief Extract mtype from XML request
  *
- * @return Hub URL.
+ * @param[in] xml XML message sent by client.
  *
- * Returns the XML-RPC endpoint for communication with the hub.
+ * Extracts the mtype identifying calling message from the XML request.
  ***************************************************************************/
-std::string GVOHub::hub_url(void) const
+std::string GVOHub::get_mtype(const GXml& xml) const
 {
-    // Set Hub URL
-    std::string hub_url = "http://"+m_hub_host+":"+m_hub_port+"/"+m_hub_path;
+    // Header
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::get_mtype" << std::endl;
+    #endif
 
-    // Return Hub URL
-    return (hub_url);
+    // Initialise response
+    std::string client_key = "";
+
+    // Get the client's private key
+    const GXmlNode* node = xml.element("methodCall > params > param > value");
+    if (node != NULL) {
+        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
+        if (text != NULL) {
+            client_key = text->text();
+        }
+    }
+
+    // Return key
+    return client_key;
 }
+/***********************************************************************//**
+ * @brief Extract client destination from XML request
+ *
+ * @param[in] xml XML message sent by client.
+ *
+ * Extracts identifier of destination client from the XML request.
+ ***************************************************************************/
+std::string GVOHub::get_destination(const GXml& xml) const
+{
+    // Header
+    #if defined(G_CONSOLE_DUMP)
+    std::cout << "GVOHub::get_mtype" << std::endl;
+    #endif
 
+    // Initialise response
+    std::string client_key = "";
+
+    // Get the client's private key
+    const GXmlNode* node = xml.element("methodCall > params > param > value");
+    if (node != NULL) {
+        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
+        if (text != NULL) {
+            client_key = text->text();
+        }
+    }
+
+    // Return key
+    return client_key;
+}
