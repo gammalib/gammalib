@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.cpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,10 +35,13 @@
 #include <netdb.h>         // getaddrinfo() function
 #include <sys/socket.h>    // socket(), connect() functions
 #include <fstream>
+#include "GTools.hpp"
+#include "GException.hpp"
+#include "GXml.hpp"
+#include "GXmlNode.hpp"
+#include "GFits.hpp"
 #include "GVOClient.hpp"
 #include "GVOHub.hpp"
-#include "GException.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FIND_HUB                                    "GVOClient::find_hub()"
@@ -368,32 +371,53 @@ GXml GVOClient::execute(const std::string& request) const
  ***************************************************************************/
 void GVOClient::publish(const GFitsHDU& hdu)
 {
+    // Signal that client should be disconnected after sending the image
+    // to Hub
+    bool disconnected = !is_connected();
+
+    // Make sure that the client is connected to a Hub
+    if (disconnected) {
+        connect();
+    }
+
     // Save FITS HDU into a temporary file
     std::string samp_share = std::tmpnam(NULL);
     GFits fits;
     fits.append(hdu);
     fits.saveto(samp_share, true);
 
+    // Get FITS extension name
+    std::string extname = hdu.extname();
+    if (extname.empty()) {
+        extname = "FITS Image";
+    }
+
     // Compose notification to be passed to the Hub
     std::string hub_command = "";
     hub_command.append("<?xml version=\"1.0\"?>\n");
-    hub_command.append("<methodCall>");
+    hub_command.append("<methodCall>\n");
     hub_command.append("  <methodName>samp.hub.notifyAll</methodName>\n");
     hub_command.append("  <params>\n");
     hub_command.append("    <param><value>image.load.fits</value></param>\n");
     hub_command.append("    <param><value>"+m_secret+"</value></param>\n");
     hub_command.append("    <param><value><struct>\n");
     hub_command.append("      <member><name>samp.params</name><value><struct>\n");
-    hub_command.append("        <member><name>name</name><value>Gammalib_FITS_FILE</value></member>\n");
+    hub_command.append("        <member><name>name</name><value>"+extname+"</value></member>\n");
     hub_command.append("        <member><name>url</name><value>file://localhost"+samp_share+"</value></member>\n");
     hub_command.append("        <member><name>image-id</name><value>Gammalib Data</value></member>\n");
     hub_command.append("      </struct></value></member>\n");
     hub_command.append("      <member><name>samp.mtype</name><value>image.load.fits</value></member>\n");
     hub_command.append("    </struct></value></param>\n");
-    hub_command.append("  </params>\n</methodCall>\n");
+    hub_command.append("  </params>\n");
+    hub_command.append("</methodCall>\n");
 
     // Send notification
     execute(hub_command);
+
+    // Disconnect client from Hub
+    if (disconnected) {
+        disconnect();
+    }
 
     // Return
     return;

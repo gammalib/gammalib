@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-18 February 2016
+23 February 2016
 
 
 1. Introduction
@@ -178,7 +178,9 @@ None
 
 15. VO module
 -------------
-None
+A GVOClient::publish() method was added that allows publishing of a FITS
+image to the Hub. The FITS image will be saved into a temporary storage
+location and the Hub will be informed that an image is available.
 
 
 16. Xspec module

@@ -1,8 +1,9 @@
-2016-02-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-02-23  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Add GVOClient::publish() method to publish a FITS HDU (#1231)
         Handle FITS extensions in GSkyMap load() and save() methods (#1695)
         Restrict Monte Carlo simulations in GModelSpatialDiffuseConst to simulation cone (#1674)
         Use default GTime in GModelSpectral eval() and eval_gradients() methods (#1672)

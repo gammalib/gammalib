@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GVOClient.hpp - VO client class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,9 +30,12 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GXml.hpp"
-#include "GXmlNode.hpp"
-#include "GFits.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GFitsHDU;
+class GXml;
+class GXmlNode;
+
 
 /***********************************************************************//**
  * @class GVOClient
