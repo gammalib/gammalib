@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GVOClient.i - VO client class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,6 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GVOClient.hpp"
+#include "GXml.hpp"
 %}
 
 
@@ -52,6 +53,7 @@ public:
     bool        ping_hub(void) const;
     void        shutdown_hub(void) const;
     GXml        execute(const std::string& request) const;
+    void        publish(const GFitsHDU& hdu);
 };
 
 
