@@ -49,6 +49,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_START_HUB                                     "GVOHub::start_hub()"
+#define G_GET_SOCKET                                   "GVOHub::get_socket()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -182,9 +183,6 @@ GVOHub* GVOHub::clone(void) const
  ***************************************************************************/
 void GVOHub::start(void)
 {
-    // Create SAMP file
-    create_samp_file();
-
     // Start Hub
     start_hub();
 
@@ -213,7 +211,7 @@ std::string GVOHub::print(const GChatter& chatter) const
         // Append Hub information
         result.append("\n"+gammalib::parformat("Hub identifier")+m_hub_id);
         result.append("\n"+gammalib::parformat("Hub key")+m_secret);
-        result.append("\n"+gammalib::parformat("Hub URL")+m_hub_url);
+        result.append("\n"+gammalib::parformat("Hub URL")+hub_url());
         result.append("\n"+gammalib::parformat("Hub host")+m_hub_host);
         result.append("\n"+gammalib::parformat("Hub port")+m_hub_port);
         result.append("\n"+gammalib::parformat("Hub path")+m_hub_path);
@@ -243,7 +241,6 @@ void GVOHub::init_members(void)
     m_hub_host      = "127.0.0.1";
     m_hub_port      = "2526";
     m_hub_path      = "xmlrpc";
-    m_hub_url       = "http://"+m_hub_host+":"+m_hub_port+"/"+m_hub_path;
     m_version       = "1.3";
     m_hub_id        = "gammalib_hub";
     m_socket        = -1;        // Signals no socket
@@ -264,7 +261,6 @@ void GVOHub::copy_members(const GVOHub& hub)
 {
     // Copy members
     m_secret   = hub.m_secret;
-    m_hub_url  = hub.m_hub_url;
     m_hub_host = hub.m_hub_host;
     m_hub_port = hub.m_hub_port;
     m_hub_path = hub.m_hub_path;
@@ -291,8 +287,7 @@ void GVOHub::free_members(void)
     }
     
     // Remove lockfile
-    std::string lockurl = get_hub_lockfile();
-    std::remove(lockurl.c_str());
+    delete_samp_file();
 
     // Return
     return;
@@ -309,46 +304,13 @@ void GVOHub::free_members(void)
  ***************************************************************************/
 void GVOHub::start_hub(void)
 {
-    // Prepare TCP/IP structure
-    struct sockaddr_in serv_addr;
-    std::memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family      = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr(m_hub_host.c_str());
-    serv_addr.sin_port        = htons(gammalib::toint(m_hub_port));
-    
-    // Create Hub socket
-    m_socket = socket(AF_INET, SOCK_STREAM, 0);
-    
-    // Creation of hub main socket
-    if (m_socket < 0) {
-        std::string msg = "Unable to create Hub socket. Errno="+
-                          gammalib::str(errno);
-        throw GException::runtime_error(G_START_HUB, msg);
-    }
-    
-    // Set hub main socket to allow multiple connections
-    int opt = 1;
-    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0) {
-        std::string msg = "Unable to set Hub socket to multiple connections."
-                          " Errno="+gammalib::str(errno);
-        throw GException::runtime_error(G_START_HUB, msg);
-    }
-    #ifdef SO_REUSEPORT
-    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0) {
-        std::string msg = "Unable to set Hub socket to multiple connections."
-                          " Errno="+gammalib::str(errno);
-        throw GException::runtime_error(G_START_HUB, msg);
-    }
-    #endif
-    
-    // Server socket is opened. Now, bind it to the port, with family etc.
-    if (bind(m_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        std::string msg = "Unable to bind Hub socket to server socket. Errno="+
-                          gammalib::str(errno);
-        throw GException::runtime_error(G_START_HUB, msg);
-    }
+    // Get socket
+    m_socket = get_socket();
 
-    // Now start listening for the clients: 5 requests simultaneously pending
+    // Create SAMP file
+    create_samp_file();
+
+    // Start listening for the clients: 5 requests simultaneously pending
     // at maximum
     if (listen(m_socket, 5) < 0) {
         std::string msg = "Unable to start listening on Hub socket. Errno="+
@@ -364,7 +326,7 @@ void GVOHub::start_hub(void)
     while (1) {
 
         // Accept connection from the client 
-    	socklen_t socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
+    	int socket = accept(m_socket, (struct sockaddr *)&cli_addr, &clilen);
     	if (socket < 0) {
             std::string msg = "Client connection to socket not accepted.";
             throw GException::runtime_error(G_START_HUB, msg);
@@ -387,6 +349,9 @@ void GVOHub::start_hub(void)
     // Close socket
     close(m_socket);
     m_socket = -1;
+
+    // Delete SAMP file
+    delete_samp_file();
 
     // Return
     return;
@@ -433,12 +398,11 @@ void GVOHub::handle_request(const socklen_t& sock)
     
     // Extract response into an XML object
     GXml xml;
-    
     size_t start = message.find("<?xml");
     if (start != std::string::npos) {
         xml = GXml(message.substr(start, std::string::npos));
     }
-    
+
     // Get methodName value
     std::string method_called;
     const GXmlNode* node = xml.element("methodCall > methodName");
@@ -485,9 +449,6 @@ void GVOHub::handle_request(const socklen_t& sock)
     }
     else if (method_called.compare("samp.hub.getMetadata") == 0) {
         request_get_metadata(xml, sock);
-    }
-    else if (method_called.compare("table.load.votable") == 0) {
-        request_ping(sock);
     }
     else if (method_called.compare("samp.hub.notify") == 0) {
         request_ping(sock);
@@ -604,7 +565,7 @@ void GVOHub::request_register(const GXml& xml, const socklen_t& sock)
     response.append("    </member>\n");
     response.append("    <member>\n");
     response.append("      <name>samp.url-translator</name>\n");
-    response.append("      <value>"+m_hub_url+"</value>\n");
+    response.append("      <value>"+hub_url()+"</value>\n");
     response.append("    </member>\n");
     response.append("  </struct></value></param>\n");
     response.append("</params>\n");
@@ -816,9 +777,6 @@ void GVOHub::request_set_xml_rpc_callback(const GXml&      xml,
     // Continue only if index is valid
     if (i != -1) {
 
-        // Get callback URL
-        std::string client_url = get_callback_url(xml);
-
         // Set callback URL
         m_clients[i].url = get_callback_url(xml);
 
@@ -947,6 +905,7 @@ void GVOHub::request_get_registered_clients(const GXml& xml, const socklen_t& so
 
     // Declare message
     std::string msg = "";
+
     // Set response
     msg.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     msg.append("<methodResponse>\n");
@@ -967,12 +926,12 @@ void GVOHub::request_get_registered_clients(const GXml& xml, const socklen_t& so
     msg.append("  </data></array></value></param>\n");
     msg.append("</params>\n");
     msg.append("</methodResponse>\n");
+
     // Post response
     post_string(msg, sock);
     
     // Return
     return;
-  
 }
 
 
@@ -1530,9 +1489,10 @@ std::string GVOHub::get_hub_lockfile(void) const
 
 
 /***********************************************************************//**
- * @brief Creates the lockfile, fill it
+ * @brief Create the lockfile
  *
- * Implements IVOA standard REC-SAMP-1.3-20120411.
+ * Creates the SAMP lockfile and fill it with information. Implements IVOA
+ * standard REC-SAMP-1.3-20120411.
  ***************************************************************************/
 void GVOHub::create_samp_file(void) const
 {
@@ -1549,7 +1509,7 @@ void GVOHub::create_samp_file(void) const
         fprintf(fptr, "# SAMP lockfile\n");
         fprintf(fptr, "# Required keys:\n");
         fprintf(fptr, "samp.secret=%s\n", m_secret.c_str());
-        fprintf(fptr, "samp.hub.xmlrpc.url=%s\n", m_hub_url.c_str());
+        fprintf(fptr, "samp.hub.xmlrpc.url=%s\n", hub_url().c_str());
         fprintf(fptr, "samp.profile.version=%s\n", m_version.c_str());
         fprintf(fptr, "# Info stored by hub for some private reason:\n");
         fprintf(fptr, "gammalib.hubid=%s\n", m_hub_id.c_str());
@@ -1561,6 +1521,87 @@ void GVOHub::create_samp_file(void) const
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete the lockfile
+ *
+ * Deletes the SAMP lockfile on disk.
+ ***************************************************************************/
+void GVOHub::delete_samp_file(void) const
+{
+    // Get lockfile URL
+    std::string lockurl = get_hub_lockfile();
+
+    // Delete lockfile
+    std::remove(lockurl.c_str());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get Hub socket
+ *
+ * @return Hub socket (-1 if no socket was found).
+ *
+ * Returns Hub socket. Starting from an initial port of 2526 the method
+ * searches for the next free port and binds it to a socket.
+ ***************************************************************************/
+int GVOHub::get_socket(void)
+{
+    // Initialise socket, port and socket address structure
+    int    sock = -1;
+    int    port = 2526;
+    struct sockaddr_in serv_addr;
+
+    // Loop over 100 ports at most
+    for (int i = 0; i < 100; ++i) {
+    
+        // Clean TCP/IP structure
+        std::memset(&serv_addr, 0, sizeof(serv_addr));
+
+        // Set TCP/IP structure
+        serv_addr.sin_family      = AF_INET;
+        serv_addr.sin_addr.s_addr = inet_addr(m_hub_host.c_str());
+        serv_addr.sin_port        = htons(port);
+    
+        // Create Hub socket
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+    
+        // Creation of hub main socket
+        if (sock < 0) {
+            std::string msg = "Unable to create Hub socket. Errno="+
+                              gammalib::str(errno);
+            throw GException::runtime_error(G_GET_SOCKET, msg);
+        }
+
+        // Now bind socket to the address and port
+        if (bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+            if (errno == EADDRINUSE) {
+                port++;
+                close(sock);
+            }
+            else {
+                std::string msg = "Unable to bind Hub socket to address "+
+                                  m_hub_host+":"+gammalib::str(port)+
+                                  ". Errno="+gammalib::str(errno);
+                throw GException::runtime_error(G_GET_SOCKET, msg);
+            }
+        }
+        else {
+            break;
+        }
+
+    } // endfor: looped over ports
+
+    // Store port as string
+    m_hub_port = gammalib::str(port);
+
+    // Return socket
+    return sock;
 }
 
 
@@ -2083,7 +2124,7 @@ std::string GVOHub::random_string(const size_t& length) const
     int pos;
     while(str.size() != length) {
         pos = ((rand() % (str.size() - 1)));
-        str.erase (pos, 1);
+        str.erase(pos, 1);
     }
    
     // Return string
@@ -2123,31 +2164,17 @@ std::string GVOHub::get_mtype(const GXml& xml) const
 
 
 /***********************************************************************//**
- * @brief Extract client destination from XML request
+ * @brief Return Hub URL
  *
- * @param[in] xml XML message sent by client.
+ * @return Hub URL.
  *
- * Extracts identifier of destination client from the XML request.
+ * Returns the XML-RPC endpoint for communication with the hub.
  ***************************************************************************/
-std::string GVOHub::get_destination(const GXml& xml) const
+std::string GVOHub::hub_url(void) const
 {
-    // Header
-    #if defined(G_CONSOLE_DUMP)
-    std::cout << "GVOHub::get_destination" << std::endl;
-    #endif
+    // Set Hub URL
+    std::string hub_url = "http://"+m_hub_host+":"+m_hub_port+"/"+m_hub_path;
 
-    // Initialise response
-    std::string client_key = "";
-
-    // Get the client's private key
-    const GXmlNode* node = xml.element("methodCall > params > param > value");
-    if (node != NULL) {
-        const GXmlText* text = static_cast<const GXmlText*>((*node)[0]);
-        if (text != NULL) {
-            client_key = text->text();
-        }
-    }
-
-    // Return key
-    return client_key;
+    // Return Hub URL
+    return (hub_url);
 }

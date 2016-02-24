@@ -45,8 +45,8 @@ class GXmlNode;
  *
  * @brief VO SAMP Hub class
  *
- * This class implements a SAMP hub for exchanges through VO-compatible
- * applications.
+ * This class implements a SAMP hub to support the interoperability of
+ * Virtual Observatory applications.
  ***************************************************************************/
 class GVOHub : public GBase {
 
@@ -65,7 +65,6 @@ public:
     std::string classname(void) const;
     void        start(void);
     std::string print(const GChatter& chatter = NORMAL) const;
-    
 
 protected:
     // Protected methods
@@ -108,7 +107,6 @@ protected:
     std::string              get_callback_url(const GXml& xml) const;
     std::string              get_hub_lockfile(void) const;
     std::string              get_mtype(const GXml& xml) const;
-    std::string              get_destination(const GXml& xml) const;
 
     // Client structure
     struct client {
@@ -128,6 +126,8 @@ protected:
 
     // Low-level methods
     void        create_samp_file(void) const;
+    void        delete_samp_file(void) const;
+    int         get_socket(void);
     void        post_samp_ok(const socklen_t& sock) const;
     void        post_samp_void(const socklen_t& sock) const;
     void	    post_string(const std::string& content,
@@ -143,16 +143,16 @@ protected:
     void        notify_image_load(const client& client,
                                   const GXml&   xml);
     std::string	random_string(const size_t& length) const;
+    std::string hub_url(void) const;
 
     // Protected members
     std::string         m_secret;    //!< Secret Hub key
-    std::string         m_hub_url;   //!< The XML-RPC endpoint for communication with the hub
     std::string         m_hub_host;  //!< Hub host
     std::string         m_hub_port;  //!< Hub port
     std::string         m_hub_path;  //!< Hub path
     std::string         m_version;   //!< The version of the SAMP Standard Profile implemented by the hub
     std::string         m_hub_id;    //!< Hub identifier used by the hub when it sends message itself rather than forwarding from others
-    socklen_t           m_socket;    //!< Hub socket
+    int                 m_socket;    //!< Hub socket
     bool                m_shutdown;  //!< Shutdown request
     std::vector<client> m_clients;   //!< Clients
 };
