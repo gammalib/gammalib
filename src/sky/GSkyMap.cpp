@@ -43,6 +43,7 @@
 #include "GWcs.hpp"
 #include "GMatrix.hpp"
 #include "GVector.hpp"
+#include "GVOClient.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT_HPX                "GSkyMap::GSkyMap(std::string&, int&,"\
@@ -1966,6 +1967,39 @@ void GSkyMap::write(GFits& file) const
         if (hdu != NULL) delete hdu;
 
     } // endif: we had data to save
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Publish sky map
+ *
+ * @param[in] name Name of sky map.
+ *
+ * Publishes the sky map on a Virtual Observatory Hub. If no Hub is currently
+ * active, the method will start a new Hub.
+ ***************************************************************************/
+void  GSkyMap::publish(const std::string& name) const
+{
+    // Create FITS file containing the sky map
+    GFits fits;
+    write(fits);
+
+    // Get last FITS HDU
+    GFitsHDU* hdu = fits[fits.size()-1];
+
+    // Optionally set extension name
+    if (!name.empty()) {
+        hdu->extname(name);
+    }
+
+    // Create VO Client
+    GVOClient client;
+
+    // Publish map using VO client
+    client.publish(*hdu);
 
     // Return
     return;

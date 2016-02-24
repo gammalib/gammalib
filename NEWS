@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-23 February 2016
+24 February 2016
 
 
 1. Introduction
@@ -156,6 +156,10 @@ extension names. Users can now specify with which extension name a sky
 map is written to a FITS file, and from which extension name it should
 be loaded. This allows to have multiple sky maps in the same file, and
 to mix also HEALPix and WCS maps in the same file (#1695).
+
+A GSkyMap::publish() method has been added that publishes the sky map
+on a Virtual Observatory Hub. This finally makes GammaLib interoperable
+with VO imaging tools (#1231).
 
 
 13. Support module

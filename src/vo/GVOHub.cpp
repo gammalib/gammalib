@@ -56,9 +56,9 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_CONSOLE_DUMP
-#define G_CONSOLE_ERRORS
-#define G_SHOW_MESSAGE
+//#define G_CONSOLE_DUMP               //!< Show method headers
+//#define G_CONSOLE_ERRORS             //!< Show error messages
+//#define G_SHOW_MESSAGE               //!< Show posted and received messages
 
 
 /*==========================================================================

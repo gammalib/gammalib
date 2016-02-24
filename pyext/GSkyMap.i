@@ -172,6 +172,7 @@ public:
     void                  save(const GFilename& filename, bool clobber = false) const;
     void                  read(const GFitsHDU& hdu);
     void                  write(GFits& file) const;
+    void                  publish(const std::string& name = "") const;
 };
 
 
