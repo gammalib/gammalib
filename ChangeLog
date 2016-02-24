@@ -3,8 +3,8 @@
         * Version 1.1.0 released
         =========================
 
-        Add GSkyMap::publish() method to publish map on VO Hub (#1231)
-        Add GVOClient::publish() method to publish a FITS HDU (#1231)
+        Add GSkyMap::publish() method to publish map on VO Hub (#1710)
+        Add GVOClient::publish() method to publish a FITS HDU (#1710)
         Handle FITS extensions in GSkyMap load() and save() methods (#1695)
         Restrict Monte Carlo simulations in GModelSpatialDiffuseConst to simulation cone (#1674)
         Use default GTime in GModelSpectral eval() and eval_gradients() methods (#1672)
