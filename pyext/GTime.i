@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GTime.i - Time class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,9 +45,8 @@ public:
     virtual ~GTime(void);
 
     // Operators
-    GTime& operator+=(const GTime& time);
-    GTime& operator-=(const GTime& time);
-    GTime& operator*=(const double& scale);
+    GTime& operator+=(const double& seconds);
+    GTime& operator-=(const double& seconds);
 
     // Methods
     void           clear(void);
@@ -73,32 +72,17 @@ public:
  * @brief GTime class extension
  ***************************************************************************/
 %extend GTime {
-    GTime __add__(const GTime& time) const {
-        return ((*self) + time);
+    GTime __add__(const double& seconds) const {
+        return ((*self) + seconds);
     }
-    GTime __sub__(const GTime& time) const {
+    GTime __radd__(const double& seconds) const {
+        return (seconds + (*self));
+    }
+    GTime __sub__(const double& seconds) const {
+        return ((*self) - seconds);
+    }
+    double __sub__(const GTime& time) const {
         return ((*self) - time);
-    }
-    GTime __mul__(const double& factor) const {
-        return ((*self) * factor);
-    }
-    // Python 2.x
-    GTime __div__(const double& factor) const {
-        return ((*self) / factor);
-    }
-    // Python 3.x
-    GTime __truediv__(const double& factor) const {
-        return ((*self) / factor);
-    }
-    // Python 2.x operator/=
-    GTime __idiv__(const double& scale) {
-        self->operator/=(scale);
-        return (*self);
-    }
-    // Python 3.x operator/=
-    GTime __itruediv__(const double& scale) {
-        self->operator/=(scale);
-        return (*self);
     }
     bool __eq__(const GTime& time) const {
         return ((*self) == time);

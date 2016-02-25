@@ -1,8 +1,9 @@
-2016-02-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-02-25  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Revise GTime operators (#1714)
         Add GSkyMap::publish() method to publish map on VO Hub (#1710)
         Add GVOClient::publish() method to publish a FITS HDU (#1710)
         Handle FITS extensions in GSkyMap load() and save() methods (#1695)

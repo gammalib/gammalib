@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,9 +29,10 @@
 #include <config.h>
 #endif
 #include <cstdio>
-#include "GTime.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GTime.hpp"
+#include "GTimeReference.hpp"
 
 /* __ Constants __________________________________________________________ */
 const double mjd_ref = 55197.000766018518519;             //!< MJD of time=0
@@ -170,7 +171,7 @@ GTime::~GTime(void)
  * @param[in] time Time.
  * @return Time.
  ***************************************************************************/
-GTime& GTime::operator= (const GTime& time)
+GTime& GTime::operator=(const GTime& time)
 { 
     // Execute only if object is not identical
     if (this != &time) {

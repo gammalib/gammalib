@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib observation module.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -119,40 +119,35 @@ class Test(gammalib.GPythonTestSuite):
         Test GTime class.
         """
         # Setup times
-        time   = gammalib.GTime(3.0)
-        time_b = time.copy()
+        time_a = gammalib.GTime(9.0)
+        time_b = gammalib.GTime(3.0)
+        secs_b = 2.0
 
         # Unary addition operator
-        time += time_b
-        self.test_value(time.secs(), 6.0);
+        time  = time_a.copy()
+        time += secs_b
+        self.test_value(time.secs(), 11.0);
 
         # Unary subtraction operator
-        time -= time_b
-        self.test_value(time.secs(), 3.0);
+        time  = time_a.copy()
+        time -= secs_b
+        self.test_value(time.secs(), 7.0);
 
-        # Unary multiplication operator
-        time *= 2.0
-        self.test_value(time.secs(), 6.0);
+        # Binary left addition operator
+        time = time_a + secs_b
+        self.test_value(time.secs(), 11.0);
 
-        # Unary division operator
-        time /= 2.0
-        self.test_value(time.secs(), 3.0);
-        
-        # Binary addition operator
-        time = time + time_b
-        self.test_value(time.secs(), 6.0);
+        # Binary right addition operator
+        time = secs_b + time_a
+        self.test_value(time.secs(), 11.0);
 
         # Binary subtraction operator
-        time = time - time_b
-        self.test_value(time.secs(), 3.0);
+        time = time_a - secs_b
+        self.test_value(time.secs(), 7.0);
 
-        # Scalar multiplication operator
-        time = time * 2.0
-        self.test_value(time.secs(), 6.0);
-
-        # Scalar division operator
-        time = time / 2.0
-        self.test_value(time.secs(), 3.0);
+        # Binary time subtraction operator
+        time = time_a - time_b
+        self.test_value(time, 6.0);
 
         # Return
         return

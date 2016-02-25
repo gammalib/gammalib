@@ -799,7 +799,7 @@ void GCOMEventCube::set_times(void)
     }
     
     // Compute mean time
-    m_time = 0.5 * (m_gti.tstart() + m_gti.tstop());
+    m_time = m_gti.tstart() + 0.5 * (m_gti.tstop() - m_gti.tstart());
 
     // Set ontime
     m_ontime = m_gti.ontime();

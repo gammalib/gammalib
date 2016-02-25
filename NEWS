@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-24 February 2016
+25 February 2016
 
 
 1. Introduction
@@ -26,12 +26,28 @@ The following methods have been added to the public interface:
 - GCTAResponseTable::table(std::string)
 - GCTAResponseTable::has_axis(std::string)
 - GCTAResponseTable::has_table(std::string)
+- friend GTime  operator+(const GTime&  time,    const double& seconds)
+- friend GTime  operator+(const double& seconds, const GTime&  time)
+- friend GTime  operator-(const GTime&  time,    const double& seconds)
+- friend double operator-(const GTime&  a,       const GTime&  b)
+- GTime::operator+=(const double& seconds)
+- GTime::operator-=(const double& seconds)
 
 The following methods have been removed:
 - GFilename::size()
 - gammalib::file_exists()
 - gammalib::file_exists_gzip()
 - gammalib::is_fits()
+- GTime::operator+=(const GTime& time)
+- GTime::operator-=(const GTime& time)
+- GTime::operator*=(const double& scale)
+- GTime::operator/=(const double& scale)
+- friend GTime operator+(const GTime &a, const GTime &b)
+- friend GTime operator-(const GTime &a, const GTime &b)
+- friend GTime operator* (const GTime &time, const double &s)
+- friend GTime operator*(const double &s, const GTime &time)
+- friend GTime operator*(const GTime &time, const double &s)
+- friend GTime operator/(const GTime &time, const double &s)
 
 The following methods have been renamed:
 - GCTAResponseTable::tables(), was GCTAResponseTable::size()
@@ -142,6 +158,12 @@ The argument of GObservation::deadc(GTime) now defaults to GTime() so
 that no argument is needed when calling the method. This reflects the
 fact that the deadtime correction is often computed as an average value
 over the observation, and does in fact not depend on time (#1670).
+
+The GTime operators have been revised as time is implemented as an
+absolute quantity, while addition and subtraction of GTime objects are
+relative operations. The GTime arguments of the operators have thus be
+replaced by double precision values that specify relative time in seconds.
+The multiplication and division operators have been removed (#1714).
 
 
 11. Optimization module

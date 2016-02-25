@@ -751,17 +751,22 @@ void TestGObservation::test_time(void)
     // Test operators
     GTime a(13.72);
     GTime b(6.28);
-    test_value((a+b).secs(), 20.00);
-    test_value((a-b).secs(), 7.44);
-    test_value((a*3.3).secs(), 45.276);
-    test_value((3.3*a).secs(), 45.276);
-    test_value((a/13.72).secs(), 1.0);
-    test_assert(a == a, "Equality operator corrupt.");
-    test_assert(a != b, "Non-equality operator corrupt.");
-    test_assert(a > b, "Greater than operator corrupt.");
-    test_assert(a >= b, "Greater than or equal operator corrupt.");
-    test_assert(b < a, "Less than operator corrupt.");
-    test_assert(b <= a, "Less than or equal operator corrupt.");
+    test_value((a+6.28).secs(), 20.00, 1.0e-6, "Seconds right addition operator");
+    test_value((6.28+a).secs(), 20.00, 1.0e-6, "Seconds left addition operator");
+    test_value((a-6.28).secs(), 7.44, 1.0e-6, "Seconds substraction operator");
+    test_value((a-b), 7.44, 1.0e-6, "Time subtraction operator");
+    GTime c = a;
+    c += 6.28,
+    test_value(c.secs(), 20.00, 1.0e-6, "Seconds unary addition operator");
+    GTime d = a;
+    d -= 6.28,
+    test_value(d.secs(), 7.44, 1.0e-6, "Seconds unary subtraction operator");
+    test_assert(a == a, "Equality operator");
+    test_assert(a != b, "Non-equality operator");
+    test_assert(a > b, "Greater than operator");
+    test_assert(a >= b, "Greater than or equal operator");
+    test_assert(b < a, "Less than operator");
+    test_assert(b <= a, "Less than or equal operator");
 
     // Return
     return;

@@ -927,14 +927,14 @@ void GLATEventCube::set_energies(void)
 
 
 /***********************************************************************//**
- * @brief Set mean event time and ontime of event cube.
+ * @brief Set mean event time and ontime of event cube
  *
- * @exception GLATException::no_gti
- *            No Good Time Intervals found in event cube.
+ * @exception GException::invalid_value
+ *            No Good Time Intervals found.
  *
- * This method computes the mean event time and the ontime of the event
- * cube. The mean event time is the average between the start and the stop
- * time. The ontime is the sum of all Good Time Intervals.
+ * Computes the mean time of the event cube by taking the mean between start
+ * and stop time. Computes also the ontime by summing up of all good time
+ * intervals.
  *
  * @todo Could add a more sophisticated mean event time computation that
  *       weights by the length of the GTIs, yet so far we do not really use
@@ -944,12 +944,14 @@ void GLATEventCube::set_times(void)
 {
     // Throw an error if GTI is empty
     if (m_gti.size() < 1) {
-        throw GLATException::no_gti(G_SET_TIMES, "Every LAT event cube needs"
-                  " associated GTIs to allow the computation of the ontime.");
+        std::string msg = "No Good Time Intervals have been found in event "
+                          "cube. Every LAT event cube needs a definition "
+                          "of the Good Time Intervals.";
+        throw GException::invalid_value(G_SET_TIMES, msg);
     }
 
     // Compute mean time
-    m_time = 0.5 * (gti().tstart() + gti().tstop());
+    m_time = m_gti.tstart() + 0.5 * (m_gti.tstop() - m_gti.tstart());
 
     // Set ontime
     m_ontime = m_gti.ontime();
