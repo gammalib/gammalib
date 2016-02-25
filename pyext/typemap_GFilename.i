@@ -41,7 +41,7 @@
         $1 = &temp;
     }
     else if (PyUnicode_Check($input)) {
-        temp = GFilename(std::string(PyBytes_AS_STRING(PyUnicode_AsEncodedString($input, "utf-8", "Error ~"))));
+        temp = GFilename(std::string(PyString_AsString(PyUnicode_AsEncodedString($input, "utf-8", "Error ~"))));
         $1 = &temp;
     }
     else {
