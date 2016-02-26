@@ -65,6 +65,12 @@ can be downloaded from
 and installed from the source files. We recommend to put also those in the
 default GammaLib install directory ``/usr/local/gamma``.
 
+GammaLib includes a Python module that is compatible with Python 2 (version
+2.3 or higher) and Python 3 (all versions). To generate the Python module,
+the Python development package including the ``Python.h`` header file needs
+to be installed on your system.
+
+
 .. _build:
 
 Building GammaLib
