@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-25 February 2016
+28 February 2016
 
 
 1. Introduction
@@ -195,6 +195,9 @@ for this purpose in the past. Furthermore, the method protocol() returns
 the access protocol (e.g. http, ftp, file) of the file name, the method
 path() returns the path of th file name, and the method file() returns the
 file name without the path.
+
+Put FITS access in a critical OMP zone to make GFilename::is_fits() thread
+safe (#1717).
 
 
 14. XML module

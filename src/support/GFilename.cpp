@@ -253,7 +253,7 @@ bool GFilename::exists(void) const
  * @return True if file is a FITS file.
  *
  * Test if the file or a compressed version of the file (with a .gz, .Z, .z,
- * or .zip extension) is a FITS file. 
+ * or .zip extension) is a FITS file. This method is thread safe.
  ***************************************************************************/
 bool GFilename::is_fits(void) const
 {
@@ -261,14 +261,19 @@ bool GFilename::is_fits(void) const
     bool is_fits = false;
 
     // Check now for a FITS file. This works only if cfitsio is available.
+    // Put the code into a critical zone as it might be called from within
+    // a parallelized thread.
     #if defined(HAVE_LIBCFITSIO)
-    int       status = 0;
-    fitsfile* fptr   = NULL;
-    status           = ffopen(&fptr, url().c_str(), 0, &status);
-    if (status == 0) {
-        is_fits = true;
+    #pragma omp critical
+    {
+        int       status = 0;
+        fitsfile* fptr   = NULL;
+        status           = ffopen(&fptr, url().c_str(), 0, &status);
+        if (status == 0) {
+            is_fits = true;
+        }
+        ffclos(fptr, &status);
     }
-    ffclos(fptr, &status);
     #endif
 
     // Return result
