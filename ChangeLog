@@ -1,8 +1,9 @@
-2016-02-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-03-01  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
         Make GFilename::is_fits thread safe (#1717).
         Revise GTime operators (#1714)
         Add GSkyMap::publish() method to publish map on VO Hub (#1710)

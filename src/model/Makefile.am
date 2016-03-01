@@ -19,6 +19,8 @@ sources = GModelPar.cpp \
           GModelSpatialRadialDisk.cpp \
           GModelSpatialRadialGauss.cpp \
           GModelSpatialRadialShell.cpp \
+          GModelSpatialRadialProfile.cpp \
+          GModelSpatialRadialProfileGauss.cpp \
           GModelSpatialElliptical.cpp \
           GModelSpatialEllipticalDisk.cpp \
           GModelSpatialEllipticalGauss.cpp \

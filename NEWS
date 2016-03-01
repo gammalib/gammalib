@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-28 February 2016
+1 March 2016
 
 
 1. Introduction
@@ -141,6 +141,14 @@ The set_mc_cone() methods of the GModelSpatialDiffuseCube class and the
 GModelSpatialDiffuseMap class now recompute only the Monte Carlo acceptance
 cone in case that the cone centre or radius have changed since the last
 computation. This speeds up the computations (#1673).
+
+Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
+The method deals with pre-computation and normalization of the profiles,
+and implements the eval(), eval_grandients() and mc() method. The class
+GModelSpatialRadialProfileGauss has been added to show how to implement
+radial profile for the case of a Gaussian, and also to cross-check the
+results with the GModelSpatialRadialGauss class that should return basically
+the same results (#1520).
 
 
 9. Numerics module

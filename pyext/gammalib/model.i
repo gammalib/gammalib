@@ -134,6 +134,8 @@
 %include "GModelSpatialRadialDisk.i"
 %include "GModelSpatialRadialGauss.i"
 %include "GModelSpatialRadialShell.i"
+%include "GModelSpatialRadialProfile.i"
+%include "GModelSpatialRadialProfileGauss.i"
 %include "GModelSpatialElliptical.i"
 %include "GModelSpatialEllipticalDisk.i"
 %include "GModelSpatialEllipticalGauss.i"
