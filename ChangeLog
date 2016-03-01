@@ -114,6 +114,7 @@
         Use rejection method in GModelSpatialDiffuseCube::mc() (#1722)
         Add energy dispersion cube for stacked analysis (#1721, #1801)
         Make GFilename::is_fits thread safe (#1717)
+        Add GModelSpatialRadialProfile and GModelSpatialRadialProfileGauss classes (#1520)
         Revise GTime operators (#1714)
         Add GSkyMap::publish() method to publish map on VO Hub (#1710)
         Add GVOClient::publish() method to publish a FITS HDU (#1710)

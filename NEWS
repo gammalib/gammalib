@@ -2,6 +2,9 @@ New Features and Important Changes in GammaLib 1.3.0.dev1
 
 11 April 2017
 
+Author(s) : Juergen Knoedlseder
+
+
 
 1. Introduction
 ---------------
@@ -111,6 +114,14 @@ power law spectrum has been added (#1948).
 
 The scale of the composite spatial models can now be fitted by adding the
 free_scale="1" attribute to the XML file (#1992).
+
+Add GModelSpatialRadialProfile class to handle arbitrary radial profiles.
+The method deals with pre-computation and normalization of the profiles,
+and implements the eval(), eval_grandients() and mc() method. The class
+GModelSpatialRadialProfileGauss has been added to show how to implement
+radial profile for the case of a Gaussian, and also to cross-check the
+results with the GModelSpatialRadialGauss class that should return basically
+the same results (#1520).
 
 
 9. Numerics module
