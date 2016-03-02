@@ -570,7 +570,6 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
     return value;
 }
 
-
 /***********************************************************************//**
  * @brief Kernel for halo density profile squared
  *

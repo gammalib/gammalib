@@ -44,6 +44,7 @@ sources = GModelPar.cpp \
           GModelSpatialRadialProfileDMEinasto.cpp \
           GModelSpatialRadialProfileGauss.cpp \
           GModelSpatialRadialProfileDMEinasto.cpp \
+          GModelSpatialRadialProfileDMBurkert.cpp \
           GModelSpatialElliptical.cpp \
           GModelSpatialEllipticalDisk.cpp \
           GModelSpatialEllipticalGauss.cpp \
