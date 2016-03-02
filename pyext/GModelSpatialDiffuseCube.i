@@ -25,6 +25,7 @@
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GEnergies.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 %}
 
@@ -81,7 +82,6 @@ public:
     void                       load(const GFilename& filename);
     void                       save(const GFilename& filename,
                                     const bool& clobber = false) const;
-    //void                       read(const GFits& file);
     void                       write(GFits& file) const;
 };
 

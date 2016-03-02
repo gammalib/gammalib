@@ -36,13 +36,13 @@
 #include "GSkyDir.hpp"
 #include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
-#include "GXmlElement.hpp"
 #include "GEbounds.hpp"
-#include "GEnergies.hpp"
 #include "GFilename.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
+class GEnergies;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -107,7 +107,6 @@ public:
     void                       load(const GFilename& filename);
     void                       save(const GFilename& filename,
                                     const bool&      clobber = false) const;
-    //void                       read(const GFits& file);
     void                       write(GFits& file) const;
 
 protected:
@@ -130,11 +129,11 @@ protected:
     GEbounds   m_ebounds;     //!< Energy bounds of the maps
 
     // Monte Carlo cache
-    mutable GSkyDir             m_mc_centre;   //!< Centre of MC cone
-    mutable double              m_mc_radius;   //!< Radius of MC cone
-    mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
-    mutable std::vector<double> m_mc_max;      //!< Maximum values for MC
-    mutable GModelSpectralNodes m_mc_spectrum; //!< Map cube spectrum
+    mutable GSkyDir             m_mc_centre;           //!< Centre of MC cone
+    mutable double              m_mc_radius;           //!< Radius of MC cone (degrees)
+    mutable double              m_mc_one_minus_cosrad; //!< 1-cosine of radius
+    mutable std::vector<double> m_mc_max;              //!< Maximum values for MC
+    mutable GModelSpectralNodes m_mc_spectrum;         //!< Map cube spectrum
 };
 
 
