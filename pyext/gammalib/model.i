@@ -155,6 +155,7 @@
 %include "GModelSpatialRadialShell.i"
 %include "GModelSpatialRadialProfile.i"
 %include "GModelSpatialRadialProfileGauss.i"
+%include "GModelSpatialRadialProfileDMEinasto.i"
 %include "GModelSpatialElliptical.i"
 %include "GModelSpatialEllipticalDisk.i"
 %include "GModelSpatialEllipticalGauss.i"
