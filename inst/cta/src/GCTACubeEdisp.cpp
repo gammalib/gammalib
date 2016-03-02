@@ -724,69 +724,19 @@ void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
 /***********************************************************************//**
  * @brief Return true energy interval that contains the energy dispersion.
  *
- * @param[in] logEobs Log10 of the observed event energy (TeV).
- * @param[in] theta Offset angle in camera system (rad).
- * @param[in] phi Azimuth angle in camera system (rad). Not used.
- * @param[in] zenith Zenith angle in Earth system (rad). Not used.
- * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
+ * @param[in] dir Sky direction where intervals should be computed
+ * @param[in] obsEng Reconstructed energy where intervals should be computed
  *
  * Returns the band of true photon energies outside of which the energy
- * dispersion becomes negligible for a given observed energy @p logEobs and
- * offset angle @p theta. An energy in considered negligible if inferior to
+ * dispersion becomes negligible for a given observed energy @p obsEnd and
+ * sky direction @p dir. An energy in considered negligible if inferior to
  * 1e-6.
  ***************************************************************************/
-GEbounds GCTACubeEdisp::ebounds_src(const GSkyDir& dir,
-                                  const GEnergy& obsEng) const
+GEbounds GCTACubeEdisp::ebounds_src(const GSkyDir& dir, const GEnergy obsEng) const
 {
-    // Get index of obsEng inside energy boundaries
-	int index = m_ebounds.index(obsEng);
 
-	// Get map indices containing the migration information
-	int binmin = m_migras.size() * index;
-	int binmax = m_migras.size() * (index + 1);
-
-	m_cube(dir, binmin)
-
-
-	// Compute only if parameters changed
-    if (!m_ebounds_src_computed || theta != m_last_theta_src) {
-
-        // Set computation flag
-        m_ebounds_src_computed = true;
-        m_last_theta_src       = theta;
-
-        // Compute ebounds_src
-        compute_ebounds_src(theta, phi, zenith, azimuth);
-
-    }
-
-    // Search index only if logEobs has changed
-    if (logEobs != m_last_logEobs) {
-
-        // Store observed energy
-        m_last_logEobs = logEobs;
-
-        // Find right index with bisection
-        int low  = 0;
-        int high = m_ebounds_src.size() - 1;
-        while ((high-low) > 1) {
-            int  mid = (low+high) / 2;
-            double e = m_edisp.axis_lo(m_inx_etrue, mid);
-            if (logEobs < std::log10(e)) {
-                high = mid;
-            }
-            else {
-                low = mid;
-            }
-        }
-
-        // Index found
-        m_index_src = low;
-
-    }
-
-    // Return energy boundaries
-    return m_ebounds_src[m_index_src];
+	throw GException::feature_not_implemented("","");
+	return GEbounds();
 }
 
 /***********************************************************************//**
