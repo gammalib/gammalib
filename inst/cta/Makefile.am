@@ -45,6 +45,7 @@ sources = src/GCTASupport.cpp \
           src/GCTACubeExposure.cpp \
           src/GCTACubeBackground.cpp \
           src/GCTACubePsf.cpp \
+          src/GCTACubeEdisp.cpp \
           src/GCTACubeSource.cpp \
           src/GCTACubeSourcePoint.cpp \
           src/GCTACubeSourceDiffuse.cpp \
@@ -96,6 +97,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTABackground3D.hpp \
                      include/GCTACubeExposure.hpp \
                      include/GCTACubePsf.hpp \
+                     include/GCTACubeEdisp.hpp \
                      include/GCTACubeBackground.hpp \
                      include/GCTACubeSource.hpp \
                      include/GCTACubeSourcePoint.hpp \

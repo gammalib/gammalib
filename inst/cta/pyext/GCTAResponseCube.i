@@ -43,6 +43,10 @@ public:
     GCTAResponseCube(const GCTACubeExposure&   exposure,
                      const GCTACubePsf&        psf,
                      const GCTACubeBackground& background);
+    GCTAResponseCube(const GCTACubeExposure&   exposure,
+                     const GCTACubePsf&        psf,
+                     const GCTACubeEdisp&      edisp,
+                     const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
     // Implement pure virtual base class methods

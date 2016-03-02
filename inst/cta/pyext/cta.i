@@ -196,6 +196,7 @@
 %include "GCTACubeExposure.i"
 %include "GCTACubeBackground.i"
 %include "GCTACubePsf.i"
+%include "GCTACubeEdisp.i"
 %include "GCTAModelCubeBackground.i"
 %include "GCTAModelIrfBackground.i"
 %include "GCTAModelAeffBackground.i"

@@ -63,6 +63,10 @@ public:
     GCTAResponseCube(const GCTACubeExposure&   exposure,
                      const GCTACubePsf&        psf,
                      const GCTACubeBackground& background);
+    GCTAResponseCube(const GCTACubeExposure&   exposure,
+                     const GCTACubePsf&        psf,
+					 const GCTACubeEdisp&      edisp,
+                     const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
     // Operators
@@ -97,6 +101,8 @@ public:
     void                      exposure(const GCTACubeExposure& exposure);
     const GCTACubePsf&        psf(void) const;
     void                      psf(const GCTACubePsf& psf);
+    const GCTACubeEdisp& edisp(void) const;
+    void                      edisp(const GCTACubeEdisp& edisp);
     const GCTACubeBackground& background(void) const;
     void                      background(const GCTACubeBackground& background);
 
@@ -134,6 +140,7 @@ private:
     GCTACubeExposure   m_exposure;    //!< Exposure cube
     GCTACubePsf        m_psf;         //!< Mean point spread function
     GCTACubeBackground m_background;  //!< Background cube
+    GCTACubeEdisp    m_edisp; //!< Energy dispersion cube
     mutable bool       m_apply_edisp; //!< Apply energy dispersion
 
     // Response cache
@@ -179,7 +186,7 @@ bool GCTAResponseCube::is_valid(void) const
 inline
 bool GCTAResponseCube::use_edisp(void) const
 {
-    return false;
+    return m_apply_edisp;
 }
 
 
@@ -291,6 +298,31 @@ inline
 const GCTACubeBackground& GCTAResponseCube::background(void) const
 {
     return (m_background);
+}
+
+
+/***********************************************************************//**
+ * @brief Set cube analysis energy dispersion cube
+ *
+ * @param[in] background Cube analysis background cube.
+ ***************************************************************************/
+inline
+void GCTAResponseCube::edisp(const GCTACubeEdisp& edisp)
+{
+    m_edisp = edisp;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return cube analysis background cube
+ *
+ * @return Reference to cube analysis background cube.
+ ***************************************************************************/
+inline
+const GCTACubeEdisp& GCTAResponseCube::edisp(void) const
+{
+    return (m_edisp);
 }
 
 #endif /* GCTARESPONSECUBE_HPP */

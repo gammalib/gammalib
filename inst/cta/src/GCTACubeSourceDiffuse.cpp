@@ -292,8 +292,16 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
                         double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
                         #endif
 
+                        // Initialise edisp value
+                        double edisp = 1.0;
+
+                        // Set edisp value if necessary
+                        if (rsp->use_edisp()) {
+                        	edisp = rsp->edisp(obsDir, obsEng.TeV() / srcEng.TeV(), srcEng);
+                        }
+
                         // Set cube value
-                        m_cube(pixel, iebin) = aeff * psf * deadc;
+                        m_cube(pixel, iebin) = aeff * psf *  edisp * deadc;
 
                     } // endif: effective area was positive
 

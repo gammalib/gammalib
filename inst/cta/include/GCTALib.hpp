@@ -68,6 +68,7 @@
 #include "GCTACubeExposure.hpp"
 #include "GCTACubeBackground.hpp"
 #include "GCTACubePsf.hpp"
+#include "GCTACubeEdisp.hpp"
 #include "GCTACubeSource.hpp"
 #include "GCTACubeSourcePoint.hpp"
 #include "GCTACubeSourceDiffuse.hpp"
