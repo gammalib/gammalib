@@ -22,6 +22,7 @@ sources = GModelPar.cpp \
           GModelSpatialRadialProfile.cpp \
           GModelSpatialRadialProfileGauss.cpp \
           GModelSpatialRadialProfileDMEinasto.cpp \
+          GModelSpatialRadialProfileDMBurkert.cpp \
           GModelSpatialElliptical.cpp \
           GModelSpatialEllipticalDisk.cpp \
           GModelSpatialEllipticalGauss.cpp \
