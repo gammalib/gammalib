@@ -240,6 +240,8 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
     m_name          = name;
     GTime   obsTime = cube->time();
 
+    GEnergy srcEng;
+
     // Setup empty skymap
     m_cube = cube->map();
     m_cube = 0.0;
@@ -297,7 +299,7 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
 
                         // Set edisp value if necessary
                         if (rsp->use_edisp()) {
-                        	edisp = rsp->edisp(obsDir, obsEng.TeV() / srcEng.TeV(), srcEng);
+                        	edisp = rsp->edisp()(obsDir, obsEng.TeV() / srcEng.TeV(), srcEng);
                         }
 
                         // Set cube value

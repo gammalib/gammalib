@@ -476,16 +476,20 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
  ***************************************************************************/
 GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
 {
-    // Initialise an empty boundary object
-	GEbounds ebounds;
-
-	// If energy dispersion is available then set the energy boundaries
-	if (edisp() != NULL) {
-	   double obsLogEng = obsEnergy.log10TeV();
-	   ebounds          = edisp().ebounds_src(obsLogEng); // Requires TeV
-	}
+//    // Initialise an empty boundary object
+//	GEbounds ebounds;
+//
+//	// If energy dispersion is available then set the energy boundaries
+//	if (edisp() != NULL) {
+//	   double obsLogEng = obsEnergy.log10TeV();
+//	   ebounds          = m_edisp.ebounds_src(obsEnergy);
+//	}
+	// Method is not implemented
+	    std::string msg = "Spatial integration of sky model over the data space "
+	                      "is not implemented.";
+	    throw GException::feature_not_implemented(G_NROI, msg);
     // Return energy boundaries
-    return ebounds;
+    return GEbounds();
 }
 
 

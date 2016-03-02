@@ -33,6 +33,7 @@
 #include "GCTAResponse.hpp"
 #include "GCTACubeExposure.hpp"
 #include "GCTACubePsf.hpp"
+#include "GCTACubeEdisp.hpp"
 #include "GCTACubeBackground.hpp"
 #include "GCTACubeSource.hpp"
 
