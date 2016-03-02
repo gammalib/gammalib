@@ -498,6 +498,11 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
  *    g = \frac{ \sqrt{l^2+d^2-2ldCos(\theta)} }{r_s}
  * \f]
  *
+ * This profile is detailed in:
+ *   "The Structure Of Dark Matter Halos In Dwarf Galaxies"
+ *   Burkert, 1995, The Astrophysical Journal, 447: L25–L28
+ *   http://iopscience.iop.org/article/10.1086/309560/pdf
+ *
  * @return unit
  *
  ***************************************************************************/
