@@ -39,9 +39,10 @@ sources = GModelPar.cpp \
           GModelSpatialRadialGauss.cpp \
           GModelSpatialRadialShell.cpp \
           GModelSpatialRadialProfile.cpp \
-          GModelSpatialRadialProfileGauss.cpp \
-          GModelSpatialRadialProfileDMEinasto.cpp \
+          GModelSpatialRadialProfileDMZhao.cpp \
           GModelSpatialRadialProfileDMBurkert.cpp \
+          GModelSpatialRadialProfileDMEinasto.cpp \
+          GModelSpatialRadialProfileGauss.cpp \
           GModelSpatialElliptical.cpp \
           GModelSpatialEllipticalDisk.cpp \
           GModelSpatialEllipticalGauss.cpp \
