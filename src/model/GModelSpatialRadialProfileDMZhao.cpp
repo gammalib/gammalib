@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iomanip>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
@@ -229,7 +228,6 @@ double GModelSpatialRadialProfileDMZhao::theta_min(void) const
     // Return value
     return m_theta_min.value();
 }
-
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
@@ -659,7 +657,6 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
     // Return value
     return value;
 }
-
 
 /***********************************************************************//**
  * @brief Kernel for zhao halo density profile squared
