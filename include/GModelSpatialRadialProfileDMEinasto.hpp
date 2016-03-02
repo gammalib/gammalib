@@ -263,4 +263,3 @@ void GModelSpatialRadialProfileDMEinasto::alpha(const double& alpha)
 }
 
 #endif /* GMODELSPATIALRADIALPROFILEDMEINASTO_HPP */
-

@@ -1,7 +1,11 @@
 /***************************************************************************
  *  GModelSpatialRadialProfileDMEinasto.i - Einasto radial profile class   *
  * ----------------------------------------------------------------------- *
+<<<<<<< HEAD
  *  copyright (C) 2016 by Nathan Kelley-Hoskins                            *
+=======
+ *  copyright (C) 2016 by Juergen Knoedlseder                              *
+>>>>>>> got a dark matter einasto halo to compile, integration is untested
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
