@@ -67,10 +67,7 @@ public:
  * by a %typemap(typecheck) construct.
  ***************************************************************************/
 %extend GModelSpatialRadialProfileDMBurkert {
-    double eval(const GPhoton& photon) const {
-        return self->GModelSpatialRadial::eval(photon);
-    }
-    double eval_gradients(const GPhoton& photon) const {
-        return self->GModelSpatialRadial::eval_gradients(photon);
+    GModelSpatialRadialProfileDMBurkert copy() {
+        return (*self);
     }
 };

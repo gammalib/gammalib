@@ -498,6 +498,12 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
  *    g = \frac{ \sqrt{l^2+d^2-2ldCos(\theta)} }{r_s}
  * \f]
  *
+ * This profile is detailed in:
+ *   Zhao, 1996
+ *   "Analytical models for galactic nuclei"
+ *   Mon. Not. R. Astron. Soc. 278, 488-49
+ *   http://mnras.oxfordjournals.org/content/278/2/488.short
+ *
  * @return unit
  *
  ***************************************************************************/

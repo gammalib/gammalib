@@ -499,8 +499,9 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
  * \f]
  *
  * This profile is detailed in:
+ *   Burkert, 1995
  *   "The Structure Of Dark Matter Halos In Dwarf Galaxies"
- *   Burkert, 1995, The Astrophysical Journal, 447: L25–L28
+ *   The Astrophysical Journal, 447: L25–L28
  *   http://iopscience.iop.org/article/10.1086/309560/pdf
  *
  * @return unit

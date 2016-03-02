@@ -498,6 +498,17 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
  *    g = \frac{ \sqrt{l^2+d^2-2ldCos(\theta)} }{r_s}
  * \f]
  *
+ * This profile is detailed in:
+ *   Springel et al, 2008
+ *   "The Aquarius Project: the subhaloes of galactic haloes"
+ *   Mon. Not. R. Astron. Soc. 391, 1685–1711
+ *   http://mnras.oxfordjournals.org/content/391/4/1685
+ *
+ * which cites:
+ *   J. Einasto, 1965
+ *   "Kinematics and dynamics of stellar systems"
+ *   Trudy Inst. Astrofiz. Alma-Ata 5, 87
+ *
  * @return unit
  *
  ***************************************************************************/
