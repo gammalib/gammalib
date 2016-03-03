@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATObservation.cpp - Fermi/LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -207,24 +207,19 @@ void GLATObservation::response(const GResponse& rsp)
  * @brief Set response function
  *
  * @param[in] irfname Name of instrument response function.
- * @param[in] caldb Optional path to calibration database.
  *
  * Set the LAT response function using the IRF name and the path to the
- * calibration database. The IFR name has to be one of
+ * calibration database. The IRF name has to be one of
  * name
  * name::front
  * name::back
  * where name is the response name (e.g. P6_v3). Note that the name is case
  * sensitive for the moment.
  ***************************************************************************/
-void GLATObservation::response(const std::string& irfname,
-                               const std::string& caldb)
+void GLATObservation::response(const std::string& irfname)
 {
     // Clear LAT response function
     m_response.clear();
-
-    // Set calibration database
-    m_response.caldb(caldb);
 
     // Load instrument response function
     m_response.load(irfname);

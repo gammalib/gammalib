@@ -87,6 +87,7 @@ private:
     void write_edisp(GFits& file) const;
     
     // Protected members
+    std::string         m_evtype;       //!< Event type
     GLATResponseTable   m_edisp_bins;   //!< Energy dispersion energy and cos theta binning
     std::vector<double> m_norm;         //!< Energy dispersion normalization
     std::vector<double> m_ls1;          //!< Energy dispersion ...

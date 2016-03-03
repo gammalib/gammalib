@@ -239,7 +239,7 @@ void GLATPsf::load(const GFilename& filename)
  * @brief Save point spread function into FITS file
  *
  * @param[in] filename FITS file.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Saves Fermi/LAT point spread function into FITS file.
  ***************************************************************************/
@@ -276,14 +276,26 @@ void GLATPsf::save(const GFilename& filename, const bool& clobber)
  ***************************************************************************/
 void GLATPsf::read(const GFits& fits)
 {
-    // Clear instance
+    // Clear instance (keep event type)
+    std::string evtype = m_evtype;
     clear();
+    m_evtype = evtype;
 
-    // Get pointer to PSF parameters table
-    const GFitsTable& hdu_rpsf = *fits.table("RPSF");
+    // Set extension names
+    std::string rpsf    = "RPSF";
+    std::string scaling = "PSF_SCALING_PARAMS";
+    if (!fits.contains(rpsf)) {
+        rpsf += "_" + m_evtype;
+    }
+    if (!fits.contains(scaling)) {
+        scaling += "_" + m_evtype;
+    }
 
-    // Get pointer to PSF scaling parameters table
-    const GFitsTable& hdu_scale = *fits.table("PSF_SCALING_PARAMS");
+    // Get PSF parameters table
+    const GFitsTable& hdu_rpsf = *fits.table(rpsf);
+
+    // Get PSF scaling parameters table
+    const GFitsTable& hdu_scale = *fits.table(scaling);
 
     // Determine PSF version (default version is version 1)
     int version = (hdu_rpsf.has_card("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
@@ -569,6 +581,7 @@ std::string GLATPsf::print(const GChatter& chatter) const
 void GLATPsf::init_members(void)
 {
     // Initialise members
+    m_evtype.clear();
     m_psf = NULL;
     
     // Return
@@ -584,6 +597,9 @@ void GLATPsf::init_members(void)
 void GLATPsf::copy_members(const GLATPsf& psf)
 {
     // Copy members
+    m_evtype = psf.m_evtype;
+
+    // Clone members
     if (psf.m_psf != NULL) {
         m_psf = psf.m_psf->clone();
     }

@@ -317,7 +317,7 @@ const GCaldb& GCTAResponseIrf::caldb(void) const
 
 
 /***********************************************************************//**
- * @brief Set path to the calibration database
+ * @brief Set calibration database
  *
  * @param[in] caldb Calibration database.
  *

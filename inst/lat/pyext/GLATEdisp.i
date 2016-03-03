@@ -58,8 +58,6 @@ public:
     int          size(void) const;
     int          nenergies(void) const;
     int          ncostheta(void) const;
-    //double       costhetamin(void) const;
-    //void         costhetamin(const double& ctheta);
     bool         has_phi(void) const;
 };
 

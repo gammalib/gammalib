@@ -92,7 +92,8 @@ private:
     void free_members(void);
     
     // Members
-    GLATPsfBase* m_psf;   //!< Pointer to versioned point spread function
+    std::string  m_evtype; //!< Event type
+    GLATPsfBase* m_psf;    //!< Pointer to versioned point spread function
 };
 
 

@@ -21,7 +21,7 @@
 /**
  * @file GLATAeff.i
  * @brief Fermi/LAT effective area class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
