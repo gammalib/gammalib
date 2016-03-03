@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Add GObservations::nobserved() method (#1723)
         Use rejection method in GCTABackground3D::mc() (#1722)
         Use rejection method in GModelSpatialDiffuseCube::mc() (#1722)
         Make GFilename::is_fits thread safe (#1717).

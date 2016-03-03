@@ -15,6 +15,7 @@ made since the last release of GammaLib.
 ---------------------------------
 The following methods have been added to the public interface:
 - GObservation::events() (non-const variant)
+- GObservations::nobserved()
 - GFilename::operator std::string()
 - GFilename::exists()
 - GFilename::is_fits()
@@ -169,6 +170,10 @@ absolute quantity, while addition and subtraction of GTime objects are
 relative operations. The GTime arguments of the operators have thus be
 replaced by double precision values that specify relative time in seconds.
 The multiplication and division operators have been removed (#1714).
+
+The GObservations::nobserved() method has been added that returns the
+total number of events in an observation container. The method is used
+by the print() method (#1723).
 
 
 11. Optimization module

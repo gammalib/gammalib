@@ -438,6 +438,10 @@ void GCTAEventCube::write(GFits& fits) const
  * @brief Return number of events in cube
  *
  * @return Number of events in cube, rounded to nearest integer value.
+ *
+ * Returns the total number of events in the cube, rounded to nearest integer
+ * value. All cube bins with a negative content will be excluded from the
+ * total.
  ***************************************************************************/
 int GCTAEventCube::number(void) const
 {

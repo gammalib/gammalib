@@ -131,6 +131,7 @@ public:
     void                errors_hessian(void);
     void                eval(void);
     double              logL(void) const;
+    int                 nobserved(void) const;
     double              npred(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
 
