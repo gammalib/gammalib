@@ -81,23 +81,31 @@ protected:
         halo_kernel_los(const double& scale_radius ,
                         const double& halo_distance,
                         const double& alpha        ,
+                        const double& beta         ,
+                        const double& gamma        ,
                         const double& theta        ) :
                         m_scale_radius(scale_radius),
                         m_halo_distance(halo_distance),
                         m_alpha(alpha),
+                        m_beta(beta),
+                        m_gamma(gamma),
                         m_theta(theta) {}
         double eval( const double& los ) ;
       protected :
         double m_scale_radius  ;
         double m_halo_distance ;
         double m_alpha         ;
+        double m_beta          ;
+        double m_gamma         ;
         double m_theta         ;
     } ;
 
     // Protected members
     GModelPar m_scale_radius  ; //!< scale radius of halo profile
     GModelPar m_halo_distance ; //!< distance from earth to halo center
-    GModelPar m_alpha         ; //!< einasto spatial power index
+    GModelPar m_alpha         ; //!< spatial power index
+    GModelPar m_beta          ; //!< spatial power index
+    GModelPar m_gamma         ; //!< spatial power index
 };
 
 
