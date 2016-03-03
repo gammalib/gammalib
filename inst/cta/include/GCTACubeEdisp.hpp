@@ -95,7 +95,7 @@ public:
     const GNodeArray& elogmeans(void) const;
     double            migra_max(void) const;
     int               offset(const int& imigra, const int& iebin) const;
-    GEbounds     ebounds_src(const GSkyDir& dir, const GEnergy obsEng) const;
+    GEbounds     ebounds_src(const GEnergy obsEng) const;
     void              read(const GFits& fits);
     void              write(GFits& file) const;
     void              load(const GFilename& filename);

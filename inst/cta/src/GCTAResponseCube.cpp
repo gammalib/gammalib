@@ -191,6 +191,9 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
     m_edisp = edisp;
     m_background = background;
 
+    // Signal that edisp is available
+    m_has_edisp = true;
+
     // Return
     return;
 }
@@ -476,20 +479,11 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
  ***************************************************************************/
 GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
 {
-//    // Initialise an empty boundary object
-//	GEbounds ebounds;
-//
-//	// If energy dispersion is available then set the energy boundaries
-//	if (edisp() != NULL) {
-//	   double obsLogEng = obsEnergy.log10TeV();
-//	   ebounds          = m_edisp.ebounds_src(obsEnergy);
-//	}
-	// Method is not implemented
-	    std::string msg = "Spatial integration of sky model over the data space "
-	                      "is not implemented.";
-	    throw GException::feature_not_implemented(G_NROI, msg);
+	// Get energy boundaries from energy dispersion
+	GEbounds ebounds = m_edisp.ebounds_src(obsEnergy);
+
     // Return energy boundaries
-    return GEbounds();
+    return ebounds;
 }
 
 
@@ -531,6 +525,17 @@ void GCTAResponseCube::read(const GXmlElement& xml)
     m_psf.load(psfname);
     m_background.load(bkgname);
 
+    // Optionally load energy dispersion cube
+    if (gammalib::xml_has_par(xml, "EdispCube")) {
+		// Get Edisp cube information and load cube
+		const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
+		std::string        edispname = gammalib::strip_whitespace(edisppar->attribute("file"));
+		m_edisp.load(edispname);
+
+		// Signal that energy dispersion is available
+		m_has_edisp = true;
+    }
+
     // Return
     return;
 }
@@ -565,6 +570,13 @@ void GCTAResponseCube::write(GXmlElement& xml) const
     filename = gammalib::strip_whitespace(m_psf.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "PsfCube");
+        par->attribute("file", filename);
+    }
+
+    // Add energy dispersions cube filename
+    filename = gammalib::strip_whitespace(m_edisp.filename());
+    if (!(filename.empty())) {
+        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
         par->attribute("file", filename);
     }
 
@@ -617,6 +629,11 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
         // Append point spread function information
         result.append("\n"+m_psf.print(chatter));
 
+        // Append energy dispersion information
+        if (m_has_edisp) {
+			result.append("\n"+m_psf.print(chatter));
+        }
+
         // Append background information
         result.append("\n"+m_background.print(chatter));
 
@@ -644,6 +661,7 @@ void GCTAResponseCube::init_members(void)
     m_edisp.clear();
     m_background.clear();
     m_apply_edisp = false;
+    m_has_edisp = false;
 
     // Initialise cache
     m_cache.clear();
@@ -666,6 +684,7 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
     m_edisp       = rsp.m_edisp;
     m_background  = rsp.m_background;
     m_apply_edisp = rsp.m_apply_edisp;
+    m_has_edisp = rsp.m_has_edisp;
 
     // Copy cache
     for (int i = 0; i < rsp.m_cache.size(); ++i) {

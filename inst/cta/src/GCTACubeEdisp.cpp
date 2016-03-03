@@ -284,10 +284,10 @@ GCTACubeEdisp& GCTACubeEdisp::operator= (const GCTACubeEdisp& cube)
  ***************************************************************************/
 double GCTACubeEdisp::operator()(const GSkyDir& dir,
                                const double&  migra,
-                               const GEnergy& energy) const
+                               const GEnergy& srcEng) const
 {
     // Update indices and weighting factors for interpolation
-    update(migra, energy.log10TeV());
+    update(migra, srcEng.log10TeV());
 
     // Perform bi-linear interpolation
     double edisp = m_wgt1 * m_cube(dir, m_inx1) +
@@ -513,7 +513,7 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
             *log << cta->instrument();
             *log << " observation \"" << cta->name();
             *log << "\" (id=" << cta->id() << ")";
-            *log << " in point spread function cube computation." << std::endl;
+            *log << " in energy dispersion cube computation." << std::endl;
         }
 
         // Loop over all pixels in sky map
@@ -539,13 +539,13 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
                     }
 
                     // Get source energy
-                    GEnergy srcEng = m_ebounds.elogmean(iebin);
+                    GEnergy obsEng = m_ebounds.elogmean(iebin);
 
                     // Get LogE/Tev
-                    double logE = srcEng.log10TeV();
+                    double logEobs = obsEng.log10TeV();
 
                     // Compute exposure weight
-                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEobs) *
                                     cta->livetime();
 
                     // Accumulate weights
@@ -557,12 +557,20 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
                         // Compute delta in radians
                         double migra = m_migras[imigra];
 
+                        // Skip migra bin if zero
+                        if (migra <= 0.0) {
+                        	continue;
+                        }
+
+                        // Compute true enrgy
+                        double logEsrc = logEobs - std::log10(migra);
+
                         // Set map index
                         int imap = offset(imigra, iebin);
 
                         // Add on Edisp cube
                         m_cube(pixel, imap) +=
-                            rsp->edisp(srcEng * migra, theta, 0.0, 0.0, 0.0, logE) * weight;
+                            rsp->edisp(obsEng, theta, 0.0, 0.0, 0.0, logEsrc) * weight;
 
                     } // endfor: looped over migra bins
 
@@ -732,11 +740,83 @@ void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
  * sky direction @p dir. An energy in considered negligible if inferior to
  * 1e-6.
  ***************************************************************************/
-GEbounds GCTACubeEdisp::ebounds_src(const GSkyDir& dir, const GEnergy obsEng) const
+GEbounds GCTACubeEdisp::ebounds_src(const GEnergy obsEng) const
 {
+	// Initialise empty ebounds object
+	GEbounds ebounds;
 
-	throw GException::feature_not_implemented("","");
-	return GEbounds();
+	// Initialise empty sky pixel (i.e. 0,0).
+	// Todo: we should think about the interface of this function:
+	// maybe it is more useful to also pass a GSkyDir for which the boundaries
+	// should be computed
+	GSkyPixel pixel;
+
+	// Set epsilon
+	const double eps = 1.0e-12;
+
+    // Initialise results
+    double migra_min = 0.0;
+    double migra_max = 0.0;
+    bool   minFound   = false;
+    bool   maxFound   = false;
+
+	// Get skymap index
+	int index = m_ebounds.index(obsEng);
+
+	// Compute map of sky ranges to be considered
+	int mapmin  = m_migras.size() * index;
+	int mapmax = m_migras.size() * (index + 1);
+
+	// Loop over sky map entries from lower migra
+	for (int imap = mapmin; imap < mapmax; ++imap) {
+
+		// Get PDF term
+		double edisp = m_cube(pixel, imap);
+
+		// Find first non-negligible PDF term
+		if (edisp >= eps) {
+			minFound   = true;
+			migra_min = m_migras[imap - mapmin];
+			break;
+		}
+	} // endfor: loop over maps
+
+	// Loop over sky map entries from high migra
+	for (int imap = mapmax - 1; imap <= mapmin; --imap) {
+
+		// Get PDF term
+		double edisp = m_cube(pixel, imap);
+
+		// Find first non-negligible PDF term
+		if (edisp >= eps) {
+			maxFound   = true;
+			migra_max = m_migras[imap - mapmin];
+			break;
+		}
+	} // endfor: loop over maps
+
+	// Initialise src energies
+	GEnergy emin;
+	GEnergy emax;
+
+	// Compute energy boundaries if they were found and if are valid
+	if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 && migra_max > migra_min) {
+		emax = obsEng / migra_min;
+		emin  = obsEng / migra_max;
+	}
+	else {
+
+		 // If we did not find boundaries or migra values were invalid
+		// then set the interval to a zero interval for safety
+        emin .log10TeV(0.0);
+        emax.log10TeV(0.0);
+	}
+
+	// Append energy boundaries
+	ebounds.append(emin, emax);
+
+	// Return energy boundaries
+	return ebounds;
 }
 
 /***********************************************************************//**
@@ -891,8 +971,7 @@ void GCTACubeEdisp::clear_cube(void)
 /***********************************************************************//**
  * @brief Update Edisp parameter cache
  *
- * @param[in] delta Angular separation between true and measured photon
- *            directions (radians).
+ * @param[in] migra Fraction between reconstructed and true energy
  * @param[in] logE Log10 true photon energy (TeV). 
  *
  * This method updates the Edisp parameter cache.

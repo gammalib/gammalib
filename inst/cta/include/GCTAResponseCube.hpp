@@ -143,6 +143,7 @@ private:
     GCTACubeBackground m_background;  //!< Background cube
     GCTACubeEdisp    m_edisp; //!< Energy dispersion cube
     mutable bool       m_apply_edisp; //!< Apply energy dispersion
+    mutable bool       m_has_edisp; //!< Flag to indicate if energy dispersion is available
 
     // Response cache
     mutable std::vector<GCTACubeSource*> m_cache; //!< Response cache
@@ -187,7 +188,7 @@ bool GCTAResponseCube::is_valid(void) const
 inline
 bool GCTAResponseCube::use_edisp(void) const
 {
-    return m_apply_edisp;
+    return (m_apply_edisp && m_has_edisp);
 }
 
 
@@ -278,6 +279,32 @@ void GCTAResponseCube::psf(const GCTACubePsf& psf)
 
 
 /***********************************************************************//**
+ * @brief Set cube analysis energy dispersion cube
+ *
+ * @param[in] edisp Cube analysis energy dispersion cube.
+ ***************************************************************************/
+inline
+void GCTAResponseCube::edisp(const GCTACubeEdisp& edisp)
+{
+    m_edisp = edisp;
+    m_has_edisp = true;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return cube analysis energy dispersion cube
+ *
+ * @return Reference to cube analysis energy dispersion cube.
+ ***************************************************************************/
+inline
+const GCTACubeEdisp& GCTAResponseCube::edisp(void) const
+{
+    return (m_edisp);
+}
+
+
+/***********************************************************************//**
  * @brief Set cube analysis background cube
  *
  * @param[in] background Cube analysis background cube.
@@ -301,29 +328,5 @@ const GCTACubeBackground& GCTAResponseCube::background(void) const
     return (m_background);
 }
 
-
-/***********************************************************************//**
- * @brief Set cube analysis energy dispersion cube
- *
- * @param[in] background Cube analysis background cube.
- ***************************************************************************/
-inline
-void GCTAResponseCube::edisp(const GCTACubeEdisp& edisp)
-{
-    m_edisp = edisp;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return cube analysis background cube
- *
- * @return Reference to cube analysis background cube.
- ***************************************************************************/
-inline
-const GCTACubeEdisp& GCTAResponseCube::edisp(void) const
-{
-    return (m_edisp);
-}
 
 #endif /* GCTARESPONSECUBE_HPP */
