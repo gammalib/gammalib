@@ -394,6 +394,14 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
     GXmlElement* par9 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
     m_core_radius.write(*par9);
 
+    // Write Beta parameter
+    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Beta");
+    m_beta.write(*par4);
+
+    // Write Gamma parameter
+    GXmlElement* par5 = gammalib::xml_need_par(G_WRITE, xml, "Gamma");
+    m_gamma.write(*par5);
+
     // Return
     return;
 }
