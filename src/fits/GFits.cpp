@@ -58,9 +58,9 @@
 #define G_INSERT2                "GFits::insert(std::string&, GFitsHDU& hdu)"
 #define G_REMOVE1                                       "GFits::remove(int&)"
 #define G_REMOVE2                               "GFits::remove(std::string&)"
-#define G_OPEN                                    "GFits::open(std::string&)"
+#define G_OPEN                               "GFits::open(GFilename&, bool&)"
 #define G_SAVE                                           "GFits::save(bool&)"
-#define G_SAVETO                         "GFits::saveto(std::string&, bool&)"
+#define G_SAVETO                           "GFits::saveto(GFilename&, bool&)"
 #define G_FREE_MEM                                    "GFits::free_members()"
 #define G_NEW_IMAGE                                      "GFits::new_image()"
 
