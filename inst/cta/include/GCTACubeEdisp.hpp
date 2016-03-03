@@ -65,27 +65,27 @@ public:
     GCTACubeEdisp(const GCTAEventCube& cube,
                 const double& mmax, const int& nmbins);
     GCTACubeEdisp(const std::string&   wcs,
-                const std::string&   coords,
-                const double&        x,
-                const double&        y,
-                const double&        dx,
-                const double&        dy,
-                const int&           nx,
-                const int&           ny,
-                const GEbounds&      ebounds,
-                const double&        mmax,
-                const int&           nmbins);
+                  const std::string&   coords,
+                  const double&        x,
+                  const double&        y,
+                  const double&        dx,
+                  const double&        dy,
+                  const int&           nx,
+                  const int&           ny,
+                  const GEbounds&      ebounds,
+                  const double&        mmax,
+                  const int&           nmbins);
     virtual ~GCTACubeEdisp(void);
 
     // Operators
     GCTACubeEdisp& operator=(const GCTACubeEdisp& cube);
-    double       operator()(const GSkyDir& dir, 
+    double         operator()(const GSkyDir& dir,
                             const double&  migra,
                             const GEnergy& energy) const;
 
     // Methods
     void              clear(void);
-    GCTACubeEdisp*      clone(void) const;
+    GCTACubeEdisp*    clone(void) const;
     std::string       classname(void) const;
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs, GLog* log = NULL);
@@ -95,7 +95,7 @@ public:
     const GNodeArray& elogmeans(void) const;
     double            migra_max(void) const;
     int               offset(const int& imigra, const int& iebin) const;
-    GEbounds     ebounds_src(const GEnergy obsEng) const;
+    GEbounds          ebounds_src(const GEnergy obsEng) const;
     void              read(const GFits& fits);
     void              write(GFits& file) const;
     void              load(const GFilename& filename);

@@ -102,7 +102,7 @@ public:
     void                      exposure(const GCTACubeExposure& exposure);
     const GCTACubePsf&        psf(void) const;
     void                      psf(const GCTACubePsf& psf);
-    const GCTACubeEdisp& edisp(void) const;
+    const GCTACubeEdisp&      edisp(void) const;
     void                      edisp(const GCTACubeEdisp& edisp);
     const GCTACubeBackground& background(void) const;
     void                      background(const GCTACubeBackground& background);
