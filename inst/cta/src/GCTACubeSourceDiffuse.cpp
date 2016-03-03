@@ -240,11 +240,15 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
     m_name          = name;
     GTime   obsTime = cube->time();
 
-    GEnergy srcEng;
-
     // Setup empty skymap
     m_cube = cube->map();
     m_cube = 0.0;
+
+    // Get energy boundaries and store them in node array
+    GEbounds ebounds = cube->ebounds();
+    for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
+    	m_logE.append(ebounds.elogmean(ieng).log10TeV());
+    }
 
     // Get livetime (in seconds) and deadtime correction factor
     double livetime = rsp->exposure().livetime();
@@ -294,16 +298,8 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
                         double psf = model.eval(GPhoton(obsDir, obsEng, obsTime));
                         #endif
 
-                        // Initialise edisp value
-                        double edisp = 1.0;
-
-                        // Set edisp value if necessary
-                        if (rsp->use_edisp()) {
-                        	edisp = rsp->edisp()(obsDir, obsEng.TeV() / srcEng.TeV(), srcEng);
-                        }
-
                         // Set cube value
-                        m_cube(pixel, iebin) = aeff * psf *  edisp * deadc;
+                        m_cube(pixel, iebin) = aeff * psf * deadc;
 
                     } // endif: effective area was positive
 
@@ -448,6 +444,7 @@ void GCTACubeSourceDiffuse::init_members(void)
 {
     // Initialise members
     m_cube.clear();
+    m_logE.clear();
    
     // Return
     return;
@@ -463,6 +460,7 @@ void GCTACubeSourceDiffuse::copy_members(const GCTACubeSourceDiffuse& source)
 {
     // Copy members
     m_cube = source.m_cube;
+    m_logE = source.m_logE;
 
     // Return
     return;

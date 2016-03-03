@@ -325,14 +325,11 @@ double GCTAResponseCube::irf(const GEvent&       event,
     // direction in radians
     double delta = obsDir.dist(srcDir);
 
-    // Determine fraction of reconstructed and true energy
-    double migra = obsEng.TeV() / srcEng.TeV();
-
     // Get maximum angular separation for PSF (in radians)
     double delta_max = psf().delta_max();
 
-    // Get maximum migra value
-    double migra_max = edisp().migra_max();
+    // Determine fraction of reconstructed and true energy
+    double migra = obsEng.TeV() / srcEng.TeV();
 
     // Initialise IRF value
     double irf = 0.0;
@@ -356,8 +353,8 @@ double GCTAResponseCube::irf(const GEvent&       event,
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
 
-                // Multiply-in energy dispersion
-                irf *= edisp()(srcDir, migra, srcEng);
+				// Multiply-in energy dispersion
+				irf *= edisp()(srcDir, migra, srcEng);
 
             } // endif: energy dispersion was available and psf was non-zero
 
@@ -573,11 +570,13 @@ void GCTAResponseCube::write(GXmlElement& xml) const
         par->attribute("file", filename);
     }
 
-    // Add energy dispersions cube filename
-    filename = gammalib::strip_whitespace(m_edisp.filename());
-    if (!(filename.empty())) {
-        GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
-        par->attribute("file", filename);
+    if (m_has_edisp) {
+		// Add energy dispersions cube filename
+		filename = gammalib::strip_whitespace(m_edisp.filename());
+		if (!(filename.empty())) {
+			GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
+			par->attribute("file", filename);
+		}
     }
 
     // Add background cube filename
@@ -631,7 +630,7 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
 
         // Append energy dispersion information
         if (m_has_edisp) {
-			result.append("\n"+m_psf.print(chatter));
+			result.append("\n"+m_edisp.print(chatter));
         }
 
         // Append background information
@@ -1458,8 +1457,52 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
 
     } // endelse: there was a cache entry for this model
 
-    // Determine IRF value
-    irf = cache->irf(bin->ipix(), bin->ieng());
+    if (use_edisp()) {
+
+		// Get array of log10TeV energies of cached diffuse model
+		GNodeArray logE = cache->nodes();
+
+		// Get true energy
+		GEnergy srcEng = source.energy();
+
+		// Continue only if there is energy information for the map cube
+		if (logE.size() > 0) {
+
+		  // Set energy for interpolation in log-energy
+		  logE.set_value(srcEng.log10TeV());
+
+		  // Compute map cube intensity for the left and right map
+		  double left_intensity  = cache->irf(bin->ipix(), logE.inx_left());
+		  double right_intensity = cache->irf(bin->ipix(), logE.inx_right());
+
+		  // Perform log-log interpolation
+		  if (left_intensity > 0.0 && right_intensity > 0.0) {
+			  double log_intensity = logE.wgt_left()  * std::log10(left_intensity) +
+					  logE.wgt_right() * std::log10(right_intensity);
+			  irf = std::pow(10.0, log_intensity);
+		  }
+		  else if (left_intensity > 0.0) {
+			  irf = left_intensity;
+		  }
+		  else if (right_intensity > 0.0) {
+			  irf = right_intensity;
+		  }
+
+		} // endif: energy information was available
+
+		// Multiply-in energy dispersion
+		if (irf > 0.0) {
+			irf *= edisp()(bin->dir().dir(), bin->energy().TeV() / srcEng.TeV(), srcEng);
+		}
+
+    } // endif: energy dispersion was available
+
+    else {
+
+    	// Compute irf value without energy dispersion
+    	irf = cache->irf(bin->ipix(), bin->ieng());
+
+    } // endelse: energy dispersion was not available
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

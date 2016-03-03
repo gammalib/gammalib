@@ -114,6 +114,7 @@ protected:
     void set_migra_axis(void);
     void set_eng_axis(void);
     void set_to_smooth(void);
+    void compute_ebounds_src(void) const;
 
     // Data
     mutable GFilename m_filename;          //!< Filename
@@ -133,6 +134,8 @@ private:
     mutable double m_wgt2;            //!< Weight of lower left node
     mutable double m_wgt3;            //!< Weight of upper right node
     mutable double m_wgt4;            //!< Weight of lower right node
+    mutable std::vector<GEbounds> m_ebounds_src;
+    mutable bool                  m_ebounds_src_computed;
 };
 
 

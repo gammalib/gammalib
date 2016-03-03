@@ -147,6 +147,7 @@ private:
 
     // Response cache
     mutable std::vector<GCTACubeSource*> m_cache; //!< Response cache
+    mutable GNodeArray m_diffuse_logE;// diffuse energy bounds computation cache
 };
 
 

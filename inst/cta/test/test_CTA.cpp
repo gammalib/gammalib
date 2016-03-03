@@ -92,8 +92,8 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispcube), "Test Edisp cube");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube), "Test background cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube), "Test edisp cube");
 
     // Return
     return;

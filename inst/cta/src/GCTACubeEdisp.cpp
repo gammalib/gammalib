@@ -396,7 +396,7 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
                     for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
 
                         // Get logE/TeV
-                    	GEnergy srcEng = m_ebounds.elogmean(iebin);
+                    	GEnergy obsEng = m_ebounds.elogmean(iebin);
 
                         // Loop over migra values
                         for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
@@ -404,11 +404,20 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
                             // Compute migra
                             double migra = m_migras[imigra];
 
+                            // Skip migra bin if zero
+                            if (migra <= 0.0) {
+                            	continue;
+                            }
+
+                            // Compute true enrgy
+                            double logEsrc = obsEng.log10TeV() - std::log10(migra);
+
                             // Set map index
                             int imap = offset(imigra, iebin);
 
                             // Set Edisp cube
-                            m_cube(pixel, imap) = rsp->edisp(srcEng * migra, theta, 0.0, 0.0, 0.0, srcEng.log10TeV());
+                            // Add on Edisp cube
+                            m_cube(pixel, imap) = rsp->edisp(obsEng, theta, 0.0, 0.0, 0.0, logEsrc) ;
 
                         } // endfor: looped over migra bins
 
@@ -643,6 +652,9 @@ void GCTACubeEdisp::read(const GFits& fits)
     // Set energy node array
     set_eng_axis();
 
+    // Compute true energy boundaries
+    compute_ebounds_src();
+
     // Compile option: guarantee smooth Edisp
     #if defined(G_SMOOTH_EDISP)
     set_to_smooth();
@@ -742,81 +754,16 @@ void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
  ***************************************************************************/
 GEbounds GCTACubeEdisp::ebounds_src(const GEnergy obsEng) const
 {
-	// Initialise empty ebounds object
-	GEbounds ebounds;
+	// If ebounds were not computed, before, compute them now
+	if (!m_ebounds_src_computed) {
+		compute_ebounds_src();
+	}
 
-	// Initialise empty sky pixel (i.e. 0,0).
-	// Todo: we should think about the interface of this function:
-	// maybe it is more useful to also pass a GSkyDir for which the boundaries
-	// should be computed
-	GSkyPixel pixel;
-
-	// Set epsilon
-	const double eps = 1.0e-12;
-
-    // Initialise results
-    double migra_min = 0.0;
-    double migra_max = 0.0;
-    bool   minFound   = false;
-    bool   maxFound   = false;
-
-	// Get skymap index
+	// Get index of observed energy in cube
 	int index = m_ebounds.index(obsEng);
 
-	// Compute map of sky ranges to be considered
-	int mapmin  = m_migras.size() * index;
-	int mapmax = m_migras.size() * (index + 1);
-
-	// Loop over sky map entries from lower migra
-	for (int imap = mapmin; imap < mapmax; ++imap) {
-
-		// Get PDF term
-		double edisp = m_cube(pixel, imap);
-
-		// Find first non-negligible PDF term
-		if (edisp >= eps) {
-			minFound   = true;
-			migra_min = m_migras[imap - mapmin];
-			break;
-		}
-	} // endfor: loop over maps
-
-	// Loop over sky map entries from high migra
-	for (int imap = mapmax - 1; imap <= mapmin; --imap) {
-
-		// Get PDF term
-		double edisp = m_cube(pixel, imap);
-
-		// Find first non-negligible PDF term
-		if (edisp >= eps) {
-			maxFound   = true;
-			migra_max = m_migras[imap - mapmin];
-			break;
-		}
-	} // endfor: loop over maps
-
-	// Initialise src energies
-	GEnergy emin;
-	GEnergy emax;
-
-	// Compute energy boundaries if they were found and if are valid
-	if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 && migra_max > migra_min) {
-		emax = obsEng / migra_min;
-		emin  = obsEng / migra_max;
-	}
-	else {
-
-		 // If we did not find boundaries or migra values were invalid
-		// then set the interval to a zero interval for safety
-        emin .log10TeV(0.0);
-        emax.log10TeV(0.0);
-	}
-
-	// Append energy boundaries
-	ebounds.append(emin, emax);
-
-	// Return energy boundaries
-	return ebounds;
+	// Return true energy boundaries
+	return m_ebounds_src[index];
 }
 
 /***********************************************************************//**
@@ -901,6 +848,8 @@ void GCTACubeEdisp::init_members(void)
     m_wgt2 = 0.0;
     m_wgt3 = 0.0;
     m_wgt4 = 0.0;
+    m_ebounds_src.clear();
+    m_ebounds_src_computed = false;
    
     // Return
     return;
@@ -931,6 +880,8 @@ void GCTACubeEdisp::copy_members(const GCTACubeEdisp& cube)
     m_wgt2 = cube.m_wgt2;
     m_wgt3 = cube.m_wgt3;
     m_wgt4 = cube.m_wgt4;
+    m_ebounds_src       = cube.m_ebounds_src;
+    m_ebounds_src_computed = cube.m_ebounds_src_computed;
 
     // Return
     return;
@@ -1091,6 +1042,104 @@ void GCTACubeEdisp::set_to_smooth(void)
         }
 
     } // endif: there were bins to pad
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute ebounds_src vector
+ *
+ * Computes for all reconstructed energy bins the energy boundaries of the true
+ * energies covered by valid migration matrix elements. Only matrix elements
+ * with values >= 1.0e-12 are considered as valid elements. In case that no
+ * matrix elements are found of a given observed energy, the interval of true
+ * energies will be set to [1 TeV, 1 TeV] (i.e. an empty interval).
+ ***************************************************************************/
+void GCTACubeEdisp::compute_ebounds_src() const
+{
+    // Clear ebounds_src vector
+    m_ebounds_src.clear();
+
+	// Initialise empty ebounds object
+	GEbounds ebounds;
+
+	// Initialise empty sky pixel (i.e. 0,0).
+	// Todo: we should think about the interface of this function:
+	// maybe it is more useful to also pass a GSkyDir for which the boundaries
+	// should be computed
+	GSkyPixel pixel;
+
+	// Set epsilon
+	const double eps = 1.0e-12;
+
+	for (int i = 0; i < m_ebounds.size(); i++) {
+
+		// Initialise results
+		double migra_min = 0.0;
+		double migra_max = 0.0;
+		bool   minFound   = false;
+		bool   maxFound   = false;
+
+		// Get mean energy
+		GEnergy obsEng = m_ebounds.elogmean(i);
+
+		// Compute map of sky ranges to be considered
+		int mapmin  = m_migras.size() * i;
+		int mapmax = m_migras.size() * (i + 1);
+
+		// Loop over sky map entries from lower migra
+		for (int imap = mapmin; imap < mapmax; ++imap) {
+
+			// Get PDF term
+			double edisp = m_cube(pixel, imap);
+
+			// Find first non-negligible PDF term
+			if (edisp >= eps) {
+				minFound   = true;
+				migra_min = m_migras[imap - mapmin];
+				break;
+			}
+		} // endfor: loop over maps
+
+		// Loop over sky map entries from high migra
+		for (int imap = mapmax - 1; imap <= mapmin; --imap) {
+
+			// Get PDF term
+			double edisp = m_cube(pixel, imap);
+
+			// Find first non-negligible PDF term
+			if (edisp >= eps) {
+				maxFound   = true;
+				migra_max = m_migras[imap - mapmin];
+				break;
+			}
+		} // endfor: loop over maps
+
+		// Initialise src energies
+		GEnergy emin;
+		GEnergy emax;
+
+		// Compute energy boundaries if they were found and if are valid
+		if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 && migra_max > migra_min) {
+			emax = obsEng / migra_min;
+			emin  = obsEng / migra_max;
+		}
+		else {
+
+			 // If we did not find boundaries or migra values were invalid
+			// then set the interval to a zero interval for safety
+			emin .log10TeV(0.0);
+			emax.log10TeV(0.0);
+		}
+
+		// Append energy boundaries
+		m_ebounds_src.push_back(GEbounds(emin, emax));
+	}
+
+	// Set flag to signal that true energy boundaries have been computed
+	m_ebounds_src_computed = true;
 
     // Return
     return;

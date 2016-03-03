@@ -83,6 +83,7 @@ public:
                const GSkyDir&          srcDir,
                const GEnergy&          srcEng,
                const GTime&            srcTime) const;
+    GNodeArray nodes(void) const;
 
 protected:
     // Protected methods
@@ -92,6 +93,7 @@ protected:
 
     // Data members
     GSkyMap m_cube;  //!< Diffuse map convolved with IRF
+    GNodeArray m_logE;  //!< Node array of energy values
 };
 
 
@@ -134,6 +136,20 @@ inline
 double GCTACubeSourceDiffuse::irf(const int& pixel, const int& iebin) const
 {
     return (m_cube(pixel, iebin));
+}
+
+
+/***********************************************************************//**
+ * @brief Return array of energy nodes
+ *
+ * @return Node Array of energy bins
+ *
+ * Returns node array of energy values
+ ***************************************************************************/
+inline
+GNodeArray GCTACubeSourceDiffuse::nodes(void) const
+{
+    return (m_logE);
 }
 
 #endif /* GCTACUBESOURCEDIFFUSE_HPP */
