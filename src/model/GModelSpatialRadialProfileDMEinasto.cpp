@@ -486,9 +486,21 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
                                m_alpha.value(),
                                theta ) ;
     GIntegral integral(&integrand) ;
+    integral.max_iter( 30 ) ;
+    
+    // also play with eps() or max_iter(), bounds()
+    
+    // Set up integration boundaries
+    // As there is usually an infinity at the halo center, this splits
+    // the integral at the m_halo_distance.
+    std::vector<double> bounds ;
+    bounds.push_back( los_min ) ;
+    bounds.push_back( los_max ) ;
+    bounds.push_back( m_halo_distance.value() );
     
     // Compute value
-    value = integral.romberg( los_min, los_max ) ;
+    //value = integral.romberg( los_min, los_max ) ;
+    value = integral.romberg( bounds ) ;
 
     // Return value
     return value;
