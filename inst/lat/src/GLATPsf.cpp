@@ -74,16 +74,17 @@ GLATPsf::GLATPsf(void)
  * @brief File constructor
  *
  * @param[in] filename FITS file name.
+ * @param[in] evtype Event type.
  *
  * Construct instance by loading the point spread function from FITS file.
  ***************************************************************************/
-GLATPsf::GLATPsf(const GFilename& filename)
+GLATPsf::GLATPsf(const GFilename& filename, const std::string& evtype)
 {
     // Initialise class members
     init_members();
 
     // Load PSF from FITS file
-    load(filename);
+    load(filename, evtype);
 
     // Return
     return;
@@ -219,11 +220,15 @@ GLATPsf* GLATPsf::clone(void) const
  * @brief Load point spread function from FITS file
  *
  * @param[in] filename FITS file.
+ * @param[in] evtype Event type.
  *
  * Loads Fermi/LAT point spread function from FITS file.
  ***************************************************************************/
-void GLATPsf::load(const GFilename& filename)
+void GLATPsf::load(const GFilename& filename, const std::string& evtype)
 {
+    // Store event type
+    m_evtype = evtype;
+
     // Open FITS file
     GFits fits(filename);
 

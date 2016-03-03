@@ -605,17 +605,10 @@ void GLATResponse::load(const std::string& rspname)
         std::string psfname   = m_caldb.filename(type_names[i],"","RPSF","","",expr);
         std::string edispname = m_caldb.filename(type_names[i],"","EDISP","","",expr);
 
-        // Add-in extension names
-        /*
-        aeffname  += "[" + type_names[i] + "]";
-        psfname   += "[" + type_names[i] + "]";
-        edispname += "[" + type_names[i] + "]";
-        */
-
         // Load IRF components
-        GLATAeff*  aeff  = new GLATAeff(aeffname);
-        GLATPsf*   psf   = new GLATPsf(psfname);
-        GLATEdisp* edisp = new GLATEdisp(edispname);
+        GLATAeff*  aeff  = new GLATAeff(aeffname, type_names[i]);
+        GLATPsf*   psf   = new GLATPsf(psfname, type_names[i]);
+        GLATEdisp* edisp = new GLATEdisp(edispname, type_names[i]);
 
         // Push IRF components on the response stack
         m_aeff.push_back(aeff);

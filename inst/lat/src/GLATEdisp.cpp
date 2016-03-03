@@ -73,17 +73,18 @@ GLATEdisp::GLATEdisp(void)
  * @brief File constructor
  *
  * @param[in] filename FITS file name.
+ * @param[in] evtype Event type.
  *
  * Construct instance by loading the energy dispersion information from FITS
  * file.
  ***************************************************************************/
-GLATEdisp::GLATEdisp(const GFilename& filename)
+GLATEdisp::GLATEdisp(const GFilename& filename, const std::string& evtype)
 {
     // Initialise class members
     init_members();
 
     // Load energy dispersion from file
-    load(filename);
+    load(filename, evtype);
 
     // Return
     return;
@@ -193,9 +194,13 @@ GLATEdisp* GLATEdisp::clone(void) const
  * @brief Load energy dispersion from FITS file
  *
  * @param[in] filename FITS file.
+ * @param[in] evtype Event type.
  ***************************************************************************/
-void GLATEdisp::load(const GFilename& filename)
+void GLATEdisp::load(const GFilename& filename, const std::string& evtype)
 {
+    // Store event type
+    m_evtype = evtype;
+
     // Open FITS file
     GFits fits(filename);
 

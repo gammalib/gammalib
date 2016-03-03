@@ -51,7 +51,7 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    explicit GLATEdisp(const GFilename& filename);
+    GLATEdisp(const GFilename& filename, const std::string& evtype);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
@@ -65,7 +65,7 @@ public:
     void         clear(void);
     GLATEdisp*   clone(void) const;
     std::string  classname(void) const;
-    void         load(const GFilename& filename);
+    void         load(const GFilename& filename, const std::string& evtype);
     void         save(const GFilename& filename,
                       const bool&      clobber = false);
     void         read(const GFits& file);

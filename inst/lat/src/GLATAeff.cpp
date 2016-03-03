@@ -75,18 +75,19 @@ GLATAeff::GLATAeff(void)
  * @brief File constructor
  *
  * @param[in] filename FITS file name.
+ * @param[in] evtype Event type.
  *
  * Construct instance by loading the information from a FITS file. Both the
  * effective area information and the efficiency factor parameters are loaded
  * when available.
  ***************************************************************************/
-GLATAeff::GLATAeff(const GFilename& filename)
+GLATAeff::GLATAeff(const GFilename& filename, const std::string& evtype)
 {
     // Initialise class members
     init_members();
 
     // Load effective area from file
-    load(filename);
+    load(filename, evtype);
 
     // Return
     return;
@@ -254,13 +255,17 @@ GLATAeff* GLATAeff::clone(void) const
  * @brief Load effective area from FITS file
  *
  * @param[in] filename FITS file.
+ * @param[in] evtype Event type.
  *
  * This method loads the effective area information, and if available, the
  * efficiency factors, from the FITS response file. See the GLATAeff::read
  * method for details.
  ***************************************************************************/
-void GLATAeff::load(const GFilename& filename)
+void GLATAeff::load(const GFilename& filename, const std::string& evtype)
 {
+    // Store event type
+    m_evtype = evtype;
+
     // Open FITS file
     GFits fits(filename);
 
