@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATResponse.i - Fermi/LAT Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,8 +61,6 @@ public:
 
     // Other Methods
     int                size(void) const;
-    void               caldb(const GCaldb& caldb);
-    const GCaldb&      caldb(void) const;
     const std::string& rspname(void) const;
     void               load(const std::string& rspname);
     void               save(const std::string& rspname) const;

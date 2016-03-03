@@ -30,7 +30,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GCaldb.hpp"
 #include "GResponse.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
@@ -139,7 +138,7 @@ std::string GLATResponse::classname(void) const
 inline
 bool GLATResponse::use_edisp(void) const
 {
-    return false;
+    return (false);
 }
 
 
@@ -151,14 +150,16 @@ bool GLATResponse::use_edisp(void) const
 inline
 bool GLATResponse::use_tdisp(void) const
 {
-    return false;
+    return (false);
 }
 
 
 /***********************************************************************//**
- * @brief Return number of bins in effective area response
+ * @brief Return number of event types
  *
- * @return Number of bins in effective area response.
+ * @return Number of event types.
+ *
+ * Returns the number of events types in this reponse.
  ***************************************************************************/
 inline
 int GLATResponse::size(void) const
@@ -175,7 +176,7 @@ int GLATResponse::size(void) const
 inline
 const std::string& GLATResponse::rspname(void) const
 {
-    return m_rspname;
+    return (m_rspname);
 }
 
 
@@ -187,7 +188,7 @@ const std::string& GLATResponse::rspname(void) const
 inline
 const bool& GLATResponse::force_mean(void) const
 {
-    return m_force_mean;
+    return (m_force_mean);
 }
 
 
