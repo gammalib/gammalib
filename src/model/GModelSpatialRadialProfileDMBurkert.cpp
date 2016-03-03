@@ -288,9 +288,6 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
     const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "Halo Distance");
     m_halo_distance.read(*par2);
 
-    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Alpha");
-    m_alpha.read(*par3);
-
     // Return
     return;
 }
@@ -322,10 +319,6 @@ void GModelSpatialRadialProfileDMBurkert::write(GXmlElement& xml) const
     // Write Halo Distance parameter
     GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "Halo Distance");
     m_halo_distance.write(*par2);
-
-    // Write Alpha parameter
-    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Alpha");
-    m_alpha.write(*par3);
 
     // Return
     return;
@@ -397,22 +390,9 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     m_halo_distance.gradient(0.0);
     m_halo_distance.has_grad(false);  // Radial components never have gradients
 
-    // Initialise alpha
-    m_alpha.clear();
-    m_alpha.name("Alpha");
-    m_alpha.unit("unitless");
-    m_alpha.value(0.17); // default to GC alpha
-    m_alpha.min(0.01);   // arbitrarily chosen
-    m_alpha.max(10.0);   // arbitrarily chosen
-    m_alpha.free();
-    m_alpha.scale(1.0);
-    m_alpha.gradient(0.0);
-    m_alpha.has_grad(false);  // Radial components never have gradients
-
     // Set parameter pointer(s)
     m_pars.push_back(&m_scale_radius );
     m_pars.push_back(&m_halo_distance);
-    m_pars.push_back(&m_alpha        );
 
     // Return
     return;
@@ -431,9 +411,8 @@ void GModelSpatialRadialProfileDMBurkert::copy_members(const GModelSpatialRadial
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
     // before. Otherwise we would have sigma twice on the stack.
-    m_scale_radius = model.m_scale_radius ;
+    m_scale_radius  = model.m_scale_radius  ;
     m_halo_distance = model.m_halo_distance ;
-    m_alpha = model.m_alpha ;
 
     // Return
     return;
@@ -469,7 +448,6 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
     // Set up integral
     halo_kernel_los integrand( m_scale_radius.value(),
                                m_halo_distance.value(),
-                               m_alpha.value(),
                                theta ) ;
     GIntegral integral(&integrand) ;
     
@@ -489,13 +467,13 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
  * at distance l from observer, at angle \f[\theta\f] from the halo center:
  * 
  * \f[
- *    f(\theta, l) = E^{ -\frac{2}{\alpha} \left( g^{\alpha} - 1 \right) }
+ *    f(\theta, l) = \frac{r_{scale}^3}{ \left( r + r_{scale} \right) \left( r^2 + r_{scale}^2 \right)}
  * \f]
  *
  * where
  *
  * \f[
- *    g = \frac{ \sqrt{l^2+d^2-2ldCos(\theta)} }{r_s}
+ *    r = \sqrt{l^2+d^2-2ldCos(\theta)}
  * \f]
  *
  * This profile is detailed in:
@@ -503,6 +481,7 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
  *   "The Structure Of Dark Matter Halos In Dwarf Galaxies"
  *   The Astrophysical Journal, 447: L25–L28
  *   http://iopscience.iop.org/article/10.1086/309560/pdf
+ *   Equation 2
  *
  * @return unit
  *
@@ -510,18 +489,14 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
 double GModelSpatialRadialProfileDMBurkert::halo_kernel_los::eval( const double &los )
 {
   
-  double g = 0.0 ;
-  g  = los * los ;
-  g += m_halo_distance * m_halo_distance ;
-  g -= 2.0 * los * m_halo_distance * gammalib::cosd(m_theta) ;
-  g  = sqrt(g) ;
-  g /= m_scale_radius ;
+  double r = 0.0 ;
+  r  = los * los ;
+  r += m_halo_distance * m_halo_distance ;
+  r -= 2.0 * los * m_halo_distance * gammalib::cosd(m_theta) ;
+  r  = sqrt(r) ;
   
-  double f = 0.0 ;
-  f  = pow( g , m_alpha ) ;
-  f -= 1.0 ;
-  f *= -2.0 / m_alpha ;
-  f  = std::exp( f ) ;
+  double f = m_scale_radius * m_scale_radius * m_scale_radius ;
+  f /= ( m_scale_radius + r ) + ( m_scale_radius*m_scale_radius + r*r ) ;
   
   return f;
 
