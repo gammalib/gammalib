@@ -551,6 +551,9 @@ void GLATResponse::load(const std::string& rspname)
     clear();
     m_caldb = caldb;
 
+    // Open Fermi LAT calibration database
+    m_caldb.open("glast", "lat");
+
     // Determine response types to be loaded. If no event type has been
     // specified then load both front and back response.
     int event_type = 0;
@@ -781,9 +784,6 @@ void GLATResponse::init_members(void)
     m_edisp.clear();
     m_ptsrc.clear();
 
-    // Open Fermi/LAT calibration database
-    m_caldb.open("glast", "lat");
-    
     // Return
     return;
 }
@@ -801,19 +801,19 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
     m_rspname    = rsp.m_rspname;
     m_force_mean = rsp.m_force_mean;
 
-    // Clone Aeff
+    // Clone Aeff response components
     m_aeff.clear();
     for (int i = 0; i < rsp.m_aeff.size(); ++i) {
         m_aeff.push_back(rsp.m_aeff[i]->clone());
     }
     
-    // Clone Psf
+    // Clone Psf response components
     m_psf.clear();
     for (int i = 0; i < rsp.m_psf.size(); ++i) {
         m_psf.push_back(rsp.m_psf[i]->clone());
     }
 
-    // Clone Edisp
+    // Clone Edisp response components
     m_edisp.clear();
     for (int i = 0; i < rsp.m_edisp.size(); ++i) {
         m_edisp.push_back(rsp.m_edisp[i]->clone());

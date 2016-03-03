@@ -40,6 +40,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+const std::string datadir   = PACKAGE_SOURCE"/inst/lat/test/data";
 const std::string lat_caldb = PACKAGE_SOURCE"/inst/lat/caldb";
 const std::string dirPass6  = PACKAGE_SOURCE"/inst/lat/test/data/p6v3";
 const std::string dirPass7  = PACKAGE_SOURCE"/inst/lat/test/data/p7v6";
@@ -877,9 +878,9 @@ int main(void)
     GTestSuites testsuites("LAT instrument specific class testing");
 
     // Check if data directory exists
-    bool has_data = (access(PACKAGE_SOURCE"/inst/lat/test/data", R_OK) == 0);
+    bool has_data = (access(datadir.c_str(), R_OK) == 0);
 
-    // Set CALDB
+    // Set CALDB environment variable
     setenv("CALDB", lat_caldb.c_str(), 1);
 
     // Initially assume that we pass all tests

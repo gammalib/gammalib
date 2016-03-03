@@ -1712,10 +1712,9 @@ int main(void)
 
     // Check if data directory exists
     bool has_data = (access(datadir.c_str(), R_OK) == 0);
-    if (has_data) {
-        std::string caldb = "CALDB="+cta_caldb;
-        putenv((char*)caldb.c_str());
-    }
+
+    // Set CALDB environment variable
+    setenv("CALDB", cta_caldb.c_str(), 1);
 
     // Initially assume that we pass all tests
     bool success = true;
