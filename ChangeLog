@@ -1,8 +1,9 @@
-2016-03-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-03-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Use rejection method in GCTABackground3D::mc() (#1722)
         Use rejection method in GModelSpatialDiffuseCube::mc() (#1722)
         Make GFilename::is_fits thread safe (#1717).
         Revise GTime operators (#1714)

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-2 March 2016
+3 March 2016
 
 
 1. Introduction
@@ -276,6 +276,10 @@ The GCTAObservation::save() method has now a special logic that decodes any
 optionally specified extension in the format [EVENTS;GTI] into an events and a
 Good Time Intervals extension name. These changes satisfy the feature request
 #1598.
+
+A rejection method is now used in GCTABackground3D::mc() to assure that the Monte
+Carlo simulated instrument directions are identical to the model evaluations
+(#1722).
 
 
 21. COMPTEL interface
