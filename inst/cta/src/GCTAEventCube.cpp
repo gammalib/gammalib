@@ -404,9 +404,22 @@ void GCTAEventCube::read(const GFits& fits)
  * @brief Write CTA event cube into FITS file.
  *
  * @param[in] fits FITS file.
+ *
+ * Writes CTA event cube into a FITS file.
  ***************************************************************************/
 void GCTAEventCube::write(GFits& fits) const
 {
+    // Remove HDUs if they exist already
+    if (fits.contains("EBOUNDS")) {
+        fits.remove("EBOUNDS");
+    }
+    if (fits.contains("GTI")) {
+        fits.remove("GTI");
+    }
+    if (fits.contains("Primary")) {
+        fits.remove("Primary");
+    }
+
     // Write cube
     m_map.write(fits);
 

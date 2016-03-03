@@ -99,18 +99,14 @@ private:
     int               m_inx_bgd;     //!< Background index
 
     // Monte Carlo cache
-    mutable std::vector<double> m_mc_cache;    //!< Monte Carlo cache
+    mutable std::vector<double> m_mc_max;      //!< Maximum rate
     mutable GModelSpectralNodes m_mc_spectrum; //!< Response cube spectrum
-    mutable int                 m_mc_nx;       //!< DETX pixels for MC
-    mutable int                 m_mc_ny;       //!< DETY pixels for MC
-    mutable int                 m_mc_npix;     //!< DETX*DETY pixels for MC
-    mutable int                 m_mc_nmaps;    //!< Number of maps for MC
-    mutable double              m_mc_detx_min; //!< DETX minimum
-    mutable double              m_mc_detx_max; //!< DETX maximum
-    mutable double              m_mc_detx_bin; //!< DETX binsize for MC
-    mutable double              m_mc_dety_min; //!< DETY minimum
-    mutable double              m_mc_dety_max; //!< DETY maximum
-    mutable double              m_mc_dety_bin; //!< DETY binsize for MC
+    mutable double              m_mc_detx_min; //!< DETX minimum (deg)
+    mutable double              m_mc_detx_max; //!< DETX maximum (deg)
+    mutable double              m_mc_detx_bin; //!< DETX binsize (deg)
+    mutable double              m_mc_dety_min; //!< DETY minimum (deg)
+    mutable double              m_mc_dety_max; //!< DETY maximum (deg)
+    mutable double              m_mc_dety_bin; //!< DETY binsize (deg)
     mutable double              m_mc_logE_min; //!< log10 energy minimum (TeV)
     mutable double              m_mc_logE_max; //!< log10 energy maximum (TeV)
     mutable double              m_mc_logE_bin; //!< log10 energy binsize (TeV)
