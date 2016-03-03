@@ -86,6 +86,7 @@ protected:
     void           init_members(void);
     void           copy_members(const GModelSpatialRadialProfileDMEinasto& model);
     void           free_members(void);
+    void           update(void) const;
     virtual double profile_value(const double& theta) const;
     void           update(void) const;
 
@@ -263,3 +264,4 @@ void GModelSpatialRadialProfileDMEinasto::alpha(const double& alpha)
 }
 
 #endif /* GMODELSPATIALRADIALPROFILEDMEINASTO_HPP */
+

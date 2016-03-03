@@ -37,6 +37,7 @@
 #include <iomanip>
 
 /* __ Constants __________________________________________________________ */
+const double mass_factor = 10.0 ; // determines volume integration radius
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialProfileDMEinasto g_radial_disk_seed;

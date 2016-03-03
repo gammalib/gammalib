@@ -538,7 +538,6 @@ void GModelSpatialRadialProfileDMBurkert::free_members(void)
 double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) const
 {
     
-
     // update precompuation cache
     update();
 
