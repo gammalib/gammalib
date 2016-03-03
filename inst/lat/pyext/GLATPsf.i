@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GLATPsf.i - Fermi/LAT point spread function class           *
+ *             GLATPsf.i - Fermi LAT point spread function class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsf.i
- * @brief Fermi/LAT point spread function class definition
+ * @brief Fermi LAT point spread function class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -48,23 +48,23 @@ public:
                       const double& ctheta);
 
     // Methods
-    void        clear(void);
-    GLATPsf*    clone(void) const;
-    std::string classname(void) const;
-    void        load(const GFilename& filename, const std::string& evtype);
-    void        save(const GFilename& filename,
-                     const bool&      clobber = false);
-    void        read(const GFits& file);
-    void        write(GFits& file) const;
-    int         size(void) const;
-    int         nenergies(void) const;
-    int         ncostheta(void) const;
-    double      costhetamin(void) const;
-    void        costhetamin(const double& ctheta);
-    bool        has_phi(void) const;
-    bool        is_front(void) const;
-    bool        is_back(void) const;
-    int         version(void) const;
+    void               clear(void);
+    GLATPsf*           clone(void) const;
+    std::string        classname(void) const;
+    const std::string& evtype(void) const;
+    void               load(const GFilename&   filename,
+                            const std::string& evtype);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false);
+    void               read(const GFits& file);
+    void               write(GFits& file) const;
+    int                size(void) const;
+    int                nenergies(void) const;
+    int                ncostheta(void) const;
+    double             costhetamin(void) const;
+    void               costhetamin(const double& ctheta);
+    bool               has_phi(void) const;
+    int                version(void) const;
 };
 
 

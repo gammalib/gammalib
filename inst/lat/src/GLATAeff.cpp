@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GLATAeff.cpp - Fermi-LAT effective area                *
+ *                  GLATAeff.cpp - Fermi LAT effective area                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.cpp
- * @brief Fermi-LAT effective area class implementation
+ * @brief Fermi LAT effective area class implementation
  * @author Juergen Knoedlseder
  */
 

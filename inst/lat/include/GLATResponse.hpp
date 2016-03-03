@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATResponse.hpp - Fermi/LAT Response class              *
+ *                GLATResponse.hpp - Fermi LAT Response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.hpp
- * @brief Fermi/LAT Response class definition
+ * @brief Fermi LAT Response class definition
  * @author Juergen Knoedlseder
  */
 
@@ -31,12 +31,7 @@
 #include <vector>
 #include <string>
 #include "GCaldb.hpp"
-//#include "GEvent.hpp"
-//#include "GModel.hpp"
-//#include "GObservation.hpp"
 #include "GResponse.hpp"
-//#include "GLATEventAtom.hpp"
-//#include "GLATEventBin.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
 #include "GLATEdisp.hpp"
@@ -119,8 +114,6 @@ private:
     // Private members
     GCaldb                    m_caldb;      //!< Calibration database
     std::string               m_rspname;    //!< Name of the instrument response
-    bool                      m_has_front;  //!< Front IRF loaded?
-    bool                      m_has_back;   //!< Back IRF loaded?
     bool                      m_force_mean; //!< Use mean PSF in any case
     std::vector<GLATAeff*>    m_aeff;       //!< Effective areas
     std::vector<GLATPsf*>     m_psf;        //!< Point spread functions

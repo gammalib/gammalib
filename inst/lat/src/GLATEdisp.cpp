@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GLATEdisp.cpp - Fermi-LAT energy dispersion               *
+ *               GLATEdisp.cpp - Fermi LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEdisp.cpp
- * @brief Fermi-LAT energy dispersion class implementation.
+ * @brief Fermi LAT energy dispersion class implementation.
  * @author Juergen Knoedlseder
  */
 

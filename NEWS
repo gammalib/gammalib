@@ -239,7 +239,9 @@ None
 
 19. Fermi-LAT interface
 ----------------------
-None
+Pass 8 response function and data are now supported. The LAT module has been
+adapted so that event types can be handled. Note that the fisheye effect is
+not taken into account (#1517).
 
 
 20. CTA interface

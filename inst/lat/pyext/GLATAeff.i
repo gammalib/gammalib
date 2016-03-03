@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GLATAeff.i - Fermi/LAT effective area class             *
+ *                 GLATAeff.i - Fermi LAT effective area class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.i
- * @brief Fermi/LAT effective area class definition
+ * @brief Fermi LAT effective area class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -49,23 +49,25 @@ public:
                       const double& phi);
 
     // Methods
-    void         clear(void);
-    GLATAeff*    clone(void) const;
-    std::string  classname(void) const;
-    void         load(const GFilename& filename, const std::string& evtype);
-    void         save(const GFilename& filename,
-                      const bool&      clobber = false);
-    void         read(const GFits& file);
-    void         write(GFits& file) const;
-    int          size(void) const;
-    int          nenergies(void) const;
-    int          ncostheta(void) const;
-    double       costhetamin(void) const;
-    void         costhetamin(const double& ctheta);
-    bool         has_phi(void) const;
-    bool         has_efficiency(void) const;
-    double       efficiency_factor1(const GEnergy& srcEng) const;
-    double       efficiency_factor2(const GEnergy& srcEng) const;
+    void               clear(void);
+    GLATAeff*          clone(void) const;
+    std::string        classname(void) const;
+    const std::string& evtype(void) const;
+    void               load(const GFilename&   filename,
+                            const std::string& evtype);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false);
+    void               read(const GFits& file);
+    void               write(GFits& file) const;
+    int                size(void) const;
+    int                nenergies(void) const;
+    int                ncostheta(void) const;
+    const double&      costhetamin(void) const;
+    void               costhetamin(const double& ctheta);
+    bool               has_phi(void) const;
+    bool               has_efficiency(void) const;
+    double             efficiency_factor1(const GEnergy& srcEng) const;
+    double             efficiency_factor2(const GEnergy& srcEng) const;
 };
 
 

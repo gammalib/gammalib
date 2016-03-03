@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GLATObservation.cpp - Fermi/LAT observation class           *
+ *             GLATObservation.cpp - Fermi LAT observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.cpp
- * @brief Fermi/LAT observation class implementation
+ * @brief Fermi LAT observation class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -210,11 +210,15 @@ void GLATObservation::response(const GResponse& rsp)
  *
  * Set the LAT response function using the IRF name and the path to the
  * calibration database. The IRF name has to be one of
- * name
- * name::front
- * name::back
- * where name is the response name (e.g. P6_v3). Note that the name is case
- * sensitive for the moment.
+ *
+ *      name (is equivalent to front+back)
+ *      name::front
+ *      name::back
+ *      name::psf(0-3)
+ *      name::edisp(0-3)
+ *
+ * where name is the response name (for example "P8R2_SOURCE_V6"). Note that
+ * the name is case sensitive, but the event typ is not case sensitive.
  ***************************************************************************/
 void GLATObservation::response(const std::string& irfname)
 {

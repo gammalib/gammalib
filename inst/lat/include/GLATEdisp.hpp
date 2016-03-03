@@ -62,21 +62,23 @@ public:
     //                     const GTime& srcTime, const GLATPointing& pnt);
 
     // Methods
-    void         clear(void);
-    GLATEdisp*   clone(void) const;
-    std::string  classname(void) const;
-    void         load(const GFilename& filename, const std::string& evtype);
-    void         save(const GFilename& filename,
-                      const bool&      clobber = false);
-    void         read(const GFits& file);
-    void         write(GFits& file) const;
-    int          size(void) const;
-    int          nenergies(void) const;
-    int          ncostheta(void) const;
-    //double       costhetamin(void) const { return m_min_ctheta; }
-    //void         costhetamin(const double& ctheta);
-    bool         has_phi(void) const { return false; }
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GLATEdisp*         clone(void) const;
+    std::string        classname(void) const;
+    const std::string& evtype(void) const;
+    void               load(const GFilename&   filename,
+                            const std::string& evtype);
+    void               save(const GFilename& filename,
+                            const bool&      clobber = false);
+    void               read(const GFits& file);
+    void               write(GFits& file) const;
+    int                size(void) const;
+    int                nenergies(void) const;
+    int                ncostheta(void) const;
+    //double             costhetamin(void) const { return m_min_ctheta; }
+    //void               costhetamin(const double& ctheta);
+    bool               has_phi(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
@@ -87,11 +89,11 @@ private:
     void write_edisp(GFits& file) const;
     
     // Protected members
-    std::string         m_evtype;       //!< Event type
-    GLATResponseTable   m_edisp_bins;   //!< Energy dispersion energy and cos theta binning
-    std::vector<double> m_norm;         //!< Energy dispersion normalization
-    std::vector<double> m_ls1;          //!< Energy dispersion ...
-    std::vector<double> m_scale;        //!< Energy dispersion scaling parameters
+    std::string         m_evtype;     //!< Event type
+    GLATResponseTable   m_edisp_bins; //!< Energy dispersion energy and cos theta binning
+    std::vector<double> m_norm;       //!< Energy dispersion normalization
+    std::vector<double> m_ls1;        //!< Energy dispersion ...
+    std::vector<double> m_scale;      //!< Energy dispersion scaling parameters
 };
 
 
@@ -104,6 +106,18 @@ inline
 std::string GLATEdisp::classname(void) const
 {
     return ("GLATEdisp");
+}
+
+
+/***********************************************************************//**
+ * @brief Return event type
+ *
+ * @return Event type.
+ ***************************************************************************/
+inline
+const std::string& GLATEdisp::evtype(void) const
+{
+    return (m_evtype);
 }
 
 
@@ -140,6 +154,18 @@ inline
 int GLATEdisp::ncostheta(void) const
 {
     return m_edisp_bins.ncostheta();
+}
+
+
+/***********************************************************************//**
+ * @brief Signal that energy dispersion has Phi dependence
+ *
+ * @return True if energy dispersion has Phi dependence.
+ ***************************************************************************/
+inline
+bool GLATEdisp::has_phi(void) const
+{
+    return false;
 }
 
 #endif /* GLATEDISP_HPP */

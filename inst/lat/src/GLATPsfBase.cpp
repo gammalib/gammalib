@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GLATPsfBase.cpp - Abstract Fermi/LAT point spread function base class  *
+ *  GLATPsfBase.cpp - Abstract Fermi LAT point spread function base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfBase.cpp
- * @brief Abstract Fermi/LAT point spread function base class implementation
+ * @brief Abstract Fermi LAT point spread function base class implementation
  * @author Juergen Knoedlseder
  */
 

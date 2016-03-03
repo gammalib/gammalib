@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATResponse.cpp - Fermi/LAT response class              *
+ *                GLATResponse.cpp - Fermi LAT response class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.cpp
- * @brief Fermi/LAT response class implementation
+ * @brief Fermi LAT response class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -526,8 +526,11 @@ GEbounds GLATResponse::ebounds(const GEnergy& obsEnergy) const
  *      name (is equivalent to front+back)
  *      name::front
  *      name::back
- *      name::psf
- *      name::edisp
+ *      name::psf(0-3)
+ *      name::edisp(0-3)
+ *
+ * where name is the response name (for example "P8R2_SOURCE_V6"). Note that
+ * the name is case sensitive, but the event typ is not case sensitive.
  ***************************************************************************/
 void GLATResponse::load(const std::string& rspname)
 {
@@ -554,23 +557,43 @@ void GLATResponse::load(const std::string& rspname)
     std::vector<std::string> array = gammalib::split(rspname, ":");
     if (array.size() == 1) {
         m_rspname   = array[0];
-        m_has_front = true;
-        m_has_back  = true;
-        event_type  = 3;
+        event_type  = 3;      // 0x0000000011
     }
     else if (array.size() == 3) {
         m_rspname          = array[0];
         std::string evtype = gammalib::strip_whitespace(gammalib::tolower(array[2]));
         if (evtype == "front") {
-            m_has_front = true;
-            event_type  = 1;  // 0x0000000001
+            event_type = 1;   // 0x0000000001
         }
         else if (evtype == "back") {
-            m_has_back = true;
             event_type = 2;   // 0x0000000010
+        }
+        else if (evtype == "psf0") {
+            event_type = 4;   // 0x0000000100
+        }
+        else if (evtype == "psf1") {
+            event_type = 8;   // 0x0000001000
+        }
+        else if (evtype == "psf2") {
+            event_type = 16;  // 0x0000010000
+        }
+        else if (evtype == "psf3") {
+            event_type = 32;  // 0x0000100000
         }
         else if (evtype == "psf") {
             event_type = 60;  // 0x0000111100
+        }
+        else if (evtype == "edisp0") {
+            event_type = 64;  // 0x0001000000
+        }
+        else if (evtype == "edisp1") {
+            event_type = 128; // 0x0010000000
+        }
+        else if (evtype == "edisp2") {
+            event_type = 256; // 0x0100000000
+        }
+        else if (evtype == "edisp3") {
+            event_type = 512; // 0x1000000000
         }
         else if (evtype == "edisp") {
             event_type = 960; // 0x1111000000
@@ -578,7 +601,8 @@ void GLATResponse::load(const std::string& rspname)
         else {
             std::string msg = "Invalid response type \""+array[2]+"\". "
                               "Expect one of \"FRONT\", \"BACK\", "
-                              "\"PSF\", or \"EDISP\" (case insensitive).";
+                              "\"PSF(0-3)\", or \"EDISP(0-3)\" "
+                              "(case insensitive).";
             throw GException::invalid_argument(G_LOAD, msg);
         }
     }
@@ -696,7 +720,7 @@ GLATEdisp* GLATResponse::edisp(const int& index) const
 /***********************************************************************//**
  * @brief Print Fermi-LAT response information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing response information.
  ***************************************************************************/
 std::string GLATResponse::print(const GChatter& chatter) const
@@ -714,19 +738,11 @@ std::string GLATResponse::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Caldb mission")+m_caldb.mission());
         result.append("\n"+gammalib::parformat("Caldb instrument")+m_caldb.instrument());
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
-        result.append("\n"+gammalib::parformat("Section(s)"));
-        if (m_has_front && m_has_back) {
-            result.append("front & back");
+        result.append("\n"+gammalib::parformat("Event types"));
+        for (int i = 0; i < size(); ++i) {
+            result.append(m_aeff[i]->evtype()+" ");
         }
-        else if (m_has_front) {
-            result.append("front");
-        }
-        else if (m_has_back) {
-            result.append("back");
-        }
-        else {
-            result.append("unknown");
-        }
+
         if (chatter > TERSE) {
             for (int i = 0; i < size(); ++i) {
                 result.append("\n"+m_aeff[i]->print(gammalib::reduce(chatter)));
@@ -759,8 +775,6 @@ void GLATResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_has_front  = false;
-    m_has_back   = false;
     m_force_mean = false;
     m_aeff.clear();
     m_psf.clear();
@@ -785,8 +799,6 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
     // Copy members
     m_caldb      = rsp.m_caldb;
     m_rspname    = rsp.m_rspname;
-    m_has_front  = rsp.m_has_front;
-    m_has_back   = rsp.m_has_back;
     m_force_mean = rsp.m_force_mean;
 
     // Clone Aeff

@@ -215,8 +215,41 @@ void TestGLATResponse::test_response_p7(void)
  ***************************************************************************/
 void TestGLATResponse::test_response_p8(void)
 {
+    // Set Pass 8 response function
+    std::string irf = "P8R2_SOURCE_V6";
+
     // Test Pass 8 IRFs
-    test_one_response("P8R2_SOURCE_V6");
+    test_one_response(irf);
+
+    // Test loading of Pass 8 PSF response
+    test_try("Test loading of Pass 8 PSF response");
+    try {
+        GLATResponse rsp;
+        rsp.load(irf+"::psf");
+        rsp.load(irf+"::psf0");
+        rsp.load(irf+"::psf1");
+        rsp.load(irf+"::psf2");
+        rsp.load(irf+"::psf3");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test loading of Pass 8 EDISP response
+    test_try("Test loading of Pass 8 EDISP response");
+    try {
+        GLATResponse rsp;
+        rsp.load(irf+"::edisp");
+        rsp.load(irf+"::edisp0");
+        rsp.load(irf+"::edisp1");
+        rsp.load(irf+"::edisp2");
+        rsp.load(irf+"::edisp3");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Return
     return;
