@@ -228,7 +228,7 @@ double GModelSpatialRadialProfileDMZhao::theta_max(void) const
     // for all possible values of alpha, 99.9% of the halo's mass is within 
     // this radius.  Must be in same units as m_scale_radius and 
     // m_halo_distance .
-    double significant_radius = 10.0 * m_scale_radius.value() ;
+    double significant_radius = 100.0 * m_scale_radius.value() ;
     
     double theta = 0.0 ;
     

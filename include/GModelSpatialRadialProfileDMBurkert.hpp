@@ -67,12 +67,17 @@ public:
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
     virtual std::string                      print(const GChatter& chatter = NORMAL) const;
+    
+    // Other methods
+    double scale_radius(void) const ;
+    void   scale_radius(const double& scale_radius ) ;
 
 protected:
     // Protected methods
     void           init_members(void);
     void           copy_members(const GModelSpatialRadialProfileDMBurkert& model);
     void           free_members(void);
+    void           update(void) const ;
     virtual double profile_value(const double& theta) const;
 
     // Integration kernel for line-of-sight integral
@@ -94,6 +99,10 @@ protected:
     // Protected members
     GModelPar m_scale_radius  ; //!< scale radius of halo profile
     GModelPar m_halo_distance ; //!< distance from earth to halo center
+    
+    // Cached members used for precomputation
+    mutable double m_last_scale_radius ;
+    mutable double m_mass_radius       ;
 };
 
 
@@ -120,6 +129,33 @@ inline
 std::string GModelSpatialRadialProfileDMBurkert::type(void) const
 {
     return "DMBurkertProfile";
+}
+
+/***********************************************************************//**
+ * @brief Return scale radius 
+ *                      
+ *@return scale radius (kpc).
+ *                      
+ * Returns the scale radius of the halo profile in kpc.
+ ***************************************************************************/
+inline  
+double GModelSpatialRadialProfileDMBurkert::scale_radius(void) const
+{       
+    return (m_scale_radius.value());
+}       
+        
+/***********************************************************************//**
+ * @brief Set scale radius
+ *  
+ * @param[in] radius scale radius (kpc).
+ *  
+ * Sets the scale radius of the halo profile in kpc.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialProfileDMBurkert::scale_radius(const double& scale_radius)
+{   
+    m_scale_radius.value(scale_radius);
+    return;
 }
 
 #endif /* GMODELSPATIALRADIALPROFILEDMBURKERT_HPP */

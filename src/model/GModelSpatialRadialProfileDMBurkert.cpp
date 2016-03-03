@@ -223,25 +223,21 @@ GModelSpatialRadialProfileDMBurkert* GModelSpatialRadialProfileDMBurkert::clone(
 double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
 {
     
-    // Radius around the halo within which we have the majority of 
-    // DM mass in the template.  'majority' in this case means,
-    // for all possible values of alpha, 99.9% of the halo's mass is within 
-    // this radius.  Must be in same units as m_scale_radius and 
-    // m_halo_distance .
-    double significant_radius = 10.0 * m_scale_radius.value() ;
-    
+    update();
+
+    // initialize value
     double theta = 0.0 ;
     
     // if earth is within the significant radius, then we must integrate
     // the entire profile
-    if ( m_halo_distance.value() < significant_radius ) {
+    if ( m_halo_distance.value() < m_mass_radius ) {
       theta = gammalib::pi ;
     
     // if the halo is far enough away (further than the significant radius)
     // then we just need to deal with the angles within the sphere of the
     // significant radius.
     } else {
-      theta = gammalib::acosd( significant_radius / m_halo_distance.value() ) ;
+      theta = gammalib::acosd( m_mass_radius / m_halo_distance.value() ) ;
     }
     
     // Return value
@@ -393,6 +389,11 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     // Set parameter pointer(s)
     m_pars.push_back(&m_scale_radius );
     m_pars.push_back(&m_halo_distance);
+    
+    // Initialize precomputation cache. Note that zero values flag
+    // uninitialised, as a zero radius is not meaningful
+    m_last_scale_radius = 0.0 ;
+    m_mass_radius       = 0.0 ;
 
     // Return
     return;
@@ -414,6 +415,10 @@ void GModelSpatialRadialProfileDMBurkert::copy_members(const GModelSpatialRadial
     m_scale_radius  = model.m_scale_radius  ;
     m_halo_distance = model.m_halo_distance ;
 
+    // copy cache values
+    m_last_scale_radius = model.m_last_scale_radius ;
+    m_mass_radius       = model.m_mass_radius       ;
+    
     // Return
     return;
 }
@@ -438,12 +443,20 @@ void GModelSpatialRadialProfileDMBurkert::free_members(void)
 double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) const
 {
     
+    // update precompuation cache
+    update();
+
     // initialize integral value
-    double value   = 0.0 ;
+    double value = 0.0 ;
     
     // Set up integration limits
-    double los_min = 0.0 ;
-    double los_max = 3.0 * m_halo_distance.value() ;
+    double los_min = m_halo_distance.value() - m_mass_radius ;
+    double los_max = m_halo_distance.value() + m_mass_radius ;
+    
+    // handle case where observer is within halo mass radius
+    if ( los_min < 0.0 ) {
+      los_min = 0.0 ;
+    }
     
     // Set up integral
     halo_kernel_los integrand( m_scale_radius.value(),
@@ -501,3 +514,26 @@ double GModelSpatialRadialProfileDMBurkert::halo_kernel_los::eval( const double 
   return f;
 
 }
+
+/***********************************************************************//**
+ * @brief Update precomputation cache
+ *
+ * Computes the mass_radius calculation, determining the radius around
+ * the halo that contains 99.99% of the mass.  For an einasto halo profile,
+ * this is just 80.0 * scale_radius .
+ *
+ ***************************************************************************/
+void GModelSpatialRadialProfileDMBurkert::update() const
+{
+  // Update if scale radius has changed
+  if ( m_last_scale_radius != scale_radius() ) {
+    
+    // Store last values
+    m_last_scale_radius = scale_radius() ;
+
+    // perform precomputations
+    m_mass_radius = 80.0 * scale_radius() ;
+    
+   } 
+}
+   
