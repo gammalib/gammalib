@@ -546,13 +546,11 @@ void GLATResponse::load(const std::string& rspname)
                                              "EDISP2",
                                              "EDISP3"};
 
-    // Clear instance but conserve calibration database
-    GCaldb caldb = m_caldb;
+    // Clear instance
     clear();
-    m_caldb = caldb;
 
-    // Open Fermi LAT calibration database
-    m_caldb.open("glast", "lat");
+    // Allocate Fermi LAT calibration database
+    GCaldb caldb("glast", "lat");
 
     // Determine response types to be loaded. If no event type has been
     // specified then load both front and back response.
@@ -628,9 +626,9 @@ void GLATResponse::load(const std::string& rspname)
 
         // Get response using the GCaldb interface
         std::string expr      = "VERSION("+gammalib::toupper(m_rspname)+")";
-        std::string aeffname  = m_caldb.filename(type_names[i],"","EFF_AREA","","",expr);
-        std::string psfname   = m_caldb.filename(type_names[i],"","RPSF","","",expr);
-        std::string edispname = m_caldb.filename(type_names[i],"","EDISP","","",expr);
+        std::string aeffname  = caldb.filename(type_names[i],"","EFF_AREA","","",expr);
+        std::string psfname   = caldb.filename(type_names[i],"","RPSF","","",expr);
+        std::string edispname = caldb.filename(type_names[i],"","EDISP","","",expr);
 
         // Load IRF components
         GLATAeff*  aeff  = new GLATAeff(aeffname, type_names[i]);
@@ -738,8 +736,6 @@ std::string GLATResponse::print(const GChatter& chatter) const
         result.append("=== GLATResponse ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("Caldb mission")+m_caldb.mission());
-        result.append("\n"+gammalib::parformat("Caldb instrument")+m_caldb.instrument());
         result.append("\n"+gammalib::parformat("Response name")+m_rspname);
         result.append("\n"+gammalib::parformat("Event types"));
         for (int i = 0; i < size(); ++i) {
@@ -776,7 +772,6 @@ std::string GLATResponse::print(const GChatter& chatter) const
 void GLATResponse::init_members(void)
 {
     // Initialise members
-    m_caldb.clear();
     m_rspname.clear();
     m_force_mean = false;
     m_aeff.clear();
@@ -797,7 +792,6 @@ void GLATResponse::init_members(void)
 void GLATResponse::copy_members(const GLATResponse& rsp)
 {
     // Copy members
-    m_caldb      = rsp.m_caldb;
     m_rspname    = rsp.m_rspname;
     m_force_mean = rsp.m_force_mean;
 

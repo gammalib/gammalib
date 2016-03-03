@@ -86,8 +86,6 @@ public:
 
     // Other Methods
     int                size(void) const;
-    void               caldb(const GCaldb& caldb);
-    const GCaldb&      caldb(void) const;
     const std::string& rspname(void) const;
     void               load(const std::string& rspname);
     void               save(const std::string& rspname) const;
@@ -112,7 +110,6 @@ private:
     void free_members(void);
 
     // Private members
-    GCaldb                    m_caldb;      //!< Calibration database
     std::string               m_rspname;    //!< Name of the instrument response
     bool                      m_force_mean; //!< Use mean PSF in any case
     std::vector<GLATAeff*>    m_aeff;       //!< Effective areas
@@ -167,33 +164,6 @@ inline
 int GLATResponse::size(void) const
 {
     return (int)m_aeff.size();
-}
-
-
-/***********************************************************************//**
- * @brief Return calibration database
- *
- * @return Calibration database.
- ***************************************************************************/
-inline
-const GCaldb& GLATResponse::caldb(void) const
-{
-    return m_caldb;
-}
-
-
-/***********************************************************************//**
- * @brief Set calibration database
- *
- * @param[in] caldb Calibration database.
- *
- * Sets the calibration database for the Fermi/LAT response.
- ***************************************************************************/
-inline
-void GLATResponse::caldb(const GCaldb& caldb)
-{
-    m_caldb = caldb;
-    return;
 }
 
 
