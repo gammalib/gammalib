@@ -77,8 +77,8 @@ protected:
     void           init_members(void);
     void           copy_members(const GModelSpatialRadialProfileDMBurkert& model);
     void           free_members(void);
-    void           update(void) const ;
     virtual double profile_value(const double& theta) const;
+    void           update(void) const ;
 
     // Integration kernel for line-of-sight integral
     class halo_kernel_los : public GFunction {
