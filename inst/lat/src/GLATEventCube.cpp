@@ -134,7 +134,7 @@ GLATEventCube::~GLATEventCube(void)
  * @param[in] cube LAT event cube.
  * @return LAT event cube.
  ***************************************************************************/
-GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
+GLATEventCube& GLATEventCube::operator=(const GLATEventCube& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -835,8 +835,27 @@ void GLATEventCube::read_ebds(const GFitsTable& hdu)
  ***************************************************************************/
 void GLATEventCube::read_gti(const GFitsTable& hdu)
 {
+    // Work on a local copy of the HDU to make the kluge work
+    GFitsTable* hdu_local = hdu.clone();
+
+    // Kluge: modify HDU table in case that the MJDREF header keyword is
+    // blank. This happens for Fermi LAT source maps since the Science
+    // Tools do not properly write out the time reference. We hard-code
+    // here the Fermi LAT time reference to circumvent the problem.
+    if (hdu.has_card("MJDREF")) {
+        if (gammalib::strip_whitespace(hdu.string("MJDREF")).empty()) {
+            hdu_local->header().remove("MJDREF");
+            hdu_local->card("MJDREFI", 51910,
+                            "Integer part of MJD reference");
+            hdu_local->card("MJDREFF", 0.00074287037037037,
+                            "Fractional part of MJD reference");
+std::cout << "GLATEventCube::read_gti: correct HDU" << std::endl;
+std::cout << *hdu_local << std::endl;
+        }
+    }
+
     // Read Good Time Intervals
-    m_gti.read(hdu);
+    m_gti.read(*hdu_local);
 
     // Set time
     set_times();
