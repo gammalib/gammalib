@@ -237,7 +237,7 @@ double GModelSpatialRadialProfileDMEinasto::theta_max(void) const
     // then we just need to deal with the angles within the sphere of the
     // significant radius.
     } else {
-      theta = gammalib::acosd( m_mass_radius / m_halo_distance.value() ) ;
+      theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
     }
     
     // Return value
@@ -542,7 +542,7 @@ double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double 
   double g = 0.0 ;
   g  = los * los ;
   g += m_halo_distance * m_halo_distance ;
-  g -= 2.0 * los * m_halo_distance * gammalib::cosd(m_theta) ;
+  g -= 2.0 * los * m_halo_distance * std::cos(m_theta) ;
   g  = sqrt(g) ;
   g /= m_scale_radius ;
   
@@ -551,6 +551,10 @@ double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double 
   f -= 1.0 ;
   f *= -2.0 / m_alpha ;
   f  = std::exp( f ) ;
+  
+  // squared, for annihilating dm
+  // would just be f if it was decaying dm
+  f = f * f ;
   
   return f;
 

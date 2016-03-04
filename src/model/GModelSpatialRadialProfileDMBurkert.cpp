@@ -34,6 +34,7 @@
 #include "GXmlElement.hpp"
 #include "GModelSpatialRadialProfileDMBurkert.hpp"
 #include "GModelSpatialRegistry.hpp"
+#include <iomanip>
 
 /* __ Constants __________________________________________________________ */
 
@@ -237,7 +238,7 @@ double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
     // then we just need to deal with the angles within the sphere of the
     // significant radius.
     } else {
-      theta = gammalib::acosd( m_mass_radius / m_halo_distance.value() ) ;
+      theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
     }
     
     // Return value
@@ -443,6 +444,7 @@ void GModelSpatialRadialProfileDMBurkert::free_members(void)
 double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) const
 {
     
+
     // update precompuation cache
     update();
 
@@ -466,6 +468,9 @@ double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) c
     
     // Compute value
     value = integral.romberg( los_min, los_max ) ;
+
+    //double tm = theta_max() ;
+    //std::cout << "burkert  theta_max=" << tm << std::setprecision(10) << "  theta=" << theta << "  d=" << m_halo_distance.value() << "  mr=" << m_mass_radius << "  rs=" << m_scale_radius.value() << "  value=" << value << std::endl;
 
     // Return value
     return value;
@@ -505,12 +510,20 @@ double GModelSpatialRadialProfileDMBurkert::halo_kernel_los::eval( const double 
   double r = 0.0 ;
   r  = los * los ;
   r += m_halo_distance * m_halo_distance ;
-  r -= 2.0 * los * m_halo_distance * gammalib::cosd(m_theta) ;
+  r -= 2.0 * los * m_halo_distance * std::cos(m_theta) ;
   r  = sqrt(r) ;
   
+  double bot = ( m_scale_radius + r ) ;
+  bot *= (m_scale_radius*m_scale_radius) + (r*r) ; 
+
   double f = m_scale_radius * m_scale_radius * m_scale_radius ;
-  f /= ( m_scale_radius + r ) + ( m_scale_radius*m_scale_radius + r*r ) ;
+  f /= bot ;
   
+  // squared, for annihilating dm
+  // would just be f if it was decaying dm
+  f  = f * f ;
+  
+  //std::cout << "kernel::eval  los=" << los << "  d=" << m_halo_distance << "  theta=" << m_theta << "  r=" << r << "  rs=" << m_scale_radius << "  f=" << f << "  bot=" << bot << std::endl;
   return f;
 
 }
@@ -532,6 +545,9 @@ void GModelSpatialRadialProfileDMBurkert::update() const
     m_last_scale_radius = scale_radius() ;
 
     // perform precomputations
+    // set the mass radius to 80*scale_radius, meaning
+    // 99.99% of the mass is contained within the mass radius,
+    // and integration only needs to worry about whats inside this radius.
     m_mass_radius = 80.0 * scale_radius() ;
     
    } 
