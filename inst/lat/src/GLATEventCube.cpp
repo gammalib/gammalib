@@ -829,9 +829,15 @@ void GLATEventCube::read_ebds(const GFitsTable& hdu)
  *
  * @param[in] hdu GTI table.
  *
- * Reads the Good Time Intervals from the GTI extension.
+ * Reads the Good Time Intervals from the GTI extension. Since the Fermi
+ * LAT Science Tools do not set corrently the time reference for source
+ * maps, the method automatically adds this missing information so that
+ * the time reference is set correctly. The time reference that is assumed
+ * for Fermi LAT is
  *
- * @todo GTI read method should take const GFitsTable* as argument
+ *      MJDREFI 51910
+ *      MJDREFF 0.00074287037037037
+ * 
  ***************************************************************************/
 void GLATEventCube::read_gti(const GFitsTable& hdu)
 {
@@ -849,8 +855,6 @@ void GLATEventCube::read_gti(const GFitsTable& hdu)
                             "Integer part of MJD reference");
             hdu_local->card("MJDREFF", 0.00074287037037037,
                             "Fractional part of MJD reference");
-std::cout << "GLATEventCube::read_gti: correct HDU" << std::endl;
-std::cout << *hdu_local << std::endl;
         }
     }
 
