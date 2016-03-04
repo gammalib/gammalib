@@ -386,6 +386,44 @@ void GCTAObservation::response(const GCTACubeExposure&   expcube,
 
 
 /***********************************************************************//**
+ * @brief Set CTA response function
+ *
+ * @param[in] expcube Exposure cube.
+ * @param[in] psfcube Psf cube.
+ * @param[in] edispcube Edisp cube.
+ * @param[in] bkgcube Background cube.
+ *
+ * Sets the CTA response function fur cube analysis by specifying the
+ * exposure cube, the Psf cube and the background cube. The method also
+ * copies over the ontime, the livetime and the deadtime correction factor
+ * from the exposure cube.
+ ***************************************************************************/
+void GCTAObservation::response(const GCTACubeExposure&   expcube,
+                               const GCTACubePsf&        psfcube,
+							   const GCTACubeEdisp&     edispcube,
+                               const GCTACubeBackground& bkgcube)
+{
+    // Free response
+    if (m_response != NULL) delete m_response;
+    m_response = NULL;
+
+    // Allocate fresh response function
+    GCTAResponseCube* rsp = new GCTAResponseCube(expcube, psfcube, edispcube, bkgcube);
+
+    // Store pointer
+    m_response = rsp;
+
+    // Copy over time information from exposure cube
+    ontime(expcube.ontime());
+    livetime(expcube.livetime());
+    deadc(expcube.deadc());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Get Region of Interest
  *
  * @return Region of Interest.

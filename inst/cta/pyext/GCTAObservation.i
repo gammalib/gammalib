@@ -78,6 +78,10 @@ public:
     void                response(const GCTACubeExposure& expcube,
                                  const GCTACubePsf&      psfcube,
                                  const GCTACubeBackground& bkgcube);
+    void                response(const GCTACubeExposure&   expcube,
+                                 const GCTACubePsf&        psfcube,
+                                 const GCTACubeEdisp&      edispcube,
+                                 const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     GCTARoi             roi(void) const;
