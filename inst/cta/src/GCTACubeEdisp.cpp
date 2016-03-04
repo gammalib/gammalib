@@ -1069,7 +1069,7 @@ void GCTACubeEdisp::compute_ebounds_src() const
 	// Todo: we should think about the interface of this function:
 	// maybe it is more useful to also pass a GSkyDir for which the boundaries
 	// should be computed
-	GSkyPixel pixel;
+	GSkyPixel pixel = m_cube.inx2pix(0);
 
 	// Set epsilon
 	const double eps = 1.0e-12;

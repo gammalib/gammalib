@@ -160,6 +160,9 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
     m_psf      = psf;
     m_background = background;
 
+    // Signal that no energy dispersion was given
+    m_has_edisp = false;
+
     // Return
     return;
 }
