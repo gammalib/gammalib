@@ -633,8 +633,8 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
     double value = 0.0;
     
     // Set up integration limits
-    double los_min = m_halo_distance.value() - m_mass_radius;
-    double los_max = m_halo_distance.value() + m_mass_radius;
+    double los_min = m_halo_distance.value() - m_mass_radius ;
+    double los_max = m_halo_distance.value() + m_mass_radius ;
     
     // Set up integral
     halo_kernel_los integrand(m_scale_radius.value(),
@@ -846,4 +846,27 @@ double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
   jfactor *= gammalib::twopi;
   
   return jfactor ;
+}
+
+/***********************************************************************//**
+ * @brief Update precomputation cache
+ *
+ * Computes the m_mass_radius calculation, determining the radius around
+ * the halo that contains 99.99% of the mass.  For a zhao halo profile,
+ * this is just 10.0 * scale_radius .
+ *
+ ***************************************************************************/
+void GModelSpatialRadialProfileDMZhao::update() const
+{
+  
+  // Update if scale radius has changed
+  if ( m_last_scale_radius != scale_radius() ) {
+    
+    // Store last values
+    m_last_scale_radius = scale_radius() ;
+    
+    // perform precomputations
+    m_mass_radius = 10.0 * scale_radius() ;
+
+  }
 }

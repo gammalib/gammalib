@@ -86,6 +86,10 @@ public:
     double mass_density(const double& radius) const;
     double jfactor(const double& angle) const ;
 
+    // Other methods
+    double scale_radius(void) const ;
+    void   scale_radius(const double& scale_radius ) ;
+
 protected:
     // Protected methods
     void           init_members(void);
