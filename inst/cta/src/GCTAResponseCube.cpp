@@ -1460,7 +1460,7 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
     if (use_edisp()) {
 
 		// Get array of log10TeV energies of cached diffuse model
-		GNodeArray logE = cache->nodes();
+		const GNodeArray& logE = cache->nodes();
 
 		// Get true energy
 		GEnergy srcEng = source.energy();

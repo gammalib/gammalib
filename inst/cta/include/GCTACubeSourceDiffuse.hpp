@@ -83,7 +83,7 @@ public:
                const GSkyDir&          srcDir,
                const GEnergy&          srcEng,
                const GTime&            srcTime) const;
-    GNodeArray nodes(void) const;
+    const GNodeArray& nodes(void) const;
 
 protected:
     // Protected methods
@@ -147,7 +147,7 @@ double GCTACubeSourceDiffuse::irf(const int& pixel, const int& iebin) const
  * Returns node array of energy values
  ***************************************************************************/
 inline
-GNodeArray GCTACubeSourceDiffuse::nodes(void) const
+const GNodeArray& GCTACubeSourceDiffuse::nodes(void) const
 {
     return (m_logE);
 }
