@@ -36,7 +36,6 @@
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
-const double mass_factor = 10.0 ; // determines volume integration radius
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialProfileDMEinasto g_radial_disk_seed;
@@ -499,7 +498,6 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
     bounds.push_back( m_halo_distance.value() );
     
     // Compute value
-    //value = integral.romberg( los_min, los_max ) ;
     value = integral.romberg( bounds ) ;
 
     // Return value

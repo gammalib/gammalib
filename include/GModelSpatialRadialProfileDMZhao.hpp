@@ -68,11 +68,16 @@ public:
     virtual void                             write(GXmlElement& xml) const;
     virtual std::string                      print(const GChatter& chatter = NORMAL) const;
 
+    // Other methods
+    double scale_radius(void) const ;
+    void   scale_radius(const double& scale_radius ) ;
+
 protected:
     // Protected methods
     void           init_members(void);
     void           copy_members(const GModelSpatialRadialProfileDMZhao& model);
     void           free_members(void);
+    void           update(void) const;
     virtual double profile_value(const double& theta) const;
 
     // Integration kernel for line-of-sight integral
@@ -106,6 +111,9 @@ protected:
     GModelPar m_alpha         ; //!< spatial power index
     GModelPar m_beta          ; //!< spatial power index
     GModelPar m_gamma         ; //!< spatial power index
+
+    mutable double m_last_scale_radius ;
+    mutable double m_mass_radius ;
 };
 
 
@@ -132,6 +140,33 @@ inline
 std::string GModelSpatialRadialProfileDMZhao::type(void) const
 {
     return "DMZhaoProfile";
+}
+
+/***********************************************************************//**
+ * @brief Return scale radius
+ *
+ * @return scale radius (kpc).
+ *
+ * Returns the scale radius of the halo profile in kpc.
+ ***************************************************************************/
+inline
+double GModelSpatialRadialProfileDMZhao::scale_radius(void) const
+{
+    return (m_scale_radius.value());
+}
+
+/***********************************************************************//**
+ * @brief Set scale radius
+ *  
+ * @param[in] radius scale radius (kpc).
+ *
+ * Sets the scale radius of the halo profile in kpc.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialProfileDMZhao::scale_radius(const double& scale_radius)
+{
+    m_scale_radius.value(scale_radius);
+    return;
 }
 
 #endif /* GMODELSPATIALRADIALPROFILEDMZHAO_HPP */
