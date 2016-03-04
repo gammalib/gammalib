@@ -675,6 +675,7 @@ double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double 
     // finish scaling the integration point by the halo's scale radius
     g /= m_scale_radius;
   
+<<<<<<< HEAD
     // calculate the halo density f at the scale distance g
     double f = 0.0;
     f  = std::pow(g, m_alpha);
@@ -687,6 +688,26 @@ double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double 
     f = f * f ;
 
     //std::cout << "kernel::eval  los=" << los << "  theta=" << m_theta << "  d=" << m_halo_distance << "  rs=" << m_scale_radius << "  alpha=" << m_alpha << "  g=" << g << "  f=" << std::setprecision(12)<< f << std::endl;
+=======
+  double g = 0.0 ;
+  g  = los * los ;
+  g += m_halo_distance * m_halo_distance ;
+  g -= 2.0 * los * m_halo_distance * std::cos(m_theta) ;
+  g  = sqrt(g) ;
+  g /= m_scale_radius ;
+  
+  double f = 0.0 ;
+  f  = pow( g , m_alpha ) ;
+  f -= 1.0 ;
+  f *= -2.0 / m_alpha ;
+  f  = std::exp( f ) ;
+  
+  // squared, for annihilating dm
+  // would just be f if it was decaying dm
+  f = f * f ;
+  
+  return f;
+>>>>>>> burkert is almost checked out, though its eval() is still about 15% higher than it should be, still need to verify einasto and zhao eval()s are ok
 
     // Return function value
     return f;

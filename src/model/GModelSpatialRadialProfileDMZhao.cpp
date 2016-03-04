@@ -832,6 +832,23 @@ double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
   double jfactor = 0.0 ;
   double dr      = (angle - minradian) / npoints ;
   double r       = 0.0;
+  double g = 0.0 ;
+  g  = los * los ;
+  g += m_halo_distance * m_halo_distance ;
+  g -= 2.0 * los * m_halo_distance * std::cos(m_theta) ;
+  g  = sqrt(g) ;
+  g /= m_scale_radius ;
+  
+  double f = 0.0 ;
+  f  = pow( g , m_alpha ) ;
+  f += 1 ;
+  f  = pow( f, (m_beta-m_gamma)/m_alpha ) ;
+  f *= pow( g, m_gamma ) ;
+  f = 1 / f ;
+
+  // squared, for annihilating dm
+  // would just be f if it was decaying dm
+  f = f * f ;
   
   // loop over different radii in the profile
   for (int i = 0; i < npoints; ++i) {

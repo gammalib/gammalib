@@ -259,6 +259,11 @@ double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
     // Always chose the lesser of ( mass_radius theta, theta_max )
     if (m_theta_max.value() * gammalib::deg2rad < theta ) {
         theta = m_theta_max.value() * gammalib::deg2rad;
+    // if the halo is far enough away (further than the significant radius)
+    // then we just need to deal with the angles within the sphere of the
+    // significant radius.
+    } else {
+      theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
     }
     
     // Return value
@@ -538,6 +543,7 @@ void GModelSpatialRadialProfileDMBurkert::free_members(void)
 double GModelSpatialRadialProfileDMBurkert::profile_value(const double& theta) const
 {
     
+
     // update precompuation cache
     update();
 
