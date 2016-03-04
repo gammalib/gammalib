@@ -396,19 +396,23 @@ int GModelSpatialRadialProfile::cache_index(void) const
         prf.mc_max = 0.0;
 
         // Set profile parameters
+        std::cout << "CACHE:" << std::endl;
         for (int k = 0; k < m_pars.size(); ++k) {
             prf.pars.push_back(m_pars[k]->value());
+            std::cout << "  pars[" << m_pars[k]->name() << "] = " << m_pars[k]->value() << std::endl;
         }
 
         // Pre-compute radial values, MC values, and mc_max. Compute
         // also the normalization.
         double rmax = theta_max();
         double dr   = rmax / m_num_nodes;
+        std::cout << "  rmax=" << rmax << "  dr=" << dr << std::endl;
         double r    = 0.0;
         double norm = 0.0;
         for (int j = 0; j < m_num_nodes; ++j) {
             double value = profile_value(r);
             double mc    = value * std::sin(r) * dr;
+            std::cout << "  j=" << j << "  r=" << r << "  value=" << value << "  mc=" << mc << std::endl;
             norm        += mc;
             if (mc > prf.mc_max) {
                 prf.mc_max = mc;
@@ -419,6 +423,7 @@ int GModelSpatialRadialProfile::cache_index(void) const
             r += dr;
         }
         norm *= gammalib::twopi;
+        std::cout << "  prf.mc_max=" << prf.mc_max << "  norm=" << norm << std::endl;
 
         // Normalize radial profile
         if (norm > 0.0) {
