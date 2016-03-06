@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-28 February 2016
+6 March 2016
 
 
 1. Introduction
@@ -32,6 +32,7 @@ The following methods have been added to the public interface:
 - friend double operator-(const GTime&  a,       const GTime&  b)
 - GTime::operator+=(const double& seconds)
 - GTime::operator-=(const double& seconds)
+- friend double operator/(const GEnergy& a, const GEnergy& b);
 
 The following methods have been removed:
 - GFilename::size()
@@ -164,6 +165,9 @@ absolute quantity, while addition and subtraction of GTime objects are
 relative operations. The GTime arguments of the operators have thus be
 replaced by double precision values that specify relative time in seconds.
 The multiplication and division operators have been removed (#1714).
+
+A division operator has been added to the GEnergy method to compute the
+ratio of two energies.
 
 
 11. Optimization module
