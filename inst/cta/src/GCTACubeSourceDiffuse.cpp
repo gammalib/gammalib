@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTACubeSourceDiffuse.cpp - CTA cube analysis diffuse source class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -237,12 +237,18 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
     }
 
     // Get diffuse source attributes
-    m_name          = name;
-    GTime   obsTime = cube->time();
+    m_name        = name;
+    GTime obsTime = cube->time();
 
     // Setup empty skymap
     m_cube = cube->map();
     m_cube = 0.0;
+
+    // Get energy boundaries and store them in node array
+    GEbounds ebounds = cube->ebounds();
+    for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
+    	m_logE.append(ebounds.elogmean(ieng).log10TeV());
+    }
 
     // Get livetime (in seconds) and deadtime correction factor
     double livetime = rsp->exposure().livetime();
@@ -325,6 +331,52 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response function
+ *
+ * @param[in] pixel Spatial pixel index [0,...,???]
+ * @param[in] srcEng True photon energy
+ * @return Instrument response function.
+ *
+ * Returns the instrument response function for a given true photon energy
+ * @p srcEng.
+ ***************************************************************************/
+double GCTACubeSourceDiffuse::irf(const int&     pixel,
+                                  const GEnergy& srcEng) const
+{
+    // Initialise response function
+    double irf = 0.0;
+    
+    // Continue only if there is energy information for the map cube
+    if (m_logE.size() > 0) {
+
+        // Set energy for interpolation in log-energy
+        m_logE.set_value(srcEng.log10TeV());
+
+        // Compute map cube intensity for the left and right map
+        double left_irf  = m_cube(pixel, m_logE.inx_left());
+        double right_irf = m_cube(pixel, m_logE.inx_right());
+
+        // Perform log-log interpolation
+        if (left_irf > 0.0 && right_irf > 0.0) {
+            double log_intensity = m_logE.wgt_left()  * std::log(left_irf) +
+                                   m_logE.wgt_right() * std::log(right_irf);
+            irf = std::exp(log_intensity);
+        }
+        else if (left_irf > 0.0) {
+            irf = left_irf;
+        }
+        else if (right_irf > 0.0) {
+            irf = right_irf;
+        }
+
+    } // endif: energy information was available
+
+    // Return instrument response function
+    return irf;
 }
 
 
@@ -438,6 +490,7 @@ void GCTACubeSourceDiffuse::init_members(void)
 {
     // Initialise members
     m_cube.clear();
+    m_logE.clear();
    
     // Return
     return;
@@ -453,6 +506,7 @@ void GCTACubeSourceDiffuse::copy_members(const GCTACubeSourceDiffuse& source)
 {
     // Copy members
     m_cube = source.m_cube;
+    m_logE = source.m_logE;
 
     // Return
     return;

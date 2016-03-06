@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAResponseCube.i - CTA cube analysis response function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,10 @@ public:
     GCTAResponseCube(const GCTACubeExposure&   exposure,
                      const GCTACubePsf&        psf,
                      const GCTACubeBackground& background);
+    GCTAResponseCube(const GCTACubeExposure&   exposure,
+                     const GCTACubePsf&        psf,
+                     const GCTACubeEdisp&      edisp,
+                     const GCTACubeBackground& background);
     virtual ~GCTAResponseCube(void);
 
     // Implement pure virtual base class methods
@@ -51,6 +55,8 @@ public:
     virtual std::string       classname(void) const;
     virtual bool              use_edisp(void) const;
     virtual bool              use_tdisp(void) const;
+    virtual bool              apply_edisp(void) const;
+    virtual void              apply_edisp(const bool& apply_edisp) const;
     virtual double            irf(const GEvent&       event,
                                   const GPhoton&      photon,
                                   const GObservation& obs) const;
@@ -70,6 +76,8 @@ public:
     void                      exposure(const GCTACubeExposure& exposure);
     const GCTACubePsf&        psf(void) const;
     void                      psf(const GCTACubePsf& psf);
+    const GCTACubeEdisp&      edisp(void) const;
+    void                      edisp(const GCTACubeEdisp& edisp);
     const GCTACubeBackground& background(void) const;
     void                      background(const GCTACubeBackground& background);
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GEnergy.i - Energy class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -103,9 +103,15 @@ public:
     GEnergy __div__(const double& factor) const {
         return ((*self) / factor);
     }
+    double __div__(const GEnergy& eng) const {
+        return ((*self) / eng);
+    }
     // Python 3.x
     GEnergy __truediv__(const double& factor) const {
         return ((*self) / factor);
+    }
+    double __truediv__(const GEnergy& eng) const {
+        return ((*self) / eng);
     }
     // Python 2.x operator/=
     GEnergy __idiv__(const double& scale) {

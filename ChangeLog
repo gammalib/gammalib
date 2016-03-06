@@ -1,8 +1,10 @@
-2016-03-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-03-06  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Add energy dispersion cube for stacked analysis (#1721).
+        Add GEnergy division operator.
         Support Fermi LAT Pass 8 response functions (#1517)
         Add GObservations::nobserved() method (#1723)
         Use rejection method in GCTABackground3D::mc() (#1722)

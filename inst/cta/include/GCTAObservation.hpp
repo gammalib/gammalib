@@ -44,6 +44,7 @@ class GCaldb;
 class GGti;
 class GCTACubeExposure;
 class GCTACubePsf;
+class GCTACubeEdisp;
 class GCTACubeBackground;
 class GCTARoi;
 
@@ -106,6 +107,10 @@ public:
                                  const GCaldb&      caldb);
     void                response(const GCTACubeExposure&   expcube,
                                  const GCTACubePsf&        psfcube,
+                                 const GCTACubeBackground& bkgcube);
+    void                response(const GCTACubeExposure&   expcube,
+                                 const GCTACubePsf&        psfcube,
+								 const GCTACubeEdisp&      edispcube,
                                  const GCTACubeBackground& bkgcube);
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
