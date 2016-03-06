@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GCTACubeEdisp.hpp - CTA cube analysis energy dispersion class     *
+ *      GCTACubeEdisp.hpp - CTA cube analysis energy dispersion class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Michael Mayer                                *
+ *  copyright (C) 2016 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,41 +29,41 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GBase.hpp"
-#include "GMath.hpp"
-#include "GFits.hpp"
 #include "GSkyMap.hpp"
 #include "GEbounds.hpp"
+#include "GEnergies.hpp"
 #include "GNodeArray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
+class GFits;
 class GFilename;
 class GObservations;
 class GCTAEventCube;
 class GCTAObservation;
 
 
-
 /***********************************************************************//**
  * @class GCTACubeEdisp
  *
- * @brief CTA energy dispersion for cube analysis
+ * @brief CTA energy dispersion for stacked analysis
  *
  * This class implements a mean CTA energy dispersion which provides the
- * average energy dispersion PDF for cube analysis as function of sky
- * position, log10 energy and delta angle between true and measured photon
- * direction.
+ * average energy dispersion probability density function for stacked
+ * analysis as function of sky position, energy migration, and true log10
+ * energy.
  ***************************************************************************/
 class GCTACubeEdisp : public GBase {
 
 public:
-   
     // Constructors and destructors
 	GCTACubeEdisp(void);
 	GCTACubeEdisp(const GCTACubeEdisp& cube);
     explicit GCTACubeEdisp(const GFilename& filename);
     GCTACubeEdisp(const GCTAEventCube& cube,
-                const double& mmax, const int& nmbins);
+                  const double&        mmax,
+                  const int&           nmbins);
     GCTACubeEdisp(const std::string&   wcs,
                   const std::string&   coords,
                   const double&        x,
@@ -72,7 +72,7 @@ public:
                   const double&        dy,
                   const int&           nx,
                   const int&           ny,
-                  const GEbounds&      ebounds,
+                  const GEnergies&     energies,
                   const double&        mmax,
                   const int&           nmbins);
     virtual ~GCTACubeEdisp(void);
@@ -80,8 +80,8 @@ public:
     // Operators
     GCTACubeEdisp& operator=(const GCTACubeEdisp& cube);
     double         operator()(const GSkyDir& dir,
-                            const double&  migra,
-                            const GEnergy& energy) const;
+                              const double&  migra,
+                              const GEnergy& energy) const;
 
     // Methods
     void              clear(void);
@@ -90,12 +90,11 @@ public:
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs, GLog* log = NULL);
     const GSkyMap&    map(void) const;
-    const GEbounds&   ebounds(void) const;
+    const GEnergies&  energies(void) const;
     const GNodeArray& migras(void) const;
-    const GNodeArray& elogmeans(void) const;
     double            migra_max(void) const;
     int               offset(const int& imigra, const int& iebin) const;
-    GEbounds          ebounds_src(const GEnergy obsEng) const;
+    GEbounds          ebounds(const GEnergy& obsEng) const;
     void              read(const GFits& fits);
     void              write(GFits& file) const;
     void              load(const GFilename& filename);
@@ -110,32 +109,28 @@ protected:
     void copy_members(const GCTACubeEdisp& cube);
     void free_members(void);
     void clear_cube(void);
-    void update(const double& migra, const double& logE) const;
-    void set_migra_axis(void);
+    void update(const double& migra, const double& logEsrc) const;
     void set_eng_axis(void);
-    void set_to_smooth(void);
-    void compute_ebounds_src(void) const;
+    void compute_ebounds(void) const;
 
-    // Data
-    mutable GFilename m_filename;          //!< Filename
-    GSkyMap           m_cube;              //!< Edisp cube
-    GEbounds          m_ebounds;           //!< Energy bounds for the Edisp cube
-    GNodeArray        m_elogmeans;         //!< Mean log10TeV energy for the Edisp cube
-    GNodeArray        m_migras;            //!< Migra bins for the Edisp cube
-    GNodeArray        m_migras_cache;      //!< Internal migra bins
+    // Members
+    mutable GFilename m_filename;  //!< Filename
+    GSkyMap           m_cube;      //!< Energy dispersion cube
+    GEnergies         m_energies;  //!< True energy values of cube
+    GNodeArray        m_elogmeans; //!< Mean log10TeV energy for the Edisp cube
+    GNodeArray        m_migras;    //!< Migra bins for the Edisp cube
 
 private:
     // Response table computation cache for 2D access
-    mutable int    m_inx1;            //!< Index of upper left node
-    mutable int    m_inx2;            //!< Index of lower left node
-    mutable int    m_inx3;            //!< Index of upper right node
-    mutable int    m_inx4;            //!< Index of lower right node
-    mutable double m_wgt1;            //!< Weight of upper left node
-    mutable double m_wgt2;            //!< Weight of lower left node
-    mutable double m_wgt3;            //!< Weight of upper right node
-    mutable double m_wgt4;            //!< Weight of lower right node
-    mutable std::vector<GEbounds> m_ebounds_src;
-    mutable bool                  m_ebounds_src_computed;
+    mutable int                   m_inx1;    //!< Index of upper left node
+    mutable int                   m_inx2;    //!< Index of lower left node
+    mutable int                   m_inx3;    //!< Index of upper right node
+    mutable int                   m_inx4;    //!< Index of lower right node
+    mutable double                m_wgt1;    //!< Weight of upper left node
+    mutable double                m_wgt2;    //!< Weight of lower left node
+    mutable double                m_wgt3;    //!< Weight of upper right node
+    mutable double                m_wgt4;    //!< Weight of lower right node
+    mutable std::vector<GEbounds> m_ebounds; //!< Energy boundaries
 };
 
 
@@ -152,13 +147,11 @@ std::string GCTACubeEdisp::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Return edisp cube sky map
+ * @brief Return energy dispersion cube sky map
  *
- * @return edisp cube sky map.
+ * @return Energy dispersion cube sky map.
  *
- * The GCTACubeEdisp represents the edisp cube as a sky map. This methods
- * returns the sky map that is stored internally by GCTACubeEdisp as edisp
- * cube.
+ * Returns the energy dispersion cube sky map.
  ***************************************************************************/
 inline
 const GSkyMap& GCTACubeEdisp::map(void) const
@@ -168,14 +161,16 @@ const GSkyMap& GCTACubeEdisp::map(void) const
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries
+ * @brief Return energies for energy dispersion cub
  *
- * @return Energy boundaris
+ * @return Energies for energy dispersion cube
+ *
+ * Returns the true energies of the energy dispersion cube.
  ***************************************************************************/
 inline
-const GEbounds& GCTACubeEdisp::ebounds(void) const
+const GEnergies& GCTACubeEdisp::energies(void) const
 {
-    return (m_ebounds);
+    return (m_energies);
 }
 
 
@@ -208,18 +203,6 @@ double GCTACubeEdisp::migra_max(void) const
 
 
 /***********************************************************************//**
- * @brief Return arithmetic mean of log10 energies
- *
- * @return Arithmetic mean of log10 energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubeEdisp::elogmeans(void) const
-{
-    return (m_elogmeans);
-}
-
-
-/***********************************************************************//**
  * @brief Return edisp cube filename
  *
  * @return Energy dispersion cube filename.
@@ -237,7 +220,12 @@ const GFilename& GCTACubeEdisp::filename(void) const
 /***********************************************************************//**
  * @brief Return map offset
  *
+ * @param[in] imigra Migration bin index.
+ * @param[in] iebin Energy bin index.
  * @return Map offset.
+ *
+ * Returns the offset of the energy dispersion in the sky map for a given
+ * migration bin index and a given energy bin index.
  ***************************************************************************/
 inline
 int GCTACubeEdisp::offset(const int& imigra, const int& iebin) const

@@ -979,8 +979,9 @@ void TestGCTAResponse::test_response_edispcube(void)
     }
     test_try("CTA Edisp cube map constructor");
     try {
-        GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-        GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+        GEnergies     energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10,
+                           energies, 2.0, 20);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -991,8 +992,9 @@ void TestGCTAResponse::test_response_edispcube(void)
     GCTAObservation obs_cta;
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
-    GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+    GEnergies     energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubeEdisp cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10,
+                       energies, 2.0, 20);
     cube.set(obs_cta);
     cube.save("test_cta_edispcube_one.fits", true);
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GCTACubeEdisp.i - CTA cube analysis energy dispersion class        *
+ *       GCTACubeEdisp.i - CTA cube analysis energy dispersion class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Michael Mayer                               *
+ *  copyright (C) 2016 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,57 +36,56 @@
  * @brief CTA energy dispersion for cube analysis
  *
  * This class implements a mean CTA energy dispersion which provides the
- * average energy dispersion for binned analysis as function of sky
- * position, log10 energy and delta  migra (fraction of true and reconstructed energy)
- *
+ * average energy dispersion probability density function for stacked
+ * analysis as function of sky position, energy migration, and true log10
+ * energy.
  ***************************************************************************/
 class GCTACubeEdisp : public GBase {
 
 public:
-   
     // Constructors and destructors
-    GCTACubeEdisp(void);
-    GCTACubeEdisp(const GCTACubeEdisp& cube);
+	GCTACubeEdisp(void);
+	GCTACubeEdisp(const GCTACubeEdisp& cube);
     explicit GCTACubeEdisp(const GFilename& filename);
     GCTACubeEdisp(const GCTAEventCube& cube,
-                const double& mmax, const int& nmbins);
+                  const double&        mmax,
+                  const int&           nmbins);
     GCTACubeEdisp(const std::string&   wcs,
-                const std::string&   coords,
-                const double&        x,
-                const double&        y,
-                const double&        dx,
-                const double&        dy,
-                const int&           nx,
-                const int&           ny,
-                const GEbounds&      ebounds,
-                const double&        mmax,
-                const int&           nmbins);
+                  const std::string&   coords,
+                  const double&        x,
+                  const double&        y,
+                  const double&        dx,
+                  const double&        dy,
+                  const int&           nx,
+                  const int&           ny,
+                  const GEnergies&     energies,
+                  const double&        mmax,
+                  const int&           nmbins);
     virtual ~GCTACubeEdisp(void);
 
     // Interpolation operator
     double operator()(const GSkyDir& dir, 
-                      const double & migra,
+                      const double&  migra,
 				      const GEnergy& energy) const;
 
     // Methods
-    void               clear(void);
-    GCTACubeEdisp*       clone(void) const;
-    std::string        classname(void) const;
-    void               set(const GCTAObservation& obs);
-    void               fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&     map(void) const;
-    const GEbounds&    ebounds(void) const;
-    const GNodeArray&  migras(void) const;
-    const GNodeArray&  elogmeans(void) const;
-    double             migra_max(void) const;
-    int                offset(const int& imigra, const int& iebin) const;
-    GEbounds           ebounds_src(const GEnergy obsEng) const;
-    void               read(const GFits& fits);
-    void               write(GFits& file) const;
-    void               load(const GFilename& filename);
-    void               save(const GFilename& filename,
-                            const bool&      clobber = false) const;
-    const GFilename&   filename(void) const;
+    void              clear(void);
+    GCTACubeEdisp*    clone(void) const;
+    std::string       classname(void) const;
+    void              set(const GCTAObservation& obs);
+    void              fill(const GObservations& obs, GLog* log = NULL);
+    const GSkyMap&    map(void) const;
+    const GEnergies&  energies(void) const;
+    const GNodeArray& migras(void) const;
+    double            migra_max(void) const;
+    int               offset(const int& imigra, const int& iebin) const;
+    GEbounds          ebounds(const GEnergy& obsEng) const;
+    void              read(const GFits& fits);
+    void              write(GFits& file) const;
+    void              load(const GFilename& filename);
+    void              save(const GFilename& filename,
+                           const bool&      clobber = false) const;
+    const GFilename&  filename(void) const;
 };
 
 

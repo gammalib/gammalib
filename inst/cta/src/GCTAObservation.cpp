@@ -394,13 +394,13 @@ void GCTAObservation::response(const GCTACubeExposure&   expcube,
  * @param[in] bkgcube Background cube.
  *
  * Sets the CTA response function fur cube analysis by specifying the
- * exposure cube, the Psf cube and the background cube. The method also
- * copies over the ontime, the livetime and the deadtime correction factor
- * from the exposure cube.
+ * exposure cube, the Psf cube, the exposure cube and the background cube.
+ * The method also copies over the ontime, the livetime and the deadtime
+ * correction factor from the exposure cube.
  ***************************************************************************/
 void GCTAObservation::response(const GCTACubeExposure&   expcube,
                                const GCTACubePsf&        psfcube,
-							   const GCTACubeEdisp&     edispcube,
+							   const GCTACubeEdisp&      edispcube,
                                const GCTACubeBackground& bkgcube)
 {
     // Free response
@@ -408,7 +408,10 @@ void GCTAObservation::response(const GCTACubeExposure&   expcube,
     m_response = NULL;
 
     // Allocate fresh response function
-    GCTAResponseCube* rsp = new GCTAResponseCube(expcube, psfcube, edispcube, bkgcube);
+    GCTAResponseCube* rsp = new GCTAResponseCube(expcube,
+                                                 psfcube,
+                                                 edispcube,
+                                                 bkgcube);
 
     // Store pointer
     m_response = rsp;

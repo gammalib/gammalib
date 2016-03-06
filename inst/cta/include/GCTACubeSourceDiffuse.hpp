@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GCTACubeSourceDiffuse.hpp - CTA cube analysis diffuse source class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,8 +30,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GCTACubeSource.hpp"
 #include "GSkyMap.hpp"
+#include "GCTACubeSource.hpp"
 #include "GCTAResponseCube.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -77,13 +77,13 @@ public:
 
     // Other methods
     double par(const int& index) const;
-    double irf(const int& pixel, const int& iebin) const;
+    double irf(const int& pixel, const int&     iebin) const;
+    double irf(const int& pixel, const GEnergy& srcEng) const;
     double psf(const GCTAResponseCube* rsp,
                const GModelSpatial*    model,
                const GSkyDir&          srcDir,
                const GEnergy&          srcEng,
                const GTime&            srcTime) const;
-    const GNodeArray& nodes(void) const;
 
 protected:
     // Protected methods
@@ -92,8 +92,8 @@ protected:
     void free_members(void);
 
     // Data members
-    GSkyMap m_cube;  //!< Diffuse map convolved with IRF
-    GNodeArray m_logE;  //!< Node array of energy values
+    GSkyMap    m_cube;  //!< Diffuse map convolved with IRF
+    GNodeArray m_logE;  //!< Node array of log10 energy values in TeV
 };
 
 
@@ -136,20 +136,6 @@ inline
 double GCTACubeSourceDiffuse::irf(const int& pixel, const int& iebin) const
 {
     return (m_cube(pixel, iebin));
-}
-
-
-/***********************************************************************//**
- * @brief Return array of energy nodes
- *
- * @return Node Array of energy bins
- *
- * Returns node array of energy values
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubeSourceDiffuse::nodes(void) const
-{
-    return (m_logE);
 }
 
 #endif /* GCTACUBESOURCEDIFFUSE_HPP */

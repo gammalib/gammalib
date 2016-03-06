@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GCTACubeEdisp.cpp - CTA cube analysis energy dispersion function class     *
+ *      GCTACubeEdisp.cpp - CTA cube analysis energy dispersion class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2016 by Michael Mayer                                *
+ *  copyright (C) 2016 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,9 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GLog.hpp"
+#include "GFits.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsTable.hpp"
 #include "GObservations.hpp"
 #include "GCTACubeEdisp.hpp"
 #include "GCTAObservation.hpp"
@@ -39,13 +42,17 @@
 #include "GCTAEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_SET                            "GCTACubeEdisp::set(GCTAObservation&)"
-#define G_FILL                     "GCTACubeEdisp::fill(GObservations&, GLog*)"
+#define G_CONSTRUCTOR1         "GCTACubeEdisp(GCTAEventCube&, double&, int&)"
+#define G_CONSTRUCTOR2  "GCTACubeEdisp(std::string&, std::string&, double&, "\
+                         "double&, double&, double&, int&, int&, GEbounds&, "\
+                                                             "double&, int&)"
+#define G_SET                          "GCTACubeEdisp::set(GCTAObservation&)"
+#define G_FILL                   "GCTACubeEdisp::fill(GObservations&, GLog*)"
+#define G_EBOUNDS                          "GCTACubeEdisp::ebounds(GEnergy&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_SMOOTH_EDISP                      //!< Guarantee no singularities
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -61,6 +68,8 @@ const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty energy dispersion cube.
  ***************************************************************************/
 GCTACubeEdisp::GCTACubeEdisp(void)
 {
@@ -75,7 +84,10 @@ GCTACubeEdisp::GCTACubeEdisp(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] cube Energy dispersion.
+ * @param[in] cube Energy dispersion cube.
+ *
+ * Constructs an energy dispersion cube by copying another energy dispersion
+ * cube.
  ***************************************************************************/
 GCTACubeEdisp::GCTACubeEdisp(const GCTACubeEdisp& cube)
 {
@@ -93,9 +105,11 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTACubeEdisp& cube)
 /***********************************************************************//**
  * @brief File constructor
  *
- * @param[in] filename energy dispersion cube filename.
+ * @param[in] filename Energy dispersion cube filename.
  *
- * Construct energy dispersion cube by loading the information from a energy dispersion cube file.
+ * Constructs an energy dispersion cube by loading the energy dispersion
+ * information from an energy dispersion cube FITS file. See the load()
+ * method for details about the format of the FITS file.
  ***************************************************************************/
 GCTACubeEdisp::GCTACubeEdisp(const GFilename& filename)
 {
@@ -114,108 +128,142 @@ GCTACubeEdisp::GCTACubeEdisp(const GFilename& filename)
  * @brief Event cube constructor
  *
  * @param[in] cube Event cube.
- * @param[in] mmax Maximum migra.
- * @param[in] nmbins Number of migra bins.
+ * @param[in] mmax Maximum energy migration (degrees, >0.0).
+ * @param[in] nmbins Number of migration bins (2 ...).
  *
- * Construct Edisp cube using the same binning and sky projection that is
- * used for the event cube.
+ * @exception GException::invalid_argument
+ *            Maximum energy migration or number of migration bins invalid.
+ *
+ * Construct an energy dispersion cube with all elements set to zero using
+ * the same binning and sky projection that is used for an event cube.
  ***************************************************************************/
 GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
-                         const int& nmbins)
+                             const int& nmbins)
 {
+    // Throw an exception if the number of migra bins is invalid or the
+    // maximum migration is not positive
+    if (nmbins < 2) {
+        std::string msg = "Number "+gammalib::str(nmbins)+" of migration "
+                          "bins is smaller than 2. Please request at least "
+                          "2 migration bins.";
+        throw GException::invalid_argument(G_CONSTRUCTOR1, msg);
+    }
+    if (mmax <= 0.0) {
+        std::string msg = "Maximum migration "+gammalib::str(mmax)+" is not "
+                          "positive. Please specify a positive maximum "
+                          "energy migration.";
+        throw GException::invalid_argument(G_CONSTRUCTOR1, msg);
+    }
+
     // Initialise class members
     init_members();
 
-    // Store energy boundaries
-    m_ebounds = cube.ebounds();
+    // Use the energy bin boundaries of the event cube as the node energies
+    // of the energy dispersion cube.
+    m_energies.clear();
+    int nbins = cube.ebounds().size();
+    if (nbins > 0) {
+        m_energies.append(cube.ebounds().emin(0));
+        for (int i = 0; i < nbins; ++i) {
+            m_energies.append(cube.ebounds().emax(i));
+        }
+    }
 
-    // Set GNodeArray used for interpolation
+    // Set energy node array used for interpolation
     set_eng_axis();
 
-    // Set delta node array
+    // Set the migration nodes
     m_migras.clear();
+    double binsize = mmax / double(nmbins);
     for (int i = 0; i < nmbins; ++i) {
-        double binsize = mmax / double(nmbins);
-        double migra   = binsize * (double(i) + 0.5); // avoid central singularity
+        double migra = binsize * (double(i) + 0.5); // avoid central singularity
         m_migras.append(migra);
     }
 
-    // Set migra node array for computation
-    set_migra_axis();
-
     // Compute number of sky maps
-    int nmaps = m_ebounds.size() * m_migras.size();
+    int nmaps = m_energies.size() * m_migras.size();
 
-    // Set Edisp cube to event cube
+    // Set energy dispersion cube to event cube
     m_cube = cube.map();
 
     // Set appropriate number of skymaps
     m_cube.nmaps(nmaps);
 
-    // Set all Edisp cube pixels to zero as we want to have a clean map
-    // upon construction
+    // Set all energy dispersion cube pixels to zero as we want to have
+    // a clean map upon construction
     m_cube = 0.0;
 
     // Return
     return;
-
 }
 
 
 /***********************************************************************//**
  * @brief Mean PSF cube constructor
  *
- * @param[in] wcs     World Coordinate System.
- * @param[in] coords  Coordinate System (CEL or GAL).
- * @param[in] x       X coordinate of sky map centre (deg).
- * @param[in] y       Y coordinate of sky map centre (deg).
- * @param[in] dx      Pixel size in x direction at centre (deg/pixel).
- * @param[in] dy      Pixel size in y direction at centre (deg/pixel).
- * @param[in] nx      Number of pixels in x direction.
- * @param[in] ny      Number of pixels in y direction.
- * @param[in] ebounds Energy boundaries.
- * @param[in] mmax    Maximum migra (deg).
- * @param[in] nmbins  Number of migra bins.
+ * @param[in] wcs      World Coordinate System.
+ * @param[in] coords   Coordinate System (CEL or GAL).
+ * @param[in] x        X coordinate of sky map centre (deg).
+ * @param[in] y        Y coordinate of sky map centre (deg).
+ * @param[in] dx       Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy       Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx       Number of pixels in x direction.
+ * @param[in] ny       Number of pixels in y direction.
+ * @param[in] energies True energies.
+ * @param[in] mmax     Maximum energy migration (degrees, >0.0).
+ * @param[in] nmbins   Number of migration bins (2 ...).
  *
- * Constructs a mean Edisp cube from cube parameters and migra binning
+ * @exception GException::invalid_argument
+ *            Maximum energy migration or number of migration bins invalid.
  *
+ * Construct an energy dispersion cube with all elements set to zero.
  ***************************************************************************/
 GCTACubeEdisp::GCTACubeEdisp(const std::string&   wcs,
-                         const std::string&   coords,
-                         const double&        x,
-                         const double&        y,
-                         const double&        dx,
-                         const double&        dy,
-                         const int&           nx,
-                         const int&           ny,
-                         const GEbounds&      ebounds,
-                         const double&        mmax,
-                         const int&           nmbins)
+                             const std::string&   coords,
+                             const double&        x,
+                             const double&        y,
+                             const double&        dx,
+                             const double&        dy,
+                             const int&           nx,
+                             const int&           ny,
+                             const GEnergies&     energies,
+                             const double&        mmax,
+                             const int&           nmbins)
 {
+    // Throw an exception if the number of migra bins is invalid or the
+    // maximum migration is not positive
+    if (nmbins < 2) {
+        std::string msg = "Number "+gammalib::str(nmbins)+" of migration "
+                          "bins is smaller than 2. Please request at least "
+                          "2 migration bins.";
+        throw GException::invalid_argument(G_CONSTRUCTOR2, msg);
+    }
+    if (mmax <= 0.0) {
+        std::string msg = "Maximum migration "+gammalib::str(mmax)+" is not "
+                          "positive. Please specify a positive maximum "
+                          "energy migration.";
+        throw GException::invalid_argument(G_CONSTRUCTOR2, msg);
+    }
+
     // Initialise class members
     init_members();
 
-    // Store energy boundaries
-    m_ebounds = ebounds;
+    // Store true energies
+    m_energies = energies;
 
-    // Set energy node array
+    // Set energy node array used for interpolation
     set_eng_axis();
 
-    // Set migra node array
+    // Set migration node array
     m_migras.clear();
+    double binsize = mmax / double(nmbins);
     for (int i = 0; i < nmbins; ++i) {
-
-        double binsize = mmax / double(nmbins);
-        double migra   = binsize * (double(i) + 0.5); // avoid central singularity
-
+        double migra = binsize * (double(i) + 0.5); // avoid central singularity
         m_migras.append(migra);
     }
 
-    // Set migra node array for computation
-    set_migra_axis();
-
     // Compute number of sky maps
-    int nmaps = m_ebounds.size() * m_migras.size();
+    int nmaps = m_energies.size() * m_migras.size();
     
     // Create sky map
     m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
@@ -227,6 +275,8 @@ GCTACubeEdisp::GCTACubeEdisp(const std::string&   wcs,
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destructs energy dispersion cube.
  ***************************************************************************/
 GCTACubeEdisp::~GCTACubeEdisp(void)
 {
@@ -247,10 +297,12 @@ GCTACubeEdisp::~GCTACubeEdisp(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] cube Edisp cube.
- * @return Mean Edisp cube.
+ * @param[in] cube Energy dispersion cube.
+ * @return Energy dispersion cube.
+ *
+ * Assigns energy dispersion cube.
  ***************************************************************************/
-GCTACubeEdisp& GCTACubeEdisp::operator= (const GCTACubeEdisp& cube)
+GCTACubeEdisp& GCTACubeEdisp::operator=(const GCTACubeEdisp& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -272,35 +324,36 @@ GCTACubeEdisp& GCTACubeEdisp::operator= (const GCTACubeEdisp& cube)
 
 
 /***********************************************************************//**
- * @brief Return edisp (in units or MeV^-1)
+ * @brief Return energy dispersion (in units of MeV^-1)
  *
  * @param[in] dir Coordinate of the true photon position.
- * @param[in] migra Fraction of true photon energy and reconstructed photon energy
- * @param[in] energy Energy of the true photon.
- * @return energy dispersion (in units or MeV^-1)
+ * @param[in] migra Energy migration (reconstructed over true energy).
+ * @param[in] energy True photon energy.
+ * @return Energy dispersion (in units of MeV^-1)
  *
- * Returns the energy dispersion for a given fraction of true and reconstructed
- * energy (in units of MeV^-1 for a given energy and coordinate
+ * Returns the energy dispersion for a given energy migration (reconstructed
+ * over true energy), true photon energy, and sky direction in units of
+ * MeV^-1.
  ***************************************************************************/
 double GCTACubeEdisp::operator()(const GSkyDir& dir,
-                               const double&  migra,
-                               const GEnergy& srcEng) const
+                                 const double&  migra,
+                                 const GEnergy& srcEng) const
 {
     // Update indices and weighting factors for interpolation
     update(migra, srcEng.log10TeV());
 
     // Perform bi-linear interpolation
     double edisp = m_wgt1 * m_cube(dir, m_inx1) +
-                 m_wgt2 * m_cube(dir, m_inx2) +
-                 m_wgt3 * m_cube(dir, m_inx3) +
-                 m_wgt4 * m_cube(dir, m_inx4);
+                   m_wgt2 * m_cube(dir, m_inx2) +
+                   m_wgt3 * m_cube(dir, m_inx3) +
+                   m_wgt4 * m_cube(dir, m_inx4);
 
-    // Make sure that Edisp does not become negative
+    // Make sure that energy dispersion does not become negative
     if (edisp < 0.0) {
         edisp = 0.0;
     }
 
-    // Return Edisp
+    // Return energy dispersion
     return edisp;
 }
 
@@ -312,9 +365,9 @@ double GCTACubeEdisp::operator()(const GSkyDir& dir,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear energy dispersion cube
  *
- * This method properly resets the object to an initial state.
+ * Clears energy dispersion cube.
  ***************************************************************************/
 void GCTACubeEdisp::clear(void)
 {
@@ -330,9 +383,9 @@ void GCTACubeEdisp::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone energy dispersion cube
  *
- * @return Deep copy of mean Edisp instance.
+ * @return Pointer to deep copy of energy dispersion cube.
  ***************************************************************************/
 GCTACubeEdisp* GCTACubeEdisp::clone(void) const
 {
@@ -341,13 +394,19 @@ GCTACubeEdisp* GCTACubeEdisp::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set Edisp cube from one CTA observation
+ * @brief Set energy dispersion cube for one CTA observation
  *
  * @param[in] obs CTA observation.
+ *
+ * @exception GException::invalid_value
+ *            CTA observation does not contain the required information.
+ *
+ * Sets the energy dispersion cube for one CTA observation. This method does
+ * nothing if the CTA observation does not contain an event list.
  ***************************************************************************/
 void GCTACubeEdisp::set(const GCTAObservation& obs)
 {
-    // Clear Edisp cube
+    // Clear energy dispersion cube
     clear_cube();
 
     // Only continue if we have an unbinned observation
@@ -356,85 +415,98 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
         // Extract region of interest from CTA observation
         const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
         if (list == NULL) {
-            std::string msg = "CTA Observation does not contain an event "
-                              "list. Event list information is needed to "
-                              "retrieve the Region of Interest for each "
-                              "CTA observation.";
+            std::string msg = "CTA Observation \""+obs.name()+"\" does not "
+                              "contain an event list. An event list is "
+                              "needed to retrieve the Region of Interest. "
+                              "Please specify a CTA observation with a "
+                              "valid event list.";
             throw GException::invalid_value(G_SET, msg);
         }
         const GCTARoi& roi = list->roi();
 
         // Check for RoI sanity
         if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+obs.name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
+            std::string msg = "No valid Region of Interest found in CTA "
+                              "observation \""+obs.name()+"\". Run ctselect "
+                              "to set the Region of Interest for this "
+                              "observation.";
             throw GException::invalid_value(G_SET, msg);
         }
 
-        // Get references on CTA response and pointing direction
+        // Get CTA response
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        const GSkyDir&         pnt = obs.pointing().dir();
+        if (rsp == NULL) {
+            std::string msg = "No valid instrument response found in CTA "
+                              "observation \""+obs.name()+"\". Please "
+                              "specify the instrument response for this "
+                              "observation.";
+            throw GException::invalid_value(G_SET, msg);
+        }
 
-        // Continue only if response is valid
-        if (rsp != NULL) {
+        // Get energy dispersion
+        const GCTAEdisp* edisp = rsp->edisp();
+        if (edisp == NULL) {
+            std::string msg = "No energy dispersion component found in "
+                              "the instrument response of CTA observation "
+                              "\""+obs.name()+"\". Please provide an "
+                              "instrument response that comprises an energy "
+                              "dispersion component.";
+            throw GException::invalid_value(G_SET, msg);
+        }
 
-            // Loop over all pixels in sky map
-            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+        // Get referenceto the pointing direction
+        const GSkyDir& pnt = obs.pointing().dir();
+
+        // Loop over all spatial pixels in energy dispersion cube
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
     
-                // Get pixel sky direction
-                GSkyDir dir = m_cube.inx2dir(pixel);
-                
-                // Continue only if pixel is within RoI
-                if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
+            
+            // Continue only if pixel is within RoI
+            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
 
-                    // Compute theta angle with respect to pointing direction
-                    // in radians
-                    double  theta = pnt.dist(dir);
+                // Compute theta angle with respect to pointing direction
+                // in radians
+                double theta = pnt.dist(dir);
 
-                    // Loop over all exposure cube energy bins
-                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                // Loop over all energy dispersion cube true energies
+                for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin){
 
-                        // Get logE/TeV
-                    	GEnergy obsEng = m_ebounds.elogmean(iebin);
+                    // Get log10 of true energy in TeV
+                    double logEsrc = m_elogmeans[iebin];
 
-                        // Loop over migra values
-                        for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
+                    // Loop over migration bins
+                    for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
 
-                            // Compute migra
-                            double migra = m_migras[imigra];
+                        // Get migration for this migration bin
+                        double migra = m_migras[imigra];
 
-                            // Skip migra bin if zero
-                            if (migra <= 0.0) {
-                            	continue;
-                            }
+                        // Skip migration bin if it's not positive
+                        if (migra <= 0.0) {
+                        	continue;
+                        }
 
-                            // Compute true enrgy
-                            double logEsrc = obsEng.log10TeV() - std::log10(migra);
+                        // Compute log10 of reconstructed energy in TeV
+                        double logEobs = std::log10(migra) - logEsrc;
 
-                            // Set map index
-                            int imap = offset(imigra, iebin);
+                        // Set map index
+                        int imap = offset(imigra, iebin);
 
-                            // Set Edisp cube
-                            // Add on Edisp cube
-                            m_cube(pixel, imap) = rsp->edisp(obsEng, theta, 0.0, 0.0, 0.0, logEsrc) ;
+                        // Set energy dispersion cube value
+                        m_cube(pixel, imap) = (*edisp)(logEobs, logEsrc,
+                                                       theta, 0.0,
+                                                       0.0, 0.0);
 
-                        } // endfor: looped over migra bins
+                    } // endfor: looped over migration bins
 
-                    } // endfor: looped over energy bins
+                } // endfor: looped over energy bins
 
-                } // endif: pixel was within RoI
+            } // endif: pixel was within RoI
 
-            } // endfor: looped over all pixels
-
-        } // endif: response was valid
+        } // endfor: looped over all pixels
 
     } // endif: observation was unbinned
-
-    // Compile option: guarantee smooth Edisp
-    #if defined(G_SMOOTH_EDISP)
-    set_to_smooth();
-    #endif
 
     // Return
     return;
@@ -442,14 +514,27 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
 
 
 /***********************************************************************//**
- * @brief Fill Edisp cube from observation container
+ * @brief Fill energy dispersion cube from observation container
  *
  * @param[in] obs Observation container.
- * @param[in] log Pointer towards logger (default: NULL).
+ * @param[in] log Pointer towards logger.
+ *
+ * @exception GException::invalid_value
+ *            Observation container does not contain the required information.
+ *
+ * Computes the stacked energy dispersion cube for all unbinned CTA
+ * observations that are in the observation container @p obs. Binned CTA
+ * observations or observations for other instruments are skipped.
+ * Information about the observations that are used will be put into the
+ * logger in case that @p log is not a NULL pointer.
+ *
+ * The method computes the average energy dispersion ...
+ *
+ * @todo Provide formula
  ***************************************************************************/
 void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
 {
-    // Clear Edisp cube
+    // Clear energy dispersion cube
     clear_cube();
 
     // Initialise skymap for exposure weight accumulation
@@ -490,31 +575,41 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
 
         // Extract energy boundaries from CTA observation
         GEbounds obs_ebounds = cta->ebounds();
+        GEnergy  obs_emin    = obs_ebounds.emin() - g_energy_margin;
+        GEnergy  obs_emax    = obs_ebounds.emax() + g_energy_margin;
 
         // Check for RoI sanity
         if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+cta->name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
+            std::string msg = "No valid Region of Interest found in CTA "
+                              "observation \""+cta->name()+"\". Run ctselect "
+                              "to set the Region of Interest for this "
+                              "observation.";
             throw GException::invalid_value(G_FILL, msg);
         }
 
-        // Get references on CTA response and pointing direction
+        // Get CTA response
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-        const GSkyDir&         pnt = cta->pointing().dir();
-
-        // Skip observation if we don't have an unbinned observation
         if (rsp == NULL) {
-            if (log != NULL) {
-                *log << "WARNING: ";
-                *log << cta->instrument();
-                *log << " observation \"" << cta->name();
-                *log << "\" (id=" << cta->id() << ")";
-                *log << " contains no IRF response.";
-                *log << " Skipping this observation." << std::endl;
-            }
-            continue;
+            std::string msg = "No valid instrument response found in CTA "
+                              "observation \""+cta->name()+"\". Please "
+                              "specify the instrument response for this "
+                              "observation.";
+            throw GException::invalid_value(G_FILL, msg);
         }
+
+        // Get energy dispersion component
+        const GCTAEdisp* edisp = rsp->edisp();
+        if (edisp == NULL) {
+            std::string msg = "No energy dispersion component found in "
+                              "the instrument response of CTA observation "
+                              "\""+cta->name()+"\". Please provide an "
+                              "instrument response that comprises an energy "
+                              "dispersion component.";
+            throw GException::invalid_value(G_FILL, msg);
+        }
+
+        // Get reference on pointing direction
+        const GSkyDir& pnt = cta->pointing().dir();
 
         // Announce observation usage
         if (log != NULL) {
@@ -539,22 +634,20 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
                 double theta = pnt.dist(dir);
 
                 // Loop over all energy bins
-                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+                for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin) {
 
-                    // Skip if pixel is not within observation energy boundaries
-                    if (!obs_ebounds.contains(m_ebounds.emin(iebin)+g_energy_margin,
-                                              m_ebounds.emax(iebin)-g_energy_margin)) {
+                    // Skip if energy is not within observation energy
+                    //  boundaries
+                    if (m_energies[iebin] < obs_emin ||
+                        m_energies[iebin] > obs_emax) {
                         continue;
                     }
 
-                    // Get source energy
-                    GEnergy obsEng = m_ebounds.elogmean(iebin);
-
-                    // Get LogE/Tev
-                    double logEobs = obsEng.log10TeV();
+                    // Get log10 of true energy in TeV
+                    double logEsrc = m_elogmeans[iebin];
 
                     // Compute exposure weight
-                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEobs) *
+                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
                                     cta->livetime();
 
                     // Accumulate weights
@@ -571,17 +664,18 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
                         	continue;
                         }
 
-                        // Compute true enrgy
-                        double logEsrc = logEobs - std::log10(migra);
+                        // Compute log10 of reconstructed energy in TeV
+                        double logEobs = std::log10(migra) - logEsrc;
 
                         // Set map index
                         int imap = offset(imigra, iebin);
 
-                        // Add on Edisp cube
-                        m_cube(pixel, imap) +=
-                            rsp->edisp(obsEng, theta, 0.0, 0.0, 0.0, logEsrc) * weight;
+                        // Add energy dispersion cube value
+                        m_cube(pixel, imap) += (*edisp)(logEobs, logEsrc,
+                                                        theta, 0.0,
+                                                        0.0, 0.0) * weight;
 
-                    } // endfor: looped over migra bins
+                    } // endfor: looped over migration bins
 
                 } // endfor: looped over energy bins
 
@@ -591,7 +685,7 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
 
     } // endfor: looped over observations
 
-    // Compute mean Edisp cube by dividing though the weights
+    // Compute mean energy dispersion cube by dividing through the weights
     for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
         for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
             if (exposure(pixel, iebin) > 0.0) {
@@ -610,22 +704,20 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
         }
     }
 
-    // Compile option: guarantee smooth Edisp
-    #if defined(G_SMOOTH_EDISP)
-    set_to_smooth();
-    #endif
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Read Edisp cube from FITS object
+ * @brief Read energy dispersion cube from FITS file
  *
- * @param[in] fits FITS object.
+ * @param[in] fits FITS file.
  *
- * Read the Edisp cube from a FITS object.
+ * Reads the energy dispersion cube from a FITS file. The energy dispersion
+ * cube values are expected in the primary extension of the FITS file, the
+ * true energy boundaries are expected in the "ENERGIES" extension, and the
+ * migration values are expected in the "MIGRAS" extension.
  ***************************************************************************/
 void GCTACubeEdisp::read(const GFits& fits)
 {
@@ -633,32 +725,21 @@ void GCTACubeEdisp::read(const GFits& fits)
     clear();
 
     // Get HDUs
-    const GFitsImage& hdu_psfcube = *fits.image("Primary");
-    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
-    const GFitsTable& hdu_migras  = *fits.table("MIGRAS");
+    const GFitsImage& hdu_edispcube = *fits.image("Primary");
+    const GFitsTable& hdu_ebounds   = *fits.table("ENERGIES");
+    const GFitsTable& hdu_migras    = *fits.table("MIGRAS");
 
-    // Read cube
-    m_cube.read(hdu_psfcube);
+    // Read energy dispersion cube
+    m_cube.read(hdu_edispcube);
 
-    // Read energy boundaries
-    m_ebounds.read(hdu_ebounds);
+    // Read true energy nodes
+    m_energies.read(hdu_ebounds);
 
-    // Read migra nodes
+    // Read migration nodes
     m_migras.read(hdu_migras);
 
-    // Set migra node array for computation
-    set_migra_axis();
-
-    // Set energy node array
-    set_eng_axis();
-
     // Compute true energy boundaries
-    compute_ebounds_src();
-
-    // Compile option: guarantee smooth Edisp
-    #if defined(G_SMOOTH_EDISP)
-    set_to_smooth();
-    #endif
+    compute_ebounds();
 
     // Return
     return;
@@ -666,21 +747,35 @@ void GCTACubeEdisp::read(const GFits& fits)
 
 
 /***********************************************************************//**
- * @brief Write CTA Edisp cube into FITS object.
+ * @brief Write energy dispersion cube into FITS file.
  *
- * @param[in] fits FITS object.
+ * @param[in] fits FITS file.
  *
- * Write the CTA Edisp cube into a FITS object.
+ * Write the energy dispersion cube into a FITS file. The energy dispersion
+ * cube values are written into the primary extension of the FITS file, the
+ * true energy boundaries are written into the "EBOUNDS" extension, and the
+ * migration values are written into the "MIGRAS" extension.
  ***************************************************************************/
 void GCTACubeEdisp::write(GFits& fits) const
 {
+    // Remove extensions from FITS file
+    if (fits.contains("MIGRAS")) {
+        fits.remove("MIGRAS");
+    }
+    if (fits.contains("ENERGIES")) {
+        fits.remove("ENERGIES");
+    }
+    if (fits.contains("Primary")) {
+        fits.remove("Primary");
+    }
+
     // Write cube
     m_cube.write(fits);
 
     // Write energy boundaries
-    m_ebounds.write(fits);
+    m_energies.write(fits, "ENERGIES");
 
-    // Write delta nodes
+    // Write migration nodes
     m_migras.write(fits, "MIGRAS");
 
     // Return
@@ -689,11 +784,12 @@ void GCTACubeEdisp::write(GFits& fits) const
 
 
 /***********************************************************************//**
- * @brief Load Edisp cube from FITS file
+ * @brief Load energy dispersion cube from FITS file
  *
- * @param[in] filename Performance table file name.
+ * @param[in] filename FITS file name.
  *
- * Loads the Edisp cube from a FITS file into the object.
+ * Loads the energy dispersion cube from a FITS file. See the read() method
+ * for information about the expected FITS file structure.
  ***************************************************************************/
 void GCTACubeEdisp::load(const GFilename& filename)
 {
@@ -715,12 +811,12 @@ void GCTACubeEdisp::load(const GFilename& filename)
 
 
 /***********************************************************************//**
- * @brief Save Edisp cube into FITS file
+ * @brief Save energy dispersion cube into FITS file
  *
- * @param[in] filename Edisp cube FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] filename FITS file name.
+ * @param[in] clobber Overwrite existing file?
  *
- * Save the Edisp cube into a FITS file.
+ * Save the energy dispersion cube into a FITS file.
  ***************************************************************************/
 void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
 {
@@ -742,35 +838,59 @@ void GCTACubeEdisp::save(const GFilename& filename, const bool& clobber) const
 
 
 /***********************************************************************//**
- * @brief Return true energy interval that contains the energy dispersion.
+ * @brief Return boundaries in true energy
  *
- * @param[in] dir Sky direction where intervals should be computed
- * @param[in] obsEng Reconstructed energy where intervals should be computed
+ * @param[in] obsEng Observed photon energy.
+ * @return Boundaries in true energy.
  *
- * Returns the band of true photon energies outside of which the energy
- * dispersion becomes negligible for a given observed energy @p obsEnd and
- * sky direction @p dir. An energy in considered negligible if inferior to
- * 1e-6.
+ * @exception GException::invalid_value
+ *            No energies defined for energy dispersion cube
+ *
+ * Returns the boundaries in true photon energies that enclose the energy
+ * disperson for a given observed photon energy @p obsEng.
  ***************************************************************************/
-GEbounds GCTACubeEdisp::ebounds_src(const GEnergy obsEng) const
+GEbounds GCTACubeEdisp::ebounds(const GEnergy& obsEng) const
 {
+    // Throw an exception if there are no energies
+    if (m_energies.is_empty()) {
+        std::string msg = "No energies defined for energy dispersion cube. "
+                          "Please define the energies before calling the "
+                          "method.";
+        throw GException::invalid_value(G_EBOUNDS, msg);
+    }
+
 	// If ebounds were not computed, before, compute them now
-	if (!m_ebounds_src_computed) {
-		compute_ebounds_src();
+	if (m_ebounds.empty()) {
+		compute_ebounds();
 	}
 
-	// Get index of observed energy in cube
-	int index = m_ebounds.index(obsEng);
+    // Return the index of the energy boundaries that are just below the
+    // observed energy. As the energy dispersion decreases with increasing
+    // energy we assure in that way that we integrate over a sufficiently
+    // large true energy range.
+    int index = 0;
+    if (obsEng > m_energies[0]) {
+        for (int i = 1; i < m_energies.size(); ++i) {
+            if (obsEng < m_energies[i]) {
+                break;
+            }
+            index++;
+        }
+        if (index >= m_energies.size()) {
+            index = m_energies.size();
+        }
+    }
 
 	// Return true energy boundaries
-	return m_ebounds_src[index];
+	return (m_ebounds[index]);
 }
 
+
 /***********************************************************************//**
- * @brief Print Edisp cube information
+ * @brief Print energy dispersion cube information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing Edisp cube information.
+ * @param[in] chatter Chattiness.
+ * @return String containing energy dispersion cube information.
  ***************************************************************************/
 std::string GCTACubeEdisp::print(const GChatter& chatter) const
 {
@@ -788,11 +908,11 @@ std::string GCTACubeEdisp::print(const GChatter& chatter) const
 
         // Append energy intervals
         if (m_ebounds.size() > 0) {
-            result.append("\n"+m_ebounds.print(chatter));
+            result.append("\n"+m_energies.print(chatter));
         }
         else {
-            result.append("\n"+gammalib::parformat("Energy intervals") +
-                          "not defined");
+            result.append("\n"+gammalib::parformat("Energies") +
+                          "Not defined");
         }
 
         // Append number of migra bins
@@ -834,10 +954,9 @@ void GCTACubeEdisp::init_members(void)
     // Initialise members
     m_filename.clear();
     m_cube.clear();
-    m_ebounds.clear();
+    m_energies.clear();
     m_elogmeans.clear();
     m_migras.clear();
-    m_migras_cache.clear();
 
     // Initialise cache
     m_inx1 = 0;
@@ -848,8 +967,7 @@ void GCTACubeEdisp::init_members(void)
     m_wgt2 = 0.0;
     m_wgt3 = 0.0;
     m_wgt4 = 0.0;
-    m_ebounds_src.clear();
-    m_ebounds_src_computed = false;
+    m_ebounds.clear();
    
     // Return
     return;
@@ -859,29 +977,27 @@ void GCTACubeEdisp::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube Edisp cube.
+ * @param[in] cube Energy dispersion cube.
  ***************************************************************************/
 void GCTACubeEdisp::copy_members(const GCTACubeEdisp& cube)
 {
     // Copy members
-    m_filename          = cube.m_filename;
-    m_cube              = cube.m_cube;
-    m_ebounds           = cube.m_ebounds;
-    m_elogmeans         = cube.m_elogmeans;
-    m_migras            = cube.m_migras;
-    m_migras_cache      = cube.m_migras_cache;
+    m_filename  = cube.m_filename;
+    m_cube      = cube.m_cube;
+    m_energies  = cube.m_energies;
+    m_elogmeans = cube.m_elogmeans;
+    m_migras    = cube.m_migras;
 
     // Copy cache
-    m_inx1 = cube.m_inx1;
-    m_inx2 = cube.m_inx2;
-    m_inx3 = cube.m_inx3;
-    m_inx4 = cube.m_inx4;
-    m_wgt1 = cube.m_wgt1;
-    m_wgt2 = cube.m_wgt2;
-    m_wgt3 = cube.m_wgt3;
-    m_wgt4 = cube.m_wgt4;
-    m_ebounds_src       = cube.m_ebounds_src;
-    m_ebounds_src_computed = cube.m_ebounds_src_computed;
+    m_inx1    = cube.m_inx1;
+    m_inx2    = cube.m_inx2;
+    m_inx3    = cube.m_inx3;
+    m_inx4    = cube.m_inx4;
+    m_wgt1    = cube.m_wgt1;
+    m_wgt2    = cube.m_wgt2;
+    m_wgt3    = cube.m_wgt3;
+    m_wgt4    = cube.m_wgt4;
+    m_ebounds = cube.m_ebounds;
 
     // Return
     return;
@@ -898,7 +1014,7 @@ void GCTACubeEdisp::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Clear all pixels in the Edisp cube
+ * @brief Clear all pixels in the energy dispersion cube
  ***************************************************************************/
 void GCTACubeEdisp::clear_cube(void)
 {
@@ -919,33 +1035,36 @@ void GCTACubeEdisp::clear_cube(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Update Edisp parameter cache
- *
- * @param[in] migra Fraction between reconstructed and true energy
- * @param[in] logE Log10 true photon energy (TeV). 
- *
- * This method updates the Edisp parameter cache.
- ***************************************************************************/
-void GCTACubeEdisp::update(const double& migra, const double& logE) const
-{
-    // Set node array for delta interpolation
-	m_migras_cache.set_value(migra);
 
+/***********************************************************************//**
+ * @brief Update energy dispersion cube indices and weights cache
+ *
+ * @param[in] migra Reconstructed over true energy.
+ * @param[in] logEsrc Log10 of true photon energy in TeV. 
+ *
+ * Updates the energy dispersion cube indices, stored in the members m_inx1,
+ * m_inx2, m_inx3, and m_inx4, and weights cache, stored in m_wgt1, m_wgt2,
+ * m_wgt3, and m_wgt4.
+ ***************************************************************************/
+void GCTACubeEdisp::update(const double& migra, const double& logEsrc) const
+{
     // Set node array for energy interpolation
-    m_elogmeans.set_value(logE);
+    m_elogmeans.set_value(logEsrc);
    
+    // Set node array for delta interpolation
+	m_migras.set_value(migra);
+
     // Set indices for bi-linear interpolation
-    m_inx1 = offset(m_migras_cache.inx_left(),  m_elogmeans.inx_left());
-    m_inx2 = offset(m_migras_cache.inx_left(),  m_elogmeans.inx_right());
-    m_inx3 = offset(m_migras_cache.inx_right(), m_elogmeans.inx_left());
-    m_inx4 = offset(m_migras_cache.inx_right(), m_elogmeans.inx_right());
+    m_inx1 = offset(m_migras.inx_left(),  m_elogmeans.inx_left());
+    m_inx2 = offset(m_migras.inx_left(),  m_elogmeans.inx_right());
+    m_inx3 = offset(m_migras.inx_right(), m_elogmeans.inx_left());
+    m_inx4 = offset(m_migras.inx_right(), m_elogmeans.inx_right());
 
     // Set weighting factors for bi-linear interpolation
-    m_wgt1 = m_migras_cache.wgt_left()  * m_elogmeans.wgt_left();
-    m_wgt2 = m_migras_cache.wgt_left()  * m_elogmeans.wgt_right();
-    m_wgt3 = m_migras_cache.wgt_right() * m_elogmeans.wgt_left();
-    m_wgt4 = m_migras_cache.wgt_right() * m_elogmeans.wgt_right();
+    m_wgt1 = m_migras.wgt_left()  * m_elogmeans.wgt_left();
+    m_wgt2 = m_migras.wgt_left()  * m_elogmeans.wgt_right();
+    m_wgt3 = m_migras.wgt_right() * m_elogmeans.wgt_left();
+    m_wgt4 = m_migras.wgt_right() * m_elogmeans.wgt_right();
 
     // Return
     return;
@@ -953,193 +1072,117 @@ void GCTACubeEdisp::update(const double& migra, const double& logE) const
 
 
 /***********************************************************************//**
- * @brief Set nodes for migra axis
- *
- * Set the migra axis nodes.
- *
- * @todo Check that none of the axis boundaries is non-positive.
- ***************************************************************************/
-void GCTACubeEdisp::set_migra_axis(void)
-{
-    // Initialise computation members
-    m_migras_cache.clear();
-
-    // use a linear binning
-	m_migras_cache.clear();
-	for (int i = 0; i < m_migras.size(); ++i) {
-		m_migras_cache.append(m_migras[i]);
-	}
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set nodes for a logarithmic (base 10) energy axis
- *
- *
- * Set axis nodes so that each node is the logarithmic mean of the lower and
- * upper energy boundary, i.e.
- * \f[ n_i = \log \sqrt{{\rm LO}_i \times {\rm HI}_i} \f]
- * where
- * \f$n_i\f$ is node \f$i\f$,
- * \f${\rm LO}_i\f$ is the lower bin boundary for bin \f$i\f$, and
- * \f${\rm HI}_i\f$ is the upper bin boundary for bin \f$i\f$.
- *
- * @todo Check that none of the axis boundaries is non-positive.
+ * @brief Set nodes for interpolation in true energy
  ***************************************************************************/
 void GCTACubeEdisp::set_eng_axis(void)
 {
-    // Get number of bins
-    int bins = m_ebounds.size();
-
     // Clear nodes
     m_elogmeans.clear();
 
-    // Compute nodes
-    for (int i = 0; i < bins; ++i) {
-     
-        // Append logE/TeV
-        m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());
-
-    }  // endfor: looped over energy bins
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Pad the last migra bins with zero
- *
- * Zero padding of the last delta bins assures that the Edisp goes to zero
- * without any step at the last migra value.
- ***************************************************************************/
-void GCTACubeEdisp::set_to_smooth(void)
-{
-    // Continue only if there are migra bins
-    if (m_migras.size() > 2) {
-
-        // Set first delta bin to value of second bin (capped Psf)
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
-            int isrc = offset(1, iebin);
-            int idst = offset(0, iebin);
-            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-                m_cube(pixel, idst) = m_cube(pixel, isrc);
-            }
-        }
+    // Set nodes
+    for (int i = 0; i < m_energies.size(); ++i) {
+        m_elogmeans.append(m_energies[i].log10TeV());
+    }
     
-        // Get index of last delta bin
-        int imigra = m_migras.size()-1;
-
-        // Pad mean Edisp with zeros in the last delta bin
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
-            int imap = offset(imigra, iebin);
-            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-                m_cube(pixel, imap) = 0.0;
-            }
-        }
-
-    } // endif: there were bins to pad
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Compute ebounds_src vector
+ * @brief Compute true energy boundary vector
  *
- * Computes for all reconstructed energy bins the energy boundaries of the true
- * energies covered by valid migration matrix elements. Only matrix elements
- * with values >= 1.0e-12 are considered as valid elements. In case that no
- * matrix elements are found of a given observed energy, the interval of true
- * energies will be set to [1 TeV, 1 TeV] (i.e. an empty interval).
+ * Computes for all energies of the energy dispersion cube the boundaries in
+ * true energy that encompass non-negligible migration matrix elements.
+ * Values >= 1.0e-12 are considered as non-negligible. In case that no matrix
+ * elements are found for a given energy, the interval of true energies will
+ * be set to [1 TeV, 1 TeV] (i.e. an empty interval).
  ***************************************************************************/
-void GCTACubeEdisp::compute_ebounds_src() const
+void GCTACubeEdisp::compute_ebounds() const
 {
-    // Clear ebounds_src vector
-    m_ebounds_src.clear();
-
-	// Initialise empty ebounds object
-	GEbounds ebounds;
-
-	// Initialise empty sky pixel (i.e. 0,0).
-	// Todo: we should think about the interface of this function:
-	// maybe it is more useful to also pass a GSkyDir for which the boundaries
-	// should be computed
-	GSkyPixel pixel = m_cube.inx2pix(0);
-
 	// Set epsilon
 	const double eps = 1.0e-12;
 
-	for (int i = 0; i < m_ebounds.size(); i++) {
+    // Clear energy boundary vector
+    m_ebounds.clear();
+
+    // Loop over all energies
+	for (int i = 0; i < m_energies.size(); i++) {
 
 		// Initialise results
 		double migra_min = 0.0;
 		double migra_max = 0.0;
-		bool   minFound   = false;
-		bool   maxFound   = false;
-
-		// Get mean energy
-		GEnergy obsEng = m_ebounds.elogmean(i);
+		bool   minFound  = false;
+		bool   maxFound  = false;
 
 		// Compute map of sky ranges to be considered
-		int mapmin  = m_migras.size() * i;
+		int mapmin = m_migras.size() * i;
 		int mapmax = m_migras.size() * (i + 1);
 
 		// Loop over sky map entries from lower migra
 		for (int imap = mapmin; imap < mapmax; ++imap) {
 
-			// Get PDF term
-			double edisp = m_cube(pixel, imap);
+			// Get maximum energy dispersion term for all sky pixels
+            double edisp = 0.0;
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+                double value = m_cube(pixel, imap);
+                if (value > edisp) {
+                    edisp = value;
+                }
+            }
 
-			// Find first non-negligible PDF term
+			// Find first non-negligible energy dispersion term
 			if (edisp >= eps) {
-				minFound   = true;
+				minFound  = true;
 				migra_min = m_migras[imap - mapmin];
 				break;
 			}
+
 		} // endfor: loop over maps
 
 		// Loop over sky map entries from high migra
-		for (int imap = mapmax - 1; imap <= mapmin; --imap) {
+		for (int imap = mapmax-1; imap <= mapmin; --imap) {
 
-			// Get PDF term
-			double edisp = m_cube(pixel, imap);
+			// Get maximum energy dispersion term for all sky pixels
+            double edisp = 0.0;
+            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+                double value = m_cube(pixel, imap);
+                if (value > edisp) {
+                    edisp = value;
+                }
+            }
 
-			// Find first non-negligible PDF term
+			// Find first non-negligible energy dispersion term
 			if (edisp >= eps) {
-				maxFound   = true;
+				maxFound  = true;
 				migra_max = m_migras[imap - mapmin];
 				break;
 			}
+
 		} // endfor: loop over maps
 
-		// Initialise src energies
+		// Initialise energy boundaries
 		GEnergy emin;
 		GEnergy emax;
 
-		// Compute energy boundaries if they were found and if are valid
-		if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 && migra_max > migra_min) {
-			emax = obsEng / migra_min;
-			emin  = obsEng / migra_max;
+		// Compute energy boundaries if they were found and if they are
+        // valid
+		if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 &&
+            migra_max > migra_min) {
+			emax = m_energies[i] / migra_min;
+			emin = m_energies[i] / migra_max;
 		}
+    
+        // ... otherwise we set the interval to a zero interval for safety
 		else {
-
-			 // If we did not find boundaries or migra values were invalid
-			// then set the interval to a zero interval for safety
-			emin .log10TeV(0.0);
+			emin.log10TeV(0.0);
 			emax.log10TeV(0.0);
 		}
 
 		// Append energy boundaries
-		m_ebounds_src.push_back(GEbounds(emin, emax));
-	}
+		m_ebounds.push_back(GEbounds(emin, emax));
 
-	// Set flag to signal that true energy boundaries have been computed
-	m_ebounds_src_computed = true;
+	} // endfor: looped over all energies
 
     // Return
     return;

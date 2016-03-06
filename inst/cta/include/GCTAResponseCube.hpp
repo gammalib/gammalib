@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.hpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -92,7 +92,7 @@ public:
                                    const GEnergy&      obsEng,
                                    const GTime&        obsTime,
                                    const GObservation& obs) const;
-    virtual GEbounds          ebounds(const GEnergy& obsEnergy) const;
+    virtual GEbounds          ebounds(const GEnergy& obsEng) const;
     virtual void              read(const GXmlElement& xml);
     virtual void              write(GXmlElement& xml) const;
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
@@ -141,13 +141,17 @@ private:
     GCTACubeExposure   m_exposure;    //!< Exposure cube
     GCTACubePsf        m_psf;         //!< Mean point spread function
     GCTACubeBackground m_background;  //!< Background cube
-    GCTACubeEdisp    m_edisp; //!< Energy dispersion cube
+    GCTACubeEdisp      m_edisp;       //!< Energy dispersion cube
     mutable bool       m_apply_edisp; //!< Apply energy dispersion
-    mutable bool       m_has_edisp; //!< Flag to indicate if energy dispersion is available
+    mutable bool       m_has_edisp;   //!< Flag to indicate if energy
+                                      //   dispersion is available
 
     // Response cache
-    mutable std::vector<GCTACubeSource*> m_cache; //!< Response cache
-    mutable GNodeArray m_diffuse_logE;// diffuse energy bounds computation cache
+    mutable std::vector<GCTACubeSource*> m_cache;        //!< Response cache
+    mutable GNodeArray                   m_diffuse_logE; //!< Diffuse energy
+                                                         //   bounds
+                                                         //   computation
+                                                         //   cache
 };
 
 
@@ -287,7 +291,7 @@ void GCTAResponseCube::psf(const GCTACubePsf& psf)
 inline
 void GCTAResponseCube::edisp(const GCTACubeEdisp& edisp)
 {
-    m_edisp = edisp;
+    m_edisp     = edisp;
     m_has_edisp = true;
     return;
 }

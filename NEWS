@@ -276,6 +276,10 @@ optionally specified extension in the format [EVENTS;GTI] into an events and a
 Good Time Intervals extension name. These changes satisfy the feature request
 #1598.
 
+Add GCTACubeEdisp class that computes the mean energy dispersion for a stacked
+analysis. This class is now used in GCTAResponseCube to take into account the
+energy dispersion is a stacked analysis (#1721).
+
 
 21. COMPTEL interface
 ---------------------

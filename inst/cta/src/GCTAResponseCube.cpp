@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAResponseCube.cpp - CTA cube analysis response function class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2014-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -181,7 +181,7 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
  **************************************************************************/
 GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
                                    const GCTACubePsf&        psf,
-								   const GCTACubeEdisp&  edisp,
+								   const GCTACubeEdisp&      edisp,
                                    const GCTACubeBackground& background) :
                   GCTAResponse()
 {
@@ -189,9 +189,9 @@ GCTAResponseCube::GCTAResponseCube(const GCTACubeExposure&   exposure,
     init_members();
 
     // Set members
-    m_exposure = exposure;
-    m_psf      = psf;
-    m_edisp = edisp;
+    m_exposure   = exposure;
+    m_psf        = psf;
+    m_edisp      = edisp;
     m_background = background;
 
     // Signal that edisp is available
@@ -331,9 +331,6 @@ double GCTAResponseCube::irf(const GEvent&       event,
     // Get maximum angular separation for PSF (in radians)
     double delta_max = psf().delta_max();
 
-    // Determine fraction of reconstructed and true energy
-    double migra = obsEng.TeV() / srcEng.TeV();
-
     // Initialise IRF value
     double irf = 0.0;
 
@@ -355,6 +352,9 @@ double GCTAResponseCube::irf(const GEvent&       event,
 
             // Multiply-in energy dispersion
             if (use_edisp() && irf > 0.0) {
+
+                // Determine fraction of reconstructed and true energy
+                double migra = obsEng.TeV() / srcEng.TeV();
 
 				// Multiply-in energy dispersion
 				irf *= edisp()(srcDir, migra, srcEng);
@@ -474,13 +474,13 @@ double GCTAResponseCube::nroi(const GModelSky&    model,
 /***********************************************************************//**
  * @brief Return true energy boundaries for a specific observed energy
  *
- * @param[in] obsEnergy Observed Energy.
- * @return True energy boundaries for given observed energy.
+ * @param[in] obsEng Observed photon energy.
+ * @return Boundaries in true energy.
  ***************************************************************************/
-GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
+GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEng) const
 {
 	// Get energy boundaries from energy dispersion
-	GEbounds ebounds = m_edisp.ebounds_src(obsEnergy);
+	GEbounds ebounds = m_edisp.ebounds(obsEng);
 
     // Return energy boundaries
     return ebounds;
@@ -492,13 +492,15 @@ GEbounds GCTAResponseCube::ebounds(const GEnergy& obsEnergy) const
  *
  * @param[in] xml XML element.
  *
- * Reads response information from an XML element. The Exposure, Psf and
- * background cubes are specified using
+ * Reads response information from an XML element. The Exposure, Psf,
+ * background cubes, and optionally the energy dispersion cube, are specified
+ * using
  *
  *      <observation name="..." id="..." instrument="...">
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="EdispCube"    file="..."/>
  *        <parameter name="BkgCube"      file="..."/>
  *      </observation>
  *
@@ -527,12 +529,9 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 
     // Optionally load energy dispersion cube
     if (gammalib::xml_has_par(xml, "EdispCube")) {
-		// Get Edisp cube information and load cube
 		const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
 		std::string        edispname = gammalib::strip_whitespace(edisppar->attribute("file"));
 		m_edisp.load(edispname);
-
-		// Signal that energy dispersion is available
 		m_has_edisp = true;
     }
 
@@ -547,12 +546,14 @@ void GCTAResponseCube::read(const GXmlElement& xml)
  * @param[in] xml XML element.
  *
  * Writes response information into an XML element. The Exposure, Psf
- * and background cubes are specified using
+ * and background cubes, and optionally the energy dispersion cube, are
+ * specified using
  *
  *      <observation name="..." id="..." instrument="...">
  *        ...
  *        <parameter name="ExposureCube" file="..."/>
  *        <parameter name="PsfCube"      file="..."/>
+ *        <parameter name="EdispCube"    file="..."/>
  *        <parameter name="BkgCube"      file="..."/>
  *      </observation>
  *
@@ -573,8 +574,8 @@ void GCTAResponseCube::write(GXmlElement& xml) const
         par->attribute("file", filename);
     }
 
+    // Optionally add energy dispersions cube filename
     if (m_has_edisp) {
-		// Add energy dispersions cube filename
 		filename = gammalib::strip_whitespace(m_edisp.filename());
 		if (!(filename.empty())) {
 			GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
@@ -631,7 +632,7 @@ std::string GCTAResponseCube::print(const GChatter& chatter) const
         // Append point spread function information
         result.append("\n"+m_psf.print(chatter));
 
-        // Append energy dispersion information
+        // Optionally append energy dispersion information
         if (m_has_edisp) {
 			result.append("\n"+m_edisp.print(chatter));
         }
@@ -663,7 +664,7 @@ void GCTAResponseCube::init_members(void)
     m_edisp.clear();
     m_background.clear();
     m_apply_edisp = false;
-    m_has_edisp = false;
+    m_has_edisp   = false;
 
     // Initialise cache
     m_cache.clear();
@@ -686,7 +687,7 @@ void GCTAResponseCube::copy_members(const GCTAResponseCube& rsp)
     m_edisp       = rsp.m_edisp;
     m_background  = rsp.m_background;
     m_apply_edisp = rsp.m_apply_edisp;
-    m_has_edisp = rsp.m_has_edisp;
+    m_has_edisp   = rsp.m_has_edisp;
 
     // Copy cache
     for (int i = 0; i < rsp.m_cache.size(); ++i) {
@@ -1460,52 +1461,20 @@ double GCTAResponseCube::irf_diffuse(const GEvent&       event,
 
     } // endelse: there was a cache entry for this model
 
+    // If energy dispersion is available then compute IRF using the true
+    // photon energy and multiply in the energy dispersion ...
     if (use_edisp()) {
-
-		// Get array of log10TeV energies of cached diffuse model
-		const GNodeArray& logE = cache->nodes();
-
-		// Get true energy
-		GEnergy srcEng = source.energy();
-
-		// Continue only if there is energy information for the map cube
-		if (logE.size() > 0) {
-
-		  // Set energy for interpolation in log-energy
-		  logE.set_value(srcEng.log10TeV());
-
-		  // Compute map cube intensity for the left and right map
-		  double left_intensity  = cache->irf(bin->ipix(), logE.inx_left());
-		  double right_intensity = cache->irf(bin->ipix(), logE.inx_right());
-
-		  // Perform log-log interpolation
-		  if (left_intensity > 0.0 && right_intensity > 0.0) {
-			  double log_intensity = logE.wgt_left()  * std::log10(left_intensity) +
-					  logE.wgt_right() * std::log10(right_intensity);
-			  irf = std::pow(10.0, log_intensity);
-		  }
-		  else if (left_intensity > 0.0) {
-			  irf = left_intensity;
-		  }
-		  else if (right_intensity > 0.0) {
-			  irf = right_intensity;
-		  }
-
-		} // endif: energy information was available
-
-		// Multiply-in energy dispersion
+    	irf = cache->irf(bin->ipix(), source.energy());
 		if (irf > 0.0) {
-			irf *= edisp()(bin->dir().dir(), bin->energy().TeV() / srcEng.TeV(), srcEng);
+			irf *= edisp()(bin->dir().dir(), bin->energy()/source.energy(),
+                           source.energy());
 		}
+    }
 
-    } // endif: energy dispersion was available
-
+    // ... otherwise compute the IRF at the observed energy
     else {
-
-    	// Compute irf value without energy dispersion
     	irf = cache->irf(bin->ipix(), bin->ieng());
-
-    } // endelse: energy dispersion was not available
+    }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
