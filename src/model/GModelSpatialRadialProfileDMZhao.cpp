@@ -34,6 +34,7 @@
 #include "GXmlElement.hpp"
 #include "GModelSpatialRadialProfileDMZhao.hpp"
 #include "GModelSpatialRegistry.hpp"
+#include <iomanip>
 
 /* __ Constants __________________________________________________________ */
 
@@ -531,6 +532,8 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
 
     // Compute value
     value = integral.romberg( bounds ) ;
+    
+    //std::cout << "  theta=" << theta << "  profile_value=" << value << std::endl;
 
     // Return value
     return value;
@@ -542,7 +545,8 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
  * @param[in] distance from observer to point in space (meters)
  *
  * Computes the value of a zhao halo density profile squared, 
- * at distance l from observer, at angle \f[\theta\f] from the halo center:
+ * at distance l from observer, at angle \f[\theta\f] from the halo center,
+ * with a halo posessing a scale radius of \f[r_s\f] :
  * 
  * \f[
  *    f(\theta, l) = \frac{1}{ g^{\gamma} {\left( g^{\alpha} + 1 \right)}^{ \frac{\beta-\gamma}{\alpha} } }
@@ -554,10 +558,15 @@ double GModelSpatialRadialProfileDMZhao::profile_value(const double& theta) cons
  *    g = \frac{ \sqrt{l^2+d^2-2ldCos(\theta)} }{r_s}
  * \f]
  *
+ * \f[ \beta \f] is the slope of the density at radii much bigger than \f[r_s\f]
+ * \f[ \gamma \f] is the slope of the density profile at radii much smaller than \f[r_s\f]
+ * \f[ \alpha \f] governs how large the transition region is between these two slopes.
+ *   larger \f[ \alpha \f] means a smaller transition region.
+ *
  * This profile is detailed in:
  *   Zhao, 1996
  *   "Analytical models for galactic nuclei"
- *   Mon. Not. R. Astron. Soc. 278, 488-49
+ *   Monthly Notices of the Royal Astronomical Society, 278, 488-49
  *   http://mnras.oxfordjournals.org/content/278/2/488.short
  *
  * @return unit
@@ -584,6 +593,8 @@ double GModelSpatialRadialProfileDMZhao::halo_kernel_los::eval( const double &lo
   // would just be f if it was decaying dm
   f = f * f ;
   
+  //std::cout << std::setprecision(10) << "kern_los::eval  los=" << los << "  hd=" << m_halo_distance << "  theta=" << m_theta << "  alpha=" << m_alpha << "  beta=" << m_beta << "  gamma=" << m_gamma << "  g=" << g << "  f=" << f << std::endl ;
+  
   return f;
 
 }
@@ -609,4 +620,9 @@ void GModelSpatialRadialProfileDMZhao::update() const
     m_mass_radius = 10.0 * scale_radius() ;
 
   }
+}
+
+double GModelSpatialRadialProfileDMZhao::prof_val( const double& theta )
+{
+  return this->profile_value(theta) ;
 }
