@@ -54,6 +54,12 @@ public:
     virtual double                           theta_max(void) const;
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
+    
+    // other methods
+    double scale_radius(void) const ;
+    void   scale_radius(const double& scale_radius ) ;
+    //double prof_val(const double& theta) ;
+
 };
 
 

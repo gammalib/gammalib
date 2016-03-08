@@ -34,6 +34,7 @@
 #include "GXmlElement.hpp"
 #include "GModelSpatialRadialProfileDMEinasto.hpp"
 #include "GModelSpatialRegistry.hpp"
+#include <iomanip>
 
 /* __ Constants __________________________________________________________ */
 
@@ -499,6 +500,8 @@ double GModelSpatialRadialProfileDMEinasto::profile_value(const double& theta) c
     
     // Compute value
     value = integral.romberg( bounds ) ;
+    
+    std::cout << "profile_value=" << value << std::endl;
 
     // Return value
     return value;
@@ -555,6 +558,8 @@ double GModelSpatialRadialProfileDMEinasto::halo_kernel_los::eval( const double 
   // squared, for annihilating dm
   // would just be f if it was decaying dm
   f = f * f ;
+
+  //std::cout << "kernel::eval  los=" << los << "  theta=" << m_theta << "  d=" << m_halo_distance << "  rs=" << m_scale_radius << "  alpha=" << m_alpha << "  g=" << g << "  f=" << std::setprecision(12)<< f << std::endl;
   
   return f;
 
@@ -582,3 +587,8 @@ void GModelSpatialRadialProfileDMEinasto::update() const
 
   }
 }
+
+//double GModelSpatialRadialProfileDMEinasto::prof_val(const double& theta )
+//{
+  //return this->profile_value( theta ) ;
+//}
