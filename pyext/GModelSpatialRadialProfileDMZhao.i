@@ -35,7 +35,7 @@
  * @brief Radial DM Einasto profile source model class
  *
  * This class implements the spatial component of the factorised source
- * model for a Dark Matter Einasto halo radial profile.
+ * model for a Dark Matter Zhao halo radial profile.
  ***************************************************************************/
 class GModelSpatialRadialProfileDMZhao : public GModelSpatialRadialProfile {
 
@@ -54,6 +54,7 @@ public:
     virtual double                           theta_max(void) const;
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
+    double prof_val(const double& theta ) ;
 };
 
 
