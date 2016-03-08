@@ -89,6 +89,7 @@ public:
     // Other methods
     double scale_radius(void) const ;
     void   scale_radius(const double& scale_radius ) ;
+    double prof_val(const double& theta ) ;
 
 protected:
     // Protected methods

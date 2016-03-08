@@ -34,6 +34,7 @@
 #include "GXmlElement.hpp"
 #include "GModelSpatialRadialProfileDMZhao.hpp"
 #include "GModelSpatialRegistry.hpp"
+#include <iomanip>
 
 /* __ Constants __________________________________________________________ */
 
@@ -850,12 +851,18 @@ double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
   // would just be f if it was decaying dm
   f = f * f ;
   
+<<<<<<< HEAD
   // loop over different radii in the profile
   for (int i = 0; i < npoints; ++i) {
 
       // integration:  Int[ profile(r) * r * dr ]
       r        = minradian + (i * dr);
       jfactor += profile_value(r) * r * dr;
+=======
+  //std::cout << std::setprecision(10) << "kern_los::eval  los=" << los << "  hd=" << m_halo_distance << "  theta=" << m_theta << "  alpha=" << m_alpha << "  beta=" << m_beta << "  gamma=" << m_gamma << "  g=" << g << "  f=" << f << std::endl ;
+  
+  return f;
+>>>>>>> added several functions and couts to check values
 
   }
   
@@ -886,4 +893,9 @@ void GModelSpatialRadialProfileDMZhao::update() const
     m_mass_radius = 10.0 * scale_radius() ;
 
   }
+}
+
+double GModelSpatialRadialProfileDMZhao::prof_val( const double& theta )
+{
+  return this->profile_value(theta) ;
 }
