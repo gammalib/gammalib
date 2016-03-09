@@ -241,6 +241,11 @@ double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
       theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
     }
     
+    // always chose the lesser of ( mass_radius theta, theta_max )
+    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
+      theta = m_theta_max.value() * gammalib::deg2rad ;
+    }
+    
     // Return value
     return theta ;
 }
@@ -285,6 +290,9 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
     const GXmlElement* par2 = gammalib::xml_get_par(G_READ, xml, "Halo Distance");
     m_halo_distance.read(*par2);
 
+    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_halo_distance.read(*par3);
+
     // Return
     return;
 }
@@ -316,6 +324,10 @@ void GModelSpatialRadialProfileDMBurkert::write(GXmlElement& xml) const
     // Write Halo Distance parameter
     GXmlElement* par2 = gammalib::xml_need_par(G_WRITE, xml, "Halo Distance");
     m_halo_distance.write(*par2);
+
+    // Write Halo Distance parameter
+    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_halo_distance.write(*par3);
 
     // Return
     return;
@@ -387,9 +399,21 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     m_halo_distance.gradient(0.0);
     m_halo_distance.has_grad(false);  // Radial components never have gradients
 
+    // Initialise theta max 
+    m_theta_max.clear();
+    m_theta_max.name("Theta Max");
+    m_theta_max.unit("degrees");
+    m_theta_max.value( 180.0 ); // can only go from halo center to opposite halo center
+    m_theta_max.min(1.0e-6); // arbitrarily chosen
+    m_theta_max.fix(); // should always be fixed!
+    m_theta_max.scale(1.0);
+    m_theta_max.gradient(0.0);
+    m_theta_max.has_grad(false);  // Radial components never have gradients
+
     // Set parameter pointer(s)
     m_pars.push_back(&m_scale_radius );
     m_pars.push_back(&m_halo_distance);
+    m_pars.push_back(&m_theta_max    );
     
     // Initialize precomputation cache. Note that zero values flag
     // uninitialised, as a zero radius is not meaningful
@@ -415,6 +439,7 @@ void GModelSpatialRadialProfileDMBurkert::copy_members(const GModelSpatialRadial
     // before. Otherwise we would have sigma twice on the stack.
     m_scale_radius  = model.m_scale_radius  ;
     m_halo_distance = model.m_halo_distance ;
+    m_theta_max     = model.m_theta_max     ;
 
     // copy cache values
     m_last_scale_radius = model.m_last_scale_radius ;

@@ -109,9 +109,10 @@ protected:
     // Protected members
     GModelPar m_scale_radius  ; //!< scale radius of halo profile
     GModelPar m_halo_distance ; //!< distance from earth to halo center
-    GModelPar m_alpha         ; //!< spatial power index
-    GModelPar m_beta          ; //!< spatial power index
-    GModelPar m_gamma         ; //!< spatial power index
+    GModelPar m_alpha         ; //!< power index, inverse transition region width
+    GModelPar m_beta          ; //!< power index, slope at >> m_scale_radius
+    GModelPar m_gamma         ; //!< power index, slope at << m_scale_radius
+    GModelPar m_theta_max     ; //!< theta max
 
     mutable double m_last_scale_radius ;
     mutable double m_mass_radius ;

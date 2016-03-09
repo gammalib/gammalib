@@ -97,6 +97,7 @@ protected:
     } ;
 
     // Protected members
+    GModelPar m_theta_max     ; //!< maximum theta angle
     GModelPar m_scale_radius  ; //!< scale radius of halo profile
     GModelPar m_halo_distance ; //!< distance from earth to halo center
     
