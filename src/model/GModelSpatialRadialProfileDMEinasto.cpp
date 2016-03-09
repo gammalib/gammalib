@@ -240,6 +240,11 @@ double GModelSpatialRadialProfileDMEinasto::theta_max(void) const
     } else {
       theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
     }
+
+    // always chose the lesser of ( mass_radius theta, theta_max )
+    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
+      theta = m_theta_max.value() * gammalib::deg2rad ;
+    }
     
     // Return value
     return theta ;
@@ -288,6 +293,9 @@ void GModelSpatialRadialProfileDMEinasto::read(const GXmlElement& xml)
     const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Alpha");
     m_alpha.read(*par3);
 
+    const GXmlElement* par4 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_alpha.read(*par4);
+
     // Return
     return;
 }
@@ -323,6 +331,10 @@ void GModelSpatialRadialProfileDMEinasto::write(GXmlElement& xml) const
     // Write Alpha parameter
     GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Alpha");
     m_alpha.write(*par3);
+
+    // Write Alpha parameter
+    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_alpha.write(*par4);
 
     // Return
     return;
@@ -406,10 +418,22 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_alpha.gradient(0.0);
     m_alpha.has_grad(false);  // Radial components never have gradients
 
+    // Initialise theta max 
+    m_theta_max.clear();
+    m_theta_max.name("Theta Max");
+    m_theta_max.unit("degrees");
+    m_theta_max.value( 180.0 ); // can only go from halo center to opposite halo center
+    m_theta_max.min(1.0e-6); // arbitrarily chosen
+    m_theta_max.fix(); // should always be fixed!
+    m_theta_max.scale(1.0);
+    m_theta_max.gradient(0.0);
+    m_theta_max.has_grad(false);  // Radial components never have gradients
+
     // Set parameter pointer(s)
     m_pars.push_back(&m_scale_radius );
     m_pars.push_back(&m_halo_distance);
     m_pars.push_back(&m_alpha        );
+    m_pars.push_back(&m_theta_max    );
     
     // Initialize precomputation cache. Note that zero values flag
     // uninitialised, as a zero radius is not meaningful
@@ -433,9 +457,10 @@ void GModelSpatialRadialProfileDMEinasto::copy_members(const GModelSpatialRadial
     // Copy members. We do not have to push back the members on the parameter
     // stack as this should have been done by init_members() that was called
     // before. Otherwise we would have sigma twice on the stack.
-    m_scale_radius  = model.m_scale_radius ;
+    m_scale_radius  = model.m_scale_radius  ;
     m_halo_distance = model.m_halo_distance ;
-    m_alpha         = model.m_alpha   ;
+    m_alpha         = model.m_alpha         ;
+    m_theta_max     = model.m_theta_max     ;
 
     // copy cache values
     m_last_scale_radius = model.m_last_scale_radius ;
