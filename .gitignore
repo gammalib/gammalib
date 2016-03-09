@@ -36,6 +36,8 @@ m4/lt~obsolete.m4
 *.dvi
 *.idx
 *.out
+*.gcda
+*.gcno
 .DS_Store
 .libs
 .deps
@@ -83,6 +85,7 @@ test/*.xml
 test/reports/*.xml
 test/*.trs
 test/region.reg
+test/test_python.sh
 
 examples/python/*.xml
 examples/python/*.html

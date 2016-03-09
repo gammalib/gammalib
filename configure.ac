@@ -1016,6 +1016,32 @@ fi
 
 
 #############################################################################
+# Checks for coverage option                                                #
+#############################################################################
+# Initialise Python coverage with empty string
+PYTHON_COVERAGE=
+
+# Check for coverage option
+AC_MSG_CHECKING(whether to build GammaLib for code coverage measure)
+AC_ARG_ENABLE([coverage],
+              AS_HELP_STRING([--enable-coverage],
+                             [turn on code coverage measure [default=no]]),
+              [enable_coverage="$enableval"],
+              [enable_coverage="no"])
+if test "x$enable_coverage" = "xyes"; then
+  CXXFLAGS="--coverage $CXXFLAGS"
+  LDFLAGS="--coverage $LDFLAGS"
+  if test "x$has_python" = "xyes"; then
+    PYTHON_COVERAGE="coverage run --append "
+  fi
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+AC_SUBST(PYTHON_COVERAGE)
+
+
+#############################################################################
 # Initialise directory path for test environment                            #
 #############################################################################
 TEST_ENV_DIR=
@@ -1365,11 +1391,13 @@ AC_CONFIG_FILES([Makefile
                  src/gammalib-setup
                  include/Makefile
                  test/Makefile
+                 test/test_python.sh
                  pyext/Makefile
                  pyext/setup.py
                  gammalib.pc
                  testconf.sh],
-                [if test -f testconf.sh; then chmod +x testconf.sh; fi])
+                [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;
+                 if test -f testconf.sh; then chmod +x testconf.sh; fi])
 
 if test "x$with_inst" = "xyes"; then
   AC_CONFIG_FILES([inst/Makefile])

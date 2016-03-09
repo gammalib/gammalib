@@ -76,7 +76,8 @@ dynamic-analysis: coverage valgrind
 # Add cppcheck rule
 cppcheck:
 	@if type cppcheck >/dev/null 2>&1; then \
-		cppcheck -v --enable=all --xml --suppress=missingIncludeSystem \
+		cppcheck -v --enable=all --xml --xml-version=2 \
+        --suppress=missingIncludeSystem \
 		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
 		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
 	else \
@@ -104,9 +105,15 @@ cppncss:
 # Add coverage rule
 coverage:
 	@if type gcovr >/dev/null 2>&1; then \
-		gcovr -r . -x -o gcovr-reports-data.xml; \
+		gcovr -r . -x -o coverage-report-cxx.xml; \
 	else \
 		echo "gcovr script not found in PATH."; \
+	fi; \
+	if type coverage >/dev/null 2>&1; then \
+	    export COVERAGE_FILE=test/.coverage; \
+		coverage xml -o coverage-report-python.xml; \
+	else \
+		echo "coverage script not found in PATH."; \
 	fi
 
 # Add Valgrind rule
