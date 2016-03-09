@@ -260,6 +260,11 @@ double GModelSpatialRadialProfileDMEinasto::theta_max(void) const
     if (m_theta_max.value() * gammalib::deg2rad < theta) {
         theta = m_theta_max.value() * gammalib::deg2rad;
     }
+
+    // always chose the lesser of ( mass_radius theta, theta_max )
+    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
+      theta = m_theta_max.value() * gammalib::deg2rad ;
+    }
     
     // Return value
     return theta;
@@ -324,6 +329,9 @@ void GModelSpatialRadialProfileDMEinasto::read(const GXmlElement& xml)
     const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
     m_core_radius.read(*par7);
 
+    const GXmlElement* par4 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_alpha.read(*par4);
+
     // Return
     return;
 }
@@ -375,6 +383,10 @@ void GModelSpatialRadialProfileDMEinasto::write(GXmlElement& xml) const
     // Write Core Radius parameter
     GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
     m_core_radius.write(*par7);
+
+    // Write Alpha parameter
+    GXmlElement* par4 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_alpha.write(*par4);
 
     // Return
     return;

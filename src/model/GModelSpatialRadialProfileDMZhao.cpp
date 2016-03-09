@@ -260,6 +260,11 @@ double GModelSpatialRadialProfileDMZhao::theta_max(void) const
     if (m_theta_max.value() * gammalib::deg2rad < theta) {
         theta = m_theta_max.value() * gammalib::deg2rad;
     }
+
+    // always chose the lesser of ( mass_radius theta, theta_max )
+    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
+      theta = m_theta_max.value() * gammalib::deg2rad ;
+    }
     
     // Return value
     return theta;
@@ -335,6 +340,10 @@ void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
     const GXmlElement* par9 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
     m_core_radius.read(*par9);
 
+    // Read Theta Max parameter
+    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_gamma.read(*par6);
+
     // Return
     return;
 }
@@ -402,6 +411,10 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
     // Write Gamma parameter
     GXmlElement* par5 = gammalib::xml_need_par(G_WRITE, xml, "Gamma");
     m_gamma.write(*par5);
+
+    // Write Theta Max parameter
+    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_gamma.write(*par6);
 
     // Return
     return;
@@ -851,18 +864,12 @@ double GModelSpatialRadialProfileDMZhao::jfactor( const double& angle ) const
   // would just be f if it was decaying dm
   f = f * f ;
   
-<<<<<<< HEAD
   // loop over different radii in the profile
   for (int i = 0; i < npoints; ++i) {
 
       // integration:  Int[ profile(r) * r * dr ]
       r        = minradian + (i * dr);
       jfactor += profile_value(r) * r * dr;
-=======
-  //std::cout << std::setprecision(10) << "kern_los::eval  los=" << los << "  hd=" << m_halo_distance << "  theta=" << m_theta << "  alpha=" << m_alpha << "  beta=" << m_beta << "  gamma=" << m_gamma << "  g=" << g << "  f=" << f << std::endl ;
-  
-  return f;
->>>>>>> added several functions and couts to check values
 
   }
   

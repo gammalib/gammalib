@@ -266,6 +266,11 @@ double GModelSpatialRadialProfileDMBurkert::theta_max(void) const
       theta = std::atan( m_mass_radius / m_halo_distance.value() ) ;
     }
     
+    // always chose the lesser of ( mass_radius theta, theta_max )
+    if ( m_theta_max.value() * gammalib::deg2rad < theta ) {
+      theta = m_theta_max.value() * gammalib::deg2rad ;
+    }
+    
     // Return value
     return theta;
 }
@@ -322,6 +327,9 @@ void GModelSpatialRadialProfileDMBurkert::read(const GXmlElement& xml)
     const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
     m_core_radius.read(*par6);
 
+    const GXmlElement* par3 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_halo_distance.read(*par3);
+
     // Return
     return;
 }
@@ -372,6 +380,10 @@ void GModelSpatialRadialProfileDMBurkert::write(GXmlElement& xml) const
     // Write Core Radius parameter
     GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Core Radius");
     m_core_radius.write(*par6);
+
+    // Write Halo Distance parameter
+    GXmlElement* par3 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_halo_distance.write(*par3);
 
     // Return
     return;
