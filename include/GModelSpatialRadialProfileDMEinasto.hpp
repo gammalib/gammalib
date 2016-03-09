@@ -104,6 +104,7 @@ protected:
     GModelPar m_scale_radius  ; //!< scale radius of halo profile
     GModelPar m_halo_distance ; //!< distance from earth to halo center
     GModelPar m_alpha         ; //!< einasto spatial power index
+    GModelPar m_theta_max     ; //!< maximum theta angle
     
     // Cached members used for pre-computation
     mutable double m_last_scale_radius ;

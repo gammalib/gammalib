@@ -34,6 +34,7 @@
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
 #include "GModelSpatialRadialProfile.hpp"
+#include <iomanip>
 
 /* __ Constants __________________________________________________________ */
 
@@ -412,7 +413,13 @@ int GModelSpatialRadialProfile::cache_index(void) const
         for (int j = 0; j < m_num_nodes; ++j) {
             double value = profile_value(r);
             double mc    = value * std::sin(r) * dr;
-            std::cout << "  j=" << j << "  r=" << r << "  value=" << value << "  mc=" << mc << std::endl;
+            std::cout << "  j=" << j << "  r=" << r << "  (deg=" ;
+            std::cout.width(4) ;
+            std::cout << r * gammalib::rad2deg << ")  value=" ;
+            std::cout.width(7);
+            std::cout << value << "  mc=" ;
+            std::cout.width(7) ;
+            std::cout << mc << std::endl;
             norm        += mc;
             if (mc > prf.mc_max) {
                 prf.mc_max = mc;
