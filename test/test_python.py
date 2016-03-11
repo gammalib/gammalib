@@ -2,7 +2,7 @@
 # ==========================================================================
 # This scripts performs unit tests for the GammaLib Python bindings.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -201,7 +201,7 @@ def test(installed=False):
 
     # If we have a non-installed version then save test results
     if not installed:
-        suites.save("reports/GPython.xml")
+        suites.save("reports/python.xml")
 
     # Set return code
     if success:
