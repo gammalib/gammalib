@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GFitsHDU.hpp - Abstract FITS extension base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -318,7 +318,8 @@ inline
 void GFitsHDU::card(const std::string& keyname, const std::string& value,
                     const std::string& comment)
 {
-    m_header.append(GFitsHeaderCard(keyname, value, comment));
+    GFitsHeaderCard card(keyname, value, comment);
+    m_header.append(card);
     return;
 }
 
@@ -334,7 +335,8 @@ inline
 void GFitsHDU::card(const std::string& keyname, const double& value,
                     const std::string& comment)
 {
-    m_header.append(GFitsHeaderCard(keyname, value, comment));
+    GFitsHeaderCard card(keyname, value, comment);
+    m_header.append(card);
     return;
 }
 
@@ -350,7 +352,8 @@ inline
 void GFitsHDU::card(const std::string& keyname, const int& value,
                     const std::string& comment)
 {
-    m_header.append(GFitsHeaderCard(keyname,  value, comment));
+    GFitsHeaderCard card(keyname,  value, comment);
+    m_header.append(card);
     return;
 }
 
