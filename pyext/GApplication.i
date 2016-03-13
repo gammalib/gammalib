@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GApplication.i - GammaLib application base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,6 +38,9 @@
  * @class GApplication
  *
  * @brief GammaLib application Python interface definition.
+ *
+ * The GApplication class is the base class for all tools and scripts that
+ * will be based on GammaLib.
  ***************************************************************************/
 class GApplication : public GBase {
 public:
@@ -48,6 +51,31 @@ public:
                  int ARGC, char **ARGV);
     GApplication(const GApplication& app);
     ~GApplication(void);
+
+    // Ignore base class methods and make methods private in Python by
+    // prepending an underscore
+    %ignore                  clear();
+    %ignore                  clone() const;
+    %ignore                  classname() const;
+    %rename(_name)           name() const;
+    %rename(_version)        version() const;
+    %rename(_telapse)        telapse() const;
+    %rename(_celapse)        celapse() const;
+    %rename(_logFileOpen)    logFileOpen(const bool& clobber = true);
+    %rename(_logTerse)       logTerse() const;
+    %rename(_logNormal)      logNormal() const;
+    %rename(_logExplicit)    logExplicit() const;
+    %rename(_logVerbose)     logVerbose() const;
+    %rename(_logDebug)       logDebug() const;
+    %rename(_clobber)        clobber() const;
+    %rename(_has_par)        has_par(const std::string& name) const;
+    %rename(_par_filename)   par_filename() const;
+    %rename(_log_filename)   log_filename() const;
+    %rename(_log_header)     log_header();
+    %rename(_log_trailer)    log_trailer();
+    %rename(_log_parameters) log_parameters();
+    %rename(_need_help)      need_help() const;
+    %rename(_log)            log;
 
     // Methods
     void               clear(void);

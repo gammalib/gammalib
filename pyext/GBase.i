@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GBase.i - GammaLib base class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,10 +35,10 @@
  *
  * @brief Interface class for all GammaLib classes
  *
- * This class defines the interface for all GammaLib classes. It is an
- * abstract base class from which all other GammaLib classes will be
- * derived. The interface class imposes on all GammaLib classes to
- * implement the following methods:
+ * The GBase class defines the interface for all GammaLib classes. It is an
+ * abstract base class from which most GammaLib classes will be derived. The
+ * interface class imposes on all GammaLib classes the implementation of the
+ * following methods:
  * 
  * clear() Sets the object to a clean initial state
  *
@@ -50,7 +50,7 @@ class GBase {
 public:
     // Constructors and destructors
     virtual ~GBase(void);
- 
+
     // Methods
     virtual void        clear(void) = 0;
     virtual GBase*      clone(void) const = 0;
