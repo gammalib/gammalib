@@ -81,6 +81,27 @@ TestGSupport* TestGSupport::clone(void) const
  ***************************************************************************/
 void TestGSupport::test_tools(void)
 {
+    // Strip whitespace
+    test_assert(gammalib::strip_whitespace("  World  ") == "World",
+                "gammalib::strip_whitespace(\"  World  \")");
+    test_assert(gammalib::strip_whitespace("World  ") == "World",
+                "gammalib::strip_whitespace(\"World  \")");
+    test_assert(gammalib::strip_whitespace("  World") == "World",
+                "gammalib::strip_whitespace(\"  World\")");
+
+    // Strip characters
+    test_assert(gammalib::strip_chars("xxWorldyy", "xy") == "World",
+                "gammalib::strip_chars(\"xxWorldyy\")");
+    test_assert(gammalib::strip_chars("Worldxy", "xy") == "World",
+                "gammalib::strip_chars(\"Worldxy\")");
+    test_assert(gammalib::strip_chars("xxWorld", "x") == "World",
+                "gammalib::strip_chars(\"xxWorld\")");
+
+    // Test noun number conversion
+    test_assert(gammalib::number("World", 0) == "Worlds", "Zero Worlds");
+    test_assert(gammalib::number("World", 1) == "World", "One World");
+    test_assert(gammalib::number("World", 2) == "Worlds", "Two Worlds");
+
     // Test XML to string conversion
     std::string s_in  = "Hallo World, you \"are\" my 'nice' <planet> & place";
     std::string s_ref = "Hallo World, you &quot;are&quot; my &apos;nice&apos;"
