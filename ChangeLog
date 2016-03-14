@@ -4,6 +4,7 @@
         =========================
 
         Add GCTAObservation filename constructor (#1744).
+        Add gammalib::number() function (#1743).
         Add energy dispersion cube for stacked analysis (#1721).
         Add GEnergy division operator.
         Support Fermi LAT Pass 8 response functions (#1517)

@@ -214,6 +214,9 @@ file name without the path.
 Put FITS access in a critical OMP zone to make GFilename::is_fits() thread
 safe (#1717).
 
+The gammalib::number() function was added to convert a singular noun into
+a plural noun is the number of instances of the noun is not one (#1743).
+
 
 14. XML module
 --------------

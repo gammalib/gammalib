@@ -53,6 +53,7 @@ namespace gammalib {
     std::string              right(const std::string& s, int n, char c = ' ');
     std::string              centre(const std::string& s, int n, char c = ' ');
     std::string              parformat(const std::string& s, const int& indent = 0);
+    std::string              number(const std::string& noun, const int& number);
     double                   plaw_photon_flux(const double& emin,
                                               const double& emax,
                                               const double& epivot,

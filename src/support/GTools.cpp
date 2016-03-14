@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -862,7 +862,7 @@ std::string gammalib::centre(const std::string& s, const int& n, const char& c)
  * @brief Convert string in parameter format
  *
  * @param[in] s String to be converted.
- * @param[in] indent Indentation of parameter (default: 0).
+ * @param[in] indent Indentation of parameter.
  * @return Parameter string.
  *
  * Converts and string into the parameter format of type "s ......: " with a
@@ -876,6 +876,31 @@ std::string gammalib::parformat(const std::string& s, const int& indent)
 
     // Set result
     std::string result = " " + s + " " + fill(".", n_right) + ": ";
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Convert singular noun into number noun
+ *
+ * @param[in] noun Singular noun.
+ * @param[in] number Number of instance of noun.
+ * @return Converted noun.
+ *
+ * Converts a singular noun into a number noun by appending a "s" to the
+ * noun if the @p number of the instances of the noun is not one.
+ ***************************************************************************/
+std::string gammalib::number(const std::string& noun, const int& number)
+{
+    // Copy input noun
+    std::string result(noun);
+
+    // Append "s" if number if not one
+    if (number != 1) {
+        result += "s";
+    }
 
     // Return result
     return result;
