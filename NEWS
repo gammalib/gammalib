@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-6 March 2016
+14 March 2016
 
 
 1. Introduction
@@ -23,6 +23,7 @@ The following methods have been added to the public interface:
 - GFilaname::protocol()
 - GFilename::path()
 - GFilename::file()
+- GCTAObservation(GFilename) constructor
 - GCTAResponseTable::axis(std::string)
 - GCTAResponseTable::table(std::string)
 - GCTAResponseTable::has_axis(std::string)
@@ -295,6 +296,11 @@ Carlo simulated instrument directions are identical to the model evaluations
 Add GCTACubeEdisp class that computes the mean energy dispersion for a stacked
 analysis. This class is now used in GCTAResponseCube to take into account the
 energy dispersion is a stacked analysis (#1721).
+
+A filename constructor has been added to GCTAObservation that allows constructing
+a CTA observation from an event list or a counts cube. A dummy argument has been
+added to the instrument constructor so that it does not conflict with the filename
+constructor (#1744).
 
 
 21. COMPTEL interface

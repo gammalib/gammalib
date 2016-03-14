@@ -79,21 +79,36 @@ void TestGCTAResponse::set(void)
     name("GCTAResponse");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response), "Test response");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff), "Test effective area");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp), "Test energy dispersion");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_PerfTable), "Test energy dispersion Performance Table computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_RMF), "Test energy dispersion RMF computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_2D), "Test energy dispersion 2D computation");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube), "Test exposure cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube), "Test PSF cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispcube), "Test Edisp cube");
-    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube), "Test background cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response),
+           "Test response");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff),
+           "Test effective area");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf),
+           "Test Gaussian point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king),
+           "Test King point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf),
+           "Test integrated point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp),
+           "Test energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_PerfTable),
+           "Test Performance Table energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_RMF),
+           "Test RMF energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp_2D),
+           "Test 2D energy dispersion");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse),
+           "Test diffuse IRF");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse),
+           "Test diffuse IRF integration");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_expcube),
+           "Test exposure cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psfcube),
+           "Test point spread function cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_edispcube),
+           "Test energy dispersion cube");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_bkgcube),
+           "Test background cube");
 
     // Return
     return;
@@ -121,9 +136,12 @@ void TestGCTAModel::set(void)
     name("Test CTA models");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAModel::test_model_cube_bgd), "Test CTA cube background model");
-    append(static_cast<pfunction>(&TestGCTAModel::test_model_irf_bgd), "Test CTA IRF background model");
-    append(static_cast<pfunction>(&TestGCTAModel::test_model_aeff_bgd), "Test CTA Aeff background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_cube_bgd),
+           "Test CTA cube background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_irf_bgd),
+           "Test CTA IRF background model");
+    append(static_cast<pfunction>(&TestGCTAModel::test_model_aeff_bgd),
+           "Test CTA Aeff background model");
 
     // Return
     return;
@@ -151,9 +169,12 @@ void TestGCTAObservation::set(void)
     name("GCTAObservation");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs), "Test unbinned observations");
-    append(static_cast<pfunction>(&TestGCTAObservation::test_binned_obs), "Test binned observation");
-    append(static_cast<pfunction>(&TestGCTAObservation::test_cube_obs), "Test cube-style observation");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs),
+           "Test unbinned observations");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_binned_obs),
+           "Test binned observation");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_stacked_obs),
+           "Test stacked observation");
 
     // Return
     return;
@@ -181,9 +202,12 @@ void TestGCTAOptimize::set(void)
     name("CTA optimizers");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_unbinned_optimizer), "Test unbinned optimizer");
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer), "Test binned optimizer");
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_cube_optimizer), "Test cube-style optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_unbinned_optimizer),
+           "Test unbinned optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer),
+           "Test binned optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_stacked_optimizer),
+           "Test stacked optimizer");
 
     // Return
     return;
@@ -1536,38 +1560,51 @@ void TestGCTAObservation::test_binned_obs(void)
 
 
 /***********************************************************************//**
- * @brief Test cube-style observation handling
+ * @brief Test stacked observation handling
  ***************************************************************************/
-void TestGCTAObservation::test_cube_obs(void)
+void TestGCTAObservation::test_stacked_obs(void)
 {
     // Set filenames
     const std::string filename = "test_cta_obs_cube.xml";
 
-    // Declare observations
-    GObservations   obs;
-    GCTAObservation run;
-
-    // Load cube-style CTA observation
-    test_try("Load cube-style CTA observation");
-    try {
-        run.load(cta_cntmap);
-        //run.response(cta_irf, GCaldb(cta_caldb));
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Construct stacked observation
+    GCTAObservation cta1(cta_cntmap,
+                         datadir+"/expcube.fits",
+                         datadir+"/psfcube.fits",
+                         datadir+"/bkgcube.fits");
+    const GCTAResponseCube* rsp =
+          dynamic_cast<const GCTAResponseCube*>(cta1.response());
+    test_assert((rsp != NULL), "Observation contains cube response");
+    if (rsp != NULL) {
+        rsp->apply_edisp(true);  // Try to use energy dispersion
+        test_assert((!rsp->use_edisp()), "Response has no energy dispersion");
     }
 
-    // Test XML loading and saving
-    test_try("Test XML loading and saving");
-    try {
-        obs = GObservations(cta_cube_xml);
-        obs.save(filename);
-        test_try_success();
+    // Construct stacked observation with energy dispersion
+    GCTAObservation cta2(cta_cntmap,
+                         datadir+"/expcube.fits",
+                         datadir+"/psfcube.fits",
+                         datadir+"/edispcube.fits",
+                         datadir+"/bkgcube.fits");
+    rsp = dynamic_cast<const GCTAResponseCube*>(cta2.response());
+    test_assert((rsp != NULL), "Observation contains cube response");
+    if (rsp != NULL) {
+        rsp->apply_edisp(true);  // Try to use energy dispersion
+        test_assert(rsp->use_edisp(), "Response has energy dispersion");
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
+
+    // Construct stacked observation from XML file (w/o energy dispersion)
+    GObservations obs(cta_cube_xml);
+    test_value(obs.size(), 1, "One observation in container");
+    rsp = dynamic_cast<const GCTAResponseCube*>(obs[0]->response());
+    test_assert((rsp != NULL), "Observation contains cube response");
+    if (rsp != NULL) {
+        rsp->apply_edisp(true);  // Try to use energy dispersion
+        test_assert((!rsp->use_edisp()), "Response has no energy dispersion");
     }
+
+    // Save observation container into XML file
+    obs.save(filename);
 
     // Exit test
     return;
@@ -1702,11 +1739,11 @@ void TestGCTAOptimize::test_binned_optimizer(void)
 
 
 /***********************************************************************//**
- * @brief Test cube optimizer
+ * @brief Test stacked optimizer
  ***************************************************************************/
-void TestGCTAOptimize::test_cube_optimizer(void)
+void TestGCTAOptimize::test_stacked_optimizer(void)
 {
-    // Load cube-style CTA observation
+    // Load stacked CTA observation
     GObservations obs(cta_cube_xml);
 
     // Load models from XML file

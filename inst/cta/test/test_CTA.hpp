@@ -116,7 +116,7 @@ public:
     virtual std::string          classname(void) const { return "TestGCTAObservation"; }
     void                         test_unbinned_obs(void);
     void                         test_binned_obs(void);
-    void                         test_cube_obs(void);
+    void                         test_stacked_obs(void);
 };
 
 
@@ -139,7 +139,7 @@ public:
     virtual std::string       classname(void) const { return "TestGCTAOptimize"; }
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
-    void                      test_cube_optimizer(void);
+    void                      test_stacked_optimizer(void);
 };
 
 /***********************************************************************//**
