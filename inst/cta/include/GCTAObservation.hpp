@@ -110,8 +110,8 @@ public:
     void                load(const GFilename& cntcube,
                              const GFilename& expcube,
                              const GFilename& psfcube,
-                             const GFilename& psfcube,
-                             const GFilename& edispcube);
+                             const GFilename& edispcube,
+                             const GFilename& bkgcube);
     void                save(const GFilename& filename,
                              const bool&      clobber = false) const;
     void                response(const std::string& rspname,
