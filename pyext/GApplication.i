@@ -52,6 +52,12 @@ public:
     GApplication(const GApplication& app);
     ~GApplication(void);
 
+    // Public methods
+    double telapse(void) const;
+    double celapse(void) const;
+    void   logFileOpen(const bool& clobber = true);
+    void   logFileClose(void);
+
     // Ignore base class methods and make methods private in Python by
     // prepending an underscore
     %ignore                  clear();
@@ -59,9 +65,6 @@ public:
     %ignore                  classname() const;
     %rename(_name)           name() const;
     %rename(_version)        version() const;
-    %rename(_telapse)        telapse() const;
-    %rename(_celapse)        celapse() const;
-    %rename(_logFileOpen)    logFileOpen(const bool& clobber = true);
     %rename(_logTerse)       logTerse() const;
     %rename(_logNormal)      logNormal() const;
     %rename(_logExplicit)    logExplicit() const;
@@ -83,9 +86,6 @@ public:
     std::string        classname(void) const;
     const std::string& name(void) const;
     const std::string& version(void) const;
-    double             telapse(void) const;
-    double             celapse(void) const;
-    void               logFileOpen(const bool& clobber = true);
     bool               logTerse(void) const;
     bool               logNormal(void) const;
     bool               logExplicit(void) const;
