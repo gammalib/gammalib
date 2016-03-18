@@ -62,6 +62,7 @@ public:
     virtual GModelSpatialRadialProfile* clone(void) const = 0;
     virtual std::string                 classname(void) const = 0;
     virtual std::string                 type(void) const = 0;
+    virtual double                      theta_min(void) const = 0;
     virtual double                      theta_max(void) const = 0;
     virtual std::string                 print(const GChatter& chatter = NORMAL) const = 0;
 

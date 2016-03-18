@@ -63,6 +63,7 @@ public:
     virtual GModelSpatialRadialProfileDMEinasto* clone(void) const;
     virtual std::string                      classname(void) const;
     virtual std::string                      type(void) const;
+    virtual double                           theta_min(void) const;
     virtual double                           theta_max(void) const;
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
@@ -104,6 +105,7 @@ protected:
     GModelPar m_scale_radius  ; //!< scale radius of halo profile
     GModelPar m_halo_distance ; //!< distance from earth to halo center
     GModelPar m_alpha         ; //!< einasto spatial power index
+    GModelPar m_theta_min     ; //!< minimum theta angle
     GModelPar m_theta_max     ; //!< maximum theta angle
     
     // Cached members used for pre-computation

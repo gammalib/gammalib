@@ -215,6 +215,20 @@ GModelSpatialRadialProfileDMEinasto* GModelSpatialRadialProfileDMEinasto::clone(
     return new GModelSpatialRadialProfileDMEinasto(*this);
 }
 
+/***********************************************************************//**
+ * @brief Return minimum model radius (in radians)
+ *
+ * @return Minimum model radius (in radians).
+ ***************************************************************************/
+double GModelSpatialRadialProfileDMEinasto::theta_min(void) const
+{
+    
+    // update precomputation cache
+    update();
+    
+    // Return value
+    return m_theta_min.value() ;
+}
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
@@ -419,6 +433,17 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_alpha.has_grad(false);  // Radial components never have gradients
 
     // Initialise theta max 
+    m_theta_min.clear();
+    m_theta_min.name("Theta Min");
+    m_theta_min.unit("degrees");
+    m_theta_min.value( 180.0 ); // can only go from halo center to opposite halo center
+    m_theta_min.min(1.0e-6); // arbitrarily chosen
+    m_theta_min.fix(); // should always be fixed!
+    m_theta_min.scale(1.0);
+    m_theta_min.gradient(0.0);
+    m_theta_min.has_grad(false);  // Radial components never have gradients
+
+    // Initialise theta max 
     m_theta_max.clear();
     m_theta_max.name("Theta Max");
     m_theta_max.unit("degrees");
@@ -433,6 +458,7 @@ void GModelSpatialRadialProfileDMEinasto::init_members(void)
     m_pars.push_back(&m_scale_radius );
     m_pars.push_back(&m_halo_distance);
     m_pars.push_back(&m_alpha        );
+    m_pars.push_back(&m_theta_min    );
     m_pars.push_back(&m_theta_max    );
     
     // Initialize precomputation cache. Note that zero values flag
@@ -460,6 +486,7 @@ void GModelSpatialRadialProfileDMEinasto::copy_members(const GModelSpatialRadial
     m_scale_radius  = model.m_scale_radius  ;
     m_halo_distance = model.m_halo_distance ;
     m_alpha         = model.m_alpha         ;
+    m_theta_min     = model.m_theta_min     ;
     m_theta_max     = model.m_theta_max     ;
 
     // copy cache values
