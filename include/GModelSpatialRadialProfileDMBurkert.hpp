@@ -63,6 +63,7 @@ public:
     virtual GModelSpatialRadialProfileDMBurkert* clone(void) const;
     virtual std::string                      classname(void) const;
     virtual std::string                      type(void) const;
+    virtual double                           theta_min(void) const;
     virtual double                           theta_max(void) const;
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
@@ -97,6 +98,7 @@ protected:
     } ;
 
     // Protected members
+    GModelPar m_theta_min     ; //!< maximum theta angle
     GModelPar m_theta_max     ; //!< maximum theta angle
     GModelPar m_scale_radius  ; //!< scale radius of halo profile
     GModelPar m_halo_distance ; //!< distance from earth to halo center

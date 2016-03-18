@@ -215,6 +215,20 @@ GModelSpatialRadialProfileDMBurkert* GModelSpatialRadialProfileDMBurkert::clone(
     return new GModelSpatialRadialProfileDMBurkert(*this);
 }
 
+/***********************************************************************//**
+ * @brief Return minimum model radius (in radians)
+ *
+ * @return Minimum model radius (in radians).
+ ***************************************************************************/
+double GModelSpatialRadialProfileDMBurkert::theta_min(void) const
+{
+    
+    // update precomputation cache
+    update();
+
+    // Return value
+    return m_theta_min.value() ;
+}
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
@@ -400,6 +414,17 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     m_halo_distance.has_grad(false);  // Radial components never have gradients
 
     // Initialise theta max 
+    m_theta_min.clear();
+    m_theta_min.name("Theta Min");
+    m_theta_min.unit("degrees");
+    m_theta_min.value( 1.0e-6 ); // 
+    m_theta_min.min(1.0e-10); // arbitrarily chosen
+    m_theta_min.fix(); // should always be fixed!
+    m_theta_min.scale(1.0);
+    m_theta_min.gradient(0.0);
+    m_theta_min.has_grad(false);  // Radial components never have gradients
+
+    // Initialise theta max 
     m_theta_max.clear();
     m_theta_max.name("Theta Max");
     m_theta_max.unit("degrees");
@@ -414,6 +439,7 @@ void GModelSpatialRadialProfileDMBurkert::init_members(void)
     m_pars.push_back(&m_scale_radius );
     m_pars.push_back(&m_halo_distance);
     m_pars.push_back(&m_theta_max    );
+    m_pars.push_back(&m_theta_min    );
     
     // Initialize precomputation cache. Note that zero values flag
     // uninitialised, as a zero radius is not meaningful
@@ -439,6 +465,7 @@ void GModelSpatialRadialProfileDMBurkert::copy_members(const GModelSpatialRadial
     // before. Otherwise we would have sigma twice on the stack.
     m_scale_radius  = model.m_scale_radius  ;
     m_halo_distance = model.m_halo_distance ;
+    m_theta_min     = model.m_theta_min     ;
     m_theta_max     = model.m_theta_max     ;
 
     // copy cache values

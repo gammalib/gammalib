@@ -259,8 +259,9 @@ GSkyDir GModelSpatialRadialProfile::mc(const GEnergy& energy,
 
     // Simulate theta angle (degrees) using a rejection method
     double theta = 0.0;
+    double theta_width = theta_max() - theta_min() ;
     while (true) {
-        theta     = ran.uniform() * theta_max();
+        theta     = theta_min() + ( ran.uniform() * theta_width ) ;
         double mc = m_profile[icache].nodes.interpolate(theta, m_profile[icache].mc);
         if ((ran.uniform() * m_profile[icache].mc_max) <= mc) {
             break;
@@ -296,7 +297,8 @@ bool GModelSpatialRadialProfile::contains(const GSkyDir& dir,
     double distance = dir.dist(this->dir());
 
     // Return flag
-    return (distance <= theta_max() + margin*gammalib::deg2rad);
+    return ( ( distance <= theta_max() + margin*gammalib::deg2rad ) && 
+             ( distance >= theta_min() + margin*gammalib::deg2rad ) ) ;
 }
 
 
@@ -408,7 +410,7 @@ int GModelSpatialRadialProfile::cache_index(void) const
         double rmax = theta_max();
         double dr   = rmax / m_num_nodes;
         std::cout << "  rmax=" << rmax << "  dr=" << dr << std::endl;
-        double r    = 0.0;
+        double r    = theta_min();
         double norm = 0.0;
         for (int j = 0; j < m_num_nodes; ++j) {
             double value = profile_value(r);
