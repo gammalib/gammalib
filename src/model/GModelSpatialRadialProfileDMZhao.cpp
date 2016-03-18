@@ -340,9 +340,13 @@ void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
     const GXmlElement* par9 = gammalib::xml_get_par(G_READ, xml, "Core Radius");
     m_core_radius.read(*par9);
 
-    // Read Theta Max parameter
-    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    // Read Theta Min parameter
+    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Theta Min");
     m_gamma.read(*par6);
+
+    // Read Theta Max parameter
+    const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_gamma.read(*par7);
 
     // Return
     return;
@@ -413,8 +417,12 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
     m_gamma.write(*par5);
 
     // Write Theta Max parameter
-    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Theta Min");
     m_gamma.write(*par6);
+
+    // Write Theta Max parameter
+    GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_gamma.write(*par7);
 
     // Return
     return;
