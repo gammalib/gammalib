@@ -214,6 +214,16 @@ GModelSpatialRadialProfileGauss* GModelSpatialRadialProfileGauss::clone(void) co
     return new GModelSpatialRadialProfileGauss(*this);
 }
 
+/***********************************************************************//**
+ * @brief Return maximum model radius (in radians)
+ *
+ * @return Maximum model radius (in radians).
+ ***************************************************************************/
+double GModelSpatialRadialProfileGauss::theta_min(void) const
+{
+    // Return value
+    return 0.0 ;
+}
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)

@@ -215,6 +215,20 @@ GModelSpatialRadialProfileDMZhao* GModelSpatialRadialProfileDMZhao::clone(void) 
     return new GModelSpatialRadialProfileDMZhao(*this);
 }
 
+/***********************************************************************//**
+ * @brief Return minimum model radius (in radians)
+ *
+ * @return Minimum model radius (in radians).
+ ***************************************************************************/
+double GModelSpatialRadialProfileDMZhao::theta_min(void) const
+{
+    
+    // update precomputation cache
+    update();
+    
+    // Return value
+    return m_theta_min.value() ;
+}
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
@@ -304,9 +318,13 @@ void GModelSpatialRadialProfileDMZhao::read(const GXmlElement& xml)
     const GXmlElement* par5 = gammalib::xml_get_par(G_READ, xml, "Gamma");
     m_gamma.read(*par5);
 
-    // Read Theta Max parameter
-    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    // Read Theta Min parameter
+    const GXmlElement* par6 = gammalib::xml_get_par(G_READ, xml, "Theta Min");
     m_gamma.read(*par6);
+
+    // Read Theta Max parameter
+    const GXmlElement* par7 = gammalib::xml_get_par(G_READ, xml, "Theta Max");
+    m_gamma.read(*par7);
 
     // Return
     return;
@@ -353,8 +371,12 @@ void GModelSpatialRadialProfileDMZhao::write(GXmlElement& xml) const
     m_gamma.write(*par5);
 
     // Write Theta Max parameter
-    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    GXmlElement* par6 = gammalib::xml_need_par(G_WRITE, xml, "Theta Min");
     m_gamma.write(*par6);
+
+    // Write Theta Max parameter
+    GXmlElement* par7 = gammalib::xml_need_par(G_WRITE, xml, "Theta Max");
+    m_gamma.write(*par7);
 
     // Return
     return;
@@ -463,6 +485,17 @@ void GModelSpatialRadialProfileDMZhao::init_members(void)
     m_gamma.has_grad(false);  // Radial components never have gradients
 
     // Initialise theta max 
+    m_theta_min.clear();
+    m_theta_min.name("Theta Min");
+    m_theta_min.unit("degrees");
+    m_theta_min.value( 1.0e-6 ); // can only go from halo center to opposite halo center
+    m_theta_min.min(1.0e-10);    // arbitrarily chosen, some halos don't converge at theta=0.0
+    m_theta_min.fix();           // should always be fixed!
+    m_theta_min.scale(1.0);
+    m_theta_min.gradient(0.0);
+    m_theta_min.has_grad(false);  // Radial components never have gradients
+
+    // Initialise theta max 
     m_theta_max.clear();
     m_theta_max.name("Theta Max");
     m_theta_max.unit("degrees");
@@ -479,6 +512,7 @@ void GModelSpatialRadialProfileDMZhao::init_members(void)
     m_pars.push_back(&m_alpha        );
     m_pars.push_back(&m_beta         );
     m_pars.push_back(&m_gamma        );
+    m_pars.push_back(&m_theta_min    );
     m_pars.push_back(&m_theta_max    );
 
     // Return
@@ -503,6 +537,7 @@ void GModelSpatialRadialProfileDMZhao::copy_members(const GModelSpatialRadialPro
     m_alpha         = model.m_alpha         ;
     m_beta          = model.m_beta          ;
     m_gamma         = model.m_gamma         ;
+    m_theta_max     = model.m_theta_min     ;
     m_theta_max     = model.m_theta_max     ;
 
     // Return

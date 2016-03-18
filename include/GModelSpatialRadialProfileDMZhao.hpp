@@ -63,6 +63,7 @@ public:
     virtual GModelSpatialRadialProfileDMZhao* clone(void) const;
     virtual std::string                      classname(void) const;
     virtual std::string                      type(void) const;
+    virtual double                           theta_min(void) const;
     virtual double                           theta_max(void) const;
     virtual void                             read(const GXmlElement& xml);
     virtual void                             write(GXmlElement& xml) const;
@@ -112,7 +113,8 @@ protected:
     GModelPar m_alpha         ; //!< power index, inverse transition region width
     GModelPar m_beta          ; //!< power index, slope at >> m_scale_radius
     GModelPar m_gamma         ; //!< power index, slope at << m_scale_radius
-    GModelPar m_theta_max     ; //!< theta max
+    GModelPar m_theta_min     ; //!< minimum theta angle
+    GModelPar m_theta_max     ; //!< maximum theta angle
 
     mutable double m_last_scale_radius ;
     mutable double m_mass_radius ;
