@@ -78,6 +78,7 @@ public:
     const int&  nrows(void) const;
     const int&  precision(void) const;
     void        precision(const int& precision);
+    void        append(const std::vector<std::string>& list);
     std::string string(const int& row, const int& col) const;
     double      real(const int& row, const int& col) const;
     int         integer(const int& row, const int& col) const;
