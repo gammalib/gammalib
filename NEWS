@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-16 March 2016
+22 April 2016
 
 
 1. Introduction
@@ -242,7 +242,8 @@ None
 
 17. Test module
 ---------------
-None
+A GTestSuite::test_value() method has been added for strings to simplify the
+writing of test cases for string comparison (#1772).
 
 
 18. Multi-wavelength interface

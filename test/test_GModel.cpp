@@ -370,12 +370,11 @@ void TestGModel::test_sky_model(void)
         GXmlElement* element = xml.element(0)->element(0);
         GModelSky    sky(*element);
         test_value(sky.size(), 6);
-        test_assert(sky.name() == "1FGL J0005.7+3815",
-                    "Expected source name \"1FGL J0005.7+3815\"");
-        test_assert(sky.instruments() == "", "Expected no instruments");
-        test_assert(sky.ids() == "", "Expected no observation identifiers");
-        test_assert(sky.type() == "PointSource", "Expected \"PointSource\"");
-        test_assert(sky.spatial() != NULL, "Expected spatial component");
+        test_value(sky.name(), "1FGL J0005.7+3815");
+        test_value(sky.instruments(), "");
+        test_value(sky.ids(), "");
+        test_value(sky.type(), "PointSource");
+        test_assert(sky.spatial()  != NULL, "Expected spatial component");
         test_assert(sky.spectral() != NULL, "Expected spectral component");
         test_assert(sky.temporal() != NULL, "Expected temporal component");
 
