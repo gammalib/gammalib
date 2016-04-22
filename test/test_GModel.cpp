@@ -371,44 +371,37 @@ void TestGModel::test_sky_model(void)
     // Test spatial and spectral component constructor
     GModelSky sky3(spat_ptsrc, spec_const);
     test_value(sky3.size(), 4); // 2 spatial, 1 spectral, 1 temporal
-    test_assert(sky3.spatial()->classname() == "GModelSpatialPointSource",
-                "Spatial component is \""+sky3.spatial()->classname()+"\"");
-    test_assert(sky3.spectral()->classname() == "GModelSpectralConst",
-                "Spectral component is \""+sky3.spectral()->classname()+"\"");
-    test_assert(sky3.temporal()->classname() == "GModelTemporalConst",
-                "Temporal component is \""+sky3.temporal()->classname()+"\"");
+    test_value(sky3.spatial()->classname(),  "GModelSpatialPointSource");
+    test_value(sky3.spectral()->classname(), "GModelSpectralConst");
+    test_value(sky3.temporal()->classname(), "GModelTemporalConst");
 
     // Test component constructor
     GModelSky sky4(spat_ptsrc, spec_const, temp_const);
     test_value(sky4.size(), 4); // 2 spatial, 1 spectral, 1 temporal
-    test_assert(sky4.spatial()->classname() == "GModelSpatialPointSource",
-                "Spatial component is \""+sky4.spatial()->classname()+"\"");
-    test_assert(sky4.spectral()->classname() == "GModelSpectralConst",
-                "Spectral component is \""+sky4.spectral()->classname()+"\"");
-    test_assert(sky4.temporal()->classname() == "GModelTemporalConst",
-                "Temporal component is \""+sky4.temporal()->classname()+"\"");
+    test_value(sky4.spatial()->classname(),  "GModelSpatialPointSource");
+    test_value(sky4.spectral()->classname(), "GModelSpectralConst");
+    test_value(sky4.temporal()->classname(), "GModelTemporalConst");
 
     // Test spatial method
     sky4.spatial(&spat_const);
-    test_assert(sky4.spatial()->classname() == "GModelSpatialDiffuseConst",
-                "Spatial component is \""+sky4.spatial()->classname()+"\"");
+    test_value(sky4.size(), 3); // 1 spatial, 1 spectral, 1 temporal
+    test_value(sky4.spatial()->classname(), "GModelSpatialDiffuseConst");
 
     // Test spectral method
     sky4.spectral(&spec_plaw);
-    test_assert(sky4.spectral()->classname() == "GModelSpectralPlaw",
-                "Spectral component is \""+sky4.spectral()->classname()+"\"");
+    test_value(sky4.size(), 5); // 1 spatial, 3 spectral, 1 temporal
+    test_value(sky4.spectral()->classname(), "GModelSpectralPlaw");
     
     // Test XML constructor
     GXml         xml1(m_xml_file);
     GXmlElement* element1 = xml1.element(0)->element(0);
     GModelSky    sky5(*element1);
     test_value(sky5.size(), 6);
-    test_assert(sky5.name() == "1FGL J0005.7+3815",
-                "Expected source name \"1FGL J0005.7+3815\"");
-    test_assert(sky5.instruments() == "", "Expected no instruments");
-    test_assert(sky5.ids() == "", "Expected no observation identifiers");
-    test_assert(sky5.type() == "PointSource", "Expected \"PointSource\"");
-    test_assert(sky5.spatial() != NULL, "Expected spatial component");
+    test_value(sky5.name(), "1FGL J0005.7+3815");
+    test_value(sky5.instruments(), "");
+    test_value(sky5.ids(), "");
+    test_value(sky5.type(), "PointSource");
+    test_assert(sky5.spatial()  != NULL, "Expected spatial component");
     test_assert(sky5.spectral() != NULL, "Expected spectral component");
     test_assert(sky5.temporal() != NULL, "Expected temporal component");
 
