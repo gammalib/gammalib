@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Add GTestSuite::test_value() string method (#1772).
         Add component setting methods to GModelSky (#1770).
         Add GApplication::logFileClose() method.
         Add GCTAObservation filename constructor (#1744).

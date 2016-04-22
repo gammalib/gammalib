@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GTestSuite.cpp - Abstract test suite base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -393,15 +393,14 @@ void GTestSuite::test_assert(const bool&        assert,
 
 
 /***********************************************************************//**
- * @brief Test a value
+ * @brief Test an integer value
  *
- * @param[in] value Value to test.
- * @param[in] expected Expected value.
- * @param[in] name Test case name (defaults to "").
- * @param[in] message Test case message (defaults to "").
+ * @param[in] value Integer value to test.
+ * @param[in] expected Expected integer value.
+ * @param[in] name Test case name.
+ * @param[in] message Test case message.
  *
- * Test if the value is comprised in the interval
- * [expected-eps, expected+eps].
+ * Test if integer @p value is the @p expected value.
  ***************************************************************************/
 void GTestSuite::test_value(const int&         value,
                             const int&         expected,
@@ -415,7 +414,7 @@ void GTestSuite::test_value(const int&         value,
         formated_name = format_name(name);
     }
     else {
-        formated_name = format_name("Test if " + gammalib::str(value) + " is " + 
+        formated_name = format_name("Test if "+gammalib::str(value)+" is "+
                                     gammalib::str(expected));
     }
 
@@ -435,8 +434,8 @@ void GTestSuite::test_value(const int&         value,
         formated_message = message;
     }
     else {
-        formated_message = "Value " + gammalib::str(value) + " equals not the " +
-                           "expected value of " + gammalib::str(expected) + ".";
+        formated_message = "Value "+gammalib::str(value)+" equals not the "+
+                           "expected value of "+gammalib::str(expected)+".";
     }
 
     // Set message
@@ -454,13 +453,13 @@ void GTestSuite::test_value(const int&         value,
 
 
 /***********************************************************************//**
- * @brief Test a value
+ * @brief Test a double precision value
  *
- * @param[in] value Value to test.
- * @param[in] expected Expected value.
- * @param[in] eps Precision of the test (default 1e-30).
- * @param[in] name Test case name (defaults to "").
- * @param[in] message Test case message (defaults to "").
+ * @param[in] value Double precision value to test.
+ * @param[in] expected Expected double precision value.
+ * @param[in] eps Precision of the test.
+ * @param[in] name Test case name.
+ * @param[in] message Test case message.
  *
  * Test if the value is comprised in the interval
  * [expected-eps, expected+eps].
@@ -478,8 +477,10 @@ void GTestSuite::test_value(const double&      value,
         formated_name = format_name(name);
     }
     else {
-        formated_name = format_name("Test if " + gammalib::str(value) + " is within " + 
-                                    gammalib::str(expected) + " +/- " + gammalib::str(eps));
+        formated_name = format_name("Test if "+gammalib::str(value)+
+                                    " is comprised within "+
+                                    gammalib::str(expected)+" +/- "+
+                                    gammalib::str(eps));
     }
 
     // Create a test case of failure type
@@ -498,9 +499,69 @@ void GTestSuite::test_value(const double&      value,
         formated_message = message;
     }
     else {
-        formated_message = "Value " + gammalib::str(value) + " not within " +
-                           gammalib::str(expected) + " +/- " + gammalib::str(eps) +
-                           " (value-expected = " + gammalib::str(value-expected) + ").";
+        formated_message = "Value "+gammalib::str(value)+" not within "+
+                           gammalib::str(expected)+" +/- "+gammalib::str(eps)+
+                           " (value-expected = "+gammalib::str(value-expected)+
+                           ").";
+    }
+
+    // Set message
+    testcase->message(formated_message);
+
+    // Log the result (".","F" or, "E")
+    std::cout << testcase->print();
+
+    // Add test case to test suite
+    m_tests.push_back(testcase);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test a string value
+ *
+ * @param[in] value String value to test.
+ * @param[in] expected Expected string value.
+ * @param[in] name Test case name (defaults to "").
+ * @param[in] message Test case message (defaults to "").
+ *
+ * Test if the string @p value corresponds to the @p expected value.
+ ***************************************************************************/
+void GTestSuite::test_value(const std::string& value,
+                            const std::string& expected,
+                            const std::string& name,
+                            const std::string& message)
+{
+    // Set test case name. If no name is specify then build the name from
+    // the actual test parameters.
+    std::string formated_name;
+    if (name != "") {
+        formated_name = format_name(name);
+    }
+    else {
+        formated_name = format_name("Test if \""+value+"\" is \""+expected+"\"");
+    }
+
+    // Create a test case of failure type
+    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST, formated_name);
+
+    // If value is not the expected one then signal test as failed and
+    // increment the number of failures
+    if (value != expected) {
+        testcase->has_passed(false);
+        m_failures++;
+    }
+
+    // If no message is specified then build message from test result
+    std::string formated_message;
+    if (message != "") {
+        formated_message = message;
+    }
+    else {
+        formated_message = "String \""+value+"\" is not equal to the "+
+                           "expected string \""+expected+"\".";
     }
 
     // Set message

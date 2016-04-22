@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestSuite.i - Abstract test suite base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 Jean-Baptiste Cayrou                           *
+ *  copyright (C) 2012-2016 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -210,6 +210,7 @@ public:
     // Methods
     void                      clear(void);
     int                       size(void) const;
+    void                      append(pfunction function, const std::string& name);
     bool                      run(void);
     const std::string&        name(void) const;
     void                      name(const std::string& name);
@@ -219,13 +220,17 @@ public:
                                           const std::string& message = "");
     void                      test_value(const int&         value,
                                          const int&         expected,
-                                         const std::string& name="",
-                                         const std::string& message="");
+                                         const std::string& name = "",
+                                         const std::string& message = "");
     void                      test_value(const double&      value,
                                          const double&      expected,
-                                         const double&      eps = 1.0e-10,
-                                         const std::string& name="",
-                                         const std::string& message="");
+                                         const double&      eps = 1.0e-7,
+                                         const std::string& name = "",
+                                         const std::string& message = "");
+    void                      test_value(const std::string& value,
+                                         const std::string& expected,
+                                         const std::string& name = "",
+                                         const std::string& message = "");
     void                      test_try(const std::string& name);
     void                      test_try_success(void);
     void                      test_try_failure(const std::string& message = "",
