@@ -1,8 +1,9 @@
-2016-03-16  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-04-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Add component setting methods to GModelSky (#1770).
         Add GApplication::logFileClose() method.
         Add GCTAObservation filename constructor (#1744).
         Add gammalib::number() function (#1743).

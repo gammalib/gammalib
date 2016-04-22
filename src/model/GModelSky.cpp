@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -396,6 +396,81 @@ GModelSky* GModelSky::clone(void) const
 {
     // Clone sky model
     return new GModelSky(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set spatial model component
+ *
+ * @param[in] spatial Pointer to spatial model component.
+ *
+ * Sets the spatial model component of the model.
+ ***************************************************************************/
+void GModelSky::spatial(const GModelSpatial* spatial)
+{
+    // Free spatial model component
+    if (m_spatial  != NULL) delete m_spatial;
+
+    // Clone spatial model component if it exists, otherwise set pointer
+    // to NULL
+    m_spatial = (spatial != NULL) ? spatial->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Set model type dependent on spatial model type
+    set_type();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set spectral model component
+ *
+ * @param[in] spectral Pointer to spectral model component.
+ *
+ * Sets the spectral model component of the model.
+ ***************************************************************************/
+void GModelSky::spectral(const GModelSpectral* spectral)
+{
+    // Free spectral model component
+    if (m_spectral  != NULL) delete m_spectral;
+
+    // Clone spectral model component if it exists, otherwise set pointer
+    // to NULL
+    m_spectral = (spectral != NULL) ? spectral->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set temporal model component
+ *
+ * @param[in] temporal Pointer to temporal model component.
+ *
+ * Sets the temporal model component of the model.
+ ***************************************************************************/
+void GModelSky::temporal(const GModelTemporal* temporal)
+{
+    // Free temporal model component
+    if (m_temporal  != NULL) delete m_temporal;
+
+    // Clone temporal model component if it exists, otherwise set pointer
+    // to NULL
+    m_temporal = (temporal != NULL) ? temporal->clone() : NULL;
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GModelSky.hpp - Sky model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -163,6 +163,9 @@ public:
     GModelSpatial*      spatial(void) const;
     GModelSpectral*     spectral(void) const;
     GModelTemporal*     temporal(void) const;
+    void                spatial(const GModelSpatial* spatial);
+    void                spectral(const GModelSpectral* spectral);
+    void                temporal(const GModelTemporal* temporal);
     double              value(const GPhoton& photon);
     GVector             gradients(const GPhoton& photon);
     GPhotons            mc(const double& area,

@@ -342,78 +342,110 @@ void TestGModel::test_model_par(void)
 void TestGModel::test_sky_model(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSky sky;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSky sky1;
+    test_value(sky1.size(), 0, "Void constructor has no parameters");
+    test_assert(sky1.spatial() == NULL,
+                "Void constructor has no spatial component");
+    test_assert(sky1.spectral() == NULL,
+                "Void constructor has no spectral component");
+    test_assert(sky1.temporal() == NULL,
+                "Void constructor has no temporal component");
 
     // Test type constructor
-    test_try("Test type constructor");
-    try {
-        GModelSky sky("My type");
-        test_assert(sky.type() == "My type", "Model type \"My type\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSky sky2("My type");
+    test_value(sky2.size(), 0, "Type constructor has no parameters");
+    test_assert(sky2.spatial() == NULL,
+                "Type constructor has no spatial component");
+    test_assert(sky2.spectral() == NULL,
+                "Type constructor has no spectral component");
+    test_assert(sky2.temporal() == NULL,
+                "Type constructor has no temporal component");
+
+    // Setup components for constructor tests
+    GModelSpatialPointSource  spat_ptsrc(10.0, -9.0);
+    GModelSpatialDiffuseConst spat_const(3.0);
+    GModelSpectralPlaw        spec_plaw(1.0, -1.0, GEnergy(1.0, "TeV"));
+    GModelSpectralConst       spec_const(2.0);
+    GModelTemporalConst       temp_const(4.0);
+
+    // Test spatial and spectral component constructor
+    GModelSky sky3(spat_ptsrc, spec_const);
+    test_value(sky3.size(), 4); // 2 spatial, 1 spectral, 1 temporal
+    test_assert(sky3.spatial()->classname() == "GModelSpatialPointSource",
+                "Spatial component is \""+sky3.spatial()->classname()+"\"");
+    test_assert(sky3.spectral()->classname() == "GModelSpectralConst",
+                "Spectral component is \""+sky3.spectral()->classname()+"\"");
+    test_assert(sky3.temporal()->classname() == "GModelTemporalConst",
+                "Temporal component is \""+sky3.temporal()->classname()+"\"");
+
+    // Test component constructor
+    GModelSky sky4(spat_ptsrc, spec_const, temp_const);
+    test_value(sky4.size(), 4); // 2 spatial, 1 spectral, 1 temporal
+    test_assert(sky4.spatial()->classname() == "GModelSpatialPointSource",
+                "Spatial component is \""+sky4.spatial()->classname()+"\"");
+    test_assert(sky4.spectral()->classname() == "GModelSpectralConst",
+                "Spectral component is \""+sky4.spectral()->classname()+"\"");
+    test_assert(sky4.temporal()->classname() == "GModelTemporalConst",
+                "Temporal component is \""+sky4.temporal()->classname()+"\"");
+
+    // Test spatial method
+    sky4.spatial(&spat_const);
+    test_assert(sky4.spatial()->classname() == "GModelSpatialDiffuseConst",
+                "Spatial component is \""+sky4.spatial()->classname()+"\"");
+
+    // Test spectral method
+    sky4.spectral(&spec_plaw);
+    test_assert(sky4.spectral()->classname() == "GModelSpectralPlaw",
+                "Spectral component is \""+sky4.spectral()->classname()+"\"");
     
-    // Test XML constructor, value and gradients
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml         xml(m_xml_file);
-        GXmlElement* element = xml.element(0)->element(0);
-        GModelSky    sky(*element);
-        test_value(sky.size(), 6);
-        test_assert(sky.name() == "1FGL J0005.7+3815",
-                    "Expected source name \"1FGL J0005.7+3815\"");
-        test_assert(sky.instruments() == "", "Expected no instruments");
-        test_assert(sky.ids() == "", "Expected no observation identifiers");
-        test_assert(sky.type() == "PointSource", "Expected \"PointSource\"");
-        test_assert(sky.spatial() != NULL, "Expected spatial component");
-        test_assert(sky.spectral() != NULL, "Expected spectral component");
-        test_assert(sky.temporal() != NULL, "Expected temporal component");
+    // Test XML constructor
+    GXml         xml1(m_xml_file);
+    GXmlElement* element1 = xml1.element(0)->element(0);
+    GModelSky    sky5(*element1);
+    test_value(sky5.size(), 6);
+    test_assert(sky5.name() == "1FGL J0005.7+3815",
+                "Expected source name \"1FGL J0005.7+3815\"");
+    test_assert(sky5.instruments() == "", "Expected no instruments");
+    test_assert(sky5.ids() == "", "Expected no observation identifiers");
+    test_assert(sky5.type() == "PointSource", "Expected \"PointSource\"");
+    test_assert(sky5.spatial() != NULL, "Expected spatial component");
+    test_assert(sky5.spectral() != NULL, "Expected spectral component");
+    test_assert(sky5.temporal() != NULL, "Expected temporal component");
 
-        // Test value
-        GSkyDir dir;
-        dir.radec_deg(83.6331, 22.0145);
-        GEnergy energy(100.0, "MeV");
-        GTime   time(0.0);
-        test_value(sky.value(GPhoton(dir, energy, time)), 1.73e-07);
+    // Test value method
+    GSkyDir dir;
+    dir.radec_deg(83.6331, 22.0145);
+    GEnergy energy(100.0, "MeV");
+    GTime   time(0.0);
+    test_value(sky5.value(GPhoton(dir, energy, time)), 1.73e-07);
 
-        // Test gradient
-        GVector vector = sky.gradients(GPhoton(dir, energy, time));
-        test_value(vector[0], 0.0);
-        test_value(vector[1], 0.0);
-        test_value(vector[2], 1e-07);
-        test_value(vector[3], 0.0);
-        test_value(vector[4], 0.0);
-        test_value(vector[5], 0.0);
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test gradient method
+    GVector vector = sky5.gradients(GPhoton(dir, energy, time));
+    test_value(vector[0], 0.0);
+    test_value(vector[1], 0.0);
+    test_value(vector[2], 1e-07);
+    test_value(vector[3], 0.0);
+    test_value(vector[4], 0.0);
+    test_value(vector[5], 0.0);
 
     // Get test sky model
-    GXml         xml(m_xml_file);
-    GXmlElement* element = xml.element(0)->element(0);
-    GModelSky    sky(*element);
+    GXml         xml2(m_xml_file);
+    GXmlElement* element2 = xml2.element(0)->element(0);
+    GModelSky    sky6(*element2);
 
     // Test has_par methods
-    test_assert(sky.spatial()->has_par("RA"), "Expect \"RA\" parameter in spatial component");
-    test_assert(!sky.spatial()->has_par("RAX"), "Do not expect \"RAX\" parameter in spatial component");
-    test_assert(sky.spectral()->has_par("Prefactor"), "Expect \"Prefactor\" parameter in spectral component");
-    test_assert(!sky.spectral()->has_par("Prefactors"), "Do not expect \"Prefactors\" parameter in spectral component");
-    test_assert(sky.temporal()->has_par("Normalization"), "Expect \"Normalization\" parameter in temporal component");
-    test_assert(!sky.temporal()->has_par("Normalizations"), "Do not expect \"Normalizations\" parameter in temporal component");
+    test_assert(sky6.spatial()->has_par("RA"),
+                "Expect \"RA\" parameter in spatial component");
+    test_assert(!sky6.spatial()->has_par("RAX"),
+                "Do not expect \"RAX\" parameter in spatial component");
+    test_assert(sky6.spectral()->has_par("Prefactor"),
+                "Expect \"Prefactor\" parameter in spectral component");
+    test_assert(!sky6.spectral()->has_par("Prefactors"),
+                "Do not expect \"Prefactors\" parameter in spectral component");
+    test_assert(sky6.temporal()->has_par("Normalization"),
+                "Expect \"Normalization\" parameter in temporal component");
+    test_assert(!sky6.temporal()->has_par("Normalizations"),
+                "Do not expect \"Normalizations\" parameter in temporal component");
 
     // Exit test
     return;
