@@ -43,6 +43,9 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_ZERO_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
+//#define G_TINY_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
+//#define G_NO_RATE_WHEN_INTERPOLATION_NOT_POSSIBLE
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_MC_INIT
@@ -244,17 +247,14 @@ double GCTABackground3D::operator()(const double& logE,
                            wgt_rl * m_background(m_inx_bgd, inx_rl + offset_emax) +
                            wgt_rr * m_background(m_inx_bgd, inx_rr + offset_emax);
 
-        // If both rates are positive then perform a logarithmic
-        // interpolation in energy
+        // If both rates are positive then perform a logarithmic interpolation
+        // in energy
         if (rate_emin > 0.0 && rate_emax > 0.0) {
             rate = std::exp(wgt_emin * std::log(rate_emin) +
                             wgt_emax * std::log(rate_emax));
         }
-        else if (rate_emin > 0.0) {
-            rate = rate_emin;
-        }
-        else if (rate_emax > 0.0) {
-            rate = rate_emax;
+        else {
+            rate = 0.0;
         }
 
         // Make sure that background rate is not negative
@@ -520,11 +520,8 @@ GCTAInstDir GCTABackground3D::mc(const GEnergy& energy,
             max_rate         = std::exp(wgt_left  * std::log(max_rate_left) +
                                         wgt_right * std::log(max_rate_right));
         }
-        else if (max_rate_left > 0.0) {
-            max_rate = max_rate_left;
-        }
-        else if (max_rate_right > 0.0) {
-            max_rate = max_rate_right;
+        else {
+            max_rate = 0.0;
         }
 
         // Get instrument direction

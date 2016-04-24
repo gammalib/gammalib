@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-22 April 2016
+25 April 2016
 
 
 1. Introduction
@@ -320,6 +320,10 @@ A filename constructor has been added to GCTAObservation that allows constructin
 a CTA observation from an event list or a counts cube. A dummy argument has been
 added to the instrument constructor so that it does not conflict with the filename
 constructor (#1744).
+
+The interpolation scheme was changed in GCTABackground3D. Formerly, if one of the
+rates above and below the requested energy was zero, the rate from the non-zero
+node was taken, resulting in a discontinuity. Now the rate is set to zero.
 
 
 21. COMPTEL interface
