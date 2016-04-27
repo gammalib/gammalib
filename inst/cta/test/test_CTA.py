@@ -295,9 +295,19 @@ class Test(gammalib.GPythonTestSuite):
         off = on
         
         # Set energy binning
-        etrue = gammalib.GEbounds(10, gammalib.GEnergy(0.1, "TeV"), gammalib.GEnergy(10.0, "TeV"))
-        ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1, "TeV"), gammalib.GEnergy(10.0, "TeV"))
-        
+        etrue = gammalib.GEbounds(10, gammalib.GEnergy(0.1, "TeV"),
+                                      gammalib.GEnergy(10.0, "TeV"))
+        ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1, "TeV"),
+                                      gammalib.GEnergy(10.0, "TeV"))
+
+        # Create background model
+        models       = gammalib.GModels()
+        bgd_spectrum = gammalib.GModelSpectralConst(1.0)
+        bgd_model    = gammalib.GCTAModelIrfBackground(bgd_spectrum)
+        bgd_model.name("Background")
+        bgd_model.instruments("CTA")
+        models.append(bgd_model)
+
         # Create ON/OFF observations by filling all events found in
         # the observation container and computing the response
         filename = self.caldb + "/../data/irf_unbinned.xml"
@@ -306,7 +316,7 @@ class Test(gammalib.GPythonTestSuite):
         for run in obs:
             onoff = gammalib.GCTAOnOffObservation(ereco, on, off)
             onoff.fill(run)
-            onoff.compute_response(run, etrue)
+            onoff.compute_response(run, models, etrue)
             onoffs.append(onoff)
 
         # Save PHA, ARF and RMFs

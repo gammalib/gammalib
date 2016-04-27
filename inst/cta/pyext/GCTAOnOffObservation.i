@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAOnOffObservation.i - CTA on-off observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Michael Mayer                                    *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -25,6 +25,7 @@
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GCTAObservation.hpp"
 #include "GCTAOnOffObservation.hpp"
 %}
 
@@ -92,18 +93,18 @@ public:
     void                  compute_response(const GCTAObservation& obs,
 		                                   const GModels& models,
                                            const GEbounds& etrue);
-    double                model_on(const GModels&             models,
-								   const GOptimizerPars&      pars,
-								   int                 ibin,
-								   GVector*            mod_grad) const;
-	double                model_off(const GModels&            models,
-									const GOptimizerPars&     pars,
-									int                 ibin,
-									GVector*            mod_grad) const;
-	double                likelihood_poisson_onoff(const GModels&        models,
-												   GMatrixSparse*  curvature,
-												   GVector*        gradient,
-												   double&         npred) const;
+    double                model_on(const GModels&        models,
+								   const GOptimizerPars& pars,
+								   int                   ibin,
+								   GVector*              mod_grad) const;
+	double                model_off(const GModels&        models,
+									const GOptimizerPars& pars,
+									int                   ibin,
+									GVector*              mod_grad) const;
+	double                likelihood_poisson_onoff(const GModels& models,
+												   GMatrixSparse* curvature,
+												   GVector*       gradient,
+												   double&        npred) const;
 };
 
 

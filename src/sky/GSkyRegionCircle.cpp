@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GSkyRegionCircle.cpp - Circular sky region class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,7 +55,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GSkyRegionCircle::GSkyRegionCircle(void)
+GSkyRegionCircle::GSkyRegionCircle(void) : GSkyRegion()
 {
     // Initialise members
     init_members();
@@ -71,7 +71,8 @@ GSkyRegionCircle::GSkyRegionCircle(void)
  * @param[in] centre Centre sky direction.
  * @param[in] radius Region radius [deg].
  ***************************************************************************/
-GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre, const double& radius)
+GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre, const double& radius) :
+                  GSkyRegion()
 {
     // Initialise members
 	init_members();
@@ -96,7 +97,7 @@ GSkyRegionCircle::GSkyRegionCircle(const GSkyDir& centre, const double& radius)
  * @param[in] radius Region radius [deg].
  ***************************************************************************/
 GSkyRegionCircle::GSkyRegionCircle(const double& ra, const double& dec,
-                                   const double& radius)
+                                   const double& radius) : GSkyRegion()
 {
     // Initialise members
 	init_members();
@@ -120,7 +121,7 @@ GSkyRegionCircle::GSkyRegionCircle(const double& ra, const double& dec,
  *
  * Constructs region from a DS9 region file line.
  ***************************************************************************/
-GSkyRegionCircle::GSkyRegionCircle(const std::string& line)
+GSkyRegionCircle::GSkyRegionCircle(const std::string& line) : GSkyRegion()
 {
 	 // Initialise members
 	 init_members();
@@ -139,7 +140,8 @@ GSkyRegionCircle::GSkyRegionCircle(const std::string& line)
  *
  * @param[in] region Circular sky region.
  ***************************************************************************/
-GSkyRegionCircle::GSkyRegionCircle(const GSkyRegionCircle& region)
+GSkyRegionCircle::GSkyRegionCircle(const GSkyRegionCircle& region) :
+                  GSkyRegion(region)
 {
     // Initialise members
     init_members();
@@ -174,13 +176,16 @@ GSkyRegionCircle::~GSkyRegionCircle(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] circle Circular sky region.
+ * @param[in] region Circular sky region.
  * @return Circular sky region.
  ***************************************************************************/
-GSkyRegionCircle& GSkyRegionCircle::operator=(const GSkyRegionCircle& circle)
+GSkyRegionCircle& GSkyRegionCircle::operator=(const GSkyRegionCircle& region)
 {
     // Execute only if object is not identical
-    if (this != &circle) {
+    if (this != &region) {
+
+        // Copy base class members
+        this->GSkyRegion::operator=(region);
 
         // Free members
         free_members();
@@ -189,7 +194,7 @@ GSkyRegionCircle& GSkyRegionCircle::operator=(const GSkyRegionCircle& circle)
         init_members();
 
         // Copy members
-        copy_members(circle);
+        copy_members(region);
 
     } // endif: object was not identical
 
@@ -557,7 +562,6 @@ void GSkyRegionCircle::init_members(void)
 	m_centre = GSkyDir();
 	m_radius = 0.0;
 	m_type   = "Circle";
-	m_solid  = 0.0;
 
 	//Return
 	return;
@@ -574,7 +578,6 @@ void GSkyRegionCircle::copy_members(const GSkyRegionCircle& region)
 	// Copy attributes
 	m_centre = region.m_centre;
 	m_radius = region.m_radius;
-	m_solid  = region.m_solid;
 
     // Return
     return;

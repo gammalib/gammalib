@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAOnOffObservation.hpp - CTA on-off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Chia-Chun Lu & Christoph Deil                    *
+ *  copyright (C) 2013-2016 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,21 +33,13 @@
 #include "GPha.hpp"
 #include "GArf.hpp"
 #include "GRmf.hpp"
-#include "GCTAEventList.hpp"
-#include "GCTAEventAtom.hpp"
-#include "GCTAObservation.hpp"
-#include "GCTAResponseIrf.hpp"
-#include "GCTAInstDir.hpp"
 #include "GSkyRegions.hpp"
-#include "GSkyRegionCircle.hpp"
-#include "GModelSpatial.hpp"
-#include "GModelSpectral.hpp"
-#include "GModelTemporal.hpp"
-#include "GModelSky.hpp"
-#include "GCTAModelRadialAcceptance.hpp"
-#include "GCTAModelIrfBackground.hpp"
-#include "GModels.hpp"
-#include "GOptimizerPars.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GModels;
+class GOptimizerPars;
+class GCTAObservation;
+
 
 /***********************************************************************//**
  * @class GCTAOnOffObservation
@@ -102,10 +94,10 @@ public:
 									const GOptimizerPars&     pars,
 										  int                 ibin,
 									      GVector*            mod_grad) const;
-	double                likelihood_poisson_onoff(const GModels&        models,
-											             GMatrixSparse*  curvature,
-											             GVector*        gradient,
-											             double&         npred) const;
+	double                likelihood_poisson_onoff(const GModels&       models,
+											             GMatrixSparse* curvature,
+											             GVector*       gradient,
+											             double&        npred) const;
 	
 protected:
     // Protected methods
@@ -118,19 +110,19 @@ protected:
     void compute_rmf(const GCTAObservation& obs, const GEbounds& etrue);
 
     // Protected data members
-    std::string                  m_name;        //!< Name
-    std::string                  m_instrument;  //!< Instrument name
-    std::string                  m_id;          //!< Observation identifier
-    GPha 		                 m_on_spec;     //!< ON counts spectrum
-    GPha 		                 m_off_spec;    //!< OFF counts spectrum 
-    GArf                         m_arf;         //!< Effective area vector
-	GArf                         m_bgd;         //!< Background rate vector
-    GRmf                         m_rmf;         //!< Energy dispersion matrix
-    GSkyRegions                  m_on_regions;  //!< Container of ON region
-    GSkyRegions                  m_off_regions; //!< Container of OFF regions
-	double*                      m_alpha;       //!< Ratios of ON/OFF exposure
-	double                       m_ontime;      //!< ON exposure time
-	double                       m_offtime;     //!< OFF exposure time
+    std::string  m_name;        //!< Name
+    std::string  m_instrument;  //!< Instrument name
+    std::string  m_id;          //!< Observation identifier
+    GPha 		 m_on_spec;     //!< ON counts spectrum
+    GPha 		 m_off_spec;    //!< OFF counts spectrum 
+    GArf         m_arf;         //!< Effective area vector
+	GArf         m_bgd;         //!< Background rate vector
+    GRmf         m_rmf;         //!< Energy dispersion matrix
+    GSkyRegions  m_on_regions;  //!< Container of ON region
+    GSkyRegions  m_off_regions; //!< Container of OFF regions
+	double*      m_alpha;       //!< Ratios of ON/OFF exposure
+	double       m_ontime;      //!< ON exposure time
+	double       m_offtime;     //!< OFF exposure time
 };
 
 
@@ -341,6 +333,5 @@ const double GCTAOnOffObservation::offtime(void) const
 {
     return m_offtime;
 }
-
 
 #endif /* GCTAONOFFOBSERVATION_HPP */

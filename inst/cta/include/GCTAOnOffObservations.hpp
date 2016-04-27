@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAOnOffObservations.hpp - CTA on-off observation container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Pierrick Martin                                  *
+ *  copyright (C) 2013-2016 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *

@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAOnOffObservations_likelihood.cpp - Likelihood function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,7 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL    "GCTAOnOffObservations::likelihood::eval(GOptimizerPars&)"
+#define G_EVAL     "GCTAOnOffObservations::likelihood::eval(GOptimizerPars&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -69,11 +69,12 @@ GCTAOnOffObservations::likelihood::likelihood(void) : GOptimizerFunction()
  *
  * @param[in] obs Observations container pointer.
  *
- * Constructs optimizer from GCTAOnOffObservations container. The method copies the
- * pointer to the observation container in the m_this member, making the
- * observation container accessible to the optimizer class.
+ * Constructs optimizer from GCTAOnOffObservations container. The method
+ * copies the pointer to the observation container in the m_this member,
+ * making the observation container accessible to the optimizer class.
  ***************************************************************************/
-GCTAOnOffObservations::likelihood::likelihood(GCTAOnOffObservations *obs) : GOptimizerFunction()
+GCTAOnOffObservations::likelihood::likelihood(GCTAOnOffObservations *obs) :
+                       GOptimizerFunction()
 {
     // Initialise members
     init_members();
@@ -93,7 +94,7 @@ GCTAOnOffObservations::likelihood::likelihood(GCTAOnOffObservations *obs) : GOpt
  * @param[in] fct Optimizer function.
  ***************************************************************************/
 GCTAOnOffObservations::likelihood::likelihood(const likelihood& fct) :
-                           GOptimizerFunction(fct)
+                       GOptimizerFunction(fct)
 {
     // Initialise members
     init_members();
@@ -206,9 +207,9 @@ void GCTAOnOffObservations::likelihood::eval(const GOptimizerPars& pars)
 			
 			// Compute likelihood
 			m_value += m_this->m_obs[i]->likelihood_poisson_onoff(m_this->models(),
-											                m_curvature,
-															m_gradient,
-											                m_npred);
+										                          m_curvature,
+															      m_gradient,
+                                                                  m_npred);
 			
 		} // endfor: looped over observations	
 
@@ -269,7 +270,6 @@ GMatrixSparse GCTAOnOffObservations::likelihood::hessian(const GOptimizerPars& p
     //const int    ncyles             = 7;
     //const double step_tolerance     = 0.1;
     //const double gradient_tolerance = 0.02;
-
 
     // Create working copy of parameters
     GOptimizerPars wrk_pars = pars;

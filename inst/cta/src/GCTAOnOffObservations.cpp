@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAOnOffObservations.cpp - ON/OFF Observation container class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013 by Pierrick Martin                                  *
+ *  copyright (C) 2013-2016 by Pierrick Martin                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -248,7 +248,8 @@ const GCTAOnOffObservation* GCTAOnOffObservations::at(const int& index) const
  * Set a deep copy and observation @p obs at the specified @p index in the
  * container.
  ***************************************************************************/
-GCTAOnOffObservation* GCTAOnOffObservations::set(const int& index, const GCTAOnOffObservation& obs)
+GCTAOnOffObservation* GCTAOnOffObservations::set(const int&                  index,
+                                                 const GCTAOnOffObservation& obs)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -338,7 +339,8 @@ GCTAOnOffObservation* GCTAOnOffObservations::append(const GCTAOnOffObservation& 
  * Inserts a deep copy of an observation into the container before the
  * observation with the specified @p index.
  ***************************************************************************/
-GCTAOnOffObservation* GCTAOnOffObservations::insert(const int& index, const GCTAOnOffObservation& obs)
+GCTAOnOffObservation* GCTAOnOffObservations::insert(const int&                  index,
+                                                    const GCTAOnOffObservation& obs)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -474,7 +476,7 @@ void GCTAOnOffObservations::extend(const GCTAOnOffObservations& obs)
  * returned.
  ***************************************************************************/
 bool GCTAOnOffObservations::contains(const std::string& instrument,
-                             const std::string& id) const
+                                     const std::string& id) const
 {
     // Get observation index
     int index = get_index(instrument, id);
@@ -600,8 +602,7 @@ void GCTAOnOffObservations::read(const GXml& xml)
 
         // ... otherwise throw an exception
         else {
-			std::string msg =
-			"Problem allocating GCTAOnOffObservation object.";
+			std::string msg = "Problem allocating GCTAOnOffObservation object.";
             throw GException::invalid_instrument(G_READ, msg);
         }
 
