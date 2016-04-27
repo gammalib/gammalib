@@ -331,6 +331,8 @@ node was taken, resulting in a discontinuity. Now the rate is set to zero.
 The GCTAOnOffObservations container class has now been removed, as On/Off observations
 are now stored as any other observation in the GObservations container (#1669).
 
+The On/Off fitting of CTA data has now been implemented (#1044).
+
 
 21. COMPTEL interface
 ---------------------

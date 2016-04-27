@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Finalize implementation of CTA On/Off fitting (#1044).
         Remove GCTAOnOffObservations class (#1669).
         Change interpolation scheme in GCTABackground3D.
         Add GCsv::append() method (#1773).
