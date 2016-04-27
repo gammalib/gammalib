@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GObservation.hpp"
 #include "GPha.hpp"
 #include "GArf.hpp"
@@ -88,48 +89,40 @@ public:
     const GArf&           arf(void) const;
 	const GArf&           bgd(void) const;
     const GRmf&           rmf(void) const;
-	const double*         alpha(void) const;
+	std::vector<double>   alpha(void) const;
 	double                offtime(void) const;
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
 	                                       const GModels& models,
                                            const GEbounds& etrue);
-    double                model_on(const GModels&             models,
-								   const GOptimizerPars&      pars,
-										  int                 ibin,
-									      GVector*            mod_grad) const;
-	double                model_off(const GModels&            models,
-									const GOptimizerPars&     pars,
-										  int                 ibin,
-									      GVector*            mod_grad) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCTAOnOffObservation& obs);
-    void free_members(void);
-	void compute_alpha(const GCTAObservation& obs);
-    void compute_arf(const GCTAObservation& obs);
-	void compute_bgd(const GCTAObservation& obs, const GModels& models);
-    void compute_rmf(const GCTAObservation& obs, const GEbounds& etrue);
+    void   init_members(void);
+    void   copy_members(const GCTAOnOffObservation& obs);
+    void   free_members(void);
+	void   compute_alpha(const GCTAObservation& obs);
+    void   compute_arf(const GCTAObservation& obs);
+	void   compute_bgd(const GCTAObservation& obs, const GModels& models);
+    void   compute_rmf(const GCTAObservation& obs, const GEbounds& etrue);
+    double model_on(const GModels& models, int ibin, GVector* mod_grad) const;
+	double model_off(const GModels& models, int ibin, GVector* mod_grad) const;
 
     // Protected data members
-    std::string   m_instrument;   //!< Instrument name
-    GCTAResponse* m_response;     //!< Pointer to instrument response functions
-	double        m_ontime;       //!< Ontime (seconds)
-	double        m_offtime;      //!< Off exposure time (seconds)
-    double        m_livetime;     //!< Livetime (seconds)
-    double        m_deadc;        //!< Deadtime correction (livetime/ontime)
-    GPha 		  m_on_spec;      //!< On counts spectrum
-    GPha 		  m_off_spec;     //!< Off counts spectrum
-    GArf          m_arf;          //!< Effective area vector
-	GArf          m_bgd;          //!< Background rate vector
-    GRmf          m_rmf;          //!< Energy dispersion matrix
-    GSkyRegions   m_on_regions;   //!< Container of On region
-    GSkyRegions   m_off_regions;  //!< Container of Off regions
-
-    // TODO: Use vector
-	double*       m_alpha;        //!< Ratios of On/Off exposure
+    std::string         m_instrument;   //!< Instrument name
+    GCTAResponse*       m_response;     //!< Pointer to instrument response functions
+	double              m_ontime;       //!< Ontime (seconds)
+	double              m_offtime;      //!< Off exposure time (seconds)
+    double              m_livetime;     //!< Livetime (seconds)
+    double              m_deadc;        //!< Deadtime correction (livetime/ontime)
+    GPha 		        m_on_spec;      //!< On counts spectrum
+    GPha 		        m_off_spec;     //!< Off counts spectrum
+    GArf                m_arf;          //!< Effective area vector
+	GArf                m_bgd;          //!< Background rate vector
+    GRmf                m_rmf;          //!< Energy dispersion matrix
+    GSkyRegions         m_on_regions;   //!< Container of On region
+    GSkyRegions         m_off_regions;  //!< Container of Off regions
+    std::vector<double> m_alpha;        //!< Ratios of On/Off exposure
 };
 
 
@@ -315,12 +308,12 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
 
 
 /***********************************************************************//**
-* @brief Return alpha parameter
+* @brief Return alpha parameter vector
 *
-* @return alpha parameter.
+* @return alpha parameter vector.
 ***************************************************************************/
 inline
-const double* GCTAOnOffObservation::alpha(void) const
+std::vector<double> GCTAOnOffObservation::alpha(void) const
 {
     return m_alpha;
 }

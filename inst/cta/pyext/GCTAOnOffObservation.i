@@ -96,20 +96,12 @@ public:
     const GArf&           arf(void) const;
 	const GArf&           bgd(void) const;
     const GRmf&           rmf(void) const;
-	const double*         alpha(void) const;
+	std::vector<double>   alpha(void) const;
 	double                offtime(void) const;
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
 	                                       const GModels& models,
                                            const GEbounds& etrue);
-    double                model_on(const GModels&             models,
-								   const GOptimizerPars&      pars,
-										  int                 ibin,
-									      GVector*            mod_grad) const;
-	double                model_off(const GModels&            models,
-									const GOptimizerPars&     pars,
-										  int                 ibin,
-									      GVector*            mod_grad) const;
 };
 
 
