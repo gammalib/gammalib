@@ -529,7 +529,7 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Fill events in the ON and OFF spectra
+ * @brief Fill events in the On and Off spectra
  *
  * @param[in] obs CTA observation.
  *
@@ -563,10 +563,15 @@ void GCTAOnOffObservation::fill(const GCTAObservation& obs)
 		}
         
 	} // endfor: looped over all events
-	
-	// Set exposure times
-	m_ontime  = obs.livetime();
-	m_offtime = obs.livetime();
+
+    // Store the livetime as exposures of the spectra
+    m_on_spec.exposure(obs.livetime());
+    m_off_spec.exposure(obs.livetime());
+
+    // Store the ontime, livetime and deadtime correction in the observation
+    m_ontime   = obs.ontime();
+    m_livetime = obs.livetime();
+    m_deadc    = obs.deadc();
 	
 	// Return
 	return;
@@ -574,7 +579,7 @@ void GCTAOnOffObservation::fill(const GCTAObservation& obs)
 
 
 /***********************************************************************//**
- * @brief Compute response for ON/OFF observation
+ * @brief Compute response for On/Off observation
  *
  * @param[in] obs CTA observation.
  * @param[in] etrue True energy boundaries.
@@ -595,9 +600,9 @@ void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
 
 
 /***********************************************************************//**
- * @brief Print ON/OFF observation information
+ * @brief Print On/Off observation information
  *
- * @return String containing ON/OFF observation information.
+ * @return String containing On/Off observation information.
  ***************************************************************************/
 std::string GCTAOnOffObservation::print(const GChatter& chatter) const
 {
@@ -872,7 +877,6 @@ void GCTAOnOffObservation::init_members(void)
     m_instrument = "CTA";
     m_response   = NULL;
     m_ontime     = 0.0;
-    m_offtime    = 0.0;
     m_livetime   = 0.0;
     m_deadc      = 1.0;
     m_on_spec.clear();
@@ -899,7 +903,6 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
     // Copy attributes
     m_instrument  = obs.m_instrument;
     m_ontime      = obs.m_ontime;
-    m_offtime     = obs.m_offtime;
     m_livetime    = obs.m_livetime;
     m_deadc       = obs.m_deadc;
     m_on_spec     = obs.m_on_spec;
@@ -1353,6 +1356,9 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
  * given energy bin, and returns it. Also computes the gradients of the
  * sky model spectral components. The method assumes that 
  * parameters are stored in the order spatial-spectral-temporal.
+ *
+ * @todo I think this method only works for point sources. What happens
+ *       for an extended source?
  ***********************************************************************/
 double GCTAOnOffObservation::model_on(const GModels& models,
                                       int            ibin,
@@ -1373,6 +1379,11 @@ double GCTAOnOffObservation::model_on(const GModels& models,
         const GEnergy emax   = m_on_spec.ebounds().emax(ibin);
         const GEnergy emean  = m_on_spec.ebounds().elogmean(ibin);
         const double  ewidth = m_on_spec.ebounds().ewidth(ibin).MeV();
+
+        // Compute normalisation factors
+        double exposure  = m_on_spec.exposure();
+        double norm_flux = m_arf[ibin] * exposure;
+        double norm_grad = norm_flux   * ewidth;
 				
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
@@ -1406,10 +1417,6 @@ double GCTAOnOffObservation::model_on(const GModels& models,
             // Spectral component (the useful one)
             GModelSpectral* spectral = sky->spectral();
             if (spectral != NULL)  {
-
-                // Compute normalisation factors
-                double norm_flux = m_arf[ibin] * m_ontime; //TODO: LIVETIME
-                double norm_grad = norm_flux   * ewidth;
 								
                 // Determine the number of gamma-ray events in model by
                 // computing the flux over the energy bin in ph/cm2/s
@@ -1479,7 +1486,8 @@ double GCTAOnOffObservation::model_off(const GModels& models,
         const double  ewidth = m_off_spec.ebounds().ewidth(ibin).MeV();
 
         // Compute normalisation factor
-        double norm = m_bgd[ibin] * m_offtime * ewidth; //TODO: LIVETIME
+        double exposure = m_off_spec.exposure();
+        double norm     = m_bgd[ibin] * exposure * ewidth;
 			
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {

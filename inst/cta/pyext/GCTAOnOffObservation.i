@@ -82,26 +82,24 @@ public:
     virtual void                  write(GXmlElement& xml) const;
 
     // Overloaded virtual methods
-	virtual double                likelihood(const GModels& models,
-                                             GVector*       gradient,
-                                             GMatrixSparse* curvature,
-                                             double*        npred) const;
+	virtual double likelihood(const GModels& models,
+                              GVector*       gradient,
+                              GMatrixSparse* curvature,
+                              double*        npred) const;
 
     // Other methods
-    void                  instrument(const std::string& instrument);
-    void                  on_regions(const GSkyRegions& regions);
-    void                  off_regions(const GSkyRegions& regions);
-    const GPha&           on_spec(void) const;
-    const GPha&           off_spec(void) const;
-    const GArf&           arf(void) const;
-	const GArf&           bgd(void) const;
-    const GRmf&           rmf(void) const;
-	std::vector<double>   alpha(void) const;
-	double                offtime(void) const;
-    void                  fill(const GCTAObservation& obs);
-    void                  compute_response(const GCTAObservation& obs,
-	                                       const GModels& models,
-                                           const GEbounds& etrue);
+    void        instrument(const std::string& instrument);
+    void        on_regions(const GSkyRegions& regions);
+    void        off_regions(const GSkyRegions& regions);
+    const GPha& on_spec(void) const;
+    const GPha& off_spec(void) const;
+    const GArf& arf(void) const;
+	const GArf& bgd(void) const;
+    const GRmf& rmf(void) const;
+    void        fill(const GCTAObservation& obs);
+    void        compute_response(const GCTAObservation& obs,
+	                             const GModels& models,
+                                 const GEbounds& etrue);
 };
 
 
