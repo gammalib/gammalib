@@ -353,6 +353,29 @@ double GObservation::model(const GModels& models,
 
 
 /***********************************************************************//**
+ * @brief Return total number of observed events
+ *
+ * @returns Total number of observed events.
+ *
+ * Returns the total number of observed events.
+ ***************************************************************************/
+int GObservation::nobserved(void) const
+{
+    // Initialise number of observed events
+    int nobserved = 0;
+
+    // Extract number of observed events from event contained
+    const GEvents* events = this->events();
+    if (events != NULL) {
+        nobserved = events->number();
+    }
+
+    // Return number of observed events
+    return nobserved;
+}
+
+
+/***********************************************************************//**
  * @brief Return total number (and optionally gradient) of predicted counts
  *        for all models
  *
