@@ -16,8 +16,6 @@ sources = src/GCTASupport.cpp \
           src/GCTAException.cpp \
           src/GCTAObservation.cpp \
           src/GCTAOnOffObservation.cpp \
-          src/GCTAOnOffObservations.cpp \
-		  src/GCTAOnOffObservations_likelihood.cpp \
           src/GCTAEventList.cpp \
           src/GCTAEventAtom.cpp \
           src/GCTAEventCube.cpp \
@@ -68,7 +66,6 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
                      include/GCTAOnOffObservation.hpp \
-                     include/GCTAOnOffObservations.hpp \
                      include/GCTAEventList.hpp \
                      include/GCTAEventAtom.hpp \
                      include/GCTAEventCube.hpp \

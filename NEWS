@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-25 April 2016
+27 April 2016
 
 
 1. Introduction
@@ -13,6 +13,9 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
+The following classes have been removed:
+- GCTAOnOffObservations
+
 The following methods have been added to the public interface:
 - GApplication::logFileClose()
 - GObservation::events() (non-const variant)
@@ -324,6 +327,9 @@ constructor (#1744).
 The interpolation scheme was changed in GCTABackground3D. Formerly, if one of the
 rates above and below the requested energy was zero, the rate from the non-zero
 node was taken, resulting in a discontinuity. Now the rate is set to zero.
+
+The GCTAOnOffObservations container class has now been removed, as On/Off observations
+are now stored as any other observation in the GObservations container (#1669).
 
 
 21. COMPTEL interface

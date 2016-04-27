@@ -1,8 +1,9 @@
-2016-04-25  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-04-27  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Remove GCTAOnOffObservations class (#1669).
         Change interpolation scheme in GCTABackground3D.
         Add GCsv::append() method (#1773).
         Add GTestSuite::test_value() string method (#1772).

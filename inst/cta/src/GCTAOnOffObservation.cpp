@@ -28,6 +28,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
+#include "GObservationRegistry.hpp"
 #include "GTools.hpp"
 #include "GModels.hpp"
 #include "GModelSky.hpp"
@@ -44,7 +46,13 @@
 #include "GCTAModelIrfBackground.hpp"
 #include "GCTAOnOffObservation.hpp"
 
+/* __ Globals ____________________________________________________________ */
+const GCTAOnOffObservation g_onoff_obs_cta_seed;
+const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
+
 /* __ Method name definitions ____________________________________________ */
+#define G_RESPONSE_SET           "GCTAOnOffObservation::response(GResponse&)"
+#define G_RESPONSE_GET                     "GCTAOnOffObservation::response()"
 #define G_WRITE                   "GCTAOnOffObservation::write(GXmlElement&)"
 #define G_READ                     "GCTAOnOffObservation::read(GXmlElement&)"
 #define G_FILL                 "GCTAOnOffObservation::fill(GCTAObservation&)"
@@ -218,6 +226,67 @@ void GCTAOnOffObservation::clear(void)
 GCTAOnOffObservation* GCTAOnOffObservation::clone(void) const
 {
     return new GCTAOnOffObservation(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set response function
+ *
+ * @param[in] rsp Response function.
+ *
+ * @exception GException::invalid_argument
+ *            Invalid response class specified.
+ *
+ * Sets the response function for the observation.
+ ***************************************************************************/
+void GCTAOnOffObservation::response(const GResponse& rsp)
+{
+    // Cast response dynamically
+    const GCTAResponse* ptr = dynamic_cast<const GCTAResponse*>(&rsp);
+
+    // Throw exception if response is not of correct type
+    if (ptr == NULL) {
+        std::string cls = std::string(typeid(&rsp).name());
+        std::string msg = "Invalid response type \""+cls+"\" provided on "
+                          "input. Please specify a \"GCTAResponse\" "
+                          "as argument.";
+        throw GException::invalid_argument(G_RESPONSE_SET, msg);
+    }
+
+    // Free response
+    if (m_response != NULL) delete m_response;
+
+    // Clone response function
+    m_response = ptr->clone();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to CTA response function
+ *
+ * @return Pointer to CTA response function.
+ *
+ * @exception GException::invalid_value
+ *            No valid response found in CTA observation.
+ *
+ * Returns a pointer to the CTA response function. An exception is thrown if
+ * the pointer is not valid, hence the user does not need to verify the
+ * validity of the pointer.
+ ***************************************************************************/
+const GCTAResponse* GCTAOnOffObservation::response(void) const
+{
+    // Throw an exception if the response pointer is not valid
+    if (m_response == NULL) {
+        std::string msg = "No valid response function found in CTA On/Off "
+                          "observation.\n";
+        throw GException::invalid_value(G_RESPONSE_GET, msg);
+    }
+
+    // Return pointer
+    return m_response;
 }
 
 
@@ -1227,12 +1296,11 @@ double GCTAOnOffObservation::model_off(const GModels&        models,
 /***********************************************************************
  * @brief Evaluate log-likelihood function for ON-OFF analysis
  *
- * @param[in] obs Observation.
- * @param[in] pars Optimizer parameters.
- * @param[in,out] curvature Curvature matrix.
- * @param[in,out] gradient Gradient.
- * @param[in,out] value Likelihood value.
- * @param[in,out] npred Number of predicted events.
+ * @param[in] models Models.
+ * @param[in,out] gradient Pointer to gradients.
+ * @param[in,out] curvature Pointer to curvature matrix.
+ * @param[in,out] npred Pointer to Npred value.
+ * @return Likelihood.
  *
  * @exception GException::invalid_value
  *            There are no model parameters.
@@ -1249,10 +1317,10 @@ double GCTAOnOffObservation::model_off(const GModels&        models,
  * The curvature matrix includes only terms containing first derivatives.
  *
  ***********************************************************************/
-double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels& models,
-											          GMatrixSparse* curvature,
-											          GVector*       gradient,
-											          double&        npred) const
+double GCTAOnOffObservation::likelihood(const GModels& models,
+                                        GVector*       gradient,
+                                        GMatrixSparse* curvature,
+                                        double*        npred) const
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -1267,7 +1335,7 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels& models,
     int    n_zero_data   = 0;
     double sum_data      = 0.0;
     double sum_model     = 0.0;
-	double init_npred    = npred;
+	double init_npred    = *npred;
     #endif
 	
 	// Initialise likelihood value
@@ -1325,8 +1393,8 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels& models,
             // Now we have all predicted gamma and background events for
             // current energy bin. Update the log(likelihood) and predicted
             // number of events
-            value += -non * log(nonpred) + nonpred - noff * log(nbgd) + nbgd;
-            npred += nonpred;
+            value  += -non * log(nonpred) + nonpred - noff * log(nbgd) + nbgd;
+            *npred += nonpred;
 		  
             // Update statistics
             #if G_OPT_DEBUG
@@ -1473,9 +1541,12 @@ double GCTAOnOffObservation::likelihood_poisson_onoff(const GModels& models,
 void GCTAOnOffObservation::init_members(void)
 {
     // Initialise members
-    m_name.clear();
-    m_id.clear();
     m_instrument = "CTA";
+    m_response   = NULL;
+    m_ontime     = 0.0;
+    m_offtime    = 0.0;
+    m_livetime   = 0.0;
+    m_deadc      = 1.0;
     m_on_spec.clear();
     m_off_spec.clear();
     m_arf.clear();
@@ -1497,9 +1568,11 @@ void GCTAOnOffObservation::init_members(void)
 void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
 {
     // Copy attributes
-    m_name        = obs.m_name;
-    m_id          = obs.m_id;
     m_instrument  = obs.m_instrument;
+    m_ontime      = obs.m_ontime;
+    m_offtime     = obs.m_offtime;
+    m_livetime    = obs.m_livetime;
+    m_deadc       = obs.m_deadc;
     m_on_spec     = obs.m_on_spec;
     m_off_spec    = obs.m_off_spec;
     m_arf         = obs.m_arf;
@@ -1507,6 +1580,9 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
     m_rmf         = obs.m_rmf;
     m_on_regions  = obs.m_on_regions;
     m_off_regions = obs.m_off_regions;
+
+    // Clone members
+    m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
 
     // Return
     return;
