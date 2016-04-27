@@ -557,6 +557,7 @@ void GSkyRegionCircle::init_members(void)
 	m_centre = GSkyDir();
 	m_radius = 0.0;
 	m_type   = "Circle";
+	m_solid  = 0.0;
 
 	//Return
 	return;
@@ -573,6 +574,7 @@ void GSkyRegionCircle::copy_members(const GSkyRegionCircle& region)
 	// Copy attributes
 	m_centre = region.m_centre;
 	m_radius = region.m_radius;
+	m_solid  = region.m_solid;
 
     // Return
     return;

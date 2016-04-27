@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAOnOffObservation.i - CTA on-off observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,7 +69,9 @@ public:
     // Methods
     void                  clear(void);
     GCTAOnOffObservation* clone(void) const;
-    std::string           classname(void) const;
+	std::string           classname(void) const;
+    void                  read(const GXmlElement& xml);
+    void                  write(GXmlElement& xml) const;
     void                  name(const std::string& name);
     void                  instrument(const std::string& instrument);
     void                  id(const std::string& id);
@@ -81,12 +83,27 @@ public:
     const GPha&           on_spec(void) const;
     const GPha&           off_spec(void) const;
     const GArf&           arf(void) const;
+	const GArf&           bgd(void) const;
     const GRmf&           rmf(void) const;
+	const double*         alpha(void) const;
+	const double          ontime(void) const;
+	const double          offtime(void) const;
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
+		                                   const GModels& models,
                                            const GEbounds& etrue);
-    void                  read(const GXmlElement& xml);
-    void                  write(GXmlElement& xml) const;
+    double                model_on(const GModels&             models,
+								   const GOptimizerPars&      pars,
+								   int                 ibin,
+								   GVector*            mod_grad) const;
+	double                model_off(const GModels&            models,
+									const GOptimizerPars&     pars,
+									int                 ibin,
+									GVector*            mod_grad) const;
+	double                likelihood_poisson_onoff(const GModels&        models,
+												   GMatrixSparse*  curvature,
+												   GVector*        gradient,
+												   double&         npred) const;
 };
 
 

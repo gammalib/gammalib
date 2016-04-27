@@ -17,6 +17,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAObservation.cpp \
           src/GCTAOnOffObservation.cpp \
           src/GCTAOnOffObservations.cpp \
+		  src/GCTAOnOffObservations_likelihood.cpp \
           src/GCTAEventList.cpp \
           src/GCTAEventAtom.cpp \
           src/GCTAEventCube.cpp \

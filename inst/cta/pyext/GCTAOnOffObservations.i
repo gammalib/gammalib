@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAOnOffObservations.i - CTA on-off observation container class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Pierrick Martin                             *
+ *  copyright (C) 2013 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,32 +39,72 @@ public:
     // Constructors and destructors
     GCTAOnOffObservations(void);
     GCTAOnOffObservations(const GCTAOnOffObservations& obs);
-    explicit GCTAOnOffObservations(const GFilename& filename);
+    explicit GCTAOnOffObservations(const std::string& filename);
     virtual ~GCTAOnOffObservations(void);
-
+	
+	// Implement virtual methods
+    virtual int                 size(void) const;
+    virtual bool                is_empty(void) const;
+    virtual void                remove(const int& index);
+    virtual void                reserve(const int& num);
+	
     // Methods
-    void                   clear(void);
-    GCTAOnOffObservations* clone(void) const;
-    std::string            classname(void) const;
-    GCTAOnOffObservation*  at(const int& index);
-    int                    size(void) const;
-    bool                   is_empty(void) const;
-    GCTAOnOffObservation*  set(const int& index, const GCTAOnOffObservation& obs);
-    GCTAOnOffObservation*  append(const GCTAOnOffObservation& obs);
-    GCTAOnOffObservation*  insert(const int& index, const GCTAOnOffObservation& obs);
-    void                   remove(const int& index);
-    void                   reserve(const int& num);
-    void                   extend(const GCTAOnOffObservations& obs);
-    bool                   contains(const std::string& instrument,
-                                    const std::string& id) const;
-	void                   load(const GFilename& filename);
-    void                   save(const GFilename& filename) const;
-    void                   read(const GXml& xml);
-    void                   write(GXml& xml) const;
-	void                   models(const GModels& models);
-    void                   models(const GFilename& filename);
-    const GModels&         models(void) const;	
+    void                        clear(void);
+    GCTAOnOffObservations*      clone(void) const;
+	std::string                 classname(void) const;
+    GCTAOnOffObservation*       at(const int& index);
+    const GCTAOnOffObservation* at(const int& index) const;
+    GCTAOnOffObservation*       set(const int& index, const GCTAOnOffObservation& obs);
+    GCTAOnOffObservation*       append(const GCTAOnOffObservation& obs);
+    GCTAOnOffObservation*       insert(const int& index, const GCTAOnOffObservation& obs);
+    void                        extend(const GCTAOnOffObservations& obs);
+    bool                        contains(const std::string& instrument,
+                                         const std::string& id) const;
+	void                        load(const std::string& filename);
+    void                        save(const std::string& filename) const;
+    void                        read(const GXml& xml);
+    void                        write(GXml& xml) const;
+	void                        models(const GModels& models);
+    void                        models(const std::string& filename);
+    const GModels&              models(void) const;	
+    void                        optimize(GOptimizer& opt);
+	void                        errors(GOptimizer& opt);
+	void                        errors_hessian(void);
+	double                      logL(void) const;
+	void                        eval(void);
+	double                      npred(void) const;
+	
+	// Optimizer function access method
+    const GCTAOnOffObservations::likelihood& function(void) const;
+	
 };
+
+// Likelihood function
+class likelihood : public GOptimizerFunction {
+public:
+    // Constructors and destructors
+    likelihood(void);
+    likelihood(GCTAOnOffObservations* obs);
+    likelihood(const likelihood& fct);
+    ~likelihood(void);
+	
+    // Implemented pure virtual base class methods
+	virtual void           eval(const GOptimizerPars& pars);
+    virtual double         value(void) const;
+    virtual GVector*       gradient(void);
+    virtual GMatrixSparse* curvature(void);
+	
+    // Other methods
+    void          set(GCTAOnOffObservations* obs);
+	double        npred(void) const;
+	GMatrixSparse hessian(const GOptimizerPars& pars);
+};
+%nestedworkaround GCTAOnOffObservations::likelihood;
+%{
+	// SWIG thinks that likelihood is a global class, so we need to trick the C++
+	// compiler into understanding this so called global type.
+	typedef GCTAOnOffObservations::likelihood likelihood;
+	%}
 
 
 /***********************************************************************//**
@@ -87,9 +127,6 @@ public:
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
-    }
-    int __len__() {
-        return (self->size());
     }
     GCTAOnOffObservations copy() {
         return (*self);

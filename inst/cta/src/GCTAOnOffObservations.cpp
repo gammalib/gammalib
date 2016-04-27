@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAOnOffObservations.cpp - ON/OFF Observation container class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Pierrick Martin                             *
+ *  copyright (C) 2013 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,7 +29,6 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
-#include "GFilename.hpp"
 #include "GException.hpp"
 #include "GCTAOnOffObservations.hpp"
 
@@ -95,7 +94,7 @@ GCTAOnOffObservations::GCTAOnOffObservations(const GCTAOnOffObservations& obs)
  * from a XML file. Please refer to the read() method for more information
  * about the structure of the XML file.
  ***************************************************************************/
-GCTAOnOffObservations::GCTAOnOffObservations(const GFilename& filename)
+GCTAOnOffObservations::GCTAOnOffObservations(const std::string& filename)
 {
     // Initialise members
     init_members();
@@ -493,13 +492,13 @@ bool GCTAOnOffObservations::contains(const std::string& instrument,
  * Loads observation from a XML file into the container. Please refer to the
  * read() method for more information about the structure of the XML file.
  ***************************************************************************/
-void GCTAOnOffObservations::load(const GFilename& filename)
+void GCTAOnOffObservations::load(const std::string& filename)
 {
     // Clear any existing observations
     clear();
 
     // Load XML document
-    GXml xml(filename.url());
+    GXml xml(filename);
 
     // Read observations from XML document
     read(xml);
@@ -517,7 +516,7 @@ void GCTAOnOffObservations::load(const GFilename& filename)
  * Saves observations into a XML file. Please refer to the read() method for
  * more information about the structure of the XML file.
  ***************************************************************************/
-void GCTAOnOffObservations::save(const GFilename& filename) const
+void GCTAOnOffObservations::save(const std::string& filename) const
 {
     // Declare empty XML document
     GXml xml;
@@ -581,11 +580,11 @@ void GCTAOnOffObservations::read(const GXml& xml)
         // Get attributes
         std::string name       = obs->attribute("name");
         std::string id         = obs->attribute("id");
-        //std::string instrument = obs->attribute("instrument");
+        std::string instrument = obs->attribute("instrument");
 
         // Allocate observation 
-        // (only CTA at the moment, implement registry if more)
-        GCTAOnOffObservation* ptr = new GCTAOnOffObservation;
+		// (only CTA at the moment, implement registry if more)
+        GCTAOnOffObservation*  ptr = new GCTAOnOffObservation;
 
         // If observation is valid then read its definition from XML file
         if (ptr != NULL) {
@@ -601,7 +600,8 @@ void GCTAOnOffObservations::read(const GXml& xml)
 
         // ... otherwise throw an exception
         else {
-            std::string msg = "Problem allocating GCTAOnOffObservation object.";
+			std::string msg =
+			"Problem allocating GCTAOnOffObservation object.";
             throw GException::invalid_instrument(G_READ, msg);
         }
 
@@ -684,7 +684,7 @@ void GCTAOnOffObservations::write(GXml& xml) const
  * method for more information about the expected structure of the XML
  * file. 
  ***************************************************************************/
-void GCTAOnOffObservations::models(const GFilename& filename)
+void GCTAOnOffObservations::models(const std::string& filename)
 {
     // Load models
     m_models.load(filename);
@@ -735,6 +735,158 @@ std::string GCTAOnOffObservations::print(const GChatter& chatter) const
 }
 
 
+/***********************************************************************//**
+ * @brief Optimize model parameters using optimizer
+ *
+ * @param[in] opt Optimizer.
+ *
+ * Optimizes the free parameters of the models by using the optimizer
+ * that has been provided by the @p opt argument.
+ ***************************************************************************/
+void GCTAOnOffObservations::optimize(GOptimizer& opt)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+	
+	// Optimize model parameters
+    opt.optimize(m_fct, pars);
+	
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes parameter errors using optimizer
+ *
+ * @param[in] opt Optimizer.
+ *
+ * Calculates the errors of the free parameters of the models by using
+ * the optimizer that has been provided by the @p opt argument.
+ ***************************************************************************/
+void GCTAOnOffObservations::errors(GOptimizer& opt)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
+    // Compute model parameter errors
+    opt.errors(m_fct, pars);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Computes parameter errors using hessian matrix and optimizer
+ *
+ * Calculates the errors of the free model parameters as the square roots
+ * of the diagonal elements of the inverse Hessian matrix. The Hessian
+ * matrix is computed using finite differences.
+ ***************************************************************************/
+void GCTAOnOffObservations::errors_hessian(void)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
+    // Get number of parameters
+    int npars = pars.size();
+
+    // Compute Hessian matrix
+    GMatrixSparse hessian = m_fct.hessian(pars);
+
+    // Signal no diagonal element loading
+    bool diag_loaded = false;
+
+    // Loop over error computation (maximum 2 passes)
+    for (int i = 0; i < 2; ++i) {
+
+        // Solve: hessian * X = unit
+        try {
+            GMatrixSparse decomposition = hessian.cholesky_decompose(true);
+            GVector unit(npars);
+            for (int ipar = 0; ipar < npars; ++ipar) {
+                unit[ipar] = 1.0;
+                GVector x  = decomposition.cholesky_solver(unit, true);
+                if (x[ipar] >= 0.0) {
+                    pars[ipar]->factor_error(sqrt(x[ipar]));
+                }
+                else {
+                    pars[ipar]->factor_error(0.0);
+                }
+                unit[ipar] = 0.0;
+            }
+        }
+        catch (GException::matrix_zero &e) {
+            std::cout << "GCTAOnOffObservations::errors_hessian: "
+                      << "All hessian matrix elements are zero."
+                      << std::endl;
+            break;
+        }
+        catch (GException::matrix_not_pos_definite &e) {
+
+            // Load diagonal if this has not yet been tried
+            if (!diag_loaded) {
+
+                // Flag errors as inaccurate
+                std::cout << "Non-Positive definite hessian matrix encountered."
+                          << std::endl;
+                std::cout << "Load diagonal elements with 1e-10."
+                          << " Fit errors may be inaccurate."
+                          << std::endl;
+
+                // Try now with diagonal loaded matrix
+                for (int ipar = 0; ipar < npars; ++ipar) {
+                    hessian(ipar,ipar) += 1.0e-10;
+                }
+
+                // Signal loading
+                diag_loaded = true;
+
+                // Try again
+                continue;
+
+            } // endif: diagonal has not yet been loaded
+
+            // ... otherwise signal an error
+            else {
+                std::cout << "Non-Positive definite hessian matrix encountered,"
+                          << " even after diagonal loading." << std::endl;
+                break;
+            }
+        }
+        catch (std::exception &e) {
+            throw;
+        }
+
+        // If no error occured then break now
+        break;
+
+    } // endfor: looped over error computation
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate function
+ *
+ * Evaluates the likelihood funtion at the actual set of parameters.
+ ***************************************************************************/
+void GCTAOnOffObservations::eval(void)
+{
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
+    // Compute log-likelihood
+    m_fct.eval(pars);
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -749,6 +901,7 @@ void GCTAOnOffObservations::init_members(void)
     // Initialise members
     m_obs.clear();
     m_models.clear();
+	m_fct.set(this);  //!< Makes sure that optimizer points to this instance
 
     // Return
     return;
@@ -765,7 +918,9 @@ void GCTAOnOffObservations::init_members(void)
  ***************************************************************************/
 void GCTAOnOffObservations::copy_members(const GCTAOnOffObservations& obs)
 {
-    // Copy attributes
+    // Copy attributes. WARNING: The member m_fct SHALL not be copied to not
+    // corrupt its m_this pointer which should always point to the proper
+    // observation. See note in init_members().
     m_models = obs.m_models;
 
     // Copy observations
