@@ -19,6 +19,7 @@ The following classes have been removed:
 The following methods have been added to the public interface:
 - GApplication::logFileClose()
 - GObservation::events() (non-const variant)
+- GObservation::nobserved()
 - GObservations::nobserved()
 - GFilename::operator std::string()
 - GFilename::exists()
@@ -190,7 +191,9 @@ The multiplication and division operators have been removed (#1714).
 
 The GObservations::nobserved() method has been added that returns the
 total number of events in an observation container. The method is used
-by the print() method (#1723).
+by the print() method. The method uses the GObservation::nobserved()
+method that have also been added to determine for each observation
+the number of observed events (#1723).
 
 A division operator has been added to the GEnergy method to compute the
 ratio of two energies.

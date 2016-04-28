@@ -86,6 +86,7 @@ public:
                               GVector*       gradient,
                               GMatrixSparse* curvature,
                               double*        npred) const;
+    virtual int    nobserved(void) const;
 
     // Other methods
     void        instrument(const std::string& instrument);
@@ -98,7 +99,6 @@ public:
     const GRmf& rmf(void) const;
     void        fill(const GCTAObservation& obs);
     void        compute_response(const GCTAObservation& obs,
-	                             const GModels& models,
                                  const GEbounds& etrue);
 };
 

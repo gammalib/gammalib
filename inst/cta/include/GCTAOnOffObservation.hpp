@@ -79,6 +79,7 @@ public:
                               GVector*       gradient,
                               GMatrixSparse* curvature,
                               double*        npred) const;
+    virtual int    nobserved(void) const;
 
     // Other methods
     void        instrument(const std::string& instrument);
@@ -91,7 +92,6 @@ public:
     const GRmf& rmf(void) const;
     void        fill(const GCTAObservation& obs);
     void        compute_response(const GCTAObservation& obs,
-	                             const GModels& models,
                                  const GEbounds& etrue);
 
 protected:
@@ -101,7 +101,7 @@ protected:
     void   free_members(void);
 	void   compute_alpha(const GCTAObservation& obs);
     void   compute_arf(const GCTAObservation& obs);
-	void   compute_bgd(const GCTAObservation& obs, const GModels& models);
+	void   compute_bgd(const GCTAObservation& obs);
     void   compute_rmf(const GCTAObservation& obs, const GEbounds& etrue);
     double model_on(const GModels& models, int ibin, GVector* mod_grad) const;
 	double model_off(const GModels& models, int ibin, GVector* mod_grad) const;
@@ -287,6 +287,18 @@ inline
 const GRmf& GCTAOnOffObservation::rmf(void) const
 {
     return (m_rmf);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Redistribution Matrix File
+ *
+ * @return Redistribution Matrix File.
+ ***************************************************************************/
+inline
+int GCTAOnOffObservation::nobserved(void) const
+{
+    return (m_on_spec.counts());
 }
 
 #endif /* GCTAONOFFOBSERVATION_HPP */

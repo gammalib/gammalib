@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GCTAOnOffObservation.cpp - CTA on-off observation class        *
+ *          GCTAOnOffObservation.cpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2013-2016 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAOnOffObservation.cpp
- * @brief CTA on-off observation class implementation
+ * @brief CTA On/Off observation class implementation
  * @author Chia-Chun Lu & Christoph Deil
  */
 
@@ -59,13 +59,12 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 #define G_COMPUTE_ALPHA                "GCTAOnOffObservation::compute_alpha("\
                                                           "GCTAObservation&)"
 #define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
-#define G_COMPUTE_BGD   "GCTAOnOffObservation::compute_bgd(GCTAObservation&,"\
-                                                                  "GModels&)"
+#define G_COMPUTE_BGD   "GCTAOnOffObservation::compute_bgd(GCTAObservation&)"
 #define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&,"\
                                                                 " GEbounds&)"
-#define G_POISSON_ONOFF     "GCTAOnOffObservation::likelihood_poisson_onoff("\
-                                 "GModels&, GOptimizerPars&, GMatrixSparse&,"\
-                                               " GVector&, double&, double&)"
+#define G_LIKELIHOOD            "GCTAOnOffObservation::likelihood(GModels&, "\
+                                          "GOptimizerPars&, GMatrixSparse&, "\
+                                                "GVector&, double&, double&)"
 
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
@@ -76,6 +75,8 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_EVAL_TIMING
+//#define G_OPT_DEBUG
 
 
 /*==========================================================================
@@ -100,7 +101,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs CTA ON/OFF observation.
+ * @param[in] obs CTA On/Off observation.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
 { 
@@ -119,8 +120,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
  * @brief Parameter constructor
  *
  * @param[in] ereco Reconstructed energy bins.
- * @param[in] on ON regions.
- * @param[in] off OFF regions.
+ * @param[in] on On regions.
+ * @param[in] off Off regions.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GEbounds&    ereco,
                                            const GSkyRegions& on,
@@ -164,10 +165,10 @@ GCTAOnOffObservation::~GCTAOnOffObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs CTA ON/OFF observation.
- * @return CTA ON/OFF observation.
+ * @param[in] obs CTA On/Off observation.
+ * @return CTA On/Off observation.
  *
- * Assigns one CTA ON/OFF observation to another ON/OFF observation object.
+ * Assigns one CTA On/Off observation to another On/Off observation object.
  ***************************************************************************/
 GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation& obs)
 { 
@@ -199,7 +200,7 @@ GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation
 /***********************************************************************//**
  * @brief Clear instance
  *
- * Clears the ON/OFF observation. All class members will be set to the
+ * Clears the On/Off observation. All class members will be set to the
  * initial state. Any information that was present in the object before will
  * be lost.
  ***************************************************************************/
@@ -219,9 +220,9 @@ void GCTAOnOffObservation::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
- * @return Pointer to deep copy of ON/OFF observation.
+ * @return Pointer to deep copy of On/Off observation.
  *
- * Returns a pointer to a deep copy of an ON/OFF observation.
+ * Returns a pointer to a deep copy of an On/Off observation.
  **************************************************************************/
 GCTAOnOffObservation* GCTAOnOffObservation::clone(void) const
 {
@@ -300,7 +301,7 @@ const GCTAResponse* GCTAOnOffObservation::response(void) const
  * @exception GException::xml_invalid_parnames
  *            Invalid parameter names found in XML element.
  *
- * Reads information for a CTA ON/OFF observation from an XML element.
+ * Reads information for a CTA On/Off observation from an XML element.
  * The expected format of the XML element is
  *
  *     <observation name="..." id="..." instrument="...">
@@ -440,7 +441,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
  * @exception GException::xml_invalid_parnames
  *            Invalid parameter names found in XML element.
  *
- * Writes information for a CTA ON/OFF observation into an XML element. The
+ * Writes information for a CTA On/Off observation into an XML element. The
  * expected format of the XML element is
  *
  *     <observation name="..." id="..." instrument="...">
@@ -535,6 +536,8 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
  *
  * @exception GException::invalid_value
  *            No CTA event list found in CTA observation.
+ *
+ * @todo Set the PHA spectra to zero before filling.
  ***************************************************************************/
 void GCTAOnOffObservation::fill(const GCTAObservation& obs)
 {
@@ -585,53 +588,16 @@ void GCTAOnOffObservation::fill(const GCTAObservation& obs)
  * @param[in] etrue True energy boundaries.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
-                                            const GModels&         models,
                                             const GEbounds&        etrue)
 {
 	// Compute response components
 	compute_arf(obs);
-	compute_bgd(obs, models);
+	compute_bgd(obs);
 	compute_rmf(obs, etrue);
 	compute_alpha(obs);
 
 	// Return
 	return;
-}
-
-
-/***********************************************************************//**
- * @brief Print On/Off observation information
- *
- * @return String containing On/Off observation information.
- ***************************************************************************/
-std::string GCTAOnOffObservation::print(const GChatter& chatter) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Continue only if chatter is not silent
-    if (chatter != SILENT) {
-    
-        // Append header
-        result.append("=== GCTAOnOffObservation ===");
-
-        // Append parameters
-        result.append("\n"+gammalib::parformat("Name")+m_name);
-        result.append("\n"+gammalib::parformat("Identifier")+m_id);
-
-        // Append spectra, ARF and RMF
-        result.append("\n"+m_on_spec.print(gammalib::reduce(chatter)));
-        result.append("\n"+m_off_spec.print(gammalib::reduce(chatter)));
-        result.append("\n"+m_arf.print(gammalib::reduce(chatter)));
-        result.append("\n"+m_rmf.print(gammalib::reduce(chatter)));
-
-        // Append regions
-        result.append("\n"+m_on_regions.print(gammalib::reduce(chatter)));
-        result.append("\n"+m_off_regions.print(gammalib::reduce(chatter)));
-    }
-
-    // Return result
-    return result;
 }
 
 
@@ -664,12 +630,12 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                                         double*        npred) const
 {
     // Timing measurement
-    #if G_EVAL_TIMING
+    #if defined(G_EVAL_TIMING)
     clock_t t_start = clock();
     #endif
 	
     // Initialise statistics
-    #if G_OPT_DEBUG
+    #if defined(G_OPT_DEBUG)
 	int    n_bins        = m_on_spec.size();
     int    n_used        = 0;
     int    n_small_model = 0;
@@ -679,18 +645,17 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 	double init_npred    = *npred;
     #endif
 	
-	// Initialise likelihood value
+	// Initialise log-likelihood value
     double value = 0.0;
 	
-	// Get number of parameters
-    int npars = models.size();
+	// Get number of model parameters in model container
+    int npars = models.npars();
 	
-	// Create model gradients array pointers (one for sky parameters, one for
-    // background parameters)
+	// Create model gradient vectors for sky and background parameters
 	GVector sky_grad(npars);
 	GVector bgd_grad(npars);
 
-	// Working arrays
+	// Allocate working array
 	GVector colvar(npars);
 	
 	// Check that there is at least one parameter
@@ -717,7 +682,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
             // Skip bin if model is too small (avoids -Inf or NaN gradients)
             double nonpred = ngam + m_alpha[i] * nbgd;
             if ((nbgd <= minmod) || (nonpred <= minmod)) {
-                #if G_OPT_DEBUG
+                #if defined(G_OPT_DEBUG)
                 n_small_model++;
                 #endif
                 continue;
@@ -730,7 +695,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
             *npred += nonpred;
 		  
             // Update statistics
-            #if G_OPT_DEBUG
+            #if defined(G_OPT_DEBUG)
             n_used++;
             sum_data  += non;
             sum_model += nonpred;
@@ -826,39 +791,77 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 		std::string msg ="No model parameter for the computation of the "
 						 "likelihood in observation \""+this->name()+
 		                 "\" (ID "+this->id()+").\n";
-		throw GException::invalid_value(G_POISSON_ONOFF,msg);
+		throw GException::invalid_value(G_LIKELIHOOD, msg);
 	}
 		
     // Dump statistics
-    #if G_OPT_DEBUG
+    #if defined(G_OPT_DEBUG)
+    std::cout << "Number of parameters: " << npars << std::endl;
     std::cout << "Number of bins: " << n_bins << std::endl;
     std::cout << "Number of bins used for computation: " << n_used << std::endl;
-    std::cout << "Number of bins excluded due to small model: " << n_small_model << std::endl;
+    std::cout << "Number of bins excluded due to small model: ";
+    std::cout << n_small_model << std::endl;
     std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
-    std::cout << "Sum of data (ON): " << sum_data << std::endl;
-    std::cout << "Sum of model (ON): " << sum_model << std::endl;
+    std::cout << "Sum of data (On): " << sum_data << std::endl;
+    std::cout << "Sum of model (On): " << sum_model << std::endl;
     std::cout << "Statistics: " << value << std::endl;
     #endif
 	
     // Optionally dump gradient and curvature matrix
-    #if G_EVAL_DEBUG
+    #if defined(G_EVAL_DEBUG)
     std::cout << *gradient << std::endl;
     std::cout << *curvature << std::endl;
     #endif
 	
     // Timing measurement
-    #if G_EVAL_TIMING
+    #if defined(G_EVAL_TIMING)
     #ifdef _OPENMP
     double t_elapse = omp_get_wtime()-t_start;
     #else
     double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     #endif
-    std::cout << "GCTAOnOffObservation::optimizer::likelihood_poisson_onoff: CPU usage = "
+    std::cout << "GCTAOnOffObservation::optimizer::likelihood: CPU usage = "
 	          << t_elapse << " sec" << std::endl;
     #endif
 	
     // Return
     return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Print On/Off observation information
+ *
+ * @return String containing On/Off observation information.
+ ***************************************************************************/
+std::string GCTAOnOffObservation::print(const GChatter& chatter) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+    
+        // Append header
+        result.append("=== GCTAOnOffObservation ===");
+
+        // Append parameters
+        result.append("\n"+gammalib::parformat("Name")+m_name);
+        result.append("\n"+gammalib::parformat("Identifier")+m_id);
+
+        // Append spectra, ARF and RMF
+        result.append("\n"+m_on_spec.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_off_spec.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_arf.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_rmf.print(gammalib::reduce(chatter)));
+
+        // Append regions
+        result.append("\n"+m_on_regions.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_off_regions.print(gammalib::reduce(chatter)));
+    }
+
+    // Return result
+    return result;
 }
 
 
@@ -896,7 +899,7 @@ void GCTAOnOffObservation::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] obs CTA on-off observation.
+ * @param[in] obs CTA On/Off observation.
  ***************************************************************************/
 void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
 {
@@ -940,6 +943,8 @@ void GCTAOnOffObservation::free_members(void)
  *
  * @exception GException::invalid_value
  *            No CTA response found in CTA observation.
+ *
+ * @todo What about the livetime? What about the solid angle of the regions?
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 {
@@ -1057,7 +1062,9 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
  * @exception GException::invalid_value
  *            No CTA response found in CTA observation.
  *
- * @todo Implement GCTAResponse::npred usage.
+ * @todo Implement GCTAResponse::npred usage instead of computing Aeff
+ *       (required the integration of PSF over On region).
+ * @todo Allow general region, not only circles.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 {
@@ -1133,17 +1140,17 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 
 /***********************************************************************//**
  * @brief Compute background rate in Off observations
- *        (taken from IRF, does not include rescaling by spectral function)
  *
  * @param[in] obs CTA observation.
- * @param[in] models Model container.
  *
  * @exception GException::invalid_argument
  *            Specified observation does not contain relevant response or
  *            background information
+ *
+ * @todo Should implement integration of background model over region.
+ * @todo Allow general region, not only circles.
  ***************************************************************************/
-void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
-                                       const GModels&         models)
+void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
 {	
     // Get energy boundaries from on spectrum
 	GEbounds ereco = m_on_spec.ebounds();
@@ -1160,77 +1167,53 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
 		// Initialize background rate array
     	m_bgd = GArf(ereco);
 	
-		// Loop over models to find background
-    	for (int j = 0; j < models.size(); ++j) {
-			
-	    	// Get model pointer. Fall through if pointer is not valid
-	    	const GModel* mptr = models[j];
-	    	if (mptr == NULL) {
-                continue;
-            }
-				
-            // Fall through if model does not apply to specific instrument and
-            // observation identifier
-            if (!mptr->is_valid(this->instrument(), this->id())) {
-                continue;
-            }
-				
-            // Fall through if this model component is not a background
-            // component of type GCTAModelIrfBackground
-            if (dynamic_cast<const GCTAModelIrfBackground*>(mptr) == NULL) {
-                continue;
-            }
-					
-            // Get pointer on CTA IRF response
-            const GCTAResponseIrf* rsp =
-                  dynamic_cast<const GCTAResponseIrf*>(obs.response());
-            if (rsp == NULL) {
-                std::string msg = "Specified observation does not contain an "
-                                  "IRF response.\n" + obs.print();
-                throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-            }
+        // Get pointer on CTA IRF response
+        const GCTAResponseIrf* rsp =
+              dynamic_cast<const GCTAResponseIrf*>(obs.response());
+        if (rsp == NULL) {
+            std::string msg = "Specified observation does not contain an "
+                              "IRF response.\n" + obs.print();
+            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
+        }
 
-            // Retrieve pointer to CTA background
-            const GCTABackground* bgd = rsp->background();
-            if (bgd == NULL) {
-                std::string msg = "Specified observation contains no "
-                                  "background information.\n" + obs.print();
-                throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-            }
+        // Retrieve pointer to CTA background
+        const GCTABackground* bgd = rsp->background();
+        if (bgd == NULL) {
+            std::string msg = "Specified observation contains no "
+                              "background information.\n" + obs.print();
+            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
+        }
 					
-            // Loop over Off regions
-            for (int m = 0; m < m_off_regions.size(); ++m)  {
+        // Loop over Off regions
+        for (int m = 0; m < m_off_regions.size(); ++m)  {
 						
-                // Get region centre direction, fall through if region is not
-                // of type GSkyRegionCircle
-                const GSkyRegionCircle* skyreg =
-                      dynamic_cast<const GSkyRegionCircle*>(m_off_regions[m]);
-				if (skyreg == NULL) {
-                    continue;
-                }
+            // Get region centre direction, fall through if region is not
+            // of type GSkyRegionCircle
+            const GSkyRegionCircle* skyreg =
+                 dynamic_cast<const GSkyRegionCircle*>(m_off_regions[m]);
+            if (skyreg == NULL) {
+                continue;
+            }
 								
-                // Get centre of circular region
-                GSkyDir centreg = skyreg->centre();
+            // Get centre of circular region
+            GSkyDir centreg = skyreg->centre();
 								
-                // Set direction to centre of the region in instrument
-                // coordinates
-                GCTAInstDir offdir = obspnt.instdir(centreg);
+            // Set direction to centre of the region in instrument coordinates
+            GCTAInstDir offdir = obspnt.instdir(centreg);
 							
-                // Loop over energy bins
-                for (int i = 0; i < nreco; ++i) {
+            // Loop over energy bins
+            for (int i = 0; i < nreco; ++i) {
 
-                    // Get log energy bin mean
-                    double logEreco = m_on_spec.ebounds().elogmean(i).log10TeV();
+                // Get log energy bin mean
+                double logEreco = m_on_spec.ebounds().elogmean(i).log10TeV();
 
-                    // Get rate in events/s/MeV
-                    m_bgd[i] += (*bgd)(logEreco, offdir.detx(), offdir.dety()) *
-                                skyreg->solidangle();
+                // Get rate in events/s/MeV
+                m_bgd[i] += (*bgd)(logEreco, offdir.detx(), offdir.dety()) *
+                            skyreg->solidangle();
 
-                } // endfor: looped over energy bins
-				
-            } // endfor: looped over sky regions
-			
-		} // endfor: looped over model component
+            } // endfor: looped over energy bins
+
+        } // endfor: looped over sky regions
 		
 	} // endif: there were spectral bins
 
@@ -1250,6 +1233,7 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs,
  *
  * @todo Check if we really should use reconstructed energy in the Aeff
  *       access.
+ * @todo Generalise to any kind of sky region
  ***************************************************************************/
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                        const GEbounds&        etrue)
@@ -1396,7 +1380,7 @@ double GCTAOnOffObservation::model_on(const GModels& models,
 				
             // Fall through if model does not apply to specific instrument
             // and observation identifier
-            if (!mptr->is_valid(this->instrument(), this->id())) {
+            if (!mptr->is_valid(instrument(), id())) {
                 ipar += mptr->size();
                 continue;
             }
@@ -1407,7 +1391,7 @@ double GCTAOnOffObservation::model_on(const GModels& models,
                 ipar += mptr->size();
                 continue;
             }
-																											
+					
             // Increase parameter counter for spatial parameter
             GModelSpatial* spatial = sky->spatial();
             if (spatial != NULL)  {
@@ -1466,6 +1450,11 @@ double GCTAOnOffObservation::model_on(const GModels& models,
  *
  * The method assumes that the model parameters are stored in the order
  * spatial-spectral-temporal.
+ *
+ * @todo So far only handles the GCTAModelIrfBackground background model;
+ *       Should be more generic, but there is maybe for the moment no
+ *       other choice than implementing something for all possible
+ *       background models; that's not very satisfactory ...
  ***********************************************************************/
 double GCTAOnOffObservation::model_off(const GModels& models,
 							           int            ibin,

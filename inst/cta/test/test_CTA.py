@@ -289,10 +289,12 @@ class Test(gammalib.GPythonTestSuite):
         crab = gammalib.GSkyDir()
         crab.radec_deg(83.6331, 22.0145)
         on = gammalib.GSkyRegions()
-        on.append(gammalib.GSkyRegionCircle(crab, 1.0))
+        on.append(gammalib.GSkyRegionCircle(crab, 0.5))
 
         # Create Off region
-        off = on
+        crab.radec_deg(83.6331, 23.5145)
+        off = gammalib.GSkyRegions()
+        off.append(gammalib.GSkyRegionCircle(crab, 0.5))
         
         # Set energy binning
         etrue = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
@@ -300,13 +302,6 @@ class Test(gammalib.GPythonTestSuite):
         ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
                                       gammalib.GEnergy(10.0, 'TeV'))
 
-        # Create background model
-        models       = gammalib.GModels()
-        bgd_spectrum = gammalib.GModelSpectralConst(1.0)
-        bgd_model    = gammalib.GCTAModelIrfBackground(bgd_spectrum)
-        bgd_model.name('Background')
-        bgd_model.instruments('CTA')
-        models.append(bgd_model)
 
         # Create On/Off observations by filling all events found in
         # the observation container and computing the response
@@ -316,8 +311,20 @@ class Test(gammalib.GPythonTestSuite):
         for run in inobs:
             onoff = gammalib.GCTAOnOffObservation(ereco, on, off)
             onoff.fill(run)
-            onoff.compute_response(run, models, etrue)
+            onoff.compute_response(run, etrue)
             outobs.append(onoff)
+
+        # Load model container and attach it to the observations
+        models = gammalib.GModels('../inst/cta/test/data/crab_irf.xml')
+        outobs.models(models)
+
+        # Perform maximum likelihood fit
+        lm = gammalib.GOptimizerLM()
+        outobs.optimize(lm)
+        outobs.errors(lm)
+        #print(lm)
+        #print(outobs)
+        #print(outobs.models())
 
         # Save PHA, ARF and RMFs
         for run in outobs:
