@@ -1,7 +1,9 @@
 GammaLib information
 ====================
-Version: 1.1.0.dev1 (30 April 2016)
-Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
+* Version: 1.1.0.dev1 (30 April 2016)
+* Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
+
+[![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
 
 
 License information
@@ -22,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 What's new in this release?
 ===========================
-See the files "NEWS" and "ChangeLog".
+See the files [NEWS](NEWS) and [ChangeLog](ChangeLog).
 
 
 What is the GammaLib anyway?
