@@ -32,9 +32,9 @@
 AC_INIT([gammalib], [1.1.0.dev1], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects])
-#AM_INIT_AUTOMAKE([gnu no-dependencies subdir-objects])
-#AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects serial-tests])
+AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects foreign])
+#AM_INIT_AUTOMAKE([gnu no-dependencies subdir-objects foreign])
+#AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability subdir-objects serial-tests foreign])
 AC_CONFIG_HEADER([config.h])
 
 

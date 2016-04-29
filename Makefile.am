@@ -27,7 +27,7 @@ doc_DATA = \
 	   COPYING \
        INSTALL \
 	   NEWS \
-	   README
+	   README.md
 docdir = ${datadir}/doc/${PACKAGE}
 
 # Extra files to be distributed in the tar file
