@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 1.1.0 (18 January 2016)
+Version: 1.1.0.dev1 (30 April 2016)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -41,8 +41,8 @@ data analysis framework that enables simultaneous multi-mission analysis.
 
 Web sites
 =========
-http://cta.irap.omp.eu/gammalib/                  - for end users
-https://cta-redmine.irap.omp.eu/projects/gammalib - for developers
+* http://cta.irap.omp.eu/gammalib/                  - for end users
+* https://cta-redmine.irap.omp.eu/projects/gammalib - for developers
 
 
 Prerequisites
@@ -57,9 +57,9 @@ can be found there.  If cfitsio does not already exist on your system,
 we recommend installation of cfitsio in the default GammaLib install
 directory as a shared library by typing:
 
-     % ./configure --prefix=/usr/local/gamma
-     % make shared
-     % make install
+     $ ./configure --prefix=/usr/local/gamma
+     $ make shared
+     $ make install
 
 GammaLib can also benefit from the presence of the readline library
 that provides line-editing and history capabilities for text input
@@ -72,25 +72,25 @@ Linux Installation
 ==================
 To build, verify and install GammaLib, simply type the following:
 
-     % ./configure
-     % make
-     % make check
-     % make install
+     $ ./configure
+     $ make
+     $ make check
+     $ make install
 
-By default GammaLib installs itself in /usr/local/gamma.  If you need to
+By default GammaLib installs itself in `/usr/local/gamma`.  If you need to
 install GammaLib in a different location or in your home directory, use
-the --prefix option to ./configure.  For example:
+the `--prefix` option to `./configure`.  For example:
 
-     % ./configure --prefix=/home/yourname/projects
-     % make
-     % make check
-     % make install
+     $ ./configure --prefix=/home/yourname/projects
+     $ make
+     $ make check
+     $ make install
 
 The file INSTALL details more about using configure. Also try
 
-     % ./configure --help.
+     $ ./configure --help.
 
-The `make check' command will run an extensive unit test to verify that
+The `make check` command will run an extensive unit test to verify that
 GammaLib was correctly built.  Make sure that all tests were successful. 
 
 
@@ -100,25 +100,25 @@ GammaLib is known to work on various flavors of OS X.  To cope with
 different system versions and architectures, there are two Mac
 specific configure options:
 
-     % ./configure --enable-universalsdk[=PATH]
+     $ ./configure --enable-universalsdk[=PATH]
 
 creates a universal build of GammaLib.  The optional argument specifies
 which OSX SDK should be used to perform the build.  This defaults to
-"/Developer/SDKs/MacOSX.10.4u.sdk".  Specify "/" when building on a 10.5
+`/Developer/SDKs/MacOSX.10.4u.sdk`.  Specify `/` when building on a 10.5
 system or higher, especially when building 64-bit code.
 
-     % ./configure --with-univeral-archs=VALUE
+     $ ./configure --with-univeral-archs=VALUE
 
 specifies the kind of universal build that should be created.  Possible
-values are: "32-bit", "3-way", "intel" or "all".  By default, a "32-bit" 
+values are: `32-bit`, `3-way`, `intel` or `all`.  By default, a `32-bit` 
 build will be made.  This option is only valid when
-"--enable-universalsdk" is specified.
+`--enable-universalsdk` is specified.
 
 These options are in particular needed if your Python architecture differs
 from the default architecture of your system.  To examine the Python
 architecture you may type:
 
-     % file `which python`
+     $ file `which python`
 
 which will return the architectures that are compiled in the Mach-0
 executable:
@@ -131,13 +131,13 @@ executable:
 If Python is 32-bit (ppc, i386) but the compiler produces by default
 64-bit code (ppc64, x86_64), the Python module will not work.  Using
 
-     % ./configure --enable-universalsdk=/
+     $ ./configure --enable-universalsdk=/
 
 will force a universal 32-bit build which creates code for ppc and 
 i386.  If on the other hand Python is 64-bit (ppc64, x86_64) but the
 compiler produces by default 32-bit code (ppc, i386), the option
 
-     % ./configure --enable-universalsdk=/ --with-univeral-archs=3-way
+     $ ./configure --enable-universalsdk=/ --with-univeral-archs=3-way
 
 will generate a universal build which contains 32-bit and 64-bit code.
 
@@ -169,7 +169,7 @@ Testing
 After building and before installing GammaLib, you should run the
 extensive unit test by typing:
 
-    % make check
+    $ make check
 
 If everything works successfully you should see
 
@@ -179,17 +179,17 @@ If everything works successfully you should see
 
 or
 
-============================================================================
-Testsuite summary for gammalib 1.1.0
-============================================================================
-# TOTAL: 20
-# PASS:  20
-# SKIP:  0
-# XFAIL: 0
-# FAIL:  0
-# XPASS: 0
-# ERROR: 0
-============================================================================
+    ============================================================================
+    Testsuite summary for gammalib 1.1.0.dev1
+    ============================================================================
+    # TOTAL: 20
+    # PASS:  20
+    # SKIP:  0
+    # XFAIL: 0
+    # FAIL:  0
+    # XPASS: 0
+    # ERROR: 0
+    ============================================================================
 
 at the end of the test (depending on your automake version).  If no Python
 support was compiled in, the number of tests performed will be reduced by one.
@@ -202,14 +202,14 @@ This will be done automatically by an initialisation script that will
 be installed in the bin directory.
 
 Assuming that you have installed GammaLib in the default directory 
-/usr/local/gamma you need to add the following to your .bashrc or 
-$HOME/.profile script on a Linux machine:
+`/usr/local/gamma` you need to add the following to your `$HOME/.bashrc` or 
+`$HOME/.profile` script on a Linux machine:
 
     export GAMMALIB=/usr/local/gamma
     source $GAMMALIB/bin/gammalib-init.sh
 
 If you use C shell or a variant then add the following to your
-.cshrc or .tcshrc script:
+`$HOME/.cshrc` or `$HOME/.tcshrc` script:
 
     setenv GAMMALIB /usr/local/gamma
     source $GAMMALIB/bin/gammalib-init.csh
@@ -220,7 +220,7 @@ Getting started
 The easiest way to start with GammaLib is by using the python interface.
 To start, type the following:
 
-    % python
+    $ python
     >>> import gammalib
     >>> models=gammalib.GModels()
     >>> print models
@@ -232,17 +232,17 @@ This examples allocates an empty GModels object that holds a collection
 of models.
 
 For examples, inspect the test directory, and the test directories
-of the instrument specific interfaces, e.g. inst/mwl/test, inst/lat/test,
-and inst/cat/test.
+of the instrument specific interfaces, e.g. `inst/mwl/test`, `inst/lat/test`,
+and `inst/cat/test`.
 
 
 Documentation
 =============
-The doc directory (usually at /usr/local/gamma/share/doc/gammalib)
+The doc directory (usually at `/usr/local/gamma/share/doc/gammalib`)
 contains the most recent set of updated documentation for this release.
 A detailed documentation can be created by typing:
 
-    % make doc
+    $ make doc
 
 before installing the library. Two types of documentation exist: 
 * code documentation
@@ -267,69 +267,76 @@ https://cta-redmine.irap.omp.eu/projects/gammalib/wiki/Submission_guidelines
 
 Known problems
 ==============
+
 Python support
-  GammaLib comes with Python wrappers so that all classes can be
-  directly used from Python.  To compile-in Python support, GammaLib
-  needs the Python.h header file, which on many distributions is not
-  installed by default.
-  To make Python.h available, install the Python developer package
-  in your distribution.  Otherwise you will not be able to use GammaLib
-  from Python.
+--------------
+
+GammaLib comes with Python wrappers so that all classes can be
+directly used from Python.  To compile-in Python support, GammaLib
+needs the Python.h header file, which on many distributions is not
+installed by default.
+To make Python.h available, install the Python developer package
+in your distribution.  Otherwise you will not be able to use GammaLib
+from Python.
 
 Readline support
-  Many distributions do not have the readline header files and symbolic
-  link to the shared library set up by default.  The same is true for the
-  ncurses library that is needed by readline.  To properly compile-in
-  readline support in GammaLib, make sure that the redline header files
-  exist and that the symbolic links are set.  In many distributions,
-  the shared redline and ncurses are located in /lib, while the symbolic
-  links are in /usr/lib.  Make sure that you have symbolic links with
-  names
+----------------
+Many distributions do not have the readline header files and symbolic
+link to the shared library set up by default.  The same is true for the
+ncurses library that is needed by readline.  To properly compile-in
+readline support in GammaLib, make sure that the redline header files
+exist and that the symbolic links are set.  In many distributions,
+the shared redline and ncurses are located in `/lib`, while the symbolic
+links are in `/usr/lib`.  Make sure that you have symbolic links with
+names
 
      libreadline.so
      libncurses.so
 
-  Symbolic links with an additional number attached, such as
-  libreadline.so.6 or libncurses.so.5 (which are found in many
-  distributions in the /lib directory) are not sufficient.
-  In many distributions, the appropriate headers and symbolic links
-  are installed if the proper readline and ncurses developer
-  packages are installed.
+Symbolic links with an additional number attached, such as
+`libreadline.so.6` or `libncurses.so.5` (which are found in many
+distributions in the `/lib` directory) are not sufficient.
+In many distributions, the appropriate headers and symbolic links
+are installed if the proper readline and ncurses developer
+packages are installed.
 
 Solaris
-  Although GammaLib builds on Solaris using the Sun compiler, there are
-  problems with global symbols in the shared library that prevent the
-  model registry to work correctly.  Furthermore, GammaLib is not able
-  to catch its own exceptions, which prevents the FITS interface to work
-  correctly.
-  GammaLib has however been built and tested successfully using the GNU
-  compiler, and this is the only build method that is currently supported.
-  Problems have also been encountered when compiling cfitsio versions
-  more recent than 3.250.  The problems have been reported to the cfitsio
-  developer team, and are likely to be solved in the future.  For the
-  time being, it is recommended to use cfitsio version 3.250 on Solaris.
+-------
+
+Although GammaLib builds on Solaris using the Sun compiler, there are
+problems with global symbols in the shared library that prevent the
+model registry to work correctly.  Furthermore, GammaLib is not able
+to catch its own exceptions, which prevents the FITS interface to work
+correctly.
+GammaLib has however been built and tested successfully using the GNU
+compiler, and this is the only build method that is currently supported.
+Problems have also been encountered when compiling cfitsio versions
+more recent than 3.250.  The problems have been reported to the cfitsio
+developer team, and are likely to be solved in the future.  For the
+time being, it is recommended to use cfitsio version 3.250 on Solaris.
 
 OpenSolaris
-  On OpenSolaris, the same problems concerning the SunStudio compiler
-  occur as for Solaris, and also here, the GNU compiler is the recommended
-  tool to build GammaLib.  Also here, cfitsio version 3.250 is the
-  recommended library as more recent version feature relocation
-  problems. GammaLib has been tested using gcc 4.3.2 on 
-  OpenSolaris 2009.06.  Make sure to create the symbolic links
+-----------
+On OpenSolaris, the same problems concerning the SunStudio compiler
+occur as for Solaris, and also here, the GNU compiler is the recommended
+tool to build GammaLib.  Also here, cfitsio version 3.250 is the
+recommended library as more recent version feature relocation
+problems. GammaLib has been tested using gcc 4.3.2 on 
+OpenSolaris 2009.06.  Make sure to create the symbolic links
 
      ln -s /usr/bin/gcc4.3.2 /usr/bin/gcc
      ln -s /usr/bin/g++4.3.2 /usr/bin/g++
 
-  which are not there by default to avoid excess warnings during
-  compilation. 
-  For OpenSolaris 2009.06, no readline package is available, hence 
-  readline support is not readily available.  Readline support can however
-  be enabled by directly installing the GNU ncurses and readline packages
-  from source (http://ftp.gnu.org/gnu).  This has been done successfully
-  on OpenSolaris 2009.06 for ncurses-5.9 and readline-6.2.  Make sure
-  to specify the `--with-shared' option when configuring ncurses, so
-  that the shared library will be built and installed.  Otherwise,
-  relocation errors may occur during compilation of GammaLib.
+which are not there by default to avoid excess warnings during
+compilation. 
+For OpenSolaris 2009.06, no readline package is available, hence 
+readline support is not readily available.  Readline support can however
+be enabled by directly installing the GNU ncurses and readline packages
+from source (http://ftp.gnu.org/gnu).  This has been done successfully
+on OpenSolaris 2009.06 for ncurses-5.9 and readline-6.2.  Make sure
+to specify the `--with-shared` option when configuring ncurses, so
+that the shared library will be built and installed.  Otherwise,
+relocation errors may occur during compilation of GammaLib.
 
 
 Contact
