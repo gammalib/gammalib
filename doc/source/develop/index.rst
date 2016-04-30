@@ -10,7 +10,11 @@ scripts, writing documentation, testing code, etc.
 
 We manage the GammaLib source code using `GitLab <https://cta-gitlab.irap.omp.eu>`_.
 We also have a `Redmine <https://cta-redmine.irap.omp.eu/projects/gammalib/>`_
-development platform to file issues.
+development platform to track issues.
+We use a continuous integration system based on
+`Jenkins <https://cta-jenkins.irap.omp.eu>`_
+and we monitor our code quality with
+`SonarQube <https://cta-sonar.irap.omp.eu/overview?id=612>`_.
 
 You may also want to get in the GammaLib information flow by subscribing to 
 the ctools@irap.omp.eu mailing list.
@@ -21,7 +25,7 @@ to allow newcomers to get familiar with the code base and the coding practices.
 You are highly invited to join one of the next coding sprints.
 
 You can also follow `@gammalib <https://twitter.com/gammalib>`_ on
-twitter to get informed about new release of GammaLib.
+twitter to get informed about new releases of GammaLib.
 
 Below a few links to learn how to contribute to GammaLib:
 
