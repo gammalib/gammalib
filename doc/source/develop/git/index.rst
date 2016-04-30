@@ -216,3 +216,27 @@ that a new branch exists in your project:
    :alt: Pushing a new branch
    :align: center
 
+
+Creating a pull request
+-----------------------
+
+Once the code is pushed into your repository you can create a request that
+your code should be merged into the GammaLib repository.
+For this you have to open the relevant issue in the
+`Redmine issue tracker <https://cta-redmine.irap.omp.eu/projects/gammalib/issues>`_
+and put the status of the issue to ``Pull request``:
+
+.. image:: pull-request.jpg
+   :width: 600px
+   :alt: Creating a pull request
+   :align: center
+
+You should indiciate in the notes in which repository and on which branch
+your change is.
+You should also describe the changes or addition you made to the code.
+Explain what you have done. Say if there is anything you’d like particular
+attention for - like a complicated change or some code you are not happy
+with.
+If you don’t think your request is ready to be merged, just say so in your
+pull request message.
+This is still a good way of getting some preliminary code review.
