@@ -4,6 +4,7 @@ GammaLib information
 * Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
+
 [![Quality Gate](https://cta-sonar.irap.omp.eu/api/badges/gate?key=gammalib)](https://cta-sonar.irap.omp.eu/dashboard/index/gammalib)
 
 
