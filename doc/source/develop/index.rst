@@ -1,7 +1,7 @@
 .. _develop:
 
-Developper documentation
-========================
+Developer documentation
+=======================
 
 GammaLib is an open source projet and you are highly welcome to contribute
 to the development.
@@ -28,5 +28,15 @@ Below a few links to learn how to contribute to GammaLib:
 .. toctree::
    :maxdepth: 1
 
-   git
+   git/index
    coding/index
+
+And here some status shields:
+
+.. image:: https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os
+   :target: https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os
+   :alt: Build Status
+
+.. image:: https://cta-sonar.irap.omp.eu/api/badges/gate?key=gammalib
+   :target: https://cta-sonar.irap.omp.eu/dashboard/index/gammalib
+   :alt: Quality Gate
