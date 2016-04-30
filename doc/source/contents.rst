@@ -7,16 +7,9 @@ Documentation
 =============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    about
    download
-   installation
-   quickstart
-   user_manual/index
-   howto/index
-   faq
-   issues
-   coding/index
-   develop
-   help
+   users/index
+   develop/index
