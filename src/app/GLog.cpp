@@ -777,10 +777,10 @@ std::string GLog::prefix(void) const
 void GLog::append(std::string arg)
 {
     // If the buffer is empty and at the beginning of a line or if the last
-    // charater is a \n, prepend a prefix at the beginning of the string to
-    // be inserted.
+    // character is a \n then prepend a prefix at the beginning of the string
+    // to be inserted.
     if ((m_buffer.size() == 0 && m_linestart) ||
-        m_buffer[m_buffer.size()-1] == '\n') {
+        (m_buffer.size() > 0 && m_buffer[m_buffer.size()-1] == '\n')) {
 
         // Prepend prefix
         arg.insert(0, prefix());
