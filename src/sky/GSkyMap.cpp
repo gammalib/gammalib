@@ -2731,12 +2731,15 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
     // Continue only if we have pixels
     if (size > 0) {
 
-        // Set dimension vector of all axes
+        // Set dimension vector of all axes. In case that only one map
+        // exists then create simply a 2D image
         std::vector<int> naxes;
         naxes.push_back(m_num_x);
         naxes.push_back(m_num_y);
-        for (int i = 0; i < ndim(); ++i) {
-            naxes.push_back(m_shape[i]);
+        if (m_num_maps > 1) {
+            for (int i = 0; i < ndim(); ++i) {
+                naxes.push_back(m_shape[i]);
+            }
         }
 
         // Allocate image
