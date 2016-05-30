@@ -37,12 +37,6 @@
 #include "GFitsImageUShort.hpp"
 #include "GTools.hpp"
 %}
-/*
-%include "std_vector.i"
-namespace std {
-   %template(FitsImageIntVector) vector<int>;
-}
-*/
 
 
 /***********************************************************************//**
