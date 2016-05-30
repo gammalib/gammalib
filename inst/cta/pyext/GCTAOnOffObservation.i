@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAOnOffObservation.i - CTA on-off observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2015 by Michael Mayer                               *
+ *  copyright (C) 2013-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -25,6 +25,7 @@
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GCTAObservation.hpp"
 #include "GCTAOnOffObservation.hpp"
 %}
 
@@ -55,9 +56,10 @@
 /***********************************************************************//**
  * @class GCTAOnOffObservation
  *
- * @brief CTA on-off observation class
+ * @brief CTA On/Off observation class
  ***************************************************************************/
-class GCTAOnOffObservation : public GBase {
+class GCTAOnOffObservation : public GObservation {
+
 public:
     // Constructors and destructors
     GCTAOnOffObservation(void);
@@ -66,27 +68,38 @@ public:
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  
-    // Methods
-    void                  clear(void);
-    GCTAOnOffObservation* clone(void) const;
-    std::string           classname(void) const;
-    void                  name(const std::string& name);
-    void                  instrument(const std::string& instrument);
-    void                  id(const std::string& id);
-    void                  on_regions(const GSkyRegions& regions);
-    void                  off_regions(const GSkyRegions& regions);
-    const std::string&    name(void) const;
-    const std::string&    instrument(void) const;
-    const std::string&    id(void) const;
-    const GPha&           on_spec(void) const;
-    const GPha&           off_spec(void) const;
-    const GArf&           arf(void) const;
-    const GRmf&           rmf(void) const;
-    void                  fill(const GCTAObservation& obs);
-    void                  compute_response(const GCTAObservation& obs,
-                                           const GEbounds& etrue);
-    void                  read(const GXmlElement& xml);
-    void                  write(GXmlElement& xml) const;
+    // Implemented pure virtual methods
+    virtual void                  clear(void);
+    virtual GCTAOnOffObservation* clone(void) const;
+	virtual std::string           classname(void) const;
+    virtual void                  response(const GResponse& rsp);
+    virtual const GResponse*      response(void) const;
+    virtual std::string           instrument(void) const;
+	virtual double                ontime(void) const;
+	virtual double                livetime(void) const;
+	virtual double                deadc(const GTime& time = GTime()) const;
+    virtual void                  read(const GXmlElement& xml);
+    virtual void                  write(GXmlElement& xml) const;
+
+    // Overloaded virtual methods
+	virtual double likelihood(const GModels& models,
+                              GVector*       gradient,
+                              GMatrixSparse* curvature,
+                              double*        npred) const;
+    virtual int    nobserved(void) const;
+
+    // Other methods
+    void        instrument(const std::string& instrument);
+    void        on_regions(const GSkyRegions& regions);
+    void        off_regions(const GSkyRegions& regions);
+    const GPha& on_spec(void) const;
+    const GPha& off_spec(void) const;
+    const GArf& arf(void) const;
+	const GArf& bgd(void) const;
+    const GRmf& rmf(void) const;
+    void        fill(const GCTAObservation& obs);
+    void        compute_response(const GCTAObservation& obs,
+                                 const GEbounds& etrue);
 };
 
 

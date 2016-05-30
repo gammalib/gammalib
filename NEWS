@@ -13,9 +13,13 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
+The following classes have been removed:
+- GCTAOnOffObservations
+
 The following methods have been added to the public interface:
 - GApplication::logFileClose()
 - GObservation::events() (non-const variant)
+- GObservation::nobserved()
 - GObservations::nobserved()
 - GFilename::operator std::string()
 - GFilename::exists()
@@ -204,7 +208,9 @@ The multiplication and division operators have been removed (#1714).
 
 The GObservations::nobserved() method has been added that returns the
 total number of events in an observation container. The method is used
-by the print() method (#1723).
+by the print() method. The method uses the GObservation::nobserved()
+method that have also been added to determine for each observation
+the number of observed events (#1723).
 
 A division operator has been added to the GEnergy method to compute the
 ratio of two energies.
@@ -351,6 +357,11 @@ node was taken, resulting in a discontinuity. Now the rate is set to zero.
 
 The classes GCTACubePsf and GCTACubeEdisp now save the information in 4D images
 instead of folding two dimension in a single dimension of a 3D image.
+
+The GCTAOnOffObservations container class has now been removed, as On/Off observations
+are now stored as any other observation in the GObservations container (#1669).
+
+The On/Off fitting of CTA data has now been implemented (#1044).
 
 
 21. COMPTEL interface

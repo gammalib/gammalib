@@ -865,14 +865,11 @@ void GObservations::eval(void)
 int GObservations::nobserved(void) const
 {
     // Initialise number of observed events
-    int nobserved = 0.0;
+    int nobserved = 0;
 
     // Compute number of observed events
     for (int i = 0; i < size(); ++i) {
-        const GEvents* events = (*this)[i]->events();
-        if (events != NULL) {
-            nobserved += events->number();
-        }
+        nobserved += (*this)[i]->nobserved();
     }
 
     // Return number of observed events

@@ -15,7 +15,6 @@
         Add GSkyMap::shape() and ndim() methods (#1733).
         Add energy dispersion cube for stacked analysis (#1721).
         Add GEnergy division operator.
-        Support Fermi LAT Pass 8 response functions (#1517)
         Add GObservations::nobserved() method (#1723)
         Use rejection method in GCTABackground3D::mc() (#1722)
         Use rejection method in GModelSpatialDiffuseCube::mc() (#1722)
@@ -23,6 +22,7 @@
         Revise GTime operators (#1714)
         Add GSkyMap::publish() method to publish map on VO Hub (#1710)
         Add GVOClient::publish() method to publish a FITS HDU (#1710)
+        Remove GCTAOnOffObservations class (#1669).
         Handle FITS extensions in GSkyMap load() and save() methods (#1695)
         Restrict Monte Carlo simulations in GModelSpatialDiffuseConst to simulation cone (#1674)
         Use default GTime in GModelSpectral eval() and eval_gradients() methods (#1672)
@@ -42,6 +42,8 @@
         Correct GCTAEdisp2D::compute_ebounds_xxx() methods (#1662)
         Use GFilename in GFits to store filename (#1649)
         Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598)
+        Support Fermi LAT Pass 8 response functions (#1517)
+        Finalize implementation of CTA On/Off fitting (#1044).
 
 
 2016-01-27  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>

@@ -68,6 +68,7 @@ public:
     virtual double           model(const GModels& models,
                                    const GEvent&  event,
                                    GVector*       gradient = NULL) const;
+    virtual int              nobserved(void) const;
     virtual double           npred(const GModels& models,
                                    GVector*       gradient = NULL) const;
     virtual double           npred(const GModel& model) const;

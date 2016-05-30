@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib CTA module.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -280,44 +280,61 @@ class Test(gammalib.GPythonTestSuite):
         # Return
         return
 
-    # Test ON/OFF analysis
+    # Test On/Off analysis
     def test_onoff(self):
         """
-        Test ON/OFF analysis.
+        Test On/Off analysis.
         """
-        # Create ON region
+        # Create On region
         crab = gammalib.GSkyDir()
         crab.radec_deg(83.6331, 22.0145)
         on = gammalib.GSkyRegions()
-        on.append(gammalib.GSkyRegionCircle(crab, 1.0))
+        on.append(gammalib.GSkyRegionCircle(crab, 0.5))
 
-        # Create OFF region
-        off = on
+        # Create Off region
+        crab.radec_deg(83.6331, 23.5145)
+        off = gammalib.GSkyRegions()
+        off.append(gammalib.GSkyRegionCircle(crab, 0.5))
         
         # Set energy binning
-        etrue = gammalib.GEbounds(10, gammalib.GEnergy(0.1, "TeV"), gammalib.GEnergy(10.0, "TeV"))
-        ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1, "TeV"), gammalib.GEnergy(10.0, "TeV"))
-        
-        # Create ON/OFF observations by filling all events found in
+        etrue = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
+                                      gammalib.GEnergy(10.0, 'TeV'))
+        ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
+                                      gammalib.GEnergy(10.0, 'TeV'))
+
+
+        # Create On/Off observations by filling all events found in
         # the observation container and computing the response
-        filename = self.caldb + "/../data/irf_unbinned.xml"
-        obs      = gammalib.GObservations(filename)
-        onoffs   = gammalib.GCTAOnOffObservations()
-        for run in obs:
+        filename = self.caldb + '/../data/irf_unbinned.xml'
+        inobs    = gammalib.GObservations(filename)
+        outobs   = gammalib.GObservations()
+        for run in inobs:
             onoff = gammalib.GCTAOnOffObservation(ereco, on, off)
             onoff.fill(run)
             onoff.compute_response(run, etrue)
-            onoffs.append(onoff)
+            outobs.append(onoff)
+
+        # Load model container and attach it to the observations
+        models = gammalib.GModels('../inst/cta/test/data/crab_irf.xml')
+        outobs.models(models)
+
+        # Perform maximum likelihood fit
+        lm = gammalib.GOptimizerLM()
+        outobs.optimize(lm)
+        outobs.errors(lm)
+        #print(lm)
+        #print(outobs)
+        #print(outobs.models())
 
         # Save PHA, ARF and RMFs
-        for run in onoffs:
-            run.on_spec().save("onoff_pha_on.fits", True)
-            run.off_spec().save("onoff_pha_off.fits", True)
-            run.arf().save("onoff_arf.fits", True)
-            run.rmf().save("onoff_rmf.fits", True)
+        for run in outobs:
+            run.on_spec().save('onoff_pha_on.fits', True)
+            run.off_spec().save('onoff_pha_off.fits', True)
+            run.arf().save('onoff_arf.fits', True)
+            run.rmf().save('onoff_rmf.fits', True)
 
-        # Save ON/OFF observations
-        onoffs.save("onoff.xml")
+        # Save On/Off observations
+        outobs.save('onoff.xml')
         
         # Return
         return

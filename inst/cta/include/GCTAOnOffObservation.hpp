@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GCTAOnOffObservation.hpp - CTA on-off observation class        *
+ *          GCTAOnOffObservation.hpp - CTA On/Off observation class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Chia-Chun Lu & Christoph Deil               *
+ *  copyright (C) 2013-2016 by Chia-Chun Lu & Christoph Deil               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAOnOffObservation.hpp
- * @brief CTA on-off observation class definition
+ * @brief CTA On/Off observation class definition
  * @author Chia-Chun Lu & Christoph Deil
  */
 
@@ -29,22 +29,25 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GBase.hpp"
+#include <vector>
+#include "GObservation.hpp"
 #include "GPha.hpp"
 #include "GArf.hpp"
 #include "GRmf.hpp"
-#include "GCTAEventList.hpp"
-#include "GCTAEventAtom.hpp"
-#include "GCTAObservation.hpp"
 #include "GSkyRegions.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GModels;
+class GOptimizerPars;
+class GCTAObservation;
 
 
 /***********************************************************************//**
  * @class GCTAOnOffObservation
  *
- * @brief CTA on-off observation class
+ * @brief CTA On/Off observation class
  ***************************************************************************/
-class GCTAOnOffObservation : public GBase {
+class GCTAOnOffObservation : public GObservation {
 
 public:
     // Constructors and destructors
@@ -57,47 +60,66 @@ public:
     // Operators
     GCTAOnOffObservation& operator=(const GCTAOnOffObservation& obs);
 
-    // Methods
-    void                  clear(void);
-    GCTAOnOffObservation* clone(void) const;
-    std::string           classname(void) const;
-    void                  name(const std::string& name);
-    void                  instrument(const std::string& instrument);
-    void                  id(const std::string& id);
-    void                  on_regions(const GSkyRegions& regions);
-    void                  off_regions(const GSkyRegions& regions);
-    const std::string&    name(void) const;
-    const std::string&    instrument(void) const;
-    const std::string&    id(void) const;
-    const GPha&           on_spec(void) const;
-    const GPha&           off_spec(void) const;
-    const GArf&           arf(void) const;
-    const GRmf&           rmf(void) const;
-    void                  fill(const GCTAObservation& obs);
-    void                  compute_response(const GCTAObservation& obs,
-                                           const GEbounds& etrue);
-    void                  read(const GXmlElement& xml);
-    void                  write(GXmlElement& xml) const;
-    std::string           print(const GChatter& chatter = NORMAL) const;
+    // Implemented pure virtual methods
+    virtual void                  clear(void);
+    virtual GCTAOnOffObservation* clone(void) const;
+	virtual std::string           classname(void) const;
+    virtual void                  response(const GResponse& rsp);
+    virtual const GCTAResponse*   response(void) const;
+    virtual std::string           instrument(void) const;
+	virtual double                ontime(void) const;
+	virtual double                livetime(void) const;
+	virtual double                deadc(const GTime& time = GTime()) const;
+    virtual void                  read(const GXmlElement& xml);
+    virtual void                  write(GXmlElement& xml) const;
+	virtual std::string           print(const GChatter& chatter = NORMAL) const;
+
+    // Overloaded virtual methods
+	virtual double likelihood(const GModels& models,
+                              GVector*       gradient,
+                              GMatrixSparse* curvature,
+                              double*        npred) const;
+    virtual int    nobserved(void) const;
+
+    // Other methods
+    void        instrument(const std::string& instrument);
+    void        on_regions(const GSkyRegions& regions);
+    void        off_regions(const GSkyRegions& regions);
+    const GPha& on_spec(void) const;
+    const GPha& off_spec(void) const;
+    const GArf& arf(void) const;
+	const GArf& bgd(void) const;
+    const GRmf& rmf(void) const;
+    void        fill(const GCTAObservation& obs);
+    void        compute_response(const GCTAObservation& obs,
+                                 const GEbounds& etrue);
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GCTAOnOffObservation& obs);
-    void free_members(void);
-    void compute_arf(const GCTAObservation& obs);
-    void compute_rmf(const GCTAObservation& obs, const GEbounds& etrue);
+    void   init_members(void);
+    void   copy_members(const GCTAOnOffObservation& obs);
+    void   free_members(void);
+	void   compute_alpha(const GCTAObservation& obs);
+    void   compute_arf(const GCTAObservation& obs);
+	void   compute_bgd(const GCTAObservation& obs);
+    void   compute_rmf(const GCTAObservation& obs, const GEbounds& etrue);
+    double model_on(const GModels& models, int ibin, GVector* mod_grad) const;
+	double model_off(const GModels& models, int ibin, GVector* mod_grad) const;
 
     // Protected data members
-    std::string m_name;         //!< Name
-    std::string m_instrument;   //!< Instrument name
-    std::string m_id;           //!< Observation identifier
-    GPha 		m_on_spec;
-    GPha 		m_off_spec;
-    GArf        m_arf;
-    GRmf        m_rmf;
-    GSkyRegions m_on_regions;
-    GSkyRegions m_off_regions;
+    std::string         m_instrument;   //!< Instrument name
+    GCTAResponse*       m_response;     //!< Pointer to instrument response functions
+	double              m_ontime;       //!< Ontime (seconds)
+    double              m_livetime;     //!< Livetime (seconds)
+    double              m_deadc;        //!< Deadtime correction (livetime/ontime)
+    GPha 		        m_on_spec;      //!< On counts spectrum
+    GPha 		        m_off_spec;     //!< Off counts spectrum
+    GArf                m_arf;          //!< Effective area vector
+	GArf                m_bgd;          //!< Background rate vector
+    GRmf                m_rmf;          //!< Energy dispersion matrix
+    GSkyRegions         m_on_regions;   //!< Container of On region
+    GSkyRegions         m_off_regions;  //!< Container of Off regions
+    std::vector<double> m_alpha;        //!< Ratios of On/Off exposure
 };
 
 
@@ -114,15 +136,58 @@ std::string GCTAOnOffObservation::classname(void) const
 
 
 /***********************************************************************//**
- * @brief Set name of observation
+ * @brief Return instrument
  *
- * @param[in] name Observation name.
+ * @return Instrument.
  ***************************************************************************/
 inline
-void GCTAOnOffObservation::name(const std::string& name)
+std::string GCTAOnOffObservation::instrument(void) const
 {
-    m_name = name;
-    return;
+    return (m_instrument);
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime
+ *
+ * @return Ontime in seconds.
+ ***************************************************************************/
+inline
+double GCTAOnOffObservation::ontime(void) const
+{
+    return (m_ontime);
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime
+ *
+ * @return Livetime in seconds.
+ ***************************************************************************/
+inline
+double GCTAOnOffObservation::livetime(void) const
+{
+    return (m_livetime);
+}
+
+
+/***********************************************************************//**
+ * @brief Return deadtime correction factor
+ *
+ * @param[in] time Time.
+ * @return Deadtime correction factor.
+ *
+ * Returns the deadtime correction factor. Optionally, this method takes a
+ * @p time argument that takes provision for returning the deadtime
+ * correction factor as function of time.
+ *
+ * The deadtime correction factor is defined as the livetime divided by the
+ * ontime.
+ ***************************************************************************/
+inline
+double GCTAOnOffObservation::deadc(const GTime& time) const
+{
+    return (m_deadc);
 }
 
 
@@ -140,22 +205,9 @@ void GCTAOnOffObservation::instrument(const std::string& instrument)
 
 
 /***********************************************************************//**
- * @brief Set observation identifier
+ * @brief Set On regions
  *
- * @param[in] id Observation identifier.
- ***************************************************************************/
-inline
-void GCTAOnOffObservation::id(const std::string& id)
-{
-    m_id = id;
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set ON regions
- *
- * @param[in] regions ON regions.
+ * @param[in] regions On regions.
  ***************************************************************************/
 inline
 void GCTAOnOffObservation::on_regions(const GSkyRegions& regions)
@@ -166,51 +218,15 @@ void GCTAOnOffObservation::on_regions(const GSkyRegions& regions)
 
 
 /***********************************************************************//**
- * @brief Set OFF regions
+ * @brief Set Off regions
  *
- * @param[in] regions OFF regions.
+ * @param[in] regions Off regions.
  ***************************************************************************/
 inline
 void GCTAOnOffObservation::off_regions(const GSkyRegions& regions)
 {
     m_off_regions = regions;
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return name of observation
- *
- * @return Observation name.
- ***************************************************************************/
-inline
-const std::string& GCTAOnOffObservation::name(void) const
-{
-    return m_name;
-}
-
-
-/***********************************************************************//**
- * @brief Return instrument
- *
- * @return Instrument.
- ***************************************************************************/
-inline
-const std::string& GCTAOnOffObservation::instrument(void) const
-{
-    return m_instrument;
-}
-
-
-/***********************************************************************//**
- * @brief Return observation identifier
- *
- * @return Observation identifier.
- ***************************************************************************/
-inline
-const std::string& GCTAOnOffObservation::id(void) const
-{
-    return m_id;
 }
 
 
@@ -222,7 +238,7 @@ const std::string& GCTAOnOffObservation::id(void) const
 inline
 const GPha& GCTAOnOffObservation::on_spec(void) const
 {
-    return m_on_spec;
+    return (m_on_spec);
 }
 
 
@@ -234,7 +250,7 @@ const GPha& GCTAOnOffObservation::on_spec(void) const
 inline
 const GPha& GCTAOnOffObservation::off_spec(void) const
 {
-    return m_off_spec;
+    return (m_off_spec);
 }
 
 
@@ -246,7 +262,19 @@ const GPha& GCTAOnOffObservation::off_spec(void) const
 inline
 const GArf& GCTAOnOffObservation::arf(void) const
 {
-    return m_arf;
+    return (m_arf);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Background Rate
+ *
+ * @return Background Rate.
+ ***************************************************************************/
+inline
+const GArf& GCTAOnOffObservation::bgd(void) const
+{
+    return (m_bgd);
 }
 
 
@@ -258,7 +286,19 @@ const GArf& GCTAOnOffObservation::arf(void) const
 inline
 const GRmf& GCTAOnOffObservation::rmf(void) const
 {
-    return m_rmf;
+    return (m_rmf);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Redistribution Matrix File
+ *
+ * @return Redistribution Matrix File.
+ ***************************************************************************/
+inline
+int GCTAOnOffObservation::nobserved(void) const
+{
+    return (m_on_spec.counts());
 }
 
 #endif /* GCTAONOFFOBSERVATION_HPP */
