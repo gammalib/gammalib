@@ -34,10 +34,17 @@
 #include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GSkyDir.hpp"
 %}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
+%include "std_vector.i"
+namespace std {
+   %template(vectori)      vector<int>;
+   %template(vectord)      vector<double>;
+   %template(vectorskydir) vector<GSkyDir>;
+};
 
 /* __ Include GammaLib typemaps __________________________________________ */
 %include typemap_GFilename.i

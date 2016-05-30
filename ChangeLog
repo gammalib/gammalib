@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Use std::vector for naxes argument in GFitsImage (#1779).
         GCTACubePsf and GCTACubeEdisp now save 4D images.
         Change interpolation scheme in GCTABackground3D.
         Add GCsv::append() method (#1773).

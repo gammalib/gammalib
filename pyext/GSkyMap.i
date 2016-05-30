@@ -28,10 +28,6 @@
 #include "GSkyMap.hpp"
 #include "GTools.hpp"
 %}
-%include "std_vector.i"
-namespace std {
-   %template(IntVector) vector<int>;
-}
 
 
 /***********************************************************************//**

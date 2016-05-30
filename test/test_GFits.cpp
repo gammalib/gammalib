@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GFits.cpp - test FITS classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -456,8 +456,10 @@ void TestGFits::test_create(void)
         int naxis       = 2;
         int nx          = 10;
         int ny          = 20;
-        int naxes[]     = {nx,ny};
-        GFitsImageDouble image(naxis, naxes);
+        std::vector<int> naxes;
+        naxes.push_back(nx);
+        naxes.push_back(ny);
+        GFitsImageDouble image(naxes);
         for (int ix = 0; ix < nx; ++ix) {
             for (int iy = 0; iy < ny; ++iy) {
                 image(ix,iy) = 0.01*ix + 0.01*iy;
@@ -730,8 +732,12 @@ void TestGFits::test_image_byte(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageByte image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageByte image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);
@@ -786,8 +792,12 @@ void TestGFits::test_image_ushort(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageUShort image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageUShort image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);
@@ -841,8 +851,12 @@ void TestGFits::test_image_short(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageShort image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageShort image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);
@@ -896,8 +910,12 @@ void TestGFits::test_image_ulong(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageULong image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageULong image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);
@@ -951,8 +969,12 @@ void TestGFits::test_image_long(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageLong image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageLong image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);
@@ -1006,8 +1028,12 @@ void TestGFits::test_image_longlong(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageLongLong image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageLongLong image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);
@@ -1060,8 +1086,12 @@ void TestGFits::test_image_float(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageFloat image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageFloat image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);
@@ -1115,8 +1145,12 @@ void TestGFits::test_image_double(void)
     TEST_4D_ACCESS(2,2,2,2)
 
     // Test image I/O with 4D image
-    int naxes[] = {2,2,2,2};
-    GFitsImageDouble image(4, naxes, pixels);
+    std::vector<int> naxes;
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    naxes.push_back(2);
+    GFitsImageDouble image(naxes, pixels);
 
     // Save image
     GFits fits(filename, true);

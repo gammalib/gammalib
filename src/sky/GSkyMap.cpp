@@ -2731,26 +2731,19 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
     // Continue only if we have pixels
     if (size > 0) {
 
-        // Set axis parameters for image construction
-        int naxis = (m_num_maps == 1) ? 2 : 2 + ndim();
-
-        // Set dimensions of all axes
-        //int* naxes = new int[naxis];
-        int naxes[256];
-        naxes[0] = m_num_x;
-        naxes[1] = m_num_y;
+        // Set dimension vector of all axes
+        std::vector<int> naxes;
+        naxes.push_back(m_num_x);
+        naxes.push_back(m_num_y);
         for (int i = 0; i < ndim(); ++i) {
-            naxes[2+i] = m_shape[i];
+            naxes.push_back(m_shape[i]);
         }
 
         // Allocate image
-        hdu = new GFitsImageDouble(naxis, naxes);
-
-        // Free dimensions of all axes
-        //delete [] naxes;
+        hdu = new GFitsImageDouble(naxes);
 
         // Store data in image
-        if (naxis == 2) {
+        if (naxes.size() == 2) {
             double* ptr = m_pixels;
             for (int iy = 0; iy < m_num_y; ++iy) {
                 for (int ix = 0; ix < m_num_x; ++ix) {

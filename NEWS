@@ -103,6 +103,18 @@ The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string
 - GCTAObservation::eventtype() returns now std::string instead of const std::string&
 
+The interface for the following methods has been changed:
+- GFitsImage naxes constructor
+- GFitsImageByte naxes constructor
+- GFitsImageDouble naxes constructor
+- GFitsImageFloat naxes constructor
+- GFitsImageLong naxes constructor
+- GFitsImageLongLong naxes constructor
+- GFitsImageSByte naxes constructor
+- GFitsImageShort naxes constructor
+- GFitsImageULong naxes constructor
+- GFitsImageUShort naxes constructor
+
 
 3. Configuration
 -----------------
@@ -132,6 +144,9 @@ was corrected by allocating now memory after inserting elements into an empty
 FITS column.
 
 GFits now uses the GFilename class to store the FITS filename (fixes #1649).
+
+The GFitsImage naxes constructor now takes a std::vector as argument instead
+of a pointer to an array and a dimension (#1779).
 
 
 7. Linear algebra module
