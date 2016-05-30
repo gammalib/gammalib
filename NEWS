@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-25 April 2016
+30 May 2016
 
 
 1. Introduction
@@ -25,6 +25,8 @@ The following methods have been added to the public interface:
 - GFilename::path()
 - GFilename::file()
 - GCsv::append()
+- GSkyMap::shape()
+- GSkyMap::ndim()
 - GModelSky::spatial()
 - GModelSky::spectral()
 - GModelSky::temporal()
@@ -209,6 +211,13 @@ to mix also HEALPix and WCS maps in the same file (#1695).
 A GSkyMap::publish() method has been added that publishes the sky map
 on a Virtual Observatory Hub. This finally makes GammaLib interoperable
 with VO imaging tools (#1231).
+
+A shape member was added to the GSkyMap class to enable handling of
+images with more than 3 dimensions. The shape() methods set or retrieve
+the number of maps in each of the dimensions, the ndim() method returns
+the number of dimensions. Note that a longitude and latitude dimensions
+are not counted in the map dimensions, i.e. a 3D image cube with
+longitude, latitude and a number of maps has a dimension of 1 (#1733).
 
 
 13. Support module

@@ -842,6 +842,12 @@ void TestGSky::test_GSkyMap(void)
     GSkyMap map_dst("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
     GSkyMap map_new("CAR", "GAL", 0.0, 0.0, -0.1, 0.1, 100, 100, 2);
 
+    // Test map dimensions and shape
+	test_value(map_src.nmaps(), 2, "Check that sky map contains 2 maps");
+	test_value(map_src.ndim(), 1, "Check that sky map has one dimension");
+	test_value(map_src.shape().size(), 1, "Check that sky map has a shape size of 1");
+	test_value(map_src.shape()[0], 2, "Check that sky map has 2 maps");
+
     // Fill map pixels
     double total_src = 0.0;
     for (int pix = 0; pix < map_src.npix(); ++pix) {
@@ -1026,6 +1032,50 @@ void TestGSky::test_GSkyMap(void)
     }
 	test_value(total_extract, total_src, 1.0e-3, "Test extract() method with 2 maps");
 	test_value(map_extract.nmaps(), 2, "Test extract() method with 2 maps");    
+
+    // Define one more map for shaping manipulation
+    GSkyMap map_shape("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 10, 10, 12);
+
+    // Test initial map dimensions and shape
+	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_shape.ndim(), 1, "Check that sky map has one dimension");
+	test_value(map_shape.shape().size(), 1, "Check that sky map has a shape size of 1");
+	test_value(map_shape.shape()[0], 12, "Check that sky map has 12 maps");
+
+    // Set new map shape
+    map_shape.shape(3,4);
+
+    // Test map dimensions and shape
+	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_shape.ndim(), 2, "Check that sky map has two dimensions");
+	test_value(map_shape.shape().size(), 2, "Check that sky map has a shape size of 2");
+	test_value(map_shape.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
+	test_value(map_shape.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
+
+    // Set new map shape
+    map_shape.shape(2,3,2);
+
+    // Test map dimensions and shape
+	test_value(map_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_shape.ndim(), 3, "Check that sky map has three dimensions");
+	test_value(map_shape.shape().size(), 3, "Check that sky map has a shape size of 3");
+	test_value(map_shape.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
+	test_value(map_shape.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
+	test_value(map_shape.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+
+    // Save map
+    map_shape.save("test_map_shape.fits", true);
+
+    // Load map
+    GSkyMap map_load_shape("test_map_shape.fits");
+
+    // Test map dimensions and shape
+	test_value(map_load_shape.nmaps(), 12, "Check that sky map contains 12 maps");
+	test_value(map_load_shape.ndim(), 3, "Check that sky map has three dimensions");
+	test_value(map_load_shape.shape().size(), 3, "Check that sky map has a shape size of 3");
+	test_value(map_load_shape.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
+	test_value(map_load_shape.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
+	test_value(map_load_shape.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
 
     // Exit test
     return;

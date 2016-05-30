@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib sky module.
 #
-# Copyright (C) 2012-2015 Juergen Knoedlseder
+# Copyright (C) 2012-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -71,6 +71,8 @@ class Test(gammalib.GPythonTestSuite):
         self.name("sky")
 
         # Append tests
+        self.append(self.test_methods, "Test sky map methods")
+        self.append(self.test_operators, "Test sky map operators")
         self.append(self.test_skymap_healpix, "Test HEALPix map")
         self.append(self.test_skymap_ait, "Test AIT projection map")
         self.append(self.test_skymap_azp, "Test AZP projection map")
@@ -80,8 +82,106 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_skymap_stg, "Test STG projection map")
         self.append(self.test_skymap_tan, "Test TAN projection map")
         self.append(self.test_fk5_to_galactic, "Test FK5 to Galactic coordinate conversion")
-        self.append(self.test_operators, "Test skymap operators")
 
+        # Return
+        return
+
+    # Test sky map methods
+    def test_methods(self):
+        """
+        Test the sky map methods.
+        """
+        # Setup sky maps
+        map = gammalib.GSkyMap("CAR", "CEL", 83.63, 22.01, -3.7, 2.6, 10, 8, 12)
+
+        # Set sky map shape
+        map.shape(3,4)
+
+        # Test map dimensions and shape
+        self.test_value(map.npix(), 80, "Check that sky map has 80 pixels");
+        self.test_value(map.nx(), 10, "Check that sky map has X dimension of 10");
+        self.test_value(map.ny(), 8, "Check that sky map has Y dimension of 8");
+        self.test_value(map.nmaps(), 12, "Check that sky map contains 12 maps");
+        self.test_value(map.ndim(), 2, "Check that sky map has two dimensions");
+        self.test_value(len(map.shape()), 2, "Check that sky map has a shape size of 2");
+        self.test_value(map.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
+        self.test_value(map.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
+
+        # Set new map shape
+        map.shape(2,3,2);
+
+        # Test map dimensions and shape
+        self.test_value(map.nmaps(), 12, "Check that sky map contains 12 maps");
+        self.test_value(map.ndim(), 3, "Check that sky map has three dimensions");
+        self.test_value(len(map.shape()), 3, "Check that sky map has a shape size of 3");
+        self.test_value(map.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
+        self.test_value(map.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
+        self.test_value(map.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+
+        # Return
+        return
+    
+    # Test sky map operators
+    def test_operators(self):
+        """
+        Test the sky map operators.
+        """
+        # Setup sky maps
+        map    = gammalib.GSkyMap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
+        map[0] = 1.0
+        map[1] = 2.0
+        map[2] = 3.0
+        map[3] = 4.0
+        map_b  = map.copy()
+        
+        # Addition operator
+        map += map_b
+        self.test_value(map[0], 2.0)
+        self.test_value(map[1], 4.0)
+        self.test_value(map[2], 6.0)
+        self.test_value(map[3], 8.0)
+
+        # Multiplication operator
+        map *= map_b
+        self.test_value(map[0],  2.0)
+        self.test_value(map[1],  8.0)
+        self.test_value(map[2], 18.0)
+        self.test_value(map[3], 32.0)
+
+        # Subtraction operator
+        map -= map_b
+        self.test_value(map[0],  1.0)
+        self.test_value(map[1],  6.0)
+        self.test_value(map[2], 15.0)
+        self.test_value(map[3], 28.0)
+
+        # Division operator
+        map /= map_b
+        self.test_value(map[0], 1.0)
+        self.test_value(map[1], 3.0)
+        self.test_value(map[2], 5.0)
+        self.test_value(map[3], 7.0)
+
+        # Scaling operator
+        map *= 2.0
+        self.test_value(map[0],  2.0)
+        self.test_value(map[1],  6.0)
+        self.test_value(map[2], 10.0)
+        self.test_value(map[3], 14.0)
+
+        # Division operator
+        map /= 2.0
+        self.test_value(map[0], 1.0)
+        self.test_value(map[1], 3.0)
+        self.test_value(map[2], 5.0)
+        self.test_value(map[3], 7.0)
+
+        # Access operator (tests also proper iteration)
+        sum = 0.0
+        for pix in map:
+            sum += pix
+        self.test_value(sum, 16.0)        
+        
         # Return
         return
 
@@ -315,68 +415,3 @@ class Test(gammalib.GPythonTestSuite):
 
         # Return
         return
-
-    # Test skymap operators
-    def test_operators(self):
-        """
-        Test the skymap operators.
-        """
-        # Setup skymaps
-        map    = gammalib.GSkyMap("CAR", "CEL", 83.6331, 22.0145, -3.7, 2.6, 2, 2)
-        map[0] = 1.0
-        map[1] = 2.0
-        map[2] = 3.0
-        map[3] = 4.0
-        map_b  = map.copy()
-        
-        # Addition operator
-        map += map_b
-        self.test_value(map[0], 2.0)
-        self.test_value(map[1], 4.0)
-        self.test_value(map[2], 6.0)
-        self.test_value(map[3], 8.0)
-
-        # Multiplication operator
-        map *= map_b
-        self.test_value(map[0],  2.0)
-        self.test_value(map[1],  8.0)
-        self.test_value(map[2], 18.0)
-        self.test_value(map[3], 32.0)
-
-        # Subtraction operator
-        map -= map_b
-        self.test_value(map[0],  1.0)
-        self.test_value(map[1],  6.0)
-        self.test_value(map[2], 15.0)
-        self.test_value(map[3], 28.0)
-
-        # Division operator
-        map /= map_b
-        self.test_value(map[0], 1.0)
-        self.test_value(map[1], 3.0)
-        self.test_value(map[2], 5.0)
-        self.test_value(map[3], 7.0)
-
-        # Scaling operator
-        map *= 2.0
-        self.test_value(map[0],  2.0)
-        self.test_value(map[1],  6.0)
-        self.test_value(map[2], 10.0)
-        self.test_value(map[3], 14.0)
-
-        # Division operator
-        map /= 2.0
-        self.test_value(map[0], 1.0)
-        self.test_value(map[1], 3.0)
-        self.test_value(map[2], 5.0)
-        self.test_value(map[3], 7.0)
-
-        # Access operator (tests also proper iteration)
-        sum = 0.0
-        for pix in map:
-            sum += pix
-        self.test_value(sum, 16.0)        
-        
-        # Return
-        return
-        

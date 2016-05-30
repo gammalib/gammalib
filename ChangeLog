@@ -1,4 +1,4 @@
-2016-04-25  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-05-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
@@ -10,6 +10,7 @@
         Add GApplication::logFileClose() method.
         Add GCTAObservation filename constructor (#1744).
         Add gammalib::number() function (#1743).
+        Add GSkyMap::shape() and ndim() methods (#1733).
         Add energy dispersion cube for stacked analysis (#1721).
         Add GEnergy division operator.
         Support Fermi LAT Pass 8 response functions (#1517)
