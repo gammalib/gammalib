@@ -2735,7 +2735,8 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
         int naxis = (m_num_maps == 1) ? 2 : 2 + ndim();
 
         // Set dimensions of all axes
-        int* naxes = new int[naxis];
+        //int* naxes = new int[naxis];
+        int naxes[256];
         naxes[0] = m_num_x;
         naxes[1] = m_num_y;
         for (int i = 0; i < ndim(); ++i) {
@@ -2746,7 +2747,7 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
         hdu = new GFitsImageDouble(naxis, naxes);
 
         // Free dimensions of all axes
-        delete [] naxes;
+        //delete [] naxes;
 
         // Store data in image
         if (naxis == 2) {
