@@ -189,6 +189,9 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
     // Set appropriate number of skymaps
     m_cube.nmaps(nmaps);
 
+    // Set cube shape
+    m_cube.shape(m_migras.size(), m_energies.size());
+
     // Set all energy dispersion cube pixels to zero as we want to have
     // a clean map upon construction
     m_cube = 0.0;
@@ -264,9 +267,12 @@ GCTACubeEdisp::GCTACubeEdisp(const std::string&   wcs,
 
     // Compute number of sky maps
     int nmaps = m_energies.size() * m_migras.size();
-    
+
     // Create sky map
     m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
+
+    // Set cube shape
+    m_cube.shape(m_migras.size(), m_energies.size());
 
     // Return
     return;

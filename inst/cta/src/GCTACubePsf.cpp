@@ -159,6 +159,9 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
     // Set appropriate number of skymaps
     m_cube.nmaps(nmaps);
 
+    // Set cube shape
+    m_cube.shape(m_deltas.size(), m_ebounds.size());
+
     // Set all PSF cube pixels to zero as we want to have a clean map
     // upon construction
     m_cube = 0.0;
@@ -227,9 +230,12 @@ GCTACubePsf::GCTACubePsf(const std::string&   wcs,
 
     // Compute number of sky maps
     int nmaps = m_ebounds.size() * m_deltas.size();
-    
+
     // Create sky map
     m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, nmaps);
+
+    // Set cube shape
+    m_cube.shape(m_deltas.size(), m_ebounds.size());
 
     // Return
     return;

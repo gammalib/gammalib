@@ -334,6 +334,9 @@ The interpolation scheme was changed in GCTABackground3D. Formerly, if one of th
 rates above and below the requested energy was zero, the rate from the non-zero
 node was taken, resulting in a discontinuity. Now the rate is set to zero.
 
+The classes GCTACubePsf and GCTACubeEdisp now save the information in 4D images
+instead of folding two dimension in a single dimension of a 3D image.
+
 
 21. COMPTEL interface
 ---------------------
