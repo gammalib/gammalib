@@ -38,7 +38,7 @@ class Test(gammalib.GPythonTestSuite):
         gammalib.GPythonTestSuite.__init__(self)
 
         # Initialise CALDB
-        self.caldb = "../inst/cta/test/caldb"
+        self.caldb = '../inst/cta/test/caldb'
 
         # Return
         return
@@ -315,7 +315,7 @@ class Test(gammalib.GPythonTestSuite):
             outobs.append(onoff)
 
         # Load model container and attach it to the observations
-        models = gammalib.GModels('../inst/cta/test/data/crab_irf.xml')
+        models = gammalib.GModels(self.caldb + '/../data/crab_irf.xml')
         outobs.models(models)
 
         # Perform maximum likelihood fit
