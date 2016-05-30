@@ -877,7 +877,7 @@ std::string GCTAOnOffObservation::print(const GChatter& chatter) const
 void GCTAOnOffObservation::init_members(void)
 {
     // Initialise members
-    m_instrument = "CTA";
+    m_instrument = "CTAOnOff";
     m_response   = NULL;
     m_ontime     = 0.0;
     m_livetime   = 0.0;
