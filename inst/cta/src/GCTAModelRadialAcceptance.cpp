@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialAcceptance.cpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -104,7 +104,7 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(void) : GModelData()
  * to learn more about the information that is expected in the XML element.
  ***************************************************************************/
 GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GXmlElement& xml) :
-                                                     GModelData(xml)
+                           GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -132,8 +132,8 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GXmlElement& xml) :
  * more about the definition of the radial and spectral components.
  ***************************************************************************/
 GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radial,
-                                                     const GModelSpectral&  spectral)
-                                                               : GModelData()
+                                                     const GModelSpectral&  spectral) :
+                           GModelData()
 {
     // Initialise members
     init_members();
@@ -164,7 +164,7 @@ GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadial& radi
  * can be destroyed after the copy without any loss of information.
  ***************************************************************************/
 GCTAModelRadialAcceptance::GCTAModelRadialAcceptance(const GCTAModelRadialAcceptance& model) :
-                                                     GModelData(model)
+                           GModelData(model)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -211,7 +211,7 @@ GCTAModelRadialAcceptance::~GCTAModelRadialAcceptance(void)
  * original object can be destroyed after the assignment without any loss of
  * information.
  ***************************************************************************/
-GCTAModelRadialAcceptance& GCTAModelRadialAcceptance::operator= (const GCTAModelRadialAcceptance& model)
+GCTAModelRadialAcceptance& GCTAModelRadialAcceptance::operator=(const GCTAModelRadialAcceptance& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -670,20 +670,8 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
         m_temporal = temporal.clone();
     }
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
-
-    // Check flag if TS value should be computed
-    bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
-
-    // Set flag if TS value should be computed
-    this->tscalc(tscalc);
+    // Read model attributes
+    read_attributes(xml);
 
     // Set parameter pointers
     set_pointers();
@@ -715,29 +703,21 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
         }
     }
 
+    // If we have a temporal model that is either not a constant, or a
+    // constant with a normalization value that differs from 1.0 then
+    // write the temporal component into the XML element. This logic
+    // assures compatibility with the Fermi/LAT format as this format
+    // does not handle temporal components.
+    bool write_temporal = ((m_temporal != NULL) &&
+                           (m_temporal->type() != "Constant" ||
+                            (*m_temporal)[0].value() != 1.0));
+
     // If no source with corresponding name was found then append one
     if (src == NULL) {
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
         if (radial()   != NULL) src->append(GXmlElement("radialModel"));
-        //if (temporal() != NULL) src->append(GXmlElement("temporalModel"));
-    }
-
-    // Set model type, name and optionally instruments
-    src->attribute("name", name());
-    src->attribute("type", type());
-    if (instruments().length() > 0) {
-        src->attribute("instrument", instruments());
-    }
-    std::string identifiers = ids();
-    if (identifiers.length() > 0) {
-        src->attribute("id", identifiers);
-    }
-
-    // Write spectral model
-    if (spectral() != NULL) {
-        GXmlElement* spec = src->element("spectrum", 0);
-        spectral()->write(*spec);
+        if (write_temporal)     src->append(GXmlElement("temporalModel"));
     }
 
     // Write radial model
@@ -746,15 +726,22 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
         radial()->write(*rad);
     }
 
-    // Write temporal model
-    /*
-    if (temporal()) {
+    // Write spectral model
+    if (spectral() != NULL) {
+        GXmlElement* spec = src->element("spectrum", 0);
+        spectral()->write(*spec);
+    }
+
+    // Optionally write temporal model
+    if (write_temporal) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
-            GXmlElement* temp = src->element("lightcurve", 0);
+            GXmlElement* temp = src->element("temporalModel", 0);
             temporal()->write(*temp);
         }
     }
-    */
+
+    // Write model attributes
+    write_attributes(*src);
 
     // Return
     return;

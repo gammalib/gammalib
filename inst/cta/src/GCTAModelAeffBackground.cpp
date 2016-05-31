@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelAeffBackground.cpp - CTA Aeff background model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -834,20 +834,8 @@ void GCTAModelAeffBackground::read(const GXmlElement& xml)
         m_temporal = constant.clone();
     }
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
-
-    // Check flag if TS value should be computed
-    bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
-
-    // Set flag if TS value should be computed
-    this->tscalc(tscalc);
+    // Read model attributes
+    read_attributes(xml);
 
     // Set parameter pointers
     set_pointers();
@@ -916,17 +904,6 @@ void GCTAModelAeffBackground::write(GXmlElement& xml) const
         if (write_temporal)     src->append(GXmlElement("temporalModel"));
     }
 
-    // Set model type, name and optionally instruments
-    src->attribute("name", name());
-    src->attribute("type", type());
-    if (instruments().length() > 0) {
-        src->attribute("instrument", instruments());
-    }
-    std::string identifiers = ids();
-    if (identifiers.length() > 0) {
-        src->attribute("id", identifiers);
-    }
-
     // Write spectral model
     if (spectral() != NULL) {
         GXmlElement* spec = src->element("spectrum", 0);
@@ -940,6 +917,9 @@ void GCTAModelAeffBackground::write(GXmlElement& xml) const
             temporal()->write(*temp);
         }
     }
+
+    // Write model attributes
+    write_attributes(*src);
 
     // Return
     return;

@@ -1,4 +1,4 @@
-2016-05-30  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-05-31  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
@@ -10,6 +10,7 @@
         Add GTestSuite::test_value() string method (#1772).
         Add component setting methods to GModelSky (#1770).
         Add GApplication::logFileClose() method.
+        Add GModel::read_attributes() and write_attributes() private methods (#1765).
         Add GCTAObservation filename constructor (#1744).
         Add gammalib::number() function (#1743).
         Add GSkyMap::shape() and ndim() methods (#1733).

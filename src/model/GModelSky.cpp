@@ -699,29 +699,8 @@ void GModelSky::read(const GXmlElement& xml)
     m_spectral = xml_spectral(*spec);
     m_temporal = temporal.clone();
 
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set model TS
-    if (xml.has_attribute("ts")) {
-        std::string ts = xml.attribute("ts");
-        this->ts(gammalib::todouble(ts));
-    }
-
-    // Set TS computation flag
-    if (xml.has_attribute("tscalc")) {
-        bool tscalc = (xml.attribute("tscalc") == "1") ? true : false;
-        this->tscalc(tscalc);
-    }
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Read instrument scales
-    read_scales(xml);
-
-    // Set observation identifiers
-    ids(xml.attribute("id"));
+    // Read model attributes
+    read_attributes(xml);
 
     // Set parameter pointers
     set_pointers();
@@ -781,29 +760,6 @@ void GModelSky::write(GXmlElement& xml) const
         if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
     }
 
-    // Set model attributes
-    src->attribute("name", name());
-    src->attribute("type", type());
-    std::string instruments = this->instruments();
-    if (instruments.length() > 0) {
-        src->attribute("instrument", instruments);
-    }
-    std::string identifiers = ids();
-    if (identifiers.length() > 0) {
-        src->attribute("id", identifiers);
-    }
-
-    // If available, set TS attribute
-    if (m_has_ts) {
-        src->attribute("ts", gammalib::str(ts(), 3));
-    }
-
-    // If tscalc parameter was available, then write it to XML
-    if (m_has_tscalc) {
-        std::string ts_calc = tscalc() ? "1" : "0";
-        src->attribute("tscalc", ts_calc);
-    }
-
     // Write spectral model
     if (spectral() != NULL) {
         GXmlElement* spec = src->element("spectrum", 0);
@@ -816,8 +772,8 @@ void GModelSky::write(GXmlElement& xml) const
         spatial()->write(*spat);
     }
 
-    // Write instrument scales
-    write_scales(*src);
+    // Write model attributes
+    write_attributes(*src);
 
     // Return
     return;
