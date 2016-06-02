@@ -245,7 +245,7 @@ void GTestSuite::append(const pfunction function, const std::string& name)
 /***********************************************************************//**
  * @brief Run all tests in test suite
  *
- * @return True is all tests were successful, false otherwise.
+ * @return True if all tests were successful, false otherwise.
  *
  * Executes all test functions that have been appended to the test suite.
  * For each test function a test case is added to the test suite.
@@ -309,6 +309,7 @@ bool GTestSuite::run(void)
             {
                 // For other exceptions
                 test->has_passed(false);
+                test->message("Non-standard C++ exception thrown");
             }
 
             // Compute elapsed time

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-31 May 2016
+2 June 2016
 
 
 1. Introduction
@@ -271,7 +271,11 @@ easy creation of a CSV file, in particular from Python lists (#1773).
 
 14. XML module
 --------------
-None
+The GXmlAttribute class does no longer store the hyphens of an attribute, but
+the hyphens are stripped upon construction, and added back when writing the
+attribute into a URL. The side effect of this new behaviour is that XML test
+reports are also written in case that an exception has occured during a unit
+test (#1746).
 
 
 15. VO module
