@@ -60,14 +60,14 @@ class Test(gammalib.GPythonTestSuite):
         Set all test functions.
         """
         # Set test name
-        self.name("CTA")
+        self.name('CTA')
 
         # Append tests
-        self.append(self.test_aeff, "Test CTA effective area classes")
-        self.append(self.test_psf, "Test CTA PSF classes")
-        self.append(self.test_edisp, "Test CTA energy dispersion classes")
-        self.append(self.test_response, "Test CTA response classes")
-        self.append(self.test_onoff, "Test CTA ON/OFF analysis")
+        self.append(self.test_aeff, 'Test CTA effective area classes')
+        self.append(self.test_psf, 'Test CTA PSF classes')
+        self.append(self.test_edisp, 'Test CTA energy dispersion classes')
+        self.append(self.test_response, 'Test CTA response classes')
+        self.append(self.test_onoff, 'Test CTA ON/OFF analysis')
 
         # Return
         return
@@ -77,14 +77,9 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test GCTAAeff classes.
         """
-        # Load 2D Aeff
-        self.test_try("Test GCTAAeff2D file constructor")
-        try:
-            filename = self.caldb + "/prod1_gauss.fits"
-            aeff     = gammalib.GCTAAeff2D(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAAeff2D from file.")
+        # Test GCTAAeff2D file constructor
+        filename = self.caldb + '/prod1_gauss.fits'
+        aeff     = gammalib.GCTAAeff2D(filename)
 
         # Test Aeff values
         self.test_value(aeff(0.0, 0.0), 5535774176.75, 0.1)
@@ -92,14 +87,9 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(aeff(0.0, 0.01745), 5682897797.76, 0.1)
         self.test_value(aeff(1.0, 0.01745), 18446656815.1, 0.1)
 
-        # Load performance file
-        self.test_try("Test GCTAAeffPerfTable file constructor")
-        try:
-            filename = self.caldb + "/cta_dummy_irf.dat"
-            aeff     = gammalib.GCTAAeffPerfTable(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAAeffPerfTable from file.")
+        # Test GCTAAeffPerfTable file constructor
+        filename = self.caldb + '/cta_dummy_irf.dat'
+        aeff     = gammalib.GCTAAeffPerfTable(filename)
 
         # Test Aeff values
         self.test_value(aeff(0.0, 0.0), 2738898000.0, 0.1)
@@ -107,14 +97,9 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(aeff(0.0, 0.01745), 2590995083.29, 0.1)
         self.test_value(aeff(1.0, 0.01745), 15838314971.2, 0.1)
 
-        # Load 1DC ARF response file
-        self.test_try("Test GCTAAeffArf file constructor")
-        try:
-            filename = self.caldb + "/dc1/arf.fits"
-            aeff     = gammalib.GCTAAeffArf(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAAeffArf from file.")
+        # Test GCTAAeffArf file constructor
+        filename = self.caldb + '/dc1/arf.fits'
+        aeff     = gammalib.GCTAAeffArf(filename)
 
         # Test Aeff values
         self.test_value(aeff(0.0, 0.0), 1607246236.98, 0.1)
@@ -130,14 +115,9 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test GCTAPsf classes.
         """
-        # Load 2D PSF
-        self.test_try("Test GCTAPsf2D file constructor")
-        try:
-            filename = self.caldb + "/prod1_gauss.fits"
-            psf      = gammalib.GCTAPsf2D(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAPsf2D from file.")
+        # Test GCTAPsf2D file constructor
+        filename = self.caldb + '/prod1_gauss.fits'
+        psf      = gammalib.GCTAPsf2D(filename)
 
         # Test PSF values
         self.test_value(psf(0.0, 0.0, 0.0), 163782.469465, 1.0e-6)
@@ -147,14 +127,9 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(psf(0.0, 1.0, 0.01745), 433247.309504, 1.0e-6)
         self.test_value(psf(0.001, 1.0, 0.01745), 111075.0692681, 1.0e-6)
 
-        # Load King profile PSF
-        self.test_try("Test GCTAPsfKing file constructor")
-        try:
-            filename = self.caldb + "/prod1_king.fits"
-            psf      = gammalib.GCTAPsfKing(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAPsfKing from file.")
+        # Test GCTAPsfKing file constructor
+        filename = self.caldb + '/prod1_king.fits'
+        psf      = gammalib.GCTAPsfKing(filename)
 
         # Test PSF values
         self.test_value(psf(0.0, 0.0, 0.0), 213666.253408, 1.0e-6)
@@ -164,14 +139,9 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(psf(0.0, 1.0, 0.01745), 660973.856068, 1.0e-6)
         self.test_value(psf(0.001, 1.0, 0.01745), 80272.5530008, 1.0e-6)
 
-        # Load performance file
-        self.test_try("Test GCTAPsfPerfTable file constructor")
-        try:
-            filename = self.caldb + "/cta_dummy_irf.dat"
-            psf      = gammalib.GCTAPsfPerfTable(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAPsfPerfTable from file.")
+        # Test GCTAPsfPerfTable file constructor
+        filename = self.caldb + '/cta_dummy_irf.dat'
+        psf      = gammalib.GCTAPsfPerfTable(filename)
 
         # Test PSF values
         self.test_value(psf(0.0, 0.0, 0.0), 537853.354917, 1.0e-6)
@@ -181,14 +151,9 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(psf(0.0, 1.0, 0.01745), 1292604.7473727, 1.0e-6)
         self.test_value(psf(0.001, 1.0, 0.01745), 22272.4258111, 1.0e-6)
 
-        # Load 1DC PSF file
-        self.test_try("Test GCTAPsfVector file constructor")
-        try:
-            filename = self.caldb + "/dc1/psf_magic.fits"
-            psf      = gammalib.GCTAPsfVector(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAPsfVector from file.")
+        # Test GCTAPsfVector file constructor
+        filename = self.caldb + '/dc1/psf_magic.fits'
+        psf      = gammalib.GCTAPsfVector(filename)
 
         # Print
         self.test_value(psf(0.0, -1.0, 0.0), 42263.9572394, 1.0e-6)
@@ -206,27 +171,17 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test GCTAEdisp classes.
         """
-        # Load RMF file
-        self.test_try("Test GCTAEdispRmf file constructor")
-        try:
-            filename = self.caldb + "/dc1/rmf.fits"
-            edisp    = gammalib.GCTAEdispRmf(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAEdispRmf from file.")
+        # Test GCTAEdispRmf file constructor
+        filename = self.caldb + '/dc1/rmf.fits'
+        edisp    = gammalib.GCTAEdispRmf(filename)
         
         # Test energy dispersion values
         self.test_value(edisp(math.log10(30),math.log10(1)), 0.0, 1.0e-9)
         self.test_value(edisp(math.log10(1),math.log10(30)), 0.0, 1.0e-9)
         
-        # Load performance file
-        self.test_try("Test GCTAEdispPerfTable file constructor")
-        try:
-            filename = self.caldb + "/cta_dummy_irf.dat"
-            edisp    = gammalib.GCTAEdispPerfTable(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAEdispPerfTable from file.")
+        # Test GCTAEdispPerfTable file constructor
+        filename = self.caldb + '/cta_dummy_irf.dat'
+        edisp    = gammalib.GCTAEdispPerfTable(filename)
 
         # Test energy dispersion values
         self.test_value(edisp(0.0, 0.0), 9.99019627861, 1.0e-6)
@@ -236,15 +191,10 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(edisp(1.0, 1.0), 18.064868197, 1.0e-6)
         self.test_value(edisp(1.001, 1.0, 0.0), 18.0463571212, 1.0e-6)
 
-        # Load response
-        self.test_try("Test GCTAResponseIrf file constructor")
-        try:
-            db  = gammalib.GCaldb(self.caldb)
-            irf = "cta_dummy_irf"
-            rsp = gammalib.GCTAResponseIrf(irf, db)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to allocate GCTAResponseIrf from file.")
+        # Test GCTAResponseIrf file constructor
+        db  = gammalib.GCaldb(self.caldb)
+        irf = 'cta_dummy_irf'
+        rsp = gammalib.GCTAResponseIrf(irf, db)
 
         # Test nedisp computations
         #dir  = gammalib.GSkyDir()
@@ -269,13 +219,8 @@ class Test(gammalib.GPythonTestSuite):
         Test response classes
         """
         # Load 1DC CTA observation (ARF, PSF, RMF)
-        self.test_try("Test 1DC responses")
-        try:
-            filename = self.caldb + "/../data/irf_1dc.xml"
-            obs      = gammalib.GObservations(filename)
-            self.test_try_success()
-        except:
-            self.test_try_failure("Unable to load 1DC responses.")
+        filename = self.caldb + '/../data/irf_1dc.xml'
+        obs      = gammalib.GObservations(filename)
 
         # Return
         return

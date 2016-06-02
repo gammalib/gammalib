@@ -99,10 +99,15 @@ GXmlAttribute::GXmlAttribute(const std::string& name, const std::string& value)
 
     // Strip any pair of leading and trailing hyphens
     int n = v.length();
-    if (n > 2) {
+    if (n >= 2) {
         if (((v[0] ==  '"') && (v[n-1] ==  '"')) ||
             ((v[0] == '\'') && (v[n-1] == '\''))) {
-            v = v.substr(1, n-2);
+            if (n > 2) {
+                v = v.substr(1, n-2);
+            }
+            else {
+                v = "";
+            }
         }
     }
 
