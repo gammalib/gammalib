@@ -348,8 +348,9 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
  * @return Sky direction.
  *
  * @exception GException::invalid_value
- *            No energy boundaries specified, or energy boundaries do not
- *            cover the specified @p energy.
+ *            No map cube defined.
+ *            No energy boundaries defined.
+ *            Simulation cone not defined or does not overlap with map cube.
  *
  * Returns a random sky direction according to the intensity distribution of
  * the model sky map and the specified energy. The method uses a rejection
@@ -359,102 +360,116 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                                      const GTime&   time,
                                      GRan&          ran) const
 {
-    // Allocate sky direction
-    GSkyDir dir;
-
     // Fetch cube
     fetch_cube();
 
     // Determine number of skymap pixels
     int npix = pixels();
 
-    // Continue only if there are skymap pixels
-    if (npix > 0) {
+    // Throw an exception if there are no sky map pixels
+    if (npix <= 0) {
+        std::string msg = "No map cube defined. Please specify a valid map cube.";
+        throw GException::invalid_value(G_MC, msg);
+    }
 
-        // If no energy boundaries are defined, throw an exception
-        if (m_ebounds.size() < 1) {
-            std::string msg = "The energy boundaries of the maps in the cube "
-                              "have not been defined. Maybe the map cube file "
-                              "is missing the \"ENERGIES\" extension which "
-                              "defines the energy of each map in the cube. "
-                              "Please provide the energy information."; 
-            throw GException::invalid_value(G_MC, msg);
-        }
+    // Throw an exception if no energy boundaries are defined
+    if (m_ebounds.size() < 1) {
+        std::string msg = "The energy boundaries of the maps in the cube have "
+                          "not been defined. Maybe the map cube file is missing "
+                          "the \"ENERGIES\" extension which defines the energy "
+                          "of each map in the cube. Please provide the energy "
+                          "information.";
+        throw GException::invalid_value(G_MC, msg);
+    }
 
-        // Set energy for interpolation
-        m_logE.set_value(energy.log10MeV());
+    // Set energy for interpolation
+    m_logE.set_value(energy.log10MeV());
 
-        // Compute maximum map value within simulation cone by log-log
-        // interpolation of tha maximum values that are stored for each
-        // map
-        double max       = 0.0;
-        double max_left  = m_mc_max[m_logE.inx_left()];
-        double max_right = m_mc_max[m_logE.inx_right()];
-        if (max_left > 0.0 && max_right > 0.0) {
-            double max_log = m_logE.wgt_left()  * std::log(max_left) +
-                             m_logE.wgt_right() * std::log(max_right);
-            max = std::exp(max_log);
-        }
-        else if (max_left > 0.0) {
-            max = max_left;
-        }
-        else if (max_right > 0.0) {
-            max = max_right;
-        }
+    // Compute maximum map value within simulation cone by log-log interpolation
+    // of the maximum values that are stored for each map
+    double max       = 0.0;
+    double max_left  = m_mc_max[m_logE.inx_left()];
+    double max_right = m_mc_max[m_logE.inx_right()];
+    if (max_left > 0.0 && max_right > 0.0) {
+        double max_log = m_logE.wgt_left()  * std::log(max_left) +
+                         m_logE.wgt_right() * std::log(max_right);
+        max = std::exp(max_log);
+    }
+    else if (max_left > 0.0) {
+        max = max_left;
+    }
+    else if (max_right > 0.0) {
+        max = max_right;
+    }
 
-        // Debug option: initialise counter
+    // Throw an exception if the maximum MC intensity is not positive. This
+    // can be the case because the simulation cone has not been defined or
+    // because it does not overlap with the sky map
+    if (max <= 0.0) {
+        std::string msg = "Simulation cone has not been defined or does not "
+                          "overlap with the sky map. Please specify a valid "
+                          "simulation cone.";
+        throw GException::invalid_value(G_MC, msg);
+    }
+
+    // Allocate sky direction
+    GSkyDir dir;
+
+    // Debug option: initialise counter
+    #if defined(G_DEBUG_MC)
+    int num_iterations = 0;
+    #endif
+
+    // Get sky direction
+    while (true) {
+
+        // Debug option: increment counter
         #if defined(G_DEBUG_MC)
-        int num_iterations = 0;
+        num_iterations++;
         #endif
 
-        // Get sky direction
-        while (true) {
+        // Simulate random sky direction within Monte Carlo simulation cone
+        double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_cosrad) *
+                       gammalib::rad2deg;
+        double phi   = 360.0 * ran.uniform();
+        dir = m_mc_centre;
+        dir.rotate_deg(phi, theta);
 
-            // Debug option: increment counter
-            #if defined(G_DEBUG_MC)
-            num_iterations++;
-            #endif
+        // Get map value at simulated sky direction
+        double value       = 0.0;
+        double value_left  = m_cube(dir, m_logE.inx_left());
+        double value_right = m_cube(dir, m_logE.inx_right());
+        if (value_left > 0.0 && value_right > 0.0) {
+            double value_log = m_logE.wgt_left()  * std::log(value_left) +
+                               m_logE.wgt_right() * std::log(value_right);
+            value = std::exp(value_log);
+        }
+        else if (value_left > 0.0) {
+            value = value_left;
+        }
+        else if (value_right > 0.0) {
+            value = value_right;
+        }
 
-            // Simulate random sky direction within Monte Carlo simulation
-            // cone
-            double theta = std::acos(1.0 - ran.uniform() * m_mc_one_minus_cosrad) *
-                           gammalib::rad2deg;
-            double phi   = 360.0 * ran.uniform();
-            dir = m_mc_centre;
-            dir.rotate_deg(phi, theta);
+        // If map value is non-positive then simulate a new sky direction
+        if (value <= 0.0) {
+            continue;
+        }
 
-            // Get map value at simulated sky direction
-            double value       = 0.0;
-            double value_left  = m_cube(dir, m_logE.inx_left());
-            double value_right = m_cube(dir, m_logE.inx_right());
-            if (value_left > 0.0 && value_right > 0.0) {
-                double value_log = m_logE.wgt_left()  * std::log(value_left) +
-                                   m_logE.wgt_right() * std::log(value_right);
-                value = std::exp(value_log);
-            }
-            else if (value_left > 0.0) {
-                value = value_left;
-            }
-            else if (value_right > 0.0) {
-                value = value_right;
-            }
+        // Get uniform random number
+        double uniform = ran.uniform() * max;
 
-            // Get uniform random number
-            double uniform = ran.uniform() * max;
+        // Exit loop if the random number is not larger than the map cube value
+        if (uniform <= value) {
+            break;
+        }
 
-            // Exit loop if we're not larger than the map value
-            if (uniform <= value) {
-                break;
-            }
+    } // endwhile: loop until sky direction was accepted
 
-        } // endwhile: loop until sky direction was accepted
-
-        // Debug option: log counter
-        #if defined(G_DEBUG_MC)
-        std::cout << num_iterations << " ";
-        #endif
-
-    } // endif: there were pixels in sky map
+    // Debug option: log counter
+    #if defined(G_DEBUG_MC)
+    std::cout << num_iterations << " ";
+    #endif
 
     // Return sky direction
     return dir;
@@ -807,7 +822,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
 
             // Log maximum intensity and total flux for debugging
             #if defined(G_DEBUG_MC_CACHE)
-            std::cout << "GModelSpatialDiffuseCube::set_mc_cone:";
+            std::cout << "GModelSpatialDiffuseCube::set_mc_cone:" << std::endl;
             std::cout << "  Maximum map intensity:" << std::endl;
             for (int i = 0; i < m_mc_max.size(); ++i) {
                 GEnergy energy;

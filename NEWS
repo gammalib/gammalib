@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-2 June 2016
+3 June 2016
 
 
 1. Introduction
@@ -179,6 +179,9 @@ The GModelSpatialDiffuseCube::mc() method now uses a rejection method for
 simulating sky directions, which makes the MC method identical to the model
 evaluation method, using in both cases a log-log interpolation. The simulation
 cone is now used for Monte Carlo simulations (#1722).
+
+Also the GModelSpatialDiffuseMap::mc() method now uses a rejection method for
+simulating sky directions (#1725).
 
 The methods spatial(), spectral() and temporal() have been added to GModelSky
 to allow setting of model components.

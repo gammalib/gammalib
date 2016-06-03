@@ -334,7 +334,7 @@ GCTACubeEdisp& GCTACubeEdisp::operator=(const GCTACubeEdisp& cube)
  *
  * @param[in] dir Coordinate of the true photon position.
  * @param[in] migra Energy migration (reconstructed over true energy).
- * @param[in] energy True photon energy.
+ * @param[in] srcEng True photon energy.
  * @return Energy dispersion (in units of MeV^-1)
  *
  * Returns the energy dispersion for a given energy migration (reconstructed
