@@ -34,6 +34,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAPsfVector.cpp \
           src/GCTAPsf2D.cpp \
           src/GCTAPsfKing.cpp \
+          src/GCTAPsfTable.cpp \
           src/GCTAEdisp.cpp \
           src/GCTAEdispPerfTable.cpp \
           src/GCTAEdispRmf.cpp \
@@ -86,6 +87,7 @@ pkginclude_HEADERS = include/GCTATypemaps.hpp \
                      include/GCTAPsfVector.hpp \
                      include/GCTAPsf2D.hpp \
                      include/GCTAPsfKing.hpp \
+                     include/GCTAPsfTable.hpp \
                      include/GCTAEdisp.hpp \
                      include/GCTAEdispPerfTable.hpp \
                      include/GCTAEdispRmf.hpp \

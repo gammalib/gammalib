@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    test_CTA.hpp  -  Test CTA classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,6 +52,7 @@ public:
     void                      test_response_aeff(void);
     void                      test_response_psf(void);
     void                      test_response_psf_king(void);
+    void                      test_response_psf_table(void);
     void                      test_response_npsf(void);
     void                      test_response_edisp(void);
     void                      test_response_edisp_PerfTable(void);

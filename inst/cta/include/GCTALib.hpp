@@ -57,6 +57,7 @@
 #include "GCTAPsfVector.hpp"
 #include "GCTAPsf2D.hpp"
 #include "GCTAPsfKing.hpp"
+#include "GCTAPsfTable.hpp"
 #include "GCTAEdisp.hpp"
 #include "GCTAEdispPerfTable.hpp"
 #include "GCTAEdispRmf.hpp"

@@ -185,6 +185,7 @@
 %include "GCTAPsfVector.i"
 %include "GCTAPsf2D.i"
 %include "GCTAPsfKing.i"
+%include "GCTAPsfTable.i"
 %include "GCTAEdisp.i"
 %include "GCTAEdispPerfTable.i"
 %include "GCTAEdispRmf.i"

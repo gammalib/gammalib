@@ -62,6 +62,7 @@ const std::string cta_irf_bgd_xml  = datadir+"/cta_model_irf_bgd.xml";
 const std::string cta_aeff_bgd_xml = datadir+"/cta_model_aeff_bgd.xml";
 const std::string cta_caldb_king   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king     = "irf_file.fits";
+const std::string cta_psf_table    = PACKAGE_SOURCE"/inst/cta/test/caldb/psf_table.fits[PSF_2D_TABLE]";
 const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
 const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
 const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
@@ -87,6 +88,8 @@ void TestGCTAResponse::set(void)
            "Test Gaussian point spread function");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king),
            "Test King point spread function");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_table),
+           "Test Table point spread function");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf),
            "Test integrated point spread function");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_edisp),
@@ -485,6 +488,57 @@ void TestGCTAResponse::test_response_psf_king(void)
             }
         }
         test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
+        
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test table point spread function
+ *
+ * The Psf computation is tested by integrating numerically the Psf
+ * function. Integration is done in a rather simplistic way, by stepping
+ * radially away from the centre. The integration is done for a set of
+ * energies from 0.1-10 TeV.
+ ***************************************************************************/
+void TestGCTAResponse::test_response_psf_table(void)
+{
+    // Load point spread function
+    GCTAPsfTable psf(cta_psf_table);
+
+    // Integrate PSF
+    GEnergy eng;
+    double  sum_check = 0.1;
+    for (double e = 0.1; e < 10.0; e *= 2.0) {
+        eng.TeV(e);
+        double r_max = psf.delta_max(eng.log10TeV()) * gammalib::rad2deg;
+        double r     = 0.0;
+        double dr    = 0.00001;
+        int    steps = int(r_max / dr);
+        double sum   = 0.0;
+        double rcont = 0.0 ;
+        for (int i = 0; i < steps; ++i) {
+            r   += dr;
+            sum += psf(r * gammalib::deg2rad, eng.log10TeV()) *
+                   gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
+                   gammalib::deg2rad;
+            
+            // since 'sum' already totals to 1.0, its also a 'fraction',
+            // which we can plug back into containment_radius(), to compare
+            // with the origial radius 'r'
+            if (sum > sum_check && sum < 1.0) {
+                rcont      = psf.containment_radius(sum, eng.log10TeV());
+                sum_check += 0.1;
+                std::string msg = "Table PSF containment radius for "+eng.print()+
+                                  " and "+gammalib::str(sum*100.0)+
+                                  "% containment";
+                test_value(rcont, r*gammalib::deg2rad, 0.1, msg);
+            }
+        }
+        test_value(sum, 1.0, 0.01, "PSF integration for "+eng.print());
         
     }
 

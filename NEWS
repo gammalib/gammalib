@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-2 June 2016
+8 June 2016
 
 
 1. Introduction
@@ -13,6 +13,9 @@ made since the last release of GammaLib.
 
 2. Public interface modifications
 ---------------------------------
+The following classes have been added:
+- GCTAPsfTable
+
 The following classes have been removed:
 - GCTAOnOffObservations
 
@@ -372,6 +375,9 @@ The GCTAOnOffObservations container class has now been removed, as On/Off observ
 are now stored as any other observation in the GObservations container (#1669).
 
 The On/Off fitting of CTA data has now been implemented (#1044).
+
+The GCTAPsfTable class has been added to support non-parametric point spread function
+histograms (#1786). 
 
 
 21. COMPTEL interface
