@@ -1979,9 +1979,9 @@ void GSkyMap::load(const GFilename& filename)
  * @param[in] filename FITS file name.
  * @param[in] clobber Overwrite existing file?
  *
- * Saves the sky map into a FITS file. If the file exists already the method
- * will append the sky map to the FITS file in case that the @p clobber
- * parameter is set to true.
+ * Saves the sky map into a FITS file. If the file exists already and the
+ * @p clobber parameter is true, the method will overwrite the content of
+ * the existing file. Otherwise, an exception is thrown.
  ***************************************************************************/
 void GSkyMap::save(const GFilename& filename, const bool& clobber) const
 {
@@ -2009,21 +2009,15 @@ void GSkyMap::save(const GFilename& filename, const bool& clobber) const
                 hdu->extname(filename.extname());
             }
 
-            // Open or create FITS file (without extension name since the
-            // requested extension may not yet exist in the file)
-            GFits fits(filename.url(), true);
-
-            // If the FITS file contains already an extension with the same
-            // name then remove now this extension
-            if (fits.contains(filename.extname())) {
-                fits.remove(filename.extname());
-            }
+            // Initialise empty FITS file
+            GFits fits;
 
             // Append sky map to FITS file
             fits.append(*hdu);
 
-            // Save FITS file
-            fits.save(clobber);
+            // Save FITS file (without extension name which was extracted
+            // earlier and set in the HDU)
+            fits.saveto(filename.url(), clobber);
 
             // Delete HDU
             delete hdu;
@@ -2074,11 +2068,15 @@ void GSkyMap::read(const GFitsHDU& hdu)
 
 
 /***********************************************************************//**
- * @brief Write skymap into FITS file
+ * @brief Write sky map into FITS file
  *
  * @param[in] file FITS file pointer.
+ * @param[in] extname Sky map extension name.
+ *
+ * Write the sky map into a FITS file. Optionally, the extension name of
+ * the FITS HDU can be specified using the @p extname parameter.
  ***************************************************************************/
-void GSkyMap::write(GFits& file) const
+void GSkyMap::write(GFits& file, const std::string& extname) const
 {
     // Continue only if we have data to save
     if (m_proj != NULL) {
@@ -2098,11 +2096,19 @@ void GSkyMap::write(GFits& file) const
 
         // Append HDU to FITS file.
         if (hdu != NULL) {
-            file.append(*hdu);
-        }
 
-        // Delete HDU
-        if (hdu != NULL) delete hdu;
+            // Optionally set extension name
+            if (extname.length() > 0) {
+                hdu->extname(extname);
+            }
+
+            // Append HDU
+            file.append(*hdu);
+
+            // Delete HDU
+            if (hdu != NULL) delete hdu;
+
+        } // endif: there was a valid HDU
 
     } // endif: we had data to save
 

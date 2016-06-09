@@ -1201,13 +1201,15 @@ void TestGSky::test_GSkyMap_io(void)
             wcs3(i,k) = 3.0*double(i+k+1);
         }
     }
-    healpix1.save(filename+"[HEALPIX1]", true);
-    wcs1.save(filename+"[WCS1]", true);
-    healpix2.save(filename+"[HEALPIX2]", true);
-    wcs2.save(filename+"[WCS2]", true);
+    GFits fits(filename, true);
+    healpix1.write(fits, "HEALPIX1");
+    wcs1.write(fits, "WCS1");
+    healpix2.write(fits, "HEALPIX2");
+    wcs2.write(fits, "WCS2");
     wcs3.shape(2,2,3);
-    wcs3.save(filename+"[WCS3]", true);
-
+    wcs3.write(fits, "WCS3");
+    fits.save(true);
+    
     // Load HEALPix map and check content
     GSkyMap map1(filename+"[HEALPIX1]");
 	test_value(map1.npix(), healpix1.npix(), "Check number of HEALPix pixels");    

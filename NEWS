@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-8 June 2016
+9 June 2016
 
 
 1. Introduction
@@ -121,6 +121,7 @@ The interface for the following methods has been changed:
 - GFitsImageShort naxes constructor
 - GFitsImageULong naxes constructor
 - GFitsImageUShort naxes constructor
+- GSkyMap::save()
 
 
 3. Configuration
@@ -251,6 +252,9 @@ the number of maps in each of the dimensions, the ndim() method returns
 the number of dimensions. Note that a longitude and latitude dimensions
 are not counted in the map dimensions, i.e. a 3D image cube with
 longitude, latitude and a number of maps has a dimension of 1 (#1733).
+
+An optional extname argument has been added to the GSkyMap::save() method
+so that the extension name can be set (#1787).
 
 
 13. Support module
