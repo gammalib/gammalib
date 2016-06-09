@@ -74,7 +74,7 @@ public:
     void             map(const GSkyMap& map);
     bool             normalize(void) const;
     void             set_mc_cone(const GSkyDir& centre,
-                            const double&  radius) const;
+                                 const double&  radius) const;
 };
 
 
