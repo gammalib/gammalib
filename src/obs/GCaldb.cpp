@@ -504,15 +504,15 @@ void GCaldb::close(void)
  * @todo time should support "now" and probably be implemented using < condition.
  * @todo expr should support arbitrary Boolean expressions.
  ***************************************************************************/
-std::string GCaldb::filename(const std::string& detector,
-                             const std::string& filter,
-                             const std::string& codename,
-                             const std::string& date,
-                             const std::string& time,
-                             const std::string& expr)
+GFilename GCaldb::filename(const std::string& detector,
+                           const std::string& filter,
+                           const std::string& codename,
+                           const std::string& date,
+                           const std::string& time,
+                           const std::string& expr)
 {
     // Initialise empty filename
-    std::string filename;
+    GFilename filename;
 
     // Continue only if CIF is opened
     if (m_cif != NULL) {

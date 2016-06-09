@@ -626,9 +626,9 @@ void GLATResponse::load(const std::string& rspname)
 
         // Get response using the GCaldb interface
         std::string expr      = "VERSION("+gammalib::toupper(m_rspname)+")";
-        std::string aeffname  = caldb.filename(type_names[i],"","EFF_AREA","","",expr);
-        std::string psfname   = caldb.filename(type_names[i],"","RPSF","","",expr);
-        std::string edispname = caldb.filename(type_names[i],"","EDISP","","",expr);
+        GFilename   aeffname  = caldb.filename(type_names[i],"","EFF_AREA","","",expr);
+        GFilename   psfname   = caldb.filename(type_names[i],"","RPSF","","",expr);
+        GFilename   edispname = caldb.filename(type_names[i],"","EDISP","","",expr);
 
         // Load IRF components
         GLATAeff*  aeff  = new GLATAeff(aeffname, type_names[i]);

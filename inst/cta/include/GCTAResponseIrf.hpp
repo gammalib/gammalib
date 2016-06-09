@@ -160,46 +160,46 @@ public:
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GCTAResponseIrf& rsp);
-    void        free_members(void);
-    std::string irf_filename(const std::string& filename) const;
-    double      irf_ptsrc(const GEvent&       event,
+    void      init_members(void);
+    void      copy_members(const GCTAResponseIrf& rsp);
+    void      free_members(void);
+    GFilename irf_filename(const std::string& filename) const;
+    double    irf_ptsrc(const GEvent&       event,
+                        const GSource&      source,
+                        const GObservation& obs) const;
+    double    irf_radial(const GEvent&       event,
+                         const GSource&      source,
+                         const GObservation& obs) const;
+    double    irf_elliptical(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+    double    irf_diffuse(const GEvent&       event,
                           const GSource&      source,
                           const GObservation& obs) const;
-    double      irf_radial(const GEvent&       event,
-                           const GSource&      source,
-                           const GObservation& obs) const;
-    double      irf_elliptical(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const;
-    double      irf_diffuse(const GEvent&       event,
-                            const GSource&      source,
-                            const GObservation& obs) const;
-    double      nroi_ptsrc(const GModelSky&    model,
+    double    nroi_ptsrc(const GModelSky&    model,
+                         const GEnergy&      srcEng,
+                         const GTime&        srcTime,
+                         const GEnergy&      obsEng,
+                         const GTime&        obsTime,
+                         const GObservation& obs) const;
+    double    nroi_radial(const GModelSky&    model,
+                          const GEnergy&      srcEng,
+                          const GTime&        srcTime,
+                          const GEnergy&      obsEng,
+                          const GTime&        obsTime,
+                          const GObservation& obs) const;
+    double    nroi_elliptical(const GModelSky&    model,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
+                              const GEnergy&      obsEng,
+                              const GTime&        obsTime,
+                              const GObservation& obs) const;
+    double    nroi_diffuse(const GModelSky&    model,
                            const GEnergy&      srcEng,
                            const GTime&        srcTime,
                            const GEnergy&      obsEng,
                            const GTime&        obsTime,
                            const GObservation& obs) const;
-    double      nroi_radial(const GModelSky&    model,
-                            const GEnergy&      srcEng,
-                            const GTime&        srcTime,
-                            const GEnergy&      obsEng,
-                            const GTime&        obsTime,
-                            const GObservation& obs) const;
-    double      nroi_elliptical(const GModelSky&    model,
-                                const GEnergy&      srcEng,
-                                const GTime&        srcTime,
-                                const GEnergy&      obsEng,
-                                const GTime&        obsTime,
-                                const GObservation& obs) const;
-    double      nroi_diffuse(const GModelSky&    model,
-                             const GEnergy&      srcEng,
-                             const GTime&        srcTime,
-                             const GEnergy&      obsEng,
-                             const GTime&        obsTime,
-                             const GObservation& obs) const;
 
     // Private data members
     GCaldb          m_caldb;          //!< Calibration database

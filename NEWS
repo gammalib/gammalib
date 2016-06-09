@@ -109,6 +109,7 @@ of std::string:
 The return value has been changed for the following methods:
 - GFits::filename() returns now GFilename instead of std::string
 - GCTAObservation::eventtype() returns now std::string instead of const std::string&
+- GCaldb::filename() returns now GFilename instead of std::string
 
 The interface for the following methods has been changed:
 - GFitsImage naxes constructor

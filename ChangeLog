@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        GCaldb::filename() method now returns GFilename (#1745)
         GSkyMap::save() now overwrites files (#1787)
         Add GCTAPsfTable class (#1786)
         Use std::vector for naxes argument in GFitsImage (#1779)

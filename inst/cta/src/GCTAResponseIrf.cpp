@@ -1021,23 +1021,23 @@ void GCTAResponseIrf::load(const std::string& rspname)
 
     // First attempt reading the response using the GCaldb interface
     std::string expr      = "NAME("+rspname+")";
-    std::string aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
-    std::string psfname   = m_caldb.filename("","","RPSF","","",expr);
-    std::string edispname = m_caldb.filename("","","EDISP","","",expr);
-    std::string bgdname   = m_caldb.filename("","","BGD","","",expr);
+    GFilename   aeffname  = m_caldb.filename("","","EFF_AREA","","",expr);
+    GFilename   psfname   = m_caldb.filename("","","RPSF","","",expr);
+    GFilename   edispname = m_caldb.filename("","","EDISP","","",expr);
+    GFilename   bgdname   = m_caldb.filename("","","BGD","","",expr);
 
     // If filenames are empty then build filenames from CALDB root path and
     // response name
-    if (aeffname.length() < 1) {
+    if (aeffname.is_empty()) {
         aeffname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
-    if (psfname.length() < 1) {
+    if (psfname.is_empty()) {
         psfname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
-    if (edispname.length() < 1) {
+    if (edispname.is_empty()) {
         edispname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
-    if (bgdname.length() < 1) {
+    if (bgdname.is_empty()) {
         bgdname = irf_filename(gammalib::filepath(m_caldb.rootdir(), rspname));
     }
 
@@ -2185,7 +2185,7 @@ void GCTAResponseIrf::free_members(void)
  * file with the added suffix .dat exists. Returns the file name with the
  * appropriate extension.
  ***************************************************************************/
-std::string GCTAResponseIrf::irf_filename(const std::string& filename) const
+GFilename GCTAResponseIrf::irf_filename(const std::string& filename) const
 {
     // Set input filename as result filename
     GFilename result = filename;
@@ -2199,7 +2199,7 @@ std::string GCTAResponseIrf::irf_filename(const std::string& filename) const
     }
 
     // Return result
-    return (result.url());
+    return result;
 }
 
 

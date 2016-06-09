@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCaldb.i - Calibration database class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,7 +57,7 @@ public:
     void               open(const std::string& mission,
                             const std::string& instrument = "");
     void               close(void);
-    std::string        filename(const std::string& detector,
+    GFilename          filename(const std::string& detector,
                                 const std::string& filter,
                                 const std::string& codename,
                                 const std::string& date,
