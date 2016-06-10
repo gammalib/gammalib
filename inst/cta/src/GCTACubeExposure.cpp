@@ -49,7 +49,6 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -124,13 +123,21 @@ GCTACubeExposure::GCTACubeExposure(const GCTAEventCube& cube)
     init_members();
 
     // Store energy boundaries
-    m_ebounds = cube.ebounds();
+    int nebins = cube.ebounds().size();
+    for (int i = 0; i < nebins; ++i) {
+        m_energies.append(cube.ebounds().emin(i));
+    }
+    if (nebins > 0) {
+        m_energies.append(cube.ebounds().emax(nebins-1));
+        
+    }
 
     // Set GNodeArray used for interpolation
     set_eng_axis();
 
     // Set exposure cube to event cube
     m_cube = cube.map();
+    m_cube.nmaps(m_energies.size());
 
     // Set all exposure cube pixels to zero as we want to have a clean map
     // upon construction
@@ -145,15 +152,15 @@ GCTACubeExposure::GCTACubeExposure(const GCTAEventCube& cube)
 /***********************************************************************//**
  * @brief Exposure cube constructor
  *
- * @param[in] wcs     World Coordinate System.
- * @param[in] coords  Coordinate System (CEL or GAL).
- * @param[in] x       X coordinate of sky map centre (deg).
- * @param[in] y       Y coordinate of sky map centre (deg).
- * @param[in] dx      Pixel size in x direction at centre (deg/pixel).
- * @param[in] dy      Pixel size in y direction at centre (deg/pixel).
- * @param[in] nx      Number of pixels in x direction.
- * @param[in] ny      Number of pixels in y direction.
- * @param[in] ebounds Energy boundaries.
+ * @param[in] wcs      World Coordinate System.
+ * @param[in] coords   Coordinate System (CEL or GAL).
+ * @param[in] x        X coordinate of sky map centre (deg).
+ * @param[in] y        Y coordinate of sky map centre (deg).
+ * @param[in] dx       Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy       Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx       Number of pixels in x direction.
+ * @param[in] ny       Number of pixels in y direction.
+ * @param[in] energies Energies.
  *
  * Constructs an exposure cube by specifying the sky map grid and the energy
  * boundaries.
@@ -166,19 +173,19 @@ GCTACubeExposure::GCTACubeExposure(const std::string&   wcs,
                                    const double&        dy,
                                    const int&           nx,
                                    const int&           ny,
-                                   const GEbounds&      ebounds)
+                                   const GEnergies&     energies)
 {
     // Initialise class members
     init_members();
 
-    // Store energy boundaries
-    m_ebounds = ebounds;
+    // Store energies
+    m_energies = energies;
 
     // Set GNodeArray used for interpolation
     set_eng_axis();
 
     // Create sky map
-    m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, m_ebounds.size());
+    m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, m_energies.size());
 
     // Return
     return;
@@ -344,11 +351,11 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
                     // in radians
                     double theta = pnt.dist(dir);
 
-                    // Loop over all exposure cube energy bins
-                    for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                    // Loop over all exposure cube energies
+                    for (int iebin = 0; iebin < m_energies.size(); ++iebin){
 
                         // Get logE/TeV
-                        double logE = m_ebounds.elogmean(iebin).log10TeV();
+                        double logE = m_energies[iebin].log10TeV();
 
                         // Set exposure cube (effective area * livetime)
                         m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
@@ -477,15 +484,18 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
                 double theta = pnt.dist(dir);
 
                 // Loop over all exposure cube energy bins
-                for (int iebin = 0; iebin < m_ebounds.size(); ++iebin){
+                for (int iebin = 0; iebin < m_energies.size(); ++iebin){
 
-                    // Only add exposure to pixel if energy bin is inside 
-                    // observation energy boundaries
-                    if (obs_ebounds.contains(m_ebounds.emin(iebin)+g_energy_margin,
-                                             m_ebounds.emax(iebin)-g_energy_margin)) {
+                    // Only add exposure if energy is inside observation energy
+                    // boundaries
+                    // TODO: The exposure cube energies are true energies, while
+                    //       the observation energy boundaries are reconstructed
+                    //       energies. In principle one would need to use the
+                    //       energy dispersion information to do this correctly.
+                    if (obs_ebounds.contains(m_energies[iebin])) {
 
                         // Get logE/TeV
-                        double logE = m_ebounds.elogmean(iebin).log10TeV();
+                        double logE = m_energies[iebin].log10TeV();
 
                         // Add to exposure cube (effective area * livetime)
                         m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
@@ -523,9 +533,9 @@ void GCTACubeExposure::read(const GFits& fits)
     clear();
 
     // Get HDUs
-    const GFitsImage& hdu_expcube = *fits.image("Primary");
-    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
-    const GFitsTable& hdu_gti     = *fits.table("GTI");
+    const GFitsImage& hdu_expcube  = *fits.image("Primary");
+    const GFitsTable& hdu_energies = *fits.table("ENERGIES");
+    const GFitsTable& hdu_gti      = *fits.table("GTI");
 
     // Read cube
     m_cube.read(hdu_expcube);
@@ -533,8 +543,8 @@ void GCTACubeExposure::read(const GFits& fits)
     // Read cube attributes
     read_attributes(hdu_expcube);
 
-    // Read energy boundaries
-    m_ebounds.read(hdu_ebounds);
+    // Read energies
+    m_energies.read(hdu_energies);
 
     // Read GTIs
     m_gti.read(hdu_gti);
@@ -548,12 +558,12 @@ void GCTACubeExposure::read(const GFits& fits)
 
 
 /***********************************************************************//**
- * @brief Write CTA exposure cube into FITS object.
+ * @brief Write CTA exposure cube into FITS file.
  *
  * @param[in] fits FITS file.
  *
- * Writes the exposure cube image, the energy boundaries and the Good Time
- * Intervals into the FITS object.
+ * Writes the exposure cube image, the energies and the Good Time Intervals
+ * into the FITS file.
  ***************************************************************************/
 void GCTACubeExposure::write(GFits& fits) const
 {
@@ -564,8 +574,8 @@ void GCTACubeExposure::write(GFits& fits) const
     GFitsHDU& hdu = *fits[fits.size()-1];
     write_attributes(hdu);
 
-    // Write energy boundaries
-    m_ebounds.write(fits);
+    // Write energies
+    m_energies.write(fits);
 
     // Write GTIs
     m_gti.write(fits);
@@ -605,7 +615,7 @@ void GCTACubeExposure::load(const GFilename& filename)
  * @brief Save exposure cube into FITS file
  *
  * @param[in] filename Exposure cube FITS file name.
- * @param[in] clobber Overwrite existing file? (default: false)
+ * @param[in] clobber Overwrite existing file?
  *
  * Save the exposure cube into a FITS file.
  ***************************************************************************/
@@ -652,12 +662,12 @@ std::string GCTACubeExposure::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Livetime"));
         result.append(gammalib::str(m_livetime)+" sec");
 
-        // Append energy intervals
-        if (m_ebounds.size() > 0) {
-            result.append("\n"+m_ebounds.print(chatter));
+        // Append energies
+        if (m_energies.size() > 0) {
+            result.append("\n"+m_energies.print(chatter));
         }
         else {
-            result.append("\n"+gammalib::parformat("Energy intervals") +
+            result.append("\n"+gammalib::parformat("Energies") +
                           "not defined");
         }
 
@@ -694,7 +704,7 @@ void GCTACubeExposure::init_members(void)
     // Initialise members
     m_filename.clear();
     m_cube.clear();
-    m_ebounds.clear();
+    m_energies.clear();
     m_elogmeans.clear();
     m_gti.clear();
     m_livetime = 0.0;
@@ -720,7 +730,7 @@ void GCTACubeExposure::copy_members(const GCTACubeExposure& cube)
     // Copy members
     m_filename  = cube.m_filename;
     m_cube      = cube.m_cube;
-    m_ebounds   = cube.m_ebounds;
+    m_energies  = cube.m_energies;
     m_elogmeans = cube.m_elogmeans;
     m_gti       = cube.m_gti;
     m_livetime  = cube.m_livetime;
@@ -775,21 +785,12 @@ void GCTACubeExposure::update(const double& logE) const
 /***********************************************************************//**
  * @brief Set nodes for a logarithmic (base 10) energy axis
  *
- *
- * Set axis nodes so that each node is the logarithmic mean of the lower and
- * upper energy boundary, i.e.
- * \f[ n_i = \log \sqrt{{\rm LO}_i \times {\rm HI}_i} \f]
- * where
- * \f$n_i\f$ is node \f$i\f$,
- * \f${\rm LO}_i\f$ is the lower bin boundary for bin \f$i\f$, and
- * \f${\rm HI}_i\f$ is the upper bin boundary for bin \f$i\f$.
- *
- * @todo Check that none of the axis boundaries is non-positive.
+ * Set axis nodes so that each node is the logarithm of the energy values.
  ***************************************************************************/
 void GCTACubeExposure::set_eng_axis(void)
 {
     // Get number of bins
-    int bins = m_ebounds.size();
+    int bins = m_energies.size();
 
     // Clear node array
     m_elogmeans.clear();
@@ -798,7 +799,7 @@ void GCTACubeExposure::set_eng_axis(void)
     for (int i = 0; i < bins; ++i) {
      
         // Get logE/TeV
-        m_elogmeans.append(m_ebounds.elogmean(i).log10TeV()); 
+        m_elogmeans.append(m_energies[i].log10TeV());
 
     }  // endfor: looped over energy bins
 

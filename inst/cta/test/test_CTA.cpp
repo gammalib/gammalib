@@ -941,8 +941,8 @@ void TestGCTAResponse::test_response_expcube(void)
     }
     test_try("CTA exposure cube map constructor");
     try {
-        GEbounds         ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-        GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
+        GEnergies        energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, energies);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -953,8 +953,8 @@ void TestGCTAResponse::test_response_expcube(void)
     GCTAObservation obs_cta;
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
-    GEbounds         ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, ebounds);
+    GEnergies        energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubeExposure cube("CAR", "CEL", 83.63, 22.01, 0.02, 0.02, 200, 200, energies);
     cube.set(obs_cta);
     cube.save("test_cta_expcube_one.fits", true);
 
@@ -1567,9 +1567,8 @@ void TestGCTAObservation::test_unbinned_obs(void)
     test_assert(fits.contains("GTI3"), "FITS should contain \"GTI3\" HDU");
     fits.close();
 
-    // Exit test
+    // Return
     return;
- 
 }
 
 
@@ -1607,9 +1606,8 @@ void TestGCTAObservation::test_binned_obs(void)
         test_try_failure(e);
     }
 
-    // Exit test
+    // Return
     return;
- 
 }
 
 
@@ -1660,9 +1658,8 @@ void TestGCTAObservation::test_stacked_obs(void)
     // Save observation container into XML file
     obs.save(filename);
 
-    // Exit test
+    // Return
     return;
- 
 }
 
 
@@ -1671,61 +1668,54 @@ void TestGCTAObservation::test_stacked_obs(void)
  ***************************************************************************/
 void TestGCTAOptimize::test_unbinned_optimizer(void)
 {
+    // Set reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            6.03743e-16, 2.01634e-17,
+                            -2.49595, 0.0249533,
+                            300000, 0,
+                            1, 0,
+                            2.94185, 0.0379307,
+                            6.43398e-05, 1.80715e-06,
+                            -1.82866, 0.0155452,
+                            1000000, 0,
+                            1, 0};
+
     // Declare observations
     GObservations   obs;
     GCTAObservation run;
 
-    // Load unbinned CTA observation
-    test_try("Load unbinned CTA observation");
-    try {
-        run.load(cta_events);
-        run.response(cta_irf, GCaldb(cta_caldb));
-        obs.append(run);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Load unbinned CTA observation and set response
+    run.load(cta_events);
+    run.response(cta_irf, GCaldb(cta_caldb));
+    obs.append(run);
 
     // Load models from XML file
     obs.models(cta_model_xml);
 
     // Perform LM optimization
-    double fit_results[] = {83.6331, 0,
-                            22.0145, 0,
-                            5.656246512e-16, 1.91458426e-17,
-                            -2.49595, 0.0249533,
-                            300000, 0,
-                            1, 0,
-                            2.94185, 0.0379307,
-                            6.490832107e-05, 1.749021094e-06,
-                            -1.82866, 0.0155452,
-                            1000000, 0,
-                            1, 0};
-    test_try("Perform LM optimization");
-    try {
-        GOptimizerLM opt;
-        opt.max_iter(100);
-        obs.optimize(opt);
-        obs.errors(opt);
-        test_try_success();
-        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            const GModel* model = obs.models()[i];
-            for (int k = 0; k < model->size(); ++k) {
-                GModelPar par  = (*model)[k];
-                std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.value(), fit_results[j++], 5.0e-5, msg);
-                test_value(par.error(), fit_results[j++], 5.0e-5, msg);
-            }
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
         }
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
@@ -1734,69 +1724,77 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
  ***************************************************************************/
 void TestGCTAOptimize::test_binned_optimizer(void)
 {
+    // Set reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.99255e-16, 2.00626e-17,
+                            -2.49175, 0.0250639,
+                            300000, 0,
+                            1, 0,
+                            2.95662, 0.0704027,
+                            6.42985e-05, 1.96478e-06,
+                            -1.82084, 0.0163749,
+                            1000000, 0,
+                            1, 0};
+
     // Declare observations
     GObservations   obs;
     GCTAObservation run;
 
-    // Load binned CTA observation
-    test_try("Load binned CTA observation");
-    try {
-        run.load(cta_cntmap);
-        run.response(cta_irf, GCaldb(cta_caldb));
-        obs.append(run);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Load binned CTA observation and set response
+    run.load(cta_cntmap);
+    run.response(cta_irf, GCaldb(cta_caldb));
+    obs.append(run);
 
     // Load models from XML file
     obs.models(cta_model_xml);
 
     // Perform LM optimization
-    double fit_results[] = {83.6331, 0,
-                            22.0145, 0,
-                            5.616410411e-16, 1.904730785e-17,
-                            -2.49175, 0.0250639,
-                            300000, 0,
-                            1, 0,
-                            2.95662, 0.0704027,
-                            6.550723074e-05, 1.945714239e-06,
-                            -1.82084, 0.0163749,
-                            1000000, 0,
-                            1, 0};
-    test_try("Perform LM optimization");
-    try {
-        GOptimizerLM opt;
-        opt.max_iter(100);
-        obs.optimize(opt);
-        obs.errors(opt);
-        test_try_success();
-        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            const GModel* model = obs.models()[i];
-            for (int k = 0; k < model->size(); ++k) {
-                GModelPar par  = (*model)[k];
-                std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.value(), fit_results[j++], 5.0e-5, msg);
-                test_value(par.error(), fit_results[j++], 5.0e-5, msg);
-            }
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
         }
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
 /***********************************************************************//**
  * @brief Test stacked optimizer
+ *
+ * The stacked response cubes have been computed using the dummy_irf.
  ***************************************************************************/
 void TestGCTAOptimize::test_stacked_optimizer(void)
 {
+    // Set reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.97794e-16, 2.00154e-17,
+                            -2.5012, 0.0250695,
+                            300000, 0,
+                            1, 0,
+                            2.95657, 0.0703984,
+                            6.42934e-05, 1.96465e-06,
+                            -1.82091, 0.0163749,
+                            1000000, 0,
+                            1, 0};
+    
     // Load stacked CTA observation
     GObservations obs(cta_cube_xml);
 
@@ -1804,41 +1802,28 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
     obs.models(cta_model_xml);
 
     // Perform LM optimization
-    double fit_results[] = {83.6331, 0,
-                            22.0145, 0,
-                            5.72212e-16, 2.01231e-17,
-                            -2.49178, 0.0250624,
-                            300000, 0,
-                            1, 0,
-                            2.95657, 0.0704068,
-                            6.68923e-05, 1.96972e-06,
-                            -1.82086, 0.0163749,
-                            1000000, 0,
-                            1, 0};
-    test_try("Perform LM optimization");
-    try {
-        GOptimizerLM opt;
-        opt.max_iter(100);
-        obs.optimize(opt);
-        obs.errors(opt);
-        test_try_success();
-        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            const GModel* model = obs.models()[i];
-            for (int k = 0; k < model->size(); ++k) {
-                GModelPar par  = (*model)[k];
-                std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.value(), fit_results[j++], 1.0e-4, msg);
-                test_value(par.error(), fit_results[j++], 1.0e-4, msg);
-            }
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
         }
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
