@@ -75,7 +75,6 @@ public:
                              const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
     const GEnergies&    energies(void) const;
-    const GNodeArray&   elogmeans(void) const;
     const GFilename&    filename(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
 
@@ -138,18 +137,6 @@ inline
 const GEnergies& GCTACubeBackground::energies(void) const
 {
     return (m_energies);
-}
-
-
-/***********************************************************************//**
- * @brief Return geometric mean of background cube energies
- *
- * @return Node array of geometric mean of background cube energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubeBackground::elogmeans(void) const
-{
-    return (m_elogmeans);
 }
 
 

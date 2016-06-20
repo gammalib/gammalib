@@ -77,7 +77,6 @@ public:
     const GSkyMap&     map(void) const;
     const GEnergies&   energies(void) const;
     const GNodeArray&  deltas(void) const;
-    const GNodeArray&  elogmeans(void) const;
     double             delta_max(void) const;
     int                offset(const int& idelta, const int& iebin) const;
     void               read(const GFits& fits);

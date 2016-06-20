@@ -92,7 +92,6 @@ public:
     const GSkyMap&    map(void) const;
     const GEnergies&  energies(void) const;
     const GNodeArray& deltas(void) const;
-    const GNodeArray& elogmeans(void) const;
     double            delta_max(void) const;
     int               offset(const int& idelta, const int& iebin) const;
     void              read(const GFits& fits);
@@ -201,18 +200,6 @@ double GCTACubePsf::delta_max(void) const
     
     // Return
     return (delta_max * gammalib::deg2rad);
-}
-
-
-/***********************************************************************//**
- * @brief Return arithmetic mean of log10 energies
- *
- * @return Arithmetic mean of log10 energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubePsf::elogmeans(void) const
-{
-    return (m_elogmeans);
 }
 
 

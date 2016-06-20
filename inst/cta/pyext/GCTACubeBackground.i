@@ -61,7 +61,6 @@ public:
                              const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
     const GEnergies&    energies(void) const;
-    const GNodeArray&   elogmeans(void) const;
     const GFilename&    filename(void) const;
 };
 

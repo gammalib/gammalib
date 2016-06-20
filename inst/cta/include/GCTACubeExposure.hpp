@@ -85,7 +85,6 @@ public:
     const GSkyMap&     cube(void) const;
     const GEnergies&   energies(void) const;
     const GGti&        gti(void) const;
-    const GNodeArray&  elogmeans(void) const;
     const double&      livetime(void) const;
     const double&      ontime(void) const;
     double             deadc(void) const;
@@ -162,18 +161,6 @@ inline
 const GEnergies& GCTACubeExposure::energies(void) const
 {
     return (m_energies);
-}
-
-
-/***********************************************************************//**
- * @brief Return arithmetic mean of log10 energies
- *
- * @return Arithmetic mean of log10 energies.
- ***************************************************************************/
-inline
-const GNodeArray& GCTACubeExposure::elogmeans(void) const
-{
-    return (m_elogmeans);
 }
 
 

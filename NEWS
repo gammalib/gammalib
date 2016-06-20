@@ -65,6 +65,9 @@ The following methods have been removed:
 - friend GTime operator*(const double &s, const GTime &time)
 - friend GTime operator*(const GTime &time, const double &s)
 - friend GTime operator/(const GTime &time, const double &s)
+- GCTACubeExposure::elogmeans()
+- GCTACubePsf::elogmeans()
+- GCTACubeBackground::elogmeans()
 
 The following methods have been renamed:
 - GCTAResponseTable::tables(), was GCTAResponseTable::size()
@@ -392,6 +395,10 @@ for given sets of energies, and now the energies are written into the FITS files
 of the energy boundaries enclosing these energies. This provides a more explicit storage
 of the response information, as before the energies had to be inferred from the energy
 boundaries of the bins (#1788).
+
+The GCTACubeExposure::elogmeans(), GCTACubePsf::elogmeans(), and GCTACubeBackground::elogmeans()
+methods have been removed as the energies() methods provide now essentially the same
+information.
 
 
 21. COMPTEL interface

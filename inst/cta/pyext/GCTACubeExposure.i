@@ -69,7 +69,6 @@ public:
     const GSkyMap&     cube(void) const;
     const GEnergies&   energies(void) const;
     const GGti&        gti(void) const;
-    const GNodeArray&  elogmeans(void) const;
     const double&      livetime(void) const;
     const double&      ontime(void) const;
     double             deadc(void) const;
