@@ -32,7 +32,7 @@
 #include "GFilename.hpp"
 #include "GSkyMap.hpp"
 #include "GNodeArray.hpp"
-#include "GEbounds.hpp"
+#include "GEnergies.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GFits;
@@ -74,7 +74,7 @@ public:
     void                save(const GFilename& filename,
                              const bool&      clobber = false) const;
     const GSkyMap&      cube(void) const;
-    const GEbounds&     ebounds(void) const;
+    const GEnergies&    energies(void) const;
     const GNodeArray&   elogmeans(void) const;
     const GFilename&    filename(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
@@ -90,7 +90,7 @@ private:
     // Members
     mutable GFilename m_filename;  //!< Name of background response file
     GSkyMap           m_cube;      //!< Background cube
-    GEbounds          m_ebounds;   //!< Energy bounds for the background cube
+    GEnergies         m_energies;  //!< Energy values for the background cube
     GNodeArray        m_elogmeans; //!< Mean energy for the background cube
 
     // Response table computation cache for 1D access
@@ -130,14 +130,14 @@ const GSkyMap& GCTACubeBackground::cube(void) const
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries
+ * @brief Return energies
  *
- * @return Energy boundaries.
+ * @return Energies
  ***************************************************************************/
 inline
-const GEbounds& GCTACubeBackground::ebounds(void) const
+const GEnergies& GCTACubeBackground::energies(void) const
 {
-    return (m_ebounds);
+    return (m_energies);
 }
 
 

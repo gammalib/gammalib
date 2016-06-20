@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-9 June 2016
+20 June 2016
 
 
 1. Introduction
@@ -386,6 +386,12 @@ The On/Off fitting of CTA data has now been implemented (#1044).
 
 The GCTAPsfTable class has been added to support non-parametric point spread function
 histograms (#1786). 
+
+The classes GCTACubeExposure, GCTACubePsf and GCTACubeBackground store response values
+for given sets of energies, and now the energies are written into the FITS files instead
+of the energy boundaries enclosing these energies. This provides a more explicit storage
+of the response information, as before the energies had to be inferred from the energy
+boundaries of the bins (#1788).
 
 
 21. COMPTEL interface

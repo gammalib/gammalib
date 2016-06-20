@@ -112,14 +112,22 @@ GCTACubeBackground::GCTACubeBackground(const GCTAEventCube& cube)
     // Initialise class members
     init_members();
 
-    // Set background cube to event cube
-    m_cube = cube.map();
-
     // Store energy boundaries
-    m_ebounds = cube.ebounds();
+    int nebins = cube.ebounds().size();
+    for (int i = 0; i < nebins; ++i) {
+        m_energies.append(cube.ebounds().emin(i));
+    }
+    if (nebins > 0) {
+        m_energies.append(cube.ebounds().emax(nebins-1));
+        
+    }
 
     // Set GNodeArray used for interpolation
     set_eng_axis();
+
+    // Set background cube to event cube
+    m_cube = cube.map();
+    m_cube.nmaps(m_energies.size());
 
     // Set all background cube pixels to zero as we want to have a clean map
     // upon construction
@@ -280,8 +288,14 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
     // Clear background cube
     m_cube = 0.0;
 
+    // Setup energy boundaries at the energy values of the background cube
+    GEbounds ebounds;
+    for (int i = 0; i < m_energies.size(); ++i) {
+        ebounds.append(m_energies[i], m_energies[i]);
+    }
+
     // Initialise event cube to evaluate models
-    GCTAEventCube eventcube = GCTAEventCube(m_cube, m_ebounds, obs[0]->events()->gti());
+    GCTAEventCube eventcube = GCTAEventCube(m_cube, ebounds, obs[0]->events()->gti());
 
     // Initialise total livetime
     double total_livetime = 0.0;
@@ -351,12 +365,9 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             // Get event bin
             GCTAEventBin* bin = eventcube[i];
 
-            // Determine energy bin index. Skip if bin is not fully contained
-            // within the energy boundaries of the observation
-            int index = m_ebounds.index(bin->energy());
-            if (index == -1 || 
-                !obs_ebounds.contains(m_ebounds.emin(index)+g_energy_margin,
-                                      m_ebounds.emax(index)-g_energy_margin)) {
+            // Skip if energy is not contained within the energy boundaries of
+            // the observation
+            if (!obs_ebounds.contains(bin->energy())) {
                 continue;
             }
 
@@ -458,14 +469,14 @@ void GCTACubeBackground::read(const GFits& fits)
     clear();
 
     // Get HDUs
-    const GFitsImage& hdu_bgdcube = *fits.image("Primary");
-    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
+    const GFitsImage& hdu_bgdcube  = *fits.image("Primary");
+    const GFitsTable& hdu_energies = *fits.table("ENERGIES");
 
     // Read cube
     m_cube.read(hdu_bgdcube);
 
-    // Read energy boundaries
-    m_ebounds.read(hdu_ebounds);
+    // Read energies
+    m_energies.read(hdu_energies);
 
     // Set energy node array
     set_eng_axis();
@@ -485,8 +496,8 @@ void GCTACubeBackground::write(GFits& fits) const
     // Write cube
     m_cube.write(fits);
 
-    // Write energy boundaries
-    m_ebounds.write(fits);
+    // Write energies
+    m_energies.write(fits);
 
     // Return
     return;
@@ -586,13 +597,6 @@ std::string GCTACubeBackground::print(const GChatter& chatter) const
                          result.append(" MeV (log10E=");
                          result.append(gammalib::str(m_elogmeans[i]));
                          result.append(")");
-                         if (m_ebounds.size() == m_elogmeans.size()) {
-                             result.append(" [");
-                             result.append(m_ebounds.emin(i).print());
-                             result.append(", ");
-                             result.append(m_ebounds.emax(i).print());
-                             result.append("]");
-                         }
                      }
                  }
                  else {
@@ -623,7 +627,7 @@ void GCTACubeBackground::init_members(void)
     // Initialise members
     m_filename.clear();
     m_cube.clear();
-    m_ebounds.clear();
+    m_energies.clear();
     m_elogmeans.clear();
 
     // Initialise cache
@@ -647,7 +651,7 @@ void GCTACubeBackground::copy_members(const GCTACubeBackground& bgd)
     // Copy members
     m_filename  = bgd.m_filename;
     m_cube      = bgd.m_cube;
-    m_ebounds   = bgd.m_ebounds;
+    m_energies  = bgd.m_energies;
     m_elogmeans = bgd.m_elogmeans;
 
     // Copy cache
@@ -675,29 +679,21 @@ void GCTACubeBackground::free_members(void)
  * @brief Set nodes for a logarithmic (base 10) energy axis
  *
  *
- * Set axis nodes so that each node is the logarithmic mean of the lower and
- * upper energy boundary, i.e.
- * \f[ n_i = \log \sqrt{{\rm LO}_i \times {\rm HI}_i} \f]
- * where
- * \f$n_i\f$ is node \f$i\f$,
- * \f${\rm LO}_i\f$ is the lower bin boundary for bin \f$i\f$, and
- * \f${\rm HI}_i\f$ is the upper bin boundary for bin \f$i\f$.
- *
- * @todo Check that none of the axis boundaries is non-positive.
+ * Set axis nodes so that each node is the logarithm of the energy values.
  ***************************************************************************/
 void GCTACubeBackground::set_eng_axis(void)
 {
     // Get number of bins
-    int bins = m_ebounds.size();
+    int bins = m_energies.size();
 
-    // Clear node array and spectrum cache
+    // Clear node array
     m_elogmeans.clear();
 
     // Compute nodes
     for (int i = 0; i < bins; ++i) {
-
+     
         // Get logE/TeV
-        m_elogmeans.append(m_ebounds.elogmean(i).log10TeV());
+        m_elogmeans.append(m_energies[i].log10TeV());
 
     }  // endfor: looped over energy bins
 

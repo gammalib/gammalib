@@ -56,6 +56,7 @@ const std::string cta_cube_xml     = datadir+"/obs_cube.xml";
 const std::string cta_bin_xml      = datadir+"/obs_binned.xml";
 const std::string cta_unbin_xml    = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml    = datadir+"/crab.xml";
+const std::string cta_stack_model  = datadir+"/crab_stacked.xml";
 const std::string cta_rsp_xml      = datadir+"/rsp_models.xml";
 const std::string cta_cube_bgd_xml = datadir+"/cta_model_cube_bgd.xml";
 const std::string cta_irf_bgd_xml  = datadir+"/cta_model_irf_bgd.xml";
@@ -1785,21 +1786,20 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
     // Set reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
-                            5.98417e-16, 2.00288e-17,
-                            -2.5012, 0.0250653,
+                            5.98597e-16, 2.00288e-17,
+                            -2.5012, 0.0250613,
                             300000, 0,
                             1, 0,
-                            2.95767, 0.070487,
-                            6.42517e-05, 1.96391e-06,
-                            -1.82091, 0.0163765,
-                            1000000, 0,
+                            0.978511, 0.0255432,
+                            0.0290683, 0.0163737,
+                            1.0e6, 0,
                             1, 0};
     
     // Load stacked CTA observation
     GObservations obs(cta_cube_xml);
 
     // Load models from XML file
-    obs.models(cta_model_xml);
+    obs.models(cta_stack_model);
 
     // Perform LM optimization
     GOptimizerLM opt;
