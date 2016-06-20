@@ -33,7 +33,7 @@
 #include "GMath.hpp"
 #include "GFits.hpp"
 #include "GSkyMap.hpp"
-#include "GEbounds.hpp"
+#include "GEnergies.hpp"
 #include "GNodeArray.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -72,7 +72,7 @@ public:
                 const double&        dy,
                 const int&           nx,
                 const int&           ny,
-                const GEbounds&      ebounds,
+                const GEnergies&     energies,
                 const double&        dmax,
                 const int&           ndbins);
     virtual ~GCTACubePsf(void);
@@ -90,7 +90,7 @@ public:
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs, GLog* log = NULL);
     const GSkyMap&    map(void) const;
-    const GEbounds&   ebounds(void) const;
+    const GEnergies&  energies(void) const;
     const GNodeArray& deltas(void) const;
     const GNodeArray& elogmeans(void) const;
     double            delta_max(void) const;
@@ -117,7 +117,7 @@ protected:
     // Data
     mutable GFilename m_filename;          //!< Filename
     GSkyMap           m_cube;              //!< PSF cube
-    GEbounds          m_ebounds;           //!< Energy bounds for the PSF cube
+    GEnergies         m_energies;          //!< Energy values for the PSF cube
     GNodeArray        m_elogmeans;         //!< Mean log10TeV energy for the PSF cube
     GNodeArray        m_deltas;            //!< Delta bins (deg) for the PSF cube
     GNodeArray        m_deltas_cache;      //!< Internal delta bins (rad)
@@ -165,14 +165,14 @@ const GSkyMap& GCTACubePsf::map(void) const
 
 
 /***********************************************************************//**
- * @brief Return energy boundaries
+ * @brief Return energies
  *
- * @return Energy boundaris
+ * @return Energies
  ***************************************************************************/
 inline
-const GEbounds& GCTACubePsf::ebounds(void) const
+const GEnergies& GCTACubePsf::energies(void) const
 {
-    return (m_ebounds);
+    return (m_energies);
 }
 
 

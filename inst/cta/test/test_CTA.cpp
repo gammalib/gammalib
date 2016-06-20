@@ -988,8 +988,8 @@ void TestGCTAResponse::test_response_psfcube(void)
     }
     test_try("CTA PSF cube map constructor");
     try {
-        GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-        GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+        GEnergies   energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+        GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, energies, 0.1, 20);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1000,8 +1000,8 @@ void TestGCTAResponse::test_response_psfcube(void)
     GCTAObservation obs_cta;
     obs_cta.load(cta_events);
     obs_cta.response(cta_irf, GCaldb(cta_caldb));
-    GEbounds    ebounds(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
-    GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, ebounds, 0.1, 20);
+    GEnergies   energies(20, GEnergy(0.1, "TeV"), GEnergy(100.0, "TeV"));
+    GCTACubePsf cube("CAR", "CEL", 83.63, 22.01, 0.4, 0.4, 10, 10, energies, 0.1, 20);
     cube.set(obs_cta);
     cube.save("test_cta_psfcube_one.fits", true);
 
@@ -1785,13 +1785,13 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
     // Set reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
-                            5.97794e-16, 2.00154e-17,
-                            -2.5012, 0.0250695,
+                            5.98417e-16, 2.00288e-17,
+                            -2.5012, 0.0250653,
                             300000, 0,
                             1, 0,
-                            2.95657, 0.0703984,
-                            6.42934e-05, 1.96465e-06,
-                            -1.82091, 0.0163749,
+                            2.95767, 0.070487,
+                            6.42517e-05, 1.96391e-06,
+                            -1.82091, 0.0163765,
                             1000000, 0,
                             1, 0};
     
