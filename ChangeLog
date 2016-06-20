@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Add weights to CTA counts cube (#1789)
         Remove GCTACubeExposure, GCTACubePsf and GCTACubeBackground elogmeans() methods
         GCTACubeExposure, GCTACubePsf and GCTACubeBackground use energy values (#1788)
         GSkyMap::save() now overwrites files (#1787)

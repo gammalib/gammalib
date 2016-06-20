@@ -161,7 +161,7 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
     int nmaps = m_energies.size() * m_deltas.size();
 
     // Set PSF cube to event cube
-    m_cube = cube.map();
+    m_cube = cube.counts();
 
     // Set appropriate number of skymaps
     m_cube.nmaps(nmaps);

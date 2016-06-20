@@ -173,6 +173,8 @@ void TestGCTAObservation::set(void)
     name("GCTAObservation");
 
     // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAObservation::test_event_cube),
+           "Test event cube");
     append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs),
            "Test unbinned observations");
     append(static_cast<pfunction>(&TestGCTAObservation::test_binned_obs),
@@ -1414,6 +1416,132 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     test_value((*model)["Index"].value(), -2.4);
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test event cube
+ ***************************************************************************/
+void TestGCTAObservation::test_event_cube(void)
+{
+    // Construct empty event cube
+    GCTAEventCube cube1;
+
+    // Test empty event cube
+    test_value(cube1.size(), 0, "Check that empty event cube has size()=0");
+    test_value(cube1.dim(), 0, "Check that empty event cube has dim()=0");
+    test_value(cube1.number(), 0, "Check that empty event cube has number()=0");
+    test_value(cube1.nx(), 0, "Check that empty event cube has nx()=0");
+    test_value(cube1.ny(), 0, "Check that empty event cube has ny()=0");
+    test_value(cube1.npix(), 0, "Check that empty event cube has npix()=0");
+    test_value(cube1.ebins(), 0, "Check that empty event cube has ebins()=0");
+
+    // Construct 3x3x5 event cube
+    GSkyMap       map("CAR", "CEL", 0.0, 0.0, 0.5, 0.5, 3, 4, 5);
+    GEbounds      ebounds(5, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+    GGti          gti(GTime(0.0, "sec"), GTime(1800.0, "sec"));
+    GCTAEventCube cube2(map, ebounds, gti);
+
+    // Test 3x3x5 event cube
+    test_value(cube2.size(), 60, "Check that event cube has size()=60");
+    test_value(cube2.dim(), 3, "Check that event cube has dim()=3");
+    test_value(cube2.number(), 0, "Check that event cube has number()=0");
+    test_value(cube2.nx(), 3, "Check that event cube has nx()=3");
+    test_value(cube2.ny(), 4, "Check that event cube has ny()=4");
+    test_value(cube2.npix(), 12, "Check that event cube has npix()=12");
+    test_value(cube2.ebins(), 5, "Check that event cube has ebins()=5");
+
+    // Fill counts cube and test result
+    double ref(0.0);
+    double value(0.0);
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                value += 0.376;
+                ref   += value;
+                map(GSkyPixel(ix,iy),iebin) = value;
+            }
+        }
+    }
+    cube2.counts(map);
+    test_value(cube2.number(), int(ref+0.5),
+               "Check event cube number() for filled cube");
+
+    // Checks weights
+    double total(0.0);
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube2.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, 60.0, 1.0e-6,
+               "Check event cube weights for cube with unity weights");
+
+    // Save event cube
+    cube2.save("test_cta_event_cube.fits", true);
+
+    // Construct counts cube from FITS file
+    GCTAEventCube cube3("test_cta_event_cube.fits");
+    
+    // Test loaded event cube
+    test_value(cube3.size(), 60, "Check that loaded event cube has size()=60");
+    test_value(cube3.dim(), 3, "Check that loaded event cube has dim()=3");
+    test_value(cube3.nx(), 3, "Check that loaded event cube has nx()=3");
+    test_value(cube3.ny(), 4, "Check that loaded event cube has ny()=4");
+    test_value(cube3.npix(), 12, "Check that loaded event cube has npix()=12");
+    test_value(cube3.ebins(), 5, "Check that loaded event cube has ebins()=5");
+    test_value(cube3.number(), int(ref+0.5),
+               "Check event cube number() for loaded cube");
+
+    // Checks weights for loaded event cube
+    total = 0.0;
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube3.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, 60.0, 1.0e-6,
+               "Check event cube weights for loaded cube with unity weights");
+
+    // Set weights
+    cube3.weights(map);
+
+    // Checks weights
+    total = 0.0;
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube3.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, ref, 1.0e-6,
+               "Check event cube weights after setting them");
+
+    // Save event cube
+    cube3.save("test_cta_event_cube.fits", true);
+
+    // Construct counts cube from FITS file
+    GCTAEventCube cube4("test_cta_event_cube.fits");
+
+    // Checks weights
+    total = 0.0;
+    for (int ix = 0; ix < cube2.nx(); ++ix) {
+        for (int iy = 0; iy < cube2.ny(); ++iy) {
+            for (int iebin = 0; iebin < cube2.ebins(); ++iebin) {
+                total += cube3.weights()(GSkyPixel(ix,iy),iebin);
+            }
+        }
+    }
+    test_value(total, ref, 1.0e-6,
+               "Check event cube weights after loading them again");
 
     // Return
     return;

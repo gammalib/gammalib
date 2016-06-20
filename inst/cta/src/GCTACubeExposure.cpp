@@ -136,7 +136,7 @@ GCTACubeExposure::GCTACubeExposure(const GCTAEventCube& cube)
     set_eng_axis();
 
     // Set exposure cube to event cube
-    m_cube = cube.map();
+    m_cube = cube.counts();
     m_cube.nmaps(m_energies.size());
 
     // Set all exposure cube pixels to zero as we want to have a clean map

@@ -184,7 +184,7 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
     int nmaps = m_energies.size() * m_migras.size();
 
     // Set energy dispersion cube to event cube
-    m_cube = cube.map();
+    m_cube = cube.counts();
 
     // Set appropriate number of skymaps
     m_cube.nmaps(nmaps);

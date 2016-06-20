@@ -42,6 +42,7 @@ The following methods have been added to the public interface:
 - GCTAResponseTable::table(std::string)
 - GCTAResponseTable::has_axis(std::string)
 - GCTAResponseTable::has_table(std::string)
+- GCTAEventCube::weights()
 - friend GTime  operator+(const GTime&  time,    const double& seconds)
 - friend GTime  operator+(const double& seconds, const GTime&  time)
 - friend GTime  operator-(const GTime&  time,    const double& seconds)
@@ -74,6 +75,7 @@ The following methods have been renamed:
 - GCTAResponseTable::axis_bins(), was GCTAResponseTable::axis()
 - GFilename::is_empty(), was GFilename::empty()
 - GFilename::url(), was GFilename::filename()
+- GCTAEventCube::counts(), was GCTAEventCube::map()
 
 The following classes now use GFilename for filenames arguments instead
 of std::string:

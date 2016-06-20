@@ -40,6 +40,8 @@ public:
     GCTAEventCube(void);
     explicit GCTAEventCube(const GFilename& filename);
     GCTAEventCube(const GSkyMap& map, const GEbounds& ebds, const GGti& gti);
+    GCTAEventCube(const GSkyMap& map, const GSkyMap& weights,
+                  const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -58,8 +60,10 @@ public:
     virtual int            number(void) const;
 
     // Other methods
-    void                   map(const GSkyMap& map);
-    const GSkyMap&         map(void) const;
+    void                   counts(const GSkyMap& counts);
+    const GSkyMap&         counts(void) const;
+    void                   weights(const GSkyMap& weights);
+    const GSkyMap&         weights(void) const;
     int                    nx(void) const;
     int                    ny(void) const;
     int                    npix(void) const;

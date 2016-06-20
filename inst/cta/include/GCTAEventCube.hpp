@@ -59,6 +59,8 @@ public:
     GCTAEventCube(void);
     explicit GCTAEventCube(const GFilename& filename);
     GCTAEventCube(const GSkyMap& map, const GEbounds& ebds, const GGti& gti);
+    GCTAEventCube(const GSkyMap& map, const GSkyMap& weights,
+                  const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -85,8 +87,10 @@ public:
     // Other methods
     const GTime&           time(void) const;
     const GEnergy&         energy(const int& index) const;
-    void                   map(const GSkyMap& map);
-    const GSkyMap&         map(void) const;
+    void                   counts(const GSkyMap& counts);
+    const GSkyMap&         counts(void) const;
+    void                   weights(const GSkyMap& weights);
+    const GSkyMap&         weights(void) const;
     int                    nx(void) const;
     int                    ny(void) const;
     int                    npix(void) const;
@@ -106,7 +110,8 @@ protected:
     void         set_bin(const int& index);
 
     // Protected members
-    GSkyMap                  m_map;        //!< Counts map stored as sky map
+    GSkyMap                  m_map;        //!< Counts cube stored as sky map
+    GSkyMap                  m_weights;    //!< Cube weights stored as sky map
     GCTAEventBin             m_bin;        //!< Actual event bin
     GTime                    m_time;       //!< Event cube mean time
     std::vector<GCTAInstDir> m_dirs;       //!< Array of event directions
@@ -132,29 +137,56 @@ std::string GCTAEventCube::classname(void) const
 /***********************************************************************//**
  * @brief Return dimension of event cube
  *
- * @return Dimension of event cube (always 3)
+ * @return Dimension of event cube.
  ***************************************************************************/
 inline
 int GCTAEventCube::dim(void) const
 {
     // Return dimension
-    return (3);
+    return ((m_map.nmaps() > 0) ? 3 : 0);
 }
 
 
 /***********************************************************************//**
- * @brief Return event cube sky map
+ * @brief Return event cube counts as sky map
  *
- * @return Event cube sky map.
+ * @return Event cube counts.
  *
- * The GCTAEventCube represents the event cube as a sky map. This methods
- * returns the sky map that is stored internally by GCTAEventCube as event
- * cube.
+ * Returns the event cube counts as sky map.
  ***************************************************************************/
 inline
-const GSkyMap& GCTAEventCube::map(void) const
+const GSkyMap& GCTAEventCube::counts(void) const
 {
     return (m_map);
+}
+
+
+/***********************************************************************//**
+ * @brief Return event cube weights as sky map
+ *
+ * @return Event cube weights.
+ *
+ * Returns the event cube weights as sky map.
+ ***************************************************************************/
+inline
+const GSkyMap& GCTAEventCube::weights(void) const
+{
+    return (m_weights);
+}
+
+
+/***********************************************************************//**
+ * @brief Set event cube weights from sky map
+ *
+ * @param[in] weights Event cube weights sky map.
+ *
+ * Sets the event cube weights from sky map.
+ ***************************************************************************/
+inline
+void GCTAEventCube::weights(const GSkyMap& weights)
+{
+    m_weights = weights;
+    return;
 }
 
 

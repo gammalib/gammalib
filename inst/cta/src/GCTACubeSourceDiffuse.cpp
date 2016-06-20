@@ -241,7 +241,7 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
     GTime obsTime = cube->time();
 
     // Setup empty skymap
-    m_cube = cube->map();
+    m_cube = cube->counts();
     m_cube = 0.0;
 
     // Get energy boundaries and store them in node array
@@ -264,7 +264,7 @@ void GCTACubeSourceDiffuse::set(const std::string&   name,
         for (int pixel = 0; pixel < cube->npix(); ++pixel) {
 
             // Get cube pixel sky direction
-            GSkyDir obsDir = cube->map().inx2dir(pixel);
+            GSkyDir obsDir = cube->counts().inx2dir(pixel);
 
             // Continue only if model contains that sky direction
             if (spatial->contains(obsDir, delta_max)) {

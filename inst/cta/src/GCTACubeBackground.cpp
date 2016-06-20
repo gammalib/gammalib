@@ -126,7 +126,7 @@ GCTACubeBackground::GCTACubeBackground(const GCTAEventCube& cube)
     set_eng_axis();
 
     // Set background cube to event cube
-    m_cube = cube.map();
+    m_cube = cube.counts();
     m_cube.nmaps(m_energies.size());
 
     // Set all background cube pixels to zero as we want to have a clean map
@@ -410,7 +410,7 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
       }
 
       // Set background cube values from event cube
-      m_cube = eventcube.map();
+      m_cube = eventcube.counts();
 
     } // endif: livetime was positive
 
