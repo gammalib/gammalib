@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventBin.cpp - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,7 @@
 #define G_SOLIDANGLE                             "GCTAEventBin::solidangle()"
 #define G_EWIDTH                                     "GCTAEventBin::ewidth()"
 #define G_ONTIME                                     "GCTAEventBin::ontime()"
+#define G_WEIGHT                                     "GCTAEventBin::weight()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -178,16 +179,17 @@ GCTAEventBin* GCTAEventBin::clone(void) const
  * @brief Return size of event bin
  *
  * The size of the event bin (units sr MeV s) is given by
- * \f[size = \Omega \times \Delta E \times \Delta T\f]
+ * \f[size = \Omega \times \Delta E \times \Delta T \times W\f]
  * where
  * \f$\Omega\f$ is the size of the spatial bin in sr,
- * \f$\Delta E\f$ is the size of the energy bin in MeV, and
- * \f$\Delta T\f$ is the ontime of the observation in seconds. 
+ * \f$\Delta E\f$ is the size of the energy bin in MeV,
+ * \f$\Delta T\f$ is the ontime of the observation in seconds, and
+ * \f$W\f$ is the weight of the bin.
  ***************************************************************************/
 double GCTAEventBin::size(void) const
 {
     // Compute bin size
-    double size = solidangle() * ewidth().MeV() * ontime();
+    double size = solidangle() * ewidth().MeV() * ontime() * weight();
 
     // Return bin size
     return size;
@@ -405,6 +407,29 @@ const double& GCTAEventBin::ontime(void) const
 
 
 /***********************************************************************//**
+ * @brief Return weight of event bin
+ *
+ * @return Weight of event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid weight pointer.
+ *
+ * Returns reference to the weight of the event bin.
+ ***************************************************************************/
+const double& GCTAEventBin::weight(void) const
+{
+    // Throw an exception if weight pointer is not valid
+    if (m_weight == NULL) {
+        throw GCTAException::no_member(G_WEIGHT,
+                                       "Invalid weight pointer.");
+    }
+
+    // Return weight
+    return *m_weight;
+}
+
+
+/***********************************************************************//**
  * @brief Print event information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -449,6 +474,7 @@ void GCTAEventBin::init_members(void)
     m_solidangle = NULL;
     m_ewidth     = NULL;
     m_ontime     = NULL;
+    m_weight     = NULL;
 
     // Return
     return;
@@ -472,6 +498,7 @@ void GCTAEventBin::copy_members(const GCTAEventBin& bin)
     m_solidangle = bin.m_solidangle;
     m_ewidth     = bin.m_ewidth;
     m_ontime     = bin.m_ontime;
+    m_weight     = bin.m_weight;
 
     // Return
     return;

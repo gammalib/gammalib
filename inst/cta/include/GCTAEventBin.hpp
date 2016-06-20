@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventBin.hpp - CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,6 +80,7 @@ public:
     const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
+    const double&  weight(void) const;
     const int&     ipix(void) const;
     const int&     ieng(void) const;
 
@@ -99,6 +100,7 @@ protected:
     double*      m_solidangle;  //!< Pointer to solid angle of pixel (sr)
     GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
     double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
+    double*      m_weight;      //!< Pointer to weight of bin
 };
 
 

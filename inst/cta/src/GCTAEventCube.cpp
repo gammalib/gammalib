@@ -972,6 +972,7 @@ void GCTAEventCube::set_bin(const int& index)
     m_bin.m_solidangle = &(m_solidangle[m_bin.m_ipix]);
     m_bin.m_ewidth     = &(m_ewidth[m_bin.m_ieng]);
     m_bin.m_ontime     = &m_ontime;
+    m_bin.m_weight     = const_cast<double*>(&(m_weights.pixels()[index]));
 
     // Return
     return;

@@ -43,6 +43,7 @@ The following methods have been added to the public interface:
 - GCTAResponseTable::has_axis(std::string)
 - GCTAResponseTable::has_table(std::string)
 - GCTAEventCube::weights()
+- GCTAEventBin::weight()
 - friend GTime  operator+(const GTime&  time,    const double& seconds)
 - friend GTime  operator+(const double& seconds, const GTime&  time)
 - friend GTime  operator-(const GTime&  time,    const double& seconds)
@@ -401,6 +402,11 @@ boundaries of the bins (#1788).
 The GCTACubeExposure::elogmeans(), GCTACubePsf::elogmeans(), and GCTACubeBackground::elogmeans()
 methods have been removed as the energies() methods provide now essentially the same
 information.
+
+A weight sky map has been added to the CTA event cube, and the weight of each bin is
+multiplied to the bin size in the GCTAEventBin::size() method so that model values are
+weigthed according to the bin weight. This enables the usage of only partially covered
+bins, arising for example from different energy thresholds or ROIs (#1789).
 
 
 21. COMPTEL interface
