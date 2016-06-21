@@ -51,7 +51,6 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const GEnergy g_energy_margin(1.0e-12, "TeV");
 
 
 /*==========================================================================
@@ -378,25 +377,6 @@ void GCTACubePsf::set(const GCTAObservation& obs)
     // Only continue if we have an unbinned observation
     if (obs.eventtype() == "EventList") {
 
-        // Extract region of interest from CTA observation
-        const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
-        if (list == NULL) {
-            std::string msg = "CTA Observation does not contain an event "
-                              "list. Event list information is needed to "
-                              "retrieve the Region of Interest for each "
-                              "CTA observation.";
-            throw GException::invalid_value(G_SET, msg);
-        }
-        const GCTARoi& roi = list->roi();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+obs.name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
-            throw GException::invalid_value(G_SET, msg);
-        }
-
         // Get references on CTA response and pointing direction
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
         const GSkyDir&         pnt = obs.pointing().dir();
@@ -410,36 +390,31 @@ void GCTACubePsf::set(const GCTAObservation& obs)
                 // Get pixel sky direction
                 GSkyDir dir = m_cube.inx2dir(pixel);
                 
-                // Continue only if pixel is within RoI
-                if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+                // Compute theta angle with respect to pointing direction
+                // in radians
+                double  theta = pnt.dist(dir);
 
-                    // Compute theta angle with respect to pointing direction
-                    // in radians
-                    double  theta = pnt.dist(dir);
+                // Loop over all exposure cube energy bins
+                for (int iebin = 0; iebin < m_energies.size(); ++iebin){
 
-                    // Loop over all exposure cube energy bins
-                    for (int iebin = 0; iebin < m_energies.size(); ++iebin){
+                    // Get logE/TeV
+                    double logE = m_energies[iebin].log10TeV();
 
-                        // Get logE/TeV
-                        double logE = m_energies[iebin].log10TeV();
+                    // Loop over delta values
+                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-                        // Loop over delta values
-                        for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                        // Compute delta in radians
+                        double delta = m_deltas[idelta] * gammalib::deg2rad;
 
-                            // Compute delta in radians
-                            double delta = m_deltas[idelta] * gammalib::deg2rad;
+                        // Set map index
+                        int imap = offset(idelta, iebin);
 
-                            // Set map index
-                            int imap = offset(idelta, iebin);
+                        // Set PSF cube
+                        m_cube(pixel, imap) = rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE);
 
-                            // Set PSF cube
-                            m_cube(pixel, imap) = rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE);
-
-                        } // endfor: looped over delta bins
-
-                    } // endfor: looped over energy bins
-
-                } // endif: pixel was within RoI
+                    } // endfor: looped over delta bins
+                    
+                } // endfor: looped over energy bins
 
             } // endfor: looped over all pixels
 
@@ -501,20 +476,6 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Extract region of interest from CTA observation
-        GCTARoi roi = cta->roi();
-
-        // Extract energy boundaries from CTA observation
-        GEbounds obs_ebounds = cta->ebounds();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+cta->name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
-            throw GException::invalid_value(G_FILL, msg);
-        }
-
         // Get references on CTA response and pointing direction
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
         const GSkyDir&         pnt = cta->pointing().dir();
@@ -547,54 +508,38 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
             // Get pixel sky direction
             GSkyDir dir = m_cube.inx2dir(pixel);
                     
-            // Continue only if pixel is within RoI
-            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Compute theta angle with respect to pointing direction in radians
+            double theta = pnt.dist(dir);
 
-                // Compute theta angle with respect to pointing
-                // direction in radians
-                double theta = pnt.dist(dir);
+            // Loop over all energy bins
+            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
 
-                // Loop over all energy bins
-                for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
+                // Get logE/TeV
+                double logE = m_energies[iebin].log10TeV();
 
-                    // Only add exposure if energy is inside observation energy
-                    // boundaries
-                    // TODO: The exposure cube energies are true energies, while
-                    //       the observation energy boundaries are reconstructed
-                    //       energies. In principle one would need to use the
-                    //       energy dispersion information to do this correctly.
-                    if (!obs_ebounds.contains(m_energies[iebin])) {
-                        continue;
-                    }
+                // Compute exposure weight
+                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                cta->livetime();
 
-                    // Get logE/TeV
-                    double logE = m_energies[iebin].log10TeV();
+                // Accumulate weights
+                exposure(pixel, iebin) += weight;
 
-                    // Compute exposure weight
-                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                    cta->livetime();
+                // Loop over delta values
+                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
 
-                    // Accumulate weights
-                    exposure(pixel, iebin) += weight;
+                    // Compute delta in radians
+                    double delta = m_deltas[idelta] * gammalib::deg2rad;
 
-                    // Loop over delta values
-                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+                    // Set map index
+                    int imap = offset(idelta, iebin);
 
-                        // Compute delta in radians
-                        double delta = m_deltas[idelta] * gammalib::deg2rad;
+                    // Add on PSF cube
+                    m_cube(pixel, imap) +=
+                       rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
 
-                        // Set map index
-                        int imap = offset(idelta, iebin);
+                } // endfor: looped over delta bins
 
-                        // Add on PSF cube
-                        m_cube(pixel, imap) +=
-                            rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
-
-                    } // endfor: looped over delta bins
-
-                } // endfor: looped over energy bins
-
-            } // endif: pixel was within RoI
+            } // endfor: looped over energy bins
 
         } // endfor: looped over all pixels
 

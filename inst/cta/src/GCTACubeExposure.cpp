@@ -300,18 +300,17 @@ GCTACubeExposure* GCTACubeExposure::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Set exposure cube from one CTA observation
+ * @brief Set exposure cube for one CTA observation
  *
  * @param[in] obs CTA observation.
  *
- * Set the exposure cube from a single CTA observations. The cube pixel
- * values are computed as product of the effective area and the livetime.
+ * Set the exposure cube for a single CTA observation. The cube pixel values
+ * are computed as product of the effective area and the livetime.
  *
  * @todo: Throw an exception if response is not valid
  ***************************************************************************/
 void GCTACubeExposure::set(const GCTAObservation& obs)
 {
-
     // Only continue if we have an unbinned observation
     if (obs.eventtype() == "EventList") {
 
@@ -319,17 +318,6 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
         m_gti.clear();
         m_livetime = 0.0;
         m_cube     = 0.0;
-
-        // Extract region of interest from CTA observation
-        GCTARoi roi = obs.roi();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+obs.name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
-            throw GException::invalid_value(G_SET, msg);
-        }
 
         // Get references on CTA response and pointing direction
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -344,26 +332,21 @@ void GCTACubeExposure::set(const GCTAObservation& obs)
                 // Get pixel sky direction
                 GSkyDir dir = m_cube.inx2dir(pixel);
 
-                // Continue only if pixel is within RoI
-                if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+                // Compute theta angle with respect to pointing direction
+                // in radians
+                double theta = pnt.dist(dir);
 
-                    // Compute theta angle with respect to pointing direction
-                    // in radians
-                    double theta = pnt.dist(dir);
+                // Loop over all exposure cube energies
+                for (int iebin = 0; iebin < m_energies.size(); ++iebin){
 
-                    // Loop over all exposure cube energies
-                    for (int iebin = 0; iebin < m_energies.size(); ++iebin){
+                    // Get logE/TeV
+                    double logE = m_energies[iebin].log10TeV();
 
-                        // Get logE/TeV
-                        double logE = m_energies[iebin].log10TeV();
+                    // Set exposure cube (effective area * livetime)
+                    m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                           obs.livetime();
 
-                        // Set exposure cube (effective area * livetime)
-                        m_cube(pixel, iebin) = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                               obs.livetime();
-
-                    } // endfor: looped over energy bins
-
-                } // endif: pixel was within RoI
+                } // endfor: looped over energy bins
     
             } // endfor: looped over all pixels
     
@@ -430,20 +413,6 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Extract region of interest from CTA observation
-        GCTARoi roi = cta->roi();
-
-        // Extract energy boundaries from CTA observation
-        GEbounds obs_ebounds = cta->ebounds();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+cta->name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
-            throw GException::invalid_value(G_FILL, msg);
-        }
-
         // Get references on CTA response and pointing direction
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
         const GSkyDir&         pnt = cta->pointing().dir();
@@ -476,36 +445,20 @@ void GCTACubeExposure::fill(const GObservations& obs, GLog* log)
             // Get pixel sky direction
             GSkyDir dir = m_cube.inx2dir(pixel);
                     
-            // Continue only if pixel is within RoI
-            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Compute theta angle with respect to pointing direction in radians
+            double theta = pnt.dist(dir);
 
-                // Compute theta angle with respect to pointing
-                // direction in radians
-                double theta = pnt.dist(dir);
+            // Loop over all exposure cube energy bins
+            for (int iebin = 0; iebin < m_energies.size(); ++iebin){
 
-                // Loop over all exposure cube energy bins
-                for (int iebin = 0; iebin < m_energies.size(); ++iebin){
+                // Get logE/TeV
+                double logE = m_energies[iebin].log10TeV();
 
-                    // Only add exposure if energy is inside observation energy
-                    // boundaries
-                    // TODO: The exposure cube energies are true energies, while
-                    //       the observation energy boundaries are reconstructed
-                    //       energies. In principle one would need to use the
-                    //       energy dispersion information to do this correctly.
-                    if (obs_ebounds.contains(m_energies[iebin])) {
+                // Add to exposure cube (effective area * livetime)
+                m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                        cta->livetime();
 
-                        // Get logE/TeV
-                        double logE = m_energies[iebin].log10TeV();
-
-                        // Add to exposure cube (effective area * livetime)
-                        m_cube(pixel, iebin) += rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                                cta->livetime();
-
-                    } // endif: energy bin was inside observation energy boundaries
-
-                } // endfor: looped over energy bins
-
-            } // endif: pixel within RoI
+            } // endfor: looped over energy bins
 
         } // endfor: looped over all pixels
 

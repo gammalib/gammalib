@@ -339,20 +339,6 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             *log << " in background cube computation." << std::endl;
         }
 
-        // Extract region of interest from CTA observation
-        GCTARoi roi = cta->roi();
-
-        // Extract energy boundaries from CTA observation
-        GEbounds obs_ebounds = cta->ebounds();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No RoI information found in input observation "
-                              "\""+cta->name()+"\". Run ctselect to specify "
-                              "an RoI for this observation";
-            throw GException::invalid_value(G_FILL, msg);
-        }
-
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
 
@@ -365,31 +351,20 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             // Get event bin
             GCTAEventBin* bin = eventcube[i];
 
-            // Skip if energy is not contained within the energy boundaries of
-            // the observation
-            if (!obs_ebounds.contains(bin->energy())) {
-                continue;
-            }
+            // Compute model value for event bin. The model value is
+            // given in counts/MeV/s/sr.
+            double model = obs.models().eval(*bin, *cta);
 
-            // Continue only if binned in contained in ROI
-            if (roi.contains(*bin)) {
+            // Multiply by livetime to get the correct weighting for
+            // each observation. We divide by the total livetime later
+            // to get the background model in units of counts/MeV/s/sr.
+            model *= livetime;
 
-                // Compute model value for event bin. The model value is
-                // given in counts/MeV/s/sr.
-                double model = obs.models().eval(*bin, *cta);
+            // Add existing number of counts
+            model += bin->counts();
 
-                // Multiply by livetime to get the correct weighting for
-                // each observation. We divide by the total livetime later
-                // to get the background model in units of counts/MeV/s/sr.
-                model *= livetime;
-
-                // Add existing number of counts
-                model += bin->counts();
-
-                // Store cumulated value (units: counts/MeV/sr)
-                bin->counts(model);
-
-            } // endif: bin was contained in RoI
+            // Store cumulated value (units: counts/MeV/sr)
+            bin->counts(model);
 
         } // endfor: looped over all bins
 

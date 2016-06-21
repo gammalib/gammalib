@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-20 June 2016
+21 June 2016
 
 
 1. Introduction
@@ -407,6 +407,10 @@ A weight sky map has been added to the CTA event cube, and the weight of each bi
 multiplied to the bin size in the GCTAEventBin::size() method so that model values are
 weigthed according to the bin weight. This enables the usage of only partially covered
 bins, arising for example from different energy thresholds or ROIs (#1789).
+
+The cube response classes GCTACubeExposure, GCTACubePsf, GCTACubeEdisp and
+GCTACubeBackground do no longer select on RoI and energy boundaries as this is now
+handled by the weight array (#1789).
 
 
 21. COMPTEL interface

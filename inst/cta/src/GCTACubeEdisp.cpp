@@ -428,16 +428,6 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
                               "valid event list.";
             throw GException::invalid_value(G_SET, msg);
         }
-        const GCTARoi& roi = list->roi();
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No valid Region of Interest found in CTA "
-                              "observation \""+obs.name()+"\". Run ctselect "
-                              "to set the Region of Interest for this "
-                              "observation.";
-            throw GException::invalid_value(G_SET, msg);
-        }
 
         // Get CTA response
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
@@ -469,46 +459,41 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
             // Get pixel sky direction
             GSkyDir dir = m_cube.inx2dir(pixel);
             
-            // Continue only if pixel is within RoI
-            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Compute theta angle with respect to pointing direction
+            // in radians
+            double theta = pnt.dist(dir);
 
-                // Compute theta angle with respect to pointing direction
-                // in radians
-                double theta = pnt.dist(dir);
+            // Loop over all energy dispersion cube true energies
+            for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin){
 
-                // Loop over all energy dispersion cube true energies
-                for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin){
+                // Get log10 of true energy in TeV
+                double logEsrc = m_elogmeans[iebin];
 
-                    // Get log10 of true energy in TeV
-                    double logEsrc = m_elogmeans[iebin];
+                // Loop over migration bins
+                for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
 
-                    // Loop over migration bins
-                    for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
+                    // Get migration for this migration bin
+                    double migra = m_migras[imigra];
 
-                        // Get migration for this migration bin
-                        double migra = m_migras[imigra];
+                    // Skip migration bin if it's not positive
+                    if (migra <= 0.0) {
+                        continue;
+                    }
 
-                        // Skip migration bin if it's not positive
-                        if (migra <= 0.0) {
-                        	continue;
-                        }
+                    // Compute log10 of reconstructed energy in TeV
+                    double logEobs = std::log10(migra) - logEsrc;
 
-                        // Compute log10 of reconstructed energy in TeV
-                        double logEobs = std::log10(migra) - logEsrc;
+                    // Set map index
+                    int imap = offset(imigra, iebin);
 
-                        // Set map index
-                        int imap = offset(imigra, iebin);
+                    // Set energy dispersion cube value
+                    m_cube(pixel, imap) = (*edisp)(logEobs, logEsrc,
+                                                   theta, 0.0,
+                                                   0.0, 0.0);
 
-                        // Set energy dispersion cube value
-                        m_cube(pixel, imap) = (*edisp)(logEobs, logEsrc,
-                                                       theta, 0.0,
-                                                       0.0, 0.0);
+                } // endfor: looped over migration bins
 
-                    } // endfor: looped over migration bins
-
-                } // endfor: looped over energy bins
-
-            } // endif: pixel was within RoI
+            } // endfor: looped over energy bins
 
         } // endfor: looped over all pixels
 
@@ -576,23 +561,6 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Extract region of interest from CTA observation
-        GCTARoi roi = cta->roi();
-
-        // Extract energy boundaries from CTA observation
-        GEbounds obs_ebounds = cta->ebounds();
-        GEnergy  obs_emin    = obs_ebounds.emin() - g_energy_margin;
-        GEnergy  obs_emax    = obs_ebounds.emax() + g_energy_margin;
-
-        // Check for RoI sanity
-        if (!roi.is_valid()) {
-            std::string msg = "No valid Region of Interest found in CTA "
-                              "observation \""+cta->name()+"\". Run ctselect "
-                              "to set the Region of Interest for this "
-                              "observation.";
-            throw GException::invalid_value(G_FILL, msg);
-        }
-
         // Get CTA response
         const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
         if (rsp == NULL) {
@@ -632,60 +600,47 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
             // Get pixel sky direction
             GSkyDir dir = m_cube.inx2dir(pixel);
                     
-            // Continue only if pixel is within RoI
-            if (roi.centre().dir().dist_deg(dir) <= roi.radius()) {
+            // Compute theta angle with respect to pointing direction in radians
+            double theta = pnt.dist(dir);
 
-                // Compute theta angle with respect to pointing
-                // direction in radians
-                double theta = pnt.dist(dir);
+            // Loop over all energy bins
+            for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin) {
 
-                // Loop over all energy bins
-                for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin) {
+                // Get log10 of true energy in TeV
+                double logEsrc = m_elogmeans[iebin];
 
-                    // Skip if energy is not within observation energy
-                    //  boundaries
-                    if (m_energies[iebin] < obs_emin ||
-                        m_energies[iebin] > obs_emax) {
+                // Compute exposure weight
+                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
+                                cta->livetime();
+
+                // Accumulate weights
+                exposure(pixel, iebin) += weight;
+
+                // Loop over delta values
+                for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
+
+                    // Compute delta in radians
+                    double migra = m_migras[imigra];
+
+                    // Skip migra bin if zero
+                    if (migra <= 0.0) {
                         continue;
                     }
 
-                    // Get log10 of true energy in TeV
-                    double logEsrc = m_elogmeans[iebin];
+                    // Compute log10 of reconstructed energy in TeV
+                    double logEobs = std::log10(migra) - logEsrc;
 
-                    // Compute exposure weight
-                    double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
-                                    cta->livetime();
+                    // Set map index
+                    int imap = offset(imigra, iebin);
 
-                    // Accumulate weights
-                    exposure(pixel, iebin) += weight;
+                    // Add energy dispersion cube value
+                    m_cube(pixel, imap) += (*edisp)(logEobs, logEsrc,
+                                                    theta, 0.0,
+                                                    0.0, 0.0) * weight;
 
-                    // Loop over delta values
-                    for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
-
-                        // Compute delta in radians
-                        double migra = m_migras[imigra];
-
-                        // Skip migra bin if zero
-                        if (migra <= 0.0) {
-                        	continue;
-                        }
-
-                        // Compute log10 of reconstructed energy in TeV
-                        double logEobs = std::log10(migra) - logEsrc;
-
-                        // Set map index
-                        int imap = offset(imigra, iebin);
-
-                        // Add energy dispersion cube value
-                        m_cube(pixel, imap) += (*edisp)(logEobs, logEsrc,
-                                                        theta, 0.0,
-                                                        0.0, 0.0) * weight;
-
-                    } // endfor: looped over migration bins
-
-                } // endfor: looped over energy bins
-
-            } // endif: pixel was within RoI
+                } // endfor: looped over migration bins
+                
+            } // endfor: looped over energy bins
 
         } // endfor: looped over all pixels
 

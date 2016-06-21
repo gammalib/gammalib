@@ -1,8 +1,9 @@
-2016-06-20  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-06-21  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        CTA cube response no longer selects on RoI and energies (#1789)
         Add weights to CTA event cube and event bin (#1789)
         Remove GCTACubeExposure, GCTACubePsf and GCTACubeBackground elogmeans() methods
         GCTACubeExposure, GCTACubePsf and GCTACubeBackground use energy values (#1788)
