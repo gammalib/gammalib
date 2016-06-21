@@ -46,30 +46,36 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir          = PACKAGE_SOURCE"/inst/cta/test/data";
-const std::string cta_caldb        = PACKAGE_SOURCE"/inst/cta/caldb";
-const std::string cta_irf          = "cta_dummy_irf";
-const std::string cta_events       = datadir+"/crab_events.fits";
-const std::string cta_events_gti   = datadir+"/crab_events_gti.fits[EVENTS2]";
-const std::string cta_cntmap       = datadir+"/crab_cntmap.fits";
-const std::string cta_cube_xml     = datadir+"/obs_cube.xml";
-const std::string cta_bin_xml      = datadir+"/obs_binned.xml";
-const std::string cta_unbin_xml    = datadir+"/obs_unbinned.xml";
-const std::string cta_model_xml    = datadir+"/crab.xml";
-const std::string cta_stack_model  = datadir+"/crab_stacked.xml";
-const std::string cta_rsp_xml      = datadir+"/rsp_models.xml";
-const std::string cta_cube_bgd_xml = datadir+"/cta_model_cube_bgd.xml";
-const std::string cta_irf_bgd_xml  = datadir+"/cta_model_irf_bgd.xml";
-const std::string cta_aeff_bgd_xml = datadir+"/cta_model_aeff_bgd.xml";
-const std::string cta_caldb_king   = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
-const std::string cta_irf_king     = "irf_file.fits";
-const std::string cta_psf_table    = PACKAGE_SOURCE"/inst/cta/test/caldb/psf_table.fits[PSF_2D_TABLE]";
-const std::string cta_edisp_perf   = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
-const std::string cta_edisp_rmf    = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
-const std::string cta_edisp_2D     = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
-const std::string cta_bkgcube      = datadir+"/bkgcube.fits";
-const std::string cta_modbck_fit   = datadir+"/bg_test.fits";
-const std::string cta_point_table  = datadir+"/crab_pointing.fits";
+const std::string datadir           = PACKAGE_SOURCE"/inst/cta/test/data";
+const std::string cta_caldb         = PACKAGE_SOURCE"/inst/cta/caldb";
+const std::string cta_irf           = "cta_dummy_irf";
+const std::string cta_events        = datadir+"/crab_events.fits";
+const std::string cta_events_gti    = datadir+"/crab_events_gti.fits[EVENTS2]";
+const std::string cta_cntmap        = datadir+"/crab_cntmap.fits";
+const std::string cta_bin_xml       = datadir+"/obs_binned.xml";
+const std::string cta_unbin_xml     = datadir+"/obs_unbinned.xml";
+const std::string cta_model_xml     = datadir+"/crab.xml";
+const std::string cta_rsp_xml       = datadir+"/rsp_models.xml";
+const std::string cta_cube_bgd_xml  = datadir+"/cta_model_cube_bgd.xml";
+const std::string cta_irf_bgd_xml   = datadir+"/cta_model_irf_bgd.xml";
+const std::string cta_aeff_bgd_xml  = datadir+"/cta_model_aeff_bgd.xml";
+const std::string cta_caldb_king    = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
+const std::string cta_irf_king      = "irf_file.fits";
+const std::string cta_psf_table     = PACKAGE_SOURCE"/inst/cta/test/caldb/psf_table.fits[PSF_2D_TABLE]";
+const std::string cta_edisp_perf    = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
+const std::string cta_edisp_rmf     = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
+const std::string cta_edisp_2D      = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
+const std::string cta_modbck_fit    = datadir+"/bg_test.fits";
+const std::string cta_point_table   = datadir+"/crab_pointing.fits";
+
+/* __ Test files for stacked analysis (based on Prod2::South_0.5h) _______ */
+const std::string cta_stacked_xml       = datadir+"/stacked_obs.xml";
+const std::string cta_stacked_model     = datadir+"/stacked_model.xml";
+const std::string cta_stacked_cntcube   = datadir+"/stacked_cntcube.fits";
+const std::string cta_stacked_expcube   = datadir+"/stacked_expcube.fits";
+const std::string cta_stacked_psfcube   = datadir+"/stacked_psfcube.fits";
+const std::string cta_stacked_edispcube = datadir+"/stacked_edispcube.fits";
+const std::string cta_stacked_bkgcube   = datadir+"/stacked_bkgcube.fits";
 
 
 /***********************************************************************//**
@@ -1022,7 +1028,7 @@ void TestGCTAResponse::test_response_psfcube(void)
 }
 
 /***********************************************************************//**
- * @brief Test PSF cube handling
+ * @brief Test background cube handling
  ***************************************************************************/
 void TestGCTAResponse::test_response_bkgcube(void)
 {
@@ -1037,7 +1043,7 @@ void TestGCTAResponse::test_response_bkgcube(void)
     }
 
     GCTACubeBackground cube;
-    cube.load(cta_bkgcube);
+    cube.load(cta_stacked_bkgcube);
     cube.save("test_cta_bkgcube.fits", true);
 
     // Return
@@ -1045,7 +1051,7 @@ void TestGCTAResponse::test_response_bkgcube(void)
 }
 
 /***********************************************************************//**
- * @brief Test Edisp cube handling
+ * @brief Test energy dispersion cube handling
  ***************************************************************************/
 void TestGCTAResponse::test_response_edispcube(void)
 {
@@ -1745,14 +1751,13 @@ void TestGCTAObservation::test_binned_obs(void)
  ***************************************************************************/
 void TestGCTAObservation::test_stacked_obs(void)
 {
-    // Set filenames
-    const std::string filename = "test_cta_obs_cube.xml";
+    // Construct stacked observation without energy dispersion
+    GCTAObservation cta1(cta_stacked_cntcube,
+                         cta_stacked_expcube,
+                         cta_stacked_psfcube,
+                         cta_stacked_bkgcube);
 
-    // Construct stacked observation
-    GCTAObservation cta1(cta_cntmap,
-                         datadir+"/expcube.fits",
-                         datadir+"/psfcube.fits",
-                         datadir+"/bkgcube.fits");
+    // Test for presence of response
     const GCTAResponseCube* rsp =
           dynamic_cast<const GCTAResponseCube*>(cta1.response());
     test_assert((rsp != NULL), "Observation contains cube response");
@@ -1762,11 +1767,13 @@ void TestGCTAObservation::test_stacked_obs(void)
     }
 
     // Construct stacked observation with energy dispersion
-    GCTAObservation cta2(cta_cntmap,
-                         datadir+"/expcube.fits",
-                         datadir+"/psfcube.fits",
-                         datadir+"/edispcube.fits",
-                         datadir+"/bkgcube.fits");
+    GCTAObservation cta2(cta_stacked_cntcube,
+                         cta_stacked_expcube,
+                         cta_stacked_psfcube,
+                         cta_stacked_edispcube,
+                         cta_stacked_bkgcube);
+
+    // Test for presence of response
     rsp = dynamic_cast<const GCTAResponseCube*>(cta2.response());
     test_assert((rsp != NULL), "Observation contains cube response");
     if (rsp != NULL) {
@@ -1774,9 +1781,11 @@ void TestGCTAObservation::test_stacked_obs(void)
         test_assert(rsp->use_edisp(), "Response has energy dispersion");
     }
 
-    // Construct stacked observation from XML file (w/o energy dispersion)
-    GObservations obs(cta_cube_xml);
+    // Construct stacked observation from XML file without energy dispersion
+    GObservations obs(cta_stacked_xml);
     test_value(obs.size(), 1, "One observation in container");
+
+    // Test for presence of response
     rsp = dynamic_cast<const GCTAResponseCube*>(obs[0]->response());
     test_assert((rsp != NULL), "Observation contains cube response");
     if (rsp != NULL) {
@@ -1785,7 +1794,7 @@ void TestGCTAObservation::test_stacked_obs(void)
     }
 
     // Save observation container into XML file
-    obs.save(filename);
+    obs.save("test_cta_obs_cube.xml");
 
     // Return
     return;
@@ -1907,27 +1916,28 @@ void TestGCTAOptimize::test_binned_optimizer(void)
 /***********************************************************************//**
  * @brief Test stacked optimizer
  *
- * The stacked response cubes have been computed using the dummy_irf.
+ * The stacked response cubes have been computed using the Prod2::South_0.5h
+ * response.
  ***************************************************************************/
 void TestGCTAOptimize::test_stacked_optimizer(void)
 {
     // Set reference result
     double fit_results[] = {83.6331, 0,
                             22.0145, 0,
-                            5.98597e-16, 2.00288e-17,
-                            -2.5012, 0.0250613,
+                            5.98351e-16, 1.09268e-17,
+                            -2.49903, 0.0145957,
                             300000, 0,
                             1, 0,
-                            0.978511, 0.0255432,
-                            0.0290683, 0.0163737,
+                            1.07386, 0.0218562,
+                            0.00440413, 0.0145699,
                             1.0e6, 0,
                             1, 0};
     
     // Load stacked CTA observation
-    GObservations obs(cta_cube_xml);
+    GObservations obs(cta_stacked_xml);
 
     // Load models from XML file
-    obs.models(cta_stack_model);
+    obs.models(cta_stacked_model);
 
     // Perform LM optimization
     GOptimizerLM opt;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <source_library title="source library">
-  <source name="MAGIC Crab (Albert et al. 2008, ApJ, 674, 1037)" type="PointSource">
+  <source name="Crab" type="PointSource">
     <spectrum type="PowerLaw">
       <parameter name="Prefactor" value="5.7" error="0" scale="1e-16" min="1e-07" max="1000" free="1" />
       <parameter name="Index" value="2.48" error="0" scale="-1" min="0" max="5" free="1" />
