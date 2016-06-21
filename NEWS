@@ -416,6 +416,9 @@ The cube response classes GCTACubeExposure, GCTACubePsf, GCTACubeEdisp and
 GCTACubeBackground do no longer select on RoI and energy boundaries as this is now
 handled by the weight array (#1789).
 
+The GCTAAeff2D class no longer extrapolates the effective area beyond the boundaries
+of the response table, but sets the effective area values to zero (#1784).
+
 
 21. COMPTEL interface
 ---------------------

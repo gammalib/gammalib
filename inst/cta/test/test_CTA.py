@@ -82,10 +82,28 @@ class Test(gammalib.GPythonTestSuite):
         aeff     = gammalib.GCTAAeff2D(filename)
 
         # Test Aeff values
-        self.test_value(aeff(0.0, 0.0), 5535774176.75, 0.1)
-        self.test_value(aeff(1.0, 0.0), 20732069462.7, 0.1)
-        self.test_value(aeff(0.0, 0.01745), 5682897797.76, 0.1)
-        self.test_value(aeff(1.0, 0.01745), 18446656815.1, 0.1)
+        self.test_value(aeff(0.0, 0.0), 5535774176.75, 0.1,
+                        'Test reference effective area value')
+        self.test_value(aeff(1.0, 0.0), 20732069462.7, 0.1,
+                        'Test reference effective area value')
+        self.test_value(aeff(0.0, 0.01745), 5682897797.76, 0.1,
+                        'Test reference effective area value')
+        self.test_value(aeff(1.0, 0.01745), 18446656815.1, 0.1,
+                        'Test reference effective area value')
+
+        # Test that Aeff values outside boundaries are zero
+        self.test_value(aeff(-1.80001, 0.0), 0.0, 1.0e-6,
+                        'Test that effective area is zero for energy below'
+                        ' minimum energy')
+        self.test_value(aeff(+2.20001, 0.0), 0.0, 1.0e-6,
+                        'Test that effective area is zero for energy above'
+                        ' maximum energy')
+        self.test_value(aeff(0.0, -0.00001), 0.0, 1.0e-6,
+                        'Test that effective area is zero for offset angle'
+                        ' below minimum offset angle')
+        self.test_value(aeff(0.0,  0.13963), 0.0, 1.0e-6,
+                        'Test that effective area is zero for offset angle'
+                        ' above maximum offset angle')
 
         # Test GCTAAeffPerfTable file constructor
         filename = self.caldb + '/cta_dummy_irf.dat'

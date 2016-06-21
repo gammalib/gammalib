@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        GCTAAeff2D no longer extrapolates beyond response table (#1784)
         Add GWcsSIN projection class (#1798)
         CTA cube response no longer selects on RoI and energies (#1789)
         Add weights to CTA event cube and event bin (#1789)
