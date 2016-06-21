@@ -31,7 +31,6 @@
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
 #include <cstdlib>                            // for system
-//#include <stdlib.h>
 #include "test_GSky.hpp"
 #include "GTools.hpp"
 
@@ -423,8 +422,8 @@ void TestGSky::test_GWcs(void)
     double crval2 = 22.01;
     double crpix1 = 100.5;
     double crpix2 = 100.5;
-    double cdelt1 =   0.5;
-    double cdelt2 =   0.5;
+    double cdelt1 =   0.1;
+    double cdelt2 =   0.1;
     int    nx     =   200;
     int    ny     =   200;
 

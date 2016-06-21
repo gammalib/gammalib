@@ -79,6 +79,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_skymap_car, "Test CAR projection map")
         self.append(self.test_skymap_mer, "Test MER projection map")
         self.append(self.test_skymap_mol, "Test MOL projection map")
+        self.append(self.test_skymap_sin, "Test SIN projection map")
         self.append(self.test_skymap_stg, "Test STG projection map")
         self.append(self.test_skymap_tan, "Test TAN projection map")
         self.append(self.test_fk5_to_galactic, "Test FK5 to Galactic coordinate conversion")
@@ -339,6 +340,17 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute generic test
         self.test_skymap_proj("MOL")
+
+        # Return
+        return
+
+    # Test SIN projection
+    def test_skymap_sin(self):
+        """
+        Test SIN projection.
+        """
+        # Execute generic test
+        self.test_skymap_proj("SIN")
 
         # Return
         return

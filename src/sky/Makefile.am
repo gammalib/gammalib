@@ -22,8 +22,9 @@ sources = GSkyDir.cpp \
           GWcsCAR.cpp \
           GWcsMER.cpp \
           GWcsMOL.cpp \
-          GWcsTAN.cpp \
+          GWcsSIN.cpp \
           GWcsSTG.cpp \
+          GWcsTAN.cpp \
           GException_sky.cpp
 
 # Build libtool library

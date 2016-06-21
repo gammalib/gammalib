@@ -15,6 +15,7 @@ made since the last release of GammaLib.
 ---------------------------------
 The following classes have been added:
 - GCTAPsfTable
+- GWcsSIN
 
 The following classes have been removed:
 - GCTAOnOffObservations
@@ -262,6 +263,9 @@ longitude, latitude and a number of maps has a dimension of 1 (#1733).
 
 An optional extname argument has been added to the GSkyMap::save() method
 so that the extension name can be set (#1787).
+
+The Orthographic/synthesis (SIN) projection has been added to the WCS
+projections (#1798).
 
 
 13. Support module

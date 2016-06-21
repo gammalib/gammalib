@@ -124,5 +124,6 @@ namespace std {
 %include "GWcsCAR.i"
 %include "GWcsMER.i"
 %include "GWcsMOL.i"
-%include "GWcsTAN.i"
+%include "GWcsSIN.i"
 %include "GWcsSTG.i"
+%include "GWcsTAN.i"

@@ -93,10 +93,11 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsAIT.hpp \
                      GWcsAZP.hpp \
                      GWcsCAR.hpp \
-                     GWcsTAN.hpp \
                      GWcsMER.hpp \
                      GWcsMOL.hpp \
+                     GWcsSIN.hpp \
                      GWcsSTG.hpp \
+                     GWcsTAN.hpp \
                      GEnergy.hpp \
                      GEnergies.hpp \
                      GTime.hpp \
