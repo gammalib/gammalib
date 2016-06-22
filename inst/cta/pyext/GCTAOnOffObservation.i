@@ -95,7 +95,6 @@ public:
     const GPha& on_spec(void) const;
     const GPha& off_spec(void) const;
     const GArf& arf(void) const;
-	const GArf& bgd(void) const;
     const GRmf& rmf(void) const;
     void        fill(const GCTAObservation& obs);
     void        compute_response(const GCTAObservation& obs,

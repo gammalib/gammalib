@@ -369,7 +369,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 			// Get filename
 			std::string filename = par->attribute("file");
 
-			// load on regions
+			// Load on regions
 			m_on_regions.load(filename);
 
 			// Increase number of parameters
@@ -395,7 +395,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 			// Get filename
 			std::string filename = par->attribute("file");
 
-			// load arf
+			// Load arf
 			m_arf.load(filename);
 
 			// Increase number of parameters
@@ -408,7 +408,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 			// Get filename
 			std::string filename = par->attribute("file");
 
-			// load Rmf
+			// Load Rmf
 			m_rmf.load(filename);
 
 			// Increase number of parameters
@@ -736,6 +736,9 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 
 	// Allocate working array
 	GVector colvar(npars);
+
+    // Get reference to alpha parameters
+    const std::vector<double>& alpha = m_arf["ALPHA"];
 	
 	// Check that there is at least one parameter
 	if (npars > 0) {
@@ -759,7 +762,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
             double nbgd = model_off(models, i, &bgd_grad);
 
             // Skip bin if model is too small (avoids -Inf or NaN gradients)
-            double nonpred = ngam + m_alpha[i] * nbgd;
+            double nonpred = ngam + alpha[i] * nbgd;
             if ((nbgd <= minmod) || (nonpred <= minmod)) {
                 #if defined(G_LIKELIHOOD_DEBUG)
                 n_small_model++;
@@ -783,10 +786,10 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
             // Fill derivatives
             double fa         = non/nonpred;
             double fb         = fa/nonpred;
-            double fc         = m_alpha[i] * fb;
-            double fd         = fc * m_alpha[i] + noff/(nbgd*nbgd);
+            double fc         = alpha[i] * fb;
+            double fd         = fc * alpha[i] + noff/(nbgd*nbgd);
             double sky_factor = 1.0 - fa;
-            double bgd_factor = 1.0 + m_alpha[i] - m_alpha[i] * fa - noff/nbgd;
+            double bgd_factor = 1.0 + alpha[i] - alpha[i] * fa - noff/nbgd;
 
             // Loop over all parameters
             for (int j = 0; j < npars; ++j) {
@@ -977,11 +980,9 @@ void GCTAOnOffObservation::init_members(void)
     m_on_spec.clear();
     m_off_spec.clear();
     m_arf.clear();
-	m_bgd.clear();
     m_rmf.clear();
     m_on_regions.clear();
     m_off_regions.clear();
-    m_alpha.clear();
 
     // Return
     return;
@@ -1003,11 +1004,9 @@ void GCTAOnOffObservation::copy_members(const GCTAOnOffObservation& obs)
     m_on_spec     = obs.m_on_spec;
     m_off_spec    = obs.m_off_spec;
     m_arf         = obs.m_arf;
-	m_bgd         = obs.m_bgd;
     m_rmf         = obs.m_rmf;
     m_on_regions  = obs.m_on_regions;
     m_off_regions = obs.m_off_regions;
-    m_alpha       = obs.m_alpha;
 
     // Clone members
     m_response = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
@@ -1054,7 +1053,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
     if (nreco > 0) {
 
 		// Initialise On/Off exposure ratios
-        m_alpha.assign(nreco, 0.0);
+        std::vector<double> alpha(nreco, 0.0);
     
         // Get CTA response pointer. Throw an exception if no response is found
         const GCTAResponseIrf* response =
@@ -1130,10 +1129,13 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 			
 			// Compute alpha for this energy bin
 			if (aoff > 0.0) {
-				m_alpha[i] = aon/aoff;
+				alpha[i] = aon/aoff;
 			}
 												 
         } // endfor: looped over reconstructed energies
+
+        // Append alpha vector to ARF
+        m_arf.append("ALPHA", alpha);
 	
     } // endif: there were energy bins
 
@@ -1246,14 +1248,14 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
     // Continue only if there are spectral bins
     int nreco = ereco.size();
     if (nreco > 0) {
+
+		// Initialise background rayes
+        std::vector<double> background(nreco, 0.0);
     		
 		// Get CTA observation pointing direction, zenith, and azimuth
 		GCTAPointing obspnt(obs.pointing());
 		double       zenith  = obspnt.zenith();
 		double       azimuth = obspnt.azimuth();
-	
-		// Initialize background rate array
-    	m_bgd = GArf(ereco);
 	
         // Get pointer on CTA IRF response
         const GCTAResponseIrf* rsp =
@@ -1296,12 +1298,16 @@ void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
                 double logEreco = m_on_spec.ebounds().elogmean(i).log10TeV();
 
                 // Get rate in events/s/MeV
-                m_bgd[i] += (*bgd)(logEreco, offdir.detx(), offdir.dety()) *
-                            skyreg->solidangle();
+                background[i] += (*bgd)(logEreco,
+                                        offdir.detx(),
+                                        offdir.dety()) * skyreg->solidangle();
 
             } // endfor: looped over energy bins
 
         } // endfor: looped over sky regions
+
+        // Append background vector to ARF
+        m_arf.append("BACKGROUND", background);
 		
 	} // endif: there were spectral bins
 
@@ -1557,6 +1563,9 @@ double GCTAOnOffObservation::model_off(const GModels& models,
 	
 	// Continue only if bin number is in range and if there are parameters
 	if ((ibin < m_off_spec.size()) && (npars > 0))  {
+
+        // Get reference to background rates
+        const std::vector<double>& background = m_arf["BACKGROUND"];
 				
         // Get energy bin mean and width
         const GEnergy emean  = m_off_spec.ebounds().elogmean(ibin);
@@ -1564,7 +1573,7 @@ double GCTAOnOffObservation::model_off(const GModels& models,
 
         // Compute normalisation factor
         double exposure = m_off_spec.exposure();
-        double norm     = m_bgd[ibin] * exposure * ewidth;
+        double norm     = background[ibin] * exposure * ewidth;
 			
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {

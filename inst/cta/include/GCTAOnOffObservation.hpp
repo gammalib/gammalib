@@ -88,7 +88,6 @@ public:
     const GPha& on_spec(void) const;
     const GPha& off_spec(void) const;
     const GArf& arf(void) const;
-	const GArf& bgd(void) const;
     const GRmf& rmf(void) const;
     void        fill(const GCTAObservation& obs);
     void        compute_response(const GCTAObservation& obs,
@@ -107,19 +106,17 @@ protected:
 	double model_off(const GModels& models, int ibin, GVector* mod_grad) const;
 
     // Protected data members
-    std::string         m_instrument;   //!< Instrument name
-    GCTAResponse*       m_response;     //!< Pointer to instrument response functions
-	double              m_ontime;       //!< Ontime (seconds)
-    double              m_livetime;     //!< Livetime (seconds)
-    double              m_deadc;        //!< Deadtime correction (livetime/ontime)
-    GPha 		        m_on_spec;      //!< On counts spectrum
-    GPha 		        m_off_spec;     //!< Off counts spectrum
-    GArf                m_arf;          //!< Effective area vector
-	GArf                m_bgd;          //!< Background rate vector
-    GRmf                m_rmf;          //!< Energy dispersion matrix
-    GSkyRegions         m_on_regions;   //!< Container of On region
-    GSkyRegions         m_off_regions;  //!< Container of Off regions
-    std::vector<double> m_alpha;        //!< Ratios of On/Off exposure
+    std::string         m_instrument;  //!< Instrument name
+    GCTAResponse*       m_response;    //!< Pointer to IRFs
+	double              m_ontime;      //!< Ontime (seconds)
+    double              m_livetime;    //!< Livetime (seconds)
+    double              m_deadc;       //!< Deadtime correction (livetime/ontime)
+    GPha 		        m_on_spec;     //!< On counts spectrum
+    GPha 		        m_off_spec;    //!< Off counts spectrum
+    GArf                m_arf;         //!< Auxiliary Response Function vector
+    GRmf                m_rmf;         //!< Redistribution matrix
+    GSkyRegions         m_on_regions;  //!< Container of On region
+    GSkyRegions         m_off_regions; //!< Container of Off regions
 };
 
 
@@ -267,18 +264,6 @@ const GArf& GCTAOnOffObservation::arf(void) const
 
 
 /***********************************************************************//**
- * @brief Return Background Rate
- *
- * @return Background Rate.
- ***************************************************************************/
-inline
-const GArf& GCTAOnOffObservation::bgd(void) const
-{
-    return (m_bgd);
-}
-
-
-/***********************************************************************//**
  * @brief Return Redistribution Matrix File
  *
  * @return Redistribution Matrix File.
@@ -291,9 +276,9 @@ const GRmf& GCTAOnOffObservation::rmf(void) const
 
 
 /***********************************************************************//**
- * @brief Return Redistribution Matrix File
+ * @brief Return number of observed events
  *
- * @return Redistribution Matrix File.
+ * @return Number of observed events.
  ***************************************************************************/
 inline
 int GCTAOnOffObservation::nobserved(void) const
