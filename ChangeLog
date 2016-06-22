@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Handle additional columns in GArf class
         GCTAAeff2D no longer extrapolates beyond response table (#1784)
         Add GWcsSIN projection class (#1798)
         CTA cube response no longer selects on RoI and energies (#1789)

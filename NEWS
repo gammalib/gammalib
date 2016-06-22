@@ -38,6 +38,11 @@ The following methods have been added to the public interface:
 - GModelSky::spatial()
 - GModelSky::spectral()
 - GModelSky::temporal()
+- GArf::columns()
+- GArf::at()
+- GArf::append()
+- GArf::operator()(int,int)
+- GArf::operator[](std::string)
 - GCTAObservation(GFilename) constructor
 - GCTAResponseTable::axis(std::string)
 - GCTAResponseTable::table(std::string)
@@ -308,7 +313,8 @@ location and the Hub will be informed that an image is available.
 
 16. Xspec module
 ----------------
-None
+The GArf class now also handles additional double precision columns that may
+be needed for response computation.
 
 
 17. Test module

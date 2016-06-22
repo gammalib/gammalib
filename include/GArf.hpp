@@ -58,14 +58,25 @@ public:
     GArf&         operator=(const GArf& arf);
     double&       operator[](const int& index);
     const double& operator[](const int& index) const;
+    double&       operator()(const int& index, const int& col);
+    const double& operator()(const int& index, const int& col) const;
+
+    // Additional column access operators
+    std::vector<double>&       operator[](const std::string& colname);
+    const std::vector<double>& operator[](const std::string& colname) const;
 
     // Methods
     void             clear(void);
     GArf*            clone(void) const;
     std::string      classname(void) const;
     int              size(void) const;
+    int              columns(void) const;
     double&          at(const int& index);
     const double&    at(const int& index) const;
+    double&          at(const int& index, const int& col);
+    const double&    at(const int& index, const int& col) const;
+    void             append(const std::string&         name,
+                            const std::vector<double>& column);
     const GEbounds&  ebounds(void) const;
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,
@@ -80,11 +91,14 @@ protected:
     void init_members(void);
     void copy_members(const GArf& pha);
     void free_members(void);
+    int  column_index(const std::string& colname) const;
     
     // Protected members
-    mutable GFilename   m_filename;   //!< Filename of origin
-    GEbounds            m_ebounds;    //!< Energy boundaries
-    std::vector<double> m_specresp;   //!< Spectral response
+    mutable GFilename                 m_filename; //!< Filename of origin
+    GEbounds                          m_ebounds;  //!< Energy boundaries
+    std::vector<double>               m_specresp; //!< Spectral response
+    std::vector<std::string>          m_colnames; //!< Additional column names
+    std::vector<std::vector<double> > m_coldata;  //!< Additional column data
 };
 
 
@@ -129,6 +143,36 @@ const double& GArf::operator[](const int& index) const
 
 
 /***********************************************************************//**
+ * @brief Return content of additional columns
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+inline
+double& GArf::operator()(const int& index, const int& col)
+{
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return content of additional columns (const version)
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+inline
+const double& GArf::operator()(const int& index, const int& col) const
+{
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
  * @brief Return number of spectral bins
  *
  * @return Number of spectral bins.
@@ -139,6 +183,20 @@ inline
 int GArf::size(void) const
 {
     return (int)m_specresp.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of additional columns
+ *
+ * @return Number of additional columns.
+ *
+ * Returns the number of additional columns.
+ ***************************************************************************/
+inline
+int GArf::columns(void) const
+{
+    return (int)m_colnames.size();
 }
 
 

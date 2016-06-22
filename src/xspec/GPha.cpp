@@ -425,6 +425,9 @@ void GPha::save(const GFilename& filename, const bool& clobber) const
  ***************************************************************************/
 void GPha::read(const GFitsTable& table)
 {
+    // Clear spectrum
+    clear();
+
     // Get data column
     const GFitsTableCol* col_data = table["COUNTS"];
 

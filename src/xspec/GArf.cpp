@@ -39,7 +39,10 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_AT                                                 "GArf::at(int&)"
+#define G_OPERATOR                           "GArf::operator[](std::string&)"
+#define G_AT1                                                "GArf::at(int&)"
+#define G_AT2                                          "GArf::at(int&, int&)"
+#define G_APPEND           "GArf::append(std::string&, std::vector<double>&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -170,6 +173,56 @@ GArf& GArf::operator=(const GArf& arf)
 }
 
 
+/***********************************************************************//**
+ * @brief Return additional vector column
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column.
+ *
+ * Returns reference to additional vector column.
+ ***************************************************************************/
+std::vector<double>& GArf::operator[](const std::string& colname)
+{
+    // Determine index of additional column (-1 if not found)
+    int index = column_index(colname);
+
+    // Throw exception if index not found
+    if (index == -1) {
+        std::string msg = "Could not find additional column with name \""+
+                          colname+"\".";
+        throw GException::invalid_value(G_OPERATOR, msg);
+    }
+
+    // Return reference to vector column
+    return (m_coldata[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return additional vector column (const version)
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column.
+ *
+ * Returns reference to additional vector column.
+ ***************************************************************************/
+const std::vector<double>& GArf::operator[](const std::string& colname) const
+{
+    // Determine index of additional column (-1 if not found)
+    int index = column_index(colname);
+
+    // Throw exception if index not found
+    if (index == -1) {
+        std::string msg = "Could not find additional column with name \""+
+                          colname+"\".";
+        throw GException::invalid_value(G_OPERATOR, msg);
+    }
+
+    // Return reference to vector column
+    return (m_coldata[index]);
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -216,9 +269,9 @@ GArf* GArf::clone(void) const
  ***************************************************************************/
 double& GArf::at(const int& index)
 {
-    // Raise exception if index is out of range
+    // Throw an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT1, index, 0, size()-1);
     }
 
     // Return reference
@@ -238,13 +291,93 @@ double& GArf::at(const int& index)
  ***************************************************************************/
 const double& GArf::at(const int& index) const
 {
-    // Raise exception if index is out of range
+    // Throw an exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT1, index, 0, size()-1);
     }
 
     // Return reference
     return (m_specresp[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return content of additional columns
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin or column index is out of range.
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+double& GArf::at(const int& index, const int& col)
+{
+    // Throw an exception if bin or column index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT2, "Bin index", index, size());
+    }
+    if (col < 0 || col >= columns()) {
+        throw GException::out_of_range(G_AT2, "Column index", col, columns());
+    }
+
+    // Return reference
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return content of additional columns (const version)
+ *
+ * @param[in] index Bin index [0,...,size()-1].
+ * @param[in] col Columns index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Spectral bin or column index is out of range.
+ *
+ * Returns reference to content of additional columns.
+ ***************************************************************************/
+const double& GArf::at(const int& index, const int& col) const
+{
+    // Throw an exception if bin or column index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT2, "Bin index", index, size());
+    }
+    if (col < 0 || col >= columns()) {
+        throw GException::out_of_range(G_AT2, "Column index", col, columns());
+    }
+
+    // Return reference
+    return (m_coldata[col][index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Append additional column to spectrum
+ *
+ * @param[in] name Additional column name.
+ * @param[in] column Additional column data.
+ ***************************************************************************/
+void GArf::append(const std::string& name, const std::vector<double>& column)
+{
+    // Throw an exception if the number of elements in the column does not
+    // correspond to the size of the spectrum
+    if (column.size() != size()) {
+        std::string msg = "Size of column "+gammalib::str(column.size())+
+                          " is incompatible with size of spectrum "+
+                          gammalib::str(size())+".";
+        throw GException::invalid_argument(G_APPEND, msg);
+    }
+
+    // Append column name
+    m_colnames.push_back(name);
+    
+    // Append column data
+    m_coldata.push_back(column);
+
+    // Return
+    return;
 }
 
 
@@ -346,7 +479,8 @@ void GArf::read(const GFitsTable& table)
 
     // Determine effective area conversion factor. Internal
     // units are cm^2
-    std::string u_specresp = gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
+    std::string u_specresp =
+                gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
     double      c_specresp = 1.0;
     if (u_specresp == "m^2" || u_specresp == "m2") {
         c_specresp = 10000.0;
@@ -368,6 +502,31 @@ void GArf::read(const GFitsTable& table)
         m_specresp.push_back(aeff);
 
     } // endfor: looped over energy bins
+
+    // Read any additional columns
+    for (int icol = 0; icol < table.ncols(); ++icol) {
+
+        // Fall through if the column is a standard column
+        std::string colname(table[icol]->name());
+        if ((colname == "ENERG_LO") ||
+            (colname == "ENERG_HI") ||
+            (colname == "SPECRESP")) {
+            continue;
+        }
+
+        // Get pointer to column
+        const GFitsTableCol* column = table[icol];
+
+        // Set column vector
+        std::vector<double> coldata;
+        for (int i = 0; i < num; ++i) {
+            coldata.push_back(column->real(i));
+        }
+
+        // Append column
+        append(colname, coldata);
+
+    } // endfor: looped over all additional columns
 
     // Return
     return;
@@ -415,9 +574,9 @@ void GArf::write(GFits& fits) const
 
         // Fill columns
         for (int i = 0; i < length; ++i) {
-            energy_lo(i) = m_ebounds.emin(i).keV();
-            energy_hi(i) = m_ebounds.emax(i).keV();
-            specresp(i)  = m_specresp[i];
+            energy_lo(i) = (float)m_ebounds.emin(i).keV();
+            energy_hi(i) = (float)m_ebounds.emax(i).keV();
+            specresp(i)  = (float)m_specresp[i];
         }
 
         // Set column units
@@ -432,6 +591,22 @@ void GArf::write(GFits& fits) const
         hdu.append(energy_lo);
         hdu.append(energy_hi);
         hdu.append(specresp);
+
+        // Append any additional columns
+        for (int icol = 0; icol < columns(); ++icol) {
+
+            // Allocate floating point vector columns
+            GFitsTableFloatCol column(m_colnames[icol], length);
+
+            // Fill columns
+            for (int i = 0; i < length; ++i) {
+                column(i) = (float)m_coldata[icol][i];
+            }
+
+            // Append columns to table
+            hdu.append(column);
+
+        } // endfor: looped over all additional columns
 
         // Append HDU to FITS file
         fits.append(hdu);
@@ -490,6 +665,8 @@ void GArf::init_members(void)
     m_filename.clear();
     m_ebounds.clear();
     m_specresp.clear();
+    m_colnames.clear();
+    m_coldata.clear();
 
     // Return
     return;
@@ -507,6 +684,8 @@ void GArf::copy_members(const GArf& arf)
     m_filename = arf.m_filename;
     m_ebounds  = arf.m_ebounds;
     m_specresp = arf.m_specresp;
+    m_colnames = arf.m_colnames;
+    m_coldata  = arf.m_coldata;
 
     // Return
     return;
@@ -520,4 +699,31 @@ void GArf::free_members(void)
 {
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns index of additional vector column
+ *
+ * @param[in] colname Vector column name.
+ * @return Vector column index.
+ *
+ * Returns index of additional vector column. Returns -1 if the vector column
+ * has not found.
+ ***************************************************************************/
+int GArf::column_index(const std::string& colname) const
+{
+    // Initialise index
+    int index(-1);
+
+    // Search vector column name
+    for (int i = 0; i < columns(); ++i) {
+        if (m_colnames[i] == colname) {
+            index = i;
+            break;
+        }
+    }
+
+    // Return index
+    return index;
 }

@@ -44,12 +44,20 @@ public:
     GArf(const GArf& arf);
     virtual ~GArf(void);
 
+    // Operators
+    double&       operator()(const int& index, const int& col);
+    const double& operator()(const int& index, const int& col) const;
+
     // Methods
     void             clear(void);
     GArf*            clone(void) const;
     std::string      classname(void) const;
     int              size(void) const;
+    int              columns(void) const;
     double&          at(const int& index);
+    double&          at(const int& index, const int& col);
+    void             append(const std::string&         name,
+                            const std::vector<double>& column);
     const GEbounds&  ebounds(void) const;
     void             load(const GFilename& filename);
     void             save(const GFilename& filename,
