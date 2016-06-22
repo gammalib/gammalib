@@ -77,6 +77,10 @@ const std::string cta_stacked_psfcube   = datadir+"/stacked_psfcube.fits";
 const std::string cta_stacked_edispcube = datadir+"/stacked_edispcube.fits";
 const std::string cta_stacked_bkgcube   = datadir+"/stacked_bkgcube.fits";
 
+/* __ Test files for On/Off analysis _____________________________________ */
+const std::string cta_onoff_xml   = datadir+"/onoff_obs.xml";
+const std::string cta_onoff_model = datadir+"/onoff_model.xml";
+
 
 /***********************************************************************//**
  * @brief Set CTA response test methods
@@ -187,6 +191,8 @@ void TestGCTAObservation::set(void)
            "Test binned observation");
     append(static_cast<pfunction>(&TestGCTAObservation::test_stacked_obs),
            "Test stacked observation");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_onoff_obs),
+           "Test On/Off observation");
 
     // Return
     return;
@@ -220,6 +226,8 @@ void TestGCTAOptimize::set(void)
            "Test binned optimizer");
     append(static_cast<pfunction>(&TestGCTAOptimize::test_stacked_optimizer),
            "Test stacked optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_onoff_optimizer),
+           "Test On/Off optimizer");
 
     // Return
     return;
@@ -1802,6 +1810,25 @@ void TestGCTAObservation::test_stacked_obs(void)
 
 
 /***********************************************************************//**
+ * @brief Test On/Off observation handling
+ *
+ * @todo Unit test to be implemented
+ ***************************************************************************/
+void TestGCTAObservation::test_onoff_obs(void)
+{
+    // Load On/Off observation into container
+    GObservations obs(cta_onoff_xml);
+    //std::cout << *(obs[0]) << std::endl;
+
+    // Save observation container into XML file
+    obs.save("test_cta_onoff_obs.xml");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test unbinned optimizer
  ***************************************************************************/
 void TestGCTAOptimize::test_unbinned_optimizer(void)
@@ -1944,6 +1971,58 @@ void TestGCTAOptimize::test_stacked_optimizer(void)
     opt.max_iter(100);
     obs.optimize(opt);
     obs.errors(opt);
+
+    // Verify fit results
+    for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+        const GModel* model = obs.models()[i];
+        for (int k = 0; k < model->size(); ++k) {
+            GModelPar par  = (*model)[k];
+            std::string msg = "Verify optimization result for " + par.print();
+            test_value(par.value(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+            test_value(par.error(), fit_results[j],
+                       std::abs(1.0e-4*fit_results[j]), msg);
+            j++;
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test On/Off optimizer
+ ***************************************************************************/
+void TestGCTAOptimize::test_onoff_optimizer(void)
+{
+    // Set reference result
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.95777e-16, 2.02034e-17,
+                            -2.50932, 0.0304839,
+                            300000, 0,
+                            1, 0,
+                            1.09509, 0.140468,
+                            0.54909, 0.0872644,
+                            1.0e6, 0,
+                            1, 0};
+    
+    // Load On/Off CTA observation
+    GObservations obs(cta_onoff_xml);
+
+    // Load models from XML file
+    obs.models(cta_onoff_model);
+
+    // Perform LM optimization
+    GOptimizerLM opt;
+    opt.max_iter(100);
+    obs.optimize(opt);
+    obs.errors(opt);
+    //std::cout << opt << std::endl;
+    //std::cout << obs << std::endl;
+    //std::cout << obs.models() << std::endl;
 
     // Verify fit results
     for (int i = 0, j = 0; i < obs.models().size(); ++i) {

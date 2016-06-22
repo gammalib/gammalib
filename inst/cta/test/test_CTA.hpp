@@ -119,6 +119,7 @@ public:
     void                         test_unbinned_obs(void);
     void                         test_binned_obs(void);
     void                         test_stacked_obs(void);
+    void                         test_onoff_obs(void);
 };
 
 
@@ -142,7 +143,9 @@ public:
     void                      test_unbinned_optimizer(void);
     void                      test_binned_optimizer(void);
     void                      test_stacked_optimizer(void);
+    void                      test_onoff_optimizer(void);
 };
+
 
 /***********************************************************************//**
  * @class TestGCTAPointing

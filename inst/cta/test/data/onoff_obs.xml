@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<observation_list title="observation list">
+  <observation name="Crab" id="00001" instrument="CTAOnOff">
+    <parameter name="Pha_on"      file="$(PACKAGE_SOURCE)/inst/cta/test/data/onoff_pha_on.fits" />
+    <parameter name="Pha_off"     file="$(PACKAGE_SOURCE)/inst/cta/test/data/onoff_pha_off.fits" />
+    <parameter name="Regions_on"  file="$(PACKAGE_SOURCE)/inst/cta/test/data/onoff_region_on.reg" />
+    <parameter name="Regions_off" file="$(PACKAGE_SOURCE)/inst/cta/test/data/onoff_region_off.reg" />
+    <parameter name="Arf"         file="$(PACKAGE_SOURCE)/inst/cta/test/data/onoff_arf.fits" />
+    <parameter name="Rmf"         file="$(PACKAGE_SOURCE)/inst/cta/test/data/onoff_rmf.fits" />
+  </observation>
+</observation_list>
