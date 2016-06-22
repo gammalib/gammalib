@@ -252,7 +252,7 @@ class Test(gammalib.GPythonTestSuite):
         crab = gammalib.GSkyDir()
         crab.radec_deg(83.6331, 22.0145)
         on = gammalib.GSkyRegions()
-        on.append(gammalib.GSkyRegionCircle(crab, 0.5))
+        on.append(gammalib.GSkyRegionCircle(crab, 0.2))
 
         # Create Off region
         crab.radec_deg(83.6331, 23.5145)
@@ -291,21 +291,21 @@ class Test(gammalib.GPythonTestSuite):
         # Test On/Off model fitting results
         sky = outobs.models()['Crab']
         bgd = outobs.models()['Background']
-        self.test_value(sky['Prefactor'].value(), 6.15281e-16, 1.0e-20,
+        self.test_value(sky['Prefactor'].value(), 5.95777e-16, 1.0e-20,
                         'Check sky model prefactor value')
-        self.test_value(sky['Prefactor'].error(), 2.35727e-17, 1.0e-20,
+        self.test_value(sky['Prefactor'].error(), 2.02034e-17, 1.0e-20,
                         'Check sky model prefactor error')
-        self.test_value(sky['Index'].value(), -2.51599, 1.0e-4,
+        self.test_value(sky['Index'].value(), -2.50932, 1.0e-4,
                         'Check sky model index value')
-        self.test_value(sky['Index'].error(), 0.037628, 1.0e-4,
+        self.test_value(sky['Index'].error(), 0.0304839, 1.0e-4,
                         'Check sky model index error')
-        self.test_value(bgd['Prefactor'].value(), 1.04038, 1.0e-4,
+        self.test_value(bgd['Prefactor'].value(), 1.09509, 1.0e-4,
                         'Check background model prefactor value')
-        self.test_value(bgd['Prefactor'].error(), 0.130852, 1.0e-4,
+        self.test_value(bgd['Prefactor'].error(), 0.140468, 1.0e-4,
                         'Check background model prefactor error')
-        self.test_value(bgd['Index'].value(), 0.539376, 1.0e-4,
+        self.test_value(bgd['Index'].value(), 0.54909, 1.0e-4,
                         'Check background model index value')
-        self.test_value(bgd['Index'].error(), 0.0855112, 1.0e-4,
+        self.test_value(bgd['Index'].error(), 0.0872644, 1.0e-4,
                         'Check background model index error')
 
         # Save PHA, ARF and RMFs

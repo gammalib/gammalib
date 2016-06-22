@@ -536,7 +536,9 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
  * @exception GException::invalid_value
  *            No CTA event list found in CTA observation.
  *
- * @todo Set the PHA spectra to zero before filling.
+ * Fills events from an observation into the On and Off spectra and cumulates
+ * their livetime. This method adds to any existing content in the On and 
+ * Off spectra.
  ***************************************************************************/
 void GCTAOnOffObservation::fill(const GCTAObservation& obs)
 {
@@ -1027,14 +1029,20 @@ void GCTAOnOffObservation::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Compute alpha parameter (ratio of On to Off effective areas)
+ * @brief Compute vector of alpha parameters
  *
  * @param[in] obs CTA observation.
  *
  * @exception GException::invalid_value
  *            No CTA response found in CTA observation.
  *
- * @todo What about the livetime? What about the solid angle of the regions?
+ * Compute the alpha parameters for all energy bins. The alpha parameter
+ * gives the ratio between the On and Off region background acceptance
+ * multiplied by the ratio between On and Off region solid angles.
+ *
+ * @todo Implement for general sky regions, not only circles
+ * @todo Integrate over the sky region instead of taking the values at the
+ *       sky region centre
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 {
@@ -1044,7 +1052,7 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
     // Continue only if there are spectral bins
     int nreco = ereco.size();
     if (nreco > 0) {
-		
+
 		// Initialise On/Off exposure ratios
         m_alpha.assign(nreco, 0.0);
     
@@ -1061,8 +1069,6 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 		// Get CTA observation pointing direction, zenith, and azimuth
 		GCTAPointing obspnt  = obs.pointing();
 		GSkyDir      obsdir  = obspnt.dir();
-		double       zenith  = obspnt.zenith();
-		double       azimuth = obspnt.azimuth();
 
         // Loop over reconstructed energies 
         for (int i = 0; i < nreco; ++i) {
@@ -1071,8 +1077,8 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
             double logEreco = ereco.elogmean(i).log10TeV();
 			
 			// Initialise effective area totals
-			double aon  = 0.0;
-			double aoff = 0.0;
+			double aon(0.0);
+			double aoff(0.0);
 			
 			// Loop over ON sky regions
             for (int m = 0; m < m_on_regions.size(); ++m)  {
@@ -1085,18 +1091,14 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 					// Get centre of circular region
 					GSkyDir centreg = skyreg->centre();
 					
-					// Compute position of region centre in instrument
-                    // coordinates (should be replaced by proper method to
-                    // yield theta and phi)
-				    double theta = obsdir.dist(centreg);
-				    double phi   = obsdir.posang(centreg);
-					
-					// Add up effective area
-					aon += response->aeff(theta,
-                                          phi,
-                                          zenith,
-                                          azimuth,
-                                          logEreco);
+                    // Compute instrument direction from region centre
+                    GCTAInstDir instdir(obspnt.instdir(centreg));
+
+                    // Add up acceptance
+                    aon += (*response->background())(logEreco,
+                                                     instdir.detx(),
+                                                     instdir.dety()) *
+                           skyreg->solidangle();
 					
 				} // endif: sky region is of type GSkyRegionCircle
 				
@@ -1113,18 +1115,14 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 					// Get centre of circular region
 					GSkyDir centreg = skyreg->centre();
 					
-					// Compute position of region centre in instrument
-                    // coordinates (should be replaced by proper method to
-                    // yield theta and phi)
-				    double theta = obsdir.dist(centreg);
-				    double phi   = obsdir.posang(centreg);
-					
-					// Add up effective area
-					aoff += response->aeff(theta,
-                                           phi,
-                                           zenith,
-                                           azimuth,
-                                           logEreco);
+                    // Compute instrument direction from region centre
+                    GCTAInstDir instdir(obspnt.instdir(centreg));
+
+                    // Add up acceptance
+                    aoff += (*response->background())(logEreco,
+                                                     instdir.detx(),
+                                                     instdir.dety()) *
+                            skyreg->solidangle();
 					
                 } // endif: sky region is of type GSkyRegionCircle
 				
