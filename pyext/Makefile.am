@@ -84,6 +84,7 @@ if WITH_INST_CTA
   testdatacta       = ../inst/cta/test/data/irf_1dc.xml \
                       ../inst/cta/test/data/irf_unbinned.xml \
                       ../inst/cta/test/data/crab_irf.xml \
+                      ../inst/cta/test/data/onoff_model.xml \
                       ../inst/cta/test/data/crab_events.fits.gz \
                       ../inst/cta/test/data/crab_cntmap.fits.gz
   testdatactadir    = $(pyexecdir)/gammalib/tests/cta/data
