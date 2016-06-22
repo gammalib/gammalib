@@ -265,15 +265,12 @@ class Test(gammalib.GPythonTestSuite):
         ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
                                       gammalib.GEnergy(10.0, 'TeV'))
 
-        # Create On/Off observations by filling all events found in
-        # the observation container and computing the response
+        # Create On/Off observations from CTA observations
         filename = self.caldb + '/../data/irf_unbinned.xml'
         inobs    = gammalib.GObservations(filename)
         outobs   = gammalib.GObservations()
         for run in inobs:
-            onoff = gammalib.GCTAOnOffObservation(ereco, on, off)
-            onoff.fill(run)
-            onoff.compute_response(run, etrue)
+            onoff = gammalib.GCTAOnOffObservation(run, etrue, ereco, on, off)
             outobs.append(onoff)
 
         # Load model container and attach it to the observations

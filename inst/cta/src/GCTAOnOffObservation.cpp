@@ -55,16 +55,15 @@ const GObservationRegistry g_onoff_obs_cta_registry(&g_onoff_obs_cta_seed);
 #define G_RESPONSE_GET                     "GCTAOnOffObservation::response()"
 #define G_WRITE                   "GCTAOnOffObservation::write(GXmlElement&)"
 #define G_READ                     "GCTAOnOffObservation::read(GXmlElement&)"
-#define G_FILL                 "GCTAOnOffObservation::fill(GCTAObservation&)"
-#define G_COMPUTE_ALPHA                "GCTAOnOffObservation::compute_alpha("\
-                                                          "GCTAObservation&)"
-#define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
-#define G_COMPUTE_BGD   "GCTAOnOffObservation::compute_bgd(GCTAObservation&)"
-#define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&,"\
-                                                                " GEbounds&)"
 #define G_LIKELIHOOD            "GCTAOnOffObservation::likelihood(GModels&, "\
                                           "GOptimizerPars&, GMatrixSparse&, "\
                                                 "GVector&, double&, double&)"
+#define G_SET                   "GCTAOnOffObservation::set(GCTAObservation&)"
+#define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
+#define G_COMPUTE_BGD   "GCTAOnOffObservation::compute_bgd(GCTAObservation&)"
+#define G_COMPUTE_ALPHA                "GCTAOnOffObservation::compute_alpha("\
+                                                          "GCTAObservation&)"
+#define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&)"
 
 /* __ Constants __________________________________________________________ */
 const double minmod = 1.0e-100;                      //!< Minimum model value
@@ -86,6 +85,8 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty On/Off observation.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(void)
 {
@@ -100,7 +101,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs CTA On/Off observation.
+ * @param[in] obs On/Off observation.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
 { 
@@ -116,15 +117,25 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
 
 
 /***********************************************************************//**
- * @brief Parameter constructor
+ * @brief CTA observation constructor
  *
- * @param[in] ereco Reconstructed energy bins.
+ * @param[in] obs CTA observation.
+ * @param[in] etrue True energy boundaries.
+ * @param[in] ereco Reconstructed energy boundaries.
  * @param[in] on On regions.
  * @param[in] off Off regions.
+ *
+ * Constructs On/Off observation a CTA observation by filling the On and Off
+ * spectra and computing the Auxiliary Response File (ARF) and Redistribution
+ * Matrix File (RMF). The method requires the specification of the true and
+ * reconstructed energy boundaries, as well as the definition of On and Off
+ * regions.
  ***************************************************************************/
-GCTAOnOffObservation::GCTAOnOffObservation(const GEbounds&    ereco,
-                                           const GSkyRegions& on,
-                                           const GSkyRegions& off)
+GCTAOnOffObservation::GCTAOnOffObservation(const GCTAObservation& obs,
+                                           const GEbounds&        etrue,
+                                           const GEbounds&        ereco,
+                                           const GSkyRegions&     on,
+                                           const GSkyRegions&     off)
 {
     // Initialise private
     init_members();
@@ -133,9 +144,16 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GEbounds&    ereco,
     m_on_spec  = GPha(ereco);
     m_off_spec = GPha(ereco);
 
+    // Initialise response information
+    m_arf = GArf(ereco);
+    m_rmf = GRmf(etrue, ereco);
+
     // Store regions
     m_on_regions  = on;
     m_off_regions = off;
+
+    // Set On/Off observation from CTA observation
+    set(obs);
 
     // Return
     return;
@@ -164,10 +182,10 @@ GCTAOnOffObservation::~GCTAOnOffObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs CTA On/Off observation.
- * @return CTA On/Off observation.
+ * @param[in] obs On/Off observation.
+ * @return On/Off observation.
  *
- * Assigns one CTA On/Off observation to another On/Off observation object.
+ * Assigns one On/Off observation to another On/Off observation object.
  ***************************************************************************/
 GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation& obs)
 { 
@@ -237,7 +255,7 @@ GCTAOnOffObservation* GCTAOnOffObservation::clone(void) const
  * @exception GException::invalid_argument
  *            Invalid response class specified.
  *
- * Sets the response function for the observation.
+ * Sets the response function for the On/Off observation.
  ***************************************************************************/
 void GCTAOnOffObservation::response(const GResponse& rsp)
 {
@@ -291,17 +309,12 @@ const GCTAResponse* GCTAOnOffObservation::response(void) const
 
 
 /***********************************************************************//**
- * @brief Read ON/OFFobservation from an xml element
+ * @brief Read On/Off observation from an XML element
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
- *
- * Reads information for a CTA On/Off observation from an XML element.
- * The expected format of the XML element is
+ * Reads information for an On/Off observation from an XML element. The
+ * expected format of the XML element is
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="Pha_on"      file="..."/>
@@ -321,109 +334,21 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 	// Extract instrument name
 	m_instrument = xml.attribute("instrument");
 
-	// Determine number of parameter nodes in XML element
-	int npars = xml.elements("parameter");
+    // Get parameters
+    std::string pha_on  = gammalib::xml_get_attr(G_READ, xml, "Pha_on",      "file");
+    std::string pha_off = gammalib::xml_get_attr(G_READ, xml, "Pha_off",     "file");
+    std::string reg_on  = gammalib::xml_get_attr(G_READ, xml, "Regions_on",  "file");
+    std::string reg_off = gammalib::xml_get_attr(G_READ, xml, "Regions_off", "file");
+    std::string arf     = gammalib::xml_get_attr(G_READ, xml, "Arf",         "file");
+    std::string rmf     = gammalib::xml_get_attr(G_READ, xml, "Rmf",         "file");
 
-	// Verify that XML element has exactly 6 parameters
-	if (xml.elements() != 6 || npars != 6) {
-		throw GException::xml_invalid_parnum(G_READ, xml,
-			  "CTA observation requires exactly 6 parameters.");
-	}
-
-	// Extract parameters
-	int npar[] = {0, 0, 0, 0, 0, 0};
-	for (int i = 0; i < npars; ++i) {
-
-		// Get parameter element
-		const GXmlElement* par = xml.element("parameter", i);
-
-		// Handle Pha_on
-		if (par->attribute("name") == "Pha_on") {
-
-			// Read pha_on file name
-			std::string filename = par->attribute("file");
-
-			// Load pha_on
-			m_on_spec.load(filename);
-
-			// Increment parameter counter
-			npar[0]++;
-		}
-
-		// Handle Pha_off
-		else if (par->attribute("name") == "Pha_off") {
-
-			// Read countsmap file name
-			std::string filename = par->attribute("file");
-
-			// Load pha_off
-			m_off_spec.load(filename);
-
-			// Increment parameter counter
-			npar[1]++;
-		}
-
-		// Handle on regions
-		else if(par->attribute("name") == "Regions_on") {
-
-			// Get filename
-			std::string filename = par->attribute("file");
-
-			// Load on regions
-			m_on_regions.load(filename);
-
-			// Increase number of parameters
-			npar[2]++;
-		}
-
-		// Handle off regions
-		else if(par->attribute("name") == "Regions_off") {
-
-			// Get filename
-			std::string filename = par->attribute("file");
-
-			// load off regions
-			m_on_regions.load(filename);
-
-			// Increase number of parameters
-			npar[3]++;
-		}
-
-		// Handle Arf
-		else if(par->attribute("name") == "Arf") {
-
-			// Get filename
-			std::string filename = par->attribute("file");
-
-			// Load arf
-			m_arf.load(filename);
-
-			// Increase number of parameters
-			npar[4]++;
-		}
-
-		// Handle Rmf
-		else if(par->attribute("name") == "Rmf") {
-
-			// Get filename
-			std::string filename = par->attribute("file");
-
-			// Load Rmf
-			m_rmf.load(filename);
-
-			// Increase number of parameters
-			npar[5]++;
-		}
-
-	} // endfor: looped over all parameters
-
-	// Verify that all parameters were found
-	if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 ||
-        npar[3] != 1 || npar[4] != 1 || npar[5] != 1) {
-		throw GException::xml_invalid_parnames(G_READ, xml,
-			  "Require \"Pha_on\" or \"Pha_off\" and \"Regions_on\""
-			  ", \"Regions_off\",\"Arf\" and \"Rmf\" parameters.");
-	}
+    // Load files
+    m_on_spec.load(pha_on);
+	m_off_spec.load(pha_off);
+    m_on_regions.load(reg_on);
+    m_off_regions.load(reg_off);
+    m_arf.load(arf);
+    m_rmf.load(rmf);
 
 	// Return
 	return;
@@ -435,12 +360,7 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
- *
- * Writes information for a CTA On/Off observation into an XML element. The
+ * Writes information for an On/Off observation into an XML element. The
  * expected format of the XML element is
  *
  *     <observation name="..." id="..." instrument="...">
@@ -452,150 +372,36 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
  *       <parameter name="Rmf"         file="..."/>
  *     </observation>
  *
+ * The actual files described in the XML elements are not written.
  ***************************************************************************/
 void GCTAOnOffObservation::write(GXmlElement& xml) const
 {
-	// If XML element has 0 nodes then append 6 parameter nodes
-	if (xml.elements() == 0) {
-		xml.append(GXmlElement("parameter name=\"Pha_on\""));
-		xml.append(GXmlElement("parameter name=\"Pha_off\""));
-		xml.append(GXmlElement("parameter name=\"Regions_on\""));
-		xml.append(GXmlElement("parameter name=\"Regions_off\""));
-		xml.append(GXmlElement("parameter name=\"Arf\""));
-		xml.append(GXmlElement("parameter name=\"Rmf\""));
-	}
+    // Allocate XML element pointer
+    GXmlElement* par;
 
-	// Verify that XML element has exactly 4 parameters
-	if (xml.elements() != 6 || xml.elements("parameter") != 6) {
-		throw GException::xml_invalid_parnum(G_WRITE, xml,
-			  "CTAOnOffObservation requires exactly 6 parameters.");
-	}
+    // Set Pha_on parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Pha_on");
+    par->attribute("file", m_on_spec.filename());
 
-	// Set or update parameter attributes
-	int npar[] = {0, 0, 0, 0, 0, 0};
-	for (int i = 0; i < 6; ++i) {
+    // Set Pha_off parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Pha_off");
+    par->attribute("file", m_off_spec.filename());
 
-		// Get parameter element
-		GXmlElement* par = xml.element("parameter", i);
+    // Set Regions_on parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Regions_on");
+    par->attribute("file", m_on_regions.filename());
 
-		// Handle on counts
-		if (par->attribute("name") == "Pha_on") {
-			par->attribute("file", m_on_spec.filename());
-			npar[0]++;
-		}
+    // Set Regions_off parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Regions_off");
+    par->attribute("file", m_off_regions.filename());
 
-		// Handle off counts
-		else if (par->attribute("name") == "Pha_off") {
-			par->attribute("file", m_off_spec.filename());
-			npar[1]++;
-		}
+    // Set Arf parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Arf");
+    par->attribute("file", m_arf.filename());
 
-		// Handle on regions
-		else if (par->attribute("name") == "Regions_on") {
-			par->attribute("file", m_on_regions.filename());
-			npar[2]++;
-		}
-
-		// Handle off regions
-		else if (par->attribute("name") == "Regions_off") {
-			par->attribute("file", m_off_regions.filename());
-			npar[3]++;
-		}
-
-		// Handle effective area
-		else if (par->attribute("name") == "Arf") {
-			par->attribute("file", m_arf.filename());
-			npar[4]++;
-		}
-
-		// Handle energy resolution
-		else if (par->attribute("name") == "Rmf") {
-			par->attribute("file", m_rmf.filename());
-			npar[5]++;
-		}
-	}
-
-	// Verify that all required parameters are present
-	if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 ||
-        npar[3] != 1 || npar[4] != 1 || npar[5] != 1) {
-		throw GException::xml_invalid_parnames(G_WRITE, xml,
-			  "Require \"Pha_on\" or \"Pha_off\" and \"Regions_on\","
-              " \"Regions_off\", \"Arf\", and \"Rmf\" parameters.");
-	}
-
-	// Return
-	return;
-}
-
-
-/***********************************************************************//**
- * @brief Fill events in the On and Off spectra
- *
- * @param[in] obs CTA observation.
- *
- * @exception GException::invalid_value
- *            No CTA event list found in CTA observation.
- *
- * Fills events from an observation into the On and Off spectra and cumulates
- * their livetime. This method adds to any existing content in the On and 
- * Off spectra.
- ***************************************************************************/
-void GCTAOnOffObservation::fill(const GCTAObservation& obs)
-{
-    // Get CTA event list pointer
-	const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-	if (events == NULL) {
-        std::string msg = "No event list found in CTA observation \""+
-                          obs.name()+"\" (ID="+obs.id()+"). ON/OFF observation "
-                          "can only be filled from event list.";
-        throw GException::invalid_value(G_FILL, msg);
-	}
-
-    // Loop over all events
-	for (int i = 0; i < events->size(); ++i) {
-
-        // Get measured event direction
-		const GCTAEventAtom* atom = (*events)[i];
-		GSkyDir              dir  = atom->dir().dir();
-
-        // Fill in spectrum according to region containment
-		if (m_on_regions.contains(dir)) {
-			m_on_spec.fill(atom->energy());
-		}
-		if (m_off_regions.contains(dir)) {
-			m_off_spec.fill(atom->energy());
-		}
-        
-	} // endfor: looped over all events
-
-    // Store the livetime as exposures of the spectra
-    m_on_spec.exposure(obs.livetime());
-    m_off_spec.exposure(obs.livetime());
-
-    // Store the ontime, livetime and deadtime correction in the observation
-    m_ontime   = obs.ontime();
-    m_livetime = obs.livetime();
-    m_deadc    = obs.deadc();
-	
-	// Return
-	return;
-}
-
-
-/***********************************************************************//**
- * @brief Compute response for On/Off observation
- *
- * @param[in] obs CTA observation.
- * @param[in] etrue True energy boundaries.
- ***************************************************************************/
-void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
-                                            const GEbounds&        etrue)
-{
-	// Compute response components
-	compute_arf(obs);
-	compute_bgd(obs);
-	compute_rmf(obs, etrue);
-	compute_alpha(obs);
+    // Set Rmf parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Rmf");
+    par->attribute("file", m_rmf.filename());
 
 	// Return
 	return;
@@ -622,8 +428,8 @@ void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
  * \f$N_{\gamma}\f$ and background events \f$N_{\rm bgd}\f$ are
  * computed from the spectral models of the relevant components in the
  * model container (spatial and temporal components are ignored so far).
- * See the model_on() and model_off() methods for details about the
- * model computations.
+ * See the N_gamma() and N_bgd() methods for details about the model
+ * computations.
  *
  * The log-likelihood is given by
  *
@@ -758,8 +564,8 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 			
             // Get number of gamma and background events (and corresponding
             // spectral model gradients)
-            double ngam = model_on(models, i, &sky_grad);
-            double nbgd = model_off(models, i, &bgd_grad);
+            double ngam = N_gamma(models, i, &sky_grad);
+            double nbgd = N_bgd(models, i, &bgd_grad);
 
             // Skip bin if model is too small (avoids -Inf or NaN gradients)
             double nonpred = ngam + alpha[i] * nbgd;
@@ -1028,6 +834,237 @@ void GCTAOnOffObservation::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Set On/Off observation from a CTA observation
+ *
+ * @param[in] obs CTA observation.
+ *
+ * @exception GException::invalid_value
+ *            No CTA event list found in CTA observation.
+ *
+ * Sets an On/Off observation from a CTA observation by filling the events
+ * that fall in the On and Off regions into the PHA spectra and by computing
+ * the corresponding ARF and RMF response functions.
+ ***************************************************************************/
+void GCTAOnOffObservation::set(const GCTAObservation& obs)
+{
+    // Get CTA event list pointer
+	const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+	if (events == NULL) {
+        std::string msg = "No event list found in CTA observation \""+
+                          obs.name()+"\" (ID="+obs.id()+"). ON/OFF observation "
+                          "can only be filled from event list.";
+        throw GException::invalid_value(G_SET, msg);
+	}
+
+    // Loop over all events
+	for (int i = 0; i < events->size(); ++i) {
+
+        // Get measured event direction
+		const GCTAEventAtom* atom = (*events)[i];
+		GSkyDir              dir  = atom->dir().dir();
+
+        // Fill in spectrum according to region containment
+		if (m_on_regions.contains(dir)) {
+			m_on_spec.fill(atom->energy());
+		}
+		if (m_off_regions.contains(dir)) {
+			m_off_spec.fill(atom->energy());
+		}
+        
+	} // endfor: looped over all events
+
+    // Store the livetime as exposures of the spectra
+    m_on_spec.exposure(obs.livetime());
+    m_off_spec.exposure(obs.livetime());
+
+    // Store the ontime, livetime and deadtime correction in the observation
+    m_ontime   = obs.ontime();
+    m_livetime = obs.livetime();
+    m_deadc    = obs.deadc();
+
+	// Compute response components
+	compute_arf(obs);
+	compute_bgd(obs);
+	compute_alpha(obs);
+	compute_rmf(obs);
+	
+	// Return
+	return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute ARF of On/Off observation
+ *
+ * @param[in] obs CTA observation.
+ *
+ * @exception GException::invalid_value
+ *            No CTA response found in CTA observation.
+ *
+ * @todo Implement GCTAResponse::npred usage instead of computing Aeff
+ *       (required the integration of PSF over On region).
+ * @todo Allow general region, not only circles.
+ ***************************************************************************/
+void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
+{
+    // Get reconstructed energy boundaries from on ARF
+	GEbounds ereco = m_arf.ebounds();
+    int      nreco = ereco.size();
+
+    // Continue only if there are ARF bins
+    if (nreco > 0) {
+    
+        // Get CTA response pointer. Throw an exception if no response is found
+        const GCTAResponseIrf* response =
+              dynamic_cast<const GCTAResponseIrf*>(obs.response());
+		if (response == NULL) {
+	        std::string msg = "Response in CTA observation \""+obs.name()+"\" "
+	                          "(ID="+obs.id()+") is not of the GCTAResponseIrf "
+                              "type.";
+	        throw GException::invalid_value(G_COMPUTE_ARF, msg);
+		}
+		
+		// Get CTA observation pointing direction, zenith, and azimuth
+		GCTAPointing obspnt  = obs.pointing();
+		GSkyDir      obsdir  = obspnt.dir();
+		double       zenith  = obspnt.zenith();
+		double       azimuth = obspnt.azimuth();
+
+        // Loop over reconstructed energies
+        for (int i = 0; i < nreco; ++i) {
+        
+            // Get mean energy of bin
+            double logEreco = ereco.elogmean(i).log10TeV();
+			
+			// Initialize effective area for this bin
+			m_arf[i] = 0.0;
+			
+			// Loop over On sky regions
+            for (int m = 0; m < m_on_regions.size(); ++m)  {
+				
+				// If region is of type GSkyRegionCircle
+				const GSkyRegionCircle* skyreg =
+                      dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
+				if (skyreg != NULL) {
+					
+					// Get centre of circular region
+					GSkyDir centre(skyreg->centre());
+					
+					// Compute position of region centre in instrument coordinates
+				    double theta = obsdir.dist(centre);
+				    double phi   = obsdir.posang(centre);
+					
+		            // Add up effective area
+		            m_arf[i] += response->aeff(theta,
+                                               phi,
+                                               zenith,
+                                               azimuth,
+                                               logEreco);
+									
+				} // endif: sky region is of type GSkyRegionCircle
+				
+			} // endfor: looped over On regions
+       
+        } // endfor: looped over reconstructed energies
+        
+	} // endif: there were energy bins
+
+	// Return
+	return;
+}
+
+
+/***********************************************************************//**
+ * @brief Compute background rate in Off region
+ *
+ * @param[in] obs CTA observation.
+ *
+ * @exception GException::invalid_argument
+ *            Observation does not contain relevant response or background
+ *            information
+ *
+ * Compute the background rate in units of events/s/MeV in all Off regions
+ * and stores the background rate as additional column with name
+ * "BACKGROUND" in the Auxiliary Response File (ARF).
+ *
+ * @todo Should implement integration of background model over region.
+ * @todo Allow general region, not only circles.
+ ***************************************************************************/
+void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
+{	
+    // Get reconstructed energy boundaries from on ARF
+	GEbounds ereco = m_arf.ebounds();
+    int      nreco = ereco.size();
+    
+    // Continue only if there are ARF bins
+    if (nreco > 0) {
+
+		// Initialise background rates to zero
+        std::vector<double> background(nreco, 0.0);
+    		
+		// Get CTA observation pointing direction
+		GCTAPointing obspnt = obs.pointing();
+	
+        // Get pointer on CTA IRF response
+        const GCTAResponseIrf* rsp =
+              dynamic_cast<const GCTAResponseIrf*>(obs.response());
+        if (rsp == NULL) {
+            std::string msg = "Specified observation does not contain an "
+                              "IRF response.\n" + obs.print();
+            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
+        }
+
+        // Get pointer to CTA background
+        const GCTABackground* bgd = rsp->background();
+        if (bgd == NULL) {
+            std::string msg = "Specified observation contains no "
+                              "background information.\n" + obs.print();
+            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
+        }
+					
+        // Loop over Off regions
+        for (int m = 0; m < m_off_regions.size(); ++m)  {
+						
+            // Get region centre direction, fall through if region is not
+            // of type GSkyRegionCircle
+            const GSkyRegionCircle* skyreg =
+                  dynamic_cast<const GSkyRegionCircle*>(m_off_regions[m]);
+            if (skyreg == NULL) {
+                continue;
+            }
+								
+            // Get centre of circular region
+            GSkyDir centre = skyreg->centre();
+								
+            // Get instrument direction of region centre
+            GCTAInstDir offdir = obspnt.instdir(centre);
+							
+            // Loop over energy bins
+            for (int i = 0; i < nreco; ++i) {
+
+                // Get log10(E/TeV) of mean reconstructed bin energy
+                double logEreco = m_on_spec.ebounds().elogmean(i).log10TeV();
+
+                // Get background rate in events/s/MeV
+                background[i] += (*bgd)(logEreco,
+                                        offdir.detx(),
+                                        offdir.dety()) * skyreg->solidangle();
+
+            } // endfor: looped over energy bins
+
+        } // endfor: looped over sky regions
+
+        // Append background vector to ARF
+        m_arf.append("BACKGROUND", background);
+		
+	} // endif: there were spectral bins
+
+	// Return
+	return;
+}
+
+
+/***********************************************************************//**
  * @brief Compute vector of alpha parameters
  *
  * @param[in] obs CTA observation.
@@ -1045,11 +1082,11 @@ void GCTAOnOffObservation::free_members(void)
  ***************************************************************************/
 void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 {
-    // Get energy boundaries from On spectrum
-	GEbounds ereco = m_on_spec.ebounds();
+    // Get reconstructed energy boundaries from on ARF
+	GEbounds ereco = m_arf.ebounds();
+    int      nreco = ereco.size();
     
-    // Continue only if there are spectral bins
-    int nreco = ereco.size();
+    // Continue only if there are ARF bins
     if (nreco > 0) {
 
 		// Initialise On/Off exposure ratios
@@ -1145,199 +1182,29 @@ void GCTAOnOffObservation::compute_alpha(const GCTAObservation& obs)
 
 
 /***********************************************************************//**
- * @brief Compute ARF of On/Off observation
- *
- * @param[in] obs CTA observation.
- *
- * @exception GException::invalid_value
- *            No CTA response found in CTA observation.
- *
- * @todo Implement GCTAResponse::npred usage instead of computing Aeff
- *       (required the integration of PSF over On region).
- * @todo Allow general region, not only circles.
- ***************************************************************************/
-void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
-{
-    // Get energy boundaries from on spectrum
-	GEbounds ereco = m_on_spec.ebounds();
-    
-    // Continue only if there are spectral bins
-    int nreco = ereco.size();
-    if (nreco > 0) {
-    
-        // Get CTA response pointer. Throw an exception if no response is found
-        const GCTAResponseIrf* response =
-              dynamic_cast<const GCTAResponseIrf*>(obs.response());
-		if (response == NULL) {
-	        std::string msg = "Response in CTA observation \""+obs.name()+"\" "
-	                          "(ID="+obs.id()+") is not of the GCTAResponseIrf "
-                              "type.";
-	        throw GException::invalid_value(G_COMPUTE_ARF, msg);
-		}
-		
-		// Get CTA observation pointing direction, zenith, and azimuth
-		GCTAPointing obspnt  = obs.pointing();
-		GSkyDir      obsdir  = obspnt.dir();
-		double       zenith  = obspnt.zenith();
-		double       azimuth = obspnt.azimuth();
-
-        // Initialize ARF
-        m_arf = GArf(ereco);
-
-        // Loop over reconstructed energies
-        for (int i = 0; i < nreco; ++i) {
-        
-            // Get mean energy of bin
-            double logEreco = ereco.elogmean(i).log10TeV();
-			
-			// Initialize effective area for this bin
-			m_arf[i] = 0.0;
-			
-			// Loop over On sky regions
-            for (int m = 0; m < m_on_regions.size(); ++m)  {
-				
-				// If region is of type GSkyRegionCircle
-				const GSkyRegionCircle* skyreg =
-                      dynamic_cast<const GSkyRegionCircle*>(m_on_regions[m]);
-				if (skyreg != NULL) {
-					
-					// Get centre of circular region
-					GSkyDir centreg(skyreg->centre());
-					
-					// Compute position of region centre in instrument coordinates
-				    double theta = obsdir.dist(centreg);
-				    double phi   = obsdir.posang(centreg);
-					
-		            // Add up effective area
-		            m_arf[i] += response->aeff(theta,
-                                               phi,
-                                               zenith,
-                                               azimuth,
-                                               logEreco);
-									
-				} // endif: sky region is of type GSkyRegionCircle
-				
-			} // endfor: looped over On regions
-       
-        } // endfor: looped over reconstructed energies
-        
-	} // endif: there were energy bins
-
-	// Return
-	return;
-}
-
-
-/***********************************************************************//**
- * @brief Compute background rate in Off observations
- *
- * @param[in] obs CTA observation.
- *
- * @exception GException::invalid_argument
- *            Specified observation does not contain relevant response or
- *            background information
- *
- * @todo Should implement integration of background model over region.
- * @todo Allow general region, not only circles.
- ***************************************************************************/
-void GCTAOnOffObservation::compute_bgd(const GCTAObservation& obs)
-{	
-    // Get energy boundaries from on spectrum
-	GEbounds ereco = m_on_spec.ebounds();
-    
-    // Continue only if there are spectral bins
-    int nreco = ereco.size();
-    if (nreco > 0) {
-
-		// Initialise background rayes
-        std::vector<double> background(nreco, 0.0);
-    		
-		// Get CTA observation pointing direction, zenith, and azimuth
-		GCTAPointing obspnt(obs.pointing());
-		double       zenith  = obspnt.zenith();
-		double       azimuth = obspnt.azimuth();
-	
-        // Get pointer on CTA IRF response
-        const GCTAResponseIrf* rsp =
-              dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        if (rsp == NULL) {
-            std::string msg = "Specified observation does not contain an "
-                              "IRF response.\n" + obs.print();
-            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-        }
-
-        // Retrieve pointer to CTA background
-        const GCTABackground* bgd = rsp->background();
-        if (bgd == NULL) {
-            std::string msg = "Specified observation contains no "
-                              "background information.\n" + obs.print();
-            throw GException::invalid_argument(G_COMPUTE_BGD, msg);
-        }
-					
-        // Loop over Off regions
-        for (int m = 0; m < m_off_regions.size(); ++m)  {
-						
-            // Get region centre direction, fall through if region is not
-            // of type GSkyRegionCircle
-            const GSkyRegionCircle* skyreg =
-                 dynamic_cast<const GSkyRegionCircle*>(m_off_regions[m]);
-            if (skyreg == NULL) {
-                continue;
-            }
-								
-            // Get centre of circular region
-            GSkyDir centreg = skyreg->centre();
-								
-            // Set direction to centre of the region in instrument coordinates
-            GCTAInstDir offdir = obspnt.instdir(centreg);
-							
-            // Loop over energy bins
-            for (int i = 0; i < nreco; ++i) {
-
-                // Get log energy bin mean
-                double logEreco = m_on_spec.ebounds().elogmean(i).log10TeV();
-
-                // Get rate in events/s/MeV
-                background[i] += (*bgd)(logEreco,
-                                        offdir.detx(),
-                                        offdir.dety()) * skyreg->solidangle();
-
-            } // endfor: looped over energy bins
-
-        } // endfor: looped over sky regions
-
-        // Append background vector to ARF
-        m_arf.append("BACKGROUND", background);
-		
-	} // endif: there were spectral bins
-
-	// Return
-	return;
-}
-
-
-/***********************************************************************//**
  * @brief Compute RMF of On/Off observation
  *
  * @param[in] obs CTA observation.
- * @param[in] etrue True energy boundaries.
  *
  * @exception GException::invalid_value
  *            Observation does not contain IRF response
+ *
+ * Compute the energy redistribution matrix for an On/Off observation. The
+ * method requires that the RMF energy axes have been defined before.
  *
  * @todo Check if we really should use reconstructed energy in the Aeff
  *       access.
  * @todo Generalise to any kind of sky region
  ***************************************************************************/
-void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
-                                       const GEbounds&        etrue)
+void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs)
 {
-    // Get reconstructed energy boundaries from on spectrum
-	GEbounds ereco = m_on_spec.ebounds();
-    
-    // Continue only if there are spectral bins
-    int ntrue = etrue.size();
-    int nreco = ereco.size();
+    // Get true and reconstructed energy boundaries from RMF
+	GEbounds etrue = m_rmf.etrue();
+	GEbounds ereco = m_rmf.emeasured();
+    int      ntrue = etrue.size();
+    int      nreco = ereco.size();
+
+    // Continue only if there are RMF bins
     if (ntrue > 0 && nreco > 0) {
     
         // Get CTA response pointer
@@ -1356,9 +1223,6 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
 		double       zenith  = obspnt.zenith();
 		double       azimuth = obspnt.azimuth();
 		
-        // Initialize RMF
-        m_rmf = GRmf(etrue, ereco);
-
         // Loop over reconstructed energy
         for (int ireco = 0; ireco < nreco; ++ireco) {
 
@@ -1367,6 +1231,9 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
 
             // Loop over true energy
             for (int itrue = 0; itrue < ntrue; ++itrue) {
+
+                // Initialise RMF element
+                m_rmf(itrue, ireco) = 0.0;
                 
                 // Compute true energy and initialise weight for this bin
                 double logEtrue = etrue.elogmean(itrue).log10TeV();
@@ -1424,33 +1291,46 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
 
 
 /***********************************************************************
- * @brief Evaluate model for sky contribution and fill model gradients
+ * @brief Compute \f$N_{\gamma}\f$ value and model parameter gradients
  *
  * @param[in] models Model container.
- * @param[in,out] ibin Energy bin number.
- * @param[in,out] mod_grad Model gradient array.
+ * @param[in] ibin Energy bin number.
+ * @param[in,out] grad Model gradient vector.
  *
- * Computes the number of expected gamma-ray events in an On region for a
- * given energy bin, and returns it. Also computes the gradients of the
- * sky model spectral components. The method assumes that 
- * parameters are stored in the order spatial-spectral-temporal.
+ * Returns the predicted number of source events \f$N_{\gamma}\f$
+ * in the On regions for a given energy bin. The method computes also
+ *
+ * \f[
+ *    \left( \frac{\partial N_{\gamma}}{\partial p_{\rm sky}} \right)
+ * \f]
+ *
+ * which are the gradients in the predicted number of source events with
+ * respect to all model parameters.
+ *
+ * The method assumes that parameters are stored in the order
+ * spatial-spectral-temporal.
  *
  * @todo I think this method only works for point sources. What happens
  *       for an extended source?
  ***********************************************************************/
-double GCTAOnOffObservation::model_on(const GModels& models,
-                                      int            ibin,
-                                      GVector*       mod_grad) const
+double GCTAOnOffObservation::N_gamma(const GModels& models,
+                                     const int&     ibin,
+                                     GVector*       grad) const
 {
 	// Get total number of model parameters
 	int npars = models.npars();
-	
-	// Initialize variables (vector has 0.0 values)
+
+	// Initialize results
 	double value = 0.0;
-	int    ipar  = 0;
+    for (int i = 0; i < npars; ++i) {
+        (*grad)[i] = 0.0;
+    }
 	
 	// Continue only if bin number is in range and there are model parameters
-	if ((ibin < m_on_spec.size()) && (npars > 0)) {
+	if ((ibin >= 0) && (ibin < m_on_spec.size()) && (npars > 0)) {
+
+        // Initialise parameter index
+        int ipar = 0;
 		
         // Get energy bin bounds
         const GEnergy emin   = m_on_spec.ebounds().emin(ibin);
@@ -1460,8 +1340,8 @@ double GCTAOnOffObservation::model_on(const GModels& models,
 
         // Compute normalisation factors
         double exposure  = m_on_spec.exposure();
-        double norm_flux = m_arf[ibin] * exposure;
-        double norm_grad = norm_flux   * ewidth;
+        double norm_flux = m_arf[ibin] * exposure; // cm2 s
+        double norm_grad = norm_flux   * ewidth;   // cm2 s MeV
 				
         // Loop over models
         for (int j = 0; j < models.size(); ++j) {
@@ -1500,7 +1380,7 @@ double GCTAOnOffObservation::model_on(const GModels& models,
                 // computing the flux over the energy bin in ph/cm2/s
                 // and multiplying this flux by the effective area (cm2)
                 // and the livetime (s)
-                value += spectral->flux(emin,emax) * norm_flux;
+                value += spectral->flux(emin, emax) * norm_flux;
 								
                 // Determine the model gradients at the current energy
                 spectral->eval_gradients(emean);
@@ -1509,7 +1389,7 @@ double GCTAOnOffObservation::model_on(const GModels& models,
                 for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
                     GModelPar& par = (*spectral)[k];
                     if (par.is_free() && ipar < npars)  {
-                        (*mod_grad)[ipar] = par.factor_gradient() * norm_grad;
+                        (*grad)[ipar] = par.factor_gradient() * norm_grad;
                     }
                 }
 								
@@ -1531,47 +1411,58 @@ double GCTAOnOffObservation::model_on(const GModels& models,
 
 
 /***********************************************************************
- * @brief Evaluate model for bgd contribution and fill model gradients
+ * @brief Compute \f$N_{\rm bgd}\f$ value and model parameter gradients
  *
  * @param[in] models Model container.
- * @param[in,out] ibin Energy bin number.
- * @param[in,out] mod_grad Model gradient array.
- * @return Number of expected background events.
+ * @param[in] ibin Energy bin index.
+ * @param[in,out] grad Model gradient vector.
+ * @return Predicted number of background events in Off regions.
  *
- * Returns the number of expected background events in the Off spectrum
- * for a given energy bin. The method computes also the gradients of the
- * background model spectral components.
+ * Returns the predicted number of background events \f$N_{\rm bgd}\f$
+ * in the Off regions for a given energy bin. The method computes also
+ *
+ * \f[
+ *    \left( \frac{\partial N_{\rm bgd}}{\partial p_{\rm bgd}} \right)
+ * \f]
+ *
+ * which are the gradients in the predicted number of background events
+ * with respect to all model parameters.
  *
  * The method assumes that the model parameters are stored in the order
- * spatial-spectral-temporal.
+ * spectral-temporal.
  *
  * @todo So far only handles the GCTAModelIrfBackground background model;
  *       Should be more generic, but there is maybe for the moment no
  *       other choice than implementing something for all possible
  *       background models; that's not very satisfactory ...
  ***********************************************************************/
-double GCTAOnOffObservation::model_off(const GModels& models,
-							           int            ibin,
-						               GVector*       mod_grad) const
+double GCTAOnOffObservation::N_bgd(const GModels& models,
+							           const int&     ibin,
+						               GVector*       grad) const
 {
 	// Get total number of model parameters
 	int npars = models.npars();
 	
-	// Initialize variables
-	double value  = 0.0;
-	int    ipar = 0;
-	
-	// Continue only if bin number is in range and if there are parameters
-	if ((ibin < m_off_spec.size()) && (npars > 0))  {
+	// Initialize results
+	double value = 0.0;
+    for (int i = 0; i < npars; ++i) {
+        (*grad)[i] = 0.0;
+    }
 
-        // Get reference to background rates
+	// Continue only if bin number is valid and if there are model parameters
+	if ((ibin >= 0) && (ibin < m_off_spec.size()) && (npars > 0))  {
+
+        // Initialise parameter index
+        int ipar = 0;
+	
+        // Get reference to background rates (events/MeV/s)
         const std::vector<double>& background = m_arf["BACKGROUND"];
 				
         // Get energy bin mean and width
         const GEnergy emean  = m_off_spec.ebounds().elogmean(ibin);
         const double  ewidth = m_off_spec.ebounds().ewidth(ibin).MeV();
 
-        // Compute normalisation factor
+        // Compute normalisation factor (events)
         double exposure = m_off_spec.exposure();
         double norm     = background[ibin] * exposure * ewidth;
 			
@@ -1591,7 +1482,7 @@ double GCTAOnOffObservation::model_off(const GModels& models,
                 continue;
             }
 						
-            // Fall through if model is not a IRF background component
+            // Fall through if model is not an IRF background component
             const GCTAModelIrfBackground* bgd =
                   dynamic_cast<const GCTAModelIrfBackground*>(mptr);
             if (bgd == NULL) {
@@ -1604,16 +1495,17 @@ double GCTAOnOffObservation::model_off(const GModels& models,
             if (spectral != NULL)  {
 
                 // Determine the number of background events in model by
-                // computing the rate at the energy bin in events/s/MeV and
-                // by multiplying the rate with the off livetime (s), the
-                // energy bin width (MeV) and the spectral normalisation
+                // computing the model normalization at the mean bin energy bin
+                // and multiplying the normalisation with the number of
+                // background events
                 value += spectral->eval_gradients(emean) * norm;
 
-                // Loop over spectral model parameters
+                // Compute the parameter gradients for all spectral model
+                // parameters
                 for (int k = 0; k < spectral->size(); ++k, ++ipar)  {
-                    GModelPar& par=(*spectral)[k];
+                    GModelPar& par = (*spectral)[k];
                     if (par.is_free() && ipar < npars)  {
-                        (*mod_grad)[ipar] = par.factor_gradient() * norm;
+                        (*grad)[ipar] += par.factor_gradient() * norm;
                     }
                 }
 								

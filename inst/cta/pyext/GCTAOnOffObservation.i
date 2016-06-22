@@ -63,8 +63,11 @@ class GCTAOnOffObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAOnOffObservation(void);
-    GCTAOnOffObservation(const GEbounds& ereco, const GSkyRegions& on,
-                         const GSkyRegions& off);
+    GCTAOnOffObservation(const GCTAObservation& obs,
+                         const GEbounds&        etrue,
+                         const GEbounds&        ereco,
+                         const GSkyRegions&     on,
+                         const GSkyRegions&     off);
     GCTAOnOffObservation(const GCTAOnOffObservation& obs);
     virtual ~GCTAOnOffObservation(void);
  
@@ -89,16 +92,15 @@ public:
     virtual int    nobserved(void) const;
 
     // Other methods
-    void        instrument(const std::string& instrument);
-    void        on_regions(const GSkyRegions& regions);
-    void        off_regions(const GSkyRegions& regions);
-    const GPha& on_spec(void) const;
-    const GPha& off_spec(void) const;
-    const GArf& arf(void) const;
-    const GRmf& rmf(void) const;
-    void        fill(const GCTAObservation& obs);
-    void        compute_response(const GCTAObservation& obs,
-                                 const GEbounds& etrue);
+    void               instrument(const std::string& instrument);
+    void               on_regions(const GSkyRegions& regions);
+    void               off_regions(const GSkyRegions& regions);
+    const GSkyRegions& on_regions(void) const;
+    const GSkyRegions& off_regions(void) const;
+    const GPha&        on_spec(void) const;
+    const GPha&        off_spec(void) const;
+    const GArf&        arf(void) const;
+    const GRmf&        rmf(void) const;
 };
 
 
