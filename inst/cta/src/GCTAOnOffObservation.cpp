@@ -75,8 +75,7 @@ const double minerr = 1.0e-100;                //!< Minimum statistical error
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_EVAL_TIMING
-//#define G_OPT_DEBUG
+//#define G_LIKELIHOOD_DEBUG                //!< Debug likelihood computation
 
 
 /*==========================================================================
@@ -601,7 +600,7 @@ void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
 }
 
 
-/***********************************************************************
+/***********************************************************************//**
  * @brief Evaluate log-likelihood function for On/Off analysis
  *
  * @param[in] models Models.
@@ -615,14 +614,92 @@ void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
  *
  * Computes the log-likelihood value for the On/Off observation. The
  * method loops over the energy bins to update the function value, its
- * derivatives and the curvature matrix. The number of On and Off counts
- * are taken from the On and Off spectra, the expected number of
- * gamma-ray and background events are computed from the spectral models
- * of the relevant components in the model container (spatial and
- * temporal components are ignored so far). See the model_on() and
- * model_off() for details about the model computations.
+ * derivatives and the curvature matrix. The number of On counts
+ * \f$N_{\rm on}\f$ and Off counts \f$N_{\rm off}\f$ are taken from the
+ * On and Off spectra, the expected number of gamma-ray events
+ * \f$N_{\gamma}\f$ and background events \f$N_{\rm bgd}\f$ are
+ * computed from the spectral models of the relevant components in the
+ * model container (spatial and temporal components are ignored so far).
+ * See the model_on() and model_off() methods for details about the
+ * model computations.
  *
- * @todo Add formula for curvature matrix computation
+ * The log-likelihood is given by
+ *
+ * \f[
+ *    \ln L = \sum_i \ln L_i
+ * \f]
+ *
+ * where the sum is taken over all energy bins \f$i\f$ and
+ *
+ * \f[
+ *    \ln L_i = - N_{\rm on}  \ln N_{\rm pred} + N_{\rm pred}
+ *              - N_{\rm off} \ln N_{\rm bgd}  + N_{\rm bgd}
+ * \f]
+ *
+ * with
+ *
+ * \f[
+ *    N_{\rm pred} = N_{\gamma} + \alpha N_{\rm bgd}
+ * \f]
+ *
+ * being the total number of predicted events for an energy bin in the On
+ * region,
+ * \f$N_{\rm on}\f$ is the total number of observed events for an energy
+ * bin in the On region,
+ * \f$N_{\rm off}\f$ is the total number of observed events for an energy
+ * bin in the Off region, and
+ * \f$N_{\rm bgd}\f$ is the predicted number of background events for an
+ * energy bin in the Off region.
+ *
+ * The log-likelihood gradient with respect to sky model parameters
+ * \f$p_{\rm sky}\f$ is given by
+ *
+ * \f[
+ *    \left( \frac{\partial \ln L_i}{\partial p_{\rm sky}} \right) =
+ *    \left( 1 - \frac{N_{\rm on}}{N_{\rm pred}} \right)
+ *    \left( \frac{\partial N_{\gamma}}{\partial p_{\rm sky}} \right)
+ * \f]
+ *
+ * and with respect to background model parameters \f$p_{\rm bgd}\f$ is
+ * given by
+ *
+ * \f[
+ *    \left( \frac{\partial \ln L_i}{\partial p_{\rm bgd}} \right) =
+ *    \left( 1 + \alpha - \frac{N_{\rm off}}{N_{\rm bgd}} -
+ *           \frac{\alpha N_{\rm on}}{N_{\rm pred}} \right)
+ *    \left( \frac{\partial N_{\rm bgd}}{\partial p_{\rm bgd}} \right)
+ * \f]
+ *
+ * The curvature matrix elements are given by
+ *
+ * \f[
+ *    \left( \frac{\partial^2 \ln L_i}{\partial^2 p_{\rm sky}} \right) =
+ *    \left( \frac{N_{\rm on}}{N_{\rm pred}^2} \right)
+ *    \left( \frac{\partial N_{\gamma}}{\partial p_{\rm sky}} \right)^2
+ * \f]
+ *
+ * \f[
+ *    \left( \frac{\partial^2 \ln L_i}{\partial p_{\rm sky}
+ *                                     \partial p_{\rm bgd}} \right) =
+ *    \left( \frac{\alpha N_{\rm on}}{N_{\rm pred}^2} \right)
+ *    \left( \frac{\partial N_{\gamma}}{\partial p_{\rm sky}} \right)
+ *    \left( \frac{\partial N_{\rm bgd}}{\partial p_{\rm bgd}} \right)
+ * \f]
+ *
+ * \f[
+ *    \left( \frac{\partial^2 \ln L_i}{\partial p_{\rm bgd}
+ *                                     \partial p_{\rm sky}} \right) =
+ *    \left( \frac{\alpha N_{\rm on}}{N_{\rm pred}^2} \right)
+ *    \left( \frac{\partial N_{\rm bgd}}{\partial p_{\rm bgd}} \right)
+ *    \left( \frac{\partial N_{\gamma}}{\partial p_{\rm sky}} \right)
+ * \f]
+ *
+ * \f[
+ *    \left( \frac{\partial^2 \ln L_i}{\partial^2 p_{\rm bgd}} \right) =
+ *    \left( \frac{N_{\rm off}}{N_{\rm bgd}^2} +
+ *           \frac{\alpha^2 N_{\rm on}}{N_{\rm pred}^2} \right)
+ *    \left( \frac{\partial N_{\rm bgd}}{\partial p_{\rm bgd}} \right)^2
+ * \f]
  ***********************************************************************/
 double GCTAOnOffObservation::likelihood(const GModels& models,
                                         GVector*       gradient,
@@ -630,12 +707,12 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                                         double*        npred) const
 {
     // Timing measurement
-    #if defined(G_EVAL_TIMING)
+    #if defined(G_LIKELIHOOD_DEBUG)
     clock_t t_start = clock();
     #endif
 	
     // Initialise statistics
-    #if defined(G_OPT_DEBUG)
+    #if defined(G_LIKELIHOOD_DEBUG)
 	int    n_bins        = m_on_spec.size();
     int    n_used        = 0;
     int    n_small_model = 0;
@@ -682,7 +759,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
             // Skip bin if model is too small (avoids -Inf or NaN gradients)
             double nonpred = ngam + m_alpha[i] * nbgd;
             if ((nbgd <= minmod) || (nonpred <= minmod)) {
-                #if defined(G_OPT_DEBUG)
+                #if defined(G_LIKELIHOOD_DEBUG)
                 n_small_model++;
                 #endif
                 continue;
@@ -695,7 +772,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
             *npred += nonpred;
 		  
             // Update statistics
-            #if defined(G_OPT_DEBUG)
+            #if defined(G_LIKELIHOOD_DEBUG)
             n_used++;
             sum_data  += non;
             sum_model += nonpred;
@@ -712,7 +789,9 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
             // Loop over all parameters
             for (int j = 0; j < npars; ++j) {
 			
-                // If spectral model for sky component is non-zero and non-infinite
+                // If spectral model for sky component is non-zero and
+                // non-infinite then handle sky component gradients and
+                // second derivatives including at least a sky component ...
                 if (sky_grad[j] != 0.0  && !gammalib::is_infinite(sky_grad[j])) {
 				
                     // Gradient
@@ -722,15 +801,19 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                     for (int k = 0; k < npars; ++k) {
 				
                         // If spectral model for sky component is non-zero and
-                        // non-infinite ...
-                        if (sky_grad[k] != 0.0  && !gammalib::is_infinite(sky_grad[k])) {
+                        // non-infinite then we have the curvature element
+                        // of a sky component
+                        if (sky_grad[k] != 0.0  &&
+                            !gammalib::is_infinite(sky_grad[k])) {
                             colvar[k] = sky_grad[j] * sky_grad[k] * fb;
                         }
 					
-                        // ... else if spectral model for sky component is
-                        // non-zero and non-infinite
-                        // ???????????????????? sky_grad[j]=0 ?????????????????
-                        else if (bgd_grad[k] != 0.0  && !gammalib::is_infinite(bgd_grad[k])) {
+                        // ... else if spectral model for background component
+                        // is non-zero and non-infinite then we have the mixed
+                        // curvature element between a sky and a background
+                        // component
+                        else if (bgd_grad[k] != 0.0  &&
+                                 !gammalib::is_infinite(bgd_grad[k])) {
                             colvar[k] = sky_grad[j] * bgd_grad[k] * fc;
                         }
 						
@@ -746,9 +829,12 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 
                 } // endif: spectral model is non-zero and non-infinite
 			
-                // ... else if spectral model for background component is
-                // non-zero and non-infinite
-                else if (bgd_grad[j] != 0.0  && !gammalib::is_infinite(bgd_grad[j])) {
+                // ... otherwise if spectral model for background component is
+                // non-zero and non-infinite then handle background component
+                // gradients and second derivatives including at least a
+                // background component
+                else if (bgd_grad[j] != 0.0  &&
+                         !gammalib::is_infinite(bgd_grad[j])) {
 				
                     // Gradient
                     (*gradient)[j] += bgd_factor * bgd_grad[j];
@@ -756,19 +842,24 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                     // Hessian (from first-order derivatives only)
                     for (int k = 0; k < npars; ++k) {
 					
-                        // If spectral model for sky component is non-zero and non-infinite
-                        // ???????????????????? sky_grad[j] ?????????????????
-                        if (sky_grad[k] != 0.0  && !gammalib::is_infinite(sky_grad[k])) {
-                            colvar[k] = bgd_grad[j] * bgd_grad[k] * fc;
+                        // If spectral model for sky component is non-zero and
+                        // non-infinite then we have the mixed curvature element
+                        // between a sky and a background component
+                        if (sky_grad[k] != 0.0  &&
+                            !gammalib::is_infinite(sky_grad[k])) {
+                            colvar[k] = bgd_grad[j] * sky_grad[k] * fc;
                         }
 						
-						// ... else if spectral model for sky component is
-                        // non-zero and non-infinite
-                        else if (bgd_grad[k] != 0.0  && !gammalib::is_infinite(bgd_grad[k])) {
+						// ... else if spectral model for background component
+                        // is non-zero and non-infinite then we have the
+                        // curvature element of a background component
+                        else if (bgd_grad[k] != 0.0  &&
+                                 !gammalib::is_infinite(bgd_grad[k])) {
                             colvar[k] = bgd_grad[j] * bgd_grad[k] * fd;
+                        }
 						
 						// ... else neither sky nor background
-                        } else {
+                        else {
                             colvar[k] = 0.0;
                         }
 
@@ -777,9 +868,8 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
                     // Update matrix
                     curvature->add_to_column(j, colvar);
 			
-                } // endif: spectral model for background component is non-
-                  //        zero and non-infinite
-						
+                } // endif: spectral model for background component valid
+
             } // endfor: looped over all parameters for derivatives computation
 			
         } // endfor: looped over energy bins
@@ -795,7 +885,7 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
 	}
 		
     // Dump statistics
-    #if defined(G_OPT_DEBUG)
+    #if defined(G_LIKELIHOOD_DEBUG)
     std::cout << "Number of parameters: " << npars << std::endl;
     std::cout << "Number of bins: " << n_bins << std::endl;
     std::cout << "Number of bins used for computation: " << n_used << std::endl;
@@ -808,13 +898,13 @@ double GCTAOnOffObservation::likelihood(const GModels& models,
     #endif
 	
     // Optionally dump gradient and curvature matrix
-    #if defined(G_EVAL_DEBUG)
+    #if defined(G_LIKELIHOOD_DEBUG)
     std::cout << *gradient << std::endl;
     std::cout << *curvature << std::endl;
     #endif
 	
     // Timing measurement
-    #if defined(G_EVAL_TIMING)
+    #if defined(G_LIKELIHOOD_DEBUG)
     #ifdef _OPENMP
     double t_elapse = omp_get_wtime()-t_start;
     #else
@@ -1488,7 +1578,7 @@ double GCTAOnOffObservation::model_off(const GModels& models,
             }
 					
             // Fall through if model does not apply to specific instrument
-            // and observation identifier
+            // and observation identifier.
             if (!mptr->is_valid(this->instrument(), this->id())) {
                 ipar += mptr->size();
                 continue;

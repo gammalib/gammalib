@@ -67,7 +67,7 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_psf, 'Test CTA PSF classes')
         self.append(self.test_edisp, 'Test CTA energy dispersion classes')
         self.append(self.test_response, 'Test CTA response classes')
-        self.append(self.test_onoff, 'Test CTA ON/OFF analysis')
+        self.append(self.test_onoff, 'Test CTA On/Off analysis')
 
         # Return
         return
@@ -265,7 +265,6 @@ class Test(gammalib.GPythonTestSuite):
         ereco = gammalib.GEbounds(10, gammalib.GEnergy(0.1,  'TeV'),
                                       gammalib.GEnergy(10.0, 'TeV'))
 
-
         # Create On/Off observations by filling all events found in
         # the observation container and computing the response
         filename = self.caldb + '/../data/irf_unbinned.xml'
@@ -278,7 +277,7 @@ class Test(gammalib.GPythonTestSuite):
             outobs.append(onoff)
 
         # Load model container and attach it to the observations
-        models = gammalib.GModels(self.caldb + '/../data/crab_irf.xml')
+        models = gammalib.GModels(self.caldb + '/../data/onoff_model.xml')
         outobs.models(models)
 
         # Perform maximum likelihood fit
@@ -289,15 +288,35 @@ class Test(gammalib.GPythonTestSuite):
         #print(outobs)
         #print(outobs.models())
 
+        # Test On/Off model fitting results
+        sky = outobs.models()['Crab']
+        bgd = outobs.models()['Background']
+        self.test_value(sky['Prefactor'].value(), 6.15281e-16, 1.0e-20,
+                        'Check sky model prefactor value')
+        self.test_value(sky['Prefactor'].error(), 2.35727e-17, 1.0e-20,
+                        'Check sky model prefactor error')
+        self.test_value(sky['Index'].value(), -2.51599, 1.0e-4,
+                        'Check sky model index value')
+        self.test_value(sky['Index'].error(), 0.037628, 1.0e-4,
+                        'Check sky model index error')
+        self.test_value(bgd['Prefactor'].value(), 1.04038, 1.0e-4,
+                        'Check background model prefactor value')
+        self.test_value(bgd['Prefactor'].error(), 0.130852, 1.0e-4,
+                        'Check background model prefactor error')
+        self.test_value(bgd['Index'].value(), 0.539376, 1.0e-4,
+                        'Check background model index value')
+        self.test_value(bgd['Index'].error(), 0.0855112, 1.0e-4,
+                        'Check background model index error')
+
         # Save PHA, ARF and RMFs
         for run in outobs:
-            run.on_spec().save('onoff_pha_on.fits', True)
-            run.off_spec().save('onoff_pha_off.fits', True)
-            run.arf().save('onoff_arf.fits', True)
-            run.rmf().save('onoff_rmf.fits', True)
+            run.on_spec().save('test_cta_onoff_pha_on.fits', True)
+            run.off_spec().save('test_cta_onoff_pha_off.fits', True)
+            run.arf().save('test_cta_onoff_arf.fits', True)
+            run.rmf().save('test_cta_onoff_rmf.fits', True)
 
         # Save On/Off observations
-        outobs.save('onoff.xml')
+        outobs.save('test_cta_onoff.xml')
         
         # Return
         return
