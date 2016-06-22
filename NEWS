@@ -381,7 +381,7 @@ Carlo simulated instrument directions are identical to the model evaluations
 
 Add GCTACubeEdisp class that computes the mean energy dispersion for a stacked
 analysis. This class is now used in GCTAResponseCube to take into account the
-energy dispersion is a stacked analysis (#1721).
+energy dispersion is a stacked analysis (#1721, #1801).
 
 A filename constructor has been added to GCTAObservation that allows constructing
 a CTA observation from an event list or a counts cube. A dummy argument has been

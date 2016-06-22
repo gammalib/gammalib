@@ -30,7 +30,7 @@
         Add GObservations::nobserved() method (#1723)
         Use rejection method in GCTABackground3D::mc() (#1722)
         Use rejection method in GModelSpatialDiffuseCube::mc() (#1722)
-        Add energy dispersion cube for stacked analysis (#1721)
+        Add energy dispersion cube for stacked analysis (#1721, #1801)
         Make GFilename::is_fits thread safe (#1717)
         Revise GTime operators (#1714)
         Add GSkyMap::publish() method to publish map on VO Hub (#1710)

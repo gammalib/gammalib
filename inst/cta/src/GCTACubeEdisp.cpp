@@ -481,15 +481,17 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
                     }
 
                     // Compute log10 of reconstructed energy in TeV
-                    double logEobs = std::log10(migra) - logEsrc;
+                    double  logEobs = std::log10(migra) + logEsrc;
+                    GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
 
                     // Set map index
                     int imap = offset(imigra, iebin);
 
-                    // Set energy dispersion cube value
-                    m_cube(pixel, imap) = (*edisp)(logEobs, logEsrc,
-                                                   theta, 0.0,
-                                                   0.0, 0.0);
+                    // Add energy dispersion cube value
+                    m_cube(pixel, imap) += rsp->edisp(Eobs,
+                                                      theta, 0.0,
+                                                      0.0, 0.0,
+                                                      logEsrc);
 
                 } // endfor: looped over migration bins
 
@@ -604,10 +606,10 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
             double theta = pnt.dist(dir);
 
             // Loop over all energy bins
-            for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin) {
+            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
 
                 // Get log10 of true energy in TeV
-                double logEsrc = m_elogmeans[iebin];
+                double logEsrc = m_energies[iebin].log10TeV();
 
                 // Compute exposure weight
                 double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
@@ -619,7 +621,7 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
                 // Loop over delta values
                 for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
 
-                    // Compute delta in radians
+                    // Compute energy migration fraction
                     double migra = m_migras[imigra];
 
                     // Skip migra bin if zero
@@ -628,15 +630,17 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
                     }
 
                     // Compute log10 of reconstructed energy in TeV
-                    double logEobs = std::log10(migra) - logEsrc;
+                    double  logEobs = std::log10(migra) + logEsrc;
+                    GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
 
                     // Set map index
                     int imap = offset(imigra, iebin);
 
                     // Add energy dispersion cube value
-                    m_cube(pixel, imap) += (*edisp)(logEobs, logEsrc,
-                                                    theta, 0.0,
-                                                    0.0, 0.0) * weight;
+                    m_cube(pixel, imap) += rsp->edisp(Eobs,
+                                                      theta, 0.0,
+                                                      0.0, 0.0,
+                                                      logEsrc) * weight;
 
                 } // endfor: looped over migration bins
                 
@@ -648,7 +652,7 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
 
     // Compute mean energy dispersion cube by dividing through the weights
     for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-        for (int iebin = 0; iebin < m_ebounds.size(); ++iebin) {
+        for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
             if (exposure(pixel, iebin) > 0.0) {
                 double norm = 1.0 / exposure(pixel, iebin);
                 for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
@@ -687,17 +691,20 @@ void GCTACubeEdisp::read(const GFits& fits)
 
     // Get HDUs
     const GFitsImage& hdu_edispcube = *fits.image("Primary");
-    const GFitsTable& hdu_ebounds   = *fits.table("ENERGIES");
+    const GFitsTable& hdu_energies  = *fits.table("ENERGIES");
     const GFitsTable& hdu_migras    = *fits.table("MIGRAS");
 
     // Read energy dispersion cube
     m_cube.read(hdu_edispcube);
 
     // Read true energy nodes
-    m_energies.read(hdu_ebounds);
+    m_energies.read(hdu_energies);
 
     // Read migration nodes
     m_migras.read(hdu_migras);
+
+    // Set energy node array used for interpolation
+    set_eng_axis();
 
     // Compute true energy boundaries
     compute_ebounds();
@@ -1102,7 +1109,7 @@ void GCTACubeEdisp::compute_ebounds() const
 		} // endfor: loop over maps
 
 		// Loop over sky map entries from high migra
-		for (int imap = mapmax-1; imap <= mapmin; --imap) {
+		for (int imap = mapmax-1; imap >= mapmin; --imap) {
 
 			// Get maximum energy dispersion term for all sky pixels
             double edisp = 0.0;
@@ -1130,8 +1137,8 @@ void GCTACubeEdisp::compute_ebounds() const
         // valid
 		if (minFound && maxFound && migra_min > 0.0 && migra_max > 0.0 &&
             migra_max > migra_min) {
-			emax = m_energies[i] / migra_min;
-			emin = m_energies[i] / migra_max;
+			emin = m_energies[i] * migra_min;
+			emax = m_energies[i] * migra_max;
 		}
     
         // ... otherwise we set the interval to a zero interval for safety
