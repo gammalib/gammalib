@@ -25,13 +25,13 @@ base=$PWD
 echo
 echo "=====> examples/cpp"
 cd examples/cpp
-cd createfits; rm -f createfits; make; ./createfits; cd ..
-cd createskymap; rm -f createskymap; make; ./createskymap; cd ..
-cd createxml; rm -f createxml; make; ./createxml; cd ..
-cd interpolate; rm -f interpolate; make; ./interpolate; cd ..
-cd numerics; rm -f numerics; make; ./numerics; cd ..
-cd optimize; rm -f optimize; make; ./optimize; cd ..
-cd readmodel; rm -f readmodel; make; ./readmodel; cd ..
+./createfits
+./createskymap
+./createxml
+./interpolate
+./numerics
+./optimize
+./readmodel
 cd $base
 
 
