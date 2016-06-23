@@ -56,22 +56,20 @@ def make_model_for_cntmap(cntmap, modname, xmlname, irf, caldb, clobber=True):
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-    """
-    Example illustrating how to create a model map for a counts map.
-    """
+
     # Dump header
-    print("")
-    print("***************************************************")
-    print("* Create model map for counts map using XML model *")
-    print("***************************************************")
-    print("... please wait for a few seconds")
+    print('')
+    print('***************************************************')
+    print('* Create model map for counts map using XML model *')
+    print('***************************************************')
+    print('... please wait for a few seconds')
 
     # Set parameters
-    irf     = "cta_dummy_irf"
-    caldb   = "./caldb"
-    xmlname = "data/crab.xml"
-    cntmap  = "data/crab_cntmap.fits"
-    modname = "model.fits"
+    irf     = 'cta_dummy_irf'
+    caldb   = '../caldb'
+    xmlname = '../data/crab.xml'
+    cntmap  = '../data/crab_cntmap.fits'
+    modname = 'model.fits'
 
     # Make the model
     make_model_for_cntmap(cntmap, modname, xmlname, irf, gammalib.GCaldb(caldb))

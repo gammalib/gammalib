@@ -121,7 +121,7 @@ if __name__ == '__main__':
     #psf = gammalib.GCTAPsfKing('../caldb/data/cta/e/bcf/IFAE20120510_50h_King/irf_file.fits')
     #psf = gammalib.GCTAPsf2D('../caldb/data/cta/e/bcf/IFAE20120510_50h/irf_file.fits')
     #psf = gammalib.GCTAPsfPerfTable('../caldb/cta_dummy_irf.dat')
-    psf = gammalib.GCTAPsfTable('../test/caldb/psf_table.fits[PSF_2D_TABLE]')
+    psf = gammalib.GCTAPsfTable('../caldb/psf_table.fits[PSF_2D_TABLE]')
 
     # Simulate PSF
     sim_psf(psf, 1.0, r_max=0.5)

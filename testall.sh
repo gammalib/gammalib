@@ -19,13 +19,21 @@
 # =====================================================================
 base=$PWD
 
+# test/dev
+# ========
+echo
+echo "=====> test/dev"
+cd test/dev
+./example_model_xml_io.py
+./example_radial_models.py
+cd $base
+
+
 # examples/python
 # ===============
 echo
 echo "=====> examples/python"
 cd examples/python
-./example_model_xml_io.py
-./example_radial_models.py
 ./matrix_howto.py
 ./models_howto.py
 ./xml_howto.py
@@ -33,11 +41,11 @@ cd examples/python
 cd $base
 
 
-# inst/cta/test
-# =============
+# inst/cta/test/dev
+# =================
 echo
-echo "=====> inst/cta/test"
-cd inst/cta/test
+echo "=====> inst/cta/test/dev"
+cd inst/cta/test/dev
 ./example_binned_ml_fit.py
 ./example_make_model.py
 ./example_sim_photons.py

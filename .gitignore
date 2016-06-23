@@ -11,6 +11,7 @@ examples/python/*.fits
 inst/cta/test/*.xml
 inst/cta/test/*.fits
 inst/cta/test/*.fits.gz
+inst/cta/test/dev/*.fits
 inst/spi/test/data/*.xml
 
 # Generated files
@@ -88,6 +89,8 @@ test/region.reg
 test/test_python.sh
 test/test_examples.sh
 test/test_csv*.dat
+test/dev/*.fits
+test/dev/*.xml
 
 examples/python/*.xml
 examples/python/*.html

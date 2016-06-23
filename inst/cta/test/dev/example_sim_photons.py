@@ -143,20 +143,18 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-    """
-    Simulate photons.
-    """
+
     # Dump header
-    print("")
-    print("********************")
-    print("* Simulate photons *")
-    print("********************")
+    print('')
+    print('********************')
+    print('* Simulate photons *')
+    print('********************')
 
     # Set XML names
-    xmlnames = ["data/crab.xml",
-                "data/crab_eplaw.xml",
-                "data/crab_file_function.xml",
-                "data/crab_file_function_mod.xml"]
+    xmlnames = ['../data/crab.xml',
+                '../data/crab_eplaw.xml']
+    #            '../data/crab_file_function.xml',
+    #            '../data/crab_file_function_mod.xml']
 
     # Set simulation parameters
     e_min    = 0.1                # 0.1 TeV

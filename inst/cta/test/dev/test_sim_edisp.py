@@ -144,7 +144,7 @@ if __name__ == '__main__':
     # Load edisp
     #edisp = gammalib.GCTAEdispRmf("./caldb/dc1/rmf.fits")
     #edisp = gammalib.GCTAEdispPerfTable("./caldb/cta_dummy_irf.dat")
-    edisp = gammalib.GCTAEdisp2D("./caldb/edisp_matrix.fits")
+    edisp = gammalib.GCTAEdisp2D("../caldb/edisp_matrix.fits")
 
     # Simulate Edisp
     sim_edisp(edisp, 20.0) # Energy in TeV

@@ -174,9 +174,9 @@ def observation(ra=83.6331, dec=22.0145, emin=0.1, emax=100.0,
     obs = gammalib.GCTAObservation()
 
     # Set response
-    exposure   = gammalib.GCTACubeExposure("data/expcube.fits")
-    psf        = gammalib.GCTACubePsf("data/psfcube.fits")
-    background = gammalib.GCTACubeBackground("data/bkgcube.fits")
+    exposure   = gammalib.GCTACubeExposure("../data/stacked_expcube.fits")
+    psf        = gammalib.GCTACubePsf("../data/stacked_psfcube.fits")
+    background = gammalib.GCTACubeBackground("../data/stacked_bkgcube.fits")
     obs.response(exposure, psf, background)
 
     # Set pointing

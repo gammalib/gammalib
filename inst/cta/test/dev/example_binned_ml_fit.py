@@ -209,30 +209,26 @@ def stacked_analysis(model, cntmap, expcube, psfcube, bkgcube):
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-    """
-    Example illustrating binned data analyses.
-    """
-    # Dump header
-    print("")
-    print("**************************************************")
-    print("* Perform maximum likelihood fitting of CTA data *")
-    print("**************************************************")
-    print("... please wait for a few seconds")
 
-    # Set parameters
-    irf     = "cta_dummy_irf"
-    caldb   = "../caldb"
-    model   = "data/crab.xml"
-    cntmap  = "data/crab_cntmap.fits"
-    expcube = "data/expcube.fits"
-    psfcube = "data/psfcube.fits"
-    bkgcube = "data/bkgcube.fits"
+    # Dump header
+    print('')
+    print('**************************************************')
+    print('* Perform maximum likelihood fitting of CTA data *')
+    print('**************************************************')
+    print('... please wait for a few seconds')
 
     # Perform binned analysis
-    results_binned = binned_analysis(model, cntmap, irf, gammalib.GCaldb(caldb))
+    results_binned = binned_analysis('../data/crab.xml',
+                                     '../data/crab_cntmap.fits',
+                                     'cta_dummy_irf',
+                                     gammalib.GCaldb('../caldb'))
 
     # Perform stacked analysis
-    results_cube = stacked_analysis(model, cntmap, expcube, psfcube, bkgcube)
+    results_cube = stacked_analysis('../data/stacked_model.xml',
+                                    '../data/stacked_cntcube.fits',
+                                    '../data/stacked_expcube.fits',
+                                    '../data/stacked_psfcube.fits',
+                                    '../data/stacked_bkgcube.fits')
 
     # Print model results
     #print(result)
