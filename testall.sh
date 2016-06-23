@@ -2,7 +2,7 @@
 #
 # Run all test and example scripts that come with the package
 #
-# Copyright (C) 2011-2015 Juergen Knoedlseder
+# Copyright (C) 2011-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,22 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # =====================================================================
 base=$PWD
-
-
-# examples/cpp
-# ===============
-echo
-echo "=====> examples/cpp"
-cd examples/cpp
-./createfits
-./createskymap
-./createxml
-./interpolate
-./numerics
-./optimize
-./readmodel
-cd $base
-
 
 # examples/python
 # ===============
