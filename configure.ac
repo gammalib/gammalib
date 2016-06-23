@@ -1394,6 +1394,8 @@ AC_CONFIG_FILES([Makefile
                  test/test_python.sh
                  pyext/Makefile
                  pyext/setup.py
+                 examples/Makefile
+                 examples/cpp/Makefile
                  gammalib.pc
                  testconf.sh],
                 [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;
