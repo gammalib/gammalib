@@ -1,8 +1,9 @@
-2016-06-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-06-23  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Correct Makefile for example executables (#1806)
         Handle additional columns in GArf class
         GCTAAeff2D no longer extrapolates beyond response table (#1784)
         Add GWcsSIN projection class (#1798)

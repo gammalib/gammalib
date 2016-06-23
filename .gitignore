@@ -86,15 +86,14 @@ test/reports/*.xml
 test/*.trs
 test/region.reg
 test/test_python.sh
+test/test_examples.sh
 test/test_csv*.dat
 
 examples/python/*.xml
 examples/python/*.html
-examples/cpp/*.fits
 examples/cpp/createfits
 examples/cpp/createskymap
 examples/cpp/createxml
-examples/cpp/my_xml_file.xml
 examples/cpp/readmodel
 examples/cpp/numerics
 examples/cpp/optimize

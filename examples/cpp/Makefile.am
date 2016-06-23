@@ -1,5 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 
+# Darwin support
+MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
+@EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
+
+# Include files
 INCLUDES = -I$(top_srcdir)/include
 
 # Program name

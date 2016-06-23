@@ -47,13 +47,13 @@ protected:
 };
 void parabola::eval(const GOptimizerPars& pars)
 {
-    const double a =  2.0;
-    const double b = -4.0;
-    const double c =  2.0;
-    double x       = pars[0]->value();
-    m_value        = a*x*x + b*x + c;
-    m_gradient[0]  = 2.0*a*x + b;
-    m_curvature(0,0)   = m_gradient[0] * m_gradient[0];
+    const double a   =  2.0;
+    const double b   = -4.0;
+    const double c   =  2.0;
+    double x         = pars[0]->value();
+    m_value          = a*x*x + b*x + c;
+    m_gradient[0]    = 2.0*a*x + b;
+    m_curvature(0,0) = m_gradient[0] * m_gradient[0];
 };
 
 
@@ -69,7 +69,6 @@ int main(void) {
     log.cout(true);
     
     // Allocate optimizer
-    //GOptimizerLM opt(log);
     GOptimizerLM opt;
 
     // Allocate function

@@ -1396,9 +1396,11 @@ AC_CONFIG_FILES([Makefile
                  pyext/setup.py
                  examples/Makefile
                  examples/cpp/Makefile
+                 test/test_examples.sh
                  gammalib.pc
                  testconf.sh],
                 [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;
+                 if test -f test/test_examples.sh; then chmod +x test/test_examples.sh; fi;
                  if test -f testconf.sh; then chmod +x testconf.sh; fi])
 
 if test "x$with_inst" = "xyes"; then

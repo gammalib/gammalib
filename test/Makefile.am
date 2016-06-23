@@ -44,7 +44,7 @@ endif
 
 # Optional python bindings
 if WITH_PYTHON
-  TEST_PYTHON_SCRIPT = test_python.sh
+  TEST_PYTHON_SCRIPT = test_python.sh test_examples.sh
   TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM):$(PYTHONPATH)
 endif
 
