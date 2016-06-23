@@ -103,9 +103,7 @@ def fit_spectrum(filename, xmlname):
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-    """
-    Perform testing.
-    """
+
     # Dump result
     print("")
     print("****************************")
@@ -123,10 +121,10 @@ if __name__ == '__main__':
         plt.title('GammaLib fit of the Crab PWN')
 
         # Extract data from FITS file
-        extract_data("data/crab_mwl.fits")
+        extract_data("../data/crab_mwl.fits")
 
         # Fit spectrum
-        fit_spectrum("data/crab_mwl.fits", "data/crab_mwl2.xml")
+        fit_spectrum("../data/crab_mwl.fits", "../data/crab_mwl2.xml")
 
         # Show spectrum
         plt.show()

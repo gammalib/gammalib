@@ -40,8 +40,8 @@ def analyse_unbinned(xmlname):
 
     # Load LAT observation
     lat = GLATObservation()
-    lat.load_unbinned("data/p7v6/ft1.fits", "data/p7v6/ft2.fits", "data/p7v6/ltcube.fits")
-    lat.response("P7SOURCE_V6", "../caldb")
+    lat.load_unbinned("../data/p7v6/ft1.fits", "../data/p7v6/ft2.fits", "../data/p7v6/ltcube.fits")
+    lat.response("P7SOURCE_V6")
 
     # Setup ROI covered by data
     instDir = GSkyDir()
@@ -82,8 +82,8 @@ def analyse_binned(xmlname):
 
     # Load LAT observation
     lat = GLATObservation()
-    lat.load_binned("data/p7v6/srcmap.fits", "data/p7v6/binned_expmap.fits", "data/p7v6/ltcube.fits")
-    lat.response("P7SOURCE_V6", "../caldb")
+    lat.load_binned("../data/p7v6/srcmap.fits", "../data/p7v6/binned_expmap.fits", "../data/p7v6/ltcube.fits")
+    lat.response("P7SOURCE_V6")
     lat.response().force_mean(True)
 
     # Append LAT observation to container
@@ -180,9 +180,7 @@ def plot_residuals(obs):
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-    """
-    Perform testing.
-    """
+
     # Dump result
     print("")
     print("**************************************")
@@ -190,5 +188,5 @@ if __name__ == '__main__':
     print("**************************************")
 
     # Analyse data
-#    analyse_unbinned("data/p7v6/crab_model.xml")
-    analyse_binned("data/p7v6/crab_model.xml")
+#    analyse_unbinned("../data/p7v6/crab_model.xml")
+    analyse_binned("../data/p7v6/crab_model.xml")

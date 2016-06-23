@@ -56,20 +56,20 @@ cd inst/cta/test/dev
 cd $base
 
 
-# inst/lat/test
-# =============
+# inst/lat/test/dev
+# =================
 echo
-echo "=====> inst/lat/test"
-cd inst/lat/test
-./test_python.py
+echo "=====> inst/lat/test/dev"
+cd inst/lat/test/dev
+#./test_python.py
 cd $base
 
 
-# inst/mwl/test
-# =============
+# inst/mwl/test/dev
+# =================
 echo
-echo "=====> inst/mwl/test"
-cd inst/mwl/test
+echo "=====> inst/mwl/test/dev"
+cd inst/mwl/test/dev
 ./test_python.py
 cd $base
 
