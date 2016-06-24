@@ -87,6 +87,10 @@ namespace gammalib {
     void                     xml_check_par(const std::string& origin,
                                            const std::string& name,
                                            const int&         number);
+    GFilename                xml_file_expand(const GXmlElement& xml,
+                                             const std::string& filename);
+    GFilename                xml_file_reduce(const GXmlElement& xml,
+                                             const std::string& filename);
     int                      recv(int fd, char *buffer, int len, int flags,
                                   int timeout);
 }

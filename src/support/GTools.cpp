@@ -47,8 +47,9 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
-#include "GXmlElement.hpp"
 #include "GEnergy.hpp"
+#include "GFilename.hpp"
+#include "GXmlElement.hpp"
 
 /* __ Compile options ____________________________________________________ */
 
@@ -1493,6 +1494,66 @@ void gammalib::xml_check_par(const std::string& origin,
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Expand file name provided as XML attribute for loading
+ *
+ * @param[in] xml XML element.
+ * @param[in] filename File name.
+ * @return Expanded file name.
+ *
+ * Expands file name provided as XML attribute for loading. If the file name
+ * is not empty and has no path it is assumed that the file is located in the
+ * same directory as the XML file, and the XML file access path is prepended
+ * to the file name.
+ ***************************************************************************/
+GFilename gammalib::xml_file_expand(const GXmlElement& xml,
+                                    const std::string& filename)
+{
+    // Set file name
+    GFilename fname(filename);
+
+    // If the file name is not empty and has no path we assume that the file
+    // name is a relative file name with respect to the XML file access path
+    // and we therefore prepend the XML file access path to the file name
+    if (!fname.is_empty() && fname.path().length() == 0) {
+        fname = xml.filename().path() + fname;
+    }
+
+    // Return file name
+    return fname;
+}
+
+
+/***********************************************************************//**
+ * @brief Reduce file name provided for writing as XML attribute
+ *
+ * @param[in] xml XML element.
+ * @param[in] filename File name.
+ * @return Reduced file name.
+ *
+ * Reduces file name provided for writing as XML attribute. If the file name
+ * is not empty and has the same access path as the XML file it is assumed
+ * that both files are located in the same directory, and the access path is
+ * stripped from the file name.
+ ***************************************************************************/
+GFilename gammalib::xml_file_reduce(const GXmlElement& xml,
+                                    const std::string& filename)
+{
+    // Set file name
+    GFilename fname(filename);
+
+    // If the file name is not empty and has the same access path as the XML
+    // file it is assumed that both files are located in the same directory,
+    // and the access path is stripped from the file name.
+    if (!fname.is_empty() && fname.path() == xml.filename().path()) {
+        fname = fname.file();
+    }
+
+    // Return file name
+    return fname;
 }
 
 
