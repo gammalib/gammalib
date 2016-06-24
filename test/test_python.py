@@ -175,10 +175,8 @@ def test(installed=False):
                 filename   = element.attribute("file")
                 head, tail = os.path.split(filename)
                 head, dir  = os.path.split(head)
-                if len(tail) > 0:
+                if len(dir) > 0:
                     filename   = "cta/"+dir+"/"+tail
-                else:
-                    filename = ""
                 element.attribute("file", filename)
             xml.save("cta/data/irf_unbinned.xml")
             xml = gammalib.GXml("cta/data/irf_1dc.xml")
@@ -189,10 +187,8 @@ def test(installed=False):
                 head, dir  = os.path.split(head)
                 if dir == "dc1":
                     dir = "caldb/dc1"
-                if len(tail) > 0:
+                if len(dir) > 0:
                     filename = "cta/"+dir+"/"+tail
-                else:
-                    filename = ""
                 element.attribute("file", filename)
             xml.save("cta/data/irf_1dc.xml")
 
