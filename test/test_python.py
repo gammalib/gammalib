@@ -73,7 +73,7 @@ def test(installed=False):
     Perform unit testing for Python interface.
     """
     # Allocate test suites
-    suites = gammalib.GTestSuites("Python interface testing")
+    suites = gammalib.GTestSuites('Python interface testing')
 
     # Allocate test suites and append them to the container
     suite1  = test_GApplication.Test()
@@ -131,7 +131,7 @@ def test(installed=False):
         suite_cta = test_CTA.Test()
         suite_cta.set()
         if installed:
-            suite_cta.caldb_path("cta/caldb")
+            suite_cta.caldb_path('cta/caldb')
         suites.append(suite_cta)
 
     # Optionally handle LAT suite
@@ -161,43 +161,43 @@ def test(installed=False):
         head, tail = os.path.split(testdir)
 
         # Copy over test data
-        os.system("cp -r %s %s" % (head+"/data", "data"))
-        os.system("cp -r %s %s" % (head+"/cta",  "cta"))
+        os.system('cp -r %s %s' % (head+'/data', 'data'))
+        os.system('cp -r %s %s' % (head+'/cta',  'cta'))
 
         # Special post processing for CTA files. This is needed because
         # the XML files contain absolute PATH information. This is a kluge
         # that works for now, but it's not a very maintainable way to
         # handle this
         if has_cta:
-            xml = gammalib.GXml("cta/data/irf_unbinned.xml")
-            elements = xml.element("observation_list").element("observation")
+            xml = gammalib.GXml('cta/data/irf_unbinned.xml')
+            elements = xml.element('observation_list').element('observation')
             for element in elements:
-                filename   = element.attribute("file")
+                filename   = element.attribute('file')
                 head, tail = os.path.split(filename)
                 head, dir  = os.path.split(head)
                 if len(dir) > 0:
-                    filename   = "cta/"+dir+"/"+tail
-                element.attribute("file", filename)
-            xml.save("cta/data/irf_unbinned.xml")
-            xml = gammalib.GXml("cta/data/irf_1dc.xml")
-            elements = xml.element("observation_list").element("observation")
+                    filename   = 'cta/'+dir+'/'+tail
+                element.attribute('file', filename)
+            xml.save('cta/data/irf_unbinned.xml')
+            xml = gammalib.GXml('cta/data/irf_1dc.xml')
+            elements = xml.element('observation_list').element('observation')
             for element in elements:
-                filename   = element.attribute("file")
+                filename   = element.attribute('file')
                 head, tail = os.path.split(filename)
                 head, dir  = os.path.split(head)
-                if dir == "dc1":
-                    dir = "caldb/dc1"
+                if dir == 'dc1':
+                    dir = 'caldb/dc1'
                 if len(dir) > 0:
-                    filename = "cta/"+dir+"/"+tail
-                element.attribute("file", filename)
-            xml.save("cta/data/irf_1dc.xml")
+                    filename = 'cta/'+dir+'/'+tail
+                element.attribute('file', filename)
+            xml.save('cta/data/irf_1dc.xml')
 
     # Run test suite
     success = suites.run()
 
     # If we have a non-installed version then save test results
     if not installed:
-        suites.save("reports/python.xml")
+        suites.save('reports/python.xml')
 
     # Set return code
     if success:
@@ -213,8 +213,6 @@ def test(installed=False):
 # Main routine entry point #
 # ======================== #
 if __name__ == '__main__':
-    """
-    Perform unit testing for Python interface.
-    """
+
     # Run tests
     test()
