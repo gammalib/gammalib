@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <source_library title="source library">
 	<source name="Crab" type="PointSource">
-        <spectrum type="FileFunction" file="data/filefunction.txt">
+        <spectrum type="FileFunction" file="filefunction.txt">
             <parameter scale="1.0" name="Normalization" min="0.0" max="1000.0" value="1.0" free="1"/>
         </spectrum>
 		<spatialModel type="SkyDirFunction">

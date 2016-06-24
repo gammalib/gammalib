@@ -484,11 +484,28 @@ bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the skymap information from an XML element. The XML element is
- * required to have 1 parameter named either "Normalization" or "Prefactor".
+ * Reads the spatial information for a diffuse map from an XML element. The
+ * expected format of the XML element is
  *
- * If the attribute @a normalize="0" or @a normalize="false" is present the
- * diffuse map will not be normalised to unity flux upon loading.
+ *     <spatialModel type="SpatialMap" file="myfile.fits" normalize="1">
+ *       <parameter name="Prefactor" value="1" min="0.1" max="10" scale="1" free="0"/>
+ *     </spatialModel>
+ *
+ * or
+ *
+ *     <spatialModel type="SpatialMap" file="myfile.fits" normalize="1">
+ *       <parameter name="Normalization" value="1" min="0.1" max="10" scale="1" free="0"/>
+ *     </spatialModel>
+ *
+ * The @p file attribute provides the filename of the diffuse map FITS file.
+ * The filename may be either an absolute filename (starting with '/') or a
+ * relative filename. If no access path is given, the file is expected to
+ * reside in the same location as the XML file.
+ *
+ * The @p normalize attribute specifies whether the sky map should be
+ * normalized to unity flux or not. If the attribute is not given, the map
+ * will be automatically normalized. To prevent normalization,
+ * @p normalize="0" needs to be specified.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
 {
@@ -523,8 +540,8 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
         }
     }
 
-    // Load skymap
-    load(xml.attribute("file"));
+    // Load sky map.
+    load(gammalib::xml_file_expand(xml, xml.attribute("file")));
 
     // Return
     return;
@@ -543,9 +560,21 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the map cube information into an XML element. The XML element has to
- * be of type "MapCubeFunction" and will have 1 parameter leaf named either
- * "Value" or "Normalization" (default).
+ * Writes the spatial information for a diffuse map into an XML element. The
+ * format of the XML element is
+ *
+ *     <spatialModel type="SpatialMap" file="myfile.fits" normalize="1">
+ *       <parameter name="Prefactor" value="1" min="0.1" max="10" scale="1" free="0"/>
+ *     </spatialModel>
+ *
+ * The @p file attribute provides the filename of the diffuse map FITS file.
+ * The filename may be either an absolute filename (starting with '/') or a
+ * relative filename. If no access path is given, the file is expected to
+ * reside in the same location as the XML file.
+ *
+ * The @p normalize attribute specifies whether the sky map should be
+ * normalized to unity flux or not. The attribute will only be written if the
+ * normalization is disabled.
  ***************************************************************************/
 void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 {
@@ -554,8 +583,9 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
         xml.attribute("type", "SpatialMap");
     }
 
-    // Set model filename
-    xml.attribute("file", m_filename);
+    // Set sky map file name
+    //xml.attribute("file", m_filename);
+    xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Verify model type
     if (xml.attribute("type") != "SpatialMap") {

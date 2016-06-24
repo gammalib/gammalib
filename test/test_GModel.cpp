@@ -72,16 +72,26 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
 
     // Append spatial model tests
-    append(static_cast<pfunction>(&TestGModel::test_point_source), "Test GModelSpatialPointSource");
-    append(static_cast<pfunction>(&TestGModel::test_radial_disk), "Test GModelSpatialRadialDisk");
-    append(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
-    append(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
-    append(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
-    append(static_cast<pfunction>(&TestGModel::test_elliptical_gauss), "Test GModelSpatialEllipticalGauss");
-    append(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
-    append(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
-    append(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
-    append(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
+    append(static_cast<pfunction>(&TestGModel::test_point_source),
+           "Test GModelSpatialPointSource");
+    append(static_cast<pfunction>(&TestGModel::test_radial_disk),
+           "Test GModelSpatialRadialDisk");
+    append(static_cast<pfunction>(&TestGModel::test_radial_gauss),
+           "Test GModelSpatialRadialGauss");
+    append(static_cast<pfunction>(&TestGModel::test_radial_shell),
+           "Test GModelSpatialRadialShell");
+    append(static_cast<pfunction>(&TestGModel::test_elliptical_disk),
+           "Test GModelSpatialEllipticalDisk");
+    append(static_cast<pfunction>(&TestGModel::test_elliptical_gauss),
+           "Test GModelSpatialEllipticalGauss");
+    append(static_cast<pfunction>(&TestGModel::test_diffuse_const),
+           "Test GModelSpatialDiffuseConst");
+    append(static_cast<pfunction>(&TestGModel::test_diffuse_cube),
+           "Test GModelSpatialDiffuseCube");
+    append(static_cast<pfunction>(&TestGModel::test_diffuse_map),
+           "Test GModelSpatialDiffuseMap");
+    append(static_cast<pfunction>(&TestGModel::test_spatial_model),
+           "Test spatial model XML I/O");
 
     // Append spectral model tests
     append(static_cast<pfunction>(&TestGModel::test_const), "Test GModelSpectralConst");
@@ -749,88 +759,67 @@ void TestGModel::test_diffuse_cube(void)
 void TestGModel::test_diffuse_map(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpatialDiffuseMap model;
-        test_assert(model.type() == "SpatialMap",
-                    "Model type \"SpatialMap\" expected.");
-        test_assert(model.filename().url() == "",
-                    "Model filename \"\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpatialDiffuseMap model1;
+    test_assert(model1.type() == "SpatialMap",
+                "Check that model is of type \"SpatialMap\".");
+    test_assert(model1.filename().url() == "",
+                "Check that model has empty filename.");
 
     // Test filename value constructor
-    test_try("Test filename value constructor");
-    try {
-        GModelSpatialDiffuseMap model(m_map_file, 3.0);
-        test_value(model.value(), 3.0);
-        test_assert(model.filename().url() == m_map_file,
-                    "Expected \""+m_map_file+"\"");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpatialDiffuseMap model2(m_map_file, 3.0);
+    test_value(model2.value(), 3.0,
+               "Check the value after loading from XML file.");
+    test_assert(model2.filename().url() == m_map_file,
+                "Check the filename after loading from XML file.");
 
     // Test skymap value constructor
-    test_try("Test skymap value constructor");
-    try {
-        GSkyMap map("GAL", 16, "RING", 10);
-        GModelSpatialDiffuseMap model(map, 3.0);
-        test_value(model.value(), 3.0);
-        test_assert(model.filename().url() == "", "Expected \"\"");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GSkyMap map("GAL", 16, "RING", 10);
+    GModelSpatialDiffuseMap model3(map, 3.0);
+    test_value(model3.value(), 3.0,
+               "Check the value after creating model from sky map.");
+    test_assert(model3.filename().url() == "",
+                "Check that filename is empty after creating model from sky map.");
     
     // Test XML constructor and attribute methods
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                    xml(m_xml_model_diffuse_map);
-        GXmlElement*            element = xml.element(0)->element(0)->element("spatialModel", 0);
-        GModelSpatialDiffuseMap model(*element);
-        test_value(model.size(), 1);
-        test_assert(model.type() == "SpatialMap", "Expected \"SpatialMap\"");
-        test_value(model.value(), 1.0);
-        test_assert(model.filename().url() == m_map_file,
-                    "Model filename \""+m_map_file+"\" expected.");
+    GXml         xml(m_xml_model_diffuse_map);
+    GXmlElement* elementp = xml.element(0)->element(0)->element("spatialModel", 0);
+    GModelSpatialDiffuseMap model(*elementp);
+    test_value(model.size(), 1,
+               "Check that model build from an XML element has one parameter.");
+    test_assert(model.type() == "SpatialMap",
+                "Check that model build from an XML element is of type "
+                "\"SpatialMap\".");
+    test_value(model.value(), 1.0,
+               "Check that normalisation of model build from an XML element is "
+               "unity.");
+    test_assert(model.filename().url() == m_map_file,
+                "Check that filename of model build from an XML elements is "
+                "\""+m_map_file+"\".");
 
-        // Test value method
-        model.value(3.9);
-        test_value(model.value(), 3.9);
+    // Test value method
+    model.value(3.9);
+    test_value(model.value(), 3.9);
 
-        // Test load method
-        model.load(m_map_file);
-        test_assert(model.filename().url() == m_map_file,
-                    "Model filename \""+m_map_file+"\" expected.");
+    // Test load method
+    model.load(m_map_file);
+    test_assert(model.filename().url() == m_map_file,
+                "Check that filename of model loaded from a file is "
+                "\""+m_map_file+"\".");
 
-        // Test map method
-        model.map(GSkyMap("GAL", 16, "RING", 10));
-        test_value(model.map().npix(), 3072);
+    // Test map method
+    model.map(GSkyMap("GAL", 16, "RING", 10));
+    test_value(model.map().npix(), 3072);
 
-        // Test operator access
-        test_value(model["Prefactor"].value(), 3.9);
-        test_value(model["Prefactor"].error(), 0.0);
-        test_value(model["Prefactor"].gradient(), 0.0);
-        model["Prefactor"].value(2.1);
-        model["Prefactor"].error(1.9);
-        model["Prefactor"].gradient(0.8);
-        test_value(model["Prefactor"].value(), 2.1);
-        test_value(model["Prefactor"].error(), 1.9);
-        test_value(model["Prefactor"].gradient(), 0.8);
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Test operator access
+    test_value(model["Prefactor"].value(), 3.9);
+    test_value(model["Prefactor"].error(), 0.0);
+    test_value(model["Prefactor"].gradient(), 0.0);
+    model["Prefactor"].value(2.1);
+    model["Prefactor"].error(1.9);
+    model["Prefactor"].gradient(0.8);
+    test_value(model["Prefactor"].value(), 2.1);
+    test_value(model["Prefactor"].error(), 1.9);
+    test_value(model["Prefactor"].gradient(), 0.8);
 
     // Initialize photon direction for testing
     GSkyDir dir;
@@ -841,22 +830,29 @@ void TestGModel::test_diffuse_map(void)
 
     // Test normalized map
     GModelSpatialDiffuseMap map_norm(m_map_file, 3.0, true);
-    test_assert(map_norm.normalize(),"Model should be normalized.");
-    test_value(map_norm.eval(photon), 13069.7741687, 0.2, "Unexpected skymap intensity.");
+    test_assert(map_norm.normalize(),
+                "Check that model is normalized.");
+    test_value(map_norm.eval(photon), 13069.7741687, 0.2,
+               "Check that model has the correct skymap intensity.");
     GXmlElement element;
     map_norm.write(element);
     map_norm.read(element);
-    test_assert(map_norm.normalize(),"Model should be normalized.");
-    test_value(map_norm.eval(photon), 13069.7741687, 0.2, "Unexpected skymap intensity.");
+    test_assert(map_norm.normalize(),
+                "Check that model is normalized.");
+    test_value(map_norm.eval(photon), 13069.7741687, 0.2,
+               "Check that model has the correct skymap intensity.");
 
     // Test non-normalized map
     GModelSpatialDiffuseMap map_nonnorm(m_map_file, 3.0, false);
-    test_assert(!map_nonnorm.normalize(),"Model should not be normalized.");
-    test_value(map_nonnorm.eval(photon), 13069.6002755, 0.2, "Unexpected skymap intensity.");
+    test_assert(!map_nonnorm.normalize(),
+                "Check that model is not normalized.");
+    test_value(map_nonnorm.eval(photon), 13069.6002755, 0.2,
+               "Check that model has the correct skymap intensity.");
     GXmlElement element2;
     map_nonnorm.write(element2);
     map_nonnorm.read(element2);
-    test_assert(!map_nonnorm.normalize(),"Model should not be normalized.");
+    test_assert(!map_nonnorm.normalize(),
+                "Check that model is not normalized.");
 
     // Exit test
     return;
@@ -2243,13 +2239,13 @@ void TestGModel::test_temp_const(void)
         test_try_failure(e);
     }
 
-    // Exit test
+    // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Test XML model.
+ * @brief Test loading and saving of XML model.
  *
  * @param[in] name Model name.
  * @param[in] filename XML model filename.
@@ -2259,33 +2255,18 @@ void TestGModel::test_temp_const(void)
 void TestGModel::test_xml_model(const std::string& name,
                                 const std::string& filename)
 {
-    // Test load constructor
-    test_try("Test load constructor");
-    try {
-        GModels models(filename);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    // Set filename of test file
+    std::string fname = "test_xml_" + name + ".xml";
 
     // Test saving and reloading
-    test_try("Test saving and reloading");
-    try {
-        GModels models(filename);
-        models.save("test.xml");
-        models.load("test.xml");
-        models.save("test.xml");
-        models.load("test.xml");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModels models(filename);
+    models.save(fname);
+    models.load(fname);
+    models.save(fname);
+    models.load(fname);
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
@@ -2295,15 +2276,15 @@ void TestGModel::test_xml_model(const std::string& name,
 void TestGModel::test_spatial_model(void)
 {
     // Test spatial models XML interface
-    test_xml_model("GModelSpatialPointSource",    m_xml_model_point_plaw);
-    test_xml_model("GModelSpatialRadialDisk",     m_xml_model_radial_disk);
-    test_xml_model("GModelSpatialRadialGauss",    m_xml_model_radial_gauss);
-    test_xml_model("GModelSpatialRadialShell",    m_xml_model_radial_shell);
-    test_xml_model("GModelSpatialEllipticalDisk", m_xml_model_elliptical_disk);
+    test_xml_model("GModelSpatialPointSource",     m_xml_model_point_plaw);
+    test_xml_model("GModelSpatialRadialDisk",      m_xml_model_radial_disk);
+    test_xml_model("GModelSpatialRadialGauss",     m_xml_model_radial_gauss);
+    test_xml_model("GModelSpatialRadialShell",     m_xml_model_radial_shell);
+    test_xml_model("GModelSpatialEllipticalDisk",  m_xml_model_elliptical_disk);
     test_xml_model("GModelSpatialEllipticalGauss", m_xml_model_elliptical_gauss);
-    test_xml_model("GModelSpatialDiffuseConst",   m_xml_model_diffuse_const);
-    test_xml_model("GModelSpatialDiffuseMap",     m_xml_model_diffuse_map);
-    test_xml_model("GModelSpatialDiffuseCube",    m_xml_model_diffuse_cube);
+    test_xml_model("GModelSpatialDiffuseConst",    m_xml_model_diffuse_const);
+    test_xml_model("GModelSpatialDiffuseMap",      m_xml_model_diffuse_map);
+    test_xml_model("GModelSpatialDiffuseCube",     m_xml_model_diffuse_cube);
 
     // Return
     return;

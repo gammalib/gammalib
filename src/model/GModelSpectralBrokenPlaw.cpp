@@ -595,8 +595,8 @@ GEnergy GModelSpectralBrokenPlaw::mc(const GEnergy& emin,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Reads the spectral information from an XML element. The format of the XML
- * elements is
+ * Reads the spectral information from an XML element. The expected format of
+ * the XML element is
  *
  *     <spectrum type="BrokenPowerLaw">
  *       <parameter name="Prefactor" scale=".." value=".." max=".." min=".." free=".."/>

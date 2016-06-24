@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <source_library title="source library">
   <source name="CrabMod" type="PointSource">
-    <spectrum type="FileFunction" file="data/crab_file_function_mod.dat">
+    <spectrum type="FileFunction" file="crab_file_function_mod.dat">
       <parameter scale="1.0" name="Normalization" min="0.0" max="1000.0" value="1.0" free="1"/>
     </spectrum>
     <spatialModel type="SkyDirFunction">

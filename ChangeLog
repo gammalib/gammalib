@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Models accessing file now support relative file names (#1808)
         Add GXmlElement and GXmlDocument filename() methods (#1808)
         Move node parent from GXmlElement to GXmlNode class (#1808)
         Correct Makefile for example executables (#1806)

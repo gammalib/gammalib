@@ -545,7 +545,8 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
     }
 
     // Save filename
-    m_filename = xml.attribute("file");
+    //m_filename = xml.attribute("file");
+    m_filename = gammalib::xml_file_expand(xml, xml.attribute("file"));
 
     // Return
     return;
@@ -621,7 +622,8 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
     }
 
     // Set filename
-    xml.attribute("file", m_filename);
+    //xml.attribute("file", m_filename);
+    xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;

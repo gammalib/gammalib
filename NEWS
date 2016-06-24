@@ -213,6 +213,10 @@ methods are now called at all relevant places, reducing code duplication and
 assuring that all attributes are correctly read by all classes and constructors
 (#1765).
 
+The GModelSpatialDiffuseMap, GModelSpatialDiffuseCube and GModelSpectralFunc
+class now support the specifications of file names that are relative to the
+XML file (#1808).
+
 
 9. Numerics module
 ------------------
