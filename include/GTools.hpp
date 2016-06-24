@@ -32,8 +32,10 @@
 #include <string>
 #include <cmath>
 #include <cfloat>
-#include "GEnergy.hpp"
-#include "GXmlElement.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEnergy;
+class GXmlElement;
 
 /* __ Constants __________________________________________________________ */
 namespace gammalib {

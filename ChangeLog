@@ -3,6 +3,8 @@
         * Version 1.1.0 released
         =========================
 
+        Add GXmlElement and GXmlDocument filename() methods (#1808)
+        Move node parent from GXmlElement to GXmlNode class (#1808)
         Correct Makefile for example executables (#1806)
         Include examples in unit tests (#1803)
         Handle additional columns in GArf class

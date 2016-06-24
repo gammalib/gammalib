@@ -47,6 +47,8 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
+#include "GXmlElement.hpp"
+#include "GEnergy.hpp"
 
 /* __ Compile options ____________________________________________________ */
 

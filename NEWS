@@ -43,6 +43,9 @@ The following methods have been added to the public interface:
 - GArf::append()
 - GArf::operator()(int,int)
 - GArf::operator[](std::string)
+- GXmlDocument::filename()
+- GXmlNode::filename()
+- GXmlNode::parent()
 - GCTAObservation(GFilename) constructor
 - GCTAResponseTable::axis(std::string)
 - GCTAResponseTable::table(std::string)
@@ -73,6 +76,7 @@ The following methods have been removed:
 - friend GTime operator*(const double &s, const GTime &time)
 - friend GTime operator*(const GTime &time, const double &s)
 - friend GTime operator/(const GTime &time, const double &s)
+- GXmlElement::parent()
 - GCTACubeExposure::elogmeans()
 - GCTACubePsf::elogmeans()
 - GCTACubeBackground::elogmeans()
@@ -302,6 +306,13 @@ the hyphens are stripped upon construction, and added back when writing the
 attribute into a URL. The side effect of this new behaviour is that XML test
 reports are also written in case that an exception has occured during a unit
 test (#1746).
+
+The node parent attribute has been move from the GXmlElement class to the
+GXmlNode class, the parent() access methods have also been moved to GXmlNode.
+A filename() method has been added to the GXmlNode and GXmlDocument classes
+that enables accessing the file name of the XML file from a GXmlNode object.
+The method walks up the parents until the root node is found, and it gets the
+file name from the root node (#1808).
 
 
 15. VO module

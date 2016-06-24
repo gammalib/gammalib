@@ -240,6 +240,7 @@ std::string GXmlDocument::print(const GChatter& chatter,
 void GXmlDocument::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_version.clear();
     m_encoding.clear();
     m_standalone.clear();
@@ -263,6 +264,7 @@ void GXmlDocument::init_members(void)
 void GXmlDocument::copy_members(const GXmlDocument& node)
 {
     // Copy attributes
+    m_filename   = node.m_filename;
     m_version    = node.m_version;
     m_encoding   = node.m_encoding;
     m_standalone = node.m_standalone;

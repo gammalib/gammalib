@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlNode.i - Abstract XML node base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,6 +68,9 @@ public:
     virtual void         remove(const int& index);
     virtual void         reserve(const int& num);
     virtual void         extend(const GXmlNode& node);
+    GXmlNode*            parent(void) const;
+    void                 parent(GXmlNode* parent);
+    GFilename            filename(void) const;
     virtual int          elements(void) const;
     virtual int          elements(const std::string& name) const;
     virtual GXmlElement* element(const int& index);
