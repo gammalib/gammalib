@@ -512,15 +512,18 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 
     // Get exposure cube information and load cube
     const GXmlElement* exppar  = gammalib::xml_get_par(G_READ, xml, "ExposureCube");
-    std::string        expname = gammalib::strip_whitespace(exppar->attribute("file"));
+    std::string        expname = gammalib::xml_file_expand(xml,
+                                           exppar->attribute("file"));
 
     // Get PSF cube information and load cube
     const GXmlElement* psfpar  = gammalib::xml_get_par(G_READ, xml, "PsfCube");
-    std::string        psfname = gammalib::strip_whitespace(psfpar->attribute("file"));
+    std::string        psfname = gammalib::xml_file_expand(xml,
+                                           psfpar->attribute("file"));
 
     // Get background cube information and load cube
     const GXmlElement* bkgpar  = gammalib::xml_get_par(G_READ, xml, "BkgCube");
-    std::string        bkgname = gammalib::strip_whitespace(bkgpar->attribute("file"));
+    std::string        bkgname = gammalib::xml_file_expand(xml,
+                                           bkgpar->attribute("file"));
 
     // Load cubes
     m_exposure.load(expname);
@@ -530,7 +533,8 @@ void GCTAResponseCube::read(const GXmlElement& xml)
     // Optionally load energy dispersion cube
     if (gammalib::xml_has_par(xml, "EdispCube")) {
 		const GXmlElement* edisppar  = gammalib::xml_get_par(G_READ, xml, "EdispCube");
-		std::string        edispname = gammalib::strip_whitespace(edisppar->attribute("file"));
+		std::string        edispname = gammalib::xml_file_expand(xml,
+                                                 edisppar->attribute("file"));
 		m_edisp.load(edispname);
 		m_has_edisp = true;
     }
@@ -561,14 +565,14 @@ void GCTAResponseCube::read(const GXmlElement& xml)
 void GCTAResponseCube::write(GXmlElement& xml) const
 {
     // Add exposure cube filename
-    std::string filename = gammalib::strip_whitespace(m_exposure.filename());
+    std::string filename = gammalib::xml_file_reduce(xml, m_exposure.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "ExposureCube");
         par->attribute("file", filename);
     }
 
     // Add PSF cube filename
-    filename = gammalib::strip_whitespace(m_psf.filename());
+    filename = gammalib::xml_file_reduce(xml, m_psf.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "PsfCube");
         par->attribute("file", filename);
@@ -576,7 +580,7 @@ void GCTAResponseCube::write(GXmlElement& xml) const
 
     // Optionally add energy dispersions cube filename
     if (m_has_edisp) {
-		filename = gammalib::strip_whitespace(m_edisp.filename());
+		filename = gammalib::xml_file_reduce(xml, m_edisp.filename());
 		if (!(filename.empty())) {
 			GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "EdispCube");
 			par->attribute("file", filename);
@@ -584,7 +588,7 @@ void GCTAResponseCube::write(GXmlElement& xml) const
     }
 
     // Add background cube filename
-    filename = gammalib::strip_whitespace(m_background.filename());
+    filename = gammalib::xml_file_reduce(xml, m_background.filename());
     if (!(filename.empty())) {
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, "BkgCube");
         par->attribute("file", filename);

@@ -279,15 +279,24 @@ void GCOMObservation::response(const std::string& rspname, const GCaldb& caldb)
  * Reads information for a COMPTEL observation from an XML element.
  * The expected format of the XML element is
  *
- *     <observation name="..." id="..." instrument="...">
- *       <parameter name="DRE" file="..."/>
- *       <parameter name="DRB" file="..."/>
- *       <parameter name="DRG" file="..."/>
- *       <parameter name="DRX" file="..."/>
- *       <parameter name="IAQ" value="..."/>
+ *     <observation name="Crab" id="00001" instrument="COM">
+ *       <parameter name="DRE" file="dre.fits"/>
+ *       <parameter name="DRB" file="drb.fits"/>
+ *       <parameter name="DRG" file="drg.fits"/>
+ *       <parameter name="DRX" file="drx.fits"/>
+ *       <parameter name="IAQ" value="ENERG(1.0-3.0)MeV"/>
  *     </observation>
  *
- * for a binned observation.
+ * for a binned observation. The @p file attribute provide either absolute
+ * or relative file name. If a file name includes no access path it is
+ * assumed that the file resides in the same location as the XML file.
+ *
+ * The value of the @p IAQ attribute should be one of
+ *
+ *     ENERG(0.75-1.0)MeV
+ *     ENERG(1.0-3.0)MeV
+ *     ENERG(3.0-10.0)MeV
+ *     ENERG(10.0-30.0)MeV
  ***************************************************************************/
 void GCOMObservation::read(const GXmlElement& xml)
 {
@@ -303,6 +312,12 @@ void GCOMObservation::read(const GXmlElement& xml)
     std::string drgname = gammalib::xml_get_attr(G_READ, xml, "DRG", "file");
     std::string drxname = gammalib::xml_get_attr(G_READ, xml, "DRX", "file");
     std::string iaqname = gammalib::xml_get_attr(G_READ, xml, "IAQ", "value");
+
+    // Expand file names
+    drename = gammalib::xml_file_expand(xml, drename);
+    drbname = gammalib::xml_file_expand(xml, drbname);
+    drgname = gammalib::xml_file_expand(xml, drgname);
+    drxname = gammalib::xml_file_expand(xml, drxname);
 
     // Load observation
     load(drename, drbname, drgname, drxname);
@@ -321,17 +336,26 @@ void GCOMObservation::read(const GXmlElement& xml)
  * @param[in] xml XML element.
  *
  * Writes information for a COMPTEL observation into an XML element. The
- * expected format of the XML element is
+ * format of the XML element is
  *
- *     <observation name="..." id="..." instrument="...">
- *       <parameter name="DRE" file="..."/>
- *       <parameter name="DRB" file="..."/>
- *       <parameter name="DRG" file="..."/>
- *       <parameter name="DRX" file="..."/>
- *       <parameter name="IAQ" value="..."/>
+ *     <observation name="Crab" id="00001" instrument="COM">
+ *       <parameter name="DRE" file="dre.fits"/>
+ *       <parameter name="DRB" file="drb.fits"/>
+ *       <parameter name="DRG" file="drg.fits"/>
+ *       <parameter name="DRX" file="drx.fits"/>
+ *       <parameter name="IAQ" value="ENERG(1.0-3.0)MeV"/>
  *     </observation>
  *
- * for a binned observation.
+ * for a binned observation. The @p file attribute provide either absolute
+ * or relative file name. If a file name includes no access path it is
+ * assumed that the file resides in the same location as the XML file.
+ *
+ * The value of the @p IAQ attribute will be one of
+ *
+ *     ENERG(0.75-1.0)MeV
+ *     ENERG(1.0-3.0)MeV
+ *     ENERG(3.0-10.0)MeV
+ *     ENERG(10.0-30.0)MeV
  ***************************************************************************/
 void GCOMObservation::write(GXmlElement& xml) const
 {
@@ -340,19 +364,19 @@ void GCOMObservation::write(GXmlElement& xml) const
 
     // Set DRE parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "DRE");
-    par->attribute("file", m_drename);
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_drename));
 
     // Set DRB parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "DRB");
-    par->attribute("file", m_drbname);
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_drbname));
 
     // Set DRG parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "DRG");
-    par->attribute("file", m_drgname);
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_drgname));
 
     // Set DRX parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "DRX");
-    par->attribute("file", m_drxname);
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_drxname));
 
     // Set IAQ parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "DRX");

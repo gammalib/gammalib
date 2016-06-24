@@ -334,13 +334,21 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 	// Extract instrument name
 	m_instrument = xml.attribute("instrument");
 
-    // Get parameters
+    // Get file names
     std::string pha_on  = gammalib::xml_get_attr(G_READ, xml, "Pha_on",      "file");
     std::string pha_off = gammalib::xml_get_attr(G_READ, xml, "Pha_off",     "file");
     std::string reg_on  = gammalib::xml_get_attr(G_READ, xml, "Regions_on",  "file");
     std::string reg_off = gammalib::xml_get_attr(G_READ, xml, "Regions_off", "file");
     std::string arf     = gammalib::xml_get_attr(G_READ, xml, "Arf",         "file");
     std::string rmf     = gammalib::xml_get_attr(G_READ, xml, "Rmf",         "file");
+
+    // Expand file names
+    pha_on  = gammalib::xml_file_expand(xml, pha_on);
+    pha_off = gammalib::xml_file_expand(xml, pha_off);
+    reg_on  = gammalib::xml_file_expand(xml, reg_on);
+    reg_off = gammalib::xml_file_expand(xml, reg_off);
+    arf     = gammalib::xml_file_expand(xml, arf);
+    rmf     = gammalib::xml_file_expand(xml, rmf);
 
     // Load files
     m_on_spec.load(pha_on);
@@ -381,27 +389,27 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 
     // Set Pha_on parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Pha_on");
-    par->attribute("file", m_on_spec.filename());
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_on_spec.filename()));
 
     // Set Pha_off parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Pha_off");
-    par->attribute("file", m_off_spec.filename());
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_off_spec.filename()));
 
     // Set Regions_on parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Regions_on");
-    par->attribute("file", m_on_regions.filename());
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_on_regions.filename()));
 
     // Set Regions_off parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Regions_off");
-    par->attribute("file", m_off_regions.filename());
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_off_regions.filename()));
 
     // Set Arf parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Arf");
-    par->attribute("file", m_arf.filename());
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_arf.filename()));
 
     // Set Rmf parameter
     par = gammalib::xml_need_par(G_WRITE, xml, "Rmf");
-    par->attribute("file", m_rmf.filename());
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_rmf.filename()));
 
 	// Return
 	return;

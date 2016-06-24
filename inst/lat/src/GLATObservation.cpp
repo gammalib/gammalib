@@ -340,9 +340,23 @@ void GLATObservation::read(const GXmlElement& xml)
 
     // Load data
     if (unbin_ok) {
+
+        // Expand file names
+        ft1file = gammalib::xml_file_expand(xml, ft1file);
+        ft2file = gammalib::xml_file_expand(xml, ft2file);
+        ltfile  = gammalib::xml_file_expand(xml, ltfile);
+
+        // Load files
         load_unbinned(ft1file, ft2file, ltfile);
     }
     else {
+
+        // Expand file names
+        cntfile = gammalib::xml_file_expand(xml, cntfile);
+        expfile = gammalib::xml_file_expand(xml, expfile);
+        ltfile  = gammalib::xml_file_expand(xml, ltfile);
+
+        // Load files
         load_binned(cntfile, expfile, ltfile);
     }
     
@@ -434,31 +448,31 @@ void GLATObservation::write(GXmlElement& xml) const
 
         // Handle FT1
         if (par->attribute("name") == "FT1") {
-            par->attribute("file", m_ft1file);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_ft1file));
             npar[0]++;
         }
 
         // Handle CountsMap
         else if (par->attribute("name") == "CountsMap") {
-            par->attribute("file", m_cntfile);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_cntfile));
             npar[0]++;
         }
 
         // Handle FT2
         else if (par->attribute("name") == "FT2") {
-            par->attribute("file", m_ft2file);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_ft2file));
             npar[1]++;
         }
 
         // Handle ExposureMap
         else if (par->attribute("name") == "ExposureMap") {
-            par->attribute("file", m_expfile);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_expfile));
             npar[1]++;
         }
 
         // Handle LiveTimeCube
         else if (par->attribute("name") == "LiveTimeCube") {
-            par->attribute("file", m_ltfile);
+            par->attribute("file", gammalib::xml_file_reduce(xml, m_ltfile));
             npar[2]++;
         }
 

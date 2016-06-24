@@ -681,7 +681,8 @@ void GCTAObservation::read(const GXmlElement& xml)
             (par->attribute("name") == "CountsCube")) {
 
             // Read eventlist file name
-            std::string filename = par->attribute("file");
+            std::string filename = gammalib::xml_file_expand(xml,
+                                             par->attribute("file"));
 
             // Load events
             load(filename);
@@ -694,7 +695,7 @@ void GCTAObservation::read(const GXmlElement& xml)
         else if (par->attribute("name") == "Background") {
 
             // Read background file name
-            m_bgdfile = par->attribute("file");
+            m_bgdfile = gammalib::xml_file_expand(xml, par->attribute("file"));
 
         }
 
@@ -952,7 +953,7 @@ void GCTAObservation::write(GXmlElement& xml) const
 
         // Write event file name
         GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, evttype);
-        par->attribute("file", m_eventfile.url());
+        par->attribute("file", gammalib::xml_file_reduce(xml, m_eventfile.url()));
 
     }
 

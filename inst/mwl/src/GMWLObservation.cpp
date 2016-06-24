@@ -232,11 +232,6 @@ void GMWLObservation::response(const GResponse& rsp)
  *
  * @param[in] xml XML element.
  *
- * @exception GException::xml_invalid_parnum
- *            Invalid number of parameters found in XML element.
- * @exception GException::xml_invalid_parnames
- *            Invalid parameter names found in XML element.
- *
  * Reads information for a multi-wavelength observation from an XML element.
  * The expected format of the XML element is
  *
@@ -255,52 +250,15 @@ void GMWLObservation::read(const GXmlElement& xml)
     // Clear observation
     clear();
 
-    // Determine number of parameter nodes in XML element
-    int npars = xml.elements("parameter");
+    // Get parameters
+    m_instrument = gammalib::xml_get_attr(G_READ, xml, "Instrument", "value");
+    std::string filename = gammalib::xml_get_attr(G_READ, xml, "Data", "file");
 
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || npars != 2) {
-        throw GException::xml_invalid_parnum(G_READ, xml,
-              "MWL observation requires exactly 2 parameters.");
-    }
+    // Expand file names
+    filename = gammalib::xml_file_expand(xml, filename);
 
-    // Extract parameters
-    int npar[2] = {0, 0};
-    for (int i = 0; i < npars; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Instrument name
-        if (par->attribute("name") == "Instrument") {
-
-            // Read instrument name
-            m_instrument = par->attribute("value");
-            
-            // Increment parameter counter
-            npar[0]++;
-        }
-
-        // Handle data filename
-        else if (par->attribute("name") == "Data") {
-
-            // Read filename
-            GFilename filename = par->attribute("file");
-
-            // Load file
-            load(filename);
-            
-            // Increment parameter counter
-            npar[1]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1) {
-        throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"Instrument\" and \"Data\" parameters.");
-    }
+    // Load file
+    load(filename);
 
     // Return
     return;
@@ -327,43 +285,16 @@ void GMWLObservation::read(const GXmlElement& xml)
  ***************************************************************************/
 void GMWLObservation::write(GXmlElement& xml) const
 {
-    // If XML element has 0 nodes then append 2 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Instrument\""));
-        xml.append(GXmlElement("parameter name=\"Data\""));
-    }
+    // Allocate XML element pointer
+    GXmlElement* par;
 
-    // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
-        throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "MWL observation requires exactly 2 parameters.");
-    }
+    // Set Instrument parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Instrument");
+    par->attribute("value", gammalib::xml_file_reduce(xml, m_instrument));
 
-    // Set or update parameter attributes
-    int npar[] = {0, 0};
-    for (int i = 0; i < 2; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle Instrument
-        if (par->attribute("name") == "Instrument") {
-            npar[0]++;
-            par->attribute("value", m_instrument);
-        }
-
-        // Handle Data
-        else if (par->attribute("name") == "Data") {
-            npar[1]++;
-            par->attribute("file", m_filename);
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1)
-        throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"Instrument\" and \"Data\" parameters.");
+    // Set Data parameter
+    par = gammalib::xml_need_par(G_WRITE, xml, "Data");
+    par->attribute("file", gammalib::xml_file_reduce(xml, m_filename));
 
     // Return
     return;
