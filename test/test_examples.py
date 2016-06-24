@@ -39,7 +39,8 @@ class Test(gammalib.GPythonTestSuite):
         gammalib.GPythonTestSuite.__init__(self)
 
         # Examples directory
-        self._dir = '../examples/cpp/'
+        self._cpp_dir    = '../examples/cpp/'
+        self._python_dir = '../examples/python/'
 
         # Return
         return
@@ -55,16 +56,41 @@ class Test(gammalib.GPythonTestSuite):
             Binary executable name.
         """
         # Setup command
-        cmd = self._dir + name
+        cmd = self._cpp_dir + name
 
         # Execute binary, make sure we catch any exception
         try:
-            rc = os.system(cmd+' >/dev/null 2>&1')
+            rc = os.system(cmd+' > example_'+name+'.log 2>&1')
         except:
             pass
 
         # Check if execution was successful
         self.test_assert(rc == 0, 'Check "'+name+'" execution on command line')
+
+        # Return
+        return
+
+    # Execute Python script
+    def _execute_python(self, name):
+        """
+        Execute Python script
+        
+        Parameters
+        ----------
+        name : str
+            Python script name with .py extension.
+        """
+        # Setup command
+        cmd = self._python_dir + name + '.py'
+
+        # Execute Python script, make sure we catch any exception
+        try:
+            rc = os.system(cmd+' > example_'+name+'.log 2>&1')
+        except:
+            pass
+
+        # Check if execution was successful
+        self.test_assert(rc == 0, 'Check "'+name+'" script from command line')
 
         # Return
         return
@@ -85,6 +111,10 @@ class Test(gammalib.GPythonTestSuite):
         self.append(self.test_numerics, "Test numerics")
         self.append(self.test_optimize, "Test optimize")
         self.append(self.test_readmodel, "Test readmodel")
+        self.append(self.test_matrix_howto, "Test matrix howto")
+        self.append(self.test_models_howto, "Test models howto")
+        self.append(self.test_xml_howto, "Test XML howto")
+        self.append(self.test_xml_html_create, "Test HTML creation")
 
         # Return
         return
@@ -174,6 +204,58 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute binary
         self._execute_binary('readmodel')
+
+        #TODO: Do any testing
+
+        # Return
+        return
+
+    # Test matrix howto
+    def test_matrix_howto(self):
+        """
+        Test matrix howto
+        """
+        # Execute python script
+        self._execute_python('matrix_howto')
+
+        #TODO: Do any testing
+
+        # Return
+        return
+
+    # Test models howto
+    def test_models_howto(self):
+        """
+        Test models howto
+        """
+        # Execute python script
+        self._execute_python('models_howto')
+
+        #TODO: Do any testing
+
+        # Return
+        return
+
+    # Test XML howto
+    def test_xml_howto(self):
+        """
+        Test XML howto
+        """
+        # Execute python script
+        self._execute_python('xml_howto')
+
+        #TODO: Do any testing
+
+        # Return
+        return
+
+    # Test HTML creation
+    def test_xml_html_create(self):
+        """
+        Test HTML creation
+        """
+        # Execute python script
+        self._execute_python('xml_html_create')
 
         #TODO: Do any testing
 

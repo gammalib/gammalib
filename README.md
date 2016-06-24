@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 1.1.0.dev1 (23 June 2016)
+* Version: 1.1.0.dev1 (24 June 2016)
 * Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)
@@ -178,7 +178,7 @@ extensive unit test by typing:
 If everything works successfully you should see
 
     ===================
-    All 20 tests passed
+    All 21 tests passed
     ===================
 
 or
@@ -186,8 +186,8 @@ or
     ============================================================================
     Testsuite summary for gammalib 1.1.0.dev1
     ============================================================================
-    # TOTAL: 20
-    # PASS:  20
+    # TOTAL: 21
+    # PASS:  21
     # SKIP:  0
     # XFAIL: 0
     # FAIL:  0

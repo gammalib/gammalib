@@ -28,19 +28,6 @@ cd test/dev
 ./example_radial_models.py
 cd $base
 
-
-# examples/python
-# ===============
-echo
-echo "=====> examples/python"
-cd examples/python
-./matrix_howto.py
-./models_howto.py
-./xml_howto.py
-./xml_html_create.py
-cd $base
-
-
 # inst/cta/test/dev
 # =================
 echo
@@ -55,7 +42,6 @@ cd inst/cta/test/dev
 ./test_sim_edisp.py
 cd $base
 
-
 # inst/lat/test/dev
 # =================
 echo
@@ -64,7 +50,6 @@ cd inst/lat/test/dev
 #./test_python.py
 cd $base
 
-
 # inst/mwl/test/dev
 # =================
 echo
@@ -72,7 +57,6 @@ echo "=====> inst/mwl/test/dev"
 cd inst/mwl/test/dev
 ./test_python.py
 cd $base
-
 
 # Signal completion
 # =================

@@ -1,15 +1,8 @@
 #! /usr/bin/env python
 # ==========================================================================
-# Scope
+# Creates a simple HTML Web page using GammaLib's xml module
 #
-#   This script creates a simple HTML Web page using GammaLib's xml module
-#
-# Usage
-#   ./xml_html_create.py
-#
-# -------------------------------------------------------------------------
-#
-# Copyright (C) 2013 Juergen Knoedlseder
+# Copyright (C) 2013-2016 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,9 +93,7 @@ def show_xml(xml):
 # Main routine entry point #
 # ======================== #
 if __name__ == '__main__':
-    """
-    This script creates a simple HTML Web page using GammaLib's xml module.
-    """
+
     # Create HTML XML document
     xml = create_html()
 
@@ -110,4 +101,4 @@ if __name__ == '__main__':
     show_xml(xml)
 
     # Save HTML document
-    xml.save("gammalib.html")
+    xml.save('example_html_create.html')
