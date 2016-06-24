@@ -152,9 +152,9 @@ if __name__ == '__main__':
 
     # Set XML names
     xmlnames = ['../data/crab.xml',
-                '../data/crab_eplaw.xml']
-    #            '../data/crab_file_function.xml',
-    #            '../data/crab_file_function_mod.xml']
+                '../data/crab_eplaw.xml',
+                '../data/crab_file_function.xml',
+                '../data/crab_file_function_mod.xml']
 
     # Set simulation parameters
     e_min    = 0.1                # 0.1 TeV

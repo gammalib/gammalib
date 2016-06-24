@@ -47,7 +47,7 @@ cd $base
 echo
 echo "=====> inst/lat/test/dev"
 cd inst/lat/test/dev
-#./test_python.py
+./test_python.py
 cd $base
 
 # inst/mwl/test/dev
