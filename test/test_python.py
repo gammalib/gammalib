@@ -205,6 +205,10 @@ def test(installed=False):
     else:
         rc = 1
 
+    # Remove temporary direction
+    if installed:
+        os.rmdir(path)
+
     # Exit with return code
     sys.exit(rc)
 
