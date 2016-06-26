@@ -65,35 +65,35 @@ class Test(gammalib.GPythonTestSuite):
 
         # Unary addition operator
         energy += energy_b
-        self.test_value(energy.TeV(), 6.0);
+        self.test_value(energy.TeV(), 6.0)
 
         # Unary subtraction operator
         energy -= energy_b
-        self.test_value(energy.TeV(), 3.0);
+        self.test_value(energy.TeV(), 3.0)
 
         # Unary multiplication operator
         energy *= 2.0
-        self.test_value(energy.TeV(), 6.0);
+        self.test_value(energy.TeV(), 6.0)
 
         # Unary division operator
         energy /= 2.0
-        self.test_value(energy.TeV(), 3.0);
+        self.test_value(energy.TeV(), 3.0)
 
         # Binary addition operator
         energy = energy + energy_b
-        self.test_value(energy.TeV(), 6.0);
+        self.test_value(energy.TeV(), 6.0)
 
         # Binary subtraction operator
         energy = energy - energy_b
-        self.test_value(energy.TeV(), 3.0);
+        self.test_value(energy.TeV(), 3.0)
 
         # Scalar multiplication operator
         energy = energy * 2.0
-        self.test_value(energy.TeV(), 6.0);
+        self.test_value(energy.TeV(), 6.0)
 
         # Scalar division operator
         energy = energy / 2.0
-        self.test_value(energy.TeV(), 3.0);
+        self.test_value(energy.TeV(), 3.0)
 
         # Return
         return
@@ -106,9 +106,9 @@ class Test(gammalib.GPythonTestSuite):
         # Setup 3 logarithmic energies
         energies = gammalib.GEnergies(3, gammalib.GEnergy(1.0, "MeV"),
                                          gammalib.GEnergy(100.0, "MeV"))
-        self.test_value(energies[0].MeV(), 1.0);
-        self.test_value(energies[1].MeV(), 10.0);
-        self.test_value(energies[2].MeV(), 100.0);
+        self.test_value(energies[0].MeV(), 1.0)
+        self.test_value(energies[1].MeV(), 10.0)
+        self.test_value(energies[2].MeV(), 100.0)
 
         # Return
         return
@@ -126,28 +126,28 @@ class Test(gammalib.GPythonTestSuite):
         # Unary addition operator
         time  = time_a.copy()
         time += secs_b
-        self.test_value(time.secs(), 11.0);
+        self.test_value(time.secs(), 11.0)
 
         # Unary subtraction operator
         time  = time_a.copy()
         time -= secs_b
-        self.test_value(time.secs(), 7.0);
+        self.test_value(time.secs(), 7.0)
 
         # Binary left addition operator
         time = time_a + secs_b
-        self.test_value(time.secs(), 11.0);
+        self.test_value(time.secs(), 11.0)
 
         # Binary right addition operator
         time = secs_b + time_a
-        self.test_value(time.secs(), 11.0);
+        self.test_value(time.secs(), 11.0)
 
         # Binary subtraction operator
         time = time_a - secs_b
-        self.test_value(time.secs(), 7.0);
+        self.test_value(time.secs(), 7.0)
 
         # Binary time subtraction operator
         time = time_a - time_b
-        self.test_value(time, 6.0);
+        self.test_value(time, 6.0)
 
         # Return
         return

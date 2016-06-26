@@ -99,25 +99,25 @@ class Test(gammalib.GPythonTestSuite):
         map.shape(3,4)
 
         # Test map dimensions and shape
-        self.test_value(map.npix(), 80, "Check that sky map has 80 pixels");
-        self.test_value(map.nx(), 10, "Check that sky map has X dimension of 10");
-        self.test_value(map.ny(), 8, "Check that sky map has Y dimension of 8");
-        self.test_value(map.nmaps(), 12, "Check that sky map contains 12 maps");
-        self.test_value(map.ndim(), 2, "Check that sky map has two dimensions");
-        self.test_value(len(map.shape()), 2, "Check that sky map has a shape size of 2");
-        self.test_value(map.shape()[0], 3, "Check that sky map has 3 maps in first dimension");
-        self.test_value(map.shape()[1], 4, "Check that sky map has 4 maps in second dimension");
+        self.test_value(map.npix(), 80, "Check that sky map has 80 pixels")
+        self.test_value(map.nx(), 10, "Check that sky map has X dimension of 10")
+        self.test_value(map.ny(), 8, "Check that sky map has Y dimension of 8")
+        self.test_value(map.nmaps(), 12, "Check that sky map contains 12 maps")
+        self.test_value(map.ndim(), 2, "Check that sky map has two dimensions")
+        self.test_value(len(map.shape()), 2, "Check that sky map has a shape size of 2")
+        self.test_value(map.shape()[0], 3, "Check that sky map has 3 maps in first dimension")
+        self.test_value(map.shape()[1], 4, "Check that sky map has 4 maps in second dimension")
 
         # Set new map shape
         map.shape(2,3,2);
 
         # Test map dimensions and shape
-        self.test_value(map.nmaps(), 12, "Check that sky map contains 12 maps");
-        self.test_value(map.ndim(), 3, "Check that sky map has three dimensions");
-        self.test_value(len(map.shape()), 3, "Check that sky map has a shape size of 3");
-        self.test_value(map.shape()[0], 2, "Check that sky map has 2 maps in first dimension");
-        self.test_value(map.shape()[1], 3, "Check that sky map has 3 maps in second dimension");
-        self.test_value(map.shape()[2], 2, "Check that sky map has 2 maps in third dimension");
+        self.test_value(map.nmaps(), 12, "Check that sky map contains 12 maps")
+        self.test_value(map.ndim(), 3, "Check that sky map has three dimensions")
+        self.test_value(len(map.shape()), 3, "Check that sky map has a shape size of 3")
+        self.test_value(map.shape()[0], 2, "Check that sky map has 2 maps in first dimension")
+        self.test_value(map.shape()[1], 3, "Check that sky map has 3 maps in second dimension")
+        self.test_value(map.shape()[2], 2, "Check that sky map has 2 maps in third dimension")
 
         # Return
         return
