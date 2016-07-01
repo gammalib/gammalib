@@ -96,10 +96,10 @@ public:
     bool __gt__(const GTime& time) const {
         return ((*self) > time);
     }
-    bool __lte__(const GTime& time) const {
+    bool __le__(const GTime& time) const {
         return ((*self) <= time);
     }
-    bool __gte__(const GTime& time) const {
+    bool __ge__(const GTime& time) const {
         return ((*self) >= time);
     }
     GTime copy() {

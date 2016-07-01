@@ -135,10 +135,10 @@ public:
     bool __gt__(const GEnergy& eng) const {
         return ((*self) > eng);
     }
-    bool __lte__(const GEnergy& eng) const {
+    bool __le__(const GEnergy& eng) const {
         return ((*self) <= eng);
     }
-    bool __gte__(const GEnergy& eng) const {
+    bool __ge__(const GEnergy& eng) const {
         return ((*self) >= eng);
     }
     GEnergy copy() {
