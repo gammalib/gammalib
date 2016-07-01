@@ -151,6 +151,7 @@ def set_versions(version, current):
     # List of all relevant files, including their access paths from the
     # source directory
     filenames = ['configure.ac',
+                 'gammalib.pc.in',
                  'README.md',
                  'sonar-project.properties',
                  'doc/Doxyfile',
@@ -259,7 +260,7 @@ if __name__ == '__main__':
     # Check for version number
     if len(sys.argv) < 3:
         print('Usage: set_version.py version [larc]')
-        print('       l : soucre code changed')
+        print('       l : source code changed')
         print('       a : interface(s) added')
         print('       r : interface(s) removed')
         print('       c : interface(s) changed')
