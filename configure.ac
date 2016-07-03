@@ -563,7 +563,7 @@ esac
 # Checks for optional instrument specific interfaces                        #
 #############################################################################
 # Checks for the existence of instrument specific interfaces
-AC_CHECK_FILE([inst/Makefile.am],
+AC_CHECK_FILE([inst/README.md],
               [with_inst=yes],
               [with_inst=no])
 AM_CONDITIONAL([WITH_INST], [test "x$with_inst" = "xyes"])
@@ -575,7 +575,7 @@ AC_ARG_WITH([mwl],
             [],
             [with_mwl=yes])
 if test "x$with_mwl" = "xyes"; then
-  AC_CHECK_FILE([inst/mwl/Makefile.am],
+  AC_CHECK_FILE([inst/mwl/README.md],
                 [with_mwl=yes],
                 [with_mwl=no])
 fi
@@ -588,7 +588,7 @@ AC_ARG_WITH([cta],
             [],
             [with_cta=yes])
 if test "x$with_cta" = "xyes"; then
-  AC_CHECK_FILE([inst/cta/Makefile.am],
+  AC_CHECK_FILE([inst/cta/README.md],
                 [with_cta=yes],
                 [with_cta=no])
 fi
@@ -601,7 +601,7 @@ AC_ARG_WITH([lat],
             [],
             [with_lat=yes])
 if test "x$with_lat" = "xyes"; then
-  AC_CHECK_FILE([inst/lat/Makefile.am],
+  AC_CHECK_FILE([inst/lat/README.md],
                 [with_lat=yes],
                 [with_lat=no])
 fi
@@ -614,7 +614,7 @@ AC_ARG_WITH([com],
             [],
             [with_com=yes])
 if test "x$with_com" = "xyes"; then
-  AC_CHECK_FILE([inst/com/Makefile.am],
+  AC_CHECK_FILE([inst/com/README.md],
                 [with_com=yes],
                 [with_com=no])
 fi
