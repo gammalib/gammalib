@@ -419,7 +419,7 @@ def set_package_version(version):
 # ============= #
 def build_tarball(branch, folder):
     """
-    Build tarball from git branch
+    Build tarball using 'make dist'
 
     Parameters
     ----------
@@ -427,12 +427,6 @@ def build_tarball(branch, folder):
         Git branch
     folder : str
         Folder name
-    clean : bool, optional
-        Clean tarball
-    silent : bool, optional
-        Perform actions silently
-    logfile : str, optional
-        Log actions in logfile
     """
     # Set base path
     base_path = os.getcwd()
@@ -444,93 +438,13 @@ def build_tarball(branch, folder):
     else:
         verbosity = ' >/dev/null 2>&1'
 
-    # Set git repo
-    repo = 'https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git'
-
-    # If the folder exists then ask whether it should be deleted
-    if os.path.isdir(folder):
-        if confirm("Folder '%s' exists, do you want to delete it?" % folder):
-            os.system('rm -rf %s' % folder)
-
-    # Clone release branch if folder does not exist
-    if not os.path.isdir(folder):
-        os.system('git clone -b %s %s %s' % (branch, repo, folder))
-
-    # Remove .git directory
-    os.system('rm -rf %s/.git' % folder)
-
-    # Get swig version and display processing information
-    swig_version = commands.getoutput('swig -version').split('\n')
-    print("Create Python wrappers using %s (%s)" %
-          (swig_version[1], swig_version[3]))
-
-    # Create temporary directory for building wrappers and copy entire package
-    # in the temporary directory
-    swigdir = 'tmp_build'
-    os.system('rm -rf %s%s' % (swigdir, verbosity))
-    os.system('cp -r %s %s%s' % (folder, swigdir, verbosity))
-
-    # Step into temporary swig directory
-    os.chdir(swigdir)
-
-    # Build wrappers
-    print("Configure for wrapper generation")
-    os.system('./autogen.sh%s' % verbosity)
-    os.system('./configure%s' % verbosity)
-    os.chdir('pyext')
-    print("Generate Python wrappers")
-    os.system('make swig%s' % verbosity)
-    os.chdir('..')
-
-    # Generate documentation
-    print("Generate documentation")
-    os.system('make doc%s' % verbosity)
-
-    # Move back to base path
-    os.chdir(base_path)
-
-    # Copy over Python wrappers
-    print("Copy Python wrappers into tarball")
-    os.system('cp -r %s/pyext/gammalib/*.py  %s/pyext/gammalib' %
-              (swigdir, folder))
-    os.system('cp -r %s/pyext/gammalib/*.cpp %s/pyext/gammalib' %
-              (swigdir, folder))
-
-    # Copy over Python wrappers
-    print("Copy documentation into tarball")
-    os.system('cp -r %s/doc/html  %s/doc/html' % (swigdir, folder))
-    os.system('cp -r %s/doc/man   %s/doc/man'  % (swigdir, folder))
-
-    # Remove temporary directory for wrapper generation
-    os.system('rm -rf %s%s' % (swigdir, verbosity))
-
-    # Create Makefile.in and configure script
-    print("Create Makefile.in and configure script")
-    os.chdir(folder)
-    os.system('./autogen.sh%s' % verbosity)
-
-    # Optionally remove a bunch of files and folders that are not needed in
-    # the tarball
-    if confirm("Clean tarball?"):
-        os.system('rm -rf .gitignore%s' % verbosity)
-        os.system('rm -rf Makefile.am%s' % verbosity)
-        os.system('rm -rf */Makefile.am%s' % verbosity)
-        os.system('rm -rf */*/Makefile.am%s' % verbosity)
-        os.system('rm -rf autogen.sh >/dev/null%s' % verbosity)
-        os.system('rm -rf configure.ac >/dev/null%s' % verbosity)
-        os.system('rm -rf sonar-project.properties%s' % verbosity)
-        os.system('rm -rf testall.sh >/dev/null%s' % verbosity)
-        os.system('rm -rf dev >/dev/null%s' % verbosity)
-        os.system('rm -rf autom4te.cache%s' % verbosity)
-        os.system('rm -rf doc/dev >/dev/null%s' % verbosity)
-
-    # Move back to base path
-    os.chdir(base_path)
-
-    # Create tarball
+    # Check package
     print("Create tarball")
-    os.system('rm -rf %s.tar.gz%s' % (folder, verbosity))
-    os.system('tar -czf %s.tar.gz %s%s' % (folder, folder, verbosity))
+    rc = os.system('make dist%s' % verbosity)
+    if rc == 0:
+        print("Tarball creation successful")
+    else:
+        print("*** Failure in creation of tarball")
 
     # Return
     return
@@ -541,7 +455,7 @@ def build_tarball(branch, folder):
 # ============= #
 def check_tarball(filename):
     """
-    Check tarball
+    Check tarball using 'make distcheck'
 
     Parameters
     ----------
@@ -562,57 +476,13 @@ def check_tarball(filename):
     else:
         verbosity = ' >/dev/null 2>&1'
 
-    # Set check and install folders
-    check   = '%s/%s.build'   % (base_path, folder)
-    install = '%s/%s.install' % (base_path, folder)
-
-    # Extract tarball
-    print("Extract tarball")
-    os.system('rm -rf %s%s' % (check, verbosity))
-    os.makedirs('%s' % (check))
-    os.system('tar xfz %s -C %s%s' % (filename, check, verbosity))
-
-    # Move into build directory
-    os.chdir('%s/%s' % (check, folder))
-
-    # Configure package
-    print("Configure package")
-    rc = os.system('./configure --prefix=%s%s' % (install, verbosity))
+    # Check tarball
+    print("Check tarball")
+    rc = os.system('make distcheck%s' % verbosity)
     if rc == 0:
-        print("Package configuration successful")
+        print("Tarball checking successful")
     else:
-        print("*** Unable to configure package")
-
-    # Make package
-    print("Build package")
-    rc = os.system('make%s' % verbosity)
-    if rc == 0:
-        print("Package building successful")
-    else:
-        print("*** Unable to build package")
-
-    # Check package
-    print("Check package")
-    rc = os.system('make check%s' % verbosity)
-    if rc == 0:
-        print("Package checking successful")
-    else:
-        print("*** Unable to check package")
-    # LOG_DRIVER = $(SHELL) $(top_srcdir)/../test-driver
-
-    # Install package
-    print("Install package")
-    rc = os.system('make install%s' % verbosity)
-    if rc == 0:
-        print("Package installation successful")
-    else:
-        print("*** Unable to install package")
-
-    # Move into install directory
-    os.chdir('%s' % install)
-
-    # Move back to base path
-    os.chdir(base_path)
+        print("*** Failure in checking of tarball")
 
     # Return
     return
