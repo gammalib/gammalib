@@ -1,0 +1,55 @@
+# ==========================================================================
+# GammaLib Python module
+#
+# Copyright (C) 2016 Juergen Knoedlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==========================================================================
+# Import modules
+from gammalib.app import *
+from gammalib.base import *
+from gammalib.fits import *
+from gammalib.linalg import *
+from gammalib.model import *
+from gammalib.numerics import *
+from gammalib.obs import *
+from gammalib.opt import *
+from gammalib.sky import *
+from gammalib.support import *
+from gammalib.test import *
+from gammalib.xml import *
+from gammalib.xspec import *
+from gammalib.vo import *
+from gammalib.mwl import *
+from gammalib.cta import *
+from gammalib.lat import *
+from gammalib.com import *
+
+# Remove swig register stuff
+bad_entries = [entry for entry in list(locals())
+               if entry.endswith('_swigregister')]
+for entry in bad_entries:
+    del locals()[entry]
+
+# Clean-up
+del gammalib.gammalib
+
+# Python test
+def test():
+    from gammalib.tests import test_python
+    test_python.test(installed=True)
+
+# Add version
+__version__ = '@PACKAGE_VERSION@'

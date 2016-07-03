@@ -1395,6 +1395,7 @@ AC_CONFIG_FILES([Makefile
                  test/test_python.sh
                  pyext/Makefile
                  pyext/setup.py
+                 pyext/gammalib/__init__.py
                  examples/Makefile
                  examples/cpp/Makefile
                  test/test_examples.sh
