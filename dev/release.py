@@ -417,7 +417,7 @@ def set_package_version(version):
 # ============= #
 # Build tarball #
 # ============= #
-def build_tarball(branch, folder, clean=False):
+def build_tarball(branch, folder):
     """
     Build tarball from git branch
 
@@ -429,9 +429,20 @@ def build_tarball(branch, folder, clean=False):
         Folder name
     clean : bool, optional
         Clean tarball
+    silent : bool, optional
+        Perform actions silently
+    logfile : str, optional
+        Log actions in logfile
     """
     # Set base path
     base_path = os.getcwd()
+
+    # Enable/disable logging
+    if confirm("Log actions in logfile?"):
+        verbosity = ' >> %s/%s.log 2>&1' % (base_path, folder)
+        os.system('rm -rf %s.log >/dev/null 2>&1' % folder)
+    else:
+        verbosity = ' >/dev/null 2>&1'
 
     # Set git repo
     repo = 'https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git'
@@ -456,25 +467,24 @@ def build_tarball(branch, folder, clean=False):
     # Create temporary directory for building wrappers and copy entire package
     # in the temporary directory
     swigdir = 'tmp_build'
-    os.system('rm -rf %s >/dev/null 2>&1' % swigdir)
-    os.system('cp -r %s %s  >/dev/null 2>&1' % (folder, swigdir))
-
+    os.system('rm -rf %s%s' % (swigdir, verbosity))
+    os.system('cp -r %s %s%s' % (folder, swigdir, verbosity))
 
     # Step into temporary swig directory
     os.chdir(swigdir)
 
     # Build wrappers
     print("Configure for wrapper generation")
-    os.system('./autogen.sh >/dev/null 2>&1')
-    os.system('./configure >/dev/null 2>&1')
+    os.system('./autogen.sh%s' % verbosity)
+    os.system('./configure%s' % verbosity)
     os.chdir('pyext')
     print("Generate Python wrappers")
-    os.system('make swig >/dev/null 2>&1')
+    os.system('make swig%s' % verbosity)
+    os.chdir('..')
 
     # Generate documentation
     print("Generate documentation")
-    #os.system('make doc >/dev/null 2>&1')
-    os.system('make doc')
+    os.system('make doc%s' % verbosity)
 
     # Move back to base path
     os.chdir(base_path)
@@ -492,27 +502,114 @@ def build_tarball(branch, folder, clean=False):
     os.system('cp -r %s/doc/man   %s/doc/man'  % (swigdir, folder))
 
     # Remove temporary directory for wrapper generation
-    os.system('rm -rf %s >/dev/null 2>&1' % swigdir)
+    os.system('rm -rf %s%s' % (swigdir, verbosity))
 
     # Create Makefile.in and configure script
     print("Create Makefile.in and configure script")
     os.chdir(folder)
-    os.system('./autogen.sh >/dev/null 2>&1')
+    os.system('./autogen.sh%s' % verbosity)
 
     # Optionally remove a bunch of files and folders that are not needed in
     # the tarball
-    if clean:
-        print("Clean tarball")
-        os.system('rm -rf Makefile.am >/dev/null 2>&1')
-        os.system('rm -rf */Makefile.am >/dev/null 2>&1')
-        os.system('rm -rf */*/Makefile.am >/dev/null 2>&1')
-        os.system('rm -rf autogen.sh >/dev/null 2>&1')
-        os.system('rm -rf configure.ac >/dev/null 2>&1')
-        os.system('rm -rf sonar-project.properties >/dev/null 2>&1')
-        os.system('rm -rf testall.sh >/dev/null 2>&1')
-        os.system('rm -rf dev >/dev/null 2>&1')
-        os.system('rm -rf autom4te.cache >/dev/null 2>&1')
-        os.system('rm -rf doc/dev >/dev/null 2>&1')
+    if confirm("Clean tarball?"):
+        os.system('rm -rf .gitignore%s' % verbosity)
+        os.system('rm -rf Makefile.am%s' % verbosity)
+        os.system('rm -rf */Makefile.am%s' % verbosity)
+        os.system('rm -rf */*/Makefile.am%s' % verbosity)
+        os.system('rm -rf autogen.sh >/dev/null%s' % verbosity)
+        os.system('rm -rf configure.ac >/dev/null%s' % verbosity)
+        os.system('rm -rf sonar-project.properties%s' % verbosity)
+        os.system('rm -rf testall.sh >/dev/null%s' % verbosity)
+        os.system('rm -rf dev >/dev/null%s' % verbosity)
+        os.system('rm -rf autom4te.cache%s' % verbosity)
+        os.system('rm -rf doc/dev >/dev/null%s' % verbosity)
+
+    # Move back to base path
+    os.chdir(base_path)
+
+    # Create tarball
+    print("Create tarball")
+    os.system('rm -rf %s.tar.gz%s' % (folder, verbosity))
+    os.system('tar -czf %s.tar.gz %s%s' % (folder, folder, verbosity))
+
+    # Return
+    return
+
+
+# ============= #
+# Check tarball #
+# ============= #
+def check_tarball(filename):
+    """
+    Check tarball
+
+    Parameters
+    ----------
+    filename : str
+        Tarball file name
+    """
+    # Set base path
+    base_path = os.getcwd()
+
+    # Set base folder
+    folder = filename.rstrip('.tar.gz')
+
+    # Enable/disable logging
+    if confirm("Log check in logfile?"):
+        name      = filename.rstrip('.tar.gz')
+        verbosity = ' >> %s/%s.check 2>&1' % (base_path, folder)
+        os.system('rm -rf %s.check >/dev/null 2>&1' % folder)
+    else:
+        verbosity = ' >/dev/null 2>&1'
+
+    # Set check and install folders
+    check   = '%s/%s.build'   % (base_path, folder)
+    install = '%s/%s.install' % (base_path, folder)
+
+    # Extract tarball
+    print("Extract tarball")
+    os.system('rm -rf %s%s' % (check, verbosity))
+    os.makedirs('%s' % (check))
+    os.system('tar xfz %s -C %s%s' % (filename, check, verbosity))
+
+    # Move into build directory
+    os.chdir('%s/%s' % (check, folder))
+
+    # Configure package
+    print("Configure package")
+    rc = os.system('./configure --prefix=%s%s' % (install, verbosity))
+    if rc == 0:
+        print("Package configuration successful")
+    else:
+        print("*** Unable to configure package")
+
+    # Make package
+    print("Build package")
+    rc = os.system('make%s' % verbosity)
+    if rc == 0:
+        print("Package building successful")
+    else:
+        print("*** Unable to build package")
+
+    # Check package
+    print("Check package")
+    rc = os.system('make check%s' % verbosity)
+    if rc == 0:
+        print("Package checking successful")
+    else:
+        print("*** Unable to check package")
+    # LOG_DRIVER = $(SHELL) $(top_srcdir)/../test-driver
+
+    # Install package
+    print("Install package")
+    rc = os.system('make install%s' % verbosity)
+    if rc == 0:
+        print("Package installation successful")
+    else:
+        print("*** Unable to install package")
+
+    # Move into install directory
+    os.chdir('%s' % install)
 
     # Move back to base path
     os.chdir(base_path)
@@ -529,11 +626,12 @@ def main_menu():
     Manage main menu
     """
     # Print main menu
-    print('[1] Make a new package release')
-    print('[2] Set the package version')
-    print('[3] Set the libtool version')
-    print('[4] Commit changes')
-    print('[5] Create tarball')
+    print('[1] Make a new release')
+    print('[2] Set the package version in current branch')
+    print('[3] Set the libtool version in current branch')
+    print('[4] Commit changes in current branch')
+    print('[5] Create tarball from current branch')
+    print('[6] Check tarball')
     print('[q] Quit')
 
     # Wait for the input
@@ -541,7 +639,7 @@ def main_menu():
     while waiting:
         choice = str(raw_input('Enter your choice: '))
         if choice == '1' or choice == '2' or choice == '3' or choice == '4' or \
-           choice == '5' or choice == 'q':
+           choice == '5' or choice == '6' or choice == 'q':
             waiting = False
 
     # Return choice
@@ -562,8 +660,8 @@ def release_menu(branch='release'):
     """
     # Annonce actions
     print("")
-    print("Make a new package release")
-    print("--------------------------")
+    print("Make a new release")
+    print("------------------")
 
     # Step 1: Create a release branch
     if confirm("Step 1: Do you want to create a '%s' branch?" % branch):
@@ -614,6 +712,15 @@ def release_menu(branch='release'):
     if confirm("Step 6: Build tarball?"):
         folder = "gammalib-%s" % get_current_version()
         build_tarball(branch, folder)
+
+    # Step 7: Check tarball
+    print("")
+    if confirm("Step 7: Check tarball?"):
+        filename = "gammalib-%s.tar.gz" % get_current_version()
+        check_tarball(filename)
+
+    # Print separator
+    print("")
 
     # Return
     return
@@ -735,6 +842,10 @@ if __name__ == '__main__':
             branch = commands.getoutput('git rev-parse --abbrev-ref HEAD')
             folder = "gammalib-%s" % get_current_version()
             build_tarball(branch, folder)
+            print('')
+        elif choice == '6':
+            filename = "gammalib-%s.tar.gz" % get_current_version()
+            check_tarball(filename)
             print('')
         elif choice == 'q':
             break
