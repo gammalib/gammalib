@@ -20,6 +20,179 @@
 # ==========================================================================
 import os
 import sys
+import commands
+
+
+# ================= #
+# Confirm something #
+# ================= #
+def confirm(text):
+    """
+    Confirm something
+
+    Parameters
+    ----------
+    text : str
+        Thing to confirm
+
+    Returns
+    -------
+    flag : bool
+        True if something is confirmed
+    """
+    # Confirmation loop
+    waiting = True
+    while waiting:
+        confirmation = str(raw_input(text+' (y/n): '))
+        if confirmation == 'q':
+            sys.exit()
+        elif confirmation == 'y':
+            flag    = True
+            waiting = False
+        elif confirmation == 'n':
+            flag    = False
+            waiting = False
+
+    # Return confirmation flag
+    return flag
+
+
+# ============== #
+# Commit changes #
+# ============== #
+def commit(message):
+    """
+    Commit changes into git repo
+
+    Parameters
+    ----------
+    message : str
+        Commit message
+    """
+    # Show changes
+    print("The following files have been changed:")
+    os.system('git status -s')
+
+    # Ask again whether the changes should be committed
+    if confirm("Commit all changes?"):
+
+        # Optionally enter a commit message
+        if len(message) == 0:
+            message = str(raw_input("Please enter a commit message: "))
+
+        # Stage all files
+        os.system('git add -u')
+
+        # Commit all changes
+        os.system('git commit -m "%s"' % message)
+    
+    # Return
+    return
+
+
+# ========================== #
+# Check if git branch exists #
+# ========================== #
+def git_branch_exists(branch):
+    """
+    Check if git branch exists
+
+    Parameters
+    ----------
+    branch : str
+        Branch name
+
+    Returns
+    -------
+    exists : bool
+        True if git branch exists
+    """
+    # Check if git branch exists
+    rc = os.system('git rev-parse --verify %s >/dev/null 2>&1' % branch)
+
+    # Set exists flag
+    if rc == 0:
+        exists = True
+    else:
+        exists = False
+
+    # Return flag
+    return exists
+
+
+# ================= #
+# Create git branch #
+# ================= #
+def create_git_branch(branch):
+    """
+    Create a git branch
+
+    Parameters
+    ----------
+    branch : str
+        Branch name
+    """
+    # If branch exists already then ask whether it should be deleted
+    if git_branch_exists(branch):
+        if confirm("Git branch '%s' exists already, do you want to delete "
+                   "it?" % branch):
+            os.system('git branch -D %s' % branch)
+
+    # If branch exists already then switch to the new branch, otherwise create
+    # new branch and switch to it
+    if git_branch_exists(branch):
+        os.system('git checkout %s' % branch)
+    else:
+        print("Created new branch '%s'" % branch)
+        os.system('git checkout -b %s' % branch)
+
+    # Return
+    return
+
+
+# ======================================= #
+# Check whether version string is correct #
+# ======================================= #
+def check_version(version):
+    """
+    Check whether version string is correct
+
+    Parameters
+    ----------
+    version : str
+        Version number
+
+    Returns
+    -------
+    check : bool
+        True if version string is correct
+    """
+    # Initialise check with False
+    check = False
+
+    # Split version string
+    split = version.split('.')
+
+    # If there are three elements or four elements we may have a valid version
+    # string
+    if len(split) == 3 or len(split) == 4:
+
+        # If the three first elements are integers we may have a valid version
+        # string
+        if split[0].isdigit() and split[1].isdigit() and split[2].isdigit():
+
+            # If we have three elements the version is valid and we are done
+            if len(split) == 3:
+                check = True
+
+            # Otherwise check if the 4th element is of format devn, where n
+            # is an integer number
+            elif split[3][0:3] == 'dev':
+                if split[3][3:].isdigit():
+                    check = True
+
+    # Return check
+    return check
 
 
 # ========================== #
@@ -94,78 +267,6 @@ def get_libtool_version():
     return version
 
 
-# ============================== #
-# Set version number in one file #
-# ============================== #
-def set_version(filename, version, current):
-    """
-    Set version number
-
-    Parameters
-    ----------
-    filename : str
-        File name
-    version : str
-        Version number
-    current : str
-        Current version number
-    """
-    # Open file in read mode
-    f = open(filename, 'r')
-
-    # Read file content
-    content = f.read()
-
-    # Close file
-    f.close()
-
-    # Replace version number
-    new_content = content.replace(current, version)
-
-    # Open file in write mode
-    f = open(filename, 'w')
-
-    # Write file content
-    f.write(new_content)
-
-    # Close file
-    f.close()
-
-    # Return
-    return
-
-
-# =============================== #
-# Set version number in all files #
-# =============================== #
-def set_versions(version, current):
-    """
-    Set version numbers in all files
-
-    Parameters
-    ----------
-    version : str
-        Version number
-    current : str
-        Current version number
-    """
-    # List of all relevant files, including their access paths from the
-    # source directory
-    filenames = ['configure.ac',
-                 'gammalib.pc.in',
-                 'README.md',
-                 'sonar-project.properties',
-                 'doc/Doxyfile',
-                 'doc/source/conf.py']
-
-    # Set versions by loop over all files
-    for filename in filenames:
-        set_version(filename, version, current)
-
-    # Return
-    return
-
-
 # =============================================== #
 # Set libtool version number in configure.ac file #
 # =============================================== #
@@ -218,36 +319,51 @@ def set_libtool_version(library=False, added=False, removed=False, changed=False
     version = '%d:%d:%d' % (current, revision, age)
 
     # Set libtool version number
-    set_version('configure.ac', version, old)
+    set_version_in_file('configure.ac', version, old)
 
     # Return
     return
 
 
-# ===================================================== #
-# Set special version number in doc/source/conf.py file #
-# ===================================================== #
-def set_special_doc_source_conf(version, current):
+# ============================== #
+# Set version number in one file #
+# ============================== #
+def set_version_in_file(filename, version, current):
     """
-    Set special version numbers in doc/source/conf.py file
+    Set version number in one file
+
+    The function replaces all current version numbers in a file by a new
+    version number.
 
     Parameters
     ----------
+    filename : str
+        File name
     version : str
-        Version number
+        New version number
     current : str
         Current version number
     """
-    # Generate current version number
-    split = current.split('.')
-    cur   = '%s.%s' % (split[0], split[1])
+    # Open file in read mode
+    f = open(filename, 'r')
 
-    # Generate new version number
-    split = version.split('.')
-    ver   = '%s.%s' % (split[0], split[1])
+    # Read file content
+    content = f.read()
 
-    # Set version number
-    set_version('doc/source/conf.py', ver, cur)
+    # Close file
+    f.close()
+
+    # Replace version number
+    new_content = content.replace(current, version)
+
+    # Open file in write mode
+    f = open(filename, 'w')
+
+    # Write file content
+    f.write(new_content)
+
+    # Close file
+    f.close()
 
     # Return
     return
@@ -256,8 +372,7 @@ def set_special_doc_source_conf(version, current):
 # ======================= #
 # Set the package version #
 # ======================= #
-def set_package_version(version, library=False, added=False, removed=False,
-                        changed=False):
+def set_package_version(version):
     """
     Set the package version
 
@@ -266,66 +381,144 @@ def set_package_version(version, library=False, added=False, removed=False,
     version : str
         Version number
     """
+    # List of all files in which the version numbers should be changed. The
+    # file name should include their access paths with respect to the source
+    # directory
+    filenames = ['configure.ac',
+                 'gammalib.pc.in',
+                 'README.md',
+                 'sonar-project.properties',
+                 'doc/Doxyfile',
+                 'doc/source/conf.py']
+
+
     # Get the current package version
     current = get_current_version()
 
-    # Set versions
-    set_versions(version, current)
+    # Set versions by loop over all files
+    for filename in filenames:
+        set_version_in_file(filename, version, current)
 
-    # Set libtool version
-    set_libtool_version(library=library, added=added, removed=removed,
-                        changed=changed)
+    # Generate current version number
+    split = current.split('.')
+    cur   = '%s.%s' % (split[0], split[1])
 
-    # Set special version number in doc/source/conf.py file
-    set_special_doc_source_conf(version, current)
+    # Generate new version number
+    split = version.split('.')
+    ver   = '%s.%s' % (split[0], split[1])
+
+    # Set version number in doc/source/conf.py file
+    set_version_in_file('doc/source/conf.py', ver, cur)
 
     # Return
     return
 
 
-# ======================================= #
-# Check whether version string is correct #
-# ======================================= #
-def check_version(version):
+# ============= #
+# Build tarball #
+# ============= #
+def build_tarball(branch, folder, clean=False):
     """
-    Check whether version string is correct
+    Build tarball from git branch
 
     Parameters
     ----------
-    version : str
-        Version number
-
-    Returns
-    -------
-    check : bool
-        True if version string is correct
+    branch : str
+        Git branch
+    folder : str
+        Folder name
+    clean : bool, optional
+        Clean tarball
     """
-    # Initialise check with False
-    check = False
+    # Set base path
+    base_path = os.getcwd()
 
-    # Split version string
-    split = version.split('.')
+    # Set git repo
+    repo = 'https://cta-gitlab.irap.omp.eu/gammalib/gammalib.git'
 
-    # If there are three elements or four elements we may have a valid version
-    # string
-    if len(split) == 3 or len(split) == 4:
+    # If the folder exists then ask whether it should be deleted
+    if os.path.isdir(folder):
+        if confirm("Folder '%s' exists, do you want to delete it?" % folder):
+            os.system('rm -rf %s' % folder)
 
-        # If the three first elements are integers we may have a valid version
-        # string
-        if split[0].isdigit() and split[1].isdigit() and split[2].isdigit():
+    # Clone release branch if folder does not exist
+    if not os.path.isdir(folder):
+        os.system('git clone -b %s %s %s' % (branch, repo, folder))
 
-            # If we have three elements the version is valid and we are done
-            if len(split) == 3:
-                check = True
+    # Remove .git directory
+    os.system('rm -rf %s/.git' % folder)
 
-            # Otherwise check if the 4th element is of format devn, where n
-            # is an integer number
-            elif split[3][0:3] == 'dev':
-                if split[3][3:].isdigit():
-                    check = True
+    # Get swig version and display processing information
+    swig_version = commands.getoutput('swig -version').split('\n')
+    print("Create Python wrappers using %s (%s)" %
+          (swig_version[1], swig_version[3]))
 
-    # Return check
-    return check
+    # Create temporary directory for building wrappers and copy entire package
+    # in the temporary directory
+    swigdir = 'tmp_build'
+    os.system('rm -rf %s >/dev/null 2>&1' % swigdir)
+    os.system('cp -r %s %s  >/dev/null 2>&1' % (folder, swigdir))
+
+
+    # Step into temporary swig directory
+    os.chdir(swigdir)
+
+    # Build wrappers
+    print("Configure for wrapper generation")
+    os.system('./autogen.sh >/dev/null 2>&1')
+    os.system('./configure >/dev/null 2>&1')
+    os.chdir('pyext')
+    print("Generate Python wrappers")
+    os.system('make swig >/dev/null 2>&1')
+
+    # Generate documentation
+    print("Generate documentation")
+    #os.system('make doc >/dev/null 2>&1')
+    os.system('make doc')
+
+    # Move back to base path
+    os.chdir(base_path)
+
+    # Copy over Python wrappers
+    print("Copy Python wrappers into tarball")
+    os.system('cp -r %s/pyext/gammalib/*.py  %s/pyext/gammalib' %
+              (swigdir, folder))
+    os.system('cp -r %s/pyext/gammalib/*.cpp %s/pyext/gammalib' %
+              (swigdir, folder))
+
+    # Copy over Python wrappers
+    print("Copy documentation into tarball")
+    os.system('cp -r %s/doc/html  %s/doc/html' % (swigdir, folder))
+    os.system('cp -r %s/doc/man   %s/doc/man'  % (swigdir, folder))
+
+    # Remove temporary directory for wrapper generation
+    os.system('rm -rf %s >/dev/null 2>&1' % swigdir)
+
+    # Create Makefile.in and configure script
+    print("Create Makefile.in and configure script")
+    os.chdir(folder)
+    os.system('./autogen.sh >/dev/null 2>&1')
+
+    # Optionally remove a bunch of files and folders that are not needed in
+    # the tarball
+    if clean:
+        print("Clean tarball")
+        os.system('rm -rf Makefile.am >/dev/null 2>&1')
+        os.system('rm -rf */Makefile.am >/dev/null 2>&1')
+        os.system('rm -rf */*/Makefile.am >/dev/null 2>&1')
+        os.system('rm -rf autogen.sh >/dev/null 2>&1')
+        os.system('rm -rf configure.ac >/dev/null 2>&1')
+        os.system('rm -rf sonar-project.properties >/dev/null 2>&1')
+        os.system('rm -rf testall.sh >/dev/null 2>&1')
+        os.system('rm -rf dev >/dev/null 2>&1')
+        os.system('rm -rf autom4te.cache >/dev/null 2>&1')
+        os.system('rm -rf doc/dev >/dev/null 2>&1')
+
+    # Move back to base path
+    os.chdir(base_path)
+
+    # Return
+    return
 
 
 # ================ #
@@ -338,13 +531,17 @@ def main_menu():
     # Print main menu
     print('[1] Make a new package release')
     print('[2] Set the package version')
+    print('[3] Set the libtool version')
+    print('[4] Commit changes')
+    print('[5] Create tarball')
     print('[q] Quit')
 
     # Wait for the input
     waiting = True
     while waiting:
         choice = str(raw_input('Enter your choice: '))
-        if choice == '1' or choice == '2' or choice == 'q':
+        if choice == '1' or choice == '2' or choice == '3' or choice == '4' or \
+           choice == '5' or choice == 'q':
             waiting = False
 
     # Return choice
@@ -354,24 +551,70 @@ def main_menu():
 # ====================== #
 # Manage package release #
 # ====================== #
-def release_menu():
+def release_menu(branch='release'):
     """
     Manage package release
+
+    Parameters
+    ----------
+    branch : str, optional
+        Release branch name
     """
+    # Annonce actions
+    print("")
+    print("Make a new package release")
+    print("--------------------------")
+
+    # Step 1: Create a release branch
+    if confirm("Step 1: Do you want to create a '%s' branch?" % branch):
+        create_git_branch(branch)
+    else:
+        if git_branch_exists(branch):
+            os.system('git checkout %s' % branch)
+        else:
+            requested = branch
+            branch    = commands.getoutput('git rev-parse --abbrev-ref HEAD')
+            print("WARNING: No '%s' branch found, continue working on "
+                  "current branch '%s'" % (requested, branch))
+
     # Get current package version
     current = get_current_version()
 
-    # Create a new release branch
-    
-    # Set the package version
-    print(' Current GammaLib version is "%s"' % current)
-    if confirm(' Do you want to change the package version?'):
-        version_menu()
+    # Step 2: Set package version
+    print("")
+    if confirm("Step 2: Current GammaLib version is '%s'. Do you want to "
+               "change the package version?" % current):
+        package_version_menu()
 
-    # Commit changes
+    # Get current libtool version
+    current = get_libtool_version()
 
-    # Create tarball
-    
+    # Step 3: Set libtool version
+    print("")
+    if confirm("Step 3: Current Libtool version is '%s'. Do you want to "
+               "change the libtool version?" % current):
+        libtool_version_menu()
+
+    # Step 4: Commit changes
+    print("")
+    if confirm("Step 4: Commit changes?"):
+        package = get_current_version()
+        libtool = get_libtool_version()
+        message = "GammaLib package version set to '%s' and libtool version "\
+                  "set to '%s'" % (package, libtool)
+        commit(message)
+
+    # Step 5: Push branch into git
+    print("")
+    if confirm("Step 5: Push changes?"):
+        os.system('git push origin %s' % branch)
+
+    # Step 6: Build tarball
+    print("")
+    if confirm("Step 6: Build tarball?"):
+        folder = "gammalib-%s" % get_current_version()
+        build_tarball(branch, folder)
+
     # Return
     return
 
@@ -379,15 +622,12 @@ def release_menu():
 # ============================== #
 # Manage package version setting #
 # ============================== #
-def version_menu():
+def package_version_menu():
     """
     Manage package version setting
     """
     # Get the current package version
     current = get_current_version()
-
-    # Print current package version
-    print(' Current GammaLib version is "%s"' % current)
 
     # Looping until the version change is accepted
     looping = True
@@ -396,39 +636,27 @@ def version_menu():
         # Get package version from input
         waiting = True
         while waiting:
-            version = str(raw_input('  Please enter new GammaLib version: '))
-            if version == 'q':
+            version = str(raw_input("Current GammaLib version is '%s'. Please "
+                                    "enter new GammaLib version: " % current))
+            if version == "q":
                 sys.exit()
             if check_version(version) == False:
-                print('  *** Invalid GammaLib version. '
-                      'Please enter the version in the format x.y.z[.devn]')
+                print("*** Invalid GammaLib version. "
+                      "Please enter the version in the format x.y.z[.devn]")
             else:
                 waiting = False
 
         # If the version number change is confirmed then do the change
-        if confirm('  Change version to "%s"?' % version):
-
-            # Determine package changes
-            library = confirm('  Has the source code changed since last release?')
-            added   = confirm('  Have interfaces been added since last release?')
-            removed = confirm('  Have interfaces been removed since last release?')
-            changed = confirm('  Have interfaces changed since last release?')
+        if confirm("Change version to '%s'?" % version):
 
             # Set package version
-            set_package_version(version, library=library, added=added,
-                                removed=removed, changed=changed)
+            set_package_version(version)
 
             # Get new package and libtool versions
             version = get_current_version()
-            libtool = get_libtool_version()
 
             # Inform about version change
-            print(' GammaLib version changed to "%s", libtool version set to "%s"' %
-                  (version, libtool))
-
-            # Ask whether changes should be committed
-            if confirm(' Should the changes be committed?'):
-                commit('GammaLib package version changed to %s' % version)
+            print("GammaLib version changed to '%s'" % (version))
 
             # Signal that we can exit looping
             looping = False
@@ -437,65 +665,36 @@ def version_menu():
     return
 
 
-# ================= #
-# Confirm something #
-# ================= #
-def confirm(text):
+# ============================== #
+# Manage libtool version setting #
+# ============================== #
+def libtool_version_menu():
     """
-    Confirm something
-
-    Parameters
-    ----------
-    text : str
-        Thing to confirm
-
-    Returns
-    -------
-    flag : bool
-        True if something is confirmed
+    Manage libtool version setting
     """
-    # Confirmation loop
-    waiting = True
-    while waiting:
-        confirmation = str(raw_input(text+' (y/n): '))
-        if confirmation == 'q':
-            sys.exit()
-        elif confirmation == 'y':
-            flag    = True
-            waiting = False
-        elif confirmation == 'n':
-            flag    = False
-            waiting = False
+    # Get current libtool version
+    current = get_libtool_version()
 
-    # Return confirmation flag
-    return flag
+    # Continue only if libtool version should be changed
+    if confirm("Current libtool version is '%s'. Do you want to change the "
+               "version?" % current):
 
+        # Determine package changes
+        library = confirm(" Has the source code changed since last release?")
+        added   = confirm(" Have interfaces been added since last release?")
+        removed = confirm(" Have interfaces been removed since last release?")
+        changed = confirm(" Have interfaces changed since last release?")
 
-# ============== #
-# Commit changes #
-# ============== #
-def commit(message):
-    """
-    Commit changes into Git repo
+        # Set libtool version
+        set_libtool_version(library=library, added=added, removed=removed,
+                            changed=changed)
 
-    Parameters
-    ----------
-    message : str
-        Commit message
-    """
-    # Show changes
-    print(' The following files have been changed:')
-    os.system('git status -s')
+        # Get new libtool version
+        version = get_libtool_version()
 
-    # Ask again whether the changes should be committed
-    if confirm(' Commit all changes?'):
-    
-        # Stage all files
-        os.system('git add -u')
+        # Print new libtool version
+        print("Libtool version changed to '%s'" % version)
 
-        # Commit all changes
-        os.system('git commit -m "%s"' % message)
-    
     # Return
     return
 
@@ -522,8 +721,21 @@ if __name__ == '__main__':
         # Dispatch according to choice
         if choice == '1':
             release_menu()
+            print('')
         elif choice == '2':
-            version_menu()
+            package_version_menu()
+            print('')
+        elif choice == '3':
+            libtool_version_menu()
+            print('')
+        elif choice == '4':
+            commit('')
+            print('')
+        elif choice == '5':
+            branch = commands.getoutput('git rev-parse --abbrev-ref HEAD')
+            folder = "gammalib-%s" % get_current_version()
+            build_tarball(branch, folder)
+            print('')
         elif choice == 'q':
             break
 
