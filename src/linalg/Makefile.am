@@ -19,3 +19,6 @@ sources = GVector.cpp \
 noinst_LTLIBRARIES = liblinalg.la
 liblinalg_la_SOURCES = $(sources)
 liblinalg_la_LDFLAGS =
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = GSparseNumeric.hpp GSparseSymbolic.hpp

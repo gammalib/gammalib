@@ -134,3 +134,9 @@ caldb_prod2_south2dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_5h
 caldb_prod2_south2_DATA  = caldb/data/cta/prod2/bcf/South_5h/irf_file.fits.gz
 caldb_prod2_south3dir    = $(datadir)/caldb/data/cta/prod2/bcf/South_50h
 caldb_prod2_south3_DATA  = caldb/data/cta/prod2/bcf/South_50h/irf_file.fits.gz
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = README.md caldb pyext \
+             include/GCTALib.hpp \
+             src/GCTAResponse_helpers.hpp src/GCTASupport.hpp \
+             test/test_CTA.hpp test/test_CTA.py test/caldb test/data

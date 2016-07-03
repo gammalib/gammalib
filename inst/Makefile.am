@@ -17,3 +17,5 @@ endif
 # Set sub directories
 SUBDIRS = $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM)
 
+# Extra files to be distributed in the tar file
+EXTRA_DIST = README.md

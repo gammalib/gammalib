@@ -227,7 +227,6 @@ liblat_la_SOURCES = $(sources)
 liblat_la_LDFLAGS =
 
 # Distribute calibration database files
-EXTRA_DIST      = $(caldb_indx) $(caldb_add) $(caldb_ea) $(caldb_edisp) $(caldb_psf)
 caldbindxdir    = $(datadir)/caldb/data/glast/lat
 caldbindx_DATA  = $(caldb_indx)
 caldbadddir     = $(datadir)/caldb/data/glast/lat/bcf
@@ -238,3 +237,8 @@ caldbedispdir   = $(datadir)/caldb/data/glast/lat/bcf/edisp
 caldbedisp_DATA = $(caldb_edisp)
 caldbpsfdir     = $(datadir)/caldb/data/glast/lat/bcf/psf
 caldbpsf_DATA   = $(caldb_psf)
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = README.md caldb pyext \
+             include/GLATLib.hpp \
+             test/test_LAT.hpp test/test_LAT.py test/data

@@ -103,78 +103,82 @@ TESTS = test_GSupport \
         $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) \
         $(TEST_PYTHON_SCRIPT)
 
+# Extra files to be distributed in the tar file
+EXTRA_DIST = data reports testinst \
+             README.md $(wildcard test_*.py)
+
 # Standard test sources and links
-test_GSupport_SOURCES = test_GSupport.cpp
+test_GSupport_SOURCES = test_GSupport.cpp test_GSupport.hpp
 test_GSupport_LDFLAGS = @LDFLAGS@
 test_GSupport_CPPFLAGS = @CPPFLAGS@
 test_GSupport_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GVector_SOURCES = test_GVector.cpp
+test_GVector_SOURCES = test_GVector.cpp test_GVector.hpp
 test_GVector_LDFLAGS = @LDFLAGS@
 test_GVector_CPPFLAGS = @CPPFLAGS@
 test_GVector_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GMatrix_SOURCES = test_GMatrix.cpp
+test_GMatrix_SOURCES = test_GMatrix.cpp test_GMatrix.hpp
 test_GMatrix_LDFLAGS = @LDFLAGS@
 test_GMatrix_CPPFLAGS = @CPPFLAGS@
 test_GMatrix_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GMatrixSparse_SOURCES = test_GMatrixSparse.cpp
+test_GMatrixSparse_SOURCES = test_GMatrixSparse.cpp test_GMatrixSparse.hpp
 test_GMatrixSparse_LDFLAGS = @LDFLAGS@
 test_GMatrixSparse_CPPFLAGS = @CPPFLAGS@
 test_GMatrixSparse_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GMatrixSymmetric_SOURCES = test_GMatrixSymmetric.cpp
+test_GMatrixSymmetric_SOURCES = test_GMatrixSymmetric.cpp test_GMatrixSymmetric.hpp
 test_GMatrixSymmetric_LDFLAGS = @LDFLAGS@
 test_GMatrixSymmetric_CPPFLAGS = @CPPFLAGS@
 test_GMatrixSymmetric_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GNumerics_SOURCES = test_GNumerics.cpp
+test_GNumerics_SOURCES = test_GNumerics.cpp test_GNumerics.hpp
 test_GNumerics_LDFLAGS = @LDFLAGS@
 test_GNumerics_CPPFLAGS = @CPPFLAGS@
 test_GNumerics_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GFits_SOURCES = test_GFits.cpp
+test_GFits_SOURCES = test_GFits.cpp test_GFits.hpp
 test_GFits_LDFLAGS = @LDFLAGS@
 test_GFits_CPPFLAGS = @CPPFLAGS@
 test_GFits_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GXml_SOURCES = test_GXml.cpp
+test_GXml_SOURCES = test_GXml.cpp test_GXml.hpp
 test_GXml_LDFLAGS = @LDFLAGS@
 test_GXml_CPPFLAGS = @CPPFLAGS@
 test_GXml_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GVO_SOURCES = test_GVO.cpp
+test_GVO_SOURCES = test_GVO.cpp test_GVO.hpp
 test_GVO_LDFLAGS = @LDFLAGS@
 test_GVO_CPPFLAGS = @CPPFLAGS@
 test_GVO_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GXspec_SOURCES = test_GXspec.cpp
+test_GXspec_SOURCES = test_GXspec.cpp test_GXspec.hpp
 test_GXspec_LDFLAGS = @LDFLAGS@
 test_GXspec_CPPFLAGS = @CPPFLAGS@
 test_GXspec_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GApplication_SOURCES = test_GApplication.cpp
+test_GApplication_SOURCES = test_GApplication.cpp test_GApplication.hpp
 test_GApplication_LDFLAGS = @LDFLAGS@
 test_GApplication_CPPFLAGS = @CPPFLAGS@
 test_GApplication_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GModel_SOURCES = test_GModel.cpp
+test_GModel_SOURCES = test_GModel.cpp test_GModel.hpp
 test_GModel_LDFLAGS = @LDFLAGS@
 test_GModel_CPPFLAGS = @CPPFLAGS@
 test_GModel_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GSky_SOURCES = test_GSky.cpp
+test_GSky_SOURCES = test_GSky.cpp test_GSky.hpp
 test_GSky_LDFLAGS = @LDFLAGS@
 test_GSky_CPPFLAGS = @CPPFLAGS@
 test_GSky_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GOptimizer_SOURCES = test_GOptimizer.cpp
+test_GOptimizer_SOURCES = test_GOptimizer.cpp test_GOptimizer.hpp
 test_GOptimizer_LDFLAGS = @LDFLAGS@
 test_GOptimizer_CPPFLAGS = @CPPFLAGS@
 test_GOptimizer_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GObservation_SOURCES = test_GObservation.cpp
+test_GObservation_SOURCES = test_GObservation.cpp test_GObservation.hpp
 test_GObservation_LDFLAGS = @LDFLAGS@
 test_GObservation_CPPFLAGS = @CPPFLAGS@
 test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la

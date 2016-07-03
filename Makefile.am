@@ -31,8 +31,8 @@ doc_DATA = \
 docdir = ${datadir}/doc/${PACKAGE}
 
 # Extra files to be distributed in the tar file
-#EXTRA_DIST = autogen.sh \
-#             gammalib.pc.in
+EXTRA_DIST = README.md \
+             doc/Doxyfile doc/source
 
 #install-data-local: $(HTML_INSTALL_DATA_TARGETS)
 #uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)

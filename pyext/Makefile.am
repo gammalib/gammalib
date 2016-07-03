@@ -73,7 +73,6 @@ testdata    = ../test/data/initial_coords.txt \
               ../test/data/file.fits.gz
 
 # Distribute scripts
-EXTRA_DIST       = $(testscripts) $(testdata)
 testscriptsdir   = $(pyexecdir)/gammalib/tests
 testscripts_DATA = $(testscripts)
 testdatadir      = $(pyexecdir)/gammalib/tests/data
@@ -102,10 +101,10 @@ if WITH_INST_CTA
   testdc1cta_DATA   = $(testdc1cta)
 endif
 
-# Sources that are required for the build. All targets in the list will be built
-# before anything. These are honored by 'make all', 'make check' and 'make install'.
-# We use this here to make sure that all these targets are build by swig before we
-# start compiling the Python modules.
+# Sources that are required for the build. All targets in the list will be
+# built before anything. These are honored by 'make all', 'make check' and
+# 'make install'. We use this here to make sure that all these targets are
+# build by swig before we start compiling the Python modules.
 BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
                 gammalib/base_wrap.cpp gammalib/base.py \
                 gammalib/fits_wrap.cpp gammalib/fits.py \
@@ -122,12 +121,16 @@ BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
                 gammalib/vo_wrap.cpp gammalib/vo.py \
                 $(INST_SWIG_TARGETS)
 
+# Extra files to be distributed in the tar file
+EXTRA_DIST = $(wildcard *.i) $(wildcard gammalib/*.i) gammalib/tests \
+             $(BUILT_SOURCES)
+
 # Dependencies. Obtain the list of dependencies by executing ls.
 DEPFILES = $(shell ls gammalib/*.Pi 2> /dev/null)
 include $(DEPFILES)
 
-# Set files to be removed in clean. We remove only the SWIG interface files if SWIG
-# is available to rebuild them. 
+# Set files to be removed in clean. We remove only the SWIG interface files
+# if SWIG is available to rebuild them.
 if HAVE_SWIG
   CLEAN_FILES = $(BUILT_SOURCES)
 endif

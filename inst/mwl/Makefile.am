@@ -30,3 +30,8 @@ pkginclude_HEADERS = include/GMWLException.hpp \
 noinst_LTLIBRARIES = libmwl.la
 libmwl_la_SOURCES = $(sources)
 libmwl_la_LDFLAGS =
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = README.md pyext \
+             include/GMWLLib.hpp \
+             test/test_MWL.hpp test/test_MWL.py test/data

@@ -43,3 +43,6 @@ sources = GFitsHeaderCard.cpp \
 noinst_LTLIBRARIES = libfits.la
 libfits_la_SOURCES = $(sources)
 libfits_la_LDFLAGS =
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = GFitsCfitsio.hpp

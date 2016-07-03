@@ -42,8 +42,13 @@ libcom_la_SOURCES = $(sources)
 libcom_la_LDFLAGS =
 
 # Distribute calibration database files
-EXTRA_DIST     = $(caldb_indx) $(caldb_irfs)
 caldbindxdir   = $(datadir)/caldb/data/cgro/comptel
 caldbindx_DATA = $(caldb_indx)
 caldbirfsdir   = $(datadir)/caldb/data/cgro/comptel/bcf
 caldbirfs_DATA = $(caldb_irfs)
+
+# Extra files to be distributed in the tar file
+EXTRA_DIST = README.md caldb pyext \
+             include/GCOMLib.hpp \
+             src/GCOMSupport.hpp \
+             test/test_COM.hpp test/test_COM.py test/data
