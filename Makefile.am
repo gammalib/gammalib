@@ -9,7 +9,7 @@ INST_DIR = inst
 endif
 
 # Subdirectories
-SUBDIRS = include $(INST_DIR) src pyext test examples
+SUBDIRS = include $(INST_DIR) src pyext examples test
 
 # Pkgconfig directory
 pkgconfigdir = $(libdir)/pkgconfig

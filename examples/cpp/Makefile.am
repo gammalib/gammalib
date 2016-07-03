@@ -16,6 +16,9 @@ bin_PROGRAMS = createfits \
                optimize \
                readmodel
 
+# Test programs (needed so that files are compiled for 'make check')
+check_PROGRAMS = $(bin_PROGRAMS)
+
 # Program definition
 createfits_SOURCES = createfits.cpp
 createfits_LDFLAGS = @LDFLAGS@
