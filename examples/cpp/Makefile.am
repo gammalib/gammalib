@@ -17,7 +17,13 @@ bin_PROGRAMS = createfits \
                readmodel
 
 # Test programs (needed so that files are compiled for 'make check')
-check_PROGRAMS = $(bin_PROGRAMS)
+check_PROGRAMS = createfits \
+                 createskymap \
+                 createxml \
+                 interpolate \
+                 numerics \
+                 optimize \
+                 readmodel
 
 # Program definition
 createfits_SOURCES = createfits.cpp
