@@ -121,7 +121,22 @@ TESTS = test_GSupport \
 
 # Extra files to be distributed in the tar file
 EXTRA_DIST = data reports testinst \
-             README.md $(wildcard test_*.py)
+             README.md \
+             test_GApplication.py \
+             test_GFits.py \
+             test_GLinalg.py \
+             test_GModel.py \
+             test_GNumerics.py \
+             test_GObservation.py \
+             test_GOptimizer.py \
+             test_GSky.py \
+             test_GSupport.py \
+             test_GTest.py \
+             test_GVO.py \
+             test_GXml.py \
+             test_GXspec.py \
+             test_examples.py \
+             test_python.py
 
 # Standard test sources and links
 test_GSupport_SOURCES = test_GSupport.cpp test_GSupport.hpp
