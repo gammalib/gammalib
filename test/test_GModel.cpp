@@ -53,6 +53,7 @@ void TestGModel::set(void)
     m_xml_model_point_plaw        = "data/model_point_plaw.xml";
     m_xml_model_point_plaw2       = "data/model_point_plaw2.xml";
     m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
+    m_xml_model_point_eplaw2      = "data/model_point_eplaw2.xml";
     m_xml_model_point_bplaw       = "data/model_point_bplaw.xml";
     m_xml_model_point_supeplaw    = "data/model_point_supeplaw.xml";
     m_xml_model_point_logparabola = "data/model_point_logparabola.xml";
@@ -89,6 +90,7 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
     append(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     append(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_eplaw2), "Test GModelSpectralExpPlaw2");
     append(static_cast<pfunction>(&TestGModel::test_supeplaw), "Test GModelSpectralSuperExpPlaw");
     append(static_cast<pfunction>(&TestGModel::test_bplaw), "Test GModelSpectralBrokenPlaw");
     append(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
@@ -1707,6 +1709,92 @@ void TestGModel::test_eplaw(void)
 
         // Test operator access
         const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Cutoff"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralExpPlaw2 class
+ ***************************************************************************/
+void TestGModel::test_eplaw2(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralExpPlaw2 model;
+        test_assert(model.type() == "ExpCutoff2",
+                                    "Model type \"ExpCutoff2\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralExpPlaw2 model(2.0, -2.1, GEnergy(100.0, "MeV"), 1.0e-3);
+        test_value(model.prefactor(), 2.0);
+        test_value(model.index(), -2.1);
+        test_value(model.pivot().MeV(), 100.0);
+        test_value(model.lambda(), 1.0e-3);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                  xml(m_xml_model_point_eplaw2);
+        GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralExpPlaw2 model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "ExpCutoff2", "Expected \"ExpCutoff2\"");
+        test_value(model.prefactor(), 5.7e-16);
+        test_value(model.index(), -2.48);
+        test_value(model.pivot().TeV(), 0.3);
+        test_value(model.lambda(), 1.0e-6);
+
+        // Test prefactor method
+        model.prefactor(2.3e-16);
+        test_value(model.prefactor(), 2.3e-16);
+
+        // Test index method
+        model.index(-2.6);
+        test_value(model.index(), -2.6);
+
+        // Test pivot method
+        model.pivot(GEnergy(0.5, "TeV"));
+        test_value(model.pivot().TeV(), 0.5);
+
+        // Test cutoff parameter method
+        model.lambda(4.2e-9);
+        test_value(model.lambda(), 4.2e-9);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "lambda"};
         for (int i = 0; i < 4; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value
