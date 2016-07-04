@@ -150,7 +150,7 @@ if IS_ELCAPITAN
 		echo "Post process module "$$f; \
 		install_name_tool -change $(libdir)/libgamma.2.dylib @rpath/libgamma.2.dylib $$f; \
 		install_name_tool -add_rpath $(libdir) $$f; \
-		install_name_tool -add_rpath $(abs_top_srcdir)/src/.libs $$f; \
+		install_name_tool -add_rpath $(abs_top_builddir)/src/.libs $$f; \
 	done
 endif
 
@@ -176,14 +176,14 @@ swig: $(BUILT_SOURCES)
 
 # General rule for core modules
 %_wrap.cpp %.py: %.i
-	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o $@ -outdir gammalib $<; \
+	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -I$(top_srcdir)/pyext -o $@ -outdir gammalib $<; \
 	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
 
 # Rule for MWL module
 if WITH_INST_MWL
 gammalib/mwl.py: gammalib/mwl_wrap.cpp
 gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -I$(top_srcdir)/pyext -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
 endif
 
@@ -191,7 +191,7 @@ endif
 if WITH_INST_CTA
 gammalib/cta.py: gammalib/cta_wrap.cpp
 gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -I$(top_srcdir)/pyext -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
 endif
 
@@ -199,7 +199,7 @@ endif
 if WITH_INST_LAT
 gammalib/lat.py: gammalib/lat_wrap.cpp
 gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -I$(top_srcdir)/pyext -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
 endif
 
@@ -207,7 +207,7 @@ endif
 if WITH_INST_COM
 gammalib/com.py: gammalib/com_wrap.cpp
 gammalib/com_wrap.cpp: $(top_srcdir)/inst/com/pyext/com.i
-	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -o gammalib/com_wrap.cpp -outdir gammalib $<; \
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -I$(top_srcdir)/pyext -o gammalib/com_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
 endif
 

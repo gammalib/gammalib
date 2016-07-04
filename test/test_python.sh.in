@@ -27,4 +27,4 @@ rm -rf .coverage
 #
 # Run the Python test
 # ===================
-@PYTHON_COVERAGE@./test_python.py
+@PYTHON_COVERAGE@@srcdir@/test_python.py

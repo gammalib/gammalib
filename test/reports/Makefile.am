@@ -1,5 +1,5 @@
 #############################################################################
-# Makefile.am for support module                                            #
+# Makefile.am for unit test reports module                                  #
 # ------------------------------------------------------------------------- #
 # Copyright (C) 2016 Juergen Knoedlseder                                    #
 # ------------------------------------------------------------------------- #
@@ -18,25 +18,3 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
 #                                                                           #
 #############################################################################
-
-# Set include directories
-INCLUDES = -I$(top_srcdir)/include \
-           -I$(top_builddir)/src \
-           -I$(top_srcdir)/src
-
-# Define sources for this directory
-sources = GException.cpp \
-          GTools.cpp \
-          GNodeArray.cpp \
-          GBilinear.cpp \
-          GCsv.cpp \
-          GRan.cpp \
-          GUrl.cpp \
-          GUrlFile.cpp \
-          GUrlString.cpp \
-          GFilename.cpp
-
-# Build libtool library
-noinst_LTLIBRARIES = libsupport.la
-libsupport_la_SOURCES = $(sources)
-libsupport_la_LDFLAGS =

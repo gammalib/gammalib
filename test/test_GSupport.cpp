@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>   // getenv
+#include <cstdlib>     // getenv
 #include <vector>
 #include "GTools.hpp"
 #include "test_GSupport.hpp"
@@ -38,6 +38,10 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+
+/* __ Constants __________________________________________________________ */
+const std::string srcdir   = std::getenv("TESTS_SRCDIR");
+const std::string csv_file = srcdir + "/test/data/csv.dat";
 
 
 /***********************************************************************//**
@@ -49,14 +53,22 @@ void TestGSupport::set(void){
     name("GSupport");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGSupport::test_tools), "Test GTools");
-    append(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
-    append(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
-    append(static_cast<pfunction>(&TestGSupport::test_bilinear), "Test GBilinear");
-    append(static_cast<pfunction>(&TestGSupport::test_url_file), "Test GUrlFile");
-    append(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
-    append(static_cast<pfunction>(&TestGSupport::test_filename), "Test GFilename");
-    append(static_cast<pfunction>(&TestGSupport::test_csv), "Test GCsv");
+    append(static_cast<pfunction>(&TestGSupport::test_tools),
+           "Test GTools");
+    append(static_cast<pfunction>(&TestGSupport::test_expand_env),
+           "Test Environment variable");
+    append(static_cast<pfunction>(&TestGSupport::test_node_array),
+           "Test GNodeArray");
+    append(static_cast<pfunction>(&TestGSupport::test_bilinear),
+           "Test GBilinear");
+    append(static_cast<pfunction>(&TestGSupport::test_url_file),
+           "Test GUrlFile");
+    append(static_cast<pfunction>(&TestGSupport::test_url_string),
+           "Test GUrlString");
+    append(static_cast<pfunction>(&TestGSupport::test_filename),
+           "Test GFilename");
+    append(static_cast<pfunction>(&TestGSupport::test_csv),
+           "Test GCsv");
 
     // Return
     return;
@@ -878,7 +890,7 @@ void TestGSupport::test_csv(void)
     test_value(csv2.nrows(), 3);
 
     // Test filename constructor
-    GCsv csv3("data/csv.dat", ",");
+    GCsv csv3(csv_file, ",");
     test_value(csv3.size(), 12);
     test_value(csv3.ncols(), 3);
     test_value(csv3.nrows(), 4);
@@ -971,6 +983,8 @@ int main(void)
 
     // Create and append test suite
     TestGSupport test;
+
+    // Append test to the container
     testsuites.append(test);
 
     // Run the testsuites

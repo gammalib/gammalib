@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp - Test model module                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Jean-Baptiste Cayrou                        *
+ *  copyright (C) 2012-2016 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,6 +82,7 @@ private:
     // Private attributes
     std::string m_map_file;
     std::string m_cube_file;
+    std::string m_filefct;
     std::string m_xml_file;
     std::string m_xml_model_point_const;
     std::string m_xml_model_point_gauss;

@@ -22,4 +22,4 @@
 #
 # Run the examples test
 # =====================
-@PYTHON_COVERAGE@./test_examples.py
+@PYTHON_COVERAGE@@srcdir@/test_examples.py

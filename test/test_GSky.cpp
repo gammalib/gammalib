@@ -43,6 +43,10 @@
 #define G_WCS_FORTH_BACK_PIXEL_DEBUG
 #define G_WCS_COPY_DEBUG
 
+/* __ Constants __________________________________________________________ */
+const std::string srcdir     = std::getenv("TESTS_SRCDIR");
+const std::string sky_region = srcdir + "/test/data/test_circle_region.reg";
+
 
 /***********************************************************************//**
  * @brief Set parameters and tests
@@ -1383,16 +1387,13 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
  ***************************************************************************/
  void TestGSky::test_GSkyRegions_io(void)
 {
-	// Set filenames
-	const std::string filename = "data/test_circle_region.reg";
-
     // Allocate regions
     GSkyRegions regions;
 
 	// Test regions loading
 	test_try("Test regions loading");
 	try {
-		regions.load(filename);
+		regions.load(sky_region);
 		test_try_success();
 	}
 	catch (std::exception &e) {

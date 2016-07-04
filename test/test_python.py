@@ -18,9 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-import gammalib
-import sys
 import os
+import sys
+import gammalib
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import test_GApplication
 import test_GLinalg
@@ -70,7 +70,7 @@ except:
 # ================== #
 def test(installed=False):
     """
-    Perform unit testing for Python interface.
+    Perform unit testing for Python interface
     """
     # Allocate test suites
     suites = gammalib.GTestSuites('Python interface testing')
@@ -131,7 +131,7 @@ def test(installed=False):
         suite_cta = test_CTA.Test()
         suite_cta.set()
         if installed:
-            suite_cta.caldb_path('cta/caldb')
+            suite_cta.testdir('cta') # Test data for installed test
         suites.append(suite_cta)
 
     # Optionally handle LAT suite

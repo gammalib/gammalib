@@ -1,8 +1,23 @@
-## Process this file with automake to produce Makefile.in
-
-# we use srcdir/src for "private" includes
-# we use srcdir/include for the static global include files
-# we use builddir/src for the generated include files to get found
+#############################################################################
+# Makefile.am for unit test module                                          #
+# ------------------------------------------------------------------------- #
+# Copyright (C) 2016 Juergen Knoedlseder                                    #
+# ------------------------------------------------------------------------- #
+#                                                                           #
+#  This program is free software: you can redistribute it and/or modify     #
+#  it under the terms of the GNU General Public License as published by     #
+#  the Free Software Foundation, either version 3 of the License, or        #
+#  (at your option) any later version.                                      #
+#                                                                           #
+#  This program is distributed in the hope that it will be useful,          #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+#  GNU General Public License for more details.                             #
+#                                                                           #
+#  You should have received a copy of the GNU General Public License        #
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
+#                                                                           #
+#############################################################################
 
 # Optional instrument specific tests
 if WITH_INST_MWL
@@ -12,7 +27,7 @@ if WITH_INST_MWL
   test_MWL_SOURCES = $(top_srcdir)/inst/mwl/test/test_MWL.cpp
   test_MWL_LDFLAGS = @LDFLAGS@
   test_MWL_CPPFLAGS = @CPPFLAGS@
-  test_MWL_LDADD = $(top_srcdir)/src/libgamma.la
+  test_MWL_LDADD = $(top_builddir)/src/libgamma.la
 endif
 if WITH_INST_CTA
   INST_CTA = test_CTA
@@ -21,7 +36,7 @@ if WITH_INST_CTA
   test_CTA_SOURCES = $(top_srcdir)/inst/cta/test/test_CTA.cpp
   test_CTA_LDFLAGS = @LDFLAGS@
   test_CTA_CPPFLAGS = @CPPFLAGS@
-  test_CTA_LDADD = $(top_srcdir)/src/libgamma.la
+  test_CTA_LDADD = $(top_builddir)/src/libgamma.la
 endif
 if WITH_INST_LAT
   INST_LAT = test_LAT
@@ -30,7 +45,7 @@ if WITH_INST_LAT
   test_LAT_SOURCES = $(top_srcdir)/inst/lat/test/test_LAT.cpp
   test_LAT_LDFLAGS = @LDFLAGS@
   test_LAT_CPPFLAGS = @CPPFLAGS@
-  test_LAT_LDADD = $(top_srcdir)/src/libgamma.la
+  test_LAT_LDADD = $(top_builddir)/src/libgamma.la
 endif
 if WITH_INST_COM
   INST_COM = test_COM
@@ -39,7 +54,7 @@ if WITH_INST_COM
   test_COM_SOURCES = $(top_srcdir)/inst/com/test/test_COM.cpp
   test_COM_LDFLAGS = @LDFLAGS@
   test_COM_CPPFLAGS = @CPPFLAGS@
-  test_COM_LDADD = $(top_srcdir)/src/libgamma.la
+  test_COM_LDADD = $(top_builddir)/src/libgamma.la
 endif
 
 # Optional python bindings
@@ -82,7 +97,8 @@ check_PROGRAMS = test_GSupport \
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
                     $(TEST_PYTHON_ENV) \
-                    PACKAGE_SOURCE=$(PACKAGE_SOURCE)
+                    TESTS_SRCDIR=$(abs_top_srcdir) \
+                    TESTS_BUILDDIR=$(abs_top_builddir)
 
 # Tests (these are the tests to be executed)
 TESTS = test_GSupport \
@@ -111,83 +127,82 @@ EXTRA_DIST = data reports testinst \
 test_GSupport_SOURCES = test_GSupport.cpp test_GSupport.hpp
 test_GSupport_LDFLAGS = @LDFLAGS@
 test_GSupport_CPPFLAGS = @CPPFLAGS@
-test_GSupport_LDADD = $(top_srcdir)/src/libgamma.la
+test_GSupport_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GVector_SOURCES = test_GVector.cpp test_GVector.hpp
 test_GVector_LDFLAGS = @LDFLAGS@
 test_GVector_CPPFLAGS = @CPPFLAGS@
-test_GVector_LDADD = $(top_srcdir)/src/libgamma.la
+test_GVector_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GMatrix_SOURCES = test_GMatrix.cpp test_GMatrix.hpp
 test_GMatrix_LDFLAGS = @LDFLAGS@
 test_GMatrix_CPPFLAGS = @CPPFLAGS@
-test_GMatrix_LDADD = $(top_srcdir)/src/libgamma.la
+test_GMatrix_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GMatrixSparse_SOURCES = test_GMatrixSparse.cpp test_GMatrixSparse.hpp
 test_GMatrixSparse_LDFLAGS = @LDFLAGS@
 test_GMatrixSparse_CPPFLAGS = @CPPFLAGS@
-test_GMatrixSparse_LDADD = $(top_srcdir)/src/libgamma.la
+test_GMatrixSparse_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GMatrixSymmetric_SOURCES = test_GMatrixSymmetric.cpp test_GMatrixSymmetric.hpp
 test_GMatrixSymmetric_LDFLAGS = @LDFLAGS@
 test_GMatrixSymmetric_CPPFLAGS = @CPPFLAGS@
-test_GMatrixSymmetric_LDADD = $(top_srcdir)/src/libgamma.la
+test_GMatrixSymmetric_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GNumerics_SOURCES = test_GNumerics.cpp test_GNumerics.hpp
 test_GNumerics_LDFLAGS = @LDFLAGS@
 test_GNumerics_CPPFLAGS = @CPPFLAGS@
-test_GNumerics_LDADD = $(top_srcdir)/src/libgamma.la
+test_GNumerics_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GFits_SOURCES = test_GFits.cpp test_GFits.hpp
 test_GFits_LDFLAGS = @LDFLAGS@
 test_GFits_CPPFLAGS = @CPPFLAGS@
-test_GFits_LDADD = $(top_srcdir)/src/libgamma.la
+test_GFits_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GXml_SOURCES = test_GXml.cpp test_GXml.hpp
 test_GXml_LDFLAGS = @LDFLAGS@
 test_GXml_CPPFLAGS = @CPPFLAGS@
-test_GXml_LDADD = $(top_srcdir)/src/libgamma.la
+test_GXml_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GVO_SOURCES = test_GVO.cpp test_GVO.hpp
 test_GVO_LDFLAGS = @LDFLAGS@
 test_GVO_CPPFLAGS = @CPPFLAGS@
-test_GVO_LDADD = $(top_srcdir)/src/libgamma.la
+test_GVO_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GXspec_SOURCES = test_GXspec.cpp test_GXspec.hpp
 test_GXspec_LDFLAGS = @LDFLAGS@
 test_GXspec_CPPFLAGS = @CPPFLAGS@
-test_GXspec_LDADD = $(top_srcdir)/src/libgamma.la
+test_GXspec_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GApplication_SOURCES = test_GApplication.cpp test_GApplication.hpp
 test_GApplication_LDFLAGS = @LDFLAGS@
 test_GApplication_CPPFLAGS = @CPPFLAGS@
-test_GApplication_LDADD = $(top_srcdir)/src/libgamma.la
+test_GApplication_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GModel_SOURCES = test_GModel.cpp test_GModel.hpp
 test_GModel_LDFLAGS = @LDFLAGS@
 test_GModel_CPPFLAGS = @CPPFLAGS@
-test_GModel_LDADD = $(top_srcdir)/src/libgamma.la
+test_GModel_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GSky_SOURCES = test_GSky.cpp test_GSky.hpp
 test_GSky_LDFLAGS = @LDFLAGS@
 test_GSky_CPPFLAGS = @CPPFLAGS@
-test_GSky_LDADD = $(top_srcdir)/src/libgamma.la
+test_GSky_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GOptimizer_SOURCES = test_GOptimizer.cpp test_GOptimizer.hpp
 test_GOptimizer_LDFLAGS = @LDFLAGS@
 test_GOptimizer_CPPFLAGS = @CPPFLAGS@
-test_GOptimizer_LDADD = $(top_srcdir)/src/libgamma.la
+test_GOptimizer_LDADD = $(top_builddir)/src/libgamma.la
 #
 test_GObservation_SOURCES = test_GObservation.cpp test_GObservation.hpp
 test_GObservation_LDFLAGS = @LDFLAGS@
 test_GObservation_CPPFLAGS = @CPPFLAGS@
-test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la
+test_GObservation_LDADD = $(top_builddir)/src/libgamma.la
 
 # Add Valgrind rule
 #	
 valgrind:
-	@export PACKAGE_SOURCE=$(PACKAGE_SOURCE) ; \
-	if type valgrind >/dev/null 2>&1; then \
+	@if type valgrind >/dev/null 2>&1; then \
 		cd .. ; \
 		ln -s test/data data ; \
 		mkdir reports ; \

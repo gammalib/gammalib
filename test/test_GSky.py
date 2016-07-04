@@ -17,9 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-import gammalib
 import os
 import math
+import gammalib
 
 
 # =========== #
@@ -387,9 +387,12 @@ class Test(gammalib.GPythonTestSuite):
         Test txt files taken from:
         See https://github.com/astropy/coordinates-benchmark
         """
+        # Get test data directory
+        datadir = os.environ['TESTS_SRCDIR'] + '/test/data/'
+
         # Set parameters
-        fk5_filename         = "data/initial_coords.txt"
-        galactic_filename    = "data/fk5_to_galactic.txt"
+        fk5_filename         = datadir + 'initial_coords.txt'
+        galactic_filename    = datadir + 'fk5_to_galactic.txt'
         fk5_coordinates      = loadtxt(fk5_filename)
         galactic_coordinates = loadtxt(galactic_filename)
         coordinates          = zip(fk5_coordinates, galactic_coordinates)

@@ -28,10 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <stdlib.h>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
-#include <stdlib.h>
+#include <cstdlib>     // getenv
 #include "test_GModel.hpp"
 #include "GTools.hpp"
 
@@ -44,32 +45,39 @@ void TestGModel::set(void)
     // Set name
     name("GModel");
 
+    // Set test data directory
+    std::string datadir = std::string(std::getenv("TESTS_SRCDIR")) +
+                          "/test/data/";
+
     // Set attributes
-    m_map_file                    = "data/cena_lobes_parkes.fits";
-    m_cube_file                   = "data/test_cube.fits";
-    m_xml_file                    = "data/crab.xml";
-    m_xml_model_point_const       = "data/model_point_const.xml";
-    m_xml_model_point_gauss       = "data/model_point_gauss.xml";
-    m_xml_model_point_plaw        = "data/model_point_plaw.xml";
-    m_xml_model_point_plaw2       = "data/model_point_plaw2.xml";
-    m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
-    m_xml_model_point_bplaw       = "data/model_point_bplaw.xml";
-    m_xml_model_point_supeplaw    = "data/model_point_supeplaw.xml";
-    m_xml_model_point_logparabola = "data/model_point_logparabola.xml";
-    m_xml_model_point_nodes       = "data/model_point_nodes.xml";
-    m_xml_model_point_filefct     = "data/model_point_filefct.xml";
-    m_xml_model_diffuse_const     = "data/model_diffuse_const.xml";
-    m_xml_model_diffuse_cube      = "data/model_diffuse_cube.xml";
-    m_xml_model_diffuse_map       = "data/model_diffuse_map.xml";
-    m_xml_model_radial_disk       = "data/model_radial_disk.xml";
-    m_xml_model_radial_gauss      = "data/model_radial_gauss.xml";
-    m_xml_model_radial_shell      = "data/model_radial_shell.xml";
-    m_xml_model_elliptical_disk   = "data/model_elliptical_disk.xml";
-    m_xml_model_elliptical_gauss  = "data/model_elliptical_gauss.xml";
+    m_map_file                    = datadir + "cena_lobes_parkes.fits";
+    m_cube_file                   = datadir + "test_cube.fits";
+    m_filefct                     = datadir + "filefunction.txt";
+    m_xml_file                    = datadir + "crab.xml";
+    m_xml_model_point_const       = datadir + "model_point_const.xml";
+    m_xml_model_point_gauss       = datadir + "model_point_gauss.xml";
+    m_xml_model_point_plaw        = datadir + "model_point_plaw.xml";
+    m_xml_model_point_plaw2       = datadir + "model_point_plaw2.xml";
+    m_xml_model_point_eplaw       = datadir + "model_point_eplaw.xml";
+    m_xml_model_point_bplaw       = datadir + "model_point_bplaw.xml";
+    m_xml_model_point_supeplaw    = datadir + "model_point_supeplaw.xml";
+    m_xml_model_point_logparabola = datadir + "model_point_logparabola.xml";
+    m_xml_model_point_nodes       = datadir + "model_point_nodes.xml";
+    m_xml_model_point_filefct     = datadir + "model_point_filefct.xml";
+    m_xml_model_diffuse_const     = datadir + "model_diffuse_const.xml";
+    m_xml_model_diffuse_cube      = datadir + "model_diffuse_cube.xml";
+    m_xml_model_diffuse_map       = datadir + "model_diffuse_map.xml";
+    m_xml_model_radial_disk       = datadir + "model_radial_disk.xml";
+    m_xml_model_radial_gauss      = datadir + "model_radial_gauss.xml";
+    m_xml_model_radial_shell      = datadir + "model_radial_shell.xml";
+    m_xml_model_elliptical_disk   = datadir + "model_elliptical_disk.xml";
+    m_xml_model_elliptical_gauss  = datadir + "model_elliptical_gauss.xml";
 
     // Append tests
-    append(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
-    append(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
+    append(static_cast<pfunction>(&TestGModel::test_model_par),
+           "Test GModelPar");
+    append(static_cast<pfunction>(&TestGModel::test_sky_model),
+           "Test GModelSky");
 
     // Append spatial model tests
     append(static_cast<pfunction>(&TestGModel::test_point_source),
@@ -94,20 +102,32 @@ void TestGModel::set(void)
            "Test spatial model XML I/O");
 
     // Append spectral model tests
-    append(static_cast<pfunction>(&TestGModel::test_const), "Test GModelSpectralConst");
-    append(static_cast<pfunction>(&TestGModel::test_gauss), "Test GModelSpectralGauss");
-    append(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
-    append(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
-    append(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
-    append(static_cast<pfunction>(&TestGModel::test_supeplaw), "Test GModelSpectralSuperExpPlaw");
-    append(static_cast<pfunction>(&TestGModel::test_bplaw), "Test GModelSpectralBrokenPlaw");
-    append(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
-    append(static_cast<pfunction>(&TestGModel::test_nodes), "Test GModelSpectralNodes");
-    append(static_cast<pfunction>(&TestGModel::test_filefct), "Test GModelSpectralFunc");
-    append(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
+    append(static_cast<pfunction>(&TestGModel::test_const),
+           "Test GModelSpectralConst");
+    append(static_cast<pfunction>(&TestGModel::test_gauss),
+           "Test GModelSpectralGauss");
+    append(static_cast<pfunction>(&TestGModel::test_plaw),
+           "Test GModelSpectralPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_plaw2),
+           "Test GModelSpectralPlaw2");
+    append(static_cast<pfunction>(&TestGModel::test_eplaw),
+           "Test GModelSpectralExpPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_supeplaw),
+           "Test GModelSpectralSuperExpPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_bplaw),
+           "Test GModelSpectralBrokenPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_logparabola),
+           "Test GModelSpectralLogParabola");
+    append(static_cast<pfunction>(&TestGModel::test_nodes),
+           "Test GModelSpectralNodes");
+    append(static_cast<pfunction>(&TestGModel::test_filefct),
+           "Test GModelSpectralFunc");
+    append(static_cast<pfunction>(&TestGModel::test_spectral_model),
+           "Test spectral model XML I/O");
 
     // Append temporal model tests
-    append(static_cast<pfunction>(&TestGModel::test_temp_const), "Test GModelTemporalConst");
+    append(static_cast<pfunction>(&TestGModel::test_temp_const),
+           "Test GModelTemporalConst");
 
     // Append genereric model tests
     append(static_cast<pfunction>(&TestGModel::test_model), "Test GModel");
@@ -116,7 +136,8 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
 
     // Append model registry tests
-    append(static_cast<pfunction>(&TestGModel::test_model_registry), "Test model registries");
+    append(static_cast<pfunction>(&TestGModel::test_model_registry),
+           "Test model registries");
 
     // Return
     return;
@@ -2110,70 +2131,45 @@ void TestGModel::test_nodes(void)
 void TestGModel::test_filefct(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralFunc model;
-        test_assert(model.type() == "FileFunction",
-                                    "Model type \"FileFunction\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralFunc model1;
+    test_assert(model1.type() == "FileFunction", "Check model type");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralFunc model("data/filefunction.txt", 2.0);
-        test_assert(model.filename().url() == "data/filefunction.txt",
-                    "Expected \"data/filefunction.txt\"");
-        test_value(model.norm(), 2.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralFunc model2(m_filefct, 2.0);
+    test_assert(model2.filename().url() == m_filefct,
+                "Check file function data file name");
+    test_value(model2.norm(), 2.0);
    
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml               xml(m_xml_model_point_filefct);
-        GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralFunc model(*element);
-        test_value(model.size(), 1);
-        test_assert(model.type() == "FileFunction", "Expected \"FileFunction\"");
-        test_assert(model.filename().url() == "data/filefunction.txt",
-                    "Expected \"data/filefunction.txt\"");
-        test_value(model.norm(), 1.0);
+    // Test XML constructor
+    GXml               xml(m_xml_model_point_filefct);
+    GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralFunc model3(*element);
+    test_value(model3.size(), 1);
+    test_assert(model3.type() == "FileFunction", "Check model type");
+    test_assert(model3.filename().url() == m_filefct,
+                "Check file function data file name");
+    test_value(model3.norm(), 1.0);
 
-        // Test filename method
-        model.filename("data/filefunction.txt");
-        test_assert(model.filename().url() == "data/filefunction.txt",
-                    "Expected \"data/filefunction.txt\"");
+    // Test filename method
+    model3.filename(m_filefct);
+    test_assert(model3.filename().url() == m_filefct,
+                "Check file function data file name");
 
-        // Test norm method
-        model.norm(3.0);
-        test_value(model.norm(), 3.0);
+    // Test norm method
+    model3.norm(3.0);
+    test_value(model3.norm(), 3.0);
 
-        // Test operator access
-        const char* strarray[] = {"Normalization"};
-        for (int i = 0; i < 1; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Normalization"};
+    for (int i = 0; i < 1; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -2744,20 +2740,20 @@ int main(void)
     GTestSuites testsuite("GModel");
 
     // Initialise success flag
-    bool was_successful=true;
+    bool success = true;
 
     // Create a test suite
     TestGModel test;
 
-    // Append to the container
+    // Append test to the container
     testsuite.append(test);
 
-    // Run
-    was_successful=testsuite.run();
+    // Run the testsuites
+    success = testsuite.run();
 
     // Save xml report
     testsuite.save("reports/GModel.xml");
 
     // Return
-    return was_successful ? 0:1;
+    return success ? 0:1;
 }

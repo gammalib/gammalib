@@ -29,8 +29,9 @@
 #include <config.h>
 #endif
 #include <stdlib.h>
-#include <iostream>
 #include <unistd.h>
+#include <iostream>
+#include <cstdlib>     // getenv
 #include "GLATLib.hpp"
 #include "GTools.hpp"
 #include "test_LAT.hpp"
@@ -40,11 +41,12 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir   = PACKAGE_SOURCE"/inst/lat/test/data";
-const std::string lat_caldb = PACKAGE_SOURCE"/inst/lat/caldb";
-const std::string dirPass6  = PACKAGE_SOURCE"/inst/lat/test/data/p6v3";
-const std::string dirPass7  = PACKAGE_SOURCE"/inst/lat/test/data/p7v6";
-const std::string dirPass8  = PACKAGE_SOURCE"/inst/lat/test/data/p8v2";
+const std::string srcdir    = std::getenv("TESTS_SRCDIR");
+const std::string datadir   = srcdir + "/inst/lat/test/data";
+const std::string lat_caldb = srcdir + "/inst/lat/caldb";
+const std::string dirPass6  = srcdir + "/inst/lat/test/data/p6v3";
+const std::string dirPass7  = srcdir + "/inst/lat/test/data/p7v6";
+const std::string dirPass8  = srcdir + "/inst/lat/test/data/p8v2";
 
 
 /***********************************************************************//**

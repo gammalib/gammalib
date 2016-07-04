@@ -1,4 +1,4 @@
-2016-06-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-07-04  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
@@ -61,6 +61,7 @@
         Use GFilename in GFits to store filename (#1649)
         Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598)
         Support Fermi LAT Pass 8 response functions (#1517)
+        Support out of source builds (#1484)
         Finalize implementation of CTA On/Off fitting (#1044, #1781)
 
 

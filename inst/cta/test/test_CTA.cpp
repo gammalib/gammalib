@@ -29,9 +29,10 @@
 #include <config.h>
 #endif
 #include <stdlib.h>
+#include <unistd.h>
 #include <iostream>
 #include <cmath>
-#include <unistd.h>
+#include <cstdlib>     // getenv
 #include "GCTALib.hpp"
 #include "GTools.hpp"
 #include "GNodeArray.hpp"
@@ -46,8 +47,10 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir           = PACKAGE_SOURCE"/inst/cta/test/data";
-const std::string cta_caldb         = PACKAGE_SOURCE"/inst/cta/caldb";
+const std::string srcdir            = std::getenv("TESTS_SRCDIR");
+const std::string datadir           = srcdir+"/inst/cta/test/data";
+const std::string caldbdir          = srcdir+"/inst/cta/test/caldb";
+const std::string cta_caldb         = srcdir+"/inst/cta/caldb";
 const std::string cta_irf           = "cta_dummy_irf";
 const std::string cta_events        = datadir+"/crab_events.fits";
 const std::string cta_events_gti    = datadir+"/crab_events_gti.fits[EVENTS2]";
@@ -59,12 +62,12 @@ const std::string cta_rsp_xml       = datadir+"/rsp_models.xml";
 const std::string cta_cube_bgd_xml  = datadir+"/cta_model_cube_bgd.xml";
 const std::string cta_irf_bgd_xml   = datadir+"/cta_model_irf_bgd.xml";
 const std::string cta_aeff_bgd_xml  = datadir+"/cta_model_aeff_bgd.xml";
-const std::string cta_caldb_king    = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/IFAE20120510_50h_King";
+const std::string cta_caldb_king    = cta_caldb+"/data/cta/e/bcf/IFAE20120510_50h_King";
 const std::string cta_irf_king      = "irf_file.fits";
-const std::string cta_psf_table     = PACKAGE_SOURCE"/inst/cta/test/caldb/psf_table.fits[PSF_2D_TABLE]";
-const std::string cta_edisp_perf    = PACKAGE_SOURCE"/inst/cta/test/caldb/cta_dummy_irf.dat";
-const std::string cta_edisp_rmf     = PACKAGE_SOURCE"/inst/cta/test/caldb/dc1/rmf.fits";
-const std::string cta_edisp_2D      = PACKAGE_SOURCE"/inst/cta/test/caldb/edisp_matrix.fits";
+const std::string cta_psf_table     = caldbdir+"/psf_table.fits[PSF_2D_TABLE]";
+const std::string cta_edisp_perf    = caldbdir+"/cta_dummy_irf.dat";
+const std::string cta_edisp_rmf     = caldbdir+"/dc1/rmf.fits";
+const std::string cta_edisp_2D      = caldbdir+"/edisp_matrix.fits";
 const std::string cta_modbck_fit    = datadir+"/bg_test.fits";
 const std::string cta_point_table   = datadir+"/crab_pointing.fits";
 

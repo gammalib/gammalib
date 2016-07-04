@@ -1,7 +1,7 @@
 /***************************************************************************
  *               test_MWL.cpp - Test multi-wavelength classes              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include <stdlib.h>
 #include <iostream>
+#include <cstdlib>     // getenv
 #include "GMWLLib.hpp"
 #include "test_MWL.hpp"
 
@@ -38,12 +39,13 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir        = PACKAGE_SOURCE"/inst/mwl/test/data";
-const std::string lat_crab_model = datadir+"/crab.xml";
-const std::string lat_crab_fits  = datadir+"/crab.fits";
-const std::string crab_model     = datadir+"/crab_mwl.xml";
-const std::string crab_fits      = datadir+"/crab_mwl.fits";
-const std::string mwl_xml        = datadir+"/obs_mwl.xml";
+const std::string srcdir         = std::getenv("TESTS_SRCDIR");
+const std::string datadir        = srcdir  + "/inst/mwl/test/data";
+const std::string lat_crab_model = datadir + "/crab.xml";
+const std::string lat_crab_fits  = datadir + "/crab.fits";
+const std::string crab_model     = datadir + "/crab_mwl.xml";
+const std::string crab_fits      = datadir + "/crab_mwl.fits";
+const std::string mwl_xml        = datadir + "/obs_mwl.xml";
 
 
 /***********************************************************************//**
@@ -55,8 +57,10 @@ void TestGMWL::set(void)
     name("GMWL");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGMWL::test_obs),       "Test observation handling");
-    append(static_cast<pfunction>(&TestGMWL::test_optimizer), "Test optimizer");
+    append(static_cast<pfunction>(&TestGMWL::test_obs),
+           "Test observation handling");
+    append(static_cast<pfunction>(&TestGMWL::test_optimizer),
+           "Test optimizer");
 
     // Return
     return;

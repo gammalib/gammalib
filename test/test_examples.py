@@ -18,9 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-import gammalib
-import sys
 import os
+import sys
+import gammalib
 
 
 # =============================================== #
@@ -33,14 +33,14 @@ class Test(gammalib.GPythonTestSuite):
     # Constructor
     def __init__(self):
         """
-        Constructor.
+        Constructor
         """
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
 
         # Examples directory
-        self._cpp_dir    = '../examples/cpp/'
-        self._python_dir = '../examples/python/'
+        self._cpp_dir    = os.environ['TESTS_BUILDDIR'] + '/examples/cpp/'
+        self._python_dir = os.environ['TESTS_SRCDIR']   + '/examples/python/'
 
         # Return
         return
@@ -127,8 +127,6 @@ class Test(gammalib.GPythonTestSuite):
         # Execute binary
         self._execute_binary('createfits')
 
-        #TODO: Do any testing
-
         # Return
         return
 
@@ -139,8 +137,6 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute binary
         self._execute_binary('createskymap')
-
-        #TODO: Do any testing
 
         # Return
         return
@@ -153,8 +149,6 @@ class Test(gammalib.GPythonTestSuite):
         # Execute binary
         self._execute_binary('createxml')
 
-        #TODO: Do any testing
-
         # Return
         return
 
@@ -165,8 +159,6 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute binary
         self._execute_binary('interpolate')
-
-        #TODO: Do any testing
 
         # Return
         return
@@ -179,8 +171,6 @@ class Test(gammalib.GPythonTestSuite):
         # Execute binary
         self._execute_binary('numerics')
 
-        #TODO: Do any testing
-
         # Return
         return
 
@@ -191,8 +181,6 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute binary
         self._execute_binary('optimize')
-
-        #TODO: Do any testing
 
         # Return
         return
@@ -205,8 +193,6 @@ class Test(gammalib.GPythonTestSuite):
         # Execute binary
         self._execute_binary('readmodel')
 
-        #TODO: Do any testing
-
         # Return
         return
 
@@ -217,8 +203,6 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute python script
         self._execute_python('matrix_howto')
-
-        #TODO: Do any testing
 
         # Return
         return
@@ -231,8 +215,6 @@ class Test(gammalib.GPythonTestSuite):
         # Execute python script
         self._execute_python('models_howto')
 
-        #TODO: Do any testing
-
         # Return
         return
 
@@ -244,8 +226,6 @@ class Test(gammalib.GPythonTestSuite):
         # Execute python script
         self._execute_python('xml_howto')
 
-        #TODO: Do any testing
-
         # Return
         return
 
@@ -256,8 +236,6 @@ class Test(gammalib.GPythonTestSuite):
         """
         # Execute python script
         self._execute_python('xml_html_create')
-
-        #TODO: Do any testing
 
         # Return
         return

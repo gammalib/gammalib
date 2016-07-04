@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include <stdlib.h>
 #include <unistd.h>
+#include <cstdlib>     // getenv
 #include "GTools.hpp"
 #include "test_COM.hpp"
 
@@ -38,8 +39,9 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir       = PACKAGE_SOURCE"/inst/com/test/data";
-const std::string com_caldb     = PACKAGE_SOURCE"/inst/com/caldb";
+const std::string srcdir        = std::getenv("TESTS_SRCDIR");
+const std::string datadir       = srcdir + "/inst/com/test/data";
+const std::string com_caldb     = srcdir + "/inst/com/caldb";
 const std::string com_iaq       = "ENERG(1.0-3.0)MeV";        // 1-3 MeV
 const std::string com_dre       = datadir+"/m50439_dre.fits"; // 1-3 MeV
 const std::string com_drb       = datadir+"/m34997_drg.fits";

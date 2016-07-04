@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
+import os
 import math
 import gammalib
 
@@ -58,8 +59,11 @@ class Test(gammalib.GPythonTestSuite):
         """
         Test GFile class interface.
         """
+        # Get test data directory
+        datadir = os.environ['TESTS_SRCDIR'] + '/test/data/'
+        
         # Set test file names
-        file = gammalib.GFilename("data/file.fits")
+        file = gammalib.GFilename(datadir+'file.fits')
 
         # Test loading of FITS file
         self.test_try("Test GFits file load constructor")

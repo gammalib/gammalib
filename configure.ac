@@ -76,14 +76,6 @@ AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where libra
 
 
 #############################################################################
-# Determine source directory for unit testing                               #
-#############################################################################
-PACKAGE_SOURCE=`pwd`
-AC_DEFINE_UNQUOTED([PACKAGE_SOURCE], "${PACKAGE_SOURCE}", [Location where source is installed])
-AC_SUBST(PACKAGE_SOURCE)
-
-
-#############################################################################
 # Check for programs that are required by automake                          #
 #############################################################################
 AC_PROG_MAKE_SET
@@ -563,7 +555,7 @@ esac
 # Checks for optional instrument specific interfaces                        #
 #############################################################################
 # Checks for the existence of instrument specific interfaces
-AC_CHECK_FILE([inst/README.md],
+AC_CHECK_FILE([$srcdir/inst/README.md],
               [with_inst=yes],
               [with_inst=no])
 AM_CONDITIONAL([WITH_INST], [test "x$with_inst" = "xyes"])
@@ -575,7 +567,7 @@ AC_ARG_WITH([mwl],
             [],
             [with_mwl=yes])
 if test "x$with_mwl" = "xyes"; then
-  AC_CHECK_FILE([inst/mwl/README.md],
+  AC_CHECK_FILE([$srcdir/inst/mwl/README.md],
                 [with_mwl=yes],
                 [with_mwl=no])
 fi
@@ -588,7 +580,7 @@ AC_ARG_WITH([cta],
             [],
             [with_cta=yes])
 if test "x$with_cta" = "xyes"; then
-  AC_CHECK_FILE([inst/cta/README.md],
+  AC_CHECK_FILE([$srcdir/inst/cta/README.md],
                 [with_cta=yes],
                 [with_cta=no])
 fi
@@ -601,7 +593,7 @@ AC_ARG_WITH([lat],
             [],
             [with_lat=yes])
 if test "x$with_lat" = "xyes"; then
-  AC_CHECK_FILE([inst/lat/README.md],
+  AC_CHECK_FILE([$srcdir/inst/lat/README.md],
                 [with_lat=yes],
                 [with_lat=no])
 fi
@@ -614,7 +606,7 @@ AC_ARG_WITH([com],
             [],
             [with_com=yes])
 if test "x$with_com" = "xyes"; then
-  AC_CHECK_FILE([inst/com/README.md],
+  AC_CHECK_FILE([$srcdir/inst/com/README.md],
                 [with_com=yes],
                 [with_com=no])
 fi
@@ -1393,12 +1385,13 @@ AC_CONFIG_FILES([Makefile
                  include/Makefile
                  test/Makefile
                  test/test_python.sh
+                 test/test_examples.sh
+                 test/reports/Makefile
                  pyext/Makefile
                  pyext/setup.py
                  pyext/gammalib/__init__.py
                  examples/Makefile
                  examples/cpp/Makefile
-                 test/test_examples.sh
                  gammalib.pc
                  testconf.sh],
                 [if test -f test/test_python.sh; then chmod +x test/test_python.sh; fi;

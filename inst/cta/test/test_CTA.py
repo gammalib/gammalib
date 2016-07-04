@@ -17,8 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ==========================================================================
-import gammalib
 import os
+import gammalib
 import math
 
 
@@ -37,19 +37,25 @@ class Test(gammalib.GPythonTestSuite):
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
 
-        # Initialise CALDB
-        self.caldb = '../inst/cta/test/caldb'
+        # Set directory base path
+        self.testdir(os.path.dirname(os.path.abspath(__file__)))
 
         # Return
         return
 
-    # Define CALDB
-    def caldb_path(self, path):
+    # Set test directory base path
+    def testdir(self, path):
         """
-        Set path to calibration database for test.
+        Set test directory base path
+
+        Parameters
+        ----------
+        path : str
+            Test directory base path
         """
-        # Set path
-        self.caldb = path
+        # Set test data paths
+        self._caldb = path + '/caldb'
+        self._data  = path + '/data'
 
         # Return
         return
@@ -78,7 +84,7 @@ class Test(gammalib.GPythonTestSuite):
         Test GCTAAeff classes.
         """
         # Test GCTAAeff2D file constructor
-        filename = self.caldb + '/prod1_gauss.fits'
+        filename = self._caldb + '/prod1_gauss.fits'
         aeff     = gammalib.GCTAAeff2D(filename)
 
         # Test Aeff values
@@ -106,7 +112,7 @@ class Test(gammalib.GPythonTestSuite):
                         ' above maximum offset angle')
 
         # Test GCTAAeffPerfTable file constructor
-        filename = self.caldb + '/cta_dummy_irf.dat'
+        filename = self._caldb + '/cta_dummy_irf.dat'
         aeff     = gammalib.GCTAAeffPerfTable(filename)
 
         # Test Aeff values
@@ -116,7 +122,7 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(aeff(1.0, 0.01745), 15838314971.2, 0.1)
 
         # Test GCTAAeffArf file constructor
-        filename = self.caldb + '/dc1/arf.fits'
+        filename = self._caldb + '/dc1/arf.fits'
         aeff     = gammalib.GCTAAeffArf(filename)
 
         # Test Aeff values
@@ -134,7 +140,7 @@ class Test(gammalib.GPythonTestSuite):
         Test GCTAPsf classes.
         """
         # Test GCTAPsf2D file constructor
-        filename = self.caldb + '/prod1_gauss.fits'
+        filename = self._caldb + '/prod1_gauss.fits'
         psf      = gammalib.GCTAPsf2D(filename)
 
         # Test PSF values
@@ -146,7 +152,7 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(psf(0.001, 1.0, 0.01745), 111075.0692681, 1.0e-6)
 
         # Test GCTAPsfKing file constructor
-        filename = self.caldb + '/prod1_king.fits'
+        filename = self._caldb + '/prod1_king.fits'
         psf      = gammalib.GCTAPsfKing(filename)
 
         # Test PSF values
@@ -158,7 +164,7 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(psf(0.001, 1.0, 0.01745), 80272.5530008, 1.0e-6)
 
         # Test GCTAPsfPerfTable file constructor
-        filename = self.caldb + '/cta_dummy_irf.dat'
+        filename = self._caldb + '/cta_dummy_irf.dat'
         psf      = gammalib.GCTAPsfPerfTable(filename)
 
         # Test PSF values
@@ -170,7 +176,7 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(psf(0.001, 1.0, 0.01745), 22272.4258111, 1.0e-6)
 
         # Test GCTAPsfVector file constructor
-        filename = self.caldb + '/dc1/psf_magic.fits'
+        filename = self._caldb + '/dc1/psf_magic.fits'
         psf      = gammalib.GCTAPsfVector(filename)
 
         # Print
@@ -190,7 +196,7 @@ class Test(gammalib.GPythonTestSuite):
         Test GCTAEdisp classes.
         """
         # Test GCTAEdispRmf file constructor
-        filename = self.caldb + '/dc1/rmf.fits'
+        filename = self._caldb + '/dc1/rmf.fits'
         edisp    = gammalib.GCTAEdispRmf(filename)
         
         # Test energy dispersion values
@@ -198,7 +204,7 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(edisp(math.log10(1),math.log10(30)), 0.0, 1.0e-9)
         
         # Test GCTAEdispPerfTable file constructor
-        filename = self.caldb + '/cta_dummy_irf.dat'
+        filename = self._caldb + '/cta_dummy_irf.dat'
         edisp    = gammalib.GCTAEdispPerfTable(filename)
 
         # Test energy dispersion values
@@ -210,7 +216,7 @@ class Test(gammalib.GPythonTestSuite):
         self.test_value(edisp(1.001, 1.0, 0.0), 18.0463571212, 1.0e-6)
 
         # Test GCTAResponseIrf file constructor
-        db  = gammalib.GCaldb(self.caldb)
+        db  = gammalib.GCaldb(self._caldb)
         irf = 'cta_dummy_irf'
         rsp = gammalib.GCTAResponseIrf(irf, db)
 
@@ -237,7 +243,7 @@ class Test(gammalib.GPythonTestSuite):
         Test response classes
         """
         # Load 1DC CTA observation (ARF, PSF, RMF)
-        filename = self.caldb + '/../data/irf_1dc.xml'
+        filename = self._data + '/irf_1dc.xml'
         obs      = gammalib.GObservations(filename)
 
         # Return
@@ -266,7 +272,7 @@ class Test(gammalib.GPythonTestSuite):
                                       gammalib.GEnergy(10.0, 'TeV'))
 
         # Create On/Off observations from CTA observations
-        filename = self.caldb + '/../data/irf_unbinned.xml'
+        filename = self._data + '/irf_unbinned.xml'
         inobs    = gammalib.GObservations(filename)
         outobs   = gammalib.GObservations()
         for run in inobs:
@@ -274,7 +280,7 @@ class Test(gammalib.GPythonTestSuite):
             outobs.append(onoff)
 
         # Load model container and attach it to the observations
-        models = gammalib.GModels(self.caldb + '/../data/onoff_model.xml')
+        models = gammalib.GModels(self._data + '/onoff_model.xml')
         outobs.models(models)
 
         # Perform maximum likelihood fit
