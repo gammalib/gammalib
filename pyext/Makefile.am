@@ -212,8 +212,10 @@ BUILT_SOURCES =
 endif # BUILD_WRAPPERS
 
 # Extra files to be distributed in the tar file
-EXTRA_DIST = $(wildcard *.i) $(wildcard gammalib/*.i) gammalib/tests \
-             $(PYTHON_WRAPPERS)
+EXTRA_DIST = gammalib/tests $(PYTHON_WRAPPERS)
+dist-hook:
+	cp -r $(srcdir)/*.i $(distdir)
+	cp -r $(srcdir)/gammalib/*.i $(distdir)/gammalib
 
 # Dependencies. Obtain the list of dependencies by executing ls.
 DEPFILES = $(shell ls gammalib/*.Pi 2> /dev/null)
@@ -237,16 +239,24 @@ endif
 # Do nothing for 'make check'
 #check-local:
 
-# Install the gammalib extension module
+# Install the gammalib Python module
 install-exec-local:
 	$(PYTHON) setup.py install --prefix=$(prefix)
 
-# Set files to be removed in clean
+# Uninstall the gammalib Python module
+uninstall-local:
+	rm -rf $(pyexecdir)/gammalib
+	rm -rf $(pyexecdir)/gammalib-@VERSION@*
+	rm -rf $(datarootdir)/gammalib
+
+# Set files to be removed in 'make clean'
 CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 
-# Remove build directory and test libraries
+# Files to be removed in build directory
 clean-local:
 	rm -rf build
-	rm -rf gammalib/__init__.py? gammalib/_*.so gammalib/*.pyc
+	rm -rf $(builddir)/gammalib/__init__.py?
+	rm -rf $(builddir)/gammalib/_*.so
+	rm -rf $(builddir)/gammalib/*.pyc
 
 endif # WITH_PYTHON

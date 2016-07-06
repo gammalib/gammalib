@@ -168,16 +168,12 @@ for module in core_modules:
 # Set extension definition for instrument dependent modules
 for module in inst_modules:
 
-    # Define paths
-    pyext_path   = '@top_srcdir@/inst/'+module+'/pyext'
-    include_path = '@top_srcdir@/inst/'+module+'/include'
-
     # Set include directories for module
     include_inst_dirs = include_dirs
-    include_inst_dirs.append(include_path)
+    include_inst_dirs.append('@top_srcdir@/inst/'+module+'/include')
 
     # Add SWIG files to install_files
-    install_files.extend(glob.glob(pyext_path+'/*.i'))
+    install_files.extend(glob.glob('@top_srcdir@/inst/'+module+'/pyext/*.i'))
 
     # In case that wrappers were not built then copy the module wrapper files
     # from the source to the build directory
@@ -189,7 +185,7 @@ for module in inst_modules:
 
     # Define module
     ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
-                           include_dirs=include_dirs, \
+                           include_dirs=include_inst_dirs, \
                            libraries=libraries,
                            library_dirs=library_dirs,
                            runtime_library_dirs=runtime_library_dirs,
