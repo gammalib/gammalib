@@ -809,14 +809,17 @@ AC_SUBST(OPENMP_LIB_LDFLAGS)
 # Python binding requires Python and either the files gammalib_wrap.cpp and #
 # gammalib.py or swig to create these files.  The following conditionals    #
 # are set:                                                                  #
-# WITH_PYTHON - Python bindings will be built                               #
-# HAVE_SWIG   - swig is available                                           #
+# WITH_PYTHON   - Python bindings will be built                             #
+# HAVE_SWIG     - swig is available                                         #
+# HAVE_WRAPPERS - wrappers are available                                    #
 #############################################################################
 # Initialise flags
 enable_python="no"
 has_python="no"
 has_python_h="no"
 has_swig="no"
+has_wrappers="no"
+build_wrappers="no"
 
 # Python binding enabled?
 AC_ARG_ENABLE([python-binding],
@@ -931,40 +934,58 @@ else
 
   # Do we have Python wrappers
   has_wrappers="yes"
-  AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
-                  pyext/gammalib/base_wrap.cpp pyext/gammalib/base.py
-                  pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
-                  pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
-                  pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
-                  pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
-                  pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
-                  pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
-                  pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
-                  pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
-                  pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
-                  pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py
-                  pyext/gammalib/xspec_wrap.cpp pyext/gammalib/xspec.py
-                  pyext/gammalib/vo_wrap.cpp pyext/gammalib/vo.py],,
+  AC_CHECK_FILES([$srcdir/pyext/gammalib/app_wrap.cpp
+                  $srcdir/pyext/gammalib/app.py
+                  $srcdir/pyext/gammalib/base_wrap.cpp
+                  $srcdir/pyext/gammalib/base.py
+                  $srcdir/pyext/gammalib/fits_wrap.cpp
+                  $srcdir/pyext/gammalib/fits.py
+                  $srcdir/pyext/gammalib/linalg_wrap.cpp
+                  $srcdir/pyext/gammalib/linalg.py
+                  $srcdir/pyext/gammalib/model_wrap.cpp
+                  $srcdir/pyext/gammalib/model.py
+                  $srcdir/pyext/gammalib/numerics_wrap.cpp
+                  $srcdir/pyext/gammalib/numerics.py
+                  $srcdir/pyext/gammalib/obs_wrap.cpp
+                  $srcdir/pyext/gammalib/obs.py
+                  $srcdir/pyext/gammalib/opt_wrap.cpp
+                  $srcdir/pyext/gammalib/opt.py
+                  $srcdir/pyext/gammalib/sky_wrap.cpp
+                  $srcdir/pyext/gammalib/sky.py
+                  $srcdir/pyext/gammalib/support_wrap.cpp
+                  $srcdir/pyext/gammalib/support.py
+                  $srcdir/pyext/gammalib/test_wrap.cpp
+                  $srcdir/pyext/gammalib/test.py
+                  $srcdir/pyext/gammalib/xml_wrap.cpp
+                  $srcdir/pyext/gammalib/xml.py
+                  $srcdir/pyext/gammalib/xspec_wrap.cpp
+                  $srcdir/pyext/gammalib/xspec.py
+                  $srcdir/pyext/gammalib/vo_wrap.cpp
+                  $srcdir/pyext/gammalib/vo.py],,
                  [has_wrappers="no"])
-if test "x$with_mwl" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_lat" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/lat_wrap.cpp pyext/gammalib/lat.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_cta" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/cta_wrap.cpp pyext/gammalib/cta.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_com" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/com_wrap.cpp pyext/gammalib/com.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$has_wrappers" = "xno"; then
-  AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
-fi
+  if test "x$with_mwl" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/mwl_wrap.cpp
+                    $srcdir/pyext/gammalib/mwl.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_lat" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/lat_wrap.cpp
+                    $srcdir/pyext/gammalib/lat.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_cta" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/cta_wrap.cpp
+                    $srcdir/pyext/gammalib/cta.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_com" = "xyes"; then
+    AC_CHECK_FILES([$srcdir/pyext/gammalib/com_wrap.cpp
+                    $srcdir/pyext/gammalib/com.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$has_wrappers" = "xno"; then
+    AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
+  fi
 
   # Do we have wrappers or can we created wrappers?
   can_wrappers="no"
@@ -972,16 +993,22 @@ fi
     can_wrappers="yes"
   fi
 
+  # Don't we have wrappers but we have swig
+  if [test "x$has_wrappers" = "xno" -a "x$has_swig" = "xyes"]; then
+    build_wrappers="yes"
+  fi
+
   # Signal if Python is enabled
   if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
     enable_python="yes"
     AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
   fi
-  
 
 fi
-AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
+AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
+AM_CONDITIONAL(HAVE_WRAPPERS, test "x$has_wrappers" = "xyes")
+AM_CONDITIONAL(BUILD_WRAPPERS, test "x$build_wrappers" = "xyes")
 
 # Set Python environment
 if test "x$enable_python" = "xyes"; then
@@ -1403,15 +1430,19 @@ if test "x$with_inst" = "xyes"; then
 fi
 if test "x$with_mwl" = "xyes"; then
   AC_CONFIG_FILES([inst/mwl/Makefile])
+  AC_CONFIG_FILES([inst/mwl/test/Makefile])
 fi
 if test "x$with_cta" = "xyes"; then
   AC_CONFIG_FILES([inst/cta/Makefile])
+  AC_CONFIG_FILES([inst/cta/test/Makefile])
 fi
 if test "x$with_lat" = "xyes"; then
   AC_CONFIG_FILES([inst/lat/Makefile])
+  AC_CONFIG_FILES([inst/lat/test/Makefile])
 fi
 if test "x$with_com" = "xyes"; then
   AC_CONFIG_FILES([inst/com/Makefile])
+  AC_CONFIG_FILES([inst/com/test/Makefile])
 fi
 AC_OUTPUT
 

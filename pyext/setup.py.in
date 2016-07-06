@@ -43,6 +43,13 @@ if is_build:
 else:
     print('Python extension module installation:')
 
+# Set prefix
+prefix = '@prefix@'
+if (len(sys.argv) >= 3):
+    if (sys.argv[2].find('--prefix') != -1):
+        start  = sys.argv[2].find('=') + 1
+        prefix = sys.argv[2][start:]
+
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
 # overrides the GammaLib settings. Otherwise, MacPorts libraries would be
 # used instead of the libraries selected by GammaLib
@@ -73,8 +80,8 @@ runtime_library_dirs = ['../src/.libs']
 libraries            = ['gamma']
 
 # Add install directory to runtime library path
-if os.path.exists('@prefix@/lib'):
-    runtime_library_dirs.append('@prefix@/lib')
+if os.path.exists(prefix+'/lib'):
+    runtime_library_dirs.append(prefix+'/lib')
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
@@ -196,7 +203,7 @@ for module in inst_modules:
     py_modules.append(pkg_name+'.'+module)
 
 # Set data files to install.
-data_files=[('@prefix@/share/gammalib/swig', install_files)]
+data_files=[(prefix+'/share/gammalib/swig', install_files)]
 
 # Setup
 setup(name='@PACKAGE_NAME@',

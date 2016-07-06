@@ -19,6 +19,9 @@
 #                                                                           #
 #############################################################################
 
+# Set sub directories
+SUBDIRS = reports
+
 # Optional instrument specific tests
 if WITH_INST_MWL
   INST_MWL = $(top_builddir)/inst/mwl/test/test_MWL
@@ -190,7 +193,6 @@ test_GObservation_CPPFLAGS = @CPPFLAGS@
 test_GObservation_LDADD = $(top_builddir)/src/libgamma.la
 
 # Add Valgrind rule
-#	
 valgrind:
 	@if type valgrind >/dev/null 2>&1; then \
 		cd .. ; \
@@ -207,3 +209,13 @@ valgrind:
 	else \
 		echo "valgrind  not found in PATH."; \
 	fi
+
+# Files to be removed in build directory
+clean-local:
+	rm -rf $(builddir)/*.fits
+	rm -rf $(builddir)/*.log
+	rm -rf $(builddir)/*.html
+	rm -rf $(builddir)/*.xml
+	rm -rf $(builddir)/*.reg
+	rm -rf $(builddir)/*.dat
+	rm -rf $(builddir)/reports/*.xml

@@ -241,13 +241,15 @@ endif
 
 # Install the gammalib Python module
 install-exec-local:
-	$(PYTHON) setup.py install --prefix=$(prefix)
+	$(PYTHON) setup.py install --prefix=$(DESTDIR)$(prefix)
 
 # Uninstall the gammalib Python module
 uninstall-local:
-	rm -rf $(pyexecdir)/gammalib
-	rm -rf $(pyexecdir)/gammalib-@VERSION@*
-	rm -rf $(datarootdir)/gammalib
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.py
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.pyc
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.so
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib-@VERSION@*.egg-info
+	rm -rf $(DESTDIR)$(datarootdir)/gammalib
 
 # Set files to be removed in 'make clean'
 CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
@@ -255,8 +257,9 @@ CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
 # Files to be removed in build directory
 clean-local:
 	rm -rf build
-	rm -rf $(builddir)/gammalib/__init__.py?
-	rm -rf $(builddir)/gammalib/_*.so
+	rm -rf $(builddir)/gammalib/*.py
 	rm -rf $(builddir)/gammalib/*.pyc
+	rm -rf $(builddir)/gammalib/*_wrap.cpp
+	rm -rf $(builddir)/gammalib/_*.so
 
 endif # WITH_PYTHON
