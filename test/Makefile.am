@@ -21,40 +21,20 @@
 
 # Optional instrument specific tests
 if WITH_INST_MWL
-  INST_MWL = test_MWL
-  INCL_MWL = -I$(top_srcdir)/inst/mwl/include
+  INST_MWL = $(top_builddir)/inst/mwl/test/test_MWL
   TEST_MWL = :$(top_srcdir)/inst/mwl/test
-  test_MWL_SOURCES = $(top_srcdir)/inst/mwl/test/test_MWL.cpp
-  test_MWL_LDFLAGS = @LDFLAGS@
-  test_MWL_CPPFLAGS = @CPPFLAGS@
-  test_MWL_LDADD = $(top_builddir)/src/libgamma.la
 endif
 if WITH_INST_CTA
-  INST_CTA = test_CTA
-  INCL_CTA = -I$(top_srcdir)/inst/cta/include
+  INST_CTA = $(top_builddir)/inst/cta/test/test_CTA
   TEST_CTA = :$(top_srcdir)/inst/cta/test
-  test_CTA_SOURCES = $(top_srcdir)/inst/cta/test/test_CTA.cpp
-  test_CTA_LDFLAGS = @LDFLAGS@
-  test_CTA_CPPFLAGS = @CPPFLAGS@
-  test_CTA_LDADD = $(top_builddir)/src/libgamma.la
 endif
 if WITH_INST_LAT
-  INST_LAT = test_LAT
-  INCL_LAT = -I$(top_srcdir)/inst/lat/include
+  INST_LAT = $(top_builddir)/inst/lat/test/test_LAT
   TEST_LAT = :$(top_srcdir)/inst/lat/test
-  test_LAT_SOURCES = $(top_srcdir)/inst/lat/test/test_LAT.cpp
-  test_LAT_LDFLAGS = @LDFLAGS@
-  test_LAT_CPPFLAGS = @CPPFLAGS@
-  test_LAT_LDADD = $(top_builddir)/src/libgamma.la
 endif
 if WITH_INST_COM
-  INST_COM = test_COM
-  INCL_COM = -I$(top_srcdir)/inst/com/include
+  INST_COM = $(top_builddir)/inst/com/test/test_COM
   TEST_COM = :$(top_srcdir)/inst/com/test
-  test_COM_SOURCES = $(top_srcdir)/inst/com/test/test_COM.cpp
-  test_COM_LDFLAGS = @LDFLAGS@
-  test_COM_CPPFLAGS = @CPPFLAGS@
-  test_COM_LDADD = $(top_builddir)/src/libgamma.la
 endif
 
 # Optional python bindings
@@ -70,11 +50,7 @@ MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
 # Include directories
 INCLUDES = -I$(top_srcdir)/include \
            -I$(top_builddir)/src \
-           -I$(top_srcdir)/src/support \
-           $(INCL_MWL) \
-           $(INCL_CTA) \
-           $(INCL_LAT) \
-           $(INCL_COM)
+           -I$(top_srcdir)/src/support
 
 # Test programs (those will be compiled)
 check_PROGRAMS = test_GSupport \
@@ -91,8 +67,7 @@ check_PROGRAMS = test_GSupport \
                  test_GModel \
                  test_GSky \
                  test_GOptimizer \
-                 test_GObservation \
-                 $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM)
+                 test_GObservation
 
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \

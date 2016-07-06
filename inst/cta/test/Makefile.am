@@ -1,5 +1,5 @@
 #############################################################################
-# Makefile.am for com module                                                #
+# Makefile.am for cta/test module                                           #
 # ------------------------------------------------------------------------- #
 # Copyright (C) 2016 Juergen Knoedlseder                                    #
 # ------------------------------------------------------------------------- #
@@ -19,41 +19,11 @@
 #                                                                           #
 #############################################################################
 
-# Set sub directories
-SUBDIRS = test
+# Test sources
+test_CTA_SOURCES = test_CTA.cpp test_CTA.hpp
+test_CTA_LDFLAGS = @LDFLAGS@
+test_CTA_CPPFLAGS = @CPPFLAGS@ -I$(srcdir)/../include -I$(top_srcdir)/include
+test_CTA_LDADD = $(top_builddir)/src/libgamma.la
 
-# Darwin support
-MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
-@EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
-
-# Set include directories
-INCLUDES = -I$(top_srcdir)/include \
-           -I$(top_builddir)/src \
-           -I$(top_srcdir)/src/support \
-           -I$(top_srcdir)/inst/mwl/include
-
-# Define sources for this directory
-sources = src/GMWLException.cpp \
-          src/GMWLObservation.cpp \
-          src/GMWLSpectrum.cpp \
-          src/GMWLDatum.cpp \
-          src/GMWLInstDir.cpp \
-          src/GMWLResponse.cpp
-
-# Define headers to be installed
-pkginclude_HEADERS = include/GMWLException.hpp \
-                     include/GMWLObservation.hpp \
-                     include/GMWLSpectrum.hpp \
-                     include/GMWLDatum.hpp \
-                     include/GMWLInstDir.hpp \
-                     include/GMWLResponse.hpp
-
-# Build libtool library
-noinst_LTLIBRARIES = libmwl.la
-libmwl_la_SOURCES = $(sources)
-libmwl_la_LDFLAGS =
-
-# Extra files to be distributed in the tar file
-EXTRA_DIST = README.md pyext \
-             include/GMWLLib.hpp \
-             test/test_MWL.hpp test/test_MWL.py test/data
+# Test programs (list of executables that will be compiled)
+check_PROGRAMS = test_CTA

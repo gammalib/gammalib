@@ -19,6 +19,9 @@
 #                                                                           #
 #############################################################################
 
+# Set sub directories
+SUBDIRS = test
+
 # Darwin support
 MACOSX_DEPLOYMENT_TARGET=@CONFIGURE_MACOSX_DEPLOYMENT_TARGET@
 @EXPORT_MACOSX_DEPLOYMENT_TARGET@export MACOSX_DEPLOYMENT_TARGET
