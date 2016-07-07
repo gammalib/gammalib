@@ -247,7 +247,9 @@ install-exec-local:
 uninstall-local:
 	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.py
 	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.pyc
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/__pycache__
 	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/tests/*.pyc
+	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/tests/__pycache__
 	rm -rf $(DESTDIR)$(pyexecdir)/gammalib/*.so
 	rm -rf $(DESTDIR)$(pyexecdir)/gammalib-@VERSION@*.egg-info
 	rm -rf $(DESTDIR)$(datarootdir)/gammalib
