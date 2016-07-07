@@ -41,12 +41,11 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string srcdir    = std::getenv("TESTS_SRCDIR");
-const std::string datadir   = srcdir + "/inst/lat/test/data";
-const std::string lat_caldb = srcdir + "/inst/lat/caldb";
-const std::string dirPass6  = srcdir + "/inst/lat/test/data/p6v3";
-const std::string dirPass7  = srcdir + "/inst/lat/test/data/p7v6";
-const std::string dirPass8  = srcdir + "/inst/lat/test/data/p8v2";
+const std::string datadir   = std::getenv("TEST_LAT_DATA");
+const std::string lat_caldb = datadir + "/../../caldb";
+const std::string dirPass6  = datadir + "/p6v3";
+const std::string dirPass7  = datadir + "/p7v6";
+const std::string dirPass8  = datadir + "/p8v2";
 
 
 /***********************************************************************//**
@@ -73,9 +72,12 @@ void TestGLATResponse::set(void)
     name("GLATResponse");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATResponse::test_response_p6), "Test P6 response");
-    append(static_cast<pfunction>(&TestGLATResponse::test_response_p7), "Test P7 response");
-    append(static_cast<pfunction>(&TestGLATResponse::test_response_p8), "Test P8 response");
+    append(static_cast<pfunction>(&TestGLATResponse::test_response_p6),
+           "Test P6 response");
+    append(static_cast<pfunction>(&TestGLATResponse::test_response_p7),
+           "Test P7 response");
+    append(static_cast<pfunction>(&TestGLATResponse::test_response_p8),
+           "Test P8 response");
 
     // Return
     return;

@@ -37,25 +37,9 @@ class Test(gammalib.GPythonTestSuite):
         # Call base class constructor
         gammalib.GPythonTestSuite.__init__(self)
 
-        # Set directory base path
-        self.testdir(os.path.dirname(os.path.abspath(__file__)))
-
-        # Return
-        return
-
-    # Set test directory base path
-    def testdir(self, path):
-        """
-        Set test directory base path
-
-        Parameters
-        ----------
-        path : str
-            Test directory base path
-        """
-        # Set test data paths
-        self._caldb = path + '/caldb'
-        self._data  = path + '/data'
+        # Set test directories
+        self._data  = os.environ['TEST_CTA_DATA']
+        self._caldb = self._data + '/../caldb'
 
         # Return
         return

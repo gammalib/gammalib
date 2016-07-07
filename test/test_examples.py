@@ -39,8 +39,8 @@ class Test(gammalib.GPythonTestSuite):
         gammalib.GPythonTestSuite.__init__(self)
 
         # Examples directory
-        self._cpp_dir    = os.environ['TESTS_BUILDDIR'] + '/examples/cpp/'
-        self._python_dir = os.environ['TESTS_SRCDIR']   + '/examples/python/'
+        self._cpp_dir    = os.environ['TEST_BUILDDIR'] + '/examples/cpp/'
+        self._python_dir = os.environ['TEST_SRCDIR']   + '/examples/python/'
 
         # Return
         return

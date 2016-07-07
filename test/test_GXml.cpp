@@ -43,11 +43,11 @@ void TestGXml::set(void)
     // Test name
     name("GXml");
 
-    // Set srcdir
-    std::string srcdir = std::getenv("TESTS_SRCDIR");
+    // Set datadir
+    std::string datadir = std::getenv("TEST_DATA");
 
     // Set XML filename
-    m_xml_file = srcdir + "/test/data/test.xml";
+    m_xml_file = datadir + "/test.xml";
 
     // Append tests
     append(static_cast<pfunction>(&TestGXml::test_GXml_attributes),

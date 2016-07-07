@@ -60,7 +60,7 @@ class Test(gammalib.GPythonTestSuite):
         Test GFile class interface.
         """
         # Get test data directory
-        datadir = os.environ['TESTS_SRCDIR'] + '/test/data/'
+        datadir = os.environ['TEST_DATA'] + '/'
         
         # Set test file names
         file = gammalib.GFilename(datadir+'file.fits')

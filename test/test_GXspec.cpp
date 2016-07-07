@@ -34,8 +34,8 @@
 
 
 /* __ Constants __________________________________________________________ */
-const std::string srcdir  = std::getenv("TESTS_SRCDIR");
-const std::string rmfname = srcdir + "/test/data/rmf.fits";
+const std::string datadir = std::getenv("TEST_DATA");
+const std::string rmfname = datadir + "/rmf.fits";
 
 
 /***********************************************************************//**

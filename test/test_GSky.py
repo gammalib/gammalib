@@ -388,7 +388,7 @@ class Test(gammalib.GPythonTestSuite):
         See https://github.com/astropy/coordinates-benchmark
         """
         # Get test data directory
-        datadir = os.environ['TESTS_SRCDIR'] + '/test/data/'
+        datadir = os.environ['TEST_DATA'] + '/'
 
         # Set parameters
         fk5_filename         = datadir + 'initial_coords.txt'

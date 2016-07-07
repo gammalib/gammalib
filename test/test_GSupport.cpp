@@ -40,8 +40,8 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string srcdir   = std::getenv("TESTS_SRCDIR");
-const std::string csv_file = srcdir + "/test/data/csv.dat";
+const std::string datadir  = std::getenv("TEST_DATA");
+const std::string csv_file = datadir + "/csv.dat";
 
 
 /***********************************************************************//**

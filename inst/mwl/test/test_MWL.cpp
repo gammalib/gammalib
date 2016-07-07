@@ -39,8 +39,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string srcdir         = std::getenv("TESTS_SRCDIR");
-const std::string datadir        = srcdir  + "/inst/mwl/test/data";
+const std::string datadir        = std::getenv("TEST_MWL_DATA");
 const std::string lat_crab_model = datadir + "/crab.xml";
 const std::string lat_crab_fits  = datadir + "/crab.fits";
 const std::string crab_model     = datadir + "/crab_mwl.xml";

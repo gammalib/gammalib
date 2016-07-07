@@ -46,32 +46,31 @@ void TestGModel::set(void)
     name("GModel");
 
     // Set test data directory
-    std::string datadir = std::string(std::getenv("TESTS_SRCDIR")) +
-                          "/test/data/";
+    std::string datadir = std::getenv("TEST_DATA");
 
     // Set attributes
-    m_map_file                    = datadir + "cena_lobes_parkes.fits";
-    m_cube_file                   = datadir + "test_cube.fits";
-    m_filefct                     = datadir + "filefunction.txt";
-    m_xml_file                    = datadir + "crab.xml";
-    m_xml_model_point_const       = datadir + "model_point_const.xml";
-    m_xml_model_point_gauss       = datadir + "model_point_gauss.xml";
-    m_xml_model_point_plaw        = datadir + "model_point_plaw.xml";
-    m_xml_model_point_plaw2       = datadir + "model_point_plaw2.xml";
-    m_xml_model_point_eplaw       = datadir + "model_point_eplaw.xml";
-    m_xml_model_point_bplaw       = datadir + "model_point_bplaw.xml";
-    m_xml_model_point_supeplaw    = datadir + "model_point_supeplaw.xml";
-    m_xml_model_point_logparabola = datadir + "model_point_logparabola.xml";
-    m_xml_model_point_nodes       = datadir + "model_point_nodes.xml";
-    m_xml_model_point_filefct     = datadir + "model_point_filefct.xml";
-    m_xml_model_diffuse_const     = datadir + "model_diffuse_const.xml";
-    m_xml_model_diffuse_cube      = datadir + "model_diffuse_cube.xml";
-    m_xml_model_diffuse_map       = datadir + "model_diffuse_map.xml";
-    m_xml_model_radial_disk       = datadir + "model_radial_disk.xml";
-    m_xml_model_radial_gauss      = datadir + "model_radial_gauss.xml";
-    m_xml_model_radial_shell      = datadir + "model_radial_shell.xml";
-    m_xml_model_elliptical_disk   = datadir + "model_elliptical_disk.xml";
-    m_xml_model_elliptical_gauss  = datadir + "model_elliptical_gauss.xml";
+    m_map_file                    = datadir + "/cena_lobes_parkes.fits";
+    m_cube_file                   = datadir + "/test_cube.fits";
+    m_filefct                     = datadir + "/filefunction.txt";
+    m_xml_file                    = datadir + "/crab.xml";
+    m_xml_model_point_const       = datadir + "/model_point_const.xml";
+    m_xml_model_point_gauss       = datadir + "/model_point_gauss.xml";
+    m_xml_model_point_plaw        = datadir + "/model_point_plaw.xml";
+    m_xml_model_point_plaw2       = datadir + "/model_point_plaw2.xml";
+    m_xml_model_point_eplaw       = datadir + "/model_point_eplaw.xml";
+    m_xml_model_point_bplaw       = datadir + "/model_point_bplaw.xml";
+    m_xml_model_point_supeplaw    = datadir + "/model_point_supeplaw.xml";
+    m_xml_model_point_logparabola = datadir + "/model_point_logparabola.xml";
+    m_xml_model_point_nodes       = datadir + "/model_point_nodes.xml";
+    m_xml_model_point_filefct     = datadir + "/model_point_filefct.xml";
+    m_xml_model_diffuse_const     = datadir + "/model_diffuse_const.xml";
+    m_xml_model_diffuse_cube      = datadir + "/model_diffuse_cube.xml";
+    m_xml_model_diffuse_map       = datadir + "/model_diffuse_map.xml";
+    m_xml_model_radial_disk       = datadir + "/model_radial_disk.xml";
+    m_xml_model_radial_gauss      = datadir + "/model_radial_gauss.xml";
+    m_xml_model_radial_shell      = datadir + "/model_radial_shell.xml";
+    m_xml_model_elliptical_disk   = datadir + "/model_elliptical_disk.xml";
+    m_xml_model_elliptical_gauss  = datadir + "/model_elliptical_gauss.xml";
 
     // Append tests
     append(static_cast<pfunction>(&TestGModel::test_model_par),

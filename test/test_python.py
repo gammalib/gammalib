@@ -22,6 +22,8 @@ import os
 import sys
 import gammalib
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Import test modules
 import test_GApplication
 import test_GLinalg
 import test_GModel
@@ -72,6 +74,14 @@ def test(installed=False):
     """
     Perform unit testing for Python interface
     """
+    # Set environment variables first
+    if installed:
+        os.environ['TEST_DATA']     = 'data'
+        os.environ['TEST_COM_DATA'] = 'com/data'
+        os.environ['TEST_CTA_DATA'] = 'cta/data'
+        os.environ['TEST_LAT_DATA'] = 'lat/data'
+        os.environ['TEST_MWL_DATA'] = 'mwl/data'
+
     # Allocate test suites
     suites = gammalib.GTestSuites('Python interface testing')
 
@@ -130,8 +140,8 @@ def test(installed=False):
     if has_cta:
         suite_cta = test_CTA.Test()
         suite_cta.set()
-        if installed:
-            suite_cta.testdir('cta') # Test data for installed test
+        #if installed:
+        #    suite_cta.testdir('cta') # Test data for installed test
         suites.append(suite_cta)
 
     # Optionally handle LAT suite
@@ -198,6 +208,8 @@ def test(installed=False):
     # If we have a non-installed version then save test results
     if not installed:
         suites.save('reports/python.xml')
+    else:
+        suites.save('/Users/jurgen/git/gammalib/gammalib/build/python_installed.xml')
 
     # Set return code
     if success:

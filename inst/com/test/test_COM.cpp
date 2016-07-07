@@ -39,16 +39,15 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string srcdir        = std::getenv("TESTS_SRCDIR");
-const std::string datadir       = srcdir + "/inst/com/test/data";
-const std::string com_caldb     = srcdir + "/inst/com/caldb";
-const std::string com_iaq       = "ENERG(1.0-3.0)MeV";        // 1-3 MeV
-const std::string com_dre       = datadir+"/m50439_dre.fits"; // 1-3 MeV
-const std::string com_drb       = datadir+"/m34997_drg.fits";
-const std::string com_drg       = datadir+"/m34997_drg.fits";
-const std::string com_drx       = datadir+"/m32171_drx.fits";
-const std::string com_obs       = datadir+"/obs.xml";
-const std::string com_model     = datadir+"/crab.xml";
+const std::string datadir   = std::getenv("TEST_COM_DATA");
+const std::string com_caldb = datadir + "/../../caldb";
+const std::string com_iaq   = "ENERG(1.0-3.0)MeV";        // 1-3 MeV
+const std::string com_dre   = datadir+"/m50439_dre.fits"; // 1-3 MeV
+const std::string com_drb   = datadir+"/m34997_drg.fits";
+const std::string com_drg   = datadir+"/m34997_drg.fits";
+const std::string com_drx   = datadir+"/m32171_drx.fits";
+const std::string com_obs   = datadir+"/obs.xml";
+const std::string com_model = datadir+"/crab.xml";
 
 
 /***********************************************************************//**

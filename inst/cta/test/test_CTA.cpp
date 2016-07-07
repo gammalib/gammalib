@@ -47,10 +47,9 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string srcdir            = std::getenv("TESTS_SRCDIR");
-const std::string datadir           = srcdir+"/inst/cta/test/data";
-const std::string caldbdir          = srcdir+"/inst/cta/test/caldb";
-const std::string cta_caldb         = srcdir+"/inst/cta/caldb";
+const std::string datadir           = std::getenv("TEST_CTA_DATA");
+const std::string caldbdir          = datadir + "/../caldb";
+const std::string cta_caldb         = datadir + "/../../caldb";
 const std::string cta_irf           = "cta_dummy_irf";
 const std::string cta_events        = datadir+"/crab_events.fits";
 const std::string cta_events_gti    = datadir+"/crab_events_gti.fits[EVENTS2]";

@@ -44,8 +44,8 @@
 #define G_WCS_COPY_DEBUG
 
 /* __ Constants __________________________________________________________ */
-const std::string srcdir     = std::getenv("TESTS_SRCDIR");
-const std::string sky_region = srcdir + "/test/data/test_circle_region.reg";
+const std::string datadir    = std::getenv("TEST_DATA");
+const std::string sky_region = datadir + "/test_circle_region.reg";
 
 
 /***********************************************************************//**

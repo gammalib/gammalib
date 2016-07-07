@@ -24,20 +24,24 @@ SUBDIRS = reports
 
 # Optional instrument specific tests
 if WITH_INST_MWL
-  INST_MWL = $(top_builddir)/inst/mwl/test/test_MWL
-  TEST_MWL = :$(top_srcdir)/inst/mwl/test
+  INST_MWL     = $(top_builddir)/inst/mwl/test/test_MWL
+  TEST_MWL     = :$(top_srcdir)/inst/mwl/test
+  TEST_MWL_ENV = TEST_MWL_DATA=$(top_srcdir)/inst/mwl/test/data
 endif
 if WITH_INST_CTA
-  INST_CTA = $(top_builddir)/inst/cta/test/test_CTA
-  TEST_CTA = :$(top_srcdir)/inst/cta/test
+  INST_CTA     = $(top_builddir)/inst/cta/test/test_CTA
+  TEST_CTA     = :$(top_srcdir)/inst/cta/test
+  TEST_CTA_ENV = TEST_CTA_DATA=$(top_srcdir)/inst/cta/test/data
 endif
 if WITH_INST_LAT
-  INST_LAT = $(top_builddir)/inst/lat/test/test_LAT
-  TEST_LAT = :$(top_srcdir)/inst/lat/test
+  INST_LAT     = $(top_builddir)/inst/lat/test/test_LAT
+  TEST_LAT     = :$(top_srcdir)/inst/lat/test
+  TEST_LAT_ENV = TEST_LAT_DATA=$(top_srcdir)/inst/lat/test/data
 endif
 if WITH_INST_COM
-  INST_COM = $(top_builddir)/inst/com/test/test_COM
-  TEST_COM = :$(top_srcdir)/inst/com/test
+  INST_COM     = $(top_builddir)/inst/com/test/test_COM
+  TEST_COM     = :$(top_srcdir)/inst/com/test
+  TEST_COM_ENV = TEST_COM_DATA=$(top_srcdir)/inst/com/test/data
 endif
 
 # Optional python bindings
@@ -75,8 +79,13 @@ check_PROGRAMS = test_GSupport \
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
                     $(TEST_PYTHON_ENV) \
-                    TESTS_SRCDIR=$(abs_top_srcdir) \
-                    TESTS_BUILDDIR=$(abs_top_builddir)
+                    TEST_SRCDIR=$(abs_top_srcdir) \
+                    TEST_BUILDDIR=$(abs_top_builddir) \
+                    TEST_DATA=$(abs_top_srcdir)/test/data \
+                    $(TEST_MWL_ENV) \
+                    $(TEST_CTA_ENV) \
+                    $(TEST_LAT_ENV) \
+                    $(TEST_COM_ENV)
 
 # Tests (these are the tests to be executed)
 TESTS = test_GSupport \
@@ -219,3 +228,11 @@ clean-local:
 	rm -rf $(builddir)/*.reg
 	rm -rf $(builddir)/*.dat
 	rm -rf $(builddir)/reports/*.xml
+
+# Tests to be done on installed version
+if WITH_PYTHON
+installcheck-local:
+	@export GAMMALIB=$(DESTDIR)$(prefix); \
+	. $(GAMMALIB)/bin/gammalib-init.sh; \
+	python -c 'import gammalib; gammalib.test()'
+endif
