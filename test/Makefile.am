@@ -233,6 +233,6 @@ clean-local:
 if WITH_PYTHON
 installcheck-local:
 	@export GAMMALIB=$(DESTDIR)$(prefix); \
-	. $(GAMMALIB)/bin/gammalib-init.sh; \
+	. $(DESTDIR)$(prefix)/bin/gammalib-init.sh; \
 	python -c 'import gammalib; gammalib.test()'
 endif
