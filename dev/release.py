@@ -417,26 +417,27 @@ def set_package_version(version):
 # ============= #
 # Build tarball #
 # ============= #
-def build_tarball(branch, folder):
+def build_tarball():
     """
     Build tarball using 'make dist'
-
-    Parameters
-    ----------
-    branch : str
-        Git branch
-    folder : str
-        Folder name
     """
     # Set base path
     base_path = os.getcwd()
 
     # Enable/disable logging
     if confirm("Log actions in logfile?"):
-        verbosity = ' >> %s/%s.log 2>&1' % (base_path, folder)
-        os.system('rm -rf %s.log >/dev/null 2>&1' % folder)
+        verbosity = ' >> %s/make_dist.log 2>&1' % (base_path)
+        os.system('rm -rf make_dist.log >/dev/null 2>&1')
     else:
         verbosity = ' >/dev/null 2>&1'
+
+    # Configure package
+    print("Configure package")
+    rc = os.system('./configure%s' % verbosity)
+    if rc == 0:
+        print("Package configuration successful")
+    else:
+        print("*** Failure in package configuration")
 
     # Check package
     print("Create tarball")
@@ -453,7 +454,7 @@ def build_tarball(branch, folder):
 # ============= #
 # Check tarball #
 # ============= #
-def check_tarball(filename):
+def check_tarball():
     """
     Check tarball using 'make distcheck'
 
@@ -465,16 +466,20 @@ def check_tarball(filename):
     # Set base path
     base_path = os.getcwd()
 
-    # Set base folder
-    folder = filename.rstrip('.tar.gz')
-
     # Enable/disable logging
     if confirm("Log check in logfile?"):
-        name      = filename.rstrip('.tar.gz')
-        verbosity = ' >> %s/%s.check 2>&1' % (base_path, folder)
-        os.system('rm -rf %s.check >/dev/null 2>&1' % folder)
+        verbosity = ' >> %s/make_distcheck.log 2>&1' % (base_path)
+        os.system('rm -rf make_distcheck.log >/dev/null 2>&1')
     else:
         verbosity = ' >/dev/null 2>&1'
+
+    # Configure package
+    print("Configure package")
+    rc = os.system('./configure%s' % verbosity)
+    if rc == 0:
+        print("Package configuration successful")
+    else:
+        print("*** Failure in package configuration")
 
     # Check tarball
     print("Check tarball")
@@ -580,14 +585,12 @@ def release_menu(branch='release'):
     # Step 6: Build tarball
     print("")
     if confirm("Step 6: Build tarball?"):
-        folder = "gammalib-%s" % get_current_version()
-        build_tarball(branch, folder)
+        build_tarball()
 
     # Step 7: Check tarball
     print("")
     if confirm("Step 7: Check tarball?"):
-        filename = "gammalib-%s.tar.gz" % get_current_version()
-        check_tarball(filename)
+        check_tarball()
 
     # Print separator
     print("")
@@ -709,13 +712,10 @@ if __name__ == '__main__':
             commit('')
             print('')
         elif choice == '5':
-            branch = commands.getoutput('git rev-parse --abbrev-ref HEAD')
-            folder = "gammalib-%s" % get_current_version()
-            build_tarball(branch, folder)
+            build_tarball()
             print('')
         elif choice == '6':
-            filename = "gammalib-%s.tar.gz" % get_current_version()
-            check_tarball(filename)
+            check_tarball()
             print('')
         elif choice == 'q':
             break
