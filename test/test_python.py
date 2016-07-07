@@ -208,8 +208,6 @@ def test(installed=False):
     # If we have a non-installed version then save test results
     if not installed:
         suites.save('reports/python.xml')
-    else:
-        suites.save('/Users/jurgen/git/gammalib/gammalib/build/python_installed.xml')
 
     # Set return code
     if success:
