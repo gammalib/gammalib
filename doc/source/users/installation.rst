@@ -157,8 +157,18 @@ module by typing::
 This will execute an extensive testing suite that should terminate with ::
 
    ===================
-   All 20 tests passed
+   All 21 tests passed
    ===================
+
+or ::
+
+  ============================================================================
+  Testsuite summary for gammalib 1.1.0
+  ============================================================================
+  # TOTAL: 21
+  # PASS:  21
+
+dependent on your autotools version.
 
 Eventually, loading the shared cfitsio and/or readline libraries may
 fail during the test if the libraries are not located in standard
