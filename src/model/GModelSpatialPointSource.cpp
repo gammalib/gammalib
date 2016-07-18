@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.cpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -341,14 +341,14 @@ bool GModelSpatialPointSource::contains(const GSkyDir& dir,
  * Read the point source information from an XML element with the following
  * format
  *
- *     <spatialModel type="SkyDirFunction">
+ *     <spatialModel type="PointSource">
  *       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
  *       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
  *     </spatialModel>
  *
  * or
  *
- *     <spatialModel type="SkyDirFunction">
+ *     <spatialModel type="PointSource">
  *       <parameter free="0" max="360" min="-360" name="GLON" scale="1" value="83.6331" />
  *       <parameter free="0" max="90" min="-90" name="GLAT" scale="1" value="22.0145" />
  *     </spatialModel>
@@ -427,7 +427,7 @@ void GModelSpatialPointSource::read(const GXmlElement& xml)
  * Write the point source information into an XML element with the following
  * format
  *
- *     <spatialModel type="SkyDirFunction">
+ *     <spatialModel type="PointSource">
  *       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
  *       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
  *     </spatialModel>

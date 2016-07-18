@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.cpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -371,7 +371,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  * Reads the radial Gauss model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="GaussFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -379,7 +379,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="GaussFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -449,7 +449,7 @@ void GModelSpatialRadialGauss::read(const GXmlElement& xml)
  * Writes the radial disk model information into an XML element. The XML
  * element will have the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="RadialGaussian">
  *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>

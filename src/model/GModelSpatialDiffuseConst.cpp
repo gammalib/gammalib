@@ -410,7 +410,7 @@ double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
  * Read the isotropic source model information from an XML element. The XML
  * element is expected to have the following format:
  *
- *     <spatialModel type="ConstantValue">
+ *     <spatialModel type="DiffuseIsotropic">
  *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
  *     </spatialModel>
  *
@@ -442,7 +442,7 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
  * Write the isotropic source model information into an XML element. The XML
  * element will have the following format:
  *
- *     <spatialModel type="ConstantValue">
+ *     <spatialModel type="DiffuseIsotropic">
  *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
  *     </spatialModel>
  *
@@ -451,13 +451,13 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "ConstantValue");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "ConstantValue") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"ConstantValue\".");
+              "Spatial model is not of type \""+type()+"\".");
     }
 
     // Get or create Value parameter

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,7 @@ public:
     virtual GModelSpatialPointSource* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
+    virtual std::string               alias(void) const;
     virtual GClassCode                code(void) const;
     virtual double                    eval(const GPhoton& photon) const;
     virtual double                    eval_gradients(const GPhoton& photon) const;
@@ -114,12 +115,26 @@ std::string GModelSpatialPointSource::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "SkyDirFunction".
+ * @return "PointSource".
  *
  * Returns the type of the spatial model.
  ***************************************************************************/
 inline
 std::string GModelSpatialPointSource::type(void) const
+{
+    return "PointSource";
+}
+
+
+/***********************************************************************//**
+ * @brief Return model type alias
+ *
+ * @return "SkyDirFunction".
+ *
+ * Returns the alias of the spatial model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialPointSource::alias(void) const
 {
     return "SkyDirFunction";
 }

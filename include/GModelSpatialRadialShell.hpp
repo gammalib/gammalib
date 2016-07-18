@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelSpatialRadialShell.hpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Christoph Deil                              *
+ *  copyright (C) 2011-2016 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,6 +74,7 @@ public:
     virtual GModelSpatialRadialShell* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
+    virtual std::string               alias(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
                                            const GTime& time) const;
@@ -135,12 +136,26 @@ std::string GModelSpatialRadialShell::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "ShellFunction".
+ * @return "RadialShell".
  *
  * Returns the type of the radial shell model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialShell::type(void) const
+{
+    return "RadialShell";
+}
+
+
+/***********************************************************************//**
+ * @brief Return model type alias
+ *
+ * @return "ShellFunction".
+ *
+ * Returns the alias of the radial shell model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialRadialShell::alias(void) const
 {
     return "ShellFunction";
 }

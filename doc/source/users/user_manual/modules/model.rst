@@ -114,7 +114,7 @@ Point source
 .. code-block:: xml
 
   <source name="Crab" type="PointSource">
-    <spatialModel type="SkyDirFunction">
+    <spatialModel type="PointSource">
       <parameter name="RA"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
       <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
     </spatialModel>
@@ -129,7 +129,7 @@ Radial disk
 .. code-block:: xml
 
   <source name="Crab" type="ExtendedSource">
-    <spatialModel type="DiskFunction">
+    <spatialModel type="RadialDisk">
       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
       <parameter name="Radius" scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
@@ -145,7 +145,7 @@ Radial Gaussian
 .. code-block:: xml
 
   <source name="Crab" type="ExtendedSource">
-    <spatialModel type="GaussFunction">
+    <spatialModel type="RadialGaussian">
       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
       <parameter name="Sigma" scale="1.0" value="0.20"    min="0.01" max="10"  free="1"/>
@@ -161,7 +161,7 @@ Radial shell
 .. code-block:: xml
 
   <source name="Crab" type="ExtendedSource">
-    <spatialModel type="ShellFunction">
+    <spatialModel type="RadialShell">
       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
       <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
@@ -196,7 +196,7 @@ Elliptical Gaussian
 .. code-block:: xml
 
   <source name="Crab" type="ExtendedSource">
-    <spatialModel type="EllipticalGauss">
+    <spatialModel type="EllipticalGaussian">
       <parameter name="RA"          scale="1.0" value="83.6331" min="-360"  max="360" free="1"/>
       <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"   max="90"  free="1"/>
       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
@@ -214,7 +214,7 @@ Isotropic source
 .. code-block:: xml
 
   <source name="Crab" type="DiffuseSource">
-    <spatialModel type="ConstantValue">
+    <spatialModel type="DiffuseIsotropic">
        <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
     </spatialModel>
     <spectrum type="...">
@@ -228,7 +228,7 @@ Diffuse map
 .. code-block:: xml
 
   <source name="Crab" type="DiffuseSource">
-    <spatialModel type="SpatialMap" file="map.fits">
+    <spatialModel type="DiffuseMap" file="map.fits">
        <parameter name="Prefactor" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
     </spatialModel>
     <spectrum type="...">
@@ -242,7 +242,7 @@ Diffuse map cube
 .. code-block:: xml
 
   <source name="Crab" type="DiffuseSource">
-    <spatialModel type="MapCubeFunction" file="map_cube.fits">
+    <spatialModel type="DiffuseMapCube" file="map_cube.fits">
       <parameter name="Normalization" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
     </spatialModel>
     <spectrum type="...">

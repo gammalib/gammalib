@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialRegistry.cpp - Spatial model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,7 +40,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DEBUG_REGISTRY 0
+//#define G_DEBUG_REGISTRY        //!< Dump registry
 
 
 /*==========================================================================
@@ -58,7 +58,7 @@ GModelSpatialRegistry::GModelSpatialRegistry(void)
     init_members();
 
     // Debug option: Show actual registry
-    #if G_DEBUG_REGISTRY
+    #if defined(G_DEBUG_REGISTRY)
     std::cout << "GModelSpatialRegistry(void): ";
     for (int i = 0; i < size(); ++i) {
         std::cout << "\"" << names()[i] << "\" ";
@@ -85,14 +85,19 @@ GModelSpatialRegistry::GModelSpatialRegistry(const GModelSpatial* model)
     init_members();
 
     // Debug option: Notify new registry
-    #if G_DEBUG_REGISTRY
+    #if defined(G_DEBUG_REGISTRY)
     std::cout << "GModelSpatialRegistry(const GModelSpatial*): ";
     std::cout << "add \"" << model->type() << "\" to registry." << std::endl;
     #endif
 
     // Allocate new registry
+    #if defined(G_LEGACY_MODEL_NAMES)
+    std::string*          new_names  = new std::string[size()+2];
+    const GModelSpatial** new_models = new const GModelSpatial*[size()+2];
+    #else
     std::string*          new_names  = new std::string[size()+1];
     const GModelSpatial** new_models = new const GModelSpatial*[size()+1];
+    #endif
 
     // Save old registry
     for (int i = 0; i < size(); ++i) {
@@ -104,15 +109,24 @@ GModelSpatialRegistry::GModelSpatialRegistry(const GModelSpatial* model)
     new_names[size()]  = model->type();
     new_models[size()] = model;
 
+    // Add new model with alias to registry for legacy naming convention
+    #if defined(G_LEGACY_MODEL_NAMES)
+    new_names[size()+1]  = model->alias();
+    new_models[size()+1] = model;
+    #endif
+
     // Set pointers on new registry
     names().assign(new_names);
     models().assign(new_models);
 
     // Increment number of models in registry
+    #if defined(G_LEGACY_MODEL_NAMES)
+    number()++;
+    #endif
     number()++;
 
     // Debug option: Show actual registry
-    #if G_DEBUG_REGISTRY
+    #if defined(G_DEBUG_REGISTRY)
     std::cout << "GModelSpatialRegistry(const GModelSpatial*): ";
     for (int i = 0; i < size(); ++i) {
         std::cout << "\"" << names()[i] << "\" ";

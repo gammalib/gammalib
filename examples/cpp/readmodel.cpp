@@ -56,7 +56,7 @@ void create_xml_file(void)
         file << "    <parameter scale=\"1.0\" name=\"Scale\" min=\"10.0\"";
         file << " max=\"1000000.0\" value=\"100.0\" free=\"0\"/>\n";
         file << "    </spectrum>\n";
-        file << "    <spatialModel type=\"SkyDirFunction\">\n";
+        file << "    <spatialModel type=\"PointSource\">\n";
         file << "      <parameter free=\"0\" max=\"360\" min=\"-360\"";
         file << " name=\"RA\" scale=\"1\" value=\"83.6331\"/>\n";
         file << "      <parameter free=\"0\" max=\"90\" min=\"-90\"";

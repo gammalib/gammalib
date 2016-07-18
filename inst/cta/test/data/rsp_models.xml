@@ -6,7 +6,7 @@
             <parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-2.1" free="1"/>
             <parameter scale="1.0" name="Scale" min="10.0" max="1000000.0" value="100.0" free="0"/>
         </spectrum>
-        <spatialModel type="SpatialMap" file="cena_lobes_parkes.fits">
+        <spatialModel type="DiffuseMap" file="cena_lobes_parkes.fits">
             <parameter scale="1" name="Prefactor" min="0.001" max="1000.0" value="1" free="0"/>
         </spatialModel>
     </source>

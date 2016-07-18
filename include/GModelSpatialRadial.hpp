@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadial.hpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,6 +66,7 @@ public:
     virtual GModelSpatialRadial* clone(void) const = 0;
     virtual std::string          classname(void) const = 0;
     virtual std::string          type(void) const = 0;
+    virtual std::string          alias(void) const = 0;
     virtual double               eval(const double&  theta,
                                       const GEnergy& energy,
                                       const GTime& time) const = 0;

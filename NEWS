@@ -217,6 +217,22 @@ The GModelSpatialDiffuseMap, GModelSpatialDiffuseCube and GModelSpectralFunc
 class now support the specifications of file names that are relative to the
 XML file (#1808).
 
+The spatial model components have been renamed to enhance the readability and
+to make them more homogenous. The Fermi/LAT Science Tools should also evolve
+to support the new names:
+* "PointSource" (alias: "SkyDirFunction")
+* "RadialDisk" (alias: "DiskFunction")
+* "RadialGaussian" (alias: "GaussFunction")
+* "RadialShell" (alias: "ShellFunction")
+* "EllipticalDisk"
+* "EllipticalGaussian" (alias: "EllipticalGauss")
+* "DiffuseIsotropic" (alias: "ConstantValue")
+* "DiffuseMap" (alias: "SpatialMap")
+* "DiffuseMapCube" (alias: "MapCubeFunction")
+By default the old model names are still supported. Support of the old model
+names can be turned off by specifying the --disable-legacy-model-names option
+to the ./configure script (#1818).
+
 
 9. Numerics module
 ------------------

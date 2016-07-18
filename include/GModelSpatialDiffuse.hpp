@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GModelSpatialDiffuse.hpp - Abstract diffuse spatial model base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2013-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,7 @@ public:
     virtual GModelSpatialDiffuse* clone(void) const = 0;
     virtual std::string           classname(void) const = 0;
     virtual std::string           type(void) const = 0;
+    virtual std::string           alias(void) const = 0;
     virtual double                eval(const GPhoton& photon) const = 0;
     virtual double                eval_gradients(const GPhoton& photon) const = 0;
     virtual GSkyDir               mc(const GEnergy& energy, const GTime& time,

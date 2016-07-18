@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GModelSpatialEllipticalGauss.hpp - Elliptical gauss source model class *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2015 by Michael Mayer                                    *
+ *  copyright (C) 2015-2016 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,6 +65,7 @@ public:
     virtual GModelSpatialEllipticalGauss* clone(void) const;
     virtual std::string                   classname(void) const;
     virtual std::string                   type(void) const;
+    virtual std::string                   alias(void) const;
     virtual double                        eval(const double&  theta,
                                                const double&  posangle,
                                                const GEnergy& energy,
@@ -125,12 +126,26 @@ std::string GModelSpatialEllipticalGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "EllipticalGauss".
+ * @return "EllipticalGaussian".
  *
  * Returns the type of the elliptical gauss model.
  ***************************************************************************/
 inline
 std::string GModelSpatialEllipticalGauss::type(void) const
+{
+    return "EllipticalGaussian";
+}
+
+
+/***********************************************************************//**
+ * @brief Return model type alias
+ *
+ * @return "EllipticalGauss".
+ *
+ * Returns the alias of the elliptical gauss model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialEllipticalGauss::alias(void) const
 {
     return "EllipticalGauss";
 }

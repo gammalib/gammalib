@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpatialRadialGauss.hpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2015 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,7 @@ public:
     virtual GModelSpatialRadialGauss* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
+    virtual std::string               alias(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
                                            const GTime& time) const;
@@ -109,12 +110,26 @@ std::string GModelSpatialRadialGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "GaussFunction".
+ * @return "RadialGaussian".
  *
  * Returns the type of the radial Gauss model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialGauss::type(void) const
+{
+    return "RadialGaussian";
+}
+
+
+/***********************************************************************//**
+ * @brief Return model type alias
+ *
+ * @return "GaussFunction".
+ *
+ * Returns the alias of the radial Gauss model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialRadialGauss::alias(void) const
 {
     return "GaussFunction";
 }

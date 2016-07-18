@@ -699,6 +699,23 @@ fi
 
 
 #############################################################################
+# Checks for Legacy model names option (G_LEGACY_MODEL_NAMES)               #
+#############################################################################
+AC_MSG_CHECKING(whether to enable legacy model names option)
+AC_ARG_ENABLE([legacy_model_names],
+              AS_HELP_STRING([--enable-legacy-model-names],
+                             [enables legacy model names [default=yes]]),
+             [LEGACY_MODEL_NAMES="$enableval"],
+             [LEGACY_MODEL_NAMES="yes"])
+if test "x$LEGACY_MODEL_NAMES" = "xyes"; then
+  AC_DEFINE([G_LEGACY_MODEL_NAMES], [1], [Legacy model names are enabled])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+
+#############################################################################
 # Checks for Warning option (G_WARNINGS)                                    #
 #############################################################################
 AC_MSG_CHECKING(whether to enable console warnings)
@@ -1559,6 +1576,11 @@ if test "x$SMALL_MEMORY" = "xyes"; then
   echo "  * Optimize memory usage        (yes)   (default)"
 else
   echo "  - Optimize memory usage        (no)"
+fi
+if test "x$LEGACY_MODEL_NAMES" = "xyes"; then
+  echo "  * Enable legacy model names    (yes)   (default)"
+else
+  echo "  - Enable legacy model names    (no)"
 fi
 if test "x$enable_openmp" = "xyes"; then
   echo "  * Enable OpenMP                (yes)   (default)"

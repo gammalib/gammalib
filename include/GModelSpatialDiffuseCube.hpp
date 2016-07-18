@@ -77,6 +77,7 @@ public:
     virtual GModelSpatialDiffuseCube* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
+    virtual std::string               alias(void) const;
     virtual double                    eval(const GPhoton& photon) const;
     virtual double                    eval_gradients(const GPhoton& photon) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
@@ -152,12 +153,26 @@ std::string GModelSpatialDiffuseCube::classname(void) const
 /***********************************************************************//**
  * @brief Return spatial model type
  *
- * @return "MapCubeFunction".
+ * @return "DiffuseMapCube".
  *
  * Returns the type of the spatial map cube model.
  ***************************************************************************/
 inline
 std::string GModelSpatialDiffuseCube::type(void) const
+{
+    return "DiffuseMapCube";
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial model type alias
+ *
+ * @return "MapCubeFunction".
+ *
+ * Returns the alias of the spatial map cube model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialDiffuseCube::alias(void) const
 {
     return "MapCubeFunction";
 }

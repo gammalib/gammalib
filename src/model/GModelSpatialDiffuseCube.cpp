@@ -508,13 +508,13 @@ bool GModelSpatialDiffuseCube::contains(const GSkyDir& dir,
  * Read the map cube information from an XML element. The XML element should
  * have either the format
  *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
  *     </spatialModel>
  *
  * or alternatively
  *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
  *       <parameter name="Value" scale="1" value="1" min="0.1" max="10" free="0"/>
  *     </spatialModel>
  *
@@ -568,13 +568,13 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
  * Write the map cube information into an XML element. The XML element will
  * have either the format
  *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
  *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
  *     </spatialModel>
  *
  * or alternatively
  *
- *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
  *       <parameter name="Value" scale="1" value="1" min="0.1" max="10" free="0"/>
  *     </spatialModel>
  *
@@ -584,13 +584,13 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "MapCubeFunction");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "MapCubeFunction") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"MapCubeFunction\".");
+              "Spatial model is not of type \""+type()+"\".");
     }
 
     // If XML element has 0 nodes then append parameter node. The name

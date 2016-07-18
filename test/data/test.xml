@@ -10,7 +10,7 @@
       <parameter free="1" max="100000" min="500" name="Cutoff" scale="1" value="8244.185952" />
       <parameter free="0" max="5" min="0" name="Index2" scale="1" value="1" />
     </spectrum>
-    <spatialModel file="LMC.fits" type="SpatialMap">
+    <spatialModel file="LMC.fits" type="DiffuseMap">
       <parameter free="0" max="1000" min="0.001" name="Prefactor" scale="1" value="1" />
     </spatialModel>
   </source>

@@ -3,6 +3,7 @@
         * Version 1.1.0 released
         =========================
 
+        Rename spatial model components (#1818)
         Fix consistency problem in GCTABackground3D (#1815)
         Models accessing file now support relative file names (#1808)
         Add GXmlElement and GXmlDocument filename() methods (#1808)

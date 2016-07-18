@@ -487,13 +487,13 @@ bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
  * Reads the spatial information for a diffuse map from an XML element. The
  * expected format of the XML element is
  *
- *     <spatialModel type="SpatialMap" file="myfile.fits" normalize="1">
+ *     <spatialModel type="DiffuseMap" file="myfile.fits" normalize="1">
  *       <parameter name="Prefactor" value="1" min="0.1" max="10" scale="1" free="0"/>
  *     </spatialModel>
  *
  * or
  *
- *     <spatialModel type="SpatialMap" file="myfile.fits" normalize="1">
+ *     <spatialModel type="DiffuseMap" file="myfile.fits" normalize="1">
  *       <parameter name="Normalization" value="1" min="0.1" max="10" scale="1" free="0"/>
  *     </spatialModel>
  *
@@ -563,7 +563,7 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
  * Writes the spatial information for a diffuse map into an XML element. The
  * format of the XML element is
  *
- *     <spatialModel type="SpatialMap" file="myfile.fits" normalize="1">
+ *     <spatialModel type="DiffuseMap" file="myfile.fits" normalize="1">
  *       <parameter name="Prefactor" value="1" min="0.1" max="10" scale="1" free="0"/>
  *     </spatialModel>
  *
@@ -580,18 +580,18 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "SpatialMap");
+        xml.attribute("type", type());
+    }
+
+    // Verify model type
+    if (xml.attribute("type") != type()) {
+        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
+              "Spatial model is not of type \""+type()+"\".");
     }
 
     // Set sky map file name
     //xml.attribute("file", m_filename);
     xml.attribute("file", gammalib::xml_file_reduce(xml, m_filename));
-
-    // Verify model type
-    if (xml.attribute("type") != "SpatialMap") {
-        throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
-              "Spatial model is not of type \"SpatialMap\".");
-    }
 
     // If XML element has 0 nodes then append parameter node. The name
     // of the node is "Prefactor" as this is the Fermi/LAT standard.

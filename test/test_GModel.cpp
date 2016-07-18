@@ -531,8 +531,8 @@ void TestGModel::test_point_source(void)
     test_try("Test void constructor");
     try {
         GModelSpatialPointSource model;
-        test_assert(model.type() == "SkyDirFunction",
-                                    "Model type \"SkyDirFunction\" expected.");
+        test_assert(model.type() == "PointSource",
+                                    "Model type \"PointSource\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -573,7 +573,7 @@ void TestGModel::test_point_source(void)
         GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialPointSource model(*element);
         test_value(model.size(), 2);
-        test_assert(model.type() == "SkyDirFunction", "Expected \"SkyDirFunction\"");
+        test_assert(model.type() == "PointSource", "Expected \"PointSource\"");
         test_value(model.ra(), 83.6331);
         test_value(model.dec(), +22.0145);
 
@@ -618,8 +618,8 @@ void TestGModel::test_diffuse_const(void)
     test_try("Test void constructor");
     try {
         GModelSpatialDiffuseConst model;
-        test_assert(model.type() == "ConstantValue",
-                                    "Model type \"ConstantValue\" expected.");
+        test_assert(model.type() == "DiffuseIsotropic",
+                                    "Model type \"DiffuseIsotropic\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -645,7 +645,8 @@ void TestGModel::test_diffuse_const(void)
         GXmlElement*              element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialDiffuseConst model(*element);
         test_value(model.size(), 1);
-        test_assert(model.type() == "ConstantValue", "Expected \"ConstantValue\"");
+        test_assert(model.type() == "DiffuseIsotropic",
+                    "Expected \"DiffuseIsotropic\"");
         test_value(model.value(), 1.0);
 
         // Test value method
@@ -684,8 +685,8 @@ void TestGModel::test_diffuse_cube(void)
     test_try("Test void constructor");
     try {
         GModelSpatialDiffuseCube model;
-        test_assert(model.type() == "MapCubeFunction",
-                                    "Model type \"MapCubeFunction\" expected.");
+        test_assert(model.type() == "DiffuseMapCube",
+                                    "Model type \"DiffuseMapCube\" expected.");
         test_assert(model.filename().url() == "", "Model filename \"\" expected.");
         test_try_success();
     }
@@ -732,7 +733,8 @@ void TestGModel::test_diffuse_cube(void)
         GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialDiffuseCube model(*element);
         test_value(model.size(), 1);
-        test_assert(model.type() == "MapCubeFunction", "Expected \"MapCubeFunction\"");
+        test_assert(model.type() == "DiffuseMapCube",
+                    "Expected \"DiffuseMapCube\"");
         test_value(model.value(), 1.0);
         test_assert(model.filename().url() == m_cube_file,
                     "Model filename \""+m_cube_file+"\" expected.");
@@ -780,8 +782,8 @@ void TestGModel::test_diffuse_map(void)
 {
     // Test void constructor
     GModelSpatialDiffuseMap model1;
-    test_assert(model1.type() == "SpatialMap",
-                "Check that model is of type \"SpatialMap\".");
+    test_assert(model1.type() == "DiffuseMap",
+                "Check that model is of type \"DiffuseMap\".");
     test_assert(model1.filename().url() == "",
                 "Check that model has empty filename.");
 
@@ -806,9 +808,9 @@ void TestGModel::test_diffuse_map(void)
     GModelSpatialDiffuseMap model(*elementp);
     test_value(model.size(), 1,
                "Check that model build from an XML element has one parameter.");
-    test_assert(model.type() == "SpatialMap",
+    test_assert(model.type() == "DiffuseMap",
                 "Check that model build from an XML element is of type "
-                "\"SpatialMap\".");
+                "\"DiffuseMap\".");
     test_value(model.value(), 1.0,
                "Check that normalisation of model build from an XML element is "
                "unity.");
@@ -888,8 +890,8 @@ void TestGModel::test_radial_disk(void)
     test_try("Test void constructor");
     try {
         GModelSpatialRadialDisk model;
-        test_assert(model.type() == "DiskFunction",
-                                    "Model type \"DiskFunction\" expected.");
+        test_assert(model.type() == "RadialDisk",
+                                    "Model type \"RadialDisk\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -919,7 +921,7 @@ void TestGModel::test_radial_disk(void)
         GXmlElement*            element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialRadialDisk model(*element);
         test_value(model.size(), 3);
-        test_assert(model.type() == "DiskFunction", "Expected \"DiskFunction\"");
+        test_assert(model.type() == "RadialDisk", "Expected \"RadialDisk\"");
         test_value(model.ra(), 83.6331);
         test_value(model.dec(), 22.0145);
         test_value(model.radius(), 0.45);
@@ -975,8 +977,8 @@ void TestGModel::test_radial_gauss(void)
     test_try("Test void constructor");
     try {
         GModelSpatialRadialGauss model;
-        test_assert(model.type() == "GaussFunction",
-                                    "Model type \"GaussFunction\" expected.");
+        test_assert(model.type() == "RadialGaussian",
+                                    "Model type \"RadialGaussian\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1006,7 +1008,8 @@ void TestGModel::test_radial_gauss(void)
         GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialRadialGauss model(*element);
         test_value(model.size(), 3);
-        test_assert(model.type() == "GaussFunction", "Expected \"GaussFunction\"");
+        test_assert(model.type() == "RadialGaussian",
+                    "Expected \"RadialGaussian\"");
         test_value(model.ra(), 83.6331);
         test_value(model.dec(), 22.0145);
         test_value(model.sigma(), 0.20);
@@ -1062,8 +1065,8 @@ void TestGModel::test_radial_shell(void)
     test_try("Test void constructor");
     try {
         GModelSpatialRadialShell model;
-        test_assert(model.type() == "ShellFunction",
-                                    "Model type \"ShellFunction\" expected.");
+        test_assert(model.type() == "RadialShell",
+                                    "Model type \"RadialShell\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1094,7 +1097,7 @@ void TestGModel::test_radial_shell(void)
         GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialRadialShell model(*element);
         test_value(model.size(), 4);
-        test_assert(model.type() == "ShellFunction", "Expected \"ShellFunction\"");
+        test_assert(model.type() == "RadialShell", "Expected \"RadialShell\"");
         test_value(model.ra(), 83.6331);
         test_value(model.dec(), 22.0145);
         test_value(model.radius(), 0.30);
@@ -1253,8 +1256,8 @@ void TestGModel::test_elliptical_gauss(void)
     test_try("Test void constructor");
     try {
         GModelSpatialEllipticalGauss model;
-        test_assert(model.type() == "EllipticalGauss",
-                                    "Model type \"EllipticalGauss\" expected.");
+        test_assert(model.type() == "EllipticalGaussian",
+                                    "Model type \"EllipticalGaussian\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1286,7 +1289,8 @@ void TestGModel::test_elliptical_gauss(void)
         GXmlElement*                 element = xml.element(0)->element(0)->element("spatialModel", 0);
         GModelSpatialEllipticalGauss model(*element);
         test_value(model.size(), 5);
-        test_assert(model.type() == "EllipticalGauss", "Expected \"EllipticalGauss\"");
+        test_assert(model.type() == "EllipticalGaussian",
+                    "Expected \"EllipticalGaussian\"");
         test_value(model.ra(), 83.6331);
         test_value(model.dec(), 22.0145);
         test_value(model.posangle(), 45.0);
@@ -2633,13 +2637,22 @@ void TestGModel::test_model_registry(void)
         int num = registry.size();
         for (int i = 0; i < num; ++i) {
             GModelSpatial* ptr = registry.alloc(registry.name(i));
-            test_assert(ptr != NULL, "Model pointer for \""+ registry.name(i)+"\" is NULL");
+            test_assert(ptr != NULL,
+                        "Model pointer for \""+ registry.name(i)+"\" is NULL");
             if (ptr != NULL) {
             
                 // Test model type
-                test_assert(ptr->type() == registry.name(i),
+                #if defined(G_LEGACY_MODEL_NAMES)
+                test_assert((ptr->type()  == registry.name(i)) ||
+                            (ptr->alias() == registry.name(i)),
+                            "Expected \""+registry.name(i)+"\" instead"
+                            " of \""+ptr->type()+"\" or \""+
+                            ptr->alias()+"\".");
+                #else
+                test_assert(ptr->type()  == registry.name(i),
                             "Expected \""+registry.name(i)+"\" instead"
                             " of \""+ptr->type()+"\".");
+                #endif
 
                 // Free model
                 delete ptr;

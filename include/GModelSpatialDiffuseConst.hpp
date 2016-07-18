@@ -62,6 +62,7 @@ public:
     virtual GModelSpatialDiffuseConst* clone(void) const;
     virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
+    virtual std::string                alias(void) const;
     virtual double                     eval(const GPhoton& photon) const;
     virtual double                     eval_gradients(const GPhoton& photon) const;
     virtual GSkyDir                    mc(const GEnergy& energy,
@@ -107,12 +108,26 @@ std::string GModelSpatialDiffuseConst::classname(void) const
 /***********************************************************************//**
  * @brief Return spatial model type
  *
- * @return "ConstantValue".
+ * @return "DiffuseIsotropic".
  *
  * Returns the type of the isotropic spatial model.
  ***************************************************************************/
 inline
 std::string GModelSpatialDiffuseConst::type(void) const
+{
+    return "DiffuseIsotropic";
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial model type alias
+ *
+ * @return "ConstantValue".
+ *
+ * Returns the alias of the isotropic spatial model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialDiffuseConst::alias(void) const
 {
     return "ConstantValue";
 }

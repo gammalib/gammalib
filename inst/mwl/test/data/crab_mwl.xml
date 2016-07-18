@@ -6,7 +6,7 @@
 			<parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-3.0" free="1"/>
 			<parameter scale="1.0" name="Scale" min="1e-07" max="1e20" value="1.0" free="0"/>
 		</spectrum>
-		<spatialModel type="SkyDirFunction">
+		<spatialModel type="PointSource">
 			<parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
 			<parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
 		</spatialModel>
@@ -17,7 +17,7 @@
 			<parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-1.5" free="1"/>
 			<parameter scale="1.0" name="Scale" min="1e-07" max="1e20" value="1000.0" free="0"/>
 		</spectrum>
-		<spatialModel type="SkyDirFunction">
+		<spatialModel type="PointSource">
 			<parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
 			<parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
 		</spatialModel>
