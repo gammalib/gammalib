@@ -5,8 +5,8 @@ Installation
 
 .. note ::
 
-   These installation instructions apply to gammalib-1.0.0 and
-   later. gammalib-1.0.0 has been built, installed and tested
+   These installation instructions apply to gammalib-1.1.0 and
+   later. gammalib-1.1.0 has been built, installed and tested
    successfully on Debian, Ubuntu, Mandriva, OpenSUSE, Scientific Linux,
    CentOS, Mac OS X, FreeBSD, and OpenSolaris (using gcc), so
    hopefully it also installs on your distribution. In case you encounter

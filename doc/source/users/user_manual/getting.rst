@@ -417,7 +417,7 @@ instrument dependent modules are enabled), you should see the following
 message in your console::
 
     ===================
-    All 20 tests passed
+    All 21 tests passed
     ===================
 
 (Note that the exact number of tests that is conducted depends on the 
