@@ -634,7 +634,7 @@ GCTAEventAtom* GCTAResponseIrf::mc(const double& area, const GPhoton& photon,
     }
 
     // Continue only if event is detected
-    if (ran.uniform() <= ulimite) {
+    if ((ulimite > 0.0) && (ran.uniform() <= ulimite)) {
 
         // Apply deadtime correction
         double deadc = obs.deadc(photon.time());

@@ -2802,7 +2802,7 @@ GFitsImageDouble* GSkyMap::create_wcs_hdu(void) const
  * @return Solid angle (steradians).
  *
  * Estimate the solid angle subtended by 4 sky directions using Huilier's
- * theroem.
+ * theorem.
  *
  * Below, the definiton of the pixel cornes and sides are shown as used
  * within the code.
@@ -2891,7 +2891,7 @@ double GSkyMap::solidangle(const GSkyDir& dir1, const GSkyDir& dir2,
  * @return Solid angle (steradians).
  *
  * Estimate the solid angle subtended by 3 sky directions using Huilier's
- * theroem.
+ * theorem.
  *
  * Below, the definiton of the pixel cornes and sides are shown as used
  * within the code.

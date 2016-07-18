@@ -659,7 +659,7 @@ GCTAEventList* GCTAModelIrfBackground::mc(const GObservation& obs, GRan& ran) co
         for (int i = 0; i < spectral.nodes(); ++i) {
             GEnergy energy    = spectral.energy(i);
             double  intensity = spectral.intensity(i);
-            double  norm      = m_spectral->eval(energy, events->tstart());
+            double  norm      = m_spectral->eval(energy);
             spectral.intensity(i, norm*intensity);
         }
 

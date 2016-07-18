@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-12 July 2016
+18 July 2016
 
 
 1. Introduction
@@ -439,6 +439,10 @@ handled by the weight array (#1789).
 
 The GCTAAeff2D class no longer extrapolates the effective area beyond the boundaries
 of the response table, but sets the effective area values to zero (#1784).
+
+The GCTABackground3D class now assures that the mc() method covers the same DETX and DETY
+range than the access operator. This fixes a consistency problem between Monte Carlo
+sampling and function evaluation (#1815).
 
 
 21. COMPTEL interface

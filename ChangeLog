@@ -1,12 +1,13 @@
-2016-07-12  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-07-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Fix consistency problem in GCTABackground3D (#1815)
         Models accessing file now support relative file names (#1808)
         Add GXmlElement and GXmlDocument filename() methods (#1808)
         Move node parent from GXmlElement to GXmlNode class (#1808)
-        Correct Makefile for example executables (#1806)
+        Fix Makefile for example executables (#1806)
         Include examples in unit tests (#1803)
         Handle additional columns in GArf class
         GCTAAeff2D no longer extrapolates beyond response table (#1784)
@@ -56,8 +57,8 @@
         Add GFilename::fullname() method
         Add GCTAEventList::remove() method
         Handle also additional columns in GCTAEventList::append() method
-        Correct GFitsTableCol::insert() method for empty columns
-        Correct GCTAEdisp2D::compute_ebounds_xxx() methods (#1662)
+        Fix GFitsTableCol::insert() method for empty columns
+        Fix GCTAEdisp2D::compute_ebounds_xxx() methods (#1662)
         Use GFilename in GFits to store filename (#1649)
         Load CTA GTI extension from the HDU name provided by the DSS keyword (#1598)
         Support Fermi LAT Pass 8 response functions (#1517)

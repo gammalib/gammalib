@@ -83,33 +83,39 @@ public:
 
 private:
     // Methods
-    void init_members(void);
-    void copy_members(const GCTABackground3D& bgd);
-    void free_members(void);
-    void init_mc_cache(void) const;
+    void   init_members(void);
+    void   copy_members(const GCTABackground3D& bgd);
+    void   free_members(void);
+    void   set_limits(void);
+    int    index(const int& idetx, const int& idety, const int& iebin) const;
+    void   init_mc_cache(void) const;
+    void   init_mc_max_rate(void) const;
+    double solid_angle(const double& detx1, const double& dety1,
+                       const double& detx2, const double& dety2,
+                       const double& detx3, const double& dety3) const;
 
     // Members
     GFilename         m_filename;    //!< Name of background response file
     GCTAResponseTable m_background;  //!< Background response table
-    double            m_mc_max_bin;  //!< Maximum spatial binsize for MC
-    double            m_mc_max_logE; //!< Maximum log energy binsize for MC
     int               m_inx_detx;    //!< DETX index
     int               m_inx_dety;    //!< DETY index
     int               m_inx_energy;  //!< Energy index
     int               m_inx_bgd;     //!< Background index
+    int               m_num_detx;    //!< Number of DETX bins
+    int               m_num_dety;    //!< Number of DETY bins
+    int               m_num_energy;  //!< Number of energy bins
+    int               m_num[3];      //!< Array of number of bins
+    double            m_detx_min;    //!< DETX minimum (radians)
+    double            m_detx_max;    //!< DETX maximum (radians)
+    double            m_dety_min;    //!< DETY minimum (radians)
+    double            m_dety_max;    //!< DETY maximum (radians)
+    double            m_logE_min;    //!< Log10(E/TeV) minimum
+    double            m_logE_max;    //!< Log10(E/TeV) maximum
 
     // Monte Carlo cache
-    mutable std::vector<double> m_mc_max;      //!< Maximum rate
-    mutable GModelSpectralNodes m_mc_spectrum; //!< Response cube spectrum
-    mutable double              m_mc_detx_min; //!< DETX minimum (deg)
-    mutable double              m_mc_detx_max; //!< DETX maximum (deg)
-    mutable double              m_mc_detx_bin; //!< DETX binsize (deg)
-    mutable double              m_mc_dety_min; //!< DETY minimum (deg)
-    mutable double              m_mc_dety_max; //!< DETY maximum (deg)
-    mutable double              m_mc_dety_bin; //!< DETY binsize (deg)
-    mutable double              m_mc_logE_min; //!< log10 energy minimum (TeV)
-    mutable double              m_mc_logE_max; //!< log10 energy maximum (TeV)
-    mutable double              m_mc_logE_bin; //!< log10 energy binsize (TeV)
+    mutable std::vector<double> m_mc_max;                //!< Maximum background rate
+    mutable GModelSpectralNodes m_mc_spectrum;           //!< Response cube spectrum
+    mutable double              m_mc_one_minus_costheta; //!< 1-cos(theta_max)
 };
 
 
