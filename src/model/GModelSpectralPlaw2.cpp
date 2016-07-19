@@ -43,7 +43,7 @@ const GModelSpectralPlaw2    g_spectral_plaw2_seed;
 const GModelSpectralRegistry g_spectral_plaw2_registry(&g_spectral_plaw2_seed);
 #if defined(G_LEGACY_XML_FORMAT)
 const GModelSpectralPlaw2    g_spectral_plaw2_legacy_seed(true, "PowerLaw2");
-const GModelSpatialRegistry  g_spectral_plaw2_legacy_registry(&g_spectral_plaw2_legacy_seed);
+const GModelSpectralRegistry g_spectral_plaw2_legacy_registry(&g_spectral_plaw2_legacy_seed);
 #endif
 
 /* __ Method name definitions ____________________________________________ */
