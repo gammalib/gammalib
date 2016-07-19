@@ -539,9 +539,6 @@ bool GModelSpatialDiffuseCube::contains(const GSkyDir& dir,
  ***************************************************************************/
 void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
 {
-    // Clear model
-    clear();
-
     // If "Normalization" parameter exists then read parameter from this
     // XML element
     if (gammalib::xml_has_par(xml, "Normalization")) {

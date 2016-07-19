@@ -48,29 +48,46 @@ void TestGModel::set(void)
     // Set test data directory
     std::string datadir = std::getenv("TEST_DATA");
 
-    // Set attributes
-    m_map_file                    = datadir + "/cena_lobes_parkes.fits";
-    m_cube_file                   = datadir + "/test_cube.fits";
-    m_filefct                     = datadir + "/filefunction.txt";
-    m_xml_file                    = datadir + "/crab.xml";
-    m_xml_model_point_const       = datadir + "/model_point_const.xml";
-    m_xml_model_point_gauss       = datadir + "/model_point_gauss.xml";
-    m_xml_model_point_plaw        = datadir + "/model_point_plaw.xml";
-    m_xml_model_point_plaw2       = datadir + "/model_point_plaw2.xml";
-    m_xml_model_point_eplaw       = datadir + "/model_point_eplaw.xml";
-    m_xml_model_point_bplaw       = datadir + "/model_point_bplaw.xml";
-    m_xml_model_point_supeplaw    = datadir + "/model_point_supeplaw.xml";
-    m_xml_model_point_logparabola = datadir + "/model_point_logparabola.xml";
-    m_xml_model_point_nodes       = datadir + "/model_point_nodes.xml";
-    m_xml_model_point_filefct     = datadir + "/model_point_filefct.xml";
-    m_xml_model_diffuse_const     = datadir + "/model_diffuse_const.xml";
-    m_xml_model_diffuse_cube      = datadir + "/model_diffuse_cube.xml";
-    m_xml_model_diffuse_map       = datadir + "/model_diffuse_map.xml";
-    m_xml_model_radial_disk       = datadir + "/model_radial_disk.xml";
-    m_xml_model_radial_gauss      = datadir + "/model_radial_gauss.xml";
-    m_xml_model_radial_shell      = datadir + "/model_radial_shell.xml";
-    m_xml_model_elliptical_disk   = datadir + "/model_elliptical_disk.xml";
-    m_xml_model_elliptical_gauss  = datadir + "/model_elliptical_gauss.xml";
+    // Set test files
+    m_map_file  = datadir + "/cena_lobes_parkes.fits";
+    m_cube_file = datadir + "/test_cube.fits";
+    m_filefct   = datadir + "/filefunction.txt";
+    m_xml_file  = datadir + "/crab.xml";
+
+    // Set model definiton XML files
+    m_xml_model_point_const        = datadir + "/model_point_const.xml";
+    m_xml_model_point_gauss        = datadir + "/model_point_gauss.xml";
+    m_xml_model_point_plaw         = datadir + "/model_point_plaw.xml";
+    m_xml_model_point_plaw2        = datadir + "/model_point_plaw2.xml";
+    m_xml_model_point_eplaw        = datadir + "/model_point_eplaw.xml";
+    m_xml_model_point_bplaw        = datadir + "/model_point_bplaw.xml";
+    m_xml_model_point_supeplaw     = datadir + "/model_point_supeplaw.xml";
+    m_xml_model_point_logparabola  = datadir + "/model_point_logparabola.xml";
+    m_xml_model_point_nodes        = datadir + "/model_point_nodes.xml";
+    m_xml_model_point_filefct      = datadir + "/model_point_filefct.xml";
+    m_xml_model_diffuse_const      = datadir + "/model_diffuse_const.xml";
+    m_xml_model_diffuse_cube       = datadir + "/model_diffuse_cube.xml";
+    m_xml_model_diffuse_map        = datadir + "/model_diffuse_map.xml";
+    m_xml_model_radial_disk        = datadir + "/model_radial_disk.xml";
+    m_xml_model_radial_gauss       = datadir + "/model_radial_gauss.xml";
+    m_xml_model_radial_shell       = datadir + "/model_radial_shell.xml";
+    m_xml_model_elliptical_disk    = datadir + "/model_elliptical_disk.xml";
+    m_xml_model_elliptical_gauss   = datadir + "/model_elliptical_gauss.xml";
+
+    // Set legacy model definition XML files
+    m_xml_legacy_radial_disk       = datadir + "/legacy_radial_disk.xml";
+    m_xml_legacy_radial_gauss      = datadir + "/legacy_radial_gauss.xml";
+    m_xml_legacy_radial_shell      = datadir + "/legacy_radial_shell.xml";
+    m_xml_legacy_elliptical_gauss  = datadir + "/legacy_elliptical_gauss.xml";
+    m_xml_legacy_diffuse_const     = datadir + "/legacy_diffuse_const.xml";
+    m_xml_legacy_diffuse_map       = datadir + "/legacy_diffuse_map.xml";
+    m_xml_legacy_diffuse_cube      = datadir + "/legacy_diffuse_cube.xml";
+    m_xml_legacy_point_const       = datadir + "/legacy_point_const.xml";
+    m_xml_legacy_point_plaw        = datadir + "/legacy_point_plaw.xml";
+    m_xml_legacy_point_plaw2       = datadir + "/legacy_point_plaw2.xml";
+    m_xml_legacy_point_eplaw       = datadir + "/legacy_point_eplaw.xml";
+    m_xml_legacy_point_supeplaw    = datadir + "/legacy_point_supeplaw.xml";
+    m_xml_legacy_point_logparabola = datadir + "/legacy_point_logparabola.xml";
 
     // Append tests
     append(static_cast<pfunction>(&TestGModel::test_model_par),
@@ -137,6 +154,36 @@ void TestGModel::set(void)
     // Append model registry tests
     append(static_cast<pfunction>(&TestGModel::test_model_registry),
            "Test model registries");
+
+    // Append legacy model tests
+    #if defined(G_LEGACY_XML_FORMAT)
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_radial_disk),
+           "Test GModelSpatialRadialDisk legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_radial_gauss),
+           "Test GModelSpatialRadialGauss legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_radial_shell),
+           "Test GModelSpatialRadialShell legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_elliptical_gauss),
+           "Test GModelSpatialEllipticalGauss legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_diffuse_const),
+           "Test GModelSpatialDiffuseConst legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_diffuse_map),
+           "Test GModelSpatialDiffuseMap legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_diffuse_cube),
+           "Test GModelSpatialDiffuseCube legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_const),
+           "Test GModelSpectralConst legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_plaw),
+           "Test GModelSpectralPlaw legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_plaw2),
+           "Test GModelSpectralPlaw2 legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_eplaw),
+           "Test GModelSpectralExpPlaw legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_supeplaw),
+           "Test GModelSpectralSuperExpPlaw legacy model");
+    append(static_cast<pfunction>(&TestGModel::test_legacy_model_point_logparabola),
+           "Test GModelSpectralLogParabola legacy model");
+    #endif
 
     // Return
     return;
@@ -2707,6 +2754,528 @@ void TestGModel::test_model_registry(void)
     // Exit test
     return;
 
+}
+
+
+/***********************************************************************//**
+ * @brief Test radial disk legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_radial_disk(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_radial_disk);
+
+    // Extract spatial component
+    GModelSpatialRadialDisk* spatial = static_cast<GModelSpatialRadialDisk*>(
+                                         static_cast<GModelSky*>(
+                                           models[0])->spatial());
+
+    // Test model values
+    test_value(spatial->type(), "DiskFunction", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->radius(), 0.45, 1.0e-7, "Check radius");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_radial_disk.xml");
+    models.clear();
+    models.load("test_xml_legacy_radial_disk.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialRadialDisk*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Re-test model values
+    test_value(spatial->type(), "DiskFunction", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->radius(), 0.45, 1.0e-7, "Check radius");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test radial Gaussian legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_radial_gauss(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_radial_gauss);
+
+    // Extract spatial component
+    GModelSpatialRadialGauss* spatial = static_cast<GModelSpatialRadialGauss*>(
+                                          static_cast<GModelSky*>(
+                                            models[0])->spatial());
+
+    // Test model values
+    test_value(spatial->type(), "GaussFunction", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->sigma(), 0.20, 1.0e-7, "Check Sigma");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_radial_gauss.xml");
+    models.clear();
+    models.load("test_xml_legacy_radial_gauss.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialRadialGauss*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Re-test model values
+    test_value(spatial->type(), "GaussFunction", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->sigma(), 0.20, 1.0e-7, "Check Sigma");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test radial shell legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_radial_shell(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_radial_shell);
+
+    // Extract spatial component
+    GModelSpatialRadialShell* spatial = static_cast<GModelSpatialRadialShell*>(
+                                          static_cast<GModelSky*>(
+                                            models[0])->spatial());
+
+    // Test model values
+    test_value(spatial->type(), "ShellFunction", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->radius(), 0.30, 1.0e-7, "Check radius");
+    test_value(spatial->width(), 0.10, 1.0e-7, "Check width");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_radial_shell.xml");
+    models.clear();
+    models.load("test_xml_legacy_radial_shell.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialRadialShell*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Re-test model values
+    test_value(spatial->type(), "ShellFunction", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->radius(), 0.30, 1.0e-7, "Check radius");
+    test_value(spatial->width(), 0.10, 1.0e-7, "Check width");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test elliptical Gaussian legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_elliptical_gauss(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_elliptical_gauss);
+
+    // Extract spatial component
+    GModelSpatialEllipticalGauss* spatial = static_cast<GModelSpatialEllipticalGauss*>(
+                                              static_cast<GModelSky*>(
+                                                models[0])->spatial());
+
+    // Test model values
+    test_value(spatial->type(), "EllipticalGauss", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->posangle(), 45.0, 1.0e-7, "Check position angle");
+    test_value(spatial->semimajor(), 0.3, 1.0e-7, "Check semi major axis");
+    test_value(spatial->semiminor(), 0.1, 1.0e-7, "Check semi minor axis");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_elliptical_gauss.xml");
+    models.clear();
+    models.load("test_xml_legacy_elliptical_gauss.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialEllipticalGauss*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Re-test model values
+    test_value(spatial->type(), "EllipticalGauss", "Check model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spatial->posangle(), 45.0, 1.0e-7, "Check position angle");
+    test_value(spatial->semimajor(), 0.3, 1.0e-7, "Check semi major axis");
+    test_value(spatial->semiminor(), 0.1, 1.0e-7, "Check semi minor axis");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test diffuse constant legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_diffuse_const(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_diffuse_const);
+
+    // Extract spatial component
+    GModelSpatialDiffuseConst* spatial = static_cast<GModelSpatialDiffuseConst*>(
+                                           static_cast<GModelSky*>(
+                                             models[0])->spatial());
+
+    // Test model values
+    test_value(spatial->type(), "ConstantValue", "Check model type");
+    test_value(spatial->value(), 1.0, 1.0e-7, "Check constant value");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_diffuse_const.xml");
+    models.clear();
+    models.load("test_xml_legacy_diffuse_const.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialDiffuseConst*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Re-test model values
+    test_value(spatial->type(), "ConstantValue", "Check model type");
+    test_value(spatial->value(), 1.0, 1.0e-7, "Check constant value");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test diffuse map legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_diffuse_map(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_diffuse_map);
+
+    // Extract spatial component
+    GModelSpatialDiffuseMap* spatial = static_cast<GModelSpatialDiffuseMap*>(
+                                         static_cast<GModelSky*>(
+                                           models[0])->spatial());
+
+    // Test model values
+    test_value(spatial->type(), "SpatialMap", "Check model type");
+    test_value(spatial->value(), 1.0, 1.0e-7, "Check constant value");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_diffuse_map.xml");
+    models.clear();
+    models.load("test_xml_legacy_diffuse_map.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialDiffuseMap*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Re-test model values
+    test_value(spatial->type(), "SpatialMap", "Check model type");
+    test_value(spatial->value(), 1.0, 1.0e-7, "Check constant value");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test diffuse map cube legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_diffuse_cube(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_diffuse_cube);
+
+    // Extract spatial component
+    GModelSpatialDiffuseCube* spatial = static_cast<GModelSpatialDiffuseCube*>(
+                                          static_cast<GModelSky*>(
+                                            models[0])->spatial());
+
+    // Test model values
+    test_value(spatial->type(), "MapCubeFunction", "Check model type");
+    test_value(spatial->value(), 1.0, 1.0e-7, "Check constant value");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_diffuse_cube.xml");
+    models.clear();
+    models.load("test_xml_legacy_diffuse_cube.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialDiffuseCube*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Re-test model values
+    test_value(spatial->type(), "MapCubeFunction", "Check model type");
+    test_value(spatial->value(), 1.0, 1.0e-7, "Check constant value");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test constant legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_point_const(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_point_const);
+
+    // Extract spatial component
+    GModelSpatialPointSource* spatial = static_cast<GModelSpatialPointSource*>(
+                                          static_cast<GModelSky*>(
+                                            models[0])->spatial());
+
+    // Extract spectral component
+    GModelSpectralConst* spectral = static_cast<GModelSpectralConst*>(
+                                      static_cast<GModelSky*>(
+                                        models[0])->spectral());
+
+    // Test model values
+    test_value(spatial->type(), "SkyDirFunction", "Check spatial model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spectral->type(), "ConstantValue", "Check spectral model type");
+    test_value(spectral->value(), 5.7e-16, 1.0e-7, "Check constant value");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_point_const.xml");
+    models.clear();
+    models.load("test_xml_legacy_point_const.xml");
+
+    // Extract spatial component
+    spatial = static_cast<GModelSpatialPointSource*>(
+                static_cast<GModelSky*>(models[0])->spatial());
+
+    // Extract spectral component
+    spectral = static_cast<GModelSpectralConst*>(
+                 static_cast<GModelSky*>(models[0])->spectral());
+
+    // Re-test model values
+    test_value(spatial->type(), "SkyDirFunction", "Check spatial model type");
+    test_value(spatial->ra(), 83.6331, 1.0e-7, "Check Right Ascension");
+    test_value(spatial->dec(), 22.0145, 1.0e-7, "Check Declination");
+    test_value(spectral->type(), "ConstantValue", "Check spectral model type");
+    test_value(spectral->value(), 5.7e-16, 1.0e-7, "Check constant value");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test power law legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_point_plaw(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_point_plaw);
+
+    // Extract spectral component
+    GModelSpectralPlaw* spectral = static_cast<GModelSpectralPlaw*>(
+                                     static_cast<GModelSky*>(
+                                       models[0])->spectral());
+
+    // Test model values
+    test_value(spectral->type(), "PowerLaw", "Check model type");
+    test_value(spectral->prefactor(), 5.7e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index(), -2.48, 1.0e-7, "Check index");
+    test_value(spectral->pivot().GeV(), 300.0, 1.0e-7, "Check pivot energy");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_point_plaw.xml");
+    models.clear();
+    models.load("test_xml_legacy_point_plaw.xml");
+
+    // Extract spectral component
+    spectral = static_cast<GModelSpectralPlaw*>(
+                 static_cast<GModelSky*>(models[0])->spectral());
+
+    // Re-test model values
+    test_value(spectral->type(), "PowerLaw", "Check model type");
+    test_value(spectral->prefactor(), 5.7e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index(), -2.48, 1.0e-7, "Check index");
+    test_value(spectral->pivot().GeV(), 300.0, 1.0e-7, "Check pivot energy");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test power law2 legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_point_plaw2(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_point_plaw2);
+
+    // Extract spectral component
+    GModelSpectralPlaw2* spectral = static_cast<GModelSpectralPlaw2*>(
+                                      static_cast<GModelSky*>(
+                                        models[0])->spectral());
+
+    // Test model values
+    test_value(spectral->type(), "PowerLaw2", "Check model type");
+    test_value(spectral->integral(), 1.0e-7, 1.0e-7, "Check integral photon flux");
+    test_value(spectral->index(), -2.0, 1.0e-7, "Check index");
+    test_value(spectral->emin().MeV(), 100.0, 1.0e-7, "Check minimum energy");
+    test_value(spectral->emax().MeV(), 500000.0, 1.0e-7, "Check maximum energy");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_point_plaw2.xml");
+    models.clear();
+    models.load("test_xml_legacy_point_plaw2.xml");
+
+    // Extract spectral component
+    spectral = static_cast<GModelSpectralPlaw2*>(
+                 static_cast<GModelSky*>(models[0])->spectral());
+
+    // Re-test model values
+    test_value(spectral->type(), "PowerLaw2", "Check model type");
+    test_value(spectral->integral(), 1.0e-7, 1.0e-7, "Check integral photon flux");
+    test_value(spectral->index(), -2.0, 1.0e-7, "Check index");
+    test_value(spectral->emin().MeV(), 100.0, 1.0e-7, "Check minimum energy");
+    test_value(spectral->emax().MeV(), 500000.0, 1.0e-7, "Check maximum energy");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test exponentially cut off power law legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_point_eplaw(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_point_eplaw);
+
+    // Extract spectral component
+    GModelSpectralExpPlaw* spectral = static_cast<GModelSpectralExpPlaw*>(
+                                        static_cast<GModelSky*>(
+                                          models[0])->spectral());
+
+    // Test model values
+    test_value(spectral->type(), "ExpCutoff", "Check model type");
+    test_value(spectral->prefactor(), 5.7e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index(), -2.48, 1.0e-7, "Check index");
+    test_value(spectral->pivot().GeV(), 300.0, 1.0e-7, "Check pivot energy");
+    test_value(spectral->cutoff().TeV(), 1.0, 1.0e-7, "Check cut off energy");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_point_eplaw.xml");
+    models.clear();
+    models.load("test_xml_legacy_point_eplaw.xml");
+
+    // Extract spectral component
+    spectral = static_cast<GModelSpectralExpPlaw*>(
+                 static_cast<GModelSky*>(models[0])->spectral());
+
+    // Re-test model values
+    test_value(spectral->type(), "ExpCutoff", "Check model type");
+    test_value(spectral->prefactor(), 5.7e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index(), -2.48, 1.0e-7, "Check index");
+    test_value(spectral->pivot().GeV(), 300.0, 1.0e-7, "Check pivot energy");
+    test_value(spectral->cutoff().TeV(), 1.0, 1.0e-7, "Check cut off energy");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test super exponentially cut off power law legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_point_supeplaw(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_point_supeplaw);
+
+    // Extract spectral component
+    GModelSpectralSuperExpPlaw* spectral = static_cast<GModelSpectralSuperExpPlaw*>(
+                                             static_cast<GModelSky*>(
+                                               models[0])->spectral());
+
+    // Test model values
+    test_value(spectral->type(), "PLSuperExpCutoff", "Check model type");
+    test_value(spectral->prefactor(), 1e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index1(), -2.0, 1.0e-7, "Check index 1");
+    test_value(spectral->pivot().TeV(), 1.0, 1.0e-7, "Check pivot energy");
+    test_value(spectral->index2(), 1.5, 1.0e-7, "Check index 2");
+    test_value(spectral->cutoff().TeV(), 1.0, 1.0e-7, "Check cut off energy");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_point_supeplaw.xml");
+    models.clear();
+    models.load("test_xml_legacy_point_supeplaw.xml");
+
+    // Extract spectral component
+    spectral = static_cast<GModelSpectralSuperExpPlaw*>(
+                 static_cast<GModelSky*>(models[0])->spectral());
+
+    // Re-test model values
+    test_value(spectral->type(), "PLSuperExpCutoff", "Check model type");
+    test_value(spectral->prefactor(), 1e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index1(), -2.0, 1.0e-7, "Check index 1");
+    test_value(spectral->pivot().TeV(), 1.0, 1.0e-7, "Check pivot energy");
+    test_value(spectral->index2(), 1.5, 1.0e-7, "Check index 2");
+    test_value(spectral->cutoff().TeV(), 1.0, 1.0e-7, "Check cut off energy");
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test log parabola legacy model
+ ***************************************************************************/
+void TestGModel::test_legacy_model_point_logparabola(void)
+{
+    // Load model from XML file
+    GModels models(m_xml_legacy_point_logparabola);
+
+    // Extract spectral component
+    GModelSpectralLogParabola* spectral = static_cast<GModelSpectralLogParabola*>(
+                                            static_cast<GModelSky*>(
+                                              models[0])->spectral());
+
+    // Test model values
+    test_value(spectral->type(), "LogParabola", "Check model type");
+    test_value(spectral->prefactor(), 5.878e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index(), -2.32473, 1.0e-7, "Check index");
+    test_value(spectral->pivot().TeV(), 1.0, 1.0e-7, "Check pivot energy");
+    test_value(spectral->curvature(), -0.074, 1.0e-7, "Check curvature)");
+
+    // Save file to disk and reload file (tests the proper saving and loading)
+    models.save("test_xml_legacy_point_logparabola.xml");
+    models.clear();
+    models.load("test_xml_legacy_point_logparabola.xml");
+
+    // Extract spectral component
+    spectral = static_cast<GModelSpectralLogParabola*>(
+                 static_cast<GModelSky*>(models[0])->spectral());
+
+    // Re-test model values
+    test_value(spectral->type(), "LogParabola", "Check model type");
+    test_value(spectral->prefactor(), 5.878e-16, 1.0e-7, "Check prefactor");
+    test_value(spectral->index(), -2.32473, 1.0e-7, "Check index");
+    test_value(spectral->pivot().TeV(), 1.0, 1.0e-7, "Check pivot energy");
+    test_value(spectral->curvature(), -0.074, 1.0e-7, "Check curvature)");
+
+    // Exit test
+    return;
 }
 
 

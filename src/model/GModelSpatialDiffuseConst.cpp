@@ -444,9 +444,6 @@ double GModelSpatialDiffuseConst::mc_norm(const GSkyDir& dir,
  ***************************************************************************/
 void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
-    // Clear model
-    clear();
-
     // Get value parameter
     const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
 
