@@ -49,6 +49,7 @@ class GModelSpatialEllipticalGauss : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalGauss(void);
+    GModelSpatialEllipticalGauss(const bool& dummy, const std::string& type);
     GModelSpatialEllipticalGauss(const GSkyDir& dir,
                                  const double&  major,
                                  const double&  minor,
@@ -65,7 +66,6 @@ public:
     virtual GModelSpatialEllipticalGauss* clone(void) const;
     virtual std::string                   classname(void) const;
     virtual std::string                   type(void) const;
-    virtual std::string                   alias(void) const;
     virtual double                        eval(const double&  theta,
                                                const double&  posangle,
                                                const GEnergy& energy,
@@ -91,6 +91,9 @@ protected:
     void copy_members(const GModelSpatialEllipticalGauss& model);
     void free_members(void);
     void update(void) const;
+
+    // Protected members
+    std::string m_type;   //!< Model type
 
     // Cached members used for pre-computations
     mutable double m_last_minor;        //!< Last semi-minor axis
@@ -126,28 +129,14 @@ std::string GModelSpatialEllipticalGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "EllipticalGaussian".
+ * @return Model type.
  *
  * Returns the type of the elliptical gauss model.
  ***************************************************************************/
 inline
 std::string GModelSpatialEllipticalGauss::type(void) const
 {
-    return "EllipticalGaussian";
-}
-
-
-/***********************************************************************//**
- * @brief Return model type alias
- *
- * @return "EllipticalGauss".
- *
- * Returns the alias of the elliptical gauss model.
- ***************************************************************************/
-inline
-std::string GModelSpatialEllipticalGauss::alias(void) const
-{
-    return "EllipticalGauss";
+    return (m_type);
 }
 
 #endif /* GMODELSPATIALELLIPTICALGAUSS_HPP */

@@ -44,7 +44,11 @@ namespace {
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialEllipticalGauss g_elliptical_gauss_seed;
-const GModelSpatialRegistry g_elliptical_gauss_registry(&g_elliptical_gauss_seed);
+const GModelSpatialRegistry        g_elliptical_gauss_registry(&g_elliptical_gauss_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialEllipticalGauss g_elliptical_gauss_legacy_seed(true, "EllipticalGauss");
+const GModelSpatialRegistry        g_elliptical_gauss_legacy_registry(&g_elliptical_gauss_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ             "GModelSpatialEllipticalGauss::read(GXmlElement&)"
@@ -72,6 +76,29 @@ GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(void) :
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty elliptical Gaussian model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialEllipticalGauss::GModelSpatialEllipticalGauss(const bool&        dummy,
+                                                           const std::string& type) :
+                              GModelSpatialElliptical()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -700,6 +727,9 @@ std::string GModelSpatialEllipticalGauss::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::init_members(void)
 {
+    // Initialise model type
+    m_type = "EllipticalGaussian";
+
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius is not meaningful
     m_last_minor        = 0.0;
@@ -729,6 +759,9 @@ void GModelSpatialEllipticalGauss::init_members(void)
  ***************************************************************************/
 void GModelSpatialEllipticalGauss::copy_members(const GModelSpatialEllipticalGauss& model)
 {
+    // Copy members
+    m_type = model.m_type;
+
     // Copy precomputation cache
     m_last_minor        = model.m_last_minor;
     m_last_major        = model.m_last_major;

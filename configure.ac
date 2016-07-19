@@ -699,16 +699,16 @@ fi
 
 
 #############################################################################
-# Checks for Legacy model names option (G_LEGACY_MODEL_NAMES)               #
+# Checks for Legacy XML format option (G_LEGACY_XML_FORMAT)                #
 #############################################################################
-AC_MSG_CHECKING(whether to enable legacy model names option)
-AC_ARG_ENABLE([legacy_model_names],
-              AS_HELP_STRING([--enable-legacy-model-names],
-                             [enables legacy model names [default=yes]]),
-             [LEGACY_MODEL_NAMES="$enableval"],
-             [LEGACY_MODEL_NAMES="yes"])
-if test "x$LEGACY_MODEL_NAMES" = "xyes"; then
-  AC_DEFINE([G_LEGACY_MODEL_NAMES], [1], [Legacy model names are enabled])
+AC_MSG_CHECKING(whether to support legacy XML format option)
+AC_ARG_ENABLE([legacy_xml_format],
+              AS_HELP_STRING([--enable-legacy-xml-format],
+                             [support legacy XML format [default=yes]]),
+              [LEGACY_XML_FORMAT="$enableval"],
+              [LEGACY_XML_FORMAT="yes"])
+if test "x$LEGACY_XML_FORMAT" = "xyes"; then
+  AC_DEFINE([G_LEGACY_XML_FORMAT], [1], [Legacy XML format is supported])
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
@@ -1577,10 +1577,10 @@ if test "x$SMALL_MEMORY" = "xyes"; then
 else
   echo "  - Optimize memory usage        (no)"
 fi
-if test "x$LEGACY_MODEL_NAMES" = "xyes"; then
-  echo "  * Enable legacy model names    (yes)   (default)"
+if test "x$LEGACY_XML_FORMAT" = "xyes"; then
+  echo "  * Support legacy XML format    (yes)   (default)"
 else
-  echo "  - Enable legacy model names    (no)"
+  echo "  - Support legacy XML format    (no)"
 fi
 if test "x$enable_openmp" = "xyes"; then
   echo "  * Enable OpenMP                (yes)   (default)"

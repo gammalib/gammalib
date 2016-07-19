@@ -60,6 +60,7 @@ class GModelSpatialDiffuseCube : public GModelSpatialDiffuse {
 public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
+    GModelSpatialDiffuseCube(const bool& dummy, const std::string& type);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
     GModelSpatialDiffuseCube(const GFilename& filename,
                              const double&    value = 1.0);
@@ -77,7 +78,6 @@ public:
     virtual GModelSpatialDiffuseCube* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
-    virtual std::string               alias(void) const;
     virtual double                    eval(const GPhoton& photon) const;
     virtual double                    eval_gradients(const GPhoton& photon) const;
     virtual GSkyDir                   mc(const GEnergy& energy,
@@ -122,12 +122,13 @@ protected:
     double cube_intensity(const GPhoton& photon) const;
 
     // Protected members
-    GModelPar  m_value;       //!< Value
-    GFilename  m_filename;    //!< Name of map cube
-    bool       m_loaded;      //!< Signals if map cube has been loaded
-    GSkyMap    m_cube;        //!< Map cube
-    GNodeArray m_logE;        //!< Log10(energy) values of the maps
-    GEbounds   m_ebounds;     //!< Energy bounds of the maps
+    std::string m_type;        //!< Model type
+    GModelPar   m_value;       //!< Value
+    GFilename   m_filename;    //!< Name of map cube
+    bool        m_loaded;      //!< Signals if map cube has been loaded
+    GSkyMap     m_cube;        //!< Map cube
+    GNodeArray  m_logE;        //!< Log10(energy) values of the maps
+    GEbounds    m_ebounds;     //!< Energy bounds of the maps
 
     // Monte Carlo cache
     mutable GSkyDir             m_mc_centre;           //!< Centre of MC cone
@@ -153,28 +154,14 @@ std::string GModelSpatialDiffuseCube::classname(void) const
 /***********************************************************************//**
  * @brief Return spatial model type
  *
- * @return "DiffuseMapCube".
+ * @return Model type.
  *
  * Returns the type of the spatial map cube model.
  ***************************************************************************/
 inline
 std::string GModelSpatialDiffuseCube::type(void) const
 {
-    return "DiffuseMapCube";
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial model type alias
- *
- * @return "MapCubeFunction".
- *
- * Returns the alias of the spatial map cube model.
- ***************************************************************************/
-inline
-std::string GModelSpatialDiffuseCube::alias(void) const
-{
-    return "MapCubeFunction";
+    return (m_type);
 }
 
 

@@ -2642,17 +2642,9 @@ void TestGModel::test_model_registry(void)
             if (ptr != NULL) {
             
                 // Test model type
-                #if defined(G_LEGACY_MODEL_NAMES)
-                test_assert((ptr->type()  == registry.name(i)) ||
-                            (ptr->alias() == registry.name(i)),
-                            "Expected \""+registry.name(i)+"\" instead"
-                            " of \""+ptr->type()+"\" or \""+
-                            ptr->alias()+"\".");
-                #else
                 test_assert(ptr->type()  == registry.name(i),
                             "Expected \""+registry.name(i)+"\" instead"
                             " of \""+ptr->type()+"\".");
-                #endif
 
                 // Free model
                 delete ptr;

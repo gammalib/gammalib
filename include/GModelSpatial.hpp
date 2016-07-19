@@ -86,7 +86,6 @@ public:
     virtual GModelSpatial* clone(void) const = 0;
     virtual std::string    classname(void) const = 0;
     virtual std::string    type(void) const = 0;
-    virtual std::string    alias(void) const = 0;
     virtual GClassCode     code(void) const = 0;
     virtual double         eval(const GPhoton& photon) const = 0;
     virtual double         eval_gradients(const GPhoton& photon) const = 0;

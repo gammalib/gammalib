@@ -45,6 +45,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialDiffuseCube g_spatial_cube_seed;
 const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialDiffuseCube g_spatial_cube_legacy_seed(true, "MapCubeFunction");
+const GModelSpatialRegistry    g_spatial_cube_legacy_registry(&g_spatial_cube_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC          "GModelSpatialDiffuseCube::mc(GEnergy&, GTime&, GRan&)"
@@ -78,6 +82,29 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(void) :
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty map cube model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -1017,6 +1044,9 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialDiffuseCube::init_members(void)
 {
+    // Initialise model type
+    m_type = "DiffuseMapCube";
+
     // Initialise Value
     m_value.clear();
     m_value.name("Normalization");
@@ -1058,6 +1088,7 @@ void GModelSpatialDiffuseCube::init_members(void)
 void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& model)
 {
     // Copy members
+    m_type     = model.m_type;
     m_value    = model.m_value;
     m_filename = model.m_filename;
     m_cube     = model.m_cube;

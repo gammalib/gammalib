@@ -50,6 +50,7 @@ class GModelSpatialRadialGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialGauss(void);
+    GModelSpatialRadialGauss(const bool& dummy, const std::string& type);
     GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
     explicit GModelSpatialRadialGauss(const GXmlElement& xml);
     GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
@@ -63,7 +64,6 @@ public:
     virtual GModelSpatialRadialGauss* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
-    virtual std::string               alias(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
                                            const GTime& time) const;
@@ -91,7 +91,8 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_sigma;      //!< Gaussian width (deg)
+    std::string m_type;      //!< Model type
+    GModelPar   m_sigma;     //!< Gaussian width (deg)
 };
 
 
@@ -110,28 +111,14 @@ std::string GModelSpatialRadialGauss::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "RadialGaussian".
+ * @return Model type.
  *
  * Returns the type of the radial Gauss model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialGauss::type(void) const
 {
-    return "RadialGaussian";
-}
-
-
-/***********************************************************************//**
- * @brief Return model type alias
- *
- * @return "GaussFunction".
- *
- * Returns the alias of the radial Gauss model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialGauss::alias(void) const
-{
-    return "GaussFunction";
+    return (m_type);
 }
 
 

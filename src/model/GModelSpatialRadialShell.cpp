@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialShell g_radial_shell_seed;
 const GModelSpatialRegistry    g_radial_shell_registry(&g_radial_shell_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialRadialShell g_radial_shell_legacy_seed(true, "ShellFunction");
+const GModelSpatialRegistry    g_radial_shell_legacy_registry(&g_radial_shell_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialRadialShell::read(GXmlElement&)"
@@ -60,11 +64,36 @@ const GModelSpatialRegistry    g_radial_shell_registry(&g_radial_shell_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty radial shell model.
  ***************************************************************************/
 GModelSpatialRadialShell::GModelSpatialRadialShell(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty radial shell model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialRadialShell::GModelSpatialRadialShell(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatialRadial()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -616,6 +645,9 @@ std::string GModelSpatialRadialShell::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialRadialShell::init_members(void)
 {
+    // Initialise model type
+    m_type = "RadialShell";
+
     // Initialise Radius
     m_radius.clear();
     m_radius.name("Radius");
@@ -669,6 +701,7 @@ void GModelSpatialRadialShell::init_members(void)
 void GModelSpatialRadialShell::copy_members(const GModelSpatialRadialShell& model)
 {
     // Copy members
+    m_type        = model.m_type;
     m_radius      = model.m_radius;
     m_width       = model.m_width;
 

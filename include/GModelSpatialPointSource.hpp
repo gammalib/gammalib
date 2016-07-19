@@ -43,14 +43,13 @@
  * This class implements a point source as the spatial component of the
  * factorised source model. The point source has two parameters: the Right
  * Ascension and Declination of the point source location.
- *
- * The model is of type "SkyDirFunction".
  ***************************************************************************/
 class GModelSpatialPointSource : public GModelSpatial {
 
 public:
     // Constructors and destructors
     GModelSpatialPointSource(void);
+    GModelSpatialPointSource(const bool& dummy, const std::string& type);
     explicit GModelSpatialPointSource(const GSkyDir& dir);
     GModelSpatialPointSource(const double& ra, const double& dec);
     explicit GModelSpatialPointSource(const GXmlElement& xml);
@@ -65,7 +64,6 @@ public:
     virtual GModelSpatialPointSource* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
-    virtual std::string               alias(void) const;
     virtual GClassCode                code(void) const;
     virtual double                    eval(const GPhoton& photon) const;
     virtual double                    eval_gradients(const GPhoton& photon) const;
@@ -95,8 +93,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_ra;          //!< Right Ascension (deg)
-    GModelPar m_dec;         //!< Declination (deg)
+    std::string m_type;   //!< Model type
+    GModelPar   m_ra;     //!< Right Ascension (deg)
+    GModelPar   m_dec;    //!< Declination (deg)
 };
 
 
@@ -115,28 +114,14 @@ std::string GModelSpatialPointSource::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "PointSource".
+ * @return Model type.
  *
  * Returns the type of the spatial model.
  ***************************************************************************/
 inline
 std::string GModelSpatialPointSource::type(void) const
 {
-    return "PointSource";
-}
-
-
-/***********************************************************************//**
- * @brief Return model type alias
- *
- * @return "SkyDirFunction".
- *
- * Returns the alias of the spatial model.
- ***************************************************************************/
-inline
-std::string GModelSpatialPointSource::alias(void) const
-{
-    return "SkyDirFunction";
+    return (m_type);
 }
 
 

@@ -39,6 +39,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialRadialGauss g_radial_gauss_seed;
 const GModelSpatialRegistry    g_radial_gauss_registry(&g_radial_gauss_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialRadialGauss g_radial_gauss_legacy_seed(true, "GaussFunction");
+const GModelSpatialRegistry    g_radial_gauss_legacy_registry(&g_radial_gauss_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialRadialGauss::read(GXmlElement&)"
@@ -59,11 +63,36 @@ const GModelSpatialRegistry    g_radial_gauss_registry(&g_radial_gauss_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty radial Gaussian model.
  ***************************************************************************/
 GModelSpatialRadialGauss::GModelSpatialRadialGauss(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty radial Gaussian model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialRadialGauss::GModelSpatialRadialGauss(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatialRadial()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -548,6 +577,8 @@ std::string GModelSpatialRadialGauss::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpatialRadialGauss::init_members(void)
 {
+    // Initialise model type
+    m_type = "RadialGaussian";
 
     // Initialise Gaussian sigma
     m_sigma.clear();
@@ -580,6 +611,7 @@ void GModelSpatialRadialGauss::init_members(void)
 void GModelSpatialRadialGauss::copy_members(const GModelSpatialRadialGauss& model)
 {
     // Copy members
+    m_type  = model.m_type;
     m_sigma = model.m_sigma;
 
     // Return

@@ -49,6 +49,7 @@ class GModelSpatialDiffuseConst : public GModelSpatialDiffuse {
 public:
     // Constructors and destructors
     GModelSpatialDiffuseConst(void);
+    GModelSpatialDiffuseConst(const bool& dummy, const std::string& type);
     explicit GModelSpatialDiffuseConst(const GXmlElement& xml);
     explicit GModelSpatialDiffuseConst(const double& value);
     GModelSpatialDiffuseConst(const GModelSpatialDiffuseConst& model);
@@ -62,7 +63,6 @@ public:
     virtual GModelSpatialDiffuseConst* clone(void) const;
     virtual std::string                classname(void) const;
     virtual std::string                type(void) const;
-    virtual std::string                alias(void) const;
     virtual double                     eval(const GPhoton& photon) const;
     virtual double                     eval_gradients(const GPhoton& photon) const;
     virtual GSkyDir                    mc(const GEnergy& energy,
@@ -87,6 +87,7 @@ protected:
     void free_members(void);
 
     // Protected members
+    std::string     m_type;          //!< Model type
     GModelPar       m_value;         //!< Value
     mutable GSkyDir m_mc_centre;     //!< Simulation cone centre
     mutable double  m_mc_cos_radius; //!< Cosine of simulation cone radius
@@ -108,28 +109,14 @@ std::string GModelSpatialDiffuseConst::classname(void) const
 /***********************************************************************//**
  * @brief Return spatial model type
  *
- * @return "DiffuseIsotropic".
+ * @return Model type.
  *
  * Returns the type of the isotropic spatial model.
  ***************************************************************************/
 inline
 std::string GModelSpatialDiffuseConst::type(void) const
 {
-    return "DiffuseIsotropic";
-}
-
-
-/***********************************************************************//**
- * @brief Return spatial model type alias
- *
- * @return "ConstantValue".
- *
- * Returns the alias of the isotropic spatial model.
- ***************************************************************************/
-inline
-std::string GModelSpatialDiffuseConst::alias(void) const
-{
-    return "ConstantValue";
+    return (m_type);
 }
 
 

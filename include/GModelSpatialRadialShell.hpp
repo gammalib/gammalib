@@ -59,6 +59,7 @@ class GModelSpatialRadialShell : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelSpatialRadialShell(void);
+    GModelSpatialRadialShell(const bool& dummy, const std::string& type);
     GModelSpatialRadialShell(const GSkyDir& dir,
                              const double&  radius,
                              const double&  width);
@@ -74,7 +75,6 @@ public:
     virtual GModelSpatialRadialShell* clone(void) const;
     virtual std::string               classname(void) const;
     virtual std::string               type(void) const;
-    virtual std::string               alias(void) const;
     virtual double                    eval(const double&  theta,
                                            const GEnergy& energy,
                                            const GTime& time) const;
@@ -107,6 +107,7 @@ protected:
     static double f2(double x);
 
     // Protected members
+    std::string     m_type;          //!< Model type
     GModelPar       m_radius;        //!< Inner shell radius (deg)
     GModelPar       m_width;         //!< Shell thickness (deg)
 
@@ -136,28 +137,14 @@ std::string GModelSpatialRadialShell::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "RadialShell".
+ * @return Model type.
  *
  * Returns the type of the radial shell model.
  ***************************************************************************/
 inline
 std::string GModelSpatialRadialShell::type(void) const
 {
-    return "RadialShell";
-}
-
-
-/***********************************************************************//**
- * @brief Return model type alias
- *
- * @return "ShellFunction".
- *
- * Returns the alias of the radial shell model.
- ***************************************************************************/
-inline
-std::string GModelSpatialRadialShell::alias(void) const
-{
-    return "ShellFunction";
+    return (m_type);
 }
 
 

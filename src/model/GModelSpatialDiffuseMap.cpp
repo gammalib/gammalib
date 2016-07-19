@@ -40,6 +40,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialDiffuseMap g_spatial_map_seed;
 const GModelSpatialRegistry   g_spatial_map_registry(&g_spatial_map_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialDiffuseMap g_spatial_map_legacy_seed(true, "SpatialMap");
+const GModelSpatialRegistry   g_spatial_map_legacy_registry(&g_spatial_map_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC           "GModelSpatialDiffuseMap::mc(GEnergy&, GTime&, GRan&)"
@@ -71,6 +75,29 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(void) :
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty spatial map model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const bool&        dummy,
+                                                 const std::string& type) :
+                         GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -814,6 +841,9 @@ void GModelSpatialDiffuseMap::load(const GFilename& filename)
  ***************************************************************************/
 void GModelSpatialDiffuseMap::init_members(void)
 {
+    // Initialise model type
+    m_type = "DiffuseMap";
+
     // Initialise Value
     m_value.clear();
     m_value.name("Prefactor");
@@ -856,6 +886,7 @@ void GModelSpatialDiffuseMap::init_members(void)
 void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
 {
     // Copy members
+    m_type          = model.m_type;
     m_value         = model.m_value;
     m_map           = model.m_map;
     m_filename      = model.m_filename;

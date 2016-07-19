@@ -37,9 +37,14 @@
 /* __ Constants __________________________________________________________ */
 const double tolerance =  0.000027777778;    // angular tolerance is 1 arcsec
 
+
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialPointSource g_spatial_ptsrc_seed;
 const GModelSpatialRegistry    g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpatialPointSource g_spatial_ptsrc_legacy_seed(true, "SkyDirFunction");
+const GModelSpatialRegistry    g_spatial_ptsrc_legacy_registry(&g_spatial_ptsrc_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                 "GModelSpatialPointSource::read(GXmlElement&)"
@@ -60,11 +65,36 @@ const GModelSpatialRegistry    g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty point source model.
  ***************************************************************************/
 GModelSpatialPointSource::GModelSpatialPointSource(void) : GModelSpatial()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty point source model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpatialPointSource::GModelSpatialPointSource(const bool&        dummy,
+                                                   const std::string& type) :
+                          GModelSpatial()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -560,6 +590,9 @@ void GModelSpatialPointSource::dir(const GSkyDir& dir)
  ***************************************************************************/
 void GModelSpatialPointSource::init_members(void)
 {
+    // Initialise model type
+    m_type = "PointSource";
+
     // Initialise Right Ascension
     m_ra.clear();
     m_ra.name("RA");
@@ -596,8 +629,9 @@ void GModelSpatialPointSource::init_members(void)
 void GModelSpatialPointSource::copy_members(const GModelSpatialPointSource& model)
 {
     // Copy members
-    m_ra  = model.m_ra;
-    m_dec = model.m_dec;
+    m_type = model.m_type;
+    m_ra   = model.m_ra;
+    m_dec  = model.m_dec;
 
     // Set parameter pointer(s)
     m_pars.clear();

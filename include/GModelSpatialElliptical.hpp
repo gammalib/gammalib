@@ -66,7 +66,6 @@ public:
     virtual GModelSpatialElliptical* clone(void) const = 0;
     virtual std::string              classname(void) const = 0;
     virtual std::string              type(void) const = 0;
-    virtual std::string              alias(void) const = 0;
     virtual double                   eval(const double&  theta,
                                           const double&  posangle,
                                           const GEnergy& energy,
