@@ -17,10 +17,10 @@
   </source>
   <source type="PointSource" name="Crab">
     <spectrum type="PowerLawPhotonFlux">
-      <parameter scale="1e-07" name="Integral" min="1e-07" max="1000.0" value="1.0" free="1"/>
-      <parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-2.0" free="1"/>
-      <parameter scale="1.0" name="LowerLimit" min="10.0" max="1000000.0" value="100.0" free="0"/>
-      <parameter scale="1.0" name="UpperLimit" min="10.0" max="1000000.0" value="500000.0" free="0"/>
+      <parameter scale="1e-07" name="PhotonFlux" min="1e-07" max="1000.0"    value="1.0" free="1"/>
+      <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
+      <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+      <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
     </spectrum>
     <spatialModel type="PointSource">
       <parameter scale="1" name="RA" min="-360" max="360" value="83.6331" free="0"/>

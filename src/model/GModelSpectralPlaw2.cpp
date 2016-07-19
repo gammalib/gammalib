@@ -629,7 +629,7 @@ GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin,
  * elements is
  *
  *     <spectrum type="PowerLawPhotonFlux">
- *       <parameter name="Integral"   scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="PhotonFlux" scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="UpperLimit" scale=".." value=".." min=".." max=".." free=".."/>
@@ -653,7 +653,13 @@ void GModelSpectralPlaw2::read(const GXmlElement& xml)
         const GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
+        #if defined(G_LEGACY_XML_FORMAT)
         if (par->attribute("name") == "Integral") {
+            m_integral.read(*par);
+            npar[0]++;
+        }
+        #endif
+        if (par->attribute("name") == "PhotonFlux") {
             m_integral.read(*par);
             npar[0]++;
         }
@@ -679,11 +685,20 @@ void GModelSpectralPlaw2::read(const GXmlElement& xml)
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
+    #if defined(G_LEGACY_XML_FORMAT)
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
-              "Power law 2 spectral model requires \"Integral\", \"Index\","
+              "Power law 2 spectral model requires \"Integral\" or "
+              "\"PhotonFlux\", \"Index\", \"LowerLimit\" and \"UpperLimit\" "
+              "parameters.");
+    }
+    #else
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+        throw GException::model_invalid_parnames(G_READ, xml,
+              "Power law 2 spectral model requires \"PhotonFlux\", \"Index\","
               " \"LowerLimit\" and \"UpperLimit\" parameters.");
     }
+    #endif
 
     // Return
     return;
@@ -706,7 +721,7 @@ void GModelSpectralPlaw2::read(const GXmlElement& xml)
  * element is
  *
  *     <spectrum type="PowerLawPhotonFlux">
- *       <parameter name="Integral"   scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="PhotonFlux" scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="UpperLimit" scale=".." value=".." min=".." max=".." free=".."/>
@@ -727,7 +742,7 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 4 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Integral\""));
+        xml.append(GXmlElement("parameter name=\"PhotonFlux\""));
         xml.append(GXmlElement("parameter name=\"Index\""));
         xml.append(GXmlElement("parameter name=\"LowerLimit\""));
         xml.append(GXmlElement("parameter name=\"UpperLimit\""));
@@ -747,7 +762,7 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
         GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
-        if (par->attribute("name") == "Integral") {
+        if (par->attribute("name") == "PhotonFlux") {
             npar[0]++;
             m_integral.write(*par);
         }
@@ -775,7 +790,7 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
     // Check of all required parameters are present
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Power law 2 spectral model requires \"Integral\", \"Index\","
+              "Power law 2 spectral model requires \"PhotonFlux\", \"Index\","
               " \"LowerLimit\" and \"UpperLimit\" parameters.");
     }
 
@@ -831,7 +846,7 @@ void GModelSpectralPlaw2::init_members(void)
 
     // Initialise integral flux
     m_integral.clear();
-    m_integral.name("Integral");
+    m_integral.name("PhotonFlux");
     m_integral.unit("ph/cm2/s");
     m_integral.scale(1.0);
     m_integral.value(1.0);       // default: 1.0

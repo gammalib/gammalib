@@ -1622,7 +1622,7 @@ void TestGModel::test_plaw2(void)
     test_value(model3.emax().MeV(), 10.0);
 
     // Test operator access
-    const char* strarray[] = {"Integral", "Index", "LowerLimit", "UpperLimit"};
+    const char* strarray[] = {"PhotonFlux", "Index", "LowerLimit", "UpperLimit"};
     for (int i = 0; i < 4; ++i) {
         std::string keyname(strarray[i]);
         model3[keyname].remove_range(); // To allow setting of any value
