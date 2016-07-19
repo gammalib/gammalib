@@ -466,57 +466,31 @@ void GModelSpectralConst::read(const GXmlElement& xml)
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "ConstantValue"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Writes the spectral information into an XML element with the format
  *
  *     <spectrum type="ConstantValue">
- *       <parameter name="Value" scale="1" min="0" max="1000" value="1" free="1"/>
+ *       <parameter name="Normalization" scale="1" min="0" max="1000" value="1" free="1"/>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralConst::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "ConstantValue");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "ConstantValue") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"ConstantValue\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append parameter node. The name
-    // of the node is "Value" as this is the Fermi-LAT standard.
-    // We thus assure that the XML files will be compatible with
-    // Fermi-LAT.
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Value\""));
-    }
+    // Get normalisation parameter
+    GXmlElement* par = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
 
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Spectral constant requires exactly 1 parameter.");
-    }
-
-    // Get parameter element
-    GXmlElement* par = xml.element("parameter", 0);
-
-    // Set parameyter
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value") {
-        m_norm.write(*par);
-    }
-    else {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-                          "Spectral constant requires either"
-                          " \"Normalization\" or \"Value\" parameter.");
-    }
+    // Write normalisation parameter
+    m_norm.write(*par);
 
     // Return
     return;

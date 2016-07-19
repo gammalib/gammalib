@@ -650,8 +650,9 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
         }
 
         // Handle pivot energy
-        else if (par->attribute("name") == "Scale" ||
-			     par->attribute("name") == "Eb") {
+        else if ((par->attribute("name") == "Scale") ||
+			     (par->attribute("name") == "Eb") ||
+                 (par->attribute("name") == "PivotEnergy")) {
             m_pivot.read(*par);
             npar[3]++;
         }
@@ -663,7 +664,7 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
         throw GException::model_invalid_parnames(G_READ, xml,
               "LogParabola requires \"Prefactor\" or \"norm\","
               " \"Index\" or \"alpha\", \"Curvature\" or \"beta\""
-              " and \"Scale\" or \"Eb\" parameters.");
+              " and \"Scale\", \"Eb\" or \"PivotEnergy\" parameters.");
     }
 
     // Return
@@ -687,10 +688,10 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
  * of the XML elements is
  *
  *     <spectrum type="LogParabola">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Curvature" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Prefactor"   ../>
+ *       <parameter name="Index"       ../>
+ *       <parameter name="Curvature"   ../>
+ *       <parameter name="PivotEnergy" ../>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralLogParabola::write(GXmlElement& xml) const
@@ -706,59 +707,17 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
               "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 4 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index\""));
-        xml.append(GXmlElement("parameter name=\"Curvature\""));
-        xml.append(GXmlElement("parameter name=\"Scale\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm      = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index     = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
+    GXmlElement* curvature = gammalib::xml_need_par(G_WRITE, xml, m_curvature.name());
+    GXmlElement* pivot     = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "LogParabola law model requires exactly 4 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0,0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor"){
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            npar[1]++;
-            m_index.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Curvature"){
-              npar[2]++;
-              m_curvature.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.write(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "LogParabola requires \"Prefactor\", \"Index\", \"Curvature\""
-              " and \"Scale\" parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_index.write(*index);
+    m_curvature.write(*curvature);
+    m_pivot.write(*pivot);
 
     // Return
     return;

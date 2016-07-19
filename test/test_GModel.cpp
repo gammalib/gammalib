@@ -1392,7 +1392,7 @@ void TestGModel::test_const(void)
         test_value(model.value(), 3.9e-16);
 
         // Test operator access
-        const char* strarray[] = {"Value"};
+        const char* strarray[] = {"Normalization"};
         for (int i = 0; i < 1; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value

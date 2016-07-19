@@ -274,55 +274,39 @@ void TestGXml::test_GXml_access(void)
     // Test root document access
     GXml xml;
     xml.load(m_xml_file);
-    test_assert(xml.size() == 3,
-                "Test if xml.children()==3",
-                "Unexpected number of children in document "+
-                gammalib::str(xml.size()));
+    test_value(xml.size(), 3, "Check number of child elements");
 
     // Test node access
     for (int i = 0; i < xml.size(); ++i) {
         GXmlNode* ptr = xml[i];
-        test_assert(ptr != 0, "Test node access");
+        test_assert(ptr != 0, "Check XML node access");
     }
-    test_assert(xml.elements() == 1,
-                "Test if xml.elements()==1",
-                "Unexpected number of child elements in document "+
-                gammalib::str(xml.elements()));
+    test_value(xml.elements(), 1, "Check number of child elements");
 
     // Test node access
     for (int i = 0; i < xml.elements(); ++i) {
         GXmlNode* ptr = xml.element(i);
-        test_assert(ptr != 0, "Test xml element access");
+        test_assert(ptr != 0, "Check XML element access");
     }
-    test_assert(xml.elements("source_library") == 1,
-                "Test if the source_library = 1",
-                "Unexpected number of child elements in document "+
-                gammalib::str(xml.elements("source_library")));
+    test_value(xml.elements("source_library"), 1, "Check number of child elements");
 
     // Test element access
     for (int i = 0; i < xml.elements("source_library"); ++i) {
         GXmlElement* ptr = xml.element("source_library", i);
-        test_assert(ptr->name() == "source_library",
-                    "Test name",
-                    "Unexpected element name "+ptr->name());
+        test_value(ptr->name(), "source_library", "Check element name");
     }
 
     // Test hierarchy access
     GXmlElement* ptr = NULL;
     ptr = xml.element("source_library");
-    test_assert(ptr->name() == "source_library", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
+    test_value(ptr->name(), "source_library", "Check hierarchy level 1");
     ptr = xml.element("source_library > source");
-    test_assert(ptr->name() == "source", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
+    test_value(ptr->name(),  "source", "Check hierarchy level 2");
     ptr = xml.element("source_library > source > spectrum");
-    test_assert(ptr->name() == "spectrum", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
+    test_value(ptr->name(), "spectrum", "Check hierarchy level 3");
     ptr = xml.element("source_library > source > spectrum > parameter[2]");
-    test_assert(ptr->name() == "parameter", "Test hierarchy access",
-                "Unexpected element name "+ptr->name());
-    test_assert(ptr->attribute("name") == "Scale", "Test hierarchy access",
-                "Unexpected element attribute "+ptr->attribute("name"));
+    test_value(ptr->name(), "parameter", "Check hierarchy level 4");
+    test_value(ptr->attribute("name"), "PivotEnergy", "Check for attribute");
 
     // Return
     return;

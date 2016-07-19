@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-18 July 2016
+19 July 2016
 
 
 1. Introduction
@@ -232,6 +232,9 @@ to support the new names:
 By default the old model names are still supported. Support of the old model
 names can be turned off by specifying the --disable-legacy-model-names option
 to the ./configure script (#1818).
+
+The model classes now write the same XML element names than those that were read
+in. In that way a maximum legacy for the Fermi/LAT data format is assured (#1820).
 
 
 9. Numerics module

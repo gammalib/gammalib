@@ -1,8 +1,9 @@
-2016-07-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-07-19  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Write same XML element names than those that were read (#1820)
         Rename spatial model components (#1818)
         Fix consistency problem in GCTABackground3D (#1815)
         Models accessing file now support relative file names (#1808)

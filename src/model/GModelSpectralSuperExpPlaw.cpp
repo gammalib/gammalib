@@ -599,11 +599,11 @@ GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
  * elements is
  *
  *     <spectrum type="PLSuperExpCutoff">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index1"    scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index2"    scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Prefactor"   ../>
+ *       <parameter name="Index1"      ../>
+ *       <parameter name="Cutoff"      ../>
+ *       <parameter name="Index2"      ../>
+ *       <parameter name="PivotEnergy" ../>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
@@ -640,7 +640,8 @@ void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
         }
 
         // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
+        else if ((par->attribute("name") == "Scale") ||
+                 (par->attribute("name") == "PivotEnergy")) {
             m_pivot.read(*par);
             npar[3]++;
         }
@@ -656,8 +657,8 @@ void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
     // Verify that all parameters were found
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Index1\", \"Cutoff\", \"Scale\" and \"Index2\""
-              " parameters.");
+              "Require \"Prefactor\", \"Index1\", \"Cutoff\", \"Scale\" or "
+              "\"PivotEnergy\" and \"Index2\" parameters.");
     }
 
     // Return
@@ -672,95 +673,44 @@ void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "ExpCutoff"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
  *     <spectrum type="PLSuperExpCutoff">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index1"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index2"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Prefactor"   ../>
+ *       <parameter name="Index1"      ../>
+ *       <parameter name="Cutoff"      ../>
+ *       <parameter name="Index2"      ../>
+ *       <parameter name="PivotEnergy" ../>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralSuperExpPlaw::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "PLSuperExpCutoff");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "PLSuperExpCutoff") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"PLSuperExpCutoff\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 5 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index1\""));
-        xml.append(GXmlElement("parameter name=\"Cutoff\""));
-        xml.append(GXmlElement("parameter name=\"Scale\""));
-        xml.append(GXmlElement("parameter name=\"Index2\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm   = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index1 = gammalib::xml_need_par(G_WRITE, xml, m_index1.name());
+    GXmlElement* ecut   = gammalib::xml_need_par(G_WRITE, xml, m_ecut.name());
+    GXmlElement* index2 = gammalib::xml_need_par(G_WRITE, xml, m_index2.name());
+    GXmlElement* pivot  = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
-    // Verify that XML element has exactly 5 parameters
-    if (xml.elements() != 5 || xml.elements("parameter") != 5) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Super Exponetial Power law model requires exactly 5 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0, 0, 0};
-    for (int i = 0; i < 5; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index1
-        else if (par->attribute("name") == "Index1") {
-            npar[1]++;
-            m_index1.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Cutoff") {
-            npar[2]++;
-            m_ecut.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.write(*par);
-            npar[3]++;
-        }
-
-        // Handle index2
-        else if (par->attribute("name") == "Index2") {
-            npar[4]++;
-            m_index2.write(*par);
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Index1\", \"Cutoff\", \"Scale\" and \"Index2\""
-              " parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_index1.write(*index1);
+    m_ecut.write(*ecut);
+    m_index2.write(*index2);
+    m_pivot.write(*pivot);
 
     // Return
     return;

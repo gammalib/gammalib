@@ -524,9 +524,9 @@ GEnergy GModelSpectralPlaw::mc(const GEnergy& emin,
  * elements is
  *
  *     <spectrum type="PowerLaw">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Prefactor"   ../>
+ *       <parameter name="Index"       ../>
+ *       <parameter name="PivotEnergy" ../>
  *     </spectrum>
  *
  * @todo Add parameter validity check
@@ -559,7 +559,8 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
         }
 
         // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
+        else if ((par->attribute("name") == "Scale") ||
+                 (par->attribute("name") == "PivotEnergy")) {
             m_pivot.read(*par);
             npar[2]++;
         }
@@ -569,7 +570,8 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
     // Verify that all parameters were found
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
+              "Require \"Prefactor\", \"Index\" and \"Scale\" or "
+              "\"PivotEnergy\" parameters.");
     }
 
     // Return
@@ -584,78 +586,38 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "PowerLaw"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
  *     <spectrum type="PowerLaw">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Prefactor"   ../>
+ *       <parameter name="Index"       ../>
+ *       <parameter name="PivotEnergy" ../>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralPlaw::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "PowerLaw");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "PowerLaw") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"PowerLaw\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 3 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index\""));
-        xml.append(GXmlElement("parameter name=\"Scale\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm  = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
+    GXmlElement* pivot = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Power law model requires exactly 3 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0};
-    for (int i = 0; i < 3; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            npar[1]++;
-            m_index.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.write(*par);
-            npar[2]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_index.write(*index);
+    m_pivot.write(*pivot);
 
     // Return
     return;
