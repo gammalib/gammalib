@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelSpectralExpPlaw.i - Exponential cut off power law model      *
+ *      GModelSpectralExpPlaw2.i - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2016 by Juergen Knoedlseder                         *
+ *  copyright (C) 2016 by Alexander Ziegler                                *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralExpPlaw2.i
  * @brief Exponential cut off power law spectral class interface definition
- * @author Juergen Knoedlseder
+ * @author Alexander Ziegler
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
