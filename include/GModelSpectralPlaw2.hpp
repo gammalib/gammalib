@@ -76,6 +76,7 @@ class GModelSpectralPlaw2 : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw2(void);
+    GModelSpectralPlaw2(const bool& dummy, const std::string& type);
     explicit GModelSpectralPlaw2(const double&  integral,
                                  const double&  index,
                                  const GEnergy& emin,
@@ -126,6 +127,7 @@ protected:
     void update(const GEnergy& srcEng) const;
 
     // Protected members
+    std::string     m_type;            //!< Model type
     GModelPar       m_integral;        //!< Integral flux
     GModelPar       m_index;           //!< Spectral index
     GModelPar       m_emin;            //!< Lower energy limit (MeV)
@@ -165,14 +167,14 @@ std::string GModelSpectralPlaw2::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "PowerLaw2".
+ * @return Model type.
  *
  * Returns the type of the spectral power law model.
  ***************************************************************************/
 inline
 std::string GModelSpectralPlaw2::type(void) const
 {
-    return "PowerLaw2";
+    return (m_type);
 }
 
 

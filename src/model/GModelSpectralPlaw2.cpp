@@ -41,6 +41,10 @@
 /* __ Globals ____________________________________________________________ */
 const GModelSpectralPlaw2    g_spectral_plaw2_seed;
 const GModelSpectralRegistry g_spectral_plaw2_registry(&g_spectral_plaw2_seed);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralPlaw2    g_spectral_plaw2_legacy_seed(true, "PowerLaw2");
+const GModelSpatialRegistry  g_spectral_plaw2_legacy_registry(&g_spectral_plaw2_legacy_seed);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralPlaw2::flux(GEnergy&, GEnergy&)"
@@ -64,11 +68,36 @@ const GModelSpectralRegistry g_spectral_plaw2_registry(&g_spectral_plaw2_seed);
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs empty power law photon flux model.
  ***************************************************************************/
 GModelSpectralPlaw2::GModelSpectralPlaw2(void) : GModelSpectral()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type constructor
+ *
+ * @param[in] dummy Dummy flag.
+ * @param[in] type Model type.
+ *
+ * Constructs empty power law photon flux model by specifying a model @p type.
+ ***************************************************************************/
+GModelSpectralPlaw2::GModelSpectralPlaw2(const bool&        dummy,
+                                         const std::string& type) :
+                     GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -599,7 +628,7 @@ GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin,
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
  *
- *     <spectrum type="PowerLaw2">
+ *     <spectrum type="PowerLawPhotonFlux">
  *       <parameter name="Integral"   scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
@@ -676,7 +705,7 @@ void GModelSpectralPlaw2::read(const GXmlElement& xml)
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
- *     <spectrum type="PowerLaw2">
+ *     <spectrum type="PowerLawPhotonFlux">
  *       <parameter name="Integral"   scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
@@ -687,13 +716,13 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "PowerLaw2");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "PowerLaw2") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"PowerLaw2\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
     // If XML element has 0 nodes then append 4 parameter nodes
@@ -797,6 +826,9 @@ std::string GModelSpectralPlaw2::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralPlaw2::init_members(void)
 {
+    // Initialise model type
+    m_type = "PowerLawPhotonFlux";
+
     // Initialise integral flux
     m_integral.clear();
     m_integral.name("Integral");
@@ -876,6 +908,7 @@ void GModelSpectralPlaw2::init_members(void)
 void GModelSpectralPlaw2::copy_members(const GModelSpectralPlaw2& model)
 {
     // Copy members
+    m_type     = model.m_type;
     m_integral = model.m_integral;
     m_index    = model.m_index;
     m_emin     = model.m_emin;
