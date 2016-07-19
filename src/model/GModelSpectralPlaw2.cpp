@@ -620,85 +620,59 @@ GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * @exception GException::invalid_value
+ *            Model parameters not found in XML element.
  *
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
  *
  *     <spectrum type="PowerLawPhotonFlux">
- *       <parameter name="PhotonFlux" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="UpperLimit" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="PhotonFlux" ../>
+ *       <parameter name="Index"      ../>
+ *       <parameter name="LowerLimit" ../>
+ *       <parameter name="UpperLimit" ../>
  *     </spectrum>
  *
  * @todo Add parameter validity check
  ***************************************************************************/
 void GModelSpectralPlaw2::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Power law 2 spectral model requires exactly 4 parameters.");
+    // If "PhotonFlux" parameter exists then read parameter from this
+    // XML element
+    if (gammalib::xml_has_par(xml, "PhotonFlux")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "PhotonFlux");
+        m_integral.read(*par);
     }
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        #if defined(G_LEGACY_XML_FORMAT)
-        if (par->attribute("name") == "Integral") {
-            m_integral.read(*par);
-            npar[0]++;
-        }
-        #endif
-        if (par->attribute("name") == "PhotonFlux") {
-            m_integral.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            m_index.read(*par);
-            npar[1]++;
-        }
-
-        // Handle lower limit
-        else if (par->attribute("name") == "LowerLimit") {
-            m_emin.read(*par);
-            npar[2]++;
-        }
-
-        // Handle upper limit
-        else if (par->attribute("name") == "UpperLimit") {
-            m_emax.read(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
+    // ... otherwise try reading parameter from "Integral" parameter
     #if defined(G_LEGACY_XML_FORMAT)
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Power law 2 spectral model requires \"Integral\" or "
-              "\"PhotonFlux\", \"Index\", \"LowerLimit\" and \"UpperLimit\" "
-              "parameters.");
-    }
-    #else
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Power law 2 spectral model requires \"PhotonFlux\", \"Index\","
-              " \"LowerLimit\" and \"UpperLimit\" parameters.");
+    else if (gammalib::xml_has_par(xml, "Integral")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Integral");
+        m_integral.read(*par);
     }
     #endif
+
+    // ... otherwise throw an exception
+    else {
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Power law photon flux model requires either "
+                          "\"PhotonFlux\" or \"Integral\" parameter.";
+        #else
+        std::string msg = "Power law photon flux model requires "
+                          "\"PhotonFlux\" parameter.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
+    }
+
+    // Get remaining XML parameters
+    const GXmlElement* index = gammalib::xml_get_par(G_READ, xml, "Index");
+    const GXmlElement* emin  = gammalib::xml_get_par(G_READ, xml, "LowerLimit");
+    const GXmlElement* emax  = gammalib::xml_get_par(G_READ, xml, "UpperLimit");
+
+    // Read parameters
+    m_index.read(*index);
+    m_emin.read(*emin);
+    m_emax.read(*emax);
 
     // Return
     return;

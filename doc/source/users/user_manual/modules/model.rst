@@ -123,6 +123,22 @@ Point source
     </spectrum>
   </source>
 
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
+
+.. code-block:: xml
+
+  <source name="Crab" type="PointSource">
+    <spatialModel type="SkyDirFunction">
+      <parameter name="RA"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+
 Radial disk
 ===========
 
@@ -138,6 +154,7 @@ Radial disk
       ...
     </spectrum>
   </source>
+
 
 Radial Gaussian
 ===============
@@ -155,6 +172,7 @@ Radial Gaussian
     </spectrum>
   </source>
 
+
 Radial shell
 ============
 
@@ -171,6 +189,7 @@ Radial shell
       ...
     </spectrum>
   </source>
+
 
 Elliptical disk
 ===============
@@ -190,6 +209,7 @@ Elliptical disk
     </spectrum>
   </source>
 
+
 Elliptical Gaussian
 ===================
 
@@ -208,6 +228,7 @@ Elliptical Gaussian
     </spectrum>
   </source>
 
+
 Isotropic source
 ================
 
@@ -222,6 +243,21 @@ Isotropic source
     </spectrum>
   </source>
 
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
+
+.. code-block:: xml
+
+  <source name="Crab" type="DiffuseSource">
+    <spatialModel type="ConstantValue">
+       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+
 Diffuse map
 ===========
 
@@ -229,12 +265,27 @@ Diffuse map
 
   <source name="Crab" type="DiffuseSource">
     <spatialModel type="DiffuseMap" file="map.fits">
+       <parameter name="Normalization" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
+
+.. code-block:: xml
+
+  <source name="Crab" type="DiffuseSource">
+    <spatialModel type="SpatialMap" file="map.fits">
        <parameter name="Prefactor" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
     </spatialModel>
     <spectrum type="...">
       ...
     </spectrum>
   </source>
+
 
 Diffuse map cube
 ================
@@ -244,6 +295,20 @@ Diffuse map cube
   <source name="Crab" type="DiffuseSource">
     <spatialModel type="DiffuseMapCube" file="map_cube.fits">
       <parameter name="Normalization" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
+    </spatialModel>
+    <spectrum type="...">
+      ...
+    </spectrum>
+  </source>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
+
+.. code-block:: xml
+
+  <source name="Crab" type="DiffuseSource">
+    <spatialModel type="MapCubeFunction" file="map_cube.fits">
+      <parameter name="Value" scale="1" value="1" min="0.001" max="1000.0" free="0"/>
     </spatialModel>
     <spectrum type="...">
       ...
@@ -272,6 +337,15 @@ The XML format for specifying a constant is:
 
    <spectrum type="ConstantValue">
     <parameter name="Normalization" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+   </spectrum>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
+
+.. code-block:: xml
+
+   <spectrum type="ConstantValue">
+    <parameter name="Value" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
    </spectrum>
 
 
@@ -348,9 +422,20 @@ where the parameters in the XML definition have the following mappings:
 
 * :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
-* :math:`E_0` = ``Scale``
+* :math:`E_0` = ``PivotEnergy``
 
 The XML format for specifying a power law is:
+
+.. code-block:: xml
+
+   <spectrum type="PowerLaw">
+    <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index"       scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="PivotEnergy" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
+   </spectrum>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
 
 .. code-block:: xml
 
@@ -361,7 +446,8 @@ The XML format for specifying a power law is:
    </spectrum>
 
 An alternative power law function is defined by the :doxy:`GModelSpectralPlaw2`
-class that uses the integral flux as parameter rather than the Prefactor:
+class that uses the integral photon flux as parameter rather than the
+Prefactor:
 
 .. math::
     \frac{dN}{dE} = \frac{N(\gamma+1)E^{\gamma}}
@@ -369,17 +455,30 @@ class that uses the integral flux as parameter rather than the Prefactor:
 
 where the parameters in the XML definition have the following mappings:
 
-* :math:`N` = ``Integral``
+* :math:`N` = ``PhotonFlux``
 * :math:`\gamma` = ``Index``
 * :math:`E_{\rm min}` = ``LowerLimit``
 * :math:`E_{\rm max}` = ``UpperLimit``
 
-The XML format for specifying a power law defined by the integral flux is:
+The XML format for specifying a power law defined by the integral photon flux
+is:
+
+.. code-block:: xml
+
+   <spectrum type="PowerLawPhotonFlux">
+    <parameter scale="1e-07" name="PhotonFlux" min="1e-07" max="1000.0"    value="1.0" free="1"/>
+    <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
+    <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
+    <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
+   </spectrum>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
 
 .. code-block:: xml
 
    <spectrum type="PowerLaw2">
-    <parameter scale="1e-07" name="Integral"   min="1e-07" max="1000.0"    value="1.0" free="1"/>
+    <parameter scale="1e-07" name="Intergal"   min="1e-07" max="1000.0"    value="1.0" free="1"/>
     <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
     <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
     <parameter scale="1.0"   name="UpperLimit" min="10.0"  max="1000000.0" value="500000.0" free="0"/>
@@ -409,10 +508,22 @@ where the parameters in the XML definition have the following mappings:
 
 * :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
-* :math:`E_0` = ``Scale``
+* :math:`E_0` = ``PivotEnergy``
 * :math:`E_{\rm cut}` = ``Cutoff``
 
 The XML format for specifying an exponentially cut-off power law is:
+
+.. code-block:: xml
+
+   <spectrum type="ExpCutoff">
+    <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index"       scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="Cutoff"      scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="1"/>
+    <parameter name="PivotEnergy" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
+   </spectrum>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
 
 .. code-block:: xml
 
@@ -441,17 +552,30 @@ where the parameters in the XML definition have the following mappings:
 * :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index1``
 * :math:`\alpha` = ``Index2``
-* :math:`E_0` = ``Scale``
+* :math:`E_0` = ``PivotEnergy``
 * :math:`E_{\rm cut}` = ``Cutoff``
 
 .. code-block:: xml
 
    <spectrum type="PLSuperExpCutoff">
-    <parameter name="Prefactor" scale="1e-16" value="1.0" min="1e-07" max="1000.0" free="1"/>
-    <parameter name="Index1"    scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
-    <parameter name="Cutoff"    scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="1"/>
-    <parameter name="Scale"     scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="0"/>
-    <parameter name="Index2"    scale="1.0"   value="1.5" min="0.1"   max="5.0"    free="1"/>
+    <parameter name="Prefactor"   scale="1e-16" value="1.0" min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index1"      scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="Cutoff"      scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="1"/>
+    <parameter name="Index2"      scale="1.0"   value="1.5" min="0.1"   max="5.0"    free="1"/>
+    <parameter name="PivotEnergy" scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="0"/>
+   </spectrum>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
+
+.. code-block:: xml
+
+   <spectrum type="PLSuperExpCutoff">
+    <parameter name="Prefactor"   scale="1e-16" value="1.0" min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index1"      scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="Cutoff"      scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="1"/>
+    <parameter name="Index2"      scale="1.0"   value="1.5" min="0.1"   max="5.0"    free="1"/>
+    <parameter name="Scale"       scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
 
@@ -527,7 +651,7 @@ where the parameters in the XML definition have the following mappings:
 * :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
 * :math:`\eta` = ``Curvature``
-* :math:`E_0` = ``Scale``
+* :math:`E_0` = ``PivotEnergy``
 
 
 The XML format for specifying a log parabola spectrum is:
@@ -535,21 +659,22 @@ The XML format for specifying a log parabola spectrum is:
 .. code-block:: xml
 
    <spectrum type="LogParabola">
-    <parameter name="Prefactor" scale="1e-17" value="5.878"   min="1e-07" max="1000.0" free="1"/>
-    <parameter name="Index"     scale="-1"    value="2.32473" min="0.0"   max="+5.0"   free="1"/>
-    <parameter name="Curvature" scale="-1"    value="0.074"   min="-5.0"  max="+5.0"   free="1"/>
-    <parameter name="Scale"     scale="1e6"   value="1.0"     min="0.01"  max="1000.0" free="0"/>
+    <parameter name="Prefactor"   scale="1e-17" value="5.878"   min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index"       scale="-1"    value="2.32473" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="Curvature"   scale="-1"    value="0.074"   min="-5.0"  max="+5.0"   free="1"/>
+    <parameter name="PivotEnergy" scale="1e6"   value="1.0"     min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
-An alternative XML format is supported for compatibility with the Fermi/LAT XML format:
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
 
 .. code-block:: xml
 
    <spectrum type="LogParabola">
-    <parameter name="Prefactor" scale="1e-17" value="5.878"   min="1e-07" max="1000.0" free="1"/>
-    <parameter name="alpha"     scale="1"     value="2.32473" min="0.0"   max="+5.0"   free="1"/>
-    <parameter name="beta"      scale="1"     value="0.074"   min="-5.0"  max="+5.0"   free="1"/>
-    <parameter name="Scale"     scale="1e6"   value="1.0"     min="0.01"  max="1000.0" free="0"/>
+    <parameter name="norm"  scale="1e-17" value="5.878"   min="1e-07" max="1000.0" free="1"/>
+    <parameter name="alpha" scale="1"     value="2.32473" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="beta"  scale="1"     value="0.074"   min="-5.0"  max="+5.0"   free="1"/>
+    <parameter name="Eb"    scale="1e6"   value="1.0"     min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
 where

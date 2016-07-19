@@ -53,7 +53,7 @@ void create_xml_file(void)
         file << " min=\"1e-07\" max=\"1000.0\" value=\"1.73\" free=\"1\"/>\n";
         file << "      <parameter scale=\"1.0\" name=\"Index\" min=\"-5.0\"";
         file << " max=\"+5.0\" value=\"-2.1\" free=\"1\"/>\n";
-        file << "    <parameter scale=\"1.0\" name=\"Scale\" min=\"10.0\"";
+        file << "    <parameter scale=\"1.0\" name=\"PivotEnergy\" min=\"10.0\"";
         file << " max=\"1000000.0\" value=\"100.0\" free=\"0\"/>\n";
         file << "    </spectrum>\n";
         file << "    <spatialModel type=\"PointSource\">\n";

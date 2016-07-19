@@ -105,9 +105,12 @@ void TestGLATLtCube::set(void)
     name("GLATLtCube");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p6), "Test P6 livetime cube");
-    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p7), "Test P7 livetime cube");
-    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p8), "Test P8 livetime cube");
+    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p6),
+           "Test P6 livetime cube");
+    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p7),
+           "Test P7 livetime cube");
+    append(static_cast<pfunction>(&TestGLATLtCube::test_ltcube_p8),
+           "Test P8 livetime cube");
 
     // Return
     return;
@@ -135,12 +138,18 @@ void TestGLATObservation::set(void)
     name("GLATObservation");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p6), "Test P6 unbinned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p7), "Test P7 unbinned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p8), "Test P8 unbinned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p6), "Test P6 binned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p7), "Test P7 binned observation");
-    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p8), "Test P8 binned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p6),
+           "Test P6 unbinned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p7),
+           "Test P7 unbinned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_unbinned_obs_p8),
+           "Test P8 unbinned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p6),
+           "Test P6 binned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p7),
+           "Test P7 binned observation");
+    append(static_cast<pfunction>(&TestGLATObservation::test_binned_obs_p8),
+           "Test P8 binned observation");
 
     // Return
     return;
@@ -168,9 +177,12 @@ void TestGLATOptimize::set(void)
     name("LAT optimizers");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p6), "Test P6 binned optimizer");
-    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p7), "Test P7 binned optimizer");
-    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p8), "Test P8 binned optimizer");
+    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p6),
+           "Test P6 binned optimizer");
+    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p7),
+           "Test P7 binned optimizer");
+    append(static_cast<pfunction>(&TestGLATOptimize::test_binned_optimizer_p8),
+           "Test P8 binned optimizer");
 
     // Return
     return;

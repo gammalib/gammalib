@@ -527,52 +527,49 @@ bool GModelSpatialDiffuseCube::contains(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * @exception GException::invalid_value
+ *            Model parameters not found in XML element.
  *
  * Read the map cube information from an XML element. The XML element should
- * have either the format
+ * have the format
  *
  *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
- *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *       <parameter name="Normalization" ../>
  *     </spatialModel>
- *
- * or alternatively
- *
- *     <spatialModel type="DiffuseMapCube" file="test_file.fits">
- *       <parameter name="Value" scale="1" value="1" min="0.1" max="10" free="0"/>
- *     </spatialModel>
- *
  ***************************************************************************/
 void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
 {
     // Clear model
     clear();
 
-    // Verify that XML element has exactly 1 parameters
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Map cube spatial model requires exactly 1 parameter.");
-    }
-
-    // Get pointer on model parameter
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value") {
+    // If "Normalization" parameter exists then read parameter from this
+    // XML element
+    if (gammalib::xml_has_par(xml, "Normalization")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Normalization");
         m_value.read(*par);
     }
+
+    // ... otherwise try reading parameter from "Value" parameter
+    #if defined(G_LEGACY_XML_FORMAT)
+    else if (gammalib::xml_has_par(xml, "Value")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
+        m_value.read(*par);
+    }
+    #endif
+
+    // ... otherwise throw an exception
     else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Map cube spatial model requires either \"Value\" or"
-              " \"Normalization\" parameter.");
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Diffuse map cube model requires either "
+                          "\"Normalization\" or \"Value\" parameter.";
+        #else
+        std::string msg = "Diffuse map cube model requires \"Normalization\" "
+                          "parameter.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Save filename
-    //m_filename = xml.attribute("file");
     m_filename = gammalib::xml_file_expand(xml, xml.attribute("file"));
 
     // Return

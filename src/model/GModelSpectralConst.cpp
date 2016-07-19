@@ -414,44 +414,42 @@ GEnergy GModelSpectralConst::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element containing power law model information.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter name found in XML element.
+ * @exception GException::invalid_value
+ *            Model parameters not found in XML element.
  *
- * Reads the spectral information from an XML element having either the
- * format
+ * Reads the spectral information from an XML element having the format
  *
  *     <spectrum type="ConstantValue">
- *       <parameter name="Value" scale="1" min="0" max="1000" value="1" free="1"/>
- *     </spectrum>
- *
- * or the format
- *
- *     <spectrum type="ConstantValue">
- *       <parameter name="Normalization" scale="1" min="0" max="1000" value="1" free="1"/>
+ *       <parameter name="Normalization" ../>
  *     </spectrum>
  ***************************************************************************/
 void GModelSpectralConst::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Spectral constant requires exactly 1 parameter.");
-    }
-
-    // Get parameter element
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value") {
+    // If "Normalization" parameter exists then read parameter from this
+    // XML element
+    if (gammalib::xml_has_par(xml, "Normalization")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Normalization");
         m_norm.read(*par);
     }
+
+    // ... otherwise try reading parameter from "Value" parameter
+    #if defined(G_LEGACY_XML_FORMAT)
+    else if (gammalib::xml_has_par(xml, "Value")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
+        m_norm.read(*par);
+    }
+    #endif
+
+    // ... otherwise throw an exception
     else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-                          "Spectral constant requires either"
-                          " \"Normalization\" or \"Value\" parameter.");
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Spectral constant model requires either "
+                          "\"Normalization\" or \"Value\" parameter.";
+        #else
+        std::string msg = "Spectral constant model requires \"Normalization\" "
+                          "parameter.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Return
@@ -541,7 +539,7 @@ void GModelSpectralConst::init_members(void)
 {
     // Initialise constant normalisation
     m_norm.clear();
-    m_norm.name("Value");
+    m_norm.name("Normalization");
     m_norm.scale(1.0);
     m_norm.value(1.0);         // default: 1.0
     m_norm.range(0.0, 1000.0); // range:   [0, 1000]

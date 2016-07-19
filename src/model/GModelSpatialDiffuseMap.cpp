@@ -506,22 +506,14 @@ bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * @exception GException::invalid_value
+ *            Model parameters not found in XML element.
  *
  * Reads the spatial information for a diffuse map from an XML element. The
  * expected format of the XML element is
  *
  *     <spatialModel type="DiffuseMap" file="myfile.fits" normalize="1">
- *       <parameter name="Prefactor" value="1" min="0.1" max="10" scale="1" free="0"/>
- *     </spatialModel>
- *
- * or
- *
- *     <spatialModel type="DiffuseMap" file="myfile.fits" normalize="1">
- *       <parameter name="Normalization" value="1" min="0.1" max="10" scale="1" free="0"/>
+ *       <parameter name="Normalization" ../>
  *     </spatialModel>
  *
  * The @p file attribute provides the filename of the diffuse map FITS file.
@@ -536,24 +528,31 @@ bool GModelSpatialDiffuseMap::contains(const GSkyDir& dir,
  ***************************************************************************/
 void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 1 parameters
-    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Spatial map model requires exactly 1 parameter.");
-    }
-
-    // Get pointer on model parameter
-    const GXmlElement* par = xml.element("parameter", 0);
-
-    // Get value
-    if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Prefactor") {
+    // If "Normalization" parameter exists then read parameter from this
+    // XML element
+    if (gammalib::xml_has_par(xml, "Normalization")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Normalization");
         m_value.read(*par);
     }
+
+    // ... otherwise try reading parameter from "Prefactor" parameter
+    #if defined(G_LEGACY_XML_FORMAT)
+    else if (gammalib::xml_has_par(xml, "Prefactor")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Prefactor");
+        m_value.read(*par);
+    }
+    #endif
+
+    // ... otherwise throw an exception
     else {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Spatial map model requires either \"Prefactor\" or"
-              " \"Normalization\" parameter.");
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Diffuse map model requires either "
+                          "\"Normalization\" or \"Prefactor\" parameter.";
+        #else
+        std::string msg = "Diffuse map model requires \"Normalization\" "
+                          "parameter.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Get optional normalization attribute
@@ -846,7 +845,7 @@ void GModelSpatialDiffuseMap::init_members(void)
 
     // Initialise Value
     m_value.clear();
-    m_value.name("Prefactor");
+    m_value.name("Normalization");
     m_value.value(1.0);
     m_value.scale(1.0);
     m_value.range(0.001, 1000.0);

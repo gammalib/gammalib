@@ -580,91 +580,82 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
  * of the XML elements is
  *
  *     <spectrum type="LogParabola">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Curvature" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Prefactor"   ../>
+ *       <parameter name="Index"       ../>
+ *       <parameter name="Curvature"   ../>
+ *       <parameter name="PivotEnergy" ../>
  *     </spectrum>
- *
- * or for compliance with Fermi-LAT
- *
- *     <spectrum type="LogParabola">
- *       <parameter name="norm"  scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="alpha" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="beta"  scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Eb"    scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
- *
- * @todo Add parameter validity check
  ***************************************************************************/
 void GModelSpectralLogParabola::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "LogParabola model requires exactly 4 parameters.");
+    // If standard parameters exists then read these parameters from the XML
+    // element
+    if (gammalib::xml_has_par(xml, "Prefactor") &&
+        gammalib::xml_has_par(xml, "Index") &&
+        gammalib::xml_has_par(xml, "Curvature") &&
+        gammalib::xml_has_par(xml, "PivotEnergy")) {
+        const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "Prefactor");
+        const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "Index");
+        const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, "Curvature");
+        const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, "PivotEnergy");
+        m_norm.read(*prefactor);
+        m_index.read(*index);
+        m_curvature.read(*curvature);
+        m_pivot.read(*pivot);
+    }
+    else if (gammalib::xml_has_par(xml, "Prefactor") &&
+             gammalib::xml_has_par(xml, "Index") &&
+             gammalib::xml_has_par(xml, "Curvature") &&
+             gammalib::xml_has_par(xml, "Scale")) {
+        const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "Prefactor");
+        const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "Index");
+        const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, "Curvature");
+        const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, "Scale");
+        m_norm.read(*prefactor);
+        m_index.read(*index);
+        m_curvature.read(*curvature);
+        m_pivot.read(*pivot);
     }
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0,0};
-    for (int i = 0; i < 4; ++i) {
+    // ... otherwise try reading parameter from legacy parameters. Note that
+    // "alpha" and "beta" are negated, hence we negate the parameters and
+    // boundaries after reading
+    #if defined(G_LEGACY_XML_FORMAT)
+    else if (gammalib::xml_has_par(xml, "norm") &&
+             gammalib::xml_has_par(xml, "alpha") &&
+             gammalib::xml_has_par(xml, "beta") &&
+             gammalib::xml_has_par(xml, "Eb")) {
+        const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "norm");
+        const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "alpha");
+        const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, "beta");
+        const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, "Eb");
+        m_norm.read(*prefactor);
+        m_index.read(*index);
+        m_index.min(-m_index.max());
+        m_index.max(-m_index.min());
+        m_index.value(-m_index.value());
+        m_curvature.read(*curvature);
+        m_curvature.min(-m_curvature.max());
+        m_curvature.max(-m_curvature.min());
+        m_curvature.value(-m_curvature.value());
+        m_pivot.read(*pivot);
+    }
+    #endif
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor" ||
-        	par->attribute("name") == "norm") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index"){
-            m_index.read(*par);
-            npar[1]++;
-        }
-
-        // Change sign if index is defined Fermi-like
-        else if(par->attribute("name") == "alpha") {
-        	m_index.read(*par);
-        	m_index.min(-m_index.max());
-        	m_index.max(-m_index.min());
-        	m_index.value(-m_index.value());
-        	npar[1]++;
-        }
-
-        // Handle curvature
-        else if (par->attribute("name") == "Curvature") {
-            m_curvature.read(*par);
-            npar[2]++;
-        }
-
-        // Change sign if curvature is defined Fermi-like
-        else if(par->attribute("name") == "beta") {
-        	m_curvature.read(*par);
-        	m_curvature.min(-m_curvature.max());
-        	m_curvature.max(-m_curvature.min());
-        	m_curvature.value(-m_curvature.value());
-        	npar[2]++;
-        }
-
-        // Handle pivot energy
-        else if ((par->attribute("name") == "Scale") ||
-			     (par->attribute("name") == "Eb") ||
-                 (par->attribute("name") == "PivotEnergy")) {
-            m_pivot.read(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3]  != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "LogParabola requires \"Prefactor\" or \"norm\","
-              " \"Index\" or \"alpha\", \"Curvature\" or \"beta\""
-              " and \"Scale\", \"Eb\" or \"PivotEnergy\" parameters.");
+    // ... otherwise throw an exception
+    else {
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Log parabola model requires either "
+                          "\"Prefactor\", \"Index\", \"Curvature\" and "
+                          "\"PivotEnergy\" parameters or ";
+                          "\"norm\", \"alpha\", \"beta\" and "
+                          "\"Eb\" parameters.";
+        #else
+        std::string msg = "Log parabola model requires "
+                          "\"Prefactor\", \"Index\", \"Curvature\" and "
+                          "\"PivotEnergy\" parameters.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
     }
 
     // Return
@@ -707,16 +698,30 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
               "Spectral model is not of type \""+type()+"\".");
     }
 
+    // Check if parameters are Fermi/LAT style and need to be negated
+    GModelPar inx = m_index;
+    GModelPar crv = m_curvature;
+    if (inx.name() == "alpha") {
+        inx.min(-inx.max());
+        inx.max(-inx.min());
+        inx.value(-inx.value());
+    }
+    if (crv.name() == "beta") {
+        crv.min(-crv.max());
+        crv.max(-crv.min());
+        crv.value(-crv.value());
+    }
+
     // Get XML parameters
     GXmlElement* norm      = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
-    GXmlElement* index     = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
-    GXmlElement* curvature = gammalib::xml_need_par(G_WRITE, xml, m_curvature.name());
+    GXmlElement* index     = gammalib::xml_need_par(G_WRITE, xml, inx.name());
+    GXmlElement* curvature = gammalib::xml_need_par(G_WRITE, xml, crv.name());
     GXmlElement* pivot     = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
     // Write parameters
     m_norm.write(*norm);
-    m_index.write(*index);
-    m_curvature.write(*curvature);
+    inx.write(*index);
+    crv.write(*curvature);
     m_pivot.write(*pivot);
 
     // Return

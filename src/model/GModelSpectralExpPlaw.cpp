@@ -566,10 +566,8 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element containing power law model information.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ * @exception GException::invalid_value
+ *            Model parameters not found in XML element.
  *
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
@@ -583,52 +581,42 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
  ***************************************************************************/
 void GModelSpectralExpPlaw::read(const GXmlElement& xml)
 {
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_READ, xml,
-              "Power law model requires exactly 4 parameters.");
+    // If "PivotEnergy" parameter exists then read parameter from this
+    // XML element
+    if (gammalib::xml_has_par(xml, "PivotEnergy")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "PivotEnergy");
+        m_pivot.read(*par);
     }
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            m_index.read(*par);
-            npar[1]++;
-        }
-
-        // Handle cutoff
-        else if (par->attribute("name") == "Cutoff") {
-            m_ecut.read(*par);
-            npar[2]++;
-        }
-
-        // Handle pivot energy
-        else if ((par->attribute("name") == "Scale") ||
-                 (par->attribute("name") == "PivotEnergy")) {
-            m_pivot.read(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Index\", \"Cutoff\" and \"Scale\""
-              " or \"PivotEnergy\" parameters.");
+    // ... otherwise try reading parameter from "Scale" parameter
+    #if defined(G_LEGACY_XML_FORMAT)
+    else if (gammalib::xml_has_par(xml, "Scale")) {
+        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Scale");
+        m_pivot.read(*par);
     }
+    #endif
+
+    // ... otherwise throw an exception
+    else {
+        #if defined(G_LEGACY_XML_FORMAT)
+        std::string msg = "Exponentially cutoff power law model requires either "
+                          "\"PivotEnergy\" or \"Scale\" parameter.";
+        #else
+        std::string msg = "Exponentially cutoff power law model requires "
+                          "\"PivotEnergy\" parameter.";
+        #endif
+        throw GException::invalid_value(G_READ, msg);
+    }
+
+    // Get remaining XML parameters
+    const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "Prefactor");
+    const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "Index");
+    const GXmlElement* cutoff    = gammalib::xml_get_par(G_READ, xml, "Cutoff");
+
+    // Read parameters
+    m_norm.read(*prefactor);
+    m_index.read(*index);
+    m_ecut.read(*cutoff);
 
     // Return
     return;

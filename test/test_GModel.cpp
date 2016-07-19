@@ -833,15 +833,15 @@ void TestGModel::test_diffuse_map(void)
     test_value(model.map().npix(), 3072);
 
     // Test operator access
-    test_value(model["Prefactor"].value(), 3.9);
-    test_value(model["Prefactor"].error(), 0.0);
-    test_value(model["Prefactor"].gradient(), 0.0);
-    model["Prefactor"].value(2.1);
-    model["Prefactor"].error(1.9);
-    model["Prefactor"].gradient(0.8);
-    test_value(model["Prefactor"].value(), 2.1);
-    test_value(model["Prefactor"].error(), 1.9);
-    test_value(model["Prefactor"].gradient(), 0.8);
+    test_value(model["Normalization"].value(), 3.9);
+    test_value(model["Normalization"].error(), 0.0);
+    test_value(model["Normalization"].gradient(), 0.0);
+    model["Normalization"].value(2.1);
+    model["Normalization"].error(1.9);
+    model["Normalization"].gradient(0.8);
+    test_value(model["Normalization"].value(), 2.1);
+    test_value(model["Normalization"].error(), 1.9);
+    test_value(model["Normalization"].gradient(), 0.8);
 
     // Initialize photon direction for testing
     GSkyDir dir;
