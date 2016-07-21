@@ -616,34 +616,19 @@ std::string GCTACubeBackground::print(const GChatter& chatter) const
          result.append("=== GCTACubeBackground ===");
 
          // Append parameters
-         result.append("\n"+gammalib::parformat("Cube file")+m_filename);
+         result.append("\n"+gammalib::parformat("Filename")+m_filename);
 
-         // Append detailed information only if a map cube exists
-         if (m_cube.npix() > 0) {
+        // Append energies
+        if (m_energies.size() > 0) {
+            result.append("\n"+m_energies.print(chatter));
+        }
+        else {
+            result.append("\n"+gammalib::parformat("Energies") +
+                          "Not defined");
+        }
 
-             // NORMAL: Append sky map
-             if (chatter >= NORMAL) {
-                 result.append("\n"+m_cube.print(chatter));
-             }
-
-             // EXPLICIT: Append energy nodes
-             if (chatter >= EXPLICIT && m_elogmeans.size() > 0) {
-                 result.append("\n"+gammalib::parformat("Cube energy values"));
-                 if (m_elogmeans.size() > 0) {
-                     for (int i = 0; i < m_elogmeans.size(); ++i) {
-                         result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
-                         result.append(gammalib::str(std::pow(10.0, m_elogmeans[i])));
-                         result.append(" TeV (log10E=");
-                         result.append(gammalib::str(m_elogmeans[i]));
-                         result.append(")");
-                     }
-                 }
-                 else {
-                     result.append("not specified");
-                 }
-             }
-
-         } // endif: map cube exists
+        // Append skymap definition
+        result.append("\n"+m_cube.print(chatter));
 
      } // endif: chatter was not silent
 

@@ -697,8 +697,8 @@ std::string GCTACubeEdisp::print(const GChatter& chatter) const
         // Append information
         result.append("\n"+gammalib::parformat("Filename")+m_filename);
 
-        // Append energy intervals
-        if (m_ebounds.size() > 0) {
+        // Append energies
+        if (m_energies.size() > 0) {
             result.append("\n"+m_energies.print(chatter));
         }
         else {

@@ -691,7 +691,7 @@ void GEnergies::write(GFits& fits, const std::string& extname) const
 /***********************************************************************//**
  * @brief Print energy container information
  *
- * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] chatter Chattiness.
  * @return String containing energy container information.
  ***************************************************************************/
 std::string GEnergies::print(const GChatter& chatter) const
@@ -712,7 +712,9 @@ std::string GEnergies::print(const GChatter& chatter) const
         // EXPLICIT: Append energies
         if (chatter >= EXPLICIT) {
             for (int i = 0; i < size(); ++i) {
-                result.append("\n"+m_energies[i].print(chatter));
+                result.append("\n");
+                result.append(gammalib::parformat("Energy "+gammalib::str(i)));
+                result.append(m_energies[i].print(chatter));
             }
         }
 
