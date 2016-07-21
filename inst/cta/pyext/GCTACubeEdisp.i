@@ -74,7 +74,7 @@ public:
     std::string       classname(void) const;
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&    map(void) const;
+    const GSkyMap&    cube(void) const;
     const GEnergies&  energies(void) const;
     const GNodeArray& migras(void) const;
     double            migra_max(void) const;

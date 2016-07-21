@@ -89,7 +89,7 @@ public:
     std::string       classname(void) const;
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&    map(void) const;
+    const GSkyMap&    cube(void) const;
     const GEnergies&  energies(void) const;
     const GNodeArray& migras(void) const;
     double            migra_max(void) const;
@@ -156,7 +156,7 @@ std::string GCTACubeEdisp::classname(void) const
  * Returns the energy dispersion cube sky map.
  ***************************************************************************/
 inline
-const GSkyMap& GCTACubeEdisp::map(void) const
+const GSkyMap& GCTACubeEdisp::cube(void) const
 {
     return (m_cube);
 }

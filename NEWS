@@ -88,6 +88,7 @@ The following methods have been renamed:
 - GFilename::url(), was GFilename::filename()
 - GCTAEventCube::counts(), was GCTAEventCube::map()
 - GCTACubePsf::cube(), was GCTACubePsf::map()
+- GCTACubeEdisp::cube(), was GCTACubeEdisp::map()
 
 The following classes now use GFilename for filenames arguments instead
 of std::string:
