@@ -696,6 +696,9 @@ void GCTAEventCube::init_members(void)
     m_ewidth.clear();
     m_ontime = 0.0;
 
+    // Prepare event bin
+    init_bin();
+
     // Return
     return;
 }
@@ -705,19 +708,29 @@ void GCTAEventCube::init_members(void)
  * @brief Copy class members
  *
  * @param[in] cube Event cube.
+ *
+ * This method copies the class members from another event cube in the actual
+ * object. It also prepares the event bin member that will be returned in
+ * case of an operator access to the class.
  ***************************************************************************/
 void GCTAEventCube::copy_members(const GCTAEventCube& cube)
 {
-    // Copy members
+    // Copy members. Note that the event bin is not copied as it will
+    // be initialised later. The event bin serves just as a container of
+    // pointers, hence we do not want to copy over the pointers from the
+    // original class.
     m_map        = cube.m_map;
     m_weights    = cube.m_weights;
-    m_bin        = cube.m_bin;
+    //m_bin        = cube.m_bin;
     m_time       = cube.m_time;
     m_dirs       = cube.m_dirs;
     m_solidangle = cube.m_solidangle;
     m_energies   = cube.m_energies;
     m_ewidth     = cube.m_ewidth;
     m_ontime     = cube.m_ontime;
+
+    // Prepare event bin
+    init_bin();
 
     // Return
     return;
@@ -924,6 +937,26 @@ void GCTAEventCube::set_times(void)
 
 
 /***********************************************************************//**
+ * @brief Initialise event bin
+ *
+ * This method initialises the event bin. The event bin is cleared and all
+ * fixed pointers are set.
+ ***************************************************************************/
+void GCTAEventCube::init_bin(void)
+{
+    // Free any existing memory
+    m_bin.free_members();
+
+    // Set fixed pointers (those will not be set in set_bin)
+    m_bin.m_time   = &m_time;
+    m_bin.m_ontime = &m_ontime;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Set event bin
  *
  * @param[in] index Event index [0,...,size()-1].
@@ -967,11 +1000,11 @@ void GCTAEventCube::set_bin(const int& index)
     // Set pointers
     m_bin.m_counts     = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_energy     = &(m_energies[m_bin.m_ieng]);
-    m_bin.m_time       = &m_time;
+    //m_bin.m_time       = &m_time;
     m_bin.m_dir        = &(m_dirs[m_bin.m_ipix]);
     m_bin.m_solidangle = &(m_solidangle[m_bin.m_ipix]);
     m_bin.m_ewidth     = &(m_ewidth[m_bin.m_ieng]);
-    m_bin.m_ontime     = &m_ontime;
+    //m_bin.m_ontime     = &m_ontime;
     m_bin.m_weight     = const_cast<double*>(&(m_weights.pixels()[index]));
 
     // Return

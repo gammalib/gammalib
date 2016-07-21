@@ -77,12 +77,19 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    const int&     ipix(void) const;
+    const int&     ieng(void) const;
     const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
     const double&  weight(void) const;
-    const int&     ipix(void) const;
-    const int&     ieng(void) const;
+    void           dir(const GCTAInstDir& dir);
+    void           energy(const GEnergy& energy);
+    void           time(const GTime& time);
+    void           solidangle(const double& solidangle);
+    void           ewidth(const GEnergy& ewidth);
+    void           ontime(const double& ontime);
+    void           weight(const double& weight);
 
 protected:
     // Protected methods
@@ -91,14 +98,15 @@ protected:
     void free_members(void);
 
     // Protected members
+    bool         m_alloc;       //!< Signals proper memory allocation
     int          m_ipix;        //!< Index in spatial map
     int          m_ieng;        //!< Index of energy layer
-    GEnergy*     m_energy;      //!< Pointer to bin energy
     GCTAInstDir* m_dir;         //!< Pointer to bin direction
     GTime*       m_time;        //!< Pointer to bin time
+    GEnergy*     m_energy;      //!< Pointer to bin energy
+    GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
     double*      m_counts;      //!< Pointer to number of counts
     double*      m_solidangle;  //!< Pointer to solid angle of pixel (sr)
-    GEnergy*     m_ewidth;      //!< Pointer to energy width of bin
     double*      m_ontime;      //!< Pointer to ontime of bin (seconds)
     double*      m_weight;      //!< Pointer to weight of bin
 };

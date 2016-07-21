@@ -107,6 +107,7 @@ protected:
     void         set_directions(void);
     virtual void set_energies(void);
     virtual void set_times(void);
+    void         init_bin(void);
     void         set_bin(const int& index);
 
     // Protected members

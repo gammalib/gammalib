@@ -58,12 +58,19 @@ public:
     virtual void               counts(const double& counts);
 
     // Other methods
+    const int&     ipix(void) const;
+    const int&     ieng(void) const;
     const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
     const double&  weight(void) const;
-    const int&     ipix(void) const;
-    const int&     ieng(void) const;
+    void           dir(const GCTAInstDir& dir);
+    void           energy(const GEnergy& energy);
+    void           time(const GTime& time);
+    void           solidangle(const double& solidangle);
+    void           ewidth(const GEnergy& ewidth);
+    void           ontime(const double& ontime);
+    void           weight(const double& weight);
 };
 
 

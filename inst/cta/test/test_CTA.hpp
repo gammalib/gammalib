@@ -115,6 +115,7 @@ public:
     virtual void                 set(void);
     virtual TestGCTAObservation* clone(void) const;
     virtual std::string          classname(void) const { return "TestGCTAObservation"; }
+    void                         test_event_bin(void);
     void                         test_event_cube(void);
     void                         test_unbinned_obs(void);
     void                         test_binned_obs(void);

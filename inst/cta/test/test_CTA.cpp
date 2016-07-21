@@ -185,6 +185,8 @@ void TestGCTAObservation::set(void)
     name("GCTAObservation");
 
     // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAObservation::test_event_bin),
+           "Test event bin");
     append(static_cast<pfunction>(&TestGCTAObservation::test_event_cube),
            "Test event cube");
     append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs),
@@ -1432,6 +1434,187 @@ void TestGCTAModel::test_model_aeff_bgd(void)
     test_value((*model)["Index"].value(), -2.4);
     test_value((*model)["PivotEnergy"].value(), 1.0e6);
     test_assert(model->is_constant(), "Model is expected to be constant.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks handling of CTA event bin
+ ***************************************************************************/
+void TestGCTAObservation::test_event_bin(void)
+{
+    // Test event bin void constructor
+    GCTAEventBin bin;
+    test_value(bin.classname(), "GCTAEventBin",
+               "Check classname() for empty bin");
+    test_value(bin.size(), 0.0, 1.0e-10, "Check size() for empty bin");
+    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for empty bin");
+    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for empty bin");
+    test_value(bin.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for empty bin");
+    test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for empty bin");
+    test_value(bin.counts(), 0.0, 1.0e-10, "Check counts() for empty bin");
+    test_value(bin.error(),  0.0, 1.0e-10, "Check error() for empty bin");
+    test_value(bin.ipix(), -1, "Check ipix() for empty bin");
+    test_value(bin.ieng(), -1, "Check ieng() for empty bin");
+    test_value(bin.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for empty bin");
+    test_value(bin.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for empty bin");
+    test_value(bin.ontime(), 0.0, 1.0e-10, "Check ontime() for empty bin");
+    test_value(bin.weight(), 0.0, 1.0e-10, "Check weight() for empty bin");
+    test_value(bin.print(), "0", "Check print() for empty bin");
+
+    // Set bin attributes
+    GSkyDir  skydir;
+    skydir.radec_deg(37.2, -67.3);
+    GCTAInstDir instdir(skydir);
+    instdir.detx(-0.78);
+    instdir.dety(+0.35);
+    bin.dir(instdir);
+    bin.energy(GEnergy(2.0, "TeV"));
+    bin.time(GTime(87.3));
+    bin.counts(4.0);
+    bin.solidangle(3.14);
+    bin.ewidth(GEnergy(7.0, "GeV"));
+    bin.ontime(101.0);
+    bin.weight(0.71);
+
+    // Set size reference
+    double ref_size = 3.14 * 7000.0 * 101.0 * 0.71;
+
+    // Test bin attributes
+    test_value(bin.size(), ref_size, 1.0e-10, "Check size() for filled bin");
+    test_value(bin.dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin.dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin.dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin.dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin.energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for filled bin");
+    test_value(bin.time().secs(), 87.3, 1.0e-10, "Check time() for filled bin");
+    test_value(bin.counts(), 4.0, 1.0e-10, "Check counts() for filled bin");
+    test_value(bin.error(),  2.0, 1.0e-10, "Check error() for filled bin");
+    test_value(bin.ipix(), -1, "Check ipix() for filled bin");
+    test_value(bin.ieng(), -1, "Check ieng() for filled bin");
+    test_value(bin.solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for filled bin");
+    test_value(bin.ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for filled bin");
+    test_value(bin.ontime(), 101.0, 1.0e-10, "Check ontime() for filled bin");
+    test_value(bin.weight(), 0.71, 1.0e-10, "Check weight() for filled bin");
+    test_value(bin.print(), "4", "Check print() for filled bin");
+
+    // Test copy constructor
+    GCTAEventBin bin2(bin);
+    test_value(bin2.size(), ref_size, 1.0e-10, "Check size() for copied bin");
+    test_value(bin2.dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin2.dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin2.dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin2.dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin2.energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for copied bin");
+    test_value(bin2.time().secs(), 87.3, 1.0e-10, "Check time() for copied bin");
+    test_value(bin2.counts(), 4.0, 1.0e-10, "Check counts() for copied bin");
+    test_value(bin2.error(),  2.0, 1.0e-10, "Check error() for copied bin");
+    test_value(bin2.ipix(), -1, "Check ipix() for copied bin");
+    test_value(bin2.ieng(), -1, "Check ieng() for copied bin");
+    test_value(bin2.solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for copied bin");
+    test_value(bin2.ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for copied bin");
+    test_value(bin2.ontime(), 101.0, 1.0e-10, "Check ontime() for copied bin");
+    test_value(bin2.weight(), 0.71, 1.0e-10, "Check weight() for copied bin");
+    test_value(bin2.print(), "4", "Check print() for copied bin");
+
+    // Assignment operator
+    GCTAEventBin bin3 = bin;
+    test_value(bin3.size(), ref_size, 1.0e-10, "Check size() for assigned bin");
+    test_value(bin3.dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin3.dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin3.dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin3.dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin3.energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for assigned bin");
+    test_value(bin3.time().secs(), 87.3, 1.0e-10,
+               "Check time() for assigned bin");
+    test_value(bin3.counts(), 4.0, 1.0e-10, "Check counts() for assigned bin");
+    test_value(bin3.error(),  2.0, 1.0e-10, "Check error() for assigned bin");
+    test_value(bin3.ipix(), -1, "Check ipix() for assigned bin");
+    test_value(bin3.ieng(), -1, "Check ieng() for assigned bin");
+    test_value(bin3.solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for assigned bin");
+    test_value(bin3.ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for assigned bin");
+    test_value(bin3.ontime(), 101.0, 1.0e-10, "Check ontime() for assigned bin");
+    test_value(bin3.weight(), 0.71, 1.0e-10, "Check weight() for assigned bin");
+    test_value(bin3.print(), "4", "Check print() for assigned bin");
+
+    // clone method
+    GCTAEventBin* bin4 = bin.clone();
+    test_value(bin4->size(), ref_size, 1.0e-10, "Check size() for cloned bin");
+    test_value(bin4->dir().dir().ra_deg(), 37.2, 1.0e-10,
+               "Check dir().dir().ra_deg() for filled bin");
+    test_value(bin4->dir().dir().dec_deg(), -67.3, 1.0e-10,
+               "Check dir().dir().dec_deg() for filled bin");
+    test_value(bin4->dir().detx(), -0.78, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin4->dir().dety(), +0.35, 1.0e-10,
+               "Check dir().detx() for filled bin");
+    test_value(bin4->energy().TeV(), 2.0, 1.0e-10,
+               "Check energy() for cloned bin");
+    test_value(bin4->time().secs(), 87.3, 1.0e-10,
+               "Check time() for cloned bin");
+    test_value(bin4->counts(), 4.0, 1.0e-10, "Check counts() for cloned bin");
+    test_value(bin4->error(),  2.0, 1.0e-10, "Check error() for cloned bin");
+    test_value(bin4->ipix(), -1, "Check ipix() for cloned bin");
+    test_value(bin4->ieng(), -1, "Check ieng() for cloned bin");
+    test_value(bin4->solidangle(), 3.14, 1.0e-10,
+               "Check solidangle() for cloned bin");
+    test_value(bin4->ewidth().GeV(), 7.0, 1.0e-10,
+               "Check ewidth() for cloned bin");
+    test_value(bin4->ontime(), 101.0, 1.0e-10, "Check ontime() for cloned bin");
+    test_value(bin4->weight(), 0.71, 1.0e-10, "Check weight() for cloned bin");
+    test_value(bin4->print(), "4", "Check print() for cloned bin");
+
+    // clear method
+    bin.clear();
+    test_value(bin.classname(), "GCTAEventBin",
+               "Check classname() for cleared bin");
+    test_value(bin.size(), 0.0, 1.0e-10, "Check size() for cleared bin");
+    test_value(bin.dir().dir().ra_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().ra_deg() for cleared bin");
+    test_value(bin.dir().dir().dec_deg(), 0.0, 1.0e-10,
+               "Check dir().dir().dec_deg() for cleared bin");
+    test_value(bin.energy().MeV(), 0.0, 1.0e-10,
+               "Check energy() for cleared bin");
+    test_value(bin.time().secs(), 0.0, 1.0e-10, "Check time() for cleared bin");
+    test_value(bin.counts(), 0.0, 1.0e-10, "Check counts() for cleared bin");
+    test_value(bin.error(),  0.0, 1.0e-10, "Check error() for cleared bin");
+    test_value(bin.ipix(), -1, "Check ipix() for cleared bin");
+    test_value(bin.ieng(), -1, "Check ieng() for cleared bin");
+    test_value(bin.solidangle(), 0.0, 1.0e-10,
+               "Check solidangle() for cleared bin");
+    test_value(bin.ewidth().MeV(), 0.0, 1.0e-10,
+               "Check ewidth() for cleared bin");
+    test_value(bin.ontime(), 0.0, 1.0e-10, "Check ontime() for cleared bin");
+    test_value(bin.weight(), 0.0, 1.0e-10, "Check weight() for cleared bin");
+    test_value(bin.print(), "0", "Check print() for cleared bin");
 
     // Return
     return;
