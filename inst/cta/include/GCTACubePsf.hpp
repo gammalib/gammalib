@@ -89,7 +89,7 @@ public:
     std::string       classname(void) const;
     void              set(const GCTAObservation& obs);
     void              fill(const GObservations& obs, GLog* log = NULL);
-    const GSkyMap&    map(void) const;
+    const GSkyMap&    cube(void) const;
     const GEnergies&  energies(void) const;
     const GNodeArray& deltas(void) const;
     double            delta_max(void) const;
@@ -159,7 +159,7 @@ std::string GCTACubePsf::classname(void) const
  * cube.
  ***************************************************************************/
 inline
-const GSkyMap& GCTACubePsf::map(void) const
+const GSkyMap& GCTACubePsf::cube(void) const
 {
     return (m_cube);
 }

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-19 July 2016
+21 July 2016
 
 
 1. Introduction
@@ -87,6 +87,7 @@ The following methods have been renamed:
 - GFilename::is_empty(), was GFilename::empty()
 - GFilename::url(), was GFilename::filename()
 - GCTAEventCube::counts(), was GCTAEventCube::map()
+- GCTACubePsf::cube(), was GCTACubePsf::map()
 
 The following classes now use GFilename for filenames arguments instead
 of std::string:
