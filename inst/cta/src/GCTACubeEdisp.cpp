@@ -46,9 +46,9 @@
 #define G_CONSTRUCTOR2  "GCTACubeEdisp(std::string&, std::string&, double&, "\
                          "double&, double&, double&, int&, int&, GEbounds&, "\
                                                              "double&, int&)"
-#define G_SET                          "GCTACubeEdisp::set(GCTAObservation&)"
-#define G_FILL                   "GCTACubeEdisp::fill(GObservations&, GLog*)"
 #define G_EBOUNDS                          "GCTACubeEdisp::ebounds(GEnergy&)"
+#define G_FILL_CUBE   "GCTACubeEdisp::fill_cube(GCTAObservation&, GSkyMap*, "\
+                                                                     "GLog*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -404,102 +404,15 @@ GCTACubeEdisp* GCTACubeEdisp::clone(void) const
  *
  * @param[in] obs CTA observation.
  *
- * @exception GException::invalid_value
- *            CTA observation does not contain the required information.
- *
- * Sets the energy dispersion cube for one CTA observation. This method does
- * nothing if the CTA observation does not contain an event list.
+ * Sets the energy dispersion cube for one CTA observation.
  ***************************************************************************/
 void GCTACubeEdisp::set(const GCTAObservation& obs)
 {
     // Clear energy dispersion cube
     clear_cube();
 
-    // Only continue if we have an unbinned observation
-    if (obs.eventtype() == "EventList") {
-
-        // Extract region of interest from CTA observation
-        const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
-        if (list == NULL) {
-            std::string msg = "CTA Observation \""+obs.name()+"\" does not "
-                              "contain an event list. An event list is "
-                              "needed to retrieve the Region of Interest. "
-                              "Please specify a CTA observation with a "
-                              "valid event list.";
-            throw GException::invalid_value(G_SET, msg);
-        }
-
-        // Get CTA response
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        if (rsp == NULL) {
-            std::string msg = "No valid instrument response found in CTA "
-                              "observation \""+obs.name()+"\". Please "
-                              "specify the instrument response for this "
-                              "observation.";
-            throw GException::invalid_value(G_SET, msg);
-        }
-
-        // Get energy dispersion
-        const GCTAEdisp* edisp = rsp->edisp();
-        if (edisp == NULL) {
-            std::string msg = "No energy dispersion component found in "
-                              "the instrument response of CTA observation "
-                              "\""+obs.name()+"\". Please provide an "
-                              "instrument response that comprises an energy "
-                              "dispersion component.";
-            throw GException::invalid_value(G_SET, msg);
-        }
-
-        // Get referenceto the pointing direction
-        const GSkyDir& pnt = obs.pointing().dir();
-
-        // Loop over all spatial pixels in energy dispersion cube
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-    
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-            
-            // Compute theta angle with respect to pointing direction
-            // in radians
-            double theta = pnt.dist(dir);
-
-            // Loop over all energy dispersion cube true energies
-            for (int iebin = 0; iebin < m_elogmeans.size(); ++iebin){
-
-                // Get log10 of true energy in TeV
-                double logEsrc = m_elogmeans[iebin];
-
-                // Loop over migration bins
-                for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
-
-                    // Get migration for this migration bin
-                    double migra = m_migras[imigra];
-
-                    // Skip migration bin if it's not positive
-                    if (migra <= 0.0) {
-                        continue;
-                    }
-
-                    // Compute log10 of reconstructed energy in TeV
-                    double  logEobs = std::log10(migra) + logEsrc;
-                    GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
-
-                    // Set map index
-                    int imap = offset(imigra, iebin);
-
-                    // Add energy dispersion cube value
-                    m_cube(pixel, imap) += rsp->edisp(Eobs,
-                                                      theta, 0.0,
-                                                      0.0, 0.0,
-                                                      logEsrc);
-
-                } // endfor: looped over migration bins
-
-            } // endfor: looped over energy bins
-
-        } // endfor: looped over all pixels
-
-    } // endif: observation was unbinned
+    // Fill energy dispersion cube
+    fill_cube(obs);
 
     // Return
     return;
@@ -512,18 +425,8 @@ void GCTACubeEdisp::set(const GCTAObservation& obs)
  * @param[in] obs Observation container.
  * @param[in] log Pointer towards logger.
  *
- * @exception GException::invalid_value
- *            Observation container does not contain the required information.
- *
- * Computes the stacked energy dispersion cube for all unbinned CTA
- * observations that are in the observation container @p obs. Binned CTA
- * observations or observations for other instruments are skipped.
- * Information about the observations that are used will be put into the
- * logger in case that @p log is not a NULL pointer.
- *
- * The method computes the average energy dispersion ...
- *
- * @todo Provide formula
+ * Sets the energy dispersion cube from all CTA observations in the
+ * observation container.
  ***************************************************************************/
 void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
 {
@@ -537,7 +440,8 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
     for (int i = 0; i < obs.size(); ++i) {
 
         // Get observation and continue only if it is a CTA observation
-        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
+        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>
+                                     (obs[i]);
 
         // Skip observation if it's not CTA
         if (cta == NULL) {
@@ -563,90 +467,8 @@ void GCTACubeEdisp::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Get CTA response
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-        if (rsp == NULL) {
-            std::string msg = "No valid instrument response found in CTA "
-                              "observation \""+cta->name()+"\". Please "
-                              "specify the instrument response for this "
-                              "observation.";
-            throw GException::invalid_value(G_FILL, msg);
-        }
-
-        // Get energy dispersion component
-        const GCTAEdisp* edisp = rsp->edisp();
-        if (edisp == NULL) {
-            std::string msg = "No energy dispersion component found in "
-                              "the instrument response of CTA observation "
-                              "\""+cta->name()+"\". Please provide an "
-                              "instrument response that comprises an energy "
-                              "dispersion component.";
-            throw GException::invalid_value(G_FILL, msg);
-        }
-
-        // Get reference on pointing direction
-        const GSkyDir& pnt = cta->pointing().dir();
-
-        // Announce observation usage
-        if (log != NULL) {
-            *log << "Including ";
-            *log << cta->instrument();
-            *log << " observation \"" << cta->name();
-            *log << "\" (id=" << cta->id() << ")";
-            *log << " in energy dispersion cube computation." << std::endl;
-        }
-
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-                    
-            // Compute theta angle with respect to pointing direction in radians
-            double theta = pnt.dist(dir);
-
-            // Loop over all energy bins
-            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
-
-                // Get log10 of true energy in TeV
-                double logEsrc = m_energies[iebin].log10TeV();
-
-                // Compute exposure weight
-                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
-                                cta->livetime();
-
-                // Accumulate weights
-                exposure(pixel, iebin) += weight;
-
-                // Loop over delta values
-                for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
-
-                    // Compute energy migration fraction
-                    double migra = m_migras[imigra];
-
-                    // Skip migra bin if zero
-                    if (migra <= 0.0) {
-                        continue;
-                    }
-
-                    // Compute log10 of reconstructed energy in TeV
-                    double  logEobs = std::log10(migra) + logEsrc;
-                    GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
-
-                    // Set map index
-                    int imap = offset(imigra, iebin);
-
-                    // Add energy dispersion cube value
-                    m_cube(pixel, imap) += rsp->edisp(Eobs,
-                                                      theta, 0.0,
-                                                      0.0, 0.0,
-                                                      logEsrc) * weight;
-
-                } // endfor: looped over migration bins
-                
-            } // endfor: looped over energy bins
-
-        } // endfor: looped over all pixels
+        // Fill exposure cube cube
+        fill_cube(*cta, &exposure, log);
 
     } // endfor: looped over observations
 
@@ -998,6 +820,143 @@ void GCTACubeEdisp::clear_cube(void)
         } // endfor: looped over all pixels
 
     } // endfor: looped over maps
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fill energy dispersion cube from observation container
+ *
+ * @param[in] obs Observation.
+ * @param[in] exposure Pointer towards exposure map.
+ * @param[in] log Pointer towards logger.
+ *
+ * @exception GException::invalid_value
+ *            No RoI or response found in CTA observation.
+ ***************************************************************************/
+void GCTACubeEdisp::fill_cube(const GCTAObservation& obs,
+                              GSkyMap*               exposure,
+                              GLog*                  log)
+{
+    // Only continue if we have an event list
+    if (obs.eventtype() == "EventList") {
+
+        // Extract pointing direction, energy boundaries and ROI from
+        // observation
+        GSkyDir  pnt         = obs.pointing().dir();
+        GEbounds obs_ebounds = obs.ebounds();
+        GCTARoi  roi         = obs.roi();
+
+        // Check for RoI sanity
+        if (!roi.is_valid()) {
+            std::string msg = "No RoI information found in "+obs.instrument()+
+                              " observation \""+obs.name()+"\". Run ctselect "
+                              "to specify an RoI for this observation.";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
+
+        // Extract response from observation
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>
+                                     (obs.response());
+        if (rsp == NULL) {
+            std::string msg = "No valid instrument response function found in "+
+                              obs.instrument()+" observation \""+obs.name()+
+                              "\". Please specify the instrument response "
+                              "function for this observation.";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
+
+        // Get energy dispersion component
+        const GCTAEdisp* edisp = rsp->edisp();
+        if (edisp == NULL) {
+            std::string msg = "No energy dispersion rcomponent found in the "
+                              "the instrument response of "+
+                              obs.instrument()+" observation \""+obs.name()+
+                              "\". Please provide an instrument response that "
+                              "comprises an energy dispersion component.";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
+
+        // Announce observation usage
+        if (log != NULL) {
+            *log << "Including ";
+            *log << obs.instrument();
+            *log << " observation \"" << obs.name();
+            *log << "\" (id=" << obs.id() << ")";
+            *log << " in energy dispersion cube computation." << std::endl;
+        }
+
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
+
+            // Skip pixel if it is outside the RoI
+            if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
+                continue;
+            }
+            
+            // Compute theta angle with respect to pointing direction in radians
+            double theta = pnt.dist(dir);
+
+            // Loop over all energy bins
+            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
+
+                // Skip energy dispersion cube energy if the energy is
+                // outside the observation energy. The energy dispersion cube
+                // energies are true energies while the observation energy
+                // boundaries are reconstructed energies, hence this is only
+                // an approximation, but probably the only we can really do.
+                if (!obs_ebounds.contains(m_energies[iebin])) {
+                    continue;
+                }
+
+                // Get log10 of true energy in TeV
+                double logEsrc = m_energies[iebin].log10TeV();
+
+                // Compute exposure weight
+                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logEsrc) *
+                                obs.livetime();
+
+                // If available, accumulate weights
+                if (exposure != NULL) {
+                    (*exposure)(pixel, iebin) += weight;
+                }
+
+                // Loop over delta values
+                for (int imigra = 0; imigra < m_migras.size(); ++imigra) {
+
+                    // Compute energy migration fraction
+                    double migra = m_migras[imigra];
+
+                    // Skip migra bin if zero
+                    if (migra <= 0.0) {
+                        continue;
+                    }
+
+                    // Compute log10 of reconstructed energy in TeV
+                    double  logEobs = std::log10(migra) + logEsrc;
+                    GEnergy Eobs(std::pow(10.0, logEobs), "TeV");
+
+                    // Set map index
+                    int imap = offset(imigra, iebin);
+
+                    // Add energy dispersion cube value
+                    m_cube(pixel, imap) += rsp->edisp(Eobs,
+                                                      theta, 0.0,
+                                                      0.0, 0.0,
+                                                      logEsrc) * weight;
+
+                } // endfor: looped over migration bins
+                
+            } // endfor: looped over energy bins
+
+        } // endfor: looped over all pixels
+
+    } // endif: observation contained an event list
 
     // Return
     return;

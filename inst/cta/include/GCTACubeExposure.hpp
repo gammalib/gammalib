@@ -101,6 +101,7 @@ protected:
     void init_members(void);
     void copy_members(const GCTACubeExposure& exp);
     void free_members(void);
+    void fill_cube(const GCTAObservation& obs, GLog* log = NULL);
     void update(const double& logE) const;
     void set_eng_axis(void);
     void read_attributes(const GFitsHDU& hdu);

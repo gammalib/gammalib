@@ -339,6 +339,20 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
             *log << " in background cube computation." << std::endl;
         }
 
+        // Extract region of interest from CTA observation
+        GCTARoi roi = cta->roi();
+
+        // Extract energy boundaries from CTA observation
+        GEbounds obs_ebounds = cta->ebounds();
+
+        // Check for RoI sanity
+        if (!roi.is_valid()) {
+            std::string msg = "No RoI information found in input observation "
+                              "\""+cta->name()+"\". Run ctselect to specify "
+                              "an RoI for this observation";
+            throw GException::invalid_value(G_FILL, msg);
+        }
+
         // Set GTI of actual observations as the GTI of the event cube
         eventcube.gti(cta->gti());
 
@@ -350,6 +364,13 @@ void GCTACubeBackground::fill(const GObservations& obs, GLog* log)
 
             // Get event bin
             GCTAEventBin* bin = eventcube[i];
+
+            // Skip if energy is not contained within RoI or the energy
+            // boundaries of the observation. Note that the contains() method
+            // tests on bin centre value.
+            if (!roi.contains(*bin) || !obs_ebounds.contains(bin->energy())) {
+                continue;
+            }
 
             // Compute model value for event bin. The model value is
             // given in counts/MeV/s/sr.

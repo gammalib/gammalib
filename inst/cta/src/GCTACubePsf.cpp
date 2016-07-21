@@ -41,6 +41,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                            "GCTACubePsf::set(GCTAObservation&)"
 #define G_FILL                     "GCTACubePsf::fill(GObservations&, GLog*)"
+#define G_FILL_CUBE     "GCTACubePsf::fill_cube(GCTAObservation&, GSkyMap*, "\
+                                                                     "GLog*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -368,59 +370,16 @@ GCTACubePsf* GCTACubePsf::clone(void) const
  * @brief Set PSF cube from one CTA observation
  *
  * @param[in] obs CTA observation.
+ *
+ * Sets the PSF cube for one CTA observation.
  ***************************************************************************/
 void GCTACubePsf::set(const GCTAObservation& obs)
 {
     // Clear PSF cube
     clear_cube();
 
-    // Only continue if we have an unbinned observation
-    if (obs.eventtype() == "EventList") {
-
-        // Get references on CTA response and pointing direction
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(obs.response());
-        const GSkyDir&         pnt = obs.pointing().dir();
-
-        // Continue only if response is valid
-        if (rsp != NULL) {
-
-            // Loop over all pixels in sky map
-            for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-    
-                // Get pixel sky direction
-                GSkyDir dir = m_cube.inx2dir(pixel);
-                
-                // Compute theta angle with respect to pointing direction
-                // in radians
-                double  theta = pnt.dist(dir);
-
-                // Loop over all exposure cube energy bins
-                for (int iebin = 0; iebin < m_energies.size(); ++iebin){
-
-                    // Get logE/TeV
-                    double logE = m_energies[iebin].log10TeV();
-
-                    // Loop over delta values
-                    for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
-
-                        // Compute delta in radians
-                        double delta = m_deltas[idelta] * gammalib::deg2rad;
-
-                        // Set map index
-                        int imap = offset(idelta, iebin);
-
-                        // Set PSF cube
-                        m_cube(pixel, imap) = rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE);
-
-                    } // endfor: looped over delta bins
-                    
-                } // endfor: looped over energy bins
-
-            } // endfor: looped over all pixels
-
-        } // endif: response was valid
-
-    } // endif: observation was unbinned
+    // Fill PSF cube
+    fill_cube(obs);
 
     // Compile option: guarantee smooth Psf
     #if defined(G_SMOOTH_PSF)
@@ -436,7 +395,9 @@ void GCTACubePsf::set(const GCTAObservation& obs)
  * @brief Fill PSF cube from observation container
  *
  * @param[in] obs Observation container.
- * @param[in] log Pointer towards logger (default: NULL).
+ * @param[in] log Pointer towards logger.
+ *
+ * Sets the PSF cube from all CTA observations in the observation container.
  ***************************************************************************/
 void GCTACubePsf::fill(const GObservations& obs, GLog* log)
 {
@@ -450,7 +411,8 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
     for (int i = 0; i < obs.size(); ++i) {
 
         // Get observation and continue only if it is a CTA observation
-        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(obs[i]);
+        const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>
+                                     (obs[i]);
 
         // Skip observation if it's not CTA
         if (cta == NULL) {
@@ -476,72 +438,8 @@ void GCTACubePsf::fill(const GObservations& obs, GLog* log)
             continue;
         }
 
-        // Get references on CTA response and pointing direction
-        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>(cta->response());
-        const GSkyDir&         pnt = cta->pointing().dir();
-
-        // Skip observation if we don't have an unbinned observation
-        if (rsp == NULL) {
-            if (log != NULL) {
-                *log << "WARNING: ";
-                *log << cta->instrument();
-                *log << " observation \"" << cta->name();
-                *log << "\" (id=" << cta->id() << ")";
-                *log << " contains no IRF response.";
-                *log << " Skipping this observation." << std::endl;
-            }
-            continue;
-        }
-
-        // Announce observation usage
-        if (log != NULL) {
-            *log << "Including ";
-            *log << cta->instrument();
-            *log << " observation \"" << cta->name();
-            *log << "\" (id=" << cta->id() << ")";
-            *log << " in point spread function cube computation." << std::endl;
-        }
-
-        // Loop over all pixels in sky map
-        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
-
-            // Get pixel sky direction
-            GSkyDir dir = m_cube.inx2dir(pixel);
-                    
-            // Compute theta angle with respect to pointing direction in radians
-            double theta = pnt.dist(dir);
-
-            // Loop over all energy bins
-            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
-
-                // Get logE/TeV
-                double logE = m_energies[iebin].log10TeV();
-
-                // Compute exposure weight
-                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
-                                cta->livetime();
-
-                // Accumulate weights
-                exposure(pixel, iebin) += weight;
-
-                // Loop over delta values
-                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
-
-                    // Compute delta in radians
-                    double delta = m_deltas[idelta] * gammalib::deg2rad;
-
-                    // Set map index
-                    int imap = offset(idelta, iebin);
-
-                    // Add on PSF cube
-                    m_cube(pixel, imap) +=
-                       rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
-
-                } // endfor: looped over delta bins
-
-            } // endfor: looped over energy bins
-
-        } // endfor: looped over all pixels
+        // Fill PSF cube
+        fill_cube(*cta, &exposure, log);
 
     } // endfor: looped over observations
 
@@ -846,6 +744,122 @@ void GCTACubePsf::clear_cube(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Fill PSF cube for one observation
+ *
+ * @param[in] obs Observation.
+ * @param[in] exposure Pointer towards exposure map.
+ * @param[in] log Pointer towards logger.
+ *
+ * @exception GException::invalid_value
+ *            No RoI or response found in CTA observation.
+ ***************************************************************************/
+void GCTACubePsf::fill_cube(const GCTAObservation& obs,
+                            GSkyMap*               exposure,
+                            GLog*                  log)
+{
+    // Only continue if we have an event list
+    if (obs.eventtype() == "EventList") {
+
+        // Extract pointing direction, energy boundaries and ROI from
+        // observation
+        GSkyDir  pnt         = obs.pointing().dir();
+        GEbounds obs_ebounds = obs.ebounds();
+        GCTARoi  roi         = obs.roi();
+
+        // Check for RoI sanity
+        if (!roi.is_valid()) {
+            std::string msg = "No RoI information found in "+obs.instrument()+
+                              " observation \""+obs.name()+"\". Run ctselect "
+                              "to specify an RoI for this observation.";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
+
+        // Extract response from observation
+        const GCTAResponseIrf* rsp = dynamic_cast<const GCTAResponseIrf*>
+                                     (obs.response());
+        if (rsp == NULL) {
+            std::string msg = "No valid instrument response function found in "+
+                              obs.instrument()+" observation \""+obs.name()+
+                              "\". Please specify the instrument response "
+                              "function for this observation.";
+            throw GException::invalid_value(G_FILL_CUBE, msg);
+        }
+
+        // Announce observation usage
+        if (log != NULL) {
+            *log << "Including ";
+            *log << obs.instrument();
+            *log << " observation \"" << obs.name();
+            *log << "\" (id=" << obs.id() << ")";
+            *log << " in point spread function cube computation." << std::endl;
+        }
+
+        // Loop over all pixels in sky map
+        for (int pixel = 0; pixel < m_cube.npix(); ++pixel) {
+
+            // Get pixel sky direction
+            GSkyDir dir = m_cube.inx2dir(pixel);
+                    
+            // Skip pixel if it is outside the RoI
+            if (roi.centre().dir().dist_deg(dir) > roi.radius()) {
+                continue;
+            }
+
+            // Compute theta angle with respect to pointing direction in radians
+            double theta = pnt.dist(dir);
+
+            // Loop over all energy bins
+            for (int iebin = 0; iebin < m_energies.size(); ++iebin) {
+
+                // Skip PSF cube energy if the energy is outside the observation
+                // energy. The PSF cube energies are true energies while the
+                // observation energy boundaries are reconstructed energies,
+                // hence this is only an approximation, but probably the only
+                // we can really do.
+                if (!obs_ebounds.contains(m_energies[iebin])) {
+                    continue;
+                }
+
+                // Get logE/TeV
+                double logE = m_energies[iebin].log10TeV();
+
+                // Compute exposure weight
+                double weight = rsp->aeff(theta, 0.0, 0.0, 0.0, logE) *
+                                obs.livetime();
+
+                // If available, accumulate weights
+                if (exposure != NULL) {
+                    (*exposure)(pixel, iebin) += weight;
+                }
+
+                // Loop over delta values
+                for (int idelta = 0; idelta < m_deltas.size(); ++idelta) {
+
+                    // Compute delta in radians
+                    double delta = m_deltas[idelta] * gammalib::deg2rad;
+
+                    // Set map index
+                    int imap = offset(idelta, iebin);
+
+                    // Add on PSF cube
+                    m_cube(pixel, imap) +=
+                       rsp->psf(delta, theta, 0.0, 0.0, 0.0, logE) * weight;
+
+                } // endfor: looped over delta bins
+
+            } // endfor: looped over energy bins
+
+        } // endfor: looped over all pixels
+
+    } // endif: observation contained an event list
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Update PSF parameter cache

@@ -109,6 +109,8 @@ protected:
     void copy_members(const GCTACubeEdisp& cube);
     void free_members(void);
     void clear_cube(void);
+    void fill_cube(const GCTAObservation& obs, GSkyMap* exposure = NULL,
+                   GLog* log = NULL);
     void update(const double& migra, const double& logEsrc) const;
     void set_eng_axis(void);
     void compute_ebounds(void) const;

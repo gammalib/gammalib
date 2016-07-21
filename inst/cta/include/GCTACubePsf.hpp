@@ -108,6 +108,8 @@ protected:
     void copy_members(const GCTACubePsf& cube);
     void free_members(void);
     void clear_cube(void);
+    void fill_cube(const GCTAObservation& obs, GSkyMap* exposure = NULL,
+                   GLog* log = NULL);
     void update(const double& delta, const double& logE) const;
     void set_delta_axis(void);
     void set_eng_axis(void);
