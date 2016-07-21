@@ -42,6 +42,15 @@ public:
     explicit GCTACubeBackground(const GFilename& filename);
     explicit GCTACubeBackground(const GCTAEventCube& cube);
     GCTACubeBackground(const GCTACubeBackground& bgd);
+    GCTACubeBackground(const std::string&   wcs,
+                       const std::string&   coords,
+                       const double&        x,
+                       const double&        y,
+                       const double&        dx,
+                       const double&        dy,
+                       const int&           nx,
+                       const int&           ny,
+                       const GEnergies&     energies);
     virtual ~GCTACubeBackground(void);
 
     // Operators

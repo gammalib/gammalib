@@ -161,8 +161,8 @@ GCTACubeExposure::GCTACubeExposure(const GCTAEventCube& cube)
  * @param[in] ny       Number of pixels in y direction.
  * @param[in] energies Energies.
  *
- * Constructs an exposure cube by specifying the sky map grid and the energy
- * boundaries.
+ * Constructs an exposure cube by specifying the sky map grid and the
+ * energies.
  ***************************************************************************/
 GCTACubeExposure::GCTACubeExposure(const std::string&   wcs,
                                    const std::string&   coords,

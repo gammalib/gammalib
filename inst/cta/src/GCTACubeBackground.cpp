@@ -158,6 +158,49 @@ GCTACubeBackground::GCTACubeBackground(const GCTACubeBackground& bgd)
 
 
 /***********************************************************************//**
+ * @brief Background cube constructor
+ *
+ * @param[in] wcs      World Coordinate System.
+ * @param[in] coords   Coordinate System (CEL or GAL).
+ * @param[in] x        X coordinate of sky map centre (deg).
+ * @param[in] y        Y coordinate of sky map centre (deg).
+ * @param[in] dx       Pixel size in x direction at centre (deg/pixel).
+ * @param[in] dy       Pixel size in y direction at centre (deg/pixel).
+ * @param[in] nx       Number of pixels in x direction.
+ * @param[in] ny       Number of pixels in y direction.
+ * @param[in] energies Energies.
+ *
+ * Constructs a background cube by specifying the sky map grid and the
+ * energies.
+ ***************************************************************************/
+GCTACubeBackground::GCTACubeBackground(const std::string&   wcs,
+                                       const std::string&   coords,
+                                       const double&        x,
+                                       const double&        y,
+                                       const double&        dx,
+                                       const double&        dy,
+                                       const int&           nx,
+                                       const int&           ny,
+                                       const GEnergies&     energies)
+{
+    // Initialise class members
+    init_members();
+
+    // Store energies
+    m_energies = energies;
+
+    // Set GNodeArray used for interpolation
+    set_eng_axis();
+
+    // Create sky map
+    m_cube = GSkyMap(wcs, coords, x, y, dx, dy, nx, ny, m_energies.size());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
 GCTACubeBackground::~GCTACubeBackground(void)

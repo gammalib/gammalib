@@ -181,7 +181,7 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
 
 
 /***********************************************************************//**
- * @brief Mean PSF cube constructor
+ * @brief PSF cube constructor
  *
  * @param[in] wcs      World Coordinate System.
  * @param[in] coords   Coordinate System (CEL or GAL).
@@ -195,8 +195,7 @@ GCTACubePsf::GCTACubePsf(const GCTAEventCube& cube, const double& dmax,
  * @param[in] dmax     Maximum delta (deg).
  * @param[in] ndbins   Number of delta bins.
  *
- * Constructs a mean PSF cube by computing the mean PSF from all CTA
- * observations found in the observation container.
+ * Constructs a PSF cube by specifying the sky map grid and the energies.
  ***************************************************************************/
 GCTACubePsf::GCTACubePsf(const std::string&   wcs,
                          const std::string&   coords,

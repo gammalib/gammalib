@@ -202,7 +202,7 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
 
 
 /***********************************************************************//**
- * @brief Mean PSF cube constructor
+ * @brief Energy dispersion cube constructor
  *
  * @param[in] wcs      World Coordinate System.
  * @param[in] coords   Coordinate System (CEL or GAL).
@@ -219,7 +219,8 @@ GCTACubeEdisp::GCTACubeEdisp(const GCTAEventCube& cube, const double& mmax,
  * @exception GException::invalid_argument
  *            Maximum energy migration or number of migration bins invalid.
  *
- * Construct an energy dispersion cube with all elements set to zero.
+ * Constructs an energy dispersion cube by specifying the sky map grid and
+ * the energies.
  ***************************************************************************/
 GCTACubeEdisp::GCTACubeEdisp(const std::string&   wcs,
                              const std::string&   coords,
