@@ -633,7 +633,7 @@ std::string GCTACubeBackground::print(const GChatter& chatter) const
                      for (int i = 0; i < m_elogmeans.size(); ++i) {
                          result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
                          result.append(gammalib::str(std::pow(10.0, m_elogmeans[i])));
-                         result.append(" MeV (log10E=");
+                         result.append(" TeV (log10E=");
                          result.append(gammalib::str(m_elogmeans[i]));
                          result.append(")");
                      }
