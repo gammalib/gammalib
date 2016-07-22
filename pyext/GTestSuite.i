@@ -69,11 +69,11 @@ public:
                                                                      "utf-8",
                                                                      "Error ~");
                     if (temp_bytes != NULL) {
-                        c_type = PyBytes_AS_STRING(temp_bytes);
+                        c_type = PyString_AsString(temp_bytes);
                     }
                 }
                 else if (py_type != NULL) {
-                    c_type = PyBytes_AS_STRING(py_type);
+                    c_type = PyString_AsString(py_type);
                 }
                 if (c_type != NULL) {
                     m_message += std::string(c_type);
@@ -84,11 +84,11 @@ public:
                                                                      "utf-8",
                                                                      "Error ~");
                     if (temp_bytes != NULL) {
-                        c_value = PyBytes_AS_STRING(temp_bytes);
+                        c_value = PyString_AsString(temp_bytes);
                     }
                 }
                 else if (py_value != NULL) {
-                    c_value = PyBytes_AS_STRING(py_value);
+                    c_value = PyString_AsString(py_value);
                 }
                 if (c_value != NULL) {
                     m_message += std::string(c_value);
