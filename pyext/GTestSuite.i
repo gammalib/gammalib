@@ -62,11 +62,37 @@ public:
                 // Extract message strings
                 PyObject *py_type  = PyObject_Str(type);
                 PyObject *py_value = PyObject_Str(value);
-                char     *c_type   = PyString_AsString(py_type);
-                char     *c_value  = PyString_AsString(py_value);
-                m_message += std::string(c_type);
-                m_message += "\n";
-                m_message += std::string(c_value);
+                char     *c_type   = NULL;
+                char     *c_value  = NULL;
+                if (PyUnicode_Check(py_type)) {
+                    PyObject* temp_bytes = PyUnicode_AsEncodedString(py_type,
+                                                                     "utf-8",
+                                                                     "Error ~");
+                    if (temp_bytes != NULL) {
+                        c_type = PyBytes_AS_STRING(temp_bytes);
+                    }
+                }
+                else if (py_type != NULL) {
+                    c_type = PyBytes_AS_STRING(py_type);
+                }
+                if (c_type != NULL) {
+                    m_message += std::string(c_type);
+                    m_message += "\n";
+                }
+                if (PyUnicode_Check(py_value)) {
+                    PyObject* temp_bytes = PyUnicode_AsEncodedString(py_value,
+                                                                     "utf-8",
+                                                                     "Error ~");
+                    if (temp_bytes != NULL) {
+                        c_value = PyBytes_AS_STRING(temp_bytes);
+                    }
+                }
+                else if (py_value != NULL) {
+                    c_value = PyBytes_AS_STRING(py_value);
+                }
+                if (c_value != NULL) {
+                    m_message += std::string(c_value);
+                }
                 Py_DECREF(py_type);
                 Py_DECREF(py_value);
             }

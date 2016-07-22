@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-* Version: 1.1.0.dev1 (19 July 2016)
+* Version: 1.1.0.dev1 (22 July 2016)
 * Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 [![Build Status](https://cta-jenkins.irap.omp.eu/buildStatus/icon?job=gammalib-integrate-os)](https://cta-jenkins.irap.omp.eu/job/gammalib-integrate-os/)

@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-21 July 2016
+22 July 2016
 
 
 1. Introduction
@@ -357,6 +357,11 @@ be needed for response computation.
 ---------------
 A GTestSuite::test_value() method has been added for strings to simplify the
 writing of test cases for string comparison (#1772).
+
+The Python interface for handling of SWIG exceptions is now also compatible
+with Python 3, hence there should be no longer "basic_string ::_S_construct
+null not valid" messages when errors occur in the SWIG interface under
+Python 3.
 
 
 18. Multi-wavelength interface
