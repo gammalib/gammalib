@@ -39,8 +39,22 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralSuperExpPlaw  g_spectral_supexpplaw_seed;
-const GModelSpectralRegistry      g_spectral_supexpplaw_registry(&g_spectral_supexpplaw_seed);
+const GModelSpectralSuperExpPlaw g_spectral_seplaw_seed1("SuperExponentialCutoffPowerLaw",
+                                                         "Prefactor",
+                                                         "Index1",
+                                                         "PivotEnergy",
+                                                         "CutoffEnergy",
+                                                         "Index2");
+const GModelSpectralRegistry     g_spectral_seplaw_registry1(&g_spectral_seplaw_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralSuperExpPlaw g_spectral_seplaw_seed2("PLSuperExpCutoff",
+                                                         "Prefactor",
+                                                         "Index1",
+                                                         "Scale",
+                                                         "Cutoff",
+                                                         "Index2");
+const GModelSpectralRegistry     g_spectral_seplaw_registry2(&g_spectral_seplaw_seed2);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_MC     "GModelSpectralSuperExpPlaw::mc(GEnergy&, GEnergy&, GTime&,"\
@@ -68,6 +82,42 @@ GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(void) : GModelSpectral()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] prefactor Name of prefactor parameter.
+ * @param[in] index1 Name of index1 parameter.
+ * @param[in] pivot Name of pivot parameter.
+ * @param[in] cutoff Name of cutoff parameter.
+ * @param[in] index2 Name of index2 parameter.
+ ***************************************************************************/
+GModelSpectralSuperExpPlaw::GModelSpectralSuperExpPlaw(const std::string& type,
+                                                       const std::string& prefactor,
+                                                       const std::string& index1,
+                                                       const std::string& pivot,
+                                                       const std::string& cutoff,
+                                                       const std::string& index2) :
+                            GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(prefactor);
+    m_index1.name(index1);
+    m_pivot.name(pivot);
+    m_ecut.name(cutoff);
+    m_index2.name(index2);
 
     // Return
     return;
@@ -588,62 +638,25 @@ GEnergy GModelSpectralSuperExpPlaw::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing power law model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::invalid_value
- *            Model parameters not found in XML element.
- *
- * Reads the spectral information from an XML element. The format of the XML
- * elements is
- *
- *     <spectrum type="PLSuperExpCutoff">
- *       <parameter name="Prefactor"   ../>
- *       <parameter name="Index1"      ../>
- *       <parameter name="Cutoff"      ../>
- *       <parameter name="Index2"      ../>
- *       <parameter name="PivotEnergy" ../>
- *     </spectrum>
+ * Reads the spectral information from an XML element.
  ***************************************************************************/
 void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
 {
-    // If "PivotEnergy" parameter exists then read parameter from this
-    // XML element
-    if (gammalib::xml_has_par(xml, "PivotEnergy")) {
-        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "PivotEnergy");
-        m_pivot.read(*par);
-    }
-
-    // ... otherwise try reading parameter from "Scale" parameter
-    #if defined(G_LEGACY_XML_FORMAT)
-    else if (gammalib::xml_has_par(xml, "Scale")) {
-        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Scale");
-        m_pivot.read(*par);
-    }
-    #endif
-
-    // ... otherwise throw an exception
-    else {
-        #if defined(G_LEGACY_XML_FORMAT)
-        std::string msg = "Super exponentially cutoff power law model requires "
-                          "either \"PivotEnergy\" or \"Scale\" parameter.";
-        #else
-        std::string msg = "Super exponentially cutoff power law model requires "
-                          "\"PivotEnergy\" parameter.";
-        #endif
-        throw GException::invalid_value(G_READ, msg);
-    }
-
-    // Get remaining XML parameters
-    const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "Prefactor");
-    const GXmlElement* index1    = gammalib::xml_get_par(G_READ, xml, "Index1");
-    const GXmlElement* cutoff    = gammalib::xml_get_par(G_READ, xml, "Cutoff");
-    const GXmlElement* index2    = gammalib::xml_get_par(G_READ, xml, "Index2");
+    // Get parameter pointers
+    const GXmlElement* norm   = gammalib::xml_get_par(G_READ, xml, m_norm.name());
+    const GXmlElement* index1 = gammalib::xml_get_par(G_READ, xml, m_index1.name());
+    const GXmlElement* index2 = gammalib::xml_get_par(G_READ, xml, m_index2.name());
+    const GXmlElement* ecut   = gammalib::xml_get_par(G_READ, xml, m_ecut.name());
+    const GXmlElement* pivot  = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
 
     // Read parameters
-    m_norm.read(*prefactor);
+    m_norm.read(*norm);
     m_index1.read(*index1);
-    m_ecut.read(*cutoff);
     m_index2.read(*index2);
+    m_ecut.read(*ecut);
+    m_pivot.read(*pivot);
 
     // Return
     return;
@@ -653,21 +666,12 @@ void GModelSpectralSuperExpPlaw::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "ExpCutoff"
+ *            Existing XML element is not of the expected type.
  *
- * Writes the spectral information into an XML element. The format of the XML
- * element is
- *
- *     <spectrum type="PLSuperExpCutoff">
- *       <parameter name="Prefactor"   ../>
- *       <parameter name="Index1"      ../>
- *       <parameter name="Cutoff"      ../>
- *       <parameter name="Index2"      ../>
- *       <parameter name="PivotEnergy" ../>
- *     </spectrum>
+ * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralSuperExpPlaw::write(GXmlElement& xml) const
 {
@@ -743,6 +747,9 @@ std::string GModelSpectralSuperExpPlaw::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralSuperExpPlaw::init_members(void)
 {
+    // Initialise model type
+    m_type = "SuperExponentialCutoffPowerLaw";
+
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Prefactor");
@@ -766,7 +773,7 @@ void GModelSpectralSuperExpPlaw::init_members(void)
 
     // Initialise cut off energy
     m_ecut.clear();
-    m_ecut.name("Cutoff");
+    m_ecut.name("CutoffEnergy");
     m_ecut.unit("MeV");
     m_ecut.scale(1.0);
     m_ecut.value(1000.0);       // default: 1000.0
@@ -790,7 +797,7 @@ void GModelSpectralSuperExpPlaw::init_members(void)
 	m_index2.name("Index2");
 	m_index2.scale(1.0);
 	m_index2.value(1.0);        // default: -2.0
-	m_index2.range(0.0,5.0); // range:   [-10,+10]
+	m_index2.range(0.0,5.0);    // range:   [-10,+10]
 	m_index2.free();
 	m_index2.gradient(0.0);
 	m_index2.has_grad(true);
@@ -834,6 +841,7 @@ void GModelSpectralSuperExpPlaw::init_members(void)
 void GModelSpectralSuperExpPlaw::copy_members(const GModelSpectralSuperExpPlaw& model)
 {
     // Copy members
+    m_type   = model.m_type;
     m_norm   = model.m_norm;
     m_index1 = model.m_index1;
     m_ecut   = model.m_ecut;

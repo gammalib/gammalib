@@ -59,6 +59,7 @@ class GModelSpectralConst : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralConst(void);
+    GModelSpectralConst(const std::string& type, const std::string& value);
     explicit GModelSpectralConst(const GXmlElement& xml);
     explicit GModelSpectralConst(const double& value);
     GModelSpectralConst(const GModelSpectralConst& model);
@@ -99,7 +100,8 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_norm;  //!< Normalization factor
+    std::string m_type;     //!< Model type
+    GModelPar   m_norm;     //!< Normalization factor
 };
 
 
@@ -118,14 +120,14 @@ std::string GModelSpectralConst::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "ConstantValue".
+ * @return Model type.
  *
  * Returns the type of the constant spectral model.
  ***************************************************************************/
 inline
 std::string GModelSpectralConst::type(void) const
 {
-    return "ConstantValue";
+    return (m_type);
 }
 
 

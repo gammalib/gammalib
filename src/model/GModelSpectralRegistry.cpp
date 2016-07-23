@@ -212,25 +212,71 @@ GModelSpectral* GModelSpectralRegistry::alloc(const GXmlElement& xml) const
     // Initialise spectral model
     GModelSpectral* model = NULL;
 
-    // Search for model type in registry
+    // Initialise missing parameters string
+    std::string missing = "";
+
+    // Search for appropriate model in registry
     for (int i = 0; i < size(); ++i) {
+
+        // If an appropriate model type was found then check the model
+        // parameters
         if (models()[i]->type() == xml.attribute("type")) {
+
+            // Check if all required parameters are present. Put all missing
+            // parameters as a comma separated list in the "missing" string.
+            // If at least one parameter is missing the "found" flag will be
+            // set to "false".
+            bool found = true;
+            for (int k = 0; k < models()[i]->size(); ++k) {
+                if (!gammalib::xml_has_par(xml, (*(models()[i]))[k].name())) {
+                    if (missing.length() > 0) {
+                        missing += " ,";
+                    }
+                    missing += "\""+(*(models()[i]))[k].name()+"\"";
+                    found = false;
+                }
+            }
+
+            // If parameters are missing then check the next model
+            if (!found) {
+                continue;
+            }
+
+            // No parameters are missing. We thus have the appropriate
+            // model and can break now.
             model = models()[i]->clone();
             break;
-        }
-    }
+
+        } // endif: appropriate type found
+
+    } // endfor: looped over models
 
     // If no model has been found then throw an exception
     if (model == NULL) {
-        std::string msg = "Spectral model of type \""+xml.attribute("type")+
-                          "\" not found in registry. Possible spectral model "
-                          "types are:";
-        for (int i = 0; i < size(); ++i) {
-            msg += " \""+models()[i]->type()+"\"";
+
+        // Initialise exception message
+        std::string msg = "";
+
+        // If the type has been found then we had missing parameters
+        if (missing.length() > 0) {
+            msg = "Spectral model of type \""+xml.attribute("type")+ "\" found "
+                  "but the following parameters are missing: "+missing;
         }
-        msg += ".";
+
+        // ... otherwise the appropriate type was not found
+        else {
+            msg = "Spectral model of type \""+xml.attribute("type")+ "\" not "
+                  "found in registry. Possible spectral model types are:";
+            for (int i = 0; i < size(); ++i) {
+                msg += " \""+models()[i]->type()+"\"";
+            }
+            msg += ".";
+        }
+
+        // Throw exception
         throw GException::invalid_value(G_ALLOC, msg);
-    }
+
+    } // endif: model was not found
 
     // Read model from XML element
     model->read(xml);

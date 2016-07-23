@@ -39,11 +39,19 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralPlaw2    g_spectral_plaw2_seed;
-const GModelSpectralRegistry g_spectral_plaw2_registry(&g_spectral_plaw2_seed);
+const GModelSpectralPlaw2    g_spectral_plaw2_seed1("PowerLaw",
+                                                    "PhotonFlux",
+                                                    "Index",
+                                                    "LowerLimit",
+                                                    "UpperLimit");
+const GModelSpectralRegistry g_spectral_plaw2_registry1(&g_spectral_plaw2_seed1);
 #if defined(G_LEGACY_XML_FORMAT)
-const GModelSpectralPlaw2    g_spectral_plaw2_legacy_seed(true, "PowerLaw2");
-const GModelSpectralRegistry g_spectral_plaw2_legacy_registry(&g_spectral_plaw2_legacy_seed);
+const GModelSpectralPlaw2    g_spectral_plaw2_seed2("PowerLaw2",
+                                                    "Integral",
+                                                    "Index",
+                                                    "LowerLimit",
+                                                    "UpperLimit");
+const GModelSpectralRegistry g_spectral_plaw2_registry2(&g_spectral_plaw2_seed2);
 #endif
 
 /* __ Method name definitions ____________________________________________ */
@@ -82,15 +90,19 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(void) : GModelSpectral()
 
 
 /***********************************************************************//**
- * @brief Model type constructor
+ * @brief Model type and parameter name constructor
  *
- * @param[in] dummy Dummy flag.
  * @param[in] type Model type.
- *
- * Constructs empty power law photon flux model by specifying a model @p type.
+ * @param[in] integral Name of integral parameter.
+ * @param[in] index Name of index parameter.
+ * @param[in] emin Name of emin parameter.
+ * @param[in] emax Name of emax parameter.
  ***************************************************************************/
-GModelSpectralPlaw2::GModelSpectralPlaw2(const bool&        dummy,
-                                         const std::string& type) :
+GModelSpectralPlaw2::GModelSpectralPlaw2(const std::string& type,
+                                         const std::string& integral,
+                                         const std::string& index,
+                                         const std::string& emin,
+                                         const std::string& emax) :
                      GModelSpectral()
 {
     // Initialise members
@@ -98,6 +110,12 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const bool&        dummy,
 
     // Set model type
     m_type = type;
+
+    // Set parameter names
+    m_integral.name(integral);
+    m_index.name(index);
+    m_emin.name(emin);
+    m_emax.name(emax);
 
     // Return
     return;
@@ -620,56 +638,18 @@ GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin,
  *
  * @param[in] xml XML element.
  *
- * @exception GException::invalid_value
- *            Model parameters not found in XML element.
- *
- * Reads the spectral information from an XML element. The format of the XML
- * elements is
- *
- *     <spectrum type="PowerLawPhotonFlux">
- *       <parameter name="PhotonFlux" ../>
- *       <parameter name="Index"      ../>
- *       <parameter name="LowerLimit" ../>
- *       <parameter name="UpperLimit" ../>
- *     </spectrum>
- *
- * @todo Add parameter validity check
+ * Reads the spectral information from an XML element.
  ***************************************************************************/
 void GModelSpectralPlaw2::read(const GXmlElement& xml)
 {
-    // If "PhotonFlux" parameter exists then read parameter from this
-    // XML element
-    if (gammalib::xml_has_par(xml, "PhotonFlux")) {
-        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "PhotonFlux");
-        m_integral.read(*par);
-    }
-
-    // ... otherwise try reading parameter from "Integral" parameter
-    #if defined(G_LEGACY_XML_FORMAT)
-    else if (gammalib::xml_has_par(xml, "Integral")) {
-        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Integral");
-        m_integral.read(*par);
-    }
-    #endif
-
-    // ... otherwise throw an exception
-    else {
-        #if defined(G_LEGACY_XML_FORMAT)
-        std::string msg = "Power law photon flux model requires either "
-                          "\"PhotonFlux\" or \"Integral\" parameter.";
-        #else
-        std::string msg = "Power law photon flux model requires "
-                          "\"PhotonFlux\" parameter.";
-        #endif
-        throw GException::invalid_value(G_READ, msg);
-    }
-
-    // Get remaining XML parameters
-    const GXmlElement* index = gammalib::xml_get_par(G_READ, xml, "Index");
-    const GXmlElement* emin  = gammalib::xml_get_par(G_READ, xml, "LowerLimit");
-    const GXmlElement* emax  = gammalib::xml_get_par(G_READ, xml, "UpperLimit");
+    // Get parameter pointers
+    const GXmlElement* integral = gammalib::xml_get_par(G_READ, xml, m_integral.name());
+    const GXmlElement* index    = gammalib::xml_get_par(G_READ, xml, m_index.name());
+    const GXmlElement* emin     = gammalib::xml_get_par(G_READ, xml, m_emin.name());
+    const GXmlElement* emax     = gammalib::xml_get_par(G_READ, xml, m_emax.name());
 
     // Read parameters
+    m_integral.read(*integral);
     m_index.read(*index);
     m_emin.read(*emin);
     m_emax.read(*emax);
@@ -686,20 +666,8 @@ void GModelSpectralPlaw2::read(const GXmlElement& xml)
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "PowerLaw2"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
- * Writes the spectral information into an XML element. The format of the XML
- * element is
- *
- *     <spectrum type="PowerLawPhotonFlux">
- *       <parameter name="PhotonFlux" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="UpperLimit" scale=".." value=".." min=".." max=".." free=".."/>
- *     </spectrum>
+ * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralPlaw2::write(GXmlElement& xml) const
 {
@@ -714,59 +682,17 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
               "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 4 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"PhotonFlux\""));
-        xml.append(GXmlElement("parameter name=\"Index\""));
-        xml.append(GXmlElement("parameter name=\"LowerLimit\""));
-        xml.append(GXmlElement("parameter name=\"UpperLimit\""));
-    }
+    // Get XML parameters
+    GXmlElement* integral = gammalib::xml_need_par(G_WRITE, xml, m_integral.name());
+    GXmlElement* index    = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
+    GXmlElement* emin     = gammalib::xml_need_par(G_WRITE, xml, m_emin.name());
+    GXmlElement* emax     = gammalib::xml_need_par(G_WRITE, xml, m_emax.name());
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Power law 2 spectral model requires exactly 4 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "PhotonFlux") {
-            npar[0]++;
-            m_integral.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            npar[1]++;
-            m_index.write(*par);
-        }
-
-        // Handle lower limit
-        else if (par->attribute("name") == "LowerLimit") {
-            m_emin.write(*par);
-            npar[2]++;
-        }
-
-        // Handle lower limit
-        else if (par->attribute("name") == "UpperLimit") {
-            m_emax.write(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Power law 2 spectral model requires \"PhotonFlux\", \"Index\","
-              " \"LowerLimit\" and \"UpperLimit\" parameters.");
-    }
+    // Write parameters
+    m_integral.write(*integral);
+    m_index.write(*index);
+    m_emin.write(*emin);
+    m_emax.write(*emax);
 
     // Return
     return;
@@ -816,7 +742,7 @@ std::string GModelSpectralPlaw2::print(const GChatter& chatter) const
 void GModelSpectralPlaw2::init_members(void)
 {
     // Initialise model type
-    m_type = "PowerLawPhotonFlux";
+    m_type = "PowerLaw";
 
     // Initialise integral flux
     m_integral.clear();

@@ -32,7 +32,6 @@
 #include "GModelSpectral.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
-//#include "GXmlElement.hpp"
 
 /* __ Forward declarations _______________________________________________ */
 class GRan;
@@ -76,11 +75,15 @@ class GModelSpectralPlaw2 : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw2(void);
-    GModelSpectralPlaw2(const bool& dummy, const std::string& type);
-    explicit GModelSpectralPlaw2(const double&  integral,
-                                 const double&  index,
-                                 const GEnergy& emin,
-                                 const GEnergy& emax);
+    GModelSpectralPlaw2(const std::string& type,
+                        const std::string& integral,
+                        const std::string& index,
+                        const std::string& emin,
+                        const std::string& emax);
+    GModelSpectralPlaw2(const double&  integral,
+                        const double&  index,
+                        const GEnergy& emin,
+                        const GEnergy& emax);
     explicit GModelSpectralPlaw2(const GXmlElement& xml);
     GModelSpectralPlaw2(const GModelSpectralPlaw2& model);
     virtual ~GModelSpectralPlaw2(void);

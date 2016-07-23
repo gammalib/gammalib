@@ -62,9 +62,13 @@ class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    explicit GModelSpectralPlaw(const double&  prefactor,
-                                const double&  index,
-                                const GEnergy& pivot);
+    GModelSpectralPlaw(const std::string& type,
+                       const std::string& prefactor,
+                       const std::string& index,
+                       const std::string& pivot);
+    GModelSpectralPlaw(const double&  prefactor,
+                       const double&  index,
+                       const GEnergy& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
@@ -110,9 +114,10 @@ protected:
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
-    GModelPar m_norm;                //!< Normalization factor
-    GModelPar m_index;               //!< Spectral index
-    GModelPar m_pivot;               //!< Pivot energy
+    std::string m_type;                //!< Model type
+    GModelPar   m_norm;                //!< Normalization factor
+    GModelPar   m_index;               //!< Spectral index
+    GModelPar   m_pivot;               //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;     //!< Last energy value
@@ -145,14 +150,14 @@ std::string GModelSpectralPlaw::classname(void) const
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "PowerLaw".
+ * @return Model type.
  *
  * Returns the type of the spectral power law model.
  ***************************************************************************/
 inline
 std::string GModelSpectralPlaw::type(void) const
 {
-    return "PowerLaw";
+    return (m_type);
 }
 
 

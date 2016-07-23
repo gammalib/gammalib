@@ -39,8 +39,26 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralLogParabola g_spectral_logparabola_seed;
-const GModelSpectralRegistry    g_spectral_logparabola_registry(&g_spectral_logparabola_seed);
+const GModelSpectralLogParabola g_spectral_logp_seed1("LogParabola",
+                                                      "Prefactor",
+                                                      "Index",
+                                                      "PivotEnergy",
+                                                      "Curvature");
+const GModelSpectralRegistry    g_spectral_logp_registry1(&g_spectral_logp_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralLogParabola g_spectral_logp_seed2("LogParabola",
+                                                      "norm",
+                                                      "alpha",
+                                                      "Eb",
+                                                      "beta");
+const GModelSpectralLogParabola g_spectral_logp_seed3("LogParabola",
+                                                      "Prefactor",
+                                                      "Index",
+                                                      "Scale",
+                                                      "Curvature");
+const GModelSpectralRegistry    g_spectral_logp_registry2(&g_spectral_logp_seed2);
+const GModelSpectralRegistry    g_spectral_logp_registry3(&g_spectral_logp_seed3);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX          "GModelSpectralLogParabola::flux(GEnergy&, GEnergy&)"
@@ -70,6 +88,39 @@ GModelSpectralLogParabola::GModelSpectralLogParabola(void) : GModelSpectral()
 {
     // Initialise private members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] prefactor Name of prefactor parameter.
+ * @param[in] index Name of index parameter.
+ * @param[in] pivot Name of pivot parameter.
+ * @param[in] curvature Name of curvature parameter.
+ ***************************************************************************/
+GModelSpectralLogParabola::GModelSpectralLogParabola(const std::string& type,
+                                                     const std::string& prefactor,
+                                                     const std::string& index,
+                                                     const std::string& pivot,
+                                                     const std::string& curvature) :
+                           GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(prefactor);
+    m_index.name(index);
+    m_pivot.name(pivot);
+    m_curvature.name(curvature);
 
     // Return
     return;
@@ -569,93 +620,34 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing logparabola model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
- *
- * Read the spectral log parabola information from an XML element. The format
- * of the XML elements is
- *
- *     <spectrum type="LogParabola">
- *       <parameter name="Prefactor"   ../>
- *       <parameter name="Index"       ../>
- *       <parameter name="Curvature"   ../>
- *       <parameter name="PivotEnergy" ../>
- *     </spectrum>
+ * Read the spectral log parabola information from an XML element.
  ***************************************************************************/
 void GModelSpectralLogParabola::read(const GXmlElement& xml)
 {
-    // If standard parameters exists then read these parameters from the XML
-    // element
-    if (gammalib::xml_has_par(xml, "Prefactor") &&
-        gammalib::xml_has_par(xml, "Index") &&
-        gammalib::xml_has_par(xml, "Curvature") &&
-        gammalib::xml_has_par(xml, "PivotEnergy")) {
-        const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "Prefactor");
-        const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "Index");
-        const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, "Curvature");
-        const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, "PivotEnergy");
-        m_norm.read(*prefactor);
-        m_index.read(*index);
-        m_curvature.read(*curvature);
-        m_pivot.read(*pivot);
-    }
-    else if (gammalib::xml_has_par(xml, "Prefactor") &&
-             gammalib::xml_has_par(xml, "Index") &&
-             gammalib::xml_has_par(xml, "Curvature") &&
-             gammalib::xml_has_par(xml, "Scale")) {
-        const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "Prefactor");
-        const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "Index");
-        const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, "Curvature");
-        const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, "Scale");
-        m_norm.read(*prefactor);
-        m_index.read(*index);
-        m_curvature.read(*curvature);
-        m_pivot.read(*pivot);
-    }
+    // Get parameter pointers
+    const GXmlElement* norm      = gammalib::xml_get_par(G_READ, xml, m_norm.name());
+    const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, m_index.name());
+    const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, m_curvature.name());
+    const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, m_pivot.name());
 
-    // ... otherwise try reading parameter from legacy parameters. Note that
-    // "alpha" and "beta" are negated, hence we negate the parameters and
-    // boundaries after reading
-    #if defined(G_LEGACY_XML_FORMAT)
-    else if (gammalib::xml_has_par(xml, "norm") &&
-             gammalib::xml_has_par(xml, "alpha") &&
-             gammalib::xml_has_par(xml, "beta") &&
-             gammalib::xml_has_par(xml, "Eb")) {
-        const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "norm");
-        const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "alpha");
-        const GXmlElement* curvature = gammalib::xml_get_par(G_READ, xml, "beta");
-        const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, "Eb");
-        m_norm.read(*prefactor);
-        m_index.read(*index);
+    // Read parameters
+    m_norm.read(*norm);
+    m_index.read(*index);
+    m_curvature.read(*curvature);
+    m_pivot.read(*pivot);
+
+    // In case that legacy parameters were used we need to negate the index
+    // and curvature because they are differently defined
+    if (gammalib::xml_has_par(xml, "alpha") &&
+        gammalib::xml_has_par(xml, "beta")) {
         m_index.min(-m_index.max());
         m_index.max(-m_index.min());
         m_index.value(-m_index.value());
-        m_curvature.read(*curvature);
         m_curvature.min(-m_curvature.max());
         m_curvature.max(-m_curvature.min());
         m_curvature.value(-m_curvature.value());
-        m_pivot.read(*pivot);
-    }
-    #endif
-
-    // ... otherwise throw an exception
-    else {
-        #if defined(G_LEGACY_XML_FORMAT)
-        std::string msg = "Log parabola model requires either "
-                          "\"Prefactor\", \"Index\", \"Curvature\" and "
-                          "\"PivotEnergy\" parameters or ";
-                          "\"norm\", \"alpha\", \"beta\" and "
-                          "\"Eb\" parameters.";
-        #else
-        std::string msg = "Log parabola model requires "
-                          "\"Prefactor\", \"Index\", \"Curvature\" and "
-                          "\"PivotEnergy\" parameters.";
-        #endif
-        throw GException::invalid_value(G_READ, msg);
     }
 
     // Return
@@ -666,24 +658,12 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "LogParabola"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
- * Write the LogParabola model information into an XML element. The format
- * of the XML elements is
- *
- *     <spectrum type="LogParabola">
- *       <parameter name="Prefactor"   ../>
- *       <parameter name="Index"       ../>
- *       <parameter name="Curvature"   ../>
- *       <parameter name="PivotEnergy" ../>
- *     </spectrum>
+ * Write the LogParabola model information into an XML element.
  ***************************************************************************/
 void GModelSpectralLogParabola::write(GXmlElement& xml) const
 {
@@ -771,6 +751,9 @@ std::string GModelSpectralLogParabola::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralLogParabola::init_members(void)
 {
+    // Initialise model type
+    m_type = "LogParabola";
+
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Prefactor");
@@ -850,10 +833,11 @@ void GModelSpectralLogParabola::init_members(void)
 void GModelSpectralLogParabola::copy_members(const GModelSpectralLogParabola& model)
 {
     // Copy members
-    m_norm  = model.m_norm;
-    m_index = model.m_index;
+    m_type      = model.m_type;
+    m_norm      = model.m_norm;
+    m_index     = model.m_index;
     m_curvature = model.m_curvature;
-    m_pivot = model.m_pivot;
+    m_pivot     = model.m_pivot;
 
     // Set parameter pointer(s)
     m_pars.clear();

@@ -37,8 +37,12 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralConst    g_spectral_const_seed;
-const GModelSpectralRegistry g_spectral_const_registry(&g_spectral_const_seed);
+const GModelSpectralConst    g_spectral_const_seed1("Constant", "Normalization");
+const GModelSpectralRegistry g_spectral_const_registry1(&g_spectral_const_seed1);
+#if defined(G_LEGACY_XML_FORMAT)
+const GModelSpectralConst    g_spectral_const_seed2("ConstantValue", "Value");
+const GModelSpectralRegistry g_spectral_const_registry2(&g_spectral_const_seed2);
+#endif
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralConst::flux(GEnergy&, GEnergy&)"
@@ -67,6 +71,30 @@ GModelSpectralConst::GModelSpectralConst(void) : GModelSpectral()
 {
     // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Model type and parameter name constructor
+ *
+ * @param[in] type Model type.
+ * @param[in] value Name of value parameter.
+ ***************************************************************************/
+GModelSpectralConst::GModelSpectralConst(const std::string& type,
+                                         const std::string& value) :
+                     GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
+
+    // Set parameter names
+    m_norm.name(value);
 
     // Return
     return;
@@ -412,45 +440,17 @@ GEnergy GModelSpectralConst::mc(const GEnergy& emin,
 /***********************************************************************//**
  * @brief Read model from XML element
  *
- * @param[in] xml XML element containing power law model information.
+ * @param[in] xml XML element.
  *
- * @exception GException::invalid_value
- *            Model parameters not found in XML element.
- *
- * Reads the spectral information from an XML element having the format
- *
- *     <spectrum type="ConstantValue">
- *       <parameter name="Normalization" ../>
- *     </spectrum>
+ * Reads the spectral information from an XML element.
  ***************************************************************************/
 void GModelSpectralConst::read(const GXmlElement& xml)
 {
-    // If "Normalization" parameter exists then read parameter from this
-    // XML element
-    if (gammalib::xml_has_par(xml, "Normalization")) {
-        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Normalization");
-        m_norm.read(*par);
-    }
+    // Get parameter pointers
+    const GXmlElement* norm = gammalib::xml_get_par(G_READ, xml, m_norm.name());
 
-    // ... otherwise try reading parameter from "Value" parameter
-    #if defined(G_LEGACY_XML_FORMAT)
-    else if (gammalib::xml_has_par(xml, "Value")) {
-        const GXmlElement* par = gammalib::xml_get_par(G_READ, xml, "Value");
-        m_norm.read(*par);
-    }
-    #endif
-
-    // ... otherwise throw an exception
-    else {
-        #if defined(G_LEGACY_XML_FORMAT)
-        std::string msg = "Spectral constant model requires either "
-                          "\"Normalization\" or \"Value\" parameter.";
-        #else
-        std::string msg = "Spectral constant model requires \"Normalization\" "
-                          "parameter.";
-        #endif
-        throw GException::invalid_value(G_READ, msg);
-    }
+    // Read parameters
+    m_norm.read(*norm);
 
     // Return
     return;
@@ -460,16 +460,12 @@ void GModelSpectralConst::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write model into XML element
  *
- * @param[in] xml XML element into which model information is written.
+ * @param[in] xml XML element.
  *
  * @exception GException::model_invalid_spectral
  *            Existing XML element is not of type "ConstantValue"
  *
- * Writes the spectral information into an XML element with the format
- *
- *     <spectrum type="ConstantValue">
- *       <parameter name="Normalization" scale="1" min="0" max="1000" value="1" free="1"/>
- *     </spectrum>
+ * Writes the spectral information into an XML element.
  ***************************************************************************/
 void GModelSpectralConst::write(GXmlElement& xml) const
 {
@@ -537,6 +533,9 @@ std::string GModelSpectralConst::print(const GChatter& chatter) const
  ***************************************************************************/
 void GModelSpectralConst::init_members(void)
 {
+    // Initialise model type
+    m_type = "Constant";
+
     // Initialise constant normalisation
     m_norm.clear();
     m_norm.name("Normalization");
@@ -564,6 +563,7 @@ void GModelSpectralConst::init_members(void)
 void GModelSpectralConst::copy_members(const GModelSpectralConst& model)
 {
     // Copy members
+    m_type = model.m_type;
     m_norm = model.m_norm;
 
     // Set parameter pointer(s)

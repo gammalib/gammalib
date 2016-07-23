@@ -8,7 +8,7 @@
     </spatialModel>
   </source>
   <source type="DiffuseSource" name="Galactic_diffuse">
-    <spectrum type="ConstantValue">
+    <spectrum type="Constant">
       <parameter scale="1.0" name="Normalization" min="0.0" max="1000.0" value="1.0" free="1"/>
     </spectrum>
     <spatialModel type="DiffuseMapCube" file="test_cube.fits">
@@ -16,7 +16,7 @@
     </spatialModel>
   </source>
   <source type="PointSource" name="Crab">
-    <spectrum type="PowerLawPhotonFlux">
+    <spectrum type="PowerLaw">
       <parameter scale="1e-07" name="PhotonFlux" min="1e-05" max="1000.0"    value="1.0" free="1"/>
       <parameter scale="1.0"   name="Index"      min="-5.0"  max="-0.1"      value="-2.0" free="1"/>
       <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>

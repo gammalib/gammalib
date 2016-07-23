@@ -1401,61 +1401,36 @@ void TestGModel::test_elliptical_gauss(void)
 void TestGModel::test_const(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralConst model;
-        test_assert(model.type() == "ConstantValue",
-                                    "Model type \"ConstantValue\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralConst model1;
+    test_value(model1.type(), "Constant", "Check void model type");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralConst model(3.0);
-        test_value(model.value(), 3.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralConst model2(3.0);
+    test_value(model2.value(), 3.0);
     
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                xml(m_xml_model_point_const);
-        GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralConst model(*element);
-        test_value(model.size(), 1);
-        test_assert(model.type() == "ConstantValue", "Expected \"ConstantValue\"");
-        test_value(model.value(), 5.7e-16);
+    // Test XML constructor
+    GXml                xml(m_xml_model_point_const);
+    GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralConst model3(*element);
+    test_value(model3.size(), 1);
+    test_value(model3.type(), "Constant", "Check model type");
+    test_value(model3.value(), 5.7e-16);
 
-        // Test value method
-        model.value(3.9e-16);
-        test_value(model.value(), 3.9e-16);
+    // Test value method
+    model3.value(3.9e-16);
+    test_value(model3.value(), 3.9e-16);
 
-        // Test operator access
-        const char* strarray[] = {"Normalization"};
-        for (int i = 0; i < 1; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Normalization"};
+    for (int i = 0; i < 1; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -1469,73 +1444,48 @@ void TestGModel::test_const(void)
 void TestGModel::test_gauss(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralGauss model;
-        test_assert(model.type() == "Gaussian",
-                                    "Model type \"Gaussian\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralGauss model1;
+    test_value(model1.type(), "Gaussian", "Check void model type");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralGauss model(1.0, GEnergy(42.0, "MeV"), GEnergy(0.5, "MeV"));
-        test_value(model.norm(), 1.0);
-        test_value(model.mean().MeV(), 42.0);
-        test_value(model.sigma().MeV(), 0.5);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralGauss model2(1.0, GEnergy(42.0, "MeV"), GEnergy(0.5, "MeV"));
+    test_value(model2.norm(), 1.0);
+    test_value(model2.mean().MeV(), 42.0);
+    test_value(model2.sigma().MeV(), 0.5);
 
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                xml(m_xml_model_point_gauss);
-        GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralGauss model(*element);
-        test_value(model.size(), 3);
-        test_assert(model.type() == "Gaussian", "Expected \"Gaussian\"");
-        test_value(model.norm(), 1.0e-10);
-        test_value(model.mean().MeV(), 5.0e6);
-        test_value(model.sigma().MeV(), 1.0e6);
+    // Test XML constructor
+    GXml                xml(m_xml_model_point_gauss);
+    GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralGauss model3(*element);
+    test_value(model3.size(), 3);
+    test_value(model3.type(), "Gaussian", "Check model type");
+    test_value(model3.norm(), 1.0e-10);
+    test_value(model3.mean().MeV(), 5.0e6);
+    test_value(model3.sigma().MeV(), 1.0e6);
 
-        // Test norm method
-        model.norm(2.3e-10);
-        test_value(model.norm(), 2.3e-10);
+    // Test norm method
+    model3.norm(2.3e-10);
+    test_value(model3.norm(), 2.3e-10);
 
-        // Test mean method
-        model.mean(GEnergy(1.5678, "TeV"));
-        test_value(model.mean().TeV(), 1.5678);
+    // Test mean method
+    model3.mean(GEnergy(1.5678, "TeV"));
+    test_value(model3.mean().TeV(), 1.5678);
 
-        // Test sigma method
-        model.sigma(GEnergy(0.1234, "TeV"));
-        test_value(model.sigma().TeV(), 0.1234);
+    // Test sigma method
+    model3.sigma(GEnergy(0.1234, "TeV"));
+    test_value(model3.sigma().TeV(), 0.1234);
 
-        // Test operator access
-        const char* strarray[] = {"Normalization", "Mean", "Sigma"};
-        for (int i = 0; i < 3; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Normalization", "Mean", "Sigma"};
+    for (int i = 0; i < 3; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -1549,75 +1499,50 @@ void TestGModel::test_gauss(void)
 void TestGModel::test_plaw(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralPlaw model;
-        test_assert(model.type() == "PowerLaw",
-                                    "Model type \"PowerLaw\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralPlaw model1;
+    test_value(model1.type(), "PowerLaw", "Check type of void model");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"));
-        test_value(model.prefactor(), 2.0);
-        test_value(model.index(), -2.1);
-        test_value(model.pivot().MeV(), 100.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralPlaw model2(2.0, -2.1, GEnergy(100.0, "MeV"));
+    test_value(model2.prefactor(), 2.0);
+    test_value(model2.index(), -2.1);
+    test_value(model2.pivot().MeV(), 100.0);
     
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml               xml(m_xml_model_point_plaw);
-        GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralPlaw model(*element);
-        test_value(model.size(), 3);
-        test_assert(model.type() == "PowerLaw", "Expected \"PowerLaw\"");
-        test_value(model.prefactor(), 5.7e-16);
-        test_value(model.index(), -2.48);
-        test_value(model.pivot().TeV(), 0.3);
+    // Test XML constructor
+    GXml               xml(m_xml_model_point_plaw);
+    GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralPlaw model3(*element);
+    test_value(model3.size(), 3);
+    test_value(model3.type(), "PowerLaw", "Check model type");
+    test_value(model3.prefactor(), 5.7e-16);
+    test_value(model3.index(), -2.48);
+    test_value(model3.pivot().TeV(), 0.3);
 
-        // Test prefactor method
-        model["Prefactor"].remove_range(); // To allow setting of any value
-        model.prefactor(3.9);
-        test_value(model.prefactor(), 3.9);
+    // Test prefactor method
+    model3["Prefactor"].remove_range(); // To allow setting of any value
+    model3.prefactor(3.9);
+    test_value(model3.prefactor(), 3.9);
 
-        // Test index method
-        model["Index"].remove_range(); // To allow setting of any value
-        model.index(2.1);
-        test_value(model.index(), 2.1);
+    // Test index method
+    model3["Index"].remove_range(); // To allow setting of any value
+    model3.index(2.1);
+    test_value(model3.index(), 2.1);
 
-        // Test pivot method
-        model["PivotEnergy"].remove_range(); // To allow setting of any value
-        model.pivot(GEnergy(10.0, "MeV"));
-        test_value(model.pivot().MeV(), 10.0);
+    // Test pivot method
+    model3["PivotEnergy"].remove_range(); // To allow setting of any value
+    model3.pivot(GEnergy(10.0, "MeV"));
+    test_value(model3.pivot().MeV(), 10.0);
 
-        // Test operator access
-        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy"};
-        for (int i = 0; i < 3; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Prefactor", "Index", "PivotEnergy"};
+    for (int i = 0; i < 3; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -1632,7 +1557,7 @@ void TestGModel::test_plaw2(void)
 {
     // Test void constructor
     GModelSpectralPlaw2 model1;
-    test_value(model1.type(), "PowerLawPhotonFlux", "Check type of void model.");
+    test_value(model1.type(), "PowerLaw", "Check type of void model");
 
     // Test value constructor
     GModelSpectralPlaw2 model2(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
@@ -1646,7 +1571,7 @@ void TestGModel::test_plaw2(void)
     GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
     GModelSpectralPlaw2 model3(*element);
     test_value(model3.size(), 4);
-    test_value(model3.type(), "PowerLawPhotonFlux", "Check model type.");
+    test_value(model3.type(), "PowerLaw", "Check model type");
     test_value(model3.integral(), 1.0e-7);
     test_value(model3.index(), -2.0);
     test_value(model3.emin().MeV(), 100.0);
@@ -1692,79 +1617,54 @@ void TestGModel::test_plaw2(void)
 void TestGModel::test_eplaw(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralExpPlaw model;
-        test_assert(model.type() == "ExpCutoff",
-                                    "Model type \"ExpCutoff\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralExpPlaw model1;
+    test_value(model1.type(), "ExponentialCutoffPowerLaw", "Check type of void model");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralExpPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"), GEnergy(1.0, "GeV"));
-        test_value(model.prefactor(), 2.0);
-        test_value(model.index(), -2.1);
-        test_value(model.pivot().MeV(), 100.0);
-        test_value(model.cutoff().GeV(), 1.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralExpPlaw model2(2.0, -2.1, GEnergy(100.0, "MeV"), GEnergy(1.0, "GeV"));
+    test_value(model2.prefactor(), 2.0);
+    test_value(model2.index(), -2.1);
+    test_value(model2.pivot().MeV(), 100.0);
+    test_value(model2.cutoff().GeV(), 1.0);
     
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                  xml(m_xml_model_point_eplaw);
-        GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralExpPlaw model(*element);
-        test_value(model.size(), 4);
-        test_assert(model.type() == "ExpCutoff", "Expected \"ExpCutoff\"");
-        test_value(model.prefactor(), 5.7e-16);
-        test_value(model.index(), -2.48);
-        test_value(model.pivot().TeV(), 0.3);
-        test_value(model.cutoff().TeV(), 1.0);
+    // Test XML constructor
+    GXml                  xml(m_xml_model_point_eplaw);
+    GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralExpPlaw model3(*element);
+    test_value(model3.size(), 4);
+    test_value(model3.type(), "ExponentialCutoffPowerLaw", "Check model type");
+    test_value(model3.prefactor(), 5.7e-16);
+    test_value(model3.index(), -2.48);
+    test_value(model3.pivot().TeV(), 0.3);
+    test_value(model3.cutoff().TeV(), 1.0);
 
-        // Test prefactor method
-        model.prefactor(2.3e-16);
-        test_value(model.prefactor(), 2.3e-16);
+    // Test prefactor method
+    model3.prefactor(2.3e-16);
+    test_value(model3.prefactor(), 2.3e-16);
 
-        // Test index method
-        model.index(-2.6);
-        test_value(model.index(), -2.6);
+    // Test index method
+    model3.index(-2.6);
+    test_value(model3.index(), -2.6);
 
-        // Test pivot method
-        model.pivot(GEnergy(0.5, "TeV"));
-        test_value(model.pivot().TeV(), 0.5);
+    // Test pivot method
+    model3.pivot(GEnergy(0.5, "TeV"));
+    test_value(model3.pivot().TeV(), 0.5);
 
-        // Test cutoff method
-        model.cutoff(GEnergy(10.0, "TeV"));
-        test_value(model.cutoff().TeV(), 10.0);
+    // Test cutoff method
+    model3.cutoff(GEnergy(10.0, "TeV"));
+    test_value(model3.cutoff().TeV(), 10.0);
 
-        // Test operator access
-        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Cutoff"};
-        for (int i = 0; i < 4; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "CutoffEnergy"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -1778,86 +1678,62 @@ void TestGModel::test_eplaw(void)
 void TestGModel::test_supeplaw(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralSuperExpPlaw model;
-        test_assert(model.type() == "PLSuperExpCutoff",
-                                    "Model type \"PLSuperExpCutoff\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralSuperExpPlaw model1;
+    test_value(model1.type(), "SuperExponentialCutoffPowerLaw", "Check void mode type");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralSuperExpPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"),
-                                         GEnergy(1.0, "GeV"), 1.1);
-        test_value(model.prefactor(), 2.0);
-        test_value(model.index1(), -2.1);
-        test_value(model.pivot().MeV(), 100.0);
-        test_value(model.cutoff().GeV(), 1.0);
-        test_value(model.index2(), 1.1);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralSuperExpPlaw model2(2.0, -2.1, GEnergy(100.0, "MeV"),
+                                      GEnergy(1.0, "GeV"), 1.1);
+    test_value(model2.prefactor(), 2.0);
+    test_value(model2.index1(), -2.1);
+    test_value(model2.pivot().MeV(), 100.0);
+    test_value(model2.cutoff().GeV(), 1.0);
+    test_value(model2.index2(), 1.1);
     
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                       xml(m_xml_model_point_supeplaw);
-        GXmlElement*               element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralSuperExpPlaw model(*element);
-        test_value(model.size(), 5);
-        test_assert(model.type() == "PLSuperExpCutoff", "Expected \"PLSuperExpCutoff\"");
-        test_value(model.prefactor(), 1e-16);
-        test_value(model.index1(), -2.0);
-        test_value(model.pivot().TeV(), 1.0);
-        test_value(model.cutoff().TeV(), 1.0);
-        test_value(model.index2(), 1.5);
+    // Test XML constructor
+    GXml                       xml(m_xml_model_point_supeplaw);
+    GXmlElement*               element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralSuperExpPlaw model3(*element);
+    test_value(model3.size(), 5);
+    test_value(model3.type(), "SuperExponentialCutoffPowerLaw", "Check model type");
+    test_value(model3.prefactor(), 1e-16);
+    test_value(model3.index1(), -2.0);
+    test_value(model3.pivot().TeV(), 1.0);
+    test_value(model3.cutoff().TeV(), 1.0);
+    test_value(model3.index2(), 1.5);
 
-        // Test prefactor method
-        model.prefactor(2.3e-16);
-        test_value(model.prefactor(), 2.3e-16);
+    // Test prefactor method
+    model3.prefactor(2.3e-16);
+    test_value(model3.prefactor(), 2.3e-16);
 
-        // Test index1 method
-        model.index1(-2.6);
-        test_value(model.index1(), -2.6);
+    // Test index1 method
+    model3.index1(-2.6);
+    test_value(model3.index1(), -2.6);
 
-        // Test pivot method
-        model.pivot(GEnergy(0.5, "TeV"));
-        test_value(model.pivot().TeV(), 0.5);
+    // Test pivot method
+    model3.pivot(GEnergy(0.5, "TeV"));
+    test_value(model3.pivot().TeV(), 0.5);
 
-        // Test cutoff method
-        model.cutoff(GEnergy(10.0, "TeV"));
-        test_value(model.cutoff().TeV(), 10.0);
+    // Test cutoff method
+    model3.cutoff(GEnergy(10.0, "TeV"));
+    test_value(model3.cutoff().TeV(), 10.0);
 
-        // Test index2 method
-        model.index2(1.7);
-        test_value(model.index2(), 1.7);
+    // Test index2 method
+    model3.index2(1.7);
+    test_value(model3.index2(), 1.7);
 
-        // Test operator access
-        const char* strarray[] = {"Prefactor", "Index1", "PivotEnergy", "Cutoff", "Index2"};
-        for (int i = 0; i < 5; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Prefactor", "Index1", "PivotEnergy",
+                              "CutoffEnergy", "Index2"};
+    for (int i = 0; i < 5; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -1871,79 +1747,54 @@ void TestGModel::test_supeplaw(void)
 void TestGModel::test_bplaw(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralBrokenPlaw model;
-        test_assert(model.type() == "BrokenPowerLaw",
-                                    "Model type \"BrokenPowerLaw\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralBrokenPlaw model1;
+    test_value(model1.type(), "BrokenPowerLaw", "Check void model type");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralBrokenPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"), -2.8);
-        test_value(model.prefactor(), 2.0);
-        test_value(model.index1(), -2.1);
-        test_value(model.breakenergy().MeV(), 100.0);
-        test_value(model.index2(), -2.8);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralBrokenPlaw model2(2.0, -2.1, GEnergy(100.0, "MeV"), -2.8);
+    test_value(model2.prefactor(), 2.0);
+    test_value(model2.index1(), -2.1);
+    test_value(model2.breakenergy().MeV(), 100.0);
+    test_value(model2.index2(), -2.8);
     
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                     xml(m_xml_model_point_bplaw);
-        GXmlElement*             element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralBrokenPlaw model(*element);
-        test_value(model.size(), 4);
-        test_assert(model.type() == "BrokenPowerLaw", "Expected \"BrokenPowerLaw\"");
-        test_value(model.prefactor(), 5.7e-16);
-        test_value(model.index1(), -2.48);
-        test_value(model.breakenergy().TeV(), 0.3);
-        test_value(model.index2(), -2.70);
+    // Test XML constructor
+    GXml                     xml(m_xml_model_point_bplaw);
+    GXmlElement*             element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralBrokenPlaw model3(*element);
+    test_value(model3.size(), 4);
+    test_value(model3.type(), "BrokenPowerLaw", "Check model type");
+    test_value(model3.prefactor(), 5.7e-16);
+    test_value(model3.index1(), -2.48);
+    test_value(model3.breakenergy().TeV(), 0.3);
+    test_value(model3.index2(), -2.70);
 
-        // Test prefactor method
-        model.prefactor(2.3e-16);
-        test_value(model.prefactor(), 2.3e-16);
+    // Test prefactor method
+    model3.prefactor(2.3e-16);
+    test_value(model3.prefactor(), 2.3e-16);
 
-        // Test index1 method
-        model.index1(-2.6);
-        test_value(model.index1(), -2.6);
+    // Test index1 method
+    model3.index1(-2.6);
+    test_value(model3.index1(), -2.6);
 
-        // Test breakenergy method
-        model.breakenergy(GEnergy(0.5, "TeV"));
-        test_value(model.breakenergy().TeV(), 0.5);
+    // Test breakenergy method
+    model3.breakenergy(GEnergy(0.5, "TeV"));
+    test_value(model3.breakenergy().TeV(), 0.5);
 
-        // Test index2 method
-        model.index2(-3.6);
-        test_value(model.index2(), -3.6);
+    // Test index2 method
+    model3.index2(-3.6);
+    test_value(model3.index2(), -3.6);
 
-        // Test operator access
-        const char* strarray[] = {"Prefactor", "Index1", "BreakValue", "Index2"};
-        for (int i = 0; i < 4; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Prefactor", "Index1", "BreakEnergy", "Index2"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -1957,79 +1808,54 @@ void TestGModel::test_bplaw(void)
 void TestGModel::test_logparabola(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralLogParabola model;
-        test_assert(model.type() == "LogParabola",
-                                    "Model type \"LogParabola\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralLogParabola model1;
+    test_value(model1.type(), "LogParabola", "Check void model type");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelSpectralLogParabola model(2.0, -2.1, GEnergy(100.0, "MeV"), -0.2);
-        test_value(model.prefactor(), 2.0);
-        test_value(model.index(), -2.1);
-        test_value(model.pivot().MeV(), 100.0);
-        test_value(model.curvature(), -0.2);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralLogParabola model2(2.0, -2.1, GEnergy(100.0, "MeV"), -0.2);
+    test_value(model2.prefactor(), 2.0);
+    test_value(model2.index(), -2.1);
+    test_value(model2.pivot().MeV(), 100.0);
+    test_value(model2.curvature(), -0.2);
     
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                      xml(m_xml_model_point_logparabola);
-        GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralLogParabola model(*element);
-        test_value(model.size(), 4);
-        test_assert(model.type() == "LogParabola", "Expected \"LogParabola\"");
-        test_value(model.prefactor(), 5.878e-16);
-        test_value(model.index(), -2.32473);
-        test_value(model.pivot().TeV(), 1.0);
-        test_value(model.curvature(), -0.074);
+    // Test XML constructor
+    GXml                      xml(m_xml_model_point_logparabola);
+    GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralLogParabola model3(*element);
+    test_value(model3.size(), 4);
+    test_value(model3.type(), "LogParabola", "Check model type");
+    test_value(model3.prefactor(), 5.878e-16);
+    test_value(model3.index(), -2.32473);
+    test_value(model3.pivot().TeV(), 1.0);
+    test_value(model3.curvature(), -0.074);
 
-        // Test prefactor method
-        model.prefactor(2.3e-16);
-        test_value(model.prefactor(), 2.3e-16);
+    // Test prefactor method
+    model3.prefactor(2.3e-16);
+    test_value(model3.prefactor(), 2.3e-16);
 
-        // Test index method
-        model.index(-2.6);
-        test_value(model.index(), -2.6);
+    // Test index method
+    model3.index(-2.6);
+    test_value(model3.index(), -2.6);
 
-        // Test pivot method
-        model.pivot(GEnergy(0.5, "TeV"));
-        test_value(model.pivot().TeV(), 0.5);
+    // Test pivot method
+    model3.pivot(GEnergy(0.5, "TeV"));
+    test_value(model3.pivot().TeV(), 0.5);
 
-        // Test curvature method
-        model.curvature(-0.1);
-        test_value(model.curvature(), -0.1);
+    // Test curvature method
+    model3.curvature(-0.1);
+    test_value(model3.curvature(), -0.1);
 
-        // Test operator access
-        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Curvature"};
-        for (int i = 0; i < 4; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Curvature"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -2043,106 +1869,81 @@ void TestGModel::test_logparabola(void)
 void TestGModel::test_nodes(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelSpectralNodes model;
-        test_assert(model.type() == "NodeFunction",
-                                    "Model type \"NodeFunction\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralNodes model1;
+    test_value(model1.type(), "NodeFunction", "Check void model type");
 
     // Test node function manimulation
-    test_try("Test node function manimulation");
-    try {
-        GModelSpectralNodes model;
-        model.reserve(3);
-        test_value(model.size(), 0);
-        test_value(model.nodes(), 0);
-        model.append(GEnergy(1.0, "MeV"), 1.0);
-        test_value(model.size(), 2);
-        test_value(model.nodes(), 1);
-        test_value(model.energy(0).MeV(), 1.0);
-        test_value(model.intensity(0), 1.0);
-        model.append(GEnergy(10.0, "MeV"), 0.1);
-        test_value(model.size(), 4);
-        test_value(model.nodes(), 2);
-        test_value(model.energy(0).MeV(), 1.0);
-        test_value(model.energy(1).MeV(), 10.0);
-        test_value(model.intensity(0), 1.0);
-        test_value(model.intensity(1), 0.1);
-        model.remove(0);
-        test_value(model.size(), 2);
-        test_value(model.nodes(), 1);
-        test_value(model.energy(0).MeV(), 10.0);
-        test_value(model.intensity(0), 0.1);
-        model.insert(0, GEnergy(1.0, "MeV"), 1.0);
-        test_value(model.size(), 4);
-        test_value(model.nodes(), 2);
-        test_value(model.energy(0).MeV(), 1.0);
-        test_value(model.energy(1).MeV(), 10.0);
-        test_value(model.intensity(0), 1.0);
-        test_value(model.intensity(1), 0.1);
-        model.extend(model);
-        test_value(model.size(), 8);
-        test_value(model.nodes(), 4);
-        test_value(model.energy(0).MeV(), 1.0);
-        test_value(model.energy(1).MeV(), 10.0);
-        test_value(model.energy(2).MeV(), 1.0);
-        test_value(model.energy(3).MeV(), 10.0);
-        test_value(model.intensity(0), 1.0);
-        test_value(model.intensity(1), 0.1);
-        test_value(model.intensity(2), 1.0);
-        test_value(model.intensity(3), 0.1);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelSpectralNodes model2;
+    model2.reserve(3);
+    test_value(model2.size(), 0);
+    test_value(model2.nodes(), 0);
+    model2.append(GEnergy(1.0, "MeV"), 1.0);
+    test_value(model2.size(), 2);
+    test_value(model2.nodes(), 1);
+    test_value(model2.energy(0).MeV(), 1.0);
+    test_value(model2.intensity(0), 1.0);
+    model2.append(GEnergy(10.0, "MeV"), 0.1);
+    test_value(model2.size(), 4);
+    test_value(model2.nodes(), 2);
+    test_value(model2.energy(0).MeV(), 1.0);
+    test_value(model2.energy(1).MeV(), 10.0);
+    test_value(model2.intensity(0), 1.0);
+    test_value(model2.intensity(1), 0.1);
+    model2.remove(0);
+    test_value(model2.size(), 2);
+    test_value(model2.nodes(), 1);
+    test_value(model2.energy(0).MeV(), 10.0);
+    test_value(model2.intensity(0), 0.1);
+    model2.insert(0, GEnergy(1.0, "MeV"), 1.0);
+    test_value(model2.size(), 4);
+    test_value(model2.nodes(), 2);
+    test_value(model2.energy(0).MeV(), 1.0);
+    test_value(model2.energy(1).MeV(), 10.0);
+    test_value(model2.intensity(0), 1.0);
+    test_value(model2.intensity(1), 0.1);
+    model2.extend(model2);
+    test_value(model2.size(), 8);
+    test_value(model2.nodes(), 4);
+    test_value(model2.energy(0).MeV(), 1.0);
+    test_value(model2.energy(1).MeV(), 10.0);
+    test_value(model2.energy(2).MeV(), 1.0);
+    test_value(model2.energy(3).MeV(), 10.0);
+    test_value(model2.intensity(0), 1.0);
+    test_value(model2.intensity(1), 0.1);
+    test_value(model2.intensity(2), 1.0);
+    test_value(model2.intensity(3), 0.1);
    
-    // Test XML constructor and value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GXml                      xml(m_xml_model_point_nodes);
-        GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralNodes model(*element);
-        test_value(model.size(), 4);
-        test_value(model.nodes(), 2);
-        test_assert(model.type() == "NodeFunction", "Expected \"NodeFunction\"");
-        test_value(model.energy(0).MeV(), 1.0);
-        test_value(model.energy(1).MeV(), 10.0);
-        test_value(model.intensity(0), 1.0e-7);
-        test_value(model.intensity(1), 0.1e-7);
+    // Test XML constructor
+    GXml                      xml(m_xml_model_point_nodes);
+    GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
+    GModelSpectralNodes model3(*element);
+    test_value(model3.size(), 4);
+    test_value(model3.nodes(), 2);
+    test_value(model3.type(), "NodeFunction", "Check model type");
+    test_value(model3.energy(0).MeV(), 1.0);
+    test_value(model3.energy(1).MeV(), 10.0);
+    test_value(model3.intensity(0), 1.0e-7);
+    test_value(model3.intensity(1), 0.1e-7);
 
-        // Test energy method
-        model.energy(0, GEnergy(0.1, "MeV"));
-        test_value(model.energy(0).MeV(), 0.1);
+    // Test energy method
+    model3.energy(0, GEnergy(0.1, "MeV"));
+    test_value(model3.energy(0).MeV(), 0.1);
 
-        // Test intensity method
-        model.intensity(0, 2.0e-7);
-        test_value(model.intensity(0), 2.0e-7);
+    // Test intensity method
+    model3.intensity(0, 2.0e-7);
+    test_value(model3.intensity(0), 2.0e-7);
 
-        // Test operator access
-        const char* strarray[] = {"Energy0", "Energy1", "Intensity0", "Intensity1"};
-        for (int i = 0; i < 4; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Energy0", "Energy1", "Intensity0", "Intensity1"};
+    for (int i = 0; i < 4; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Exit test
@@ -2157,11 +1958,11 @@ void TestGModel::test_filefct(void)
 {
     // Test void constructor
     GModelSpectralFunc model1;
-    test_assert(model1.type() == "FileFunction", "Check model type");
+    test_value(model1.type(), "FileFunction", "Check void model type");
 
     // Test value constructor
     GModelSpectralFunc model2(m_filefct, 2.0);
-    test_assert(model2.filename().url() == m_filefct,
+    test_value(model2.filename().url(), m_filefct,
                 "Check file function data file name");
     test_value(model2.norm(), 2.0);
    
@@ -2170,15 +1971,15 @@ void TestGModel::test_filefct(void)
     GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
     GModelSpectralFunc model3(*element);
     test_value(model3.size(), 1);
-    test_assert(model3.type() == "FileFunction", "Check model type");
-    test_assert(model3.filename().url() == m_filefct,
-                "Check file function data file name");
+    test_value(model3.type(), "FileFunction", "Check model type");
+    test_value(model3.filename().url(), m_filefct,
+               "Check file function data file name");
     test_value(model3.norm(), 1.0);
 
     // Test filename method
     model3.filename(m_filefct);
-    test_assert(model3.filename().url() == m_filefct,
-                "Check file function data file name");
+    test_value(model3.filename().url(), m_filefct,
+               "Check file function data file name");
 
     // Test norm method
     model3.norm(3.0);
@@ -2208,56 +2009,31 @@ void TestGModel::test_filefct(void)
 void TestGModel::test_temp_const(void)
 {
     // Test void constructor
-    test_try("Test void constructor");
-    try {
-        GModelTemporalConst model;
-        test_assert(model.type() == "Constant",
-                                    "Model type \"Constant\" expected.");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelTemporalConst model1;
+    test_value(model1.type(), "Constant", "Check void model type");
 
     // Test value constructor
-    test_try("Test value constructor");
-    try {
-        GModelTemporalConst model(3.0);
-        test_value(model.norm(), 3.0);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
+    GModelTemporalConst model2(3.0);
+    test_value(model2.norm(), 3.0);
     
-    // Test value
-    test_try("Test XML constructor, value and gradients");
-    try {
-        // Test XML constructor
-        GModelTemporalConst model;
+    // Test XML constructor
+    GModelTemporalConst model3;
 
-        // Test value method
-        model.norm(3.9);
-        test_value(model.norm(), 3.9);
+    // Test value method
+    model3.norm(3.9);
+    test_value(model3.norm(), 3.9);
 
-        // Test operator access
-        const char* strarray[] = {"Normalization"};
-        for (int i = 0; i < 1; ++i) {
-            std::string keyname(strarray[i]);
-            model[keyname].remove_range(); // To allow setting of any value
-            model[keyname].value(2.1);
-            model[keyname].error(1.9);
-            model[keyname].gradient(0.8);
-            test_value(model[keyname].value(), 2.1);
-            test_value(model[keyname].error(), 1.9);
-            test_value(model[keyname].gradient(), 0.8);
-        }
-
-        // Success if we reached this point
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
+    // Test operator access
+    const char* strarray[] = {"Normalization"};
+    for (int i = 0; i < 1; ++i) {
+        std::string keyname(strarray[i]);
+        model3[keyname].remove_range(); // To allow setting of any value
+        model3[keyname].value(2.1);
+        model3[keyname].error(1.9);
+        model3[keyname].gradient(0.8);
+        test_value(model3[keyname].value(), 2.1);
+        test_value(model3[keyname].error(), 1.9);
+        test_value(model3[keyname].gradient(), 0.8);
     }
 
     // Return

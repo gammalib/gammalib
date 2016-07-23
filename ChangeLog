@@ -1,8 +1,10 @@
-2016-07-22  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2016-07-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 1.1.0 released
         =========================
 
+        Check on model parameters in spectral registry (#1824)
+        Rename spectral model components (#1821)
         Fix exception handling SWIG interface for Python 3
         Write same XML element names than those that were read (#1820)
         Rename spatial model components (#1818)

@@ -335,7 +335,7 @@ The XML format for specifying a constant is:
 
 .. code-block:: xml
 
-   <spectrum type="ConstantValue">
+   <spectrum type="Constant">
     <parameter name="Normalization" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
    </spectrum>
 
@@ -465,7 +465,7 @@ is:
 
 .. code-block:: xml
 
-   <spectrum type="PowerLawPhotonFlux">
+   <spectrum type="PowerLaw">
     <parameter scale="1e-07" name="PhotonFlux" min="1e-07" max="1000.0"    value="1.0" free="1"/>
     <parameter scale="1.0"   name="Index"      min="-5.0"  max="+5.0"      value="-2.0" free="1"/>
     <parameter scale="1.0"   name="LowerLimit" min="10.0"  max="1000000.0" value="100.0" free="0"/>
@@ -509,17 +509,17 @@ where the parameters in the XML definition have the following mappings:
 * :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
 * :math:`E_0` = ``PivotEnergy``
-* :math:`E_{\rm cut}` = ``Cutoff``
+* :math:`E_{\rm cut}` = ``CutoffEnergy``
 
 The XML format for specifying an exponentially cut-off power law is:
 
 .. code-block:: xml
 
-   <spectrum type="ExpCutoff">
-    <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
-    <parameter name="Index"       scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
-    <parameter name="Cutoff"      scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="1"/>
-    <parameter name="PivotEnergy" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
+   <spectrum type="ExponentialCutoffPowerLaw">
+    <parameter name="Prefactor"    scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index"        scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="CutoffEnergy" scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="1"/>
+    <parameter name="PivotEnergy"  scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
 An alternative XML format is supported for compatibility with the Fermi/LAT XML
@@ -553,16 +553,16 @@ where the parameters in the XML definition have the following mappings:
 * :math:`\gamma` = ``Index1``
 * :math:`\alpha` = ``Index2``
 * :math:`E_0` = ``PivotEnergy``
-* :math:`E_{\rm cut}` = ``Cutoff``
+* :math:`E_{\rm cut}` = ``CutoffEnergy``
 
 .. code-block:: xml
 
-   <spectrum type="PLSuperExpCutoff">
-    <parameter name="Prefactor"   scale="1e-16" value="1.0" min="1e-07" max="1000.0" free="1"/>
-    <parameter name="Index1"      scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
-    <parameter name="Cutoff"      scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="1"/>
-    <parameter name="Index2"      scale="1.0"   value="1.5" min="0.1"   max="5.0"    free="1"/>
-    <parameter name="PivotEnergy" scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="0"/>
+   <spectrum type="SuperExponentialCutoffPowerLaw">
+    <parameter name="Prefactor"    scale="1e-16" value="1.0" min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index1"       scale="-1"    value="2.0" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="CutoffEnergy" scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="1"/>
+    <parameter name="Index2"       scale="1.0"   value="1.5" min="0.1"   max="5.0"    free="1"/>
+    <parameter name="PivotEnergy"  scale="1e6"   value="1.0" min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
 An alternative XML format is supported for compatibility with the Fermi/LAT XML
@@ -598,9 +598,21 @@ where the parameters in the XML definition have the following mappings:
 * :math:`k_0` = ``Prefactor``
 * :math:`\gamma_1` = ``Index1``
 * :math:`\gamma_2` = ``Index2``
-* :math:`E_b` = ``BreakValue``
+* :math:`E_b` = ``BreakEnergy``
 
 The XML format for specifying a broken power law is:
+
+.. code-block:: xml
+
+   <spectrum type="BrokenPowerLaw">
+    <parameter name="Prefactor"   scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index1"      scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="BreakEnergy" scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="1"/>
+    <parameter name="Index2"      scale="-1"    value="2.70" min="0.01"  max="1000.0" free="1"/>
+   </spectrum>
+
+An alternative XML format is supported for compatibility with the Fermi/LAT XML
+format:
 
 .. code-block:: xml
 

@@ -38,9 +38,13 @@ class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    explicit GModelSpectralPlaw(const double&  prefactor,
-                                const double&  index,
-                                const GEnergy& pivot);
+    GModelSpectralPlaw(const std::string& type,
+                       const std::string& prefactor,
+                       const std::string& index,
+                       const std::string& pivot);
+    GModelSpectralPlaw(const double&  prefactor,
+                       const double&  index,
+                       const GEnergy& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);

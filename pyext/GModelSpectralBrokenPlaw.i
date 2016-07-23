@@ -38,6 +38,11 @@ class GModelSpectralBrokenPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralBrokenPlaw(void);
+    GModelSpectralBrokenPlaw(const std::string& type,
+                             const std::string& prefactor,
+                             const std::string& index1,
+                             const std::string& breakenergy,
+                             const std::string& index2);
     GModelSpectralBrokenPlaw(const double&  prefactor,
                              const double&  index1,
                              const GEnergy& breakenergy,

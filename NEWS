@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 1.1.0
 
 Author(s) : Juergen Knoedlseder
 
-22 July 2016
+24 July 2016
 
 
 1. Introduction
@@ -141,6 +141,9 @@ The interface for the following methods has been changed:
 - GFitsImageULong naxes constructor
 - GFitsImageUShort naxes constructor
 - GSkyMap::save()
+- GModelSpectralRegistry::alloc()
+- GModelSpatialRegistry::alloc()
+- GModelTemporalRegistry::alloc()
 
 
 3. Configuration
@@ -237,6 +240,28 @@ to the ./configure script (#1818).
 
 The model classes now write the same XML element names than those that were read
 in. In that way a maximum legacy for the Fermi/LAT data format is assured (#1820).
+
+The spectral registry class now also checks for model parameter names which allows
+to have models of the same type but with different parameters in the registry
+(#1824). The interface for the GModelSpectralRegistry::alloc() method has been
+changed so that it no longer takes a name string but an XML element. The same has
+been done for the GModelSpatialRegistry and GModelTemporalRegistry classes so that
+more general model definition XML file handling can be implemented.
+
+The names of some spectral model components have been modified to be more
+explicit and homogenous:
+* "Constant" (was "ConstantValue")
+* "PowerLaw" (combines "PowerLaw" and "PowerLaw2")
+* "BrokenPowerLaw"
+* "ExponentialCutoffPowerLaw" (was "ExpCutoff")
+* "SuperExponentialCutoffPowerLaw" (was "PLSuperExpCutoff")
+* "Gaussian"
+* "LogParabola"
+* "FileFunction"
+* "NodeFunction"
+By default the old model names are still supported. Support of the old model
+names can be turned off by specifying the --disable-legacy-model-names option
+to the ./configure script (#1821).
 
 
 9. Numerics module

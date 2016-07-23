@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <source_library title="source library">
   <source name="Test cube" type="DiffuseSource">
-    <spectrum type="ConstantValue">
+    <spectrum type="Constant">
       <parameter name="Normalization" scale="1" value="1" min="0" max="1000" free="1"/>
     </spectrum>
     <spatialModel type="DiffuseMapCube" file="test_cube.fits">

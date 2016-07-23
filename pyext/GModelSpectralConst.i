@@ -38,6 +38,7 @@ class GModelSpectralConst : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralConst(void);
+    GModelSpectralConst(const std::string& type, const std::string& value);
     explicit GModelSpectralConst(const GXmlElement& xml);
     explicit GModelSpectralConst(const double& value);
     GModelSpectralConst(const GModelSpectralConst& model);
