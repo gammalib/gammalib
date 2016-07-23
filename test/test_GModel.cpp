@@ -2604,16 +2604,6 @@ void TestGModel::test_models(void)
  ***************************************************************************/
 void TestGModel::test_model_registry(void)
 {
-    // Test GModelRegistry void constructor
-    test_try("Test GModelRegistry void constructor");
-    try {
-        GModelRegistry registry;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
     // Test GModelRegistry allocators
     test_try("Test GModelRegistry model allocation");
     try {
@@ -2641,110 +2631,45 @@ void TestGModel::test_model_registry(void)
         test_try_failure(e);
     }
 
-    // Test GModelSpatialRegistry void constructor
-    test_try("Test GModelSpatialRegistry void constructor");
+    // Test GModelSpatialRegistry allocator for invalid XML element
+    test_try("Test GModelSpatialRegistry allocator for invalid XML element");
     try {
+        GXmlElement           xml;
         GModelSpatialRegistry registry;
+        GModelSpatial*        ptr = registry.alloc(xml);
+        test_try_failure("Invalid XML element shall throw an exception");
+    }
+    catch (GException::invalid_value &e) {
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Test GModelSpatialRegistry allocators
-    test_try("Test GModelSpatialRegistry model allocation");
+    // Test GModelSpectralRegistry allocator for invalid XML element
+    test_try("Test GModelSpectralRegistry allocator for invalid XML element");
     try {
-        // Loop over all models in registry
-        GModelSpatialRegistry registry;
-        int num = registry.size();
-        for (int i = 0; i < num; ++i) {
-            GModelSpatial* ptr = registry.alloc(registry.name(i));
-            test_assert(ptr != NULL,
-                        "Model pointer for \""+ registry.name(i)+"\" is NULL");
-            if (ptr != NULL) {
-            
-                // Test model type
-                test_assert(ptr->type()  == registry.name(i),
-                            "Expected \""+registry.name(i)+"\" instead"
-                            " of \""+ptr->type()+"\".");
-
-                // Free model
-                delete ptr;
-            }
-        } // endfor: looped over all models
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test GModelSpectralRegistry void constructor
-    test_try("Test GModelSpectralRegistry void constructor");
-    try {
+        GXmlElement            xml;
         GModelSpectralRegistry registry;
+        GModelSpectral*        ptr = registry.alloc(xml);
+        test_try_failure("Invalid XML element shall throw an exception");
+    }
+    catch (GException::invalid_value &e) {
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Test GModelSpectralRegistry allocators
-    test_try("Test GModelSpectralRegistry model allocation");
+    // Test GModelTemporalRegistry allocator for invalid XML element
+    test_try("Test GModelTemporalRegistry allocator for invalid XML element");
     try {
-        // Loop over all models in registry
-        GModelSpectralRegistry registry;
-        int num = registry.size();
-        for (int i = 0; i < num; ++i) {
-            GModelSpectral* ptr = registry.alloc(registry.name(i));
-            test_assert(ptr != NULL, "Model pointer for \""+registry.name(i)+"\" is NULL");
-            if (ptr != NULL) {
-            
-                // Test model type
-                test_assert(ptr->type() == registry.name(i),
-                            "Expected \""+registry.name(i)+"\" instead"
-                            " of \""+ptr->type()+"\".");
-
-                // Free model
-                delete ptr;
-            }
-        } // endfor: looped over all models
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test GModelTemporalRegistry void constructor
-    test_try("Test GModelTemporalRegistry void constructor");
-    try {
+        GXmlElement            xml;
         GModelTemporalRegistry registry;
-        test_try_success();
+        GModelTemporal*        ptr = registry.alloc(xml);
+        test_try_failure("Invalid XML element shall throw an exception");
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test GModelTemporalRegistry allocators
-    test_try("Test GModelTemporalRegistry model allocation");
-    try {
-        // Loop over all models in registry
-        GModelTemporalRegistry registry;
-        int num = registry.size();
-        for (int i = 0; i < num; ++i) {
-            GModelTemporal* ptr = registry.alloc(registry.name(i));
-            test_assert(ptr != NULL, "Model pointer for \""+ \
-                                     registry.name(i)+"\" is NULL");
-            if (ptr != NULL) {
-            
-                // Test model type
-                test_assert(ptr->type() == registry.name(i),
-                            "Expected \""+registry.name(i)+"\" instead"
-                            " of \""+ptr->type()+"\".");
-
-                // Free model
-                delete ptr;
-            }
-        } // endfor: looped over all models
+    catch (GException::invalid_value &e) {
         test_try_success();
     }
     catch (std::exception &e) {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialRegistry.hpp - Spatial model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2014 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2016 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,7 +30,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GRegistry.hpp"
-#include "GModelSpatial.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GXmlElement;
+class GModelSpatial;
 
 
 /***********************************************************************//**
@@ -40,8 +43,8 @@
  *
  * The registry class allows the registration of spatial models that are not
  * necessarily compiled into the GammaLib. It uses the static members
- * m_number, m_names, and m_models which are allocated globally to keep track
- * of spatial models that are available throughout all linked libraries. To
+ * m_number and m_models which are allocated globally to keep track of
+ * spatial models that are available throughout all linked libraries. To
  * register a spatial model it is sufficient to add
  *
  *     const GModelSpatialXXX      g_spatial_XXX_seed;
@@ -65,7 +68,7 @@ public:
     // Methods
     std::string    classname(void) const;
     int            size(void) const;
-    GModelSpatial* alloc(const std::string& name) const;
+    GModelSpatial* alloc(const GXmlElement& xml) const;
     std::string    name(const int& index) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
@@ -84,11 +87,6 @@ private:
     static int& number() {
         static int m_number = 0;
         return m_number;
-    };
-    // Model names
-    static GRegistryPointer<std::string>& names() {
-        static GRegistryPointer<std::string> m_names;
-        return m_names;
     };
     // Pointer to seed models
     static GRegistryPointer<const GModelSpatial*>& models() {

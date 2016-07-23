@@ -1107,33 +1107,18 @@ bool GCTAModelAeffBackground::valid_model(void) const
 
 
 /***********************************************************************//**
- * @brief Construct spectral model from XML element
+ * @brief Return pointer to spectral model from XML element
  *
- * @param[in] spectral XML element containing spectral model information.
+ * @param[in] spectral XML element.
+ * @return Pointer to spectral model.
  *
- * @exception GException::model_invalid_spectral
- *            Invalid spectral model type encountered.
- *
- * Returns pointer to a spectral model that is defined in an XML element.
+ * Returns pointer to spectral model that is defined in an XML element.
  ***************************************************************************/
 GModelSpectral* GCTAModelAeffBackground::xml_spectral(const GXmlElement& spectral) const
 {
-    // Get spectral model type
-    std::string type = spectral.attribute("type");
-
     // Get spectral model
     GModelSpectralRegistry registry;
-    GModelSpectral*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(spectral);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
-    }
+    GModelSpectral*        ptr = registry.alloc(spectral);
 
     // Return pointer
     return ptr;
@@ -1141,33 +1126,18 @@ GModelSpectral* GCTAModelAeffBackground::xml_spectral(const GXmlElement& spectra
 
 
 /***********************************************************************//**
- * @brief Construct temporal model from XML element
+ * @brief Return pointer to temporal model from XML element
  *
- * @param[in] temporal XML element containing temporal model information.
+ * @param[in] temporal XML element.
+ * @return Pointer to temporal model.
  *
- * @exception GException::model_invalid_temporal
- *            Invalid temporal model type encountered.
- *
- * Returns pointer to a temporal model that is defined in an XML element.
+ * Returns pointer to temporal model that is defined in an XML element.
  ***************************************************************************/
 GModelTemporal* GCTAModelAeffBackground::xml_temporal(const GXmlElement& temporal) const
 {
-    // Get temporal model type
-    std::string type = temporal.attribute("type");
-
     // Get temporal model
     GModelTemporalRegistry registry;
-    GModelTemporal*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(temporal);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_temporal(G_XML_TEMPORAL, type);
-    }
+    GModelTemporal*        ptr = registry.alloc(temporal);
 
     // Return pointer
     return ptr;

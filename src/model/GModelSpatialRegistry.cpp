@@ -28,11 +28,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GModelPar.hpp"
+#include "GModelSpatial.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ALLOC                  "GModelSpatialRegistry::alloc(GXmlElement&)"
 #define G_NAME                            "GModelSpatialRegistry::name(int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -61,7 +64,7 @@ GModelSpatialRegistry::GModelSpatialRegistry(void)
     #if defined(G_DEBUG_REGISTRY)
     std::cout << "GModelSpatialRegistry(void): ";
     for (int i = 0; i < size(); ++i) {
-        std::cout << "\"" << names()[i] << "\" ";
+        std::cout << "\"" << models()[i]->type() << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -91,21 +94,17 @@ GModelSpatialRegistry::GModelSpatialRegistry(const GModelSpatial* model)
     #endif
 
     // Allocate new registry
-    std::string*          new_names  = new std::string[size()+1];
     const GModelSpatial** new_models = new const GModelSpatial*[size()+1];
 
     // Save old registry
     for (int i = 0; i < size(); ++i) {
-        new_names[i]  = names()[i];
         new_models[i] = models()[i];
     }
 
     // Add new model to registry
-    new_names[size()]  = model->type();
     new_models[size()] = model;
 
     // Set pointers on new registry
-    names().assign(new_names);
     models().assign(new_models);
 
     // Increment number of models in registry
@@ -115,7 +114,7 @@ GModelSpatialRegistry::GModelSpatialRegistry(const GModelSpatial* model)
     #if defined(G_DEBUG_REGISTRY)
     std::cout << "GModelSpatialRegistry(const GModelSpatial*): ";
     for (int i = 0; i < size(); ++i) {
-        std::cout << "\"" << names()[i] << "\" ";
+        std::cout << "\"" << models()[i]->type() << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -196,29 +195,47 @@ GModelSpatialRegistry& GModelSpatialRegistry::operator=(const GModelSpatialRegis
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate spatial model of given name
+ * @brief Allocate spatial model that is found in XML element
  *
- * @param[in] name Model name.
- * @return Pointer to model (NULL if name is not registered).
+ * @param[in] xml XML element.
+ * @return Pointer to spatial model.
  *
- * Returns a pointer to a void spatial model instance of the specified
- * name. If the name has not been found in the registry, a NULL pointer is
- * returned.
+ * @exception GException::invalid_value
+ *            No appropriate spatial model found in XML element.
+ *
+ * Returns a pointer to a spatial model instance that corresponds to the
+ * type found in an XML element. If no appropriate model is found the method
+ * will throw an exception.
  ***************************************************************************/
-GModelSpatial* GModelSpatialRegistry::alloc(const std::string& name) const
+GModelSpatial* GModelSpatialRegistry::alloc(const GXmlElement& xml) const
 {
     // Initialise spatial model
     GModelSpatial* model = NULL;
 
-    // Search for model in registry
+    // Search for model type in registry
     for (int i = 0; i < size(); ++i) {
-        if (names()[i] == name) {
+        if (models()[i]->type() == xml.attribute("type")) {
             model = models()[i]->clone();
             break;
         }
     }
 
-    // Return spatial model
+    // If no model has been found then throw an exception
+    if (model == NULL) {
+        std::string msg = "Spatial model of type \""+xml.attribute("type")+
+                          "\" not found in registry. Possible spatial model "
+                          "types are:";
+        for (int i = 0; i < size(); ++i) {
+            msg += " \""+models()[i]->type()+"\"";
+        }
+        msg += ".";
+        throw GException::invalid_value(G_ALLOC, msg);
+    }
+
+    // Read model from XML element
+    model->read(xml);
+
+    // Return spectral model
     return model;
 }
 
@@ -237,12 +254,13 @@ std::string GModelSpatialRegistry::name(const int& index) const
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_NAME, index, 0, size()-1);
+        throw GException::out_of_range(G_NAME, "Spatial model index", index,
+                                       size());
     }
     #endif
 
     // Return name
-    return (names()[index]);
+    return (models()[index]->type());
 }
 
 
@@ -270,8 +288,15 @@ std::string GModelSpatialRegistry::print(const GChatter& chatter) const
         // NORMAL: Append models
         if (chatter >= NORMAL) {
             for (int i = 0; i < size(); ++i) {
-                result.append("\n"+gammalib::parformat(names()[i]));
-                result.append(models()[i]->type());
+                result.append("\n"+gammalib::parformat(models()[i]->type()));
+                for (int k = 0; k < models()[i]->size(); ++k) {
+                    if (k > 0) {
+                        result.append(", ");
+                    }
+                    result.append("\"");
+                    result.append((*(models()[i]))[k].name());
+                    result.append("\"");
+                }
             }
         }
 

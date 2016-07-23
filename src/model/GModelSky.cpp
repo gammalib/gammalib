@@ -1170,32 +1170,18 @@ void GModelSky::set_type(void)
 
 
 /***********************************************************************//**
- * @brief Construct spatial model from XML element
+ * @brief Return pointer to spatial model from XML element
  *
- * @param[in] spatial XML element containing spatial model information.
+ * @param[in] spatial XML element.
  * @return Pointer to spatial model.
  *
- * @exception GException::model_invalid_spatial
- *            Invalid spatial model type encountered.
+ * Returns pointer to spatial model that is defined in an XML element.
  ***************************************************************************/
 GModelSpatial* GModelSky::xml_spatial(const GXmlElement& spatial) const
 {
-    // Get spatial model type
-    std::string type = spatial.attribute("type");
-
     // Get spatial model
     GModelSpatialRegistry registry;
-    GModelSpatial*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(spatial);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spatial(G_XML_SPATIAL, type);
-    }
+    GModelSpatial*        ptr = registry.alloc(spatial);
 
     // Return pointer
     return ptr;
@@ -1203,32 +1189,18 @@ GModelSpatial* GModelSky::xml_spatial(const GXmlElement& spatial) const
 
 
 /***********************************************************************//**
- * @brief Construct spectral model from XML element
+ * @brief Return pointer to spectral model from XML element
  *
- * @param[in] spectral XML element containing spectral model information.
+ * @param[in] spectral XML element.
  * @return Pointer to spectral model.
  *
- * @exception GException::model_invalid_spectral
- *            Invalid spatial model type encountered.
+ * Returns pointer to spectral model that is defined in an XML element.
  ***************************************************************************/
 GModelSpectral* GModelSky::xml_spectral(const GXmlElement& spectral) const
 {
-    // Get spectral model type
-    std::string type = spectral.attribute("type");
-
     // Get spectral model
     GModelSpectralRegistry registry;
-    GModelSpectral*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(spectral);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spectral(G_XML_SPECTRAL, type);
-    }
+    GModelSpectral*        ptr = registry.alloc(spectral);
 
     // Return pointer
     return ptr;
@@ -1236,32 +1208,18 @@ GModelSpectral* GModelSky::xml_spectral(const GXmlElement& spectral) const
 
 
 /***********************************************************************//**
- * @brief Construct temporal model from XML element
+ * @brief Return pointer to temporal model from XML element
  *
- * @param[in] temporal XML element containing temporal model information.
+ * @param[in] temporal XML element.
  * @return Pointer to temporal model.
  *
- * @exception GException::model_invalid_temporal
- *            Invalid spatial model type encountered.
+ * Returns pointer to temporal model that is defined in an XML element.
  ***************************************************************************/
 GModelTemporal* GModelSky::xml_temporal(const GXmlElement& temporal) const
 {
-    // Get temporal model type
-    std::string type = temporal.attribute("type");
-
     // Get temporal model
     GModelTemporalRegistry registry;
-    GModelTemporal*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(temporal);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_temporal(G_XML_TEMPORAL, type);
-    }
+    GModelTemporal*        ptr = registry.alloc(temporal);
 
     // Return pointer
     return ptr;
