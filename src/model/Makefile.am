@@ -30,8 +30,8 @@ sources = GModelPar.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralBrokenPlaw.cpp \
           GModelSpectralConst.cpp \
+          GModelSpectralExpInvPlaw.cpp \
           GModelSpectralExpPlaw.cpp \
-	  GModelSpectralExpPlaw2.cpp \
           GModelSpectralSuperExpPlaw.cpp \
           GModelSpectralFunc.cpp \
           GModelSpectralGauss.cpp \

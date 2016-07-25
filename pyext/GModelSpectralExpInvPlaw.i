@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GModelSpectralExpPlaw2.i - Exponential cut off power law model     *
+ *    GModelSpectralExpInvPlaw.i - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 by Alexander Ziegler                                *
  * ----------------------------------------------------------------------- *
@@ -19,40 +19,44 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpectralExpPlaw2.i
+ * @file GModelSpectralExpInvPlaw.i
  * @brief Exponential cut off power law spectral class interface definition
  * @author Alexander Ziegler
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpectralExpPlaw2.hpp"
+#include "GModelSpectralExpInvPlaw.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelSpectralExpPlaw2
+ * @class GModelSpectralExpInvPlaw
  *
  * @brief Exponential cut off power law spectral class
  ***************************************************************************/
-class GModelSpectralExpPlaw2 : public GModelSpectral {
+class GModelSpectralExpInvPlaw : public GModelSpectral {
 
 public:
     // Constructors and destructors
-    GModelSpectralExpPlaw2(void);
-    explicit GModelSpectralExpPlaw2(const double&  prefactor,
+    GModelSpectralExpInvPlaw(void);
+    explicit GModelSpectralExpInvPlaw(const double&  prefactor,
                                     const double&  index,
                                     const GEnergy& pivot,
-                                    const double& lambda);
-    explicit GModelSpectralExpPlaw2(const GXmlElement& xml);
-    GModelSpectralExpPlaw2(const GModelSpectralExpPlaw2& model);
-    virtual ~GModelSpectralExpPlaw2(void);
+                                    const double& alpha);
+    explicit GModelSpectralExpInvPlaw(const double&  prefactor,
+                                        const double&  index,
+                                        const GEnergy& pivot,
+                                        const GEnergy& cutoff);
+    explicit GModelSpectralExpInvPlaw(const GXmlElement& xml);
+    GModelSpectralExpInvPlaw(const GModelSpectralExpInvPlaw& model);
+    virtual ~GModelSpectralExpInvPlaw(void);
 
     // Operators
-    virtual GModelSpectralExpPlaw2& operator=(const GModelSpectralExpPlaw2& model);
+    virtual GModelSpectralExpInvPlaw& operator=(const GModelSpectralExpInvPlaw& model);
 
     // Implemented pure virtual methods
     virtual void                    clear(void);
-    virtual GModelSpectralExpPlaw2* clone(void) const;
+    virtual GModelSpectralExpInvPlaw* clone(void) const;
     virtual std::string             classname(void) const;
     virtual std::string             type(void) const;
     virtual double                  eval(const GEnergy& srcEng,
@@ -76,18 +80,21 @@ public:
     void    prefactor(const double& prefactor);
     double  index(void) const;
     void    index(const double& index);
-    double  lambda(void) const;
-    void    lambda(const double& lambda);
+    double  inverse_cutoff(void) const;
+    void    inverse_cutoff(const double& alpha);
+    GEnergy cutoff(void) const;
+    void    cutoff(const GEnergy& cutoff);
     GEnergy pivot(void) const;
     void    pivot(const GEnergy& pivot);
+    
 };
 
 
 /***********************************************************************//**
- * @brief GModelSpectralExpPlaw2 class extension
+ * @brief GModelSpectralExpInvPlaw class extension
  ***************************************************************************/
-%extend GModelSpectralExpPlaw2 {
-    GModelSpectralExpPlaw2 copy() {
+%extend GModelSpectralExpInvPlaw {
+    GModelSpectralExpInvPlaw copy() {
         return (*self);
     }
 };

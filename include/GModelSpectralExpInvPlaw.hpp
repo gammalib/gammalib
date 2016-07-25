@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GModelSpectralExpPlaw2.hpp - Exponential cut off power law model    *
+ *    GModelSpectralExpInvPlaw.hpp - Exponential cut off power law model   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 by Alexander Ziegler                                *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpectralExpPlaw2.hpp
+ * @file GModelSpectralExpInvPlaw.hpp
  * @brief Exponential cut off power law spectral class interface definition
  * @author Alexander Ziegler
  */
 
-#ifndef GMODELSPECTRALEXPPLAW2_HPP
-#define GMODELSPECTRALEXPPLAW2_HPP
+#ifndef GMODELSPECTRALEXPINVPLAW_HPP
+#define GMODELSPECTRALEXPINVPLAW_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -41,7 +41,7 @@ class GXmlElement;
 
 
 /***********************************************************************//**
- * @class GModelSpectralExpPlaw2
+ * @class GModelSpectralExpInvPlaw
  *
  * @brief Exponential cut off power law spectral class
  *
@@ -51,34 +51,38 @@ class GXmlElement;
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *    \exp \left( -{\tt m\_lamda}*E \right)
+ *    \exp \left( -{\tt m\_alpha}*E \right)
  * \f]
  *
  * where
  * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
  * - \f${\tt m\_pivot}\f$ is the pivot energy,
  * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_lambda}\f$ is the cut-off parameter (1/cut-off energy).
+ * - \f${\tt m\_alpha}\f$ is the cut-off parameter (1/cut-off energy).
  ***************************************************************************/
-class GModelSpectralExpPlaw2 : public GModelSpectral {
+class GModelSpectralExpInvPlaw : public GModelSpectral {
 
 public:
     // Constructors and destructors
-    GModelSpectralExpPlaw2(void);
-    explicit GModelSpectralExpPlaw2(const double&  prefactor,
+    GModelSpectralExpInvPlaw(void);
+    explicit GModelSpectralExpInvPlaw(const double&  prefactor,
                                     const double&  index,
                                     const GEnergy& pivot,
-                                    const double& lambda);
-    explicit GModelSpectralExpPlaw2(const GXmlElement& xml);
-    GModelSpectralExpPlaw2(const GModelSpectralExpPlaw2& model);
-    virtual ~GModelSpectralExpPlaw2(void);
+                                    const double& alpha);
+    explicit GModelSpectralExpInvPlaw(const double&  prefactor,
+                                        const double&  index,
+                                        const GEnergy& pivot,
+                                        const GEnergy& cutoff);
+    explicit GModelSpectralExpInvPlaw(const GXmlElement& xml);
+    GModelSpectralExpInvPlaw(const GModelSpectralExpInvPlaw& model);
+    virtual ~GModelSpectralExpInvPlaw(void);
 
     // Operators
-    virtual GModelSpectralExpPlaw2& operator=(const GModelSpectralExpPlaw2& model);
+    virtual GModelSpectralExpInvPlaw& operator=(const GModelSpectralExpInvPlaw& model);
 
     // Implemented pure virtual methods
     virtual void                    clear(void);
-    virtual GModelSpectralExpPlaw2* clone(void) const;
+    virtual GModelSpectralExpInvPlaw* clone(void) const;
     virtual std::string             classname(void) const;
     virtual std::string             type(void) const;
     virtual double                  eval(const GEnergy& srcEng,
@@ -102,15 +106,17 @@ public:
     void    prefactor(const double& prefactor);
     double  index(void) const;
     void    index(const double& index);
-    double  lambda(void) const;
-    void    lambda(const double& lambda);
+    double  inverse_cutoff(void) const;
+    void    inverse_cutoff(const double& alpha);
+    GEnergy cutoff(void) const;
+    void    cutoff(const GEnergy& cutoff);
     GEnergy pivot(void) const;
     void    pivot(const GEnergy& pivot);
 
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GModelSpectralExpPlaw2& model);
+    void copy_members(const GModelSpectralExpInvPlaw& model);
     void free_members(void);
     void update_eval_cache(const GEnergy& energy) const;
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
@@ -121,17 +127,17 @@ protected:
         flux_kernel(const double& norm,
                     const double& index,
                     const double& pivot,
-                    const double& lambda) :
+                    const double& alpha) :
                     m_norm(norm),
                     m_index(index),
                     m_inv_pivot(1.0/pivot),
-                    m_lambda(lambda) {}
+                    m_alpha(alpha) {}
         double eval(const double& eng);
     protected:
         double m_norm;      //!< Normalization
         double m_index;     //!< Index
         double m_inv_pivot; //!< 1 / Pivot energy
-        double m_lambda;    //!< Cut-off parameter
+        double m_alpha;     //!< Cut-off parameter
     };
 
     // Energy flux integration kernel
@@ -140,32 +146,32 @@ protected:
         eflux_kernel(const double& norm,
                      const double& index,
                      const double& pivot,
-                     const double& lambda) :
+                     const double& alpha) :
                      m_norm(norm),
                      m_index(index),
                      m_inv_pivot(1.0/pivot),
-                     m_lambda(lambda) {}
+                     m_alpha(alpha) {}
         double eval(const double& eng);
     protected:
         double m_norm;      //!< Normalization
         double m_index;     //!< Index
         double m_inv_pivot; //!< 1 / Pivot energy
-        double m_lambda;    //!< Cut-off parameter
+        double m_alpha;     //!< Cut-off parameter
     };
 
     // Protected members
     GModelPar m_norm;               //!< Normalization factor
     GModelPar m_index;              //!< Spectral index
-    GModelPar m_lambda;             //!< Cut-off parameter
+    GModelPar m_alpha;              //!< Cut-off parameter
     GModelPar m_pivot;              //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;   //!< Last energy value
     mutable double  m_last_index;    //!< Last index parameter
-    mutable double  m_last_lambda;   //!< Last cut-off parameter
+    mutable double  m_last_alpha;    //!< Last cut-off parameter
     mutable double  m_last_pivot;    //!< Last pivot parameter
     mutable double  m_last_e_norm;   //!< Last E/Epivot value
-    mutable double  m_last_e_lambda; //!< Last E*lambda value
+    mutable double  m_last_e_alpha;  //!< Last E*alpha value
     mutable double  m_last_power;    //!< Last power value
     mutable double  m_mc_emin;       //!< Minimum energy
     mutable double  m_mc_emax;       //!< Maximum energy
@@ -178,30 +184,30 @@ protected:
 /***********************************************************************//**
  * @brief Return class name
  *
- * @return String containing the class name ("GModelSpectralExpPlaw2").
+ * @return String containing the class name ("GModelSpectralExpInvPlaw").
  ***************************************************************************/
 inline
-std::string GModelSpectralExpPlaw2::classname(void) const
+std::string GModelSpectralExpInvPlaw::classname(void) const
 {
-    return ("GModelSpectralExpPlaw2");
+    return ("GModelSpectralExpInvPlaw");
 }
 
 
 /***********************************************************************//**
  * @brief Return model type
  *
- * @return "ExpCutoff2".
+ * @return "ExponentialInverseCutoffPowerLaw".
  *
  * Returns the type of the exponentially cut off power law model.
  ***************************************************************************/
 inline
-std::string GModelSpectralExpPlaw2::type(void) const
+std::string GModelSpectralExpInvPlaw::type(void) const
 {
-    return "ExpCutoff2";
+    return "ExponentialInverseCutoffPowerLaw";
 }
 
 
-/***********************************************************************//**
+/****ExponentialInverseCutoffPowerLaw*********************************************************//**
  * @brief Return pre factor
  *
  * @return Pre factor (ph/cm2/s/MeV).
@@ -209,7 +215,7 @@ std::string GModelSpectralExpPlaw2::type(void) const
  * Returns the pre factor.
  ***************************************************************************/
 inline
-double GModelSpectralExpPlaw2::prefactor(void) const
+double GModelSpectralExpInvPlaw::prefactor(void) const
 {
     return (m_norm.value());
 }
@@ -223,7 +229,7 @@ double GModelSpectralExpPlaw2::prefactor(void) const
  * Sets the pre factor.
  ***************************************************************************/
 inline
-void GModelSpectralExpPlaw2::prefactor(const double& prefactor)
+void GModelSpectralExpInvPlaw::prefactor(const double& prefactor)
 {
     m_norm.value(prefactor);
     return;
@@ -238,7 +244,7 @@ void GModelSpectralExpPlaw2::prefactor(const double& prefactor)
  * Returns the power law index.
  ***************************************************************************/
 inline
-double GModelSpectralExpPlaw2::index(void) const
+double GModelSpectralExpInvPlaw::index(void) const
 {
     return (m_index.value());
 }
@@ -252,7 +258,7 @@ double GModelSpectralExpPlaw2::index(void) const
  * Sets the power law index.
  ***************************************************************************/
 inline
-void GModelSpectralExpPlaw2::index(const double& index)
+void GModelSpectralExpInvPlaw::index(const double& index)
 {
     m_index.value(index);
     return;
@@ -267,7 +273,7 @@ void GModelSpectralExpPlaw2::index(const double& index)
  * Returns the pivot energy.
  ***************************************************************************/
 inline
-GEnergy GModelSpectralExpPlaw2::pivot(void) const
+GEnergy GModelSpectralExpInvPlaw::pivot(void) const
 {
     GEnergy energy;
     energy.MeV(m_pivot.value());
@@ -283,7 +289,7 @@ GEnergy GModelSpectralExpPlaw2::pivot(void) const
  * Sets the pivot energy.
  ***************************************************************************/
 inline
-void GModelSpectralExpPlaw2::pivot(const GEnergy& pivot)
+void GModelSpectralExpInvPlaw::pivot(const GEnergy& pivot)
 {
     m_pivot.value(pivot.MeV());
     return;
@@ -298,24 +304,56 @@ void GModelSpectralExpPlaw2::pivot(const GEnergy& pivot)
  * Returns the exponential cut-off parameter.
  ***************************************************************************/
 inline
-double GModelSpectralExpPlaw2::lambda(void) const
+double GModelSpectralExpInvPlaw::inverse_cutoff(void) const
 {
-	return (m_lambda.value());
+	return (m_alpha.value());
 }
 
 
 /***********************************************************************//**
  * @brief Set exponential cut-off parameter
  *
- * @param[in] lambda Exponential cut-off parameter.
+ * @param[in] alpha Exponential cut-off parameter.
  *
  * Sets the exponential cut-off parameter.
  ***************************************************************************/
 inline
-void GModelSpectralExpPlaw2::lambda(const double& lambda)
+void GModelSpectralExpInvPlaw::inverse_cutoff(const double& alpha)
 {
-    m_lambda.value(lambda);
+    m_alpha.value(alpha);
     return;
 }
 
-#endif /* GMODELSPECTRALEXPPLAW2_HPP */
+
+/***********************************************************************//**
+ * @brief Return cut-off energy (1/cut-off parameter)
+ *
+ * @return Exponential cut-off energy.
+ *
+ * Returns the exponential cut-off energy.
+ ***************************************************************************/
+inline
+GEnergy GModelSpectralExpInvPlaw::cutoff(void) const
+{
+    GEnergy cutoff;
+    cutoff.MeV(1.0/m_alpha.value());
+    return cutoff;
+}
+
+
+/***********************************************************************//**
+ * @brief Set exponential cut-off parameter via passing cut-off energy
+ *
+ * @param[in] cutoff Exponential cut-off energy.
+ *
+ * Sets the exponential cut-off parameter.
+ ***************************************************************************/
+inline
+void GModelSpectralExpInvPlaw::cutoff(const GEnergy& cutoff)
+{
+    m_alpha.value(1./cutoff.MeV());
+    return;
+}
+
+
+#endif /* GMODELSPECTRALEXPINVPLAW_HPP */

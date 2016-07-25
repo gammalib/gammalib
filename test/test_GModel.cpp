@@ -53,7 +53,7 @@ void TestGModel::set(void)
     m_xml_model_point_plaw        = "data/model_point_plaw.xml";
     m_xml_model_point_plaw2       = "data/model_point_plaw2.xml";
     m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
-    m_xml_model_point_eplaw2      = "data/model_point_eplaw2.xml";
+    m_xml_model_point_einvplaw    = "data/model_point_einvplaw.xml";
     m_xml_model_point_bplaw       = "data/model_point_bplaw.xml";
     m_xml_model_point_supeplaw    = "data/model_point_supeplaw.xml";
     m_xml_model_point_logparabola = "data/model_point_logparabola.xml";
@@ -90,7 +90,7 @@ void TestGModel::set(void)
     append(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
     append(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     append(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
-    append(static_cast<pfunction>(&TestGModel::test_eplaw2), "Test GModelSpectralExpPlaw2");
+    append(static_cast<pfunction>(&TestGModel::test_einvplaw), "Test GModelSpectralExpInvPlaw");
     append(static_cast<pfunction>(&TestGModel::test_supeplaw), "Test GModelSpectralSuperExpPlaw");
     append(static_cast<pfunction>(&TestGModel::test_bplaw), "Test GModelSpectralBrokenPlaw");
     append(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
@@ -1733,16 +1733,17 @@ void TestGModel::test_eplaw(void)
 
 
 /***********************************************************************//**
- * @brief Test GModelSpectralExpPlaw2 class
+ * @brief Test GModelSpectralExpInvPlaw class
  ***************************************************************************/
-void TestGModel::test_eplaw2(void)
+void TestGModel::test_einvplaw(void)
 {
     // Test void constructor
     test_try("Test void constructor");
     try {
-        GModelSpectralExpPlaw2 model;
-        test_assert(model.type() == "ExpCutoff2",
-                                    "Model type \"ExpCutoff2\" expected.");
+        GModelSpectralExpInvPlaw model;
+
+        test_assert(model.type() == "ExponentialInverseCutoffPowerLaw",
+                                    "Model type \"ExponentialInverseCutoffPowerLaw\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1752,30 +1753,44 @@ void TestGModel::test_eplaw2(void)
     // Test value constructor
     test_try("Test value constructor");
     try {
-        GModelSpectralExpPlaw2 model(2.0, -2.1, GEnergy(100.0, "MeV"), 1.0e-3);
+        GModelSpectralExpInvPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"), 1.0e-3);
         test_value(model.prefactor(), 2.0);
         test_value(model.index(), -2.1);
         test_value(model.pivot().MeV(), 100.0);
-        test_value(model.lambda(), 1.0e-3);
+        test_value(model.inverse_cutoff(), 1.0e-3);
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
+    // Test alternative value constructor
+        test_try("Test alternative value constructor");
+        try {
+            GModelSpectralExpInvPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"), GEnergy(1.0e+3, "MeV"));
+            test_value(model.prefactor(), 2.0);
+            test_value(model.index(), -2.1);
+            test_value(model.pivot().MeV(), 100.0);
+            test_value(model.inverse_cutoff(), 1.0e-3);
+            test_try_success();
+        }
+        catch (std::exception &e) {
+            test_try_failure(e);
+        }
+
     // Test XML constructor and value
     test_try("Test XML constructor, value and gradients");
     try {
         // Test XML constructor
-        GXml                  xml(m_xml_model_point_eplaw2);
+        GXml                  xml(m_xml_model_point_einvplaw);
         GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
-        GModelSpectralExpPlaw2 model(*element);
+        GModelSpectralExpInvPlaw model(*element);
         test_value(model.size(), 4);
-        test_assert(model.type() == "ExpCutoff2", "Expected \"ExpCutoff2\"");
+        test_assert(model.type() == "ExponentialInverseCutoffPowerLaw", "Expected \"ExponentialInverseCutoffPowerLaw\"");
         test_value(model.prefactor(), 5.7e-16);
         test_value(model.index(), -2.48);
         test_value(model.pivot().TeV(), 0.3);
-        test_value(model.lambda(), 1.0e-6);
+        test_value(model.inverse_cutoff(), 1.0e-6);
 
         // Test prefactor method
         model.prefactor(2.3e-16);
@@ -1790,11 +1805,11 @@ void TestGModel::test_eplaw2(void)
         test_value(model.pivot().TeV(), 0.5);
 
         // Test cutoff parameter method
-        model.lambda(4.2e-9);
-        test_value(model.lambda(), 4.2e-9);
+        model.inverse_cutoff(4.2e-9);
+        test_value(model.inverse_cutoff(), 4.2e-9);
 
         // Test operator access
-        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "lambda"};
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "InverseCutoff"};
         for (int i = 0; i < 4; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value
@@ -2408,6 +2423,7 @@ void TestGModel::test_spectral_model(void)
     test_xml_model("GModelSpectralPlaw",         m_xml_model_point_plaw);
     test_xml_model("GModelSpectralPlaw2",        m_xml_model_point_plaw2);
     test_xml_model("GModelSpectralExpPaw",       m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralExpInvPaw",    m_xml_model_point_einvplaw);
     test_xml_model("GModelSpectralBrokenPlaw",   m_xml_model_point_bplaw);
     test_xml_model("GModelSpectralSuperExpPlaw", m_xml_model_point_supeplaw);
     test_xml_model("GModelSpectralLogParabola",  m_xml_model_point_logparabola);

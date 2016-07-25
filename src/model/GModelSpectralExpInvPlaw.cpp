@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GModelSpectralExpPlaw2.cpp - Exponential cut off power law model    *
+ *    GModelSpectralExpInvPlaw.cpp - Exponential cut off power law model   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2016 by Alexander Ziegler                                *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpectralExpPlaw2.cpp
+ * @file GModelSpectralExpInvPlaw.cpp
  * @brief Exponential cut off power law spectral class implementation
  * @author Alexander Ziegler
  */
@@ -33,19 +33,20 @@
 #include "GTools.hpp"
 #include "GRan.hpp"
 #include "GIntegral.hpp"
-#include "GModelSpectralExpPlaw2.hpp"
+#include "GModelSpectralExpInvPlaw.hpp"
 #include "GModelSpectralRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralExpPlaw2 g_spectral_expplaw2_seed;
-const GModelSpectralRegistry g_spectral_expplaw2_registry(&g_spectral_expplaw2_seed);
+const GModelSpectralExpInvPlaw g_spectral_expinvplaw_seed;
+const GModelSpectralRegistry g_spectral_expinvplaw_registry(&g_spectral_expinvplaw_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC  "GModelSpectralExpPlaw2::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
-#define G_READ                   "GModelSpectralExpPlaw2::read(GXmlElement&)"
-#define G_WRITE                 "GModelSpectralExpPlaw2::write(GXmlElement&)"
+#define G_MC 	  "GModelSpectralExpInvPlaw::mc(GEnergy&, GEnergy&, GTime&,"\
+											                       " GRan&)"
+#define G_READ                "GModelSpectralExpInvPlaw::read(GXmlElement&)"
+#define G_WRITE              "GModelSpectralExpInvPlaw::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -63,7 +64,7 @@ const GModelSpectralRegistry g_spectral_expplaw2_registry(&g_spectral_expplaw2_s
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(void) : GModelSpectral()
+GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(void) : GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -79,18 +80,18 @@ GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(void) : GModelSpectral()
  * @param[in] prefactor Pre factor normalization (ph/cm2/s/MeV).
  * @param[in] index Power law index.
  * @param[in] pivot Pivot energy.
- * @param[in] lambda Cut-off parameter.
+ * @param[in] alpha Cut-off parameter.
  *
  * Construct an exponentially cut off power law from
  * - a prefactor value (in units of ph/cm2/s/MeV)
  * - a spectral index,
  * - a pivot energy, and
- * - a cut-off parameter lambda.
+ * - a cut-off parameter alpha (in units 1/MeV).
  ***************************************************************************/
-GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(const double&  prefactor,
+GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(const double&  prefactor,
                                               const double&  index,
                                               const GEnergy& pivot,
-                                              const double & lambda) :
+                                              const double& alpha) :
                        GModelSpectral()
 {
     // Initialise members
@@ -100,7 +101,44 @@ GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(const double&  prefactor,
     m_norm.value(prefactor);
     m_index.value(index);
     m_pivot.value(pivot.MeV()); // Internally stored in MeV
-    m_lambda.value(lambda);     // Internally stored in 1/MeV
+    m_alpha.value(alpha);       // Internally stored in 1/MeV
+
+    // Autoscale parameters
+    autoscale();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Constructor (construct model via cut-off energy)
+ *
+ * @param[in] prefactor Pre factor normalization (ph/cm2/s/MeV).
+ * @param[in] index Power law index.
+ * @param[in] pivot Pivot energy.
+ * @param[in] cutoff Cut-off energy.
+ *
+ * Construct an exponentially cut off power law from
+ * - a prefactor value (in units of ph/cm2/s/MeV)
+ * - a spectral index,
+ * - a pivot energy, and
+ * - a cut-off energy (in unit MeV).
+ ***************************************************************************/
+GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(const double&  prefactor,
+                                              const double&  index,
+                                              const GEnergy& pivot,
+                                              const GEnergy& cutoff) :
+                       GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set parameters
+    m_norm.value(prefactor);
+    m_index.value(index);
+    m_pivot.value(pivot.MeV());        // Internally stored in MeV
+    m_alpha.value(1./cutoff.MeV());   // Internally stored in 1/MeV
 
     // Autoscale parameters
     autoscale();
@@ -119,7 +157,7 @@ GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(const double&  prefactor,
  * information from an XML element. See the read() method for more
  * information about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(const GXmlElement& xml) :
+GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(const GXmlElement& xml) :
                        GModelSpectral()
 {
     // Initialise members
@@ -138,7 +176,7 @@ GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(const GXmlElement& xml) :
  *
  * @param[in] model Exponentially cut off power law model.
  ***************************************************************************/
-GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(const GModelSpectralExpPlaw2& model) :
+GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(const GModelSpectralExpInvPlaw& model) :
                        GModelSpectral(model)
 {
     // Initialise members
@@ -155,7 +193,7 @@ GModelSpectralExpPlaw2::GModelSpectralExpPlaw2(const GModelSpectralExpPlaw2& mod
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpectralExpPlaw2::~GModelSpectralExpPlaw2(void)
+GModelSpectralExpInvPlaw::~GModelSpectralExpInvPlaw(void)
 {
     // Free members
     free_members();
@@ -177,7 +215,7 @@ GModelSpectralExpPlaw2::~GModelSpectralExpPlaw2(void)
  * @param[in] model Exponentially cut off power law model.
  * @return Exponentially cut off power law model.
  ***************************************************************************/
-GModelSpectralExpPlaw2& GModelSpectralExpPlaw2::operator=(const GModelSpectralExpPlaw2& model)
+GModelSpectralExpInvPlaw& GModelSpectralExpInvPlaw::operator=(const GModelSpectralExpInvPlaw& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -210,7 +248,7 @@ GModelSpectralExpPlaw2& GModelSpectralExpPlaw2::operator=(const GModelSpectralEx
 /***********************************************************************//**
  * @brief Clear exponentially cut off power law model
  ***************************************************************************/
-void GModelSpectralExpPlaw2::clear(void)
+void GModelSpectralExpInvPlaw::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -230,10 +268,10 @@ void GModelSpectralExpPlaw2::clear(void)
  *
  * @return Pointer to deep copy of exponentially cut off power law model.
  ***************************************************************************/
-GModelSpectralExpPlaw2* GModelSpectralExpPlaw2::clone(void) const
+GModelSpectralExpInvPlaw* GModelSpectralExpInvPlaw::clone(void) const
 {
     // Clone exponentially cut off power law model
-    return new GModelSpectralExpPlaw2(*this);
+    return new GModelSpectralExpInvPlaw(*this);
 }
 
 
@@ -249,20 +287,20 @@ GModelSpectralExpPlaw2* GModelSpectralExpPlaw2::clone(void) const
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *    \exp \left( -{\tt m\_lamda}*E \right)
+ *    \exp \left( -{\tt m\_alpha}*E \right)
  * \f]
  *
  * where
  * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
  * - \f${\tt m\_pivot}\f$ is the pivot energy,
  * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_lambda}\f$ is the cut-off parameter.
+ * - \f${\tt m\_alpha}\f$ is the cut-off parameter.
  *
  * @todo The method expects that pivot!=0. Otherwise Inf or NaN
  *       may result. We should add a test that prevents using invalid
  *       values.
  ***************************************************************************/
-double GModelSpectralExpPlaw2::eval(const GEnergy& srcEng,
+double GModelSpectralExpInvPlaw::eval(const GEnergy& srcEng,
                                    const GTime&   srcTime) const
 {
     // Update the evaluation cache
@@ -301,14 +339,14 @@ double GModelSpectralExpPlaw2::eval(const GEnergy& srcEng,
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *    \exp \left( -{\tt m\_lamda}*E \right)
+ *    \exp \left( -{\tt m\_alpha}*E \right)
  * \f]
  *
  * where
  * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
  * - \f${\tt m\_pivot}\f$ is the pivot energy,
  * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_lambda}\f$ is the cut-off parameter.
+ * - \f${\tt m\_alpha}\f$ is the cut-off parameter.
  *
  * The method also evaluates the partial derivatives of the model with
  * respect to the parameters using
@@ -324,7 +362,7 @@ double GModelSpectralExpPlaw2::eval(const GEnergy& srcEng,
  * \f]
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_lambda}} =
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_alpha}} =
  *      S_{\rm E}(E | t) \, \left( -E \right)
  * \f]
  *
@@ -338,7 +376,7 @@ double GModelSpectralExpPlaw2::eval(const GEnergy& srcEng,
  *       may result. We should add a test that prevents using invalid
  *       values.
  ***************************************************************************/
-double GModelSpectralExpPlaw2::eval_gradients(const GEnergy& srcEng,
+double GModelSpectralExpInvPlaw::eval_gradients(const GEnergy& srcEng,
                                              const GTime&   srcTime)
 {
     // Update the evaluation cache
@@ -354,15 +392,15 @@ double GModelSpectralExpPlaw2::eval_gradients(const GEnergy& srcEng,
                       ? m_norm.scale() * m_last_power : 0.0;
     double g_index  = (m_index.is_free())
                       ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
-    double g_lambda = (m_lambda.is_free())
-                      ? -value * m_lambda.scale() * m_last_energy.MeV() : 0.0;
+    double g_alpha =  (m_alpha.is_free())
+                      ? -value * m_alpha.scale() * m_last_energy.MeV() : 0.0;
     double g_pivot  = (m_pivot.is_free())
                       ? -value * m_last_index / m_pivot.factor_value() : 0.0;
 
     // Set gradients
     m_norm.factor_gradient(g_norm);
     m_index.factor_gradient(g_index);
-    m_lambda.factor_gradient(g_lambda);
+    m_alpha.factor_gradient(g_alpha);
     m_pivot.factor_gradient(g_pivot);
 
     // Compile option: Check for NaN/Inf
@@ -374,7 +412,7 @@ double GModelSpectralExpPlaw2::eval_gradients(const GEnergy& srcEng,
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", e_norm=" << m_last_e_norm;
-        std::cout << ", e_lambda=" << m_last_e_lambda;
+        std::cout << ", e_alpha=" << m_last_e_alpha;
         std::cout << ", power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
@@ -403,7 +441,7 @@ double GModelSpectralExpPlaw2::eval_gradients(const GEnergy& srcEng,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done numerically.
  ***************************************************************************/
-double GModelSpectralExpPlaw2::flux(const GEnergy& emin,
+double GModelSpectralExpInvPlaw::flux(const GEnergy& emin,
                                    const GEnergy& emax) const
 {
     // Initialise flux
@@ -414,7 +452,7 @@ double GModelSpectralExpPlaw2::flux(const GEnergy& emin,
 
         // Setup integration kernel
         flux_kernel integrand(m_norm.value(),  m_index.value(),
-                              m_pivot.value(), m_lambda.value());
+                              m_pivot.value(), m_alpha.value());
         GIntegral integral(&integrand);
 
         // Get integration boundaries in MeV
@@ -449,7 +487,7 @@ double GModelSpectralExpPlaw2::flux(const GEnergy& emin,
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done numerically.
  ***************************************************************************/
-double GModelSpectralExpPlaw2::eflux(const GEnergy& emin,
+double GModelSpectralExpInvPlaw::eflux(const GEnergy& emin,
                                     const GEnergy& emax) const
 {
     // Initialise flux
@@ -460,7 +498,7 @@ double GModelSpectralExpPlaw2::eflux(const GEnergy& emin,
 
         // Setup integration kernel
         eflux_kernel integrand(m_norm.value(),  m_index.value(),
-                               m_pivot.value(), m_lambda.value());
+                               m_pivot.value(), m_alpha.value());
         GIntegral integral(&integrand);
 
         // Get integration boundaries in MeV
@@ -498,7 +536,7 @@ double GModelSpectralExpPlaw2::eflux(const GEnergy& emin,
  * power law distribution. Then the energy is accepted or rejected based
  * on an acceptance fraction that is computed from the exponential cut off.
  ***************************************************************************/
-GEnergy GModelSpectralExpPlaw2::mc(const GEnergy& emin,
+GEnergy GModelSpectralExpInvPlaw::mc(const GEnergy& emin,
                                   const GEnergy& emax,
                                   const GTime&   time,
                                   GRan&          ran) const
@@ -520,7 +558,7 @@ GEnergy GModelSpectralExpPlaw2::mc(const GEnergy& emin,
     
     // Initialse acceptance fraction
     double acceptance_fraction;
-    double inv_ecut = m_lambda.value();
+    double inv_ecut = m_alpha.value();
 
     // Use rejection method to draw a random energy. We first draw
     // analytically from a power law, and then compare the power law
@@ -568,66 +606,36 @@ GEnergy GModelSpectralExpPlaw2::mc(const GEnergy& emin,
  *
  * @exception GException::model_invalid_parnum
  *            Invalid number of model parameters found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
  *
  * Reads the spectral information from an XML element. The format of the XML
  * elements is
  *
- *     <spectrum type="ExpCutoff2">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="lambda"    scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *     <spectrum type="ExponentialInverseCutoffPowerLaw">
+ *       <parameter name="Prefactor"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"         scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="InverseCutoff" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="PivotEnergy"   scale=".." value=".." min=".." max=".." free=".."/>
  *     </spectrum>
  ***************************************************************************/
-void GModelSpectralExpPlaw2::read(const GXmlElement& xml)
+void GModelSpectralExpInvPlaw::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 4 parameters
     if (xml.elements() != 4 || xml.elements("parameter") != 4) {
         throw GException::model_invalid_parnum(G_READ, xml,
-              "Power law model requires exactly 4 parameters.");
+              "ExponentialInverseCutoffPowerLaw model requires exactly 4 parameters.");
     }
 
-    // Extract model parameters
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
+    // Get XML parameters
+    const GXmlElement* prefactor = gammalib::xml_get_par(G_READ, xml, "Prefactor");
+    const GXmlElement* index     = gammalib::xml_get_par(G_READ, xml, "Index");
+    const GXmlElement* alpha     = gammalib::xml_get_par(G_READ, xml, "InverseCutoff");
+    const GXmlElement* pivot     = gammalib::xml_get_par(G_READ, xml, "PivotEnergy");
 
-        // Get parameter element
-        const GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            m_norm.read(*par);
-            npar[0]++;
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            m_index.read(*par);
-            npar[1]++;
-        }
-
-        // Handle cutoff parameter
-        else if (par->attribute("name") == "lambda") {
-            m_lambda.read(*par);
-            npar[2]++;
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.read(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_READ, xml,
-              "Require \"Prefactor\", \"Index\", \"lambda\" and \"Scale\""
-              " parameters.");
-    }
+    // Read parameters
+    m_norm.read(*prefactor);
+    m_index.read(*index);
+    m_alpha.read(*alpha);
+    m_pivot.read(*pivot);
 
     // Return
     return;
@@ -640,88 +648,42 @@ void GModelSpectralExpPlaw2::read(const GXmlElement& xml)
  * @param[in] xml XML element into which model information is written.
  *
  * @exception GException::model_invalid_spectral
- *            Existing XML element is not of type "ExpCutoff"
- * @exception GException::model_invalid_parnum
- *            Invalid number of model parameters or nodes found in XML element.
- * @exception GException::model_invalid_parnames
- *            Invalid model parameter names found in XML element.
+ *            Existing XML element is not of type "ExponentialInverseCutoffPowerLaw"
  *
  * Writes the spectral information into an XML element. The format of the XML
  * element is
  *
- *     <spectrum type="ExpCutoff2">
- *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="lambda"    scale=".." value=".." min=".." max=".." free=".."/>
- *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *     <spectrum type="ExponentialInverseCutoffPowerLaw">
+ *       <parameter name="Prefactor"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"         scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="InverseCutoff" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="PivotEnergy"   scale=".." value=".." min=".." max=".." free=".."/>
  *     </spectrum>
  ***************************************************************************/
-void GModelSpectralExpPlaw2::write(GXmlElement& xml) const
+void GModelSpectralExpInvPlaw::write(GXmlElement& xml) const
 {
-    // Set model type
+	// Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "ExpCutoff2");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "ExpCutoff2") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"ExpCutoff2\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 4 parameter nodes
-    if (xml.elements() == 0) {
-        xml.append(GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(GXmlElement("parameter name=\"Index\""));
-        xml.append(GXmlElement("parameter name=\"lambda\""));
-        xml.append(GXmlElement("parameter name=\"Scale\""));
-    }
+    // Get XML parameters
+    GXmlElement* norm   = gammalib::xml_need_par(G_WRITE, xml, m_norm.name());
+    GXmlElement* index  = gammalib::xml_need_par(G_WRITE, xml, m_index.name());
+    GXmlElement* alpha  = gammalib::xml_need_par(G_WRITE, xml, m_alpha.name());
+    GXmlElement* pivot  = gammalib::xml_need_par(G_WRITE, xml, m_pivot.name());
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
-        throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Power law model requires exactly 4 parameters.");
-    }
-
-    // Set or update model parameter attributes
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
-
-        // Get parameter element
-        GXmlElement* par = xml.element("parameter", i);
-
-        // Handle prefactor
-        if (par->attribute("name") == "Prefactor") {
-            npar[0]++;
-            m_norm.write(*par);
-        }
-
-        // Handle index
-        else if (par->attribute("name") == "Index") {
-            npar[1]++;
-            m_index.write(*par);
-        }
-
-        // Handle cutoff parameter
-        else if (par->attribute("name") == "lambda") {
-            npar[2]++;
-            m_lambda.write(*par);
-        }
-
-        // Handle pivot energy
-        else if (par->attribute("name") == "Scale") {
-            m_pivot.write(*par);
-            npar[3]++;
-        }
-
-    } // endfor: looped over all parameters
-
-    // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
-        throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Index\", \"lambda\" and \"Scale\""
-              " parameters.");
-    }
+    // Write parameters
+    m_norm.write(*norm);
+    m_index.write(*index);
+    m_alpha.write(*alpha);
+    m_pivot.write(*pivot);
 
     // Return
     return;
@@ -734,7 +696,7 @@ void GModelSpectralExpPlaw2::write(GXmlElement& xml) const
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
  ***************************************************************************/
-std::string GModelSpectralExpPlaw2::print(const GChatter& chatter) const
+std::string GModelSpectralExpInvPlaw::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -743,7 +705,7 @@ std::string GModelSpectralExpPlaw2::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GModelSpectralExpPlaw2 ===");
+        result.append("=== GModelSpectralExpInvPlaw ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Number of parameters"));
@@ -768,7 +730,7 @@ std::string GModelSpectralExpPlaw2::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelSpectralExpPlaw2::init_members(void)
+void GModelSpectralExpInvPlaw::init_members(void)
 {
     // Initialise powerlaw normalisation
     m_norm.clear();
@@ -792,16 +754,16 @@ void GModelSpectralExpPlaw2::init_members(void)
     m_index.has_grad(true);
 
     // Initialise cut off parameter
-    m_lambda.clear();
-    m_lambda.name("lambda");
-    m_lambda.unit("1/MeV");
-    m_lambda.scale(1.0);
-    m_lambda.value(0.001);      // default: 0.001
-    m_lambda.min(0.0);          // min:     0.0
-    m_lambda.max(10.0);	    	// max:     10.0
-    m_lambda.free();
-    m_lambda.gradient(0.0);
-    m_lambda.has_grad(true);
+    m_alpha.clear();
+    m_alpha.name("InverseCutoff");
+    m_alpha.unit("1/MeV");
+    m_alpha.scale(1.0);
+    m_alpha.value(0.001);      // default: 0.001
+    m_alpha.min(0.0);          // min:     0.0
+    m_alpha.max(10.0);	    	// max:     10.0
+    m_alpha.free();
+    m_alpha.gradient(0.0);
+    m_alpha.has_grad(true);
 
     // Initialise pivot energy
     m_pivot.clear();
@@ -817,16 +779,16 @@ void GModelSpectralExpPlaw2::init_members(void)
     m_pars.clear();
     m_pars.push_back(&m_norm);
     m_pars.push_back(&m_index);
-    m_pars.push_back(&m_lambda);
+    m_pars.push_back(&m_alpha);
     m_pars.push_back(&m_pivot);
 
     // Initialise eval cache
     m_last_energy.clear();
     m_last_index    = 1.0e30;
-    m_last_lambda   = 1.0e30;
+    m_last_alpha    = 1.0e30;
     m_last_pivot    = 1.0e30;
     m_last_e_norm   = 0.0;
-    m_last_e_lambda = 0.0;
+    m_last_e_alpha  = 0.0;
     m_last_power    = 0.0;
 
     // Initialise MC cache
@@ -846,28 +808,28 @@ void GModelSpectralExpPlaw2::init_members(void)
  *
  * @param[in] model Exponential cut off power law model.
  ***************************************************************************/
-void GModelSpectralExpPlaw2::copy_members(const GModelSpectralExpPlaw2& model)
+void GModelSpectralExpInvPlaw::copy_members(const GModelSpectralExpInvPlaw& model)
 {
     // Copy members
     m_norm   = model.m_norm;
     m_index  = model.m_index;
-    m_lambda = model.m_lambda;
+    m_alpha  = model.m_alpha;
     m_pivot  = model.m_pivot;
 
     // Set parameter pointer(s)
     m_pars.clear();
     m_pars.push_back(&m_norm);
     m_pars.push_back(&m_index);
-    m_pars.push_back(&m_lambda);
+    m_pars.push_back(&m_alpha);
     m_pars.push_back(&m_pivot);
 
     // Copy eval cache
     m_last_energy   = model.m_last_energy;
     m_last_index    = model.m_last_index;
-    m_last_lambda   = model.m_last_lambda;
+    m_last_alpha    = model.m_last_alpha;
     m_last_pivot    = model.m_last_pivot;
     m_last_e_norm   = model.m_last_e_norm;
-    m_last_e_lambda = model.m_last_e_lambda;
+    m_last_e_alpha  = model.m_last_e_alpha;
     m_last_power    = model.m_last_power;
 
     // Copy MC cache
@@ -885,7 +847,7 @@ void GModelSpectralExpPlaw2::copy_members(const GModelSpectralExpPlaw2& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelSpectralExpPlaw2::free_members(void)
+void GModelSpectralExpInvPlaw::free_members(void)
 {
     // Return
     return;
@@ -899,33 +861,33 @@ void GModelSpectralExpPlaw2::free_members(void)
  *
  * Updates the precomputation cache for eval() and eval_gradients() methods.
  ***************************************************************************/
-void GModelSpectralExpPlaw2::update_eval_cache(const GEnergy& energy) const
+void GModelSpectralExpInvPlaw::update_eval_cache(const GEnergy& energy) const
 {
     // Get parameter values (takes 3 multiplications which are difficult
     // to avoid)
     double index  = m_index.value();
-    double lambda = m_lambda.value();
+    double alpha  = m_alpha.value();
     double pivot  = m_pivot.value();
     
-    // If the energy or one of the parameters index, lambda or pivot
+    // If the energy or one of the parameters index, alpha or pivot
     // energy has changed then recompute the cache
     if ((m_last_energy != energy) ||
         (m_last_index  != index)  ||
-        (m_last_lambda != lambda) ||
+        (m_last_alpha  != alpha) ||
         (m_last_pivot  != pivot)) {
 
         // Store actual energy and parameter values
         m_last_energy = energy;
         m_last_index  = index;
-        m_last_lambda = lambda;
+        m_last_alpha  = alpha;
         m_last_pivot  = pivot;
 
         // Compute and store value
         double eng      = energy.MeV();
         m_last_e_norm   = eng / m_last_pivot;
-        m_last_e_lambda = eng * m_last_lambda;
+        m_last_e_alpha  = eng * m_last_alpha;
         m_last_power    = std::pow(m_last_e_norm, m_last_index) *
-                          std::exp(-m_last_e_lambda);
+                          std::exp(-m_last_e_alpha);
     } // endif: recomputation was required
 
     // Return
@@ -941,7 +903,7 @@ void GModelSpectralExpPlaw2::update_eval_cache(const GEnergy& energy) const
  *
  * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
-void GModelSpectralExpPlaw2::update_mc_cache(const GEnergy& emin,
+void GModelSpectralExpInvPlaw::update_mc_cache(const GEnergy& emin,
                                              const GEnergy& emax) const
 
 {
@@ -983,11 +945,11 @@ void GModelSpectralExpPlaw2::update_mc_cache(const GEnergy& emin,
  *
  * @param[in] energy Energy (MeV).
  ***************************************************************************/
-double GModelSpectralExpPlaw2::flux_kernel::eval(const double& energy)
+double GModelSpectralExpInvPlaw::flux_kernel::eval(const double& energy)
 {
     // Evaluate function value
     double e_norm = energy * m_inv_pivot;
-    double e_cut  = energy * m_lambda;
+    double e_cut  = energy * m_alpha;
     double power  = std::pow(e_norm, m_index) * std::exp(-e_cut);
     double value  = m_norm * power;
 
@@ -1001,11 +963,11 @@ double GModelSpectralExpPlaw2::flux_kernel::eval(const double& energy)
  *
  * @param[in] energy Energy (MeV).
  ***************************************************************************/
-double GModelSpectralExpPlaw2::eflux_kernel::eval(const double& energy)
+double GModelSpectralExpInvPlaw::eflux_kernel::eval(const double& energy)
 {
     // Evaluate function value
     double e_norm = energy * m_inv_pivot;
-    double e_cut  = energy * m_lambda;
+    double e_cut  = energy * m_alpha;
     double power  = std::pow(e_norm, m_index) * std::exp(-e_cut);
     double value  = m_norm * power * energy;
 
