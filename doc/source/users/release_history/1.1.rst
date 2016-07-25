@@ -17,11 +17,8 @@ In particular, this release provides:
 * New names for spatial and spectral model and their parameters
   (see :ref:`sec_model`)
 
-Change log
-----------
-
 Bug fixes
-^^^^^^^^^
+---------
 
 * Fix exception handling SWIG interface for Python 3
 * [`1815 <https://cta-redmine.irap.omp.eu/issues/1815>`_] -
@@ -35,7 +32,7 @@ Bug fixes
   Fix ``GCTAEdisp2D::compute_ebounds_xxx()`` methods
 
 Improvements
-^^^^^^^^^^^^
+------------
 
 * [`1824 <https://cta-redmine.irap.omp.eu/issues/1824>`_] -
   Check on model parameters in spectral registry
@@ -101,7 +98,7 @@ Improvements
   Load CTA GTI extension from the HDU name provided by the DSS keyword
 
 New features
-^^^^^^^^^^^^
+------------
 
 * [`1803 <https://cta-redmine.irap.omp.eu/issues/1803>`_] -
   Include examples in unit tests
@@ -145,7 +142,7 @@ New features
   Finalize implementation of CTA On/Off fitting
 
 Clean up
-^^^^^^^^
+--------
 
 * Remove ``GCTACubeExposure::elogmeans()``, ``GCTACubePsf::elogmeans()``
   and ``GCTACubeBackground::elogmeans()`` methods

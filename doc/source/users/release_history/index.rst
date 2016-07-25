@@ -3,7 +3,7 @@
 Release History
 ===============
 
-Major release history:
+Major releases:
 
 .. toctree::
    :maxdepth: 1
