@@ -51,14 +51,14 @@ class GXmlElement;
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
  *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *    \exp \left( -{\tt m\_alpha}*E \right)
+ *    \exp \left( -{\tt m\_lambda}*E \right)
  * \f]
  *
  * where
  * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
  * - \f${\tt m\_pivot}\f$ is the pivot energy,
  * - \f${\tt m\_index}\f$ is the spectral index, and
- * - \f${\tt m\_alpha}\f$ is the cut-off parameter (1/cut-off energy).
+ * - \f${\tt m\_lambda}\f$ is the cut-off parameter (1/cut-off energy).
  ***************************************************************************/
 class GModelSpectralExpInvPlaw : public GModelSpectral {
 
@@ -68,7 +68,7 @@ public:
     explicit GModelSpectralExpInvPlaw(const double&  prefactor,
                                     const double&  index,
                                     const GEnergy& pivot,
-                                    const double& alpha);
+                                    const double& lambda);
     explicit GModelSpectralExpInvPlaw(const double&  prefactor,
                                         const double&  index,
                                         const GEnergy& pivot,
@@ -107,7 +107,7 @@ public:
     double  index(void) const;
     void    index(const double& index);
     double  inverse_cutoff(void) const;
-    void    inverse_cutoff(const double& alpha);
+    void    inverse_cutoff(const double& lambda);
     GEnergy cutoff(void) const;
     void    cutoff(const GEnergy& cutoff);
     GEnergy pivot(void) const;
@@ -127,17 +127,17 @@ protected:
         flux_kernel(const double& norm,
                     const double& index,
                     const double& pivot,
-                    const double& alpha) :
+                    const double& lambda) :
                     m_norm(norm),
                     m_index(index),
                     m_inv_pivot(1.0/pivot),
-                    m_alpha(alpha) {}
+                    m_lambda(lambda) {}
         double eval(const double& eng);
     protected:
         double m_norm;      //!< Normalization
         double m_index;     //!< Index
         double m_inv_pivot; //!< 1 / Pivot energy
-        double m_alpha;     //!< Cut-off parameter
+        double m_lambda;    //!< Cut-off parameter
     };
 
     // Energy flux integration kernel
@@ -146,32 +146,32 @@ protected:
         eflux_kernel(const double& norm,
                      const double& index,
                      const double& pivot,
-                     const double& alpha) :
+                     const double& lambda) :
                      m_norm(norm),
                      m_index(index),
                      m_inv_pivot(1.0/pivot),
-                     m_alpha(alpha) {}
+                     m_lambda(lambda) {}
         double eval(const double& eng);
     protected:
         double m_norm;      //!< Normalization
         double m_index;     //!< Index
         double m_inv_pivot; //!< 1 / Pivot energy
-        double m_alpha;     //!< Cut-off parameter
+        double m_lambda;    //!< Cut-off parameter
     };
 
     // Protected members
     GModelPar m_norm;               //!< Normalization factor
     GModelPar m_index;              //!< Spectral index
-    GModelPar m_alpha;              //!< Cut-off parameter
+    GModelPar m_lambda;             //!< Cut-off parameter
     GModelPar m_pivot;              //!< Pivot energy
 
     // Cached members used for pre-computations
     mutable GEnergy m_last_energy;   //!< Last energy value
     mutable double  m_last_index;    //!< Last index parameter
-    mutable double  m_last_alpha;    //!< Last cut-off parameter
+    mutable double  m_last_lambda;   //!< Last cut-off parameter
     mutable double  m_last_pivot;    //!< Last pivot parameter
     mutable double  m_last_e_norm;   //!< Last E/Epivot value
-    mutable double  m_last_e_alpha;  //!< Last E*alpha value
+    mutable double  m_last_e_lambda; //!< Last E*lambda value
     mutable double  m_last_power;    //!< Last power value
     mutable double  m_mc_emin;       //!< Minimum energy
     mutable double  m_mc_emax;       //!< Maximum energy
@@ -306,21 +306,21 @@ void GModelSpectralExpInvPlaw::pivot(const GEnergy& pivot)
 inline
 double GModelSpectralExpInvPlaw::inverse_cutoff(void) const
 {
-	return (m_alpha.value());
+	return (m_lambda.value());
 }
 
 
 /***********************************************************************//**
  * @brief Set exponential cut-off parameter
  *
- * @param[in] alpha Exponential cut-off parameter.
+ * @param[in] lambda Exponential cut-off parameter.
  *
  * Sets the exponential cut-off parameter.
  ***************************************************************************/
 inline
-void GModelSpectralExpInvPlaw::inverse_cutoff(const double& alpha)
+void GModelSpectralExpInvPlaw::inverse_cutoff(const double& lambda)
 {
-    m_alpha.value(alpha);
+    m_lambda.value(lambda);
     return;
 }
 
@@ -336,7 +336,7 @@ inline
 GEnergy GModelSpectralExpInvPlaw::cutoff(void) const
 {
     GEnergy cutoff;
-    cutoff.MeV(1.0/m_alpha.value());
+    cutoff.MeV(1.0/m_lambda.value());
     return cutoff;
 }
 
@@ -351,7 +351,7 @@ GEnergy GModelSpectralExpInvPlaw::cutoff(void) const
 inline
 void GModelSpectralExpInvPlaw::cutoff(const GEnergy& cutoff)
 {
-    m_alpha.value(1./cutoff.MeV());
+    m_lambda.value(1./cutoff.MeV());
     return;
 }
 

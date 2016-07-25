@@ -429,14 +429,14 @@ cut-off energy for function parametrisation:
 
 .. math::
     \frac{dN}{dE} = k_0 \left( \frac{E}{E_0} \right)^{\gamma}
-                    \exp \left( -\alpha E \right)    
+                    \exp \left( -\lambda E \right)
 
 where the parameters in the XML definition have the following mappings:
 
 * :math:`k_0` = ``Prefactor``
 * :math:`\gamma` = ``Index``
 * :math:`E_0` = ``PivotEnergy``
-* :math:`\alpha` = ``InverseCutoff``
+* :math:`\lambda` = ``InverseCutoffEnergy``
 
 The XML format for specifying an exponentially cut-off power law using this 
 alternative parametrisation is:
@@ -444,10 +444,10 @@ alternative parametrisation is:
 .. code-block:: xml
 
    <spectrum type="ExponentialInverseCutoffPowerLaw">
-    <parameter name="Prefactor"     scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
-    <parameter name="Index"         scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
-    <parameter name="InverseCutoff" scale="1e-6"  value="1.0"  min="0.0"   max="100.0"  free="1"/>
-    <parameter name="PivotEnergy"   scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
+    <parameter name="Prefactor"           scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
+    <parameter name="Index"               scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
+    <parameter name="InverseCutoffEnergy" scale="1e-6"  value="1.0"  min="0.0"   max="100.0"  free="1"/>
+    <parameter name="PivotEnergy"         scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
    </spectrum>
 
 

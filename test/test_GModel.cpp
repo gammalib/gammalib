@@ -1809,7 +1809,7 @@ void TestGModel::test_einvplaw(void)
         test_value(model.inverse_cutoff(), 4.2e-9);
 
         // Test operator access
-        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "InverseCutoff"};
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "InverseCutoffEnergy"};
         for (int i = 0; i < 4; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value
