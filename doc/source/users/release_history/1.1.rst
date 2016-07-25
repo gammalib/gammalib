@@ -7,6 +7,7 @@ Overview
 --------
 
 GammaLib 1.1 is a major release that adds significant functionality.
+
 In particular, this release provides:
 
 * Support for Fermi/LAT Pass 8 analysis
