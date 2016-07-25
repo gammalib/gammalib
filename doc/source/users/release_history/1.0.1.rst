@@ -1,0 +1,20 @@
+.. _1.0.1:
+
+GammaLib 1.0.1 release (27 January 2016)
+========================================
+
+Overview
+--------
+
+GammaLib 1.0.1 is a bug fix for GammaLib release 1.0.
+
+The following bugs have been fixed:
+
+* [`1616 <https://cta-redmine.irap.omp.eu/issues/1616>`_] -
+  Add units to CTA event list columns
+* [`1611 <https://cta-redmine.irap.omp.eu/issues/1611>`_] -
+  Allow usage of numbers in FITS extension names
+* [`1607 <https://cta-redmine.irap.omp.eu/issues/1607>`_] -
+  Solve compatibility issues with Anaconda on Mac OS X
+* [`1584 <https://cta-redmine.irap.omp.eu/issues/1584>`_] -
+  Correct diffuse map MC normalisation

@@ -1,0 +1,156 @@
+.. _1.1:
+
+GammaLib 1.1 release (24 July 2016)
+===================================
+
+Overview
+--------
+
+GammaLib 1.1 is a major release that adds significant functionality.
+In particular, this release provides:
+
+* Support for Fermi/LAT Pass 8 analysis
+* Support for CTA on/off fitting
+* Point Spread Function histograms for CTA
+* Energy dispersion for stacked CTA analysis
+* Publication of sky maps to the Virtual Observatory hub
+* New names for spatial and spectral model and their parameters
+  (see :ref:`sec_model`)
+
+Change log
+----------
+
+Bug fixes
+^^^^^^^^^
+
+* Fix exception handling SWIG interface for Python 3
+* [`1815 <https://cta-redmine.irap.omp.eu/issues/1815>`_] -
+  Fix consistency problem in ``GCTABackground3D``
+* [`1806 <https://cta-redmine.irap.omp.eu/issues/1806>`_] -
+  Fix Makefile for example executables
+* [`1717 <https://cta-redmine.irap.omp.eu/issues/1717>`_] -
+  Make ``GFilename::is_fits`` thread safe
+* Fix ``GFitsTableCol::insert()`` method for empty columns
+* [`1662 <https://cta-redmine.irap.omp.eu/issues/1662>`_] -
+  Fix ``GCTAEdisp2D::compute_ebounds_xxx()`` methods
+
+Improvements
+^^^^^^^^^^^^
+
+* [`1824 <https://cta-redmine.irap.omp.eu/issues/1824>`_] -
+  Check on model parameters in spectral registry
+* [`1821 <https://cta-redmine.irap.omp.eu/issues/1821>`_] -
+  Rename spectral model components
+* [`1820 <https://cta-redmine.irap.omp.eu/issues/1820>`_] -
+  Write same XML element names than those that were read
+* [`1818 <https://cta-redmine.irap.omp.eu/issues/1818>`_] -
+  Rename spatial model components
+* [`1808 <https://cta-redmine.irap.omp.eu/issues/1808>`_] -
+  Models accessing file now support relative file names,
+  add ``GXmlElement::filename()`` and ``GXmlDocument::filename()`` methods,
+  move node parent from GXmlElement to GXmlNode class
+* [`1784 <https://cta-redmine.irap.omp.eu/issues/1784>`_] -
+  ``GCTAAeff2D`` no longer extrapolates beyond response table
+* [`1787 <https://cta-redmine.irap.omp.eu/issues/1787>`_] -
+  ``GSkyMap::save()`` now overwrites files
+* [`1779 <https://cta-redmine.irap.omp.eu/issues/1779>`_] -
+  Use ``std::vector`` for naxes argument in ``GFitsImage``
+* ``GCTACubePsf`` and ``GCTACubeEdisp`` now save 4D images
+* Change interpolation scheme in ``GCTABackground3D``
+* [`1765 <https://cta-redmine.irap.omp.eu/issues/1765>`_] -
+  Add ``GModel::read_attributes()`` and ``GModel::write_attributes()``
+  private methods
+* [`1746 <https://cta-redmine.irap.omp.eu/issues/1746>`_] -
+  Also write test reports in case of an exception
+* [`1745 <https://cta-redmine.irap.omp.eu/issues/1745>`_] -
+  ``GCaldb::filename()`` method now returns ``GFilename``
+* [`1725 <https://cta-redmine.irap.omp.eu/issues/1725>`_] -
+  Use rejection method in ``GModelSpatialDiffuseMap::mc()``
+* [`1722 <https://cta-redmine.irap.omp.eu/issues/1722>`_] -
+  Use rejection method in ``GCTABackground3D::mc()`` and
+  ``GModelSpatialDiffuseCube::mc()``
+* [`1714 <https://cta-redmine.irap.omp.eu/issues/1714>`_] -
+  Revise GTime operators
+* [`1695 <https://cta-redmine.irap.omp.eu/issues/1695>`_] -
+  Handle FITS extensions in ``GSkyMap::load()`` and ``GSkyMap::save()`` methods
+* [`1674 <https://cta-redmine.irap.omp.eu/issues/1674>`_] -
+  Restrict Monte Carlo simulations in ``GModelSpatialDiffuseConst`` to
+  simulation cone
+* [`1673 <https://cta-redmine.irap.omp.eu/issues/1673>`_] -
+  Optimise ``GModelSpatialDiffuseMap::set_mc_cone()`` and
+  ``GModelSpatialDiffuseCube::set_mc_cone()`` methods
+* [`1672 <https://cta-redmine.irap.omp.eu/issues/1672>`_] -
+  Use default ``GTime`` in ``GModelSpectral::eval()`` and
+  ``GModelSpectral::eval_gradients()`` methods
+* [`1671 <https://cta-redmine.irap.omp.eu/issues/1671>`_] -
+  The ``GApplicationPar::filename()`` methods now take and return ``GFilename``
+* [`1670 <https://cta-redmine.irap.omp.eu/issues/1670>`_] -
+  Use default ``GTime`` in ``GObservation::deadc()`` method
+* [`1666 <https://cta-redmine.irap.omp.eu/issues/1666>`_] -
+  Add ``GFilename`` methods and remove equivalents from ``GTools``
+* [`1664 <https://cta-redmine.irap.omp.eu/issues/1664>`_] -
+  Add non-const ``GObservation::events()`` method
+* [`1656 <https://cta-redmine.irap.omp.eu/issues/1656>`_] -
+  Use column names for CTA response table access
+* [`1649 <https://cta-redmine.irap.omp.eu/issues/1649>`_] -
+  Use ``GFilename`` in ``GFits`` to store filename
+* [`1648 <https://cta-redmine.irap.omp.eu/issues/1648>`_] -
+  Implement event fetching and disposal in ``GCTAEventList`` class
+* Handle also additional columns in ``GCTAEventList::append()`` method
+* [`1598 <https://cta-redmine.irap.omp.eu/issues/1598>`_] -
+  Load CTA GTI extension from the HDU name provided by the DSS keyword
+
+New features
+^^^^^^^^^^^^
+
+* [`1803 <https://cta-redmine.irap.omp.eu/issues/1803>`_] -
+  Include examples in unit tests
+* Handle additional columns in ``GArf`` class
+* [`1798 <https://cta-redmine.irap.omp.eu/issues/1798>`_] -
+  Add ``GWcsSIN`` projection class
+* [`1789 <https://cta-redmine.irap.omp.eu/issues/1789>`_] -
+  Add weights to CTA event cube and event bin
+* [`1786 <https://cta-redmine.irap.omp.eu/issues/1786>`_] -
+  Add ``GCTAPsfTable`` class
+* [`1773 <https://cta-redmine.irap.omp.eu/issues/1773>`_] -
+  Add ``GCsv::append()`` method
+* [`1772 <https://cta-redmine.irap.omp.eu/issues/1772>`_] -
+  Add ``GTestSuite::test_value()`` string method
+* [`1770 <https://cta-redmine.irap.omp.eu/issues/1770>`_] -
+  Add component setting methods to ``GModelSky``
+* Add ``GApplication::logFileClose()`` method
+* [`1744 <https://cta-redmine.irap.omp.eu/issues/1744>`_] -
+  Add ``GCTAObservation`` filename constructor
+* [`1743 <https://cta-redmine.irap.omp.eu/issues/1743>`_] -
+  Add ``gammalib::number()`` function
+* [`1733 <https://cta-redmine.irap.omp.eu/issues/1733>`_] -
+  Add ``GSkyMap::shape()`` and ``GSkyMap::ndim()`` methods
+* Add ``GEnergy`` division operator
+* [`1723 <https://cta-redmine.irap.omp.eu/issues/1723>`_] -
+  Add ``GObservations::nobserved()`` method
+* [`1721 <https://cta-redmine.irap.omp.eu/issues/1721>`_] -
+  Add energy dispersion cube for stacked analysis
+* [`1710 <https://cta-redmine.irap.omp.eu/issues/1710>`_] -
+  Add ``GSkyMap::publish()`` method to publish map on VO Hub and add
+  ``GVOClient::publish()`` method to publish a FITS HDU
+* [`1710 <https://cta-redmine.irap.omp.eu/issues/1710>`_] -
+  Add ``GSkyMap::publish()`` method to publish map on VO Hub
+* Add ``GFilename::fullname()`` method
+* Add ``GCTAEventList::remove()`` method
+* [`1517 <https://cta-redmine.irap.omp.eu/issues/1517>`_] -
+  Support Fermi LAT Pass 8 response functions
+* [`1484 <https://cta-redmine.irap.omp.eu/issues/1484>`_] -
+  Support out of source builds
+* [`1044 <https://cta-redmine.irap.omp.eu/issues/1044>`_, `1781 <https://cta-redmine.irap.omp.eu/issues/1781>`_] -
+  Finalize implementation of CTA On/Off fitting
+
+Clean up
+^^^^^^^^
+
+* Remove ``GCTACubeExposure::elogmeans()``, ``GCTACubePsf::elogmeans()``
+  and ``GCTACubeBackground::elogmeans()`` methods
+* [`1669 <https://cta-redmine.irap.omp.eu/issues/1669>`_] -
+  Remove ``GCTAOnOffObservations`` class
+* [`1648 <https://cta-redmine.irap.omp.eu/issues/1648>`_] -
+  Remove event fetching from ``GCTAObservation`` class
+
