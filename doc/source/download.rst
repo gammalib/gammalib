@@ -15,7 +15,7 @@ Releases
 
 The latest GammaLib release is
 `gammalib-1.1.0 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.1.0.tar.gz>`_
-(20 July 2016).
+(24 July 2016).
 
 To download an older release, click on the corresponding release number:
 `1.0.1 <http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.0.1.tar.gz>`_
