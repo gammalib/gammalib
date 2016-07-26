@@ -123,7 +123,7 @@ GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(const double&  prefactor,
  * - a prefactor value (in units of ph/cm2/s/MeV)
  * - a spectral index,
  * - a pivot energy, and
- * - a cut-off energy (in unit MeV).
+ * - a cut-off energy.
  ***************************************************************************/
 GModelSpectralExpInvPlaw::GModelSpectralExpInvPlaw(const double&  prefactor,
                                               const double&  index,
